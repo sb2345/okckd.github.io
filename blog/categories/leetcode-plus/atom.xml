@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Leetcode_plus | My Octopress Blog]]></title>
+  <link href="http://okckd.github.io/blog/categories/leetcode-plus/atom.xml" rel="self"/>
+  <link href="http://okckd.github.io/"/>
+  <updated>2014-07-28T01:50:24+08:00</updated>
+  <id>http://okckd.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode Plus] Sliding Window Maximum]]></title>
+    <link href="http://okckd.github.io/blog/2014/07/27/Sliding-Window-Maximum/"/>
+    <updated>2014-07-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/07/27/Sliding-Window-Maximum</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://leetcode.com/2011/01/sliding-window-maximum.html)
+
+> A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right. You can only see the w numbers in the window. Each time the sliding window moves rightwards by one position. Following is an example:
+The array is [1 3 -1 -3 5 3 6 7], and w is 3.
+
+    Window position                Max
+    ---------------               -----
+    [1  3  -1] -3  5  3  6  7       3
+     1 [3  -1  -3] 5  3  6  7       3
+     1  3 [-1  -3  5] 3  6  7       5
+     1  3  -1 [-3  5  3] 6  7       5
+     1  3  -1  -3 [5  3  6] 7       6
+     1  3  -1  -3  5 [3  6  7]      7
+
+> Input: A long array A[], and a window width w
+
+> Output: An array B[], B[i] is the maximum value of from A[i] to A[i+w-1]
+
+### Analysis
+
+__The  naive approach is using a Heap__. This time complexity is O(n*logn). However, there is a better way using a (double-ended) queue. 
+
+__We do not need to [keep all numbers](http://n00tc0d3r.blogspot.sg/2013/04/sliding-window-maximum.html)__. For example, suppose numbers in a window of size 4 are (1, 3, -1, 2). Obviously, no matter what next numbers are, 1 and -1 are never going to be a maximal as the window moving. The queue should look like (3, 2) in this case.
+
+### Solution
+
+1. When moves to a new number, iterate through back of the queue, removes all numbers that are not greater than the new one, and then insert the new one to the back.
+1. FindMax only need to take the first one of the queue.
+1. To remove a number outside the window, only compare whether the current index is greater than the front of queue. If so, remove it.
+
+[A natural way](http://leetcode.com/2011/01/sliding-window-maximum.html) most people would think is to try to maintain the queue size the same as the window’s size. Try to break away from this thought and think out of the box. 
+
+### Code
+
+Code by N00tc0d3r. 
+
+	public int[] windowMax(int[] nums, int window) {
+		int w = (nums.length < window) ? nums.length : window;
+		// A deque allows insertion/deletion on both ends.
+		// Maintain the first as the index of maximal of the window
+		// and elements after it are all smaller and came later than the first.
+		Deque<Integer> que = new ArrayDeque<Integer>();
+
+		// initialize window
+		int i = 0;
+		while (i < w) {
+			while (!que.isEmpty() && nums[que.getLast()] <= nums[i]) {
+				que.removeLast();
+			}
+			que.addLast(i++);
+		}
+
+		// sliding window
+		int[] max = new int[nums.length - w + 1];
+		max[i - w] = que.getFirst();
+		while (i < nums.length) {
+			// add new element
+			while (!que.isEmpty() && nums[que.getLast()] <= nums[i]) {
+				que.removeLast();
+			}
+			que.addLast(i);
+			// remove old element if still in que
+			if (!que.isEmpty() && i - w >= que.getFirst()) {
+				que.removeFirst();
+			}
+			// get maximal
+			++i;
+			max[i - w] = que.getFirst();
+		}
+
+		return max;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode Plus] Coins in a Line]]></title>
+    <link href="http://okckd.github.io/blog/2014/07/27/Coins-in-Line/"/>
+    <updated>2014-07-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/07/27/Coins-in-Line</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://leetcode.com/2011/02/coins-in-line.html)
+
+> There are n coins in a line. Two players take turns to take a coin from one of the ends of the line until there are no more coins left. The player with the larger amount of money wins. Assume that you go first, describe an algorithm to compute the maximum amount of money you can win. 
+
+### Analysis
+
+__There's a guaranteed 'win strategy'__, if the input array is even size. Find the sum of coins at even and odd positions respectively. Then, make sure you always take coin from even (or odd, whichever sum is bigger) position. 
+
+This strategy is clever and simple, but __DOES NOT maximize your total sum__. 
+
+### Solution
+
+__The optimized solution is to use [2-D DP](http://tech-queries.blogspot.sg/2011/06/get-maximum-sum-from-coins-in-line.html)__. Now we have array A and C(i, j) which is the maximum sum possible when remaining coins are from i to j. 
+
+You can take either i or j. Since the opponent is as smart as you, he would have chosen the choice that yields the minimum amount to you. 
+
+So, the final equation is: 
+
+> C(i, j) = max { Ai + min{C(i+2, j), C(i+1, j-1)}, Aj + min{C(i+1, j-1), C(i, j-2)} }
+
+### Code
+
+C++ code
+
+    #define MAX 100  
+    int maxMoney(int A[], int N) {
+        int C[MAX][MAX] = {0};  
+        int x, y, z; //x = C[m+2][n], y = C[m+1][n-1], z = C[m][n-2]  
+        for (int i = 0; i < N; i++) {
+            for (int m = 0, n = i; n < N; m++, n++) {
+              //calculate x, y, z  
+              x = (m+2 < N)                         ? C[m+2][n] : 0;  
+              y = (m+1 < N && n-1 >= 0)    ? C[m+1][n-1] : 0;  
+              z = (n-1 > 0)                            ? C[m][n-2] : 0;  
+              C[m][n] = max(A[m] + min(x,y),  
+                                     A[n] + min(y,z));  
+              //For Debugging        
+              cout << x << ", " << y << ", " << z << endl;  
+              cout << m << ", " << n << ", " << C[m][n] << endl;  
+            }
+        }
+        return C[0][N-1];
+    }
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode Plus] Convert Binary Search Tree to Circular Doubly-Linked List]]></title>
+    <link href="http://okckd.github.io/blog/2014/07/24/Convert-BST-To-Circular-DLL/"/>
+    <updated>2014-07-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/07/24/Convert-BST-To-Circular-DLL</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html)
+
+> Convert a BST to a sorted circular doubly-linked list in-place. 
+
+> Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.
+
+### Inorder solution
+
+This question can be solved with __inorder traversal with the help of a 'pre' pointer__. 
+
+This solution is recommended by L33tcode, but not very intuitive, and difficult to write. The C++ code is attached below. [source](http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html). 
+
+    void treeToDoublyList(Node *p, Node *& prev, Node *& head) {
+      if (!p) return;
+      treeToDoublyList(p->left, prev, head);
+      // current node's left points to previous node
+      p->left = prev;
+      if (prev)
+        prev->right = p;  // previous node's right points to current node
+      else
+        head = p; // current node (smallest element) is head of
+                  // the list if previous node is not available
+      // as soon as the recursion ends, the head's left pointer 
+      // points to the last node, and the last node's right pointer
+      // points to the head pointer.
+      Node *right = p->right;
+      head->left = p;
+      p->right = head;
+      // updates previous node
+      prev = p;
+      treeToDoublyList(right, prev, head);
+    }
+
+    // Given an ordered binary tree, returns a sorted circular
+    // doubly-linked list. The conversion is done in-place.
+    Node* treeToDoublyList(Node *root) {
+      Node *prev = NULL;
+      Node *head = NULL;
+      treeToDoublyList(root, prev, head);
+      return head;
+    }
+
+### Divide and conquer solution
+
+The good and intuitive solution is to do D&C and __solve left and right recursively__. Do note how the circular linked lists are merged, and be careful when replacing the pointers. 
+
+The Java code is posted below. [source](http://cslibrary.stanford.edu/109/TreeListRecursion.html)
+
+	public static TreeNode treeToList(TreeNode root) {
+		if (root == null)
+			return (null);
+
+		// Recursively do the subtrees (leap of faith!)
+		TreeNode aList = treeToList(root.left);
+		TreeNode bList = treeToList(root.right);
+
+		// Make root a circular DLL
+		root.left = root;
+		root.right = root;
+
+		// At this point we have three lists, merge them
+		aList = append(aList, root);
+		aList = append(aList, bList);
+
+		return (aList);
+	}
+
+	/*
+	 * given two circular doubly linked lists, append them and return the new
+	 * list.
+	 */
+	public static TreeNode append(TreeNode a, TreeNode b) {
+		if (a == null)
+			return (b);
+		if (b == null)
+			return (a);
+
+		TreeNode aLast = a.left;
+		TreeNode bLast = b.left;
+
+		aLast.right = b;
+		b.left = aLast;
+		bLast.right = a;
+		a.left = bLast;
+
+		return (a);
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode Plus] Reverse Linked List Iteratively and Recursively]]></title>
+    <link href="http://okckd.github.io/blog/2014/06/17/Reverse-linkedlist-recursively/"/>
+    <updated>2014-06-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/06/17/Reverse-linkedlist-recursively</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://leetcode.com/2010/04/reversing-linked-list-iteratively-and.html)
+
+> Implement the reversal of a singly linked list iteratively and recursively. 
+
+### Iteratively
+
+First, the iterative solution is very common, and is listed as __one of the "5 fundamental operations of linked list"__ in the NineChap4 post. I will quote below. 
+
+> First variant: Reverse from a particular node to the end
+
+	public ListNode reverse(ListNode start) {
+        ListNode result = null;
+        ListNode cur = start;
+        while (cur != null) {
+            ListNode temp = cur.next;
+            cur.next = result;
+            result = cur;
+            cur = temp;
+        }
+        return result;
+	}
+
+> Second variant: Reverse from a node until another node
+
+	public ListNode reverseRange(ListNode start, int len) {
+		ListNode result = null;
+		ListNode cur = start;
+		while (len > 0) {
+			ListNode temp = cur.next;
+			cur.next = result;
+			result = cur;
+			cur = temp;
+			len--;
+		}
+		start.next = cur;
+		return result;
+	}
+
+
+### Recursively
+
+A good code from [here](http://stackoverflow.com/a/354937).
+
+    public ListNode Reverse(ListNode list) {
+        if (list == null) return null; 
+        if (list.next == null) return list; 
+        ListNode secondElem = list.next;
+        list.next = null;
+        ListNode reverseRest = Reverse(secondElem);
+        secondElem.next = list;
+        return reverseRest;
+    }
+
+Alternatively, the code can be written in a 'show-off' practice.
+
+    public ListNode Reverse(ListNode list) {
+        if (list == null) return null;
+        if (list.next == null) return list;
+        ListNode reverseRest = Reverse(list.next);
+        list.next.next = list;
+        list.next = null;
+        return reverseRest;
+    }
+
+Test cases urgently needed. ]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode Plus] Binary Tree Serialize and Deserialize]]></title>
+    <link href="http://okckd.github.io/blog/2014/06/16/Binary-tree-serialize-deserialize/"/>
+    <updated>2014-06-16T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/06/16/Binary-tree-serialize-deserialize</id>
+    <content type="html"><![CDATA[### Question 
+
+[link1](http://leetcode.com/2010/09/serializationdeserialization-of-binary.html), [link2](http://leetcode.com/2010/09/saving-binary-search-tree-to-file.html).
+
+> Variant 1: Given a Binary Search Tree, serialize and deserialize it.
+
+> Variant 2: Given a Binary Tree, serialize and deserialize it.
+
+### Variant 1 - Binary search tree
+
+__We must only use pre-order__. 
+
+Think about why, or read [link1](http://leetcode.com/2010/09/serializationdeserialization-of-binary.html). So, serialization is simple - preorder traversal. 
+
+The desecialization would make use of the first element, and range validation method. This is very similar to another question 'validate BST'. Rmb the key is: 
+
+> Each time we add a number, we also pass the valid range within which the number can lie between. 
+
+#### Code
+
+The code is concise, but may not be easy to write: 
+
+    void readBSTHelper(int min, int max, int &insertVal,
+                       BinaryTree *&p, ifstream &fin) {
+      if (insertVal > min && insertVal < max) {
+        int val = insertVal;
+        p = new BinaryTree(val);
+        if (fin >> insertVal) {
+          readBSTHelper(min, val, insertVal, p->left, fin);
+          readBSTHelper(val, max, insertVal, p->right, fin);
+        }
+      }
+    }
+
+    void readBST(BinaryTree *&root, ifstream &fin) {
+      int val;
+      fin >> val;
+      readBSTHelper(INT_MIN, INT_MAX, val, root, fin);
+    }
+
+### Variant 2 - Binary tree
+
+For binary tree, we could not use above solution any more. We must use some NULL pointers to fill in empty slots. For this variant, __pre-order and level-order both would work__. 
+
+Then which of these 2 is a better choice?
+
+<pre>
+   1
+  / \
+ 2   3
+</pre>
+
+> Given the tree above: 
+>
+> The pre-order serialization is: {1, 2, #, #, 3, #, #}
+>
+> The level-order serialization is: {1, 2, 3}
+>
+> We can see that level-order is a better idea, because last level null pointers need not be handled. 
+
+#### Code (preorder)
+
+The serializaion is a simple traversal. 
+
+    void writeBinaryTree(BinaryTree *p, ostream &out) {
+      if (!p) {
+        out << "# ";
+      } else {
+        out << p->data << " ";
+        writeBinaryTree(p->left, out);
+        writeBinaryTree(p->right, out);
+      }
+    }
+
+The deserialization is a little bit like "convert linked list to balanced tree" (where we use first element of the list as root of the tree). 
+
+    void readBinaryTree(BinaryTree *&p, ifstream &fin) {
+      int token;
+      bool isNumber;
+      if (!readNextToken(token, fin, isNumber)) 
+        return;
+      if (isNumber) {
+        p = new BinaryTree(token);
+        readBinaryTree(p->left, fin);
+        readBinaryTree(p->right, fin);
+      }
+    }
+
+I did not find any code for level-order, but it's similar to 'level-order traversal'. 
+
+### One more thing
+
+A Binary Search Tree (BST) is useful for storing phone book records in a memory limited device, such as a cell phone. The records are always maintained in sorted order, inserting and deleting a record takes O(lg n) time (slower than linked list, but much better than array). 
+
+### One more one-more-thing
+
+__This post we use # as a sentinel__. There is also __[another idea](http://stackoverflow.com/a/15044868) of doing both Inorder and Preorder traversal__ to searialize the tree data, and use the solution to "Construct Binary Tree from Preorder and Inorder" to deserialize it. 
+]]></content>
+  </entry>
+  
+</feed>
