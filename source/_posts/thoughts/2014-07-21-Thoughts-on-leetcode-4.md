@@ -1,10 +1,9 @@
 ---
 layout: post
-title: "Some thoughts on LeetCode questions IV (`)"
+title: "Some thoughts on LeetCode questions IV"
 comments: true
 category: Thoughts
 tags: [thoughts]
-published: false
 ---
 
 ### Some stats
@@ -17,3 +16,4 @@ The AC/submission rate shall be used as a benchmark for future improvement.
 
 ### Thoughts
 
+Keep up the hard work! 
