@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "[Question] Construct a BST from preorder traversal"
+title: "[Question] Construct a BST from Preorder Traversal"
 comments: true
 category: General
-tags: [  ]
+tags: [ cc150 ]
 ---
 
 ### Question 
