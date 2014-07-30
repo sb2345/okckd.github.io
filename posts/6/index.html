@@ -9,8 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Overview HashTable HashTable is thread safe synchronized. Only 1 thread can access at a time (compromise speed).
-HashTable does not allow null for &hellip;">
+  <meta name="description" content="Question Implement a HashMap Hint: An instance of HashMap has two parameters that affect its performance: initial capacity and load factor. The &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +65,173 @@ HashTable does not allow null for &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/01/Implement-Hashmap/">[Question] Implement a HashMap</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p>Implement a HashMap</p>
+
+<p><strong>Hint</strong>:</p>
+
+<blockquote><p>An instance of HashMap has two parameters that affect its performance: initial capacity and load factor. The capacity is the number of buckets in the hash table, and the initial capacity is simply the capacity at the time the hash table is created. The load factor is a measure of how full the hash table is allowed to get before its capacity is automatically increased. When the number of entries in the hash table exceeds the product of the load factor and the current capacity, the hash table is rehashed (that is, internal data structures are rebuilt) so that the hash table has approximately twice the number of buckets. <a href="http://stackoverflow.com/a/10901821">source</a></p>
+
+<p>Load factor = n/k where n is the number of entries and k is the number of buckets.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Some points to take note:</p>
+
+<ol>
+<li><p>So first of all, we would need 2 important parameters in a Hashmap: <strong>initial capacity and load factor</strong>. In Java, it&rsquo;s default 0.75.</p>
+
+<p> For example the product of capacity and load factor = 16 * 0.75 = 12. This represents that after storing the 12th key – value pair into the HashMap , its capacity will become 32.</p></li>
+<li><p>Then we would need an Entry&lt;Obj, Obj> Class to store <strong>key-value pairs</strong>. Important to note the Entry would have a &lsquo;next&rsquo; pointer, in order to mimic a LinkedList.</p></li>
+<li><p>Except key, value and next pointer, Entry class <strong>also need to store the &lsquo;hash&rsquo; value</strong>, because it will be used during comparison.</p></li>
+<li><p>The main bucket is an array of Entry objects. It should resize when it has to, and this is <strong>done in the addEntry() method</strong>. I skipped this part of code.</p></li>
+<li><p>The code for put() and get() method are similar, because it&rsquo;s bascially <strong>calculate hash</strong>, then <strong>get array index</strong>, using that index to <strong>locate the head Entry object</strong>, and then do a linear search for key. If found, put() will replace it, and get() will return it. Note than after replaced, the old value is returned (Java designed in this way, I personally wouldn&rsquo;t do this).</p></li>
+<li><p>Last important thing is the <strong>indexFor() method</strong>. It looks useless to me at first, then I realize that this method is mapping my hash value into the index in the array. Fine, but this bit operation still looks odd. Look at next section for more.</p></li>
+</ol>
+
+
+<h3>The Niubility Operation: h &amp; (length &ndash; 1)</h3>
+
+<p>This actually equals to the value of (h % length). It converts the hash value into array index.</p>
+
+<blockquote><p>这个方法非常巧妙，它通过 h &amp; (length &ndash; 1) 来得到该对象的保存位，而HashMap底层数组的长度总是 2 的 n 次方，这是HashMap在速度上的优化。</p>
+
+<p>当length总是 2 的n次方时，h &amp; (length &ndash; 1)运算等价于对length取模，也就是h % length，但是 &amp; 比 % 具有更高的效率。<a href="http://www.cnblogs.com/-clq/archive/2012/01/11/2318870.html">source</a></p></blockquote>
+
+<p>That&rsquo;s all about implementing a HashMap. It&rsquo;s difficult, but having a general idea definitely helps.</p>
+
+<p>What&rsquo;s more, know the mod operation &ldquo;h &amp; (length &ndash; 1)&rdquo; would definitely help you grab some attentions!</p>
+
+<h3>Code</h3>
+
+<pre><code>public class MyHashMap {
+
+    Pair[] table;
+    float loadFactor;
+    int size;
+
+    public MyHashMap(int initialCapacity, float loadFactor) {
+        if (initialCapacity &lt; 0 || loadFactor &lt;= 0) {
+            return;
+        }
+        table = new Pair[initialCapacity];
+        this.size = 0;
+        this.loadFactor = loadFactor;
+    }
+
+    public String get(int key) {
+        int hash = hash(key);
+        int i = indexFor(hash, table.length);
+        Pair e = table[i];
+        for (; e != null; e = e.next) {
+            if (e.hash == hash &amp;&amp; key == e.key) {
+                return e.value;
+            }
+        }
+        return null;
+    }
+
+    public String put(int key, String value) {
+        int hash = hash(key);
+        int i = indexFor(hash, table.length);
+        Pair e = table[i];
+        for (; e != null; e = e.next) {
+            if (e.hash == hash &amp;&amp; key == e.key) {
+                String oldValue = e.value;
+                e.value = value;
+                return oldValue;
+            }
+        }
+        addEntry(hash, key, value, i);
+        return null;
+    }
+
+    void addEntry(int hash, int key, String value, int i) {
+        // in charge of resizing here (check the load factor)
+        // resizing code is not written here
+        Pair e = table[i];
+        table[i] = new Pair(hash, key, value, e);
+    }
+
+    int indexFor(int h, int length) {
+        return h &amp; (length - 1);
+    }
+
+    final int hash(int code) {
+        // this is the hash function from java 6 source code
+        code ^= (code &gt;&gt;&gt; 20) ^ (code &gt;&gt;&gt; 12);
+        return code ^ (code &gt;&gt;&gt; 7) ^ (code &gt;&gt;&gt; 4);
+    }
+
+    public static void main(String[] args) {
+        MyHashMap map = new MyHashMap(16, 0.5f);
+        map.put(1, "a");
+        map.put(2, "b");
+        map.put(3, "c");
+        System.out.println(map.get(1));
+        System.out.println(map.get(2));
+        System.out.println(map.get(3));
+        map.put(1, "Spider Man");
+        map.put(4, "d");
+        map.put(3, "Peter Parker");
+        System.out.println(map.get(1));
+        System.out.println(map.get(2));
+        System.out.println(map.get(3));
+        System.out.println(map.get(4));
+        System.out.println(map.get(5));
+    }
+
+    class Pair {
+        int hash;
+        int key;
+        String value;
+        Pair next;
+
+        Pair(int h, int k, String v, Pair n) {
+            hash = h;
+            key = k;
+            value = v;
+            next = n;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1417,72 +1583,6 @@ Remove:
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Minimum-subarray/">[LintCode] Minimum Subarray</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/minimum-subarray/">link</a></p>
-
-<blockquote><p>Given an array of integers, find the subarray with smallest sum. Return the sum of the subarray.</p>
-
-<p>Note The subarray should contain at least one integer.</p>
-
-<p>Example For [1, -1, -2, 1], return -3</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Same as &ldquo;Max subarray&rdquo;.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int minSubArray(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    if (nums == null || nums.size() == 0) {
-        return 0;
-    }
-    int min = nums.get(0);
-    int pre = Math.min(0, nums.get(0));
-    for (int i = 1; i &lt; nums.size(); i++) {
-        pre += nums.get(i);
-        min = Math.min(min, pre);
-        pre = Math.min(0, pre);
-    }
-    return min;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/7">&larr; Older</a>
@@ -1504,6 +1604,10 @@ Remove:
       </li>
     
       <li class="post">
+        <a href="/blog/2014/07/30/Nth-Fibonacci-Number-In-LogN/">[Question] Nth Fibonacci Number in O(LogN)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/07/29/Which-is-faster/">[Question] Which Loop Is Faster</a>
       </li>
     
@@ -1513,10 +1617,6 @@ Remove:
     
       <li class="post">
         <a href="/blog/2014/07/29/Find-Min-Max-in-Array/">[Question] Find Min & Max in an Array Using Minimum Comparisons</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/29/Construct-BST-from-preorder/">[Question] Construct a BST From Preorder Traversal</a>
       </li>
     
   </ul>
