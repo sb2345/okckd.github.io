@@ -12,7 +12,7 @@ tags: [  ]
 
 > Find Nth fibonacci number in O(logN) time complexity.
 
-### Analysis
+### Solution
 
 {% img middle /assets/images/fibonacci_matrix.png %}
 
@@ -27,11 +27,14 @@ It's a recursive sequence, where we can get the following equation:
 	..
 	A* [ F(n) F(n-1) ] = [ F(n+1) F(n) ] = A^n * [ F(1) F(0) ]
 
-### Solution
+Which means: 
 
+{% img middle /assets/images/fibonacci_equation.png %}
+
+So all that is left is finding the nth power of the matrix A. Well, this can be computed in O(log n) time, by recursive doubling. For more, see question post or [here](http://www.codechef.com/wiki/tutorial-dynamic-programming#Finding_nth_Finobacci_number_in_Olog_n). 
 
 ### Code
 
-__not written by me__
+__not written__
 
 
