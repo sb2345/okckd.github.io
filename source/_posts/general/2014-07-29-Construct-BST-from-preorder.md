@@ -22,4 +22,33 @@ __Howver, there's [O(n) solutions](http://www.geeksforgeeks.org/construct-bst-fr
 
 > The trick is to set a range {min .. max} for every node. Initialize the range as {INT_MIN .. INT_MAX}. The first node will definitely be in range, so create root node. To construct the left subtree, set the range as {INT_MIN …root->data}. If a values is in the range {INT_MIN .. root->data}, the values is part part of left subtree. To construct the right subtree, set the range as {root->data..max .. INT_MAX}.
 
-There's another __[O(n) solution](http://www.geeksforgeeks.org/construct-bst-from-given-preorder-traversal-set-2/) using stack__. 
+__The key__ is the we need __a public variable__ as a pointer (to traverse thru the array). 
+
+There's another [O(n) solution](http://www.geeksforgeeks.org/construct-bst-from-given-preorder-traversal-set-2/) using stack. I wont' cover for now. 
+
+### Code
+
+__written by me__
+
+It's not an easy question, to be frank. 
+
+	int p;
+    
+	public TreeNode solution(int[] preorder) {
+        p = 0;
+		return helper(preorder, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	}
+
+	private TreeNode helper(int[] A, int min, int max) {
+		int len = A.length;
+		if (p >= len) {
+			return null;
+		} else if (A[p] < min || A[p] > max) {
+			return null;
+		}
+		TreeNode root = new TreeNode(A[p]);
+		p++;
+		root.left = helper(A, min, root.val);
+		root.right = helper(A, root.val, max);
+		return root;
+	}
