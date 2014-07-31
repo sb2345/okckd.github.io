@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link Given two queues with their standard operations (enqueue, dequeue, isempty, size), implement a stack with its standard operations (pop &hellip;">
+  <meta name="description" content="Question link Convert a BST to a sorted circular doubly-linked list in-place. Think of the left and right pointers as synonymous to the previous and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,132 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/Convert-BST-To-Circular-DLL/">[LeetCode Plus] Convert Binary Search Tree to Circular Doubly-Linked List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">link</a></p>
+
+<blockquote><p>Convert a BST to a sorted circular doubly-linked list in-place.</p>
+
+<p>Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.</p></blockquote>
+
+<h3>Inorder solution</h3>
+
+<p>This question can be solved with <strong>inorder traversal with the help of a &lsquo;pre&rsquo; pointer</strong>.</p>
+
+<p>This solution is recommended by L33tcode, but not very intuitive, and difficult to write. The C++ code is attached below. <a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">source</a>.</p>
+
+<pre><code>void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
+  if (!p) return;
+  treeToDoublyList(p-&gt;left, prev, head);
+  // current node's left points to previous node
+  p-&gt;left = prev;
+  if (prev)
+    prev-&gt;right = p;  // previous node's right points to current node
+  else
+    head = p; // current node (smallest element) is head of
+              // the list if previous node is not available
+  // as soon as the recursion ends, the head's left pointer 
+  // points to the last node, and the last node's right pointer
+  // points to the head pointer.
+  Node *right = p-&gt;right;
+  head-&gt;left = p;
+  p-&gt;right = head;
+  // updates previous node
+  prev = p;
+  treeToDoublyList(right, prev, head);
+}
+
+// Given an ordered binary tree, returns a sorted circular
+// doubly-linked list. The conversion is done in-place.
+Node* treeToDoublyList(Node *root) {
+  Node *prev = NULL;
+  Node *head = NULL;
+  treeToDoublyList(root, prev, head);
+  return head;
+}
+</code></pre>
+
+<h3>Divide and conquer solution</h3>
+
+<p>The good and intuitive solution is to do D&amp;C and <strong>solve left and right recursively</strong>. Do note how the circular linked lists are merged, and be careful when replacing the pointers.</p>
+
+<p>The Java code is posted below. <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">source</a></p>
+
+<pre><code>public static TreeNode treeToList(TreeNode root) {
+    if (root == null)
+        return (null);
+
+    // Recursively do the subtrees (leap of faith!)
+    TreeNode aList = treeToList(root.left);
+    TreeNode bList = treeToList(root.right);
+
+    // Make root a circular DLL
+    root.left = root;
+    root.right = root;
+
+    // At this point we have three lists, merge them
+    aList = append(aList, root);
+    aList = append(aList, bList);
+
+    return (aList);
+}
+
+/*
+ * given two circular doubly linked lists, append them and return the new
+ * list.
+ */
+public static TreeNode append(TreeNode a, TreeNode b) {
+    if (a == null)
+        return (b);
+    if (b == null)
+        return (a);
+
+    TreeNode aLast = a.left;
+    TreeNode bLast = b.left;
+
+    aLast.right = b;
+    b.left = aLast;
+    bLast.right = a;
+    a.left = bLast;
+
+    return (a);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -860,70 +986,6 @@ private static String removeDigit(String number, int digitIndex) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Clone-octopress-blog-from-a-different-computer/">[Octopress] Clone Octopress Blog From a Different Computer</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&rsquo;ve had a little confusions about how to develop my Octopress blog on 2 different computers. Some solutions posted online does not work, and it turns out that some commands have changed its functions in new version of Octopress. So, I write this post to clarify these confusions.</p>
-
-<p>To set up a new local repository from an online github octopress blog repo, follow the instructions:</p>
-
-<ol>
-<li><p><strong>clone the source branch to the local octopress folder</strong></p>
-
-<blockquote><p>git clone -b source git@github.com:willran168/willran168.github.io.git octopress</p></blockquote></li>
-<li><p><strong>run the rake installation to configure everything</strong></p>
-
-<blockquote><p>cd octopress
-gem install bundler
-rbenv rehash    (I think this is optional)
-bundle install
-rake setup_github_pages</p></blockquote></li>
-<li><p><strong>enter repository URL</strong></p>
-
-<blockquote><p>git@github.com:willran168/willran168.github.io.git</p></blockquote></li>
-<li><p><strong>clone the master branch to the _deploy subfolder</strong></p>
-
-<blockquote><p>git clone git@github.com:willran168/willran168.github.io.git _deploy</p></blockquote></li>
-</ol>
-
-
-<p>Clone master branch is the last step. Because running <code>rake setup_github_pages</code> will remove previous _deploy folder and init a new repo inside of it. So master have to be cloned after this step.</p>
-
-<p>It&rsquo;s done. Now we can do &lsquo;rake gen_deploy&rsquo;, or &lsquo;git commit or push origin source&rsquo;.</p>
-
-<p><a href="http://blog.zerosharp.com/clone-your-octopress-to-blog-from-two-places/">reference</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -949,15 +1011,15 @@ rake setup_github_pages</p></blockquote></li>
       </li>
     
       <li class="post">
+        <a href="/blog/2014/07/31/Number-Of-Bus-Stations/">[Question] Number of Bus-Stations</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/07/31/Inorder-Successor-BST/">[Question] Inorder Successor in Binary Search Tree</a>
       </li>
     
       <li class="post">
         <a href="/blog/2014/07/30/Peripheral-Of-Complete-Tree/">[Question] Peripheral of a Complete Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/30/Nth-Fibonacci-Number-In-LogN/">[Question] Nth Fibonacci Number in O(LogN)</a>
       </li>
     
   </ul>
