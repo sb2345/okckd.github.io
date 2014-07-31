@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[Question] Search Range in BST (Trim a BST) - My Octopress Blog</title>
+  <title>[Question] Inorder Successor in Binary Search Tree - My Octopress Blog</title>
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link Given the root of a binary search tree and 2 numbers min and max, trim the tree such that all the numbers in the new tree are between &hellip;">
+  <meta name="description" content="Question link In Binary Tree, Inorder successor of a node is the next node in Inorder traversal of the Binary Tree. Inorder Successor is NULL for the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://okckd.github.io/blog/2014/06/13/Search-range-BST-trim-BST">
+  <link rel="canonical" href="http://okckd.github.io/blog/2014/07/30/Inorder-Successor-BST">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
@@ -68,7 +68,7 @@
   
   <header>
     
-      <h1 class="entry-title">[Question] Search Range in BST (Trim a BST)</h1>
+      <h1 class="entry-title">[Question] Inorder Successor in Binary Search Tree</h1>
     
     
       <p class="meta">
@@ -84,7 +84,7 @@
   
 
 
-<time datetime="2014-06-13T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-07-30T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -93,61 +93,73 @@
 
 <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.ardendertat.com/2012/01/17/programming-interview-questions-26-trim-binary-search-tree/">link</a></p>
+<p><a href="http://www.geeksforgeeks.org/inorder-successor-in-binary-search-tree/">link</a></p>
 
-<blockquote><p>Given the root of a binary search tree and 2 numbers min and max, trim the tree such that all the numbers in the new tree are between min and max (inclusive). The resulting tree should still be a valid binary search tree.</p></blockquote>
+<blockquote><p>In Binary Tree, Inorder successor of a node is the next node in Inorder traversal of the Binary Tree. Inorder Successor is NULL for the last node in Inoorder traversal.</p>
 
-<p>Input:</p>
+<p>Write a program with:</p>
 
-<p><img class="left" src="/assets/images/search-range-input.png"></p>
-
-<p>With min value as 5 and max value as 13, the output is:</p>
-
-<p><img class="left" src="/assets/images/search-range-output.png"></p>
-
-<h3>Analysis</h3>
-
-<p>There is a good analysis from <a href="http://www.geeksforgeeks.org/print-bst-keys-in-the-given-range/">geeksforgeeks</a>:</p>
-
-<blockquote><ol>
-<li>If value of root’s key is greater than k1, then recursively call in left subtree.</li>
-<li>If value of root’s key is in range, then print the root’s key.</li>
-<li>If value of root’s key is smaller than k2, then recursively call in right subtree.</li>
+<ol>
+<li>parent pointer provided</li>
+<li>parent pointer not provided</li>
 </ol>
 </blockquote>
 
-<p>Another great solution is from <a href="http://www.ardendertat.com/2012/01/17/programming-interview-questions-26-trim-binary-search-tree/">Arden Dertat</a>.</p>
+<h3>Solution</h3>
+
+<p><strong>If have parent pointer, it&rsquo;s easy</strong>. Read solution <a href="http://tech-queries.blogspot.sg/2010/04/inorder-succesor-in-binary-tree.html">here</a>.</p>
+
+<p><strong>If no parent pointer, then we make use of the property of BST, can get an O(h) solution</strong>. h is the height.</p>
+
+<p>A very good solution from <a href="http://algorithmsandme.blogspot.sg/2013/08/binary-search-tree-inorder-successor.html">this blog</a>.</p>
+
+<ol>
+<li>Start with root.</li>
+<li>If the node is given has less than root, then search on left side <strong>and update successor</strong>.</li>
+<li>If the node is greater than root, then search in right part, <strong>don&rsquo;t update successor</strong>.</li>
+<li>If we find the node
+
+<ol>
+<li>if the node has right sub tree, then the minimum node on the right sub tree of node is the in-order successor.</li>
+<li>otherwise, just return successor</li>
+</ol>
+</li>
+</ol>
+
+
+<p>The most important point is: we only update <strong>successor</strong> during left turn, and don&rsquo;t update during right turn.</p>
 
 <h3>Code</h3>
 
-<p>First code, from geeksforgeeks &ndash; print the result instead of return.</p>
+<p><strong>written by me</strong></p>
 
-<pre><code>void Print(struct node *root, int k1, int k2)
-{
-   if ( NULL == root )
-      return;
-   if ( k1 &lt; root-&gt;data )
-     Print(root-&gt;left, k1, k2);
-   if ( k1 &lt;= root-&gt;data &amp;&amp; k2 &gt;= root-&gt;data )
-     printf("%d ", root-&gt;data );
-   if ( k2 &gt; root-&gt;data )
-     Print(root-&gt;right, k1, k2);
+<pre><code>public TreeNode inorderSuccessor(TreeNode root, TreeNode target) {
+    if (target.right != null) {
+        return this.findLeftMost(target.right);
+    } else {
+        return this.traverse(root, new TreeNode(-1), target);
+    }
 }
-</code></pre>
 
-<p>Second code from Arden:</p>
+private TreeNode traverse(TreeNode cur, TreeNode pre, TreeNode target) {
+    if (cur.val == target.val) {
+        return pre;
+    } else if (cur.val &lt; target.val) {
+        cur = cur.right;
+        return traverse(cur, pre, target);
+    } else {
+        pre = cur;
+        cur = cur.left;
+        return traverse(cur, pre, target);
+    }
+}
 
-<pre><code>def trimBST(tree, minVal, maxVal): 
-    if not tree: 
-        return 
-    tree.left=trimBST(tree.left, minVal, maxVal) 
-    tree.right=trimBST(tree.right, minVal, maxVal) 
-    if minVal&lt;=tree.val&lt;=maxVal: 
-        return tree 
-    if tree.val&lt;minVal: 
-        return tree.right 
-    if tree.val&gt;maxVal: 
-        return tree.left
+private TreeNode findLeftMost(TreeNode node) {
+    while (node.left != null) {
+        node = node.left;
+    }
+    return node;
+}
 </code></pre>
 </div>
 
@@ -171,7 +183,7 @@
   
 
 
-<time datetime="2014-06-13T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-07-30T00:00:00+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -185,7 +197,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/06/13/Search-range-BST-trim-BST/" data-via="" data-counturl="http://okckd.github.io/blog/2014/06/13/Search-range-BST-trim-BST/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/07/30/Inorder-Successor-BST/" data-via="" data-counturl="http://okckd.github.io/blog/2014/07/30/Inorder-Successor-BST/" >Tweet</a>
   
   
   
@@ -194,10 +206,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/06/12/NineChap-Permutation/" title="Previous Post: [NineChap 1.2] Permutation">&laquo; [NineChap 1.2] Permutation</a>
+        <a class="basic-alignment left" href="/blog/2014/07/29/Which-is-faster/" title="Previous Post: [Question] Which loop is faster">&laquo; [Question] Which loop is faster</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/06/14/Count-negative-in-2D-Sorted-Matrix/" title="Next Post: [Question] Count negative in a 2D Sorted Matrix">[Question] Count negative in a 2D Sorted Matrix &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/07/30/Nth-Fibonacci-Number-In-LogN/" title="Next Post: [Question] Nth Fibonacci Number In O(LogN)">[Question] Nth Fibonacci Number In O(LogN) &raquo;</a>
       
     </p>
   </footer>
