@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link Given an array of integers find the maximum and minimum elements by using minimum comparisons. Solution Compare in Pairs. If n is odd &hellip;">
+  <meta name="description" content="Question link Given a string, recursively remove adjacent duplicate characters from string. The output string should not have any adjacent duplicates &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,87 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/29/Remove-char-in-Pairs/">[Question] Remove Chars in Pairs</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/recursively-remove-adjacent-duplicates-given-string/">link</a></p>
+
+<blockquote><p>Given a string, recursively remove adjacent duplicate characters from string. The output string should not have any adjacent duplicates.</p>
+
+<p>Input:  azxxzy</p>
+
+<p>Output: ay</p>
+
+<p>First &ldquo;azxxzy&rdquo; is reduced to &ldquo;azzy&rdquo;. The string &ldquo;azzy&rdquo; contains duplicates, so it is further reduced to &ldquo;ay&rdquo;.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>We could do it recursively until all pairs are removed, but it&rsquo;s not good.</p>
+
+<p>There&rsquo;s an O(n) solution.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Most obvious solution is to use a stack</strong>. In the end, the stack stores all unmatched chars.</p>
+
+<p>But we can also <strong>do it without using space</strong> (assuming the input is char array). Just use the original char array to store result, with the helper of 2 pointers. <a href="http://tech-queries.blogspot.sg/2011/02/remove-pairs.html">The code</a> is very much concise.</p>
+
+<h3>Code</h3>
+
+<p><strong>Refactored code by me</strong></p>
+
+<pre><code>public static String remove_pair(char[] input) {
+    int len = input.length;
+    int right = 1, left = 0;
+
+    while (right &lt; len) {
+        // Cancel pairs
+        while (right &lt; len &amp;&amp; left &gt;= 0 &amp;&amp; input[right] == input[left]) {
+            right++;
+            left--;
+        }
+        if (right == len) {
+            break;
+        }
+        input[++left] = input[right++];
+    }
+    return String.valueOf(input).substring(0, left + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -814,103 +895,6 @@ private TreeNode constructTree() {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Elephant-And-Bananas/">[Question] Elephant and Bananas</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2011/04/elephant-and-banana.html">link</a></p>
-
-<blockquote><p>There&rsquo;s a elephant, which can carry max 1000 bananas. The elephant eats a banana every 1 Km (both forward and back).</p>
-
-<p>Now we want to transfer 3000 bananas to a place 1000 Km away. How many bananas can be left?</p>
-
-<p>Also solved to generalized problem (write code for solution).</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>If we subdivide distances for each kilometer</strong>. Notice if elephant wants to shift all the bananas 1 km, <strong>you will loose 5 bananas every km</strong>.</p>
-
-<p>So we transferred 2995 (998+998+999) to one km distance. This process continues until after 200 km, we have only 2000 bananas left with remaining distance of 800 km.</p>
-
-<p><strong>Start from here, we only loose 3 bananas every km</strong>. This goes on for another 334 km, we will have 998 bananas left, and the rest of the bananas can be transfered in a single journey.</p>
-
-<h3>Solution</h3>
-
-<p><strong>532 bananas</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong></p>
-
-<pre><code>double transferBananas(double N, double D, double C, double F) {  
-    // base case: remaining bananas &lt;= C,  
-    // so carry all the bananas in one trip  
-    // at this point if distance is more than N/F,  
-    // elephant can never reach destination, return 0  
-    if (N &lt;= C) {
-        double bananasAtDestination = N - D*F;  
-        return (bananasAtDestination &gt;= 0.0) ?  
-            bananasAtDestination :  0.0;    // out of bananas!  
-    }  
-
-    // # trips you would travel back and forth  
-    int numTrips = 2*(ceil(N/C) - 1) + 1;  
-
-    // how many bananas you consume per km  
-    double costPerKm = numTrips * F;  
-
-    // remaining number of bananas after consumption, we want it  
-    // as an integer multiple of C.  
-    double remainingBananas = C*(ceil(N/C) - 1.0);  
-
-    // this is the distance you are able to travel before you  
-    // reach ONE LESS round trip fetching bananas  
-    // derived from eq: N - costPerKm * traveled = remaining bananas  
-
-    double traveled = (N - remainingBananas) / costPerKm;  
-
-    // we are able to travel greater (or equal) than the remaining  
-    // distance, so fetch the bananas right to the destination  
-    if (traveled &gt;= D)
-        return N - D*costPerKm;  
-
-    // calculate recursively as we travel ONE less round trip now.  
-    return transferBananas(remainingBananas, D-traveled, C, F);  
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -936,15 +920,15 @@ private TreeNode constructTree() {
       </li>
     
       <li class="post">
+        <a href="/blog/2014/08/01/">[Question] Shuffle a Given Array</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/07/31/Run-Length-Encoding/">[Question] Run-Length Encoding</a>
       </li>
     
       <li class="post">
         <a href="/blog/2014/07/31/Points-On-Globe/">[Question] Points on Globe Puzzle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/07/31/Number-Of-Bus-Stations/">[Question] Number of Bus-Stations</a>
       </li>
     
   </ul>
