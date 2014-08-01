@@ -4,7 +4,7 @@
   <title><![CDATA[Category: General | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/general/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-01T11:18:50+08:00</updated>
+  <updated>2014-08-01T17:29:50+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[Question] Max Sum in a 2D Array (`)]]></title>
+    <title type="html"><![CDATA[[Question] Max Sum in a 2D Array]]></title>
     <link href="http://okckd.github.io/blog/2014/08/01/Max-Sum-In-2D-Array/"/>
     <updated>2014-08-01T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/08/01/Max-Sum-In-2D-Array</id>
@@ -74,6 +74,95 @@ __written by me__
 			sumSoFar = Math.max(0, sumSoFar + B[i]);
 		}
 		return maxSum;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Arranging Sequence]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/01/Arranging-Sequence/"/>
+    <updated>2014-08-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/01/Arranging-Sequence</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://tech-queries.blogspot.sg/2008/11/arranging-sequence.html)
+
+> We have an array of 2n elements like "a1 a2...an b1 b2...bn". WAP to rearrange the array as "a1 b1 a2 b2...an bn"
+
+> time complexity is O(n) no extra array or memory can be taken.
+
+> Input : 1 2 3 4 5 6 7 8 9 10 11 12 (even number input)
+>
+> Output: 1 7 2 8 3 9 4 10 5 11 6 12
+
+> Input : 1 2 3 4 5 6 7 (odd number input)
+>
+> Output: 1 5 2 6 3 7 4
+
+### Analysis
+
+This is a difficult question. 
+
+I did not find enough resources online, but have come up with 2 solutions.
+
+### Solution
+
+__First is like bubble sort (read it somewhere before)__. Always swap in pairs (starting from the middle): 
+
+	1st: 1 2 3 4 5 6 7
+	2nd: 1 2 3 5 4 6 7
+	3rd: 1 2 5 3 6 4 7
+	4th: 1 5 2 6 3 7 4
+	done
+
+__Second solution is to swap in cycles (put current value in its 'successor' position, and continue from there)__. But in order to identify cycles, additional space is used. I wrote the code (which make use of 'visited' array) is listed below. the time complexity is between O(n) and O(n^2). 
+
+More info on this topic can be found on [wikipedia](http://en.wikipedia.org/wiki/In-place_matrix_transposition). 
+
+### Code
+
+__written by me__
+
+	public void rearrange(int[] A) {
+		int effLength = A.length;
+		if (A.length % 2 == 0) {
+			// for even number of input, last element is unchanged
+			effLength--;
+		}
+		// make sure 'effLength' is an odd number.
+		int half = effLength / 2 + 1;
+		int pos = 1;
+		int posValue = A[pos];
+		int numSwaps = 0;
+		boolean[] visited = new boolean[effLength];
+		// visited is used as flag to avoid repeat swap
+		// eg. when input is { 1, 2, 3, 4, 5, 6, 7 }, repeat swap as below:
+		// 2 -> 3 -> 5 -> 2 -> 3 ...
+		while (numSwaps < effLength - 1) {
+			// swap (effLength - 1) times because 1st position is unchanged
+			int newPos = getNewPosition(A, pos, half);
+			if (visited[newPos]) {
+				// if this new position is swap already, skip it
+				pos = (pos + 1) % effLength;
+				posValue = A[pos];
+				continue;
+			}
+			int temp = A[newPos];
+			A[newPos] = posValue;
+			posValue = temp;
+			pos = newPos;
+
+			visited[newPos] = true;
+			numSwaps++;
+		}
+	}
+
+	private int getNewPosition(int[] array, int pos, int half) {
+		if (pos < half) {
+			return 2 * pos;
+		} else {
+			return 2 * (pos - half) + 1;
+		}
 	}
 ]]></content>
   </entry>
@@ -162,73 +251,6 @@ __The suggestted solution__ from [here](http://tech-queries.blogspot.sg/2009/05/
 Now use a counter. When sees an A, increment. When sees an D, decreament. In the end, return the largest counter value. 
 
 Note: If you have a arriving and a departing at same time, put departure time first.
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Inorder Successor in Binary Search Tree]]></title>
-    <link href="http://okckd.github.io/blog/2014/07/31/Inorder-Successor-BST/"/>
-    <updated>2014-07-31T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/07/31/Inorder-Successor-BST</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.geeksforgeeks.org/inorder-successor-in-binary-search-tree/)
-
-> In Binary Tree, Inorder successor of a node is the next node in Inorder traversal of the Binary Tree. Inorder Successor is NULL for the last node in Inoorder traversal.
-
-> Write a program with: 
-
-> 1. parent pointer provided
-> 1. parent pointer not provided
-
-### Solution
-
-__If have parent pointer, it's easy__. Read solution [here](http://tech-queries.blogspot.sg/2010/04/inorder-succesor-in-binary-tree.html). 
-
-__If no parent pointer, then we make use of the property of BST, can get an O(h) solution__. h is the height. 
-
-A very good solution from [this blog](http://algorithmsandme.blogspot.sg/2013/08/binary-search-tree-inorder-successor.html).
-
-1. Start with root.
-2. If the node is given has less than root, then search on left side __and update successor__.
-3. If the node is greater than root, then search in right part, __don't update successor__.
-4. If we find the node
-	1. if the node has right sub tree, then the minimum node on the right sub tree of node is the in-order successor.
-	1. otherwise, just return successor
-
-The most important point is: we only update __successor__ during left turn, and don't update during right turn. 
-
-### Code
-
-__written by me__
-
-	public TreeNode inorderSuccessor(TreeNode root, TreeNode target) {
-		if (target.right != null) {
-			return this.findLeftMost(target.right);
-		} else {
-			return this.traverse(root, new TreeNode(-1), target);
-		}
-	}
-
-	private TreeNode traverse(TreeNode cur, TreeNode pre, TreeNode target) {
-		if (cur.val == target.val) {
-			return pre;
-		} else if (cur.val < target.val) {
-			cur = cur.right;
-			return traverse(cur, pre, target);
-		} else {
-			pre = cur;
-			cur = cur.left;
-			return traverse(cur, pre, target);
-		}
-	}
-
-	private TreeNode findLeftMost(TreeNode node) {
-		while (node.left != null) {
-			node = node.left;
-		}
-		return node;
-	}
 ]]></content>
   </entry>
   
