@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="strStr Question Implement strStr Before solving the problem, it&rsquo;s very important to ask this questions: Can we use system library (eg. str. &hellip;">
+  <meta name="description" content="First Word For BST it&rsquo;s very important to do insert and delete (balancing not required). Insertion is easy, but deletion is very difficult. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,190 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/11/Study-BST-insert-and-delete/">[Collection] a Study of BST Node Insertion / Deletion</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>First Word</h2>
+
+<p>For BST it&rsquo;s very important to do insert and delete (balancing not required).</p>
+
+<p>Insertion is easy, but deletion is very difficult. However, it&rsquo;s a good idea to at least know the principles.</p>
+
+<h3>Insert a node</h3>
+
+<h4>Steps:</h4>
+
+<ol>
+<li><p>check whether new value = current node value. If not, proceed.</p></li>
+<li><p>if new value is less, than:</p>
+
+<ol>
+<li>if current node has no left child, set left to new value, and return</li>
+<li>otherwise, go to left child and start over</li>
+</ol>
+</li>
+<li><p>if new value is greater, than:</p>
+
+<ol>
+<li>if current node has no right child, set right to new value</li>
+<li>otherwise, go to right child and start over</li>
+</ol>
+</li>
+</ol>
+
+
+<h4>Note:</h4>
+
+<p>The BST may not be balanced after the insertion.</p>
+
+<h4>Code</h4>
+
+<p>Code snippet from <a href="http://www.algolist.net/Data_structures/Binary_search_tree/Insertion">this article</a></p>
+
+<pre><code>public boolean add(TreeNode node, int value) {
+    if (value == node.val)
+        return false;
+    if (value &lt; node.val) {
+        if (node.left == null) {
+            node.left = new TreeNode(value);
+            return true;
+        } else {
+            return add(node.left, value);
+        }
+    } else if (value &gt; node.val) {
+        if (node.right == null) {
+            node.right = new TreeNode(value);
+            return true;
+        } else {
+            return add(node.right, value);
+        }
+    }
+    return false;
+}
+</code></pre>
+
+<h3>Delete a node</h3>
+
+<h4>Steps:</h4>
+
+<ol>
+<li>Find the node</li>
+<li>Find the maximum node in the left subtree</li>
+<li>Replace the node with the maximum node in the left subtree.</li>
+</ol>
+
+
+<h4>Special Cases:</h4>
+
+<ol>
+<li>The node doest have a left child.</li>
+<li>The maximum node in the left subtree has a left child.</li>
+<li>The node is the root of the tree</li>
+</ol>
+
+
+<h4>Code</h4>
+
+<p>The source code given by <a href="http://answer.ninechapter.com/solutions/delete-a-node-in-binary-search-tree/">ninechap</a></p>
+
+<pre><code>private void myDeleteNode(TreeNode parent, TreeNode node) {
+    if (node.left == null) {
+        if (parent.right == node) {
+            parent.right = node.right;
+        } else {
+            parent.left = node.right;
+        }
+    } else {
+        TreeNode maxNodeParent = node;
+        TreeNode maxNode = node.left;
+
+        // find the maximum node in the left sub tree
+        while (maxNode.right != null) {
+            maxNodeParent = maxNode;
+            maxNode = maxNode.right;
+        }
+
+        if (maxNodeParent.left == maxNode) {
+            maxNodeParent.left = maxNode.left;
+        } else {
+            maxNodeParent.right = maxNode.left;
+        }
+
+        // move replacedNode to node
+        maxNode.left = node.left;
+        maxNode.right = node.right;
+        if (parent.left == node) {
+            parent.left = maxNode;
+        } else {
+            parent.right = maxNode;
+        }
+    }
+}
+
+private void findAndDelete(TreeNode parent, TreeNode node, int val) {
+    if (node == null) {
+        return;
+    }
+    if (node.val == val) {
+        myDeleteNode(parent, node);
+    } else if (node.val &lt; val) {
+        findAndDelete(node, node.right, val);
+    } else {
+        findAndDelete(node, node.left, val);
+    }
+}
+
+public TreeNode deleteNode(TreeNode root, int val) {
+    TreeNode dummyNode = new TreeNode(0);
+    dummyNode.left = root;
+    findAndDelete(dummyNode, root, val);
+    return dummyNode.left;
+}
+</code></pre>
+
+<h3>A little bit on balancing</h3>
+
+<p>There are 2 ways to balance a tree. <strong>Most common method is tree rotation</strong>:</p>
+
+<p><img class="left" src="/assets/images/rotate-tree.png"></p>
+
+<p>An AVL Trees means a self-balancing search trees. If balance gets out of range −1&hellip;+1, the subtree is rotated to bring into balance.</p>
+
+<p><strong>Second way is to convert tree into a linkedlist</strong>, then build the tree again (we have discussed this algorithm before, pick the middle element).</p>
+
+<p>This method is slow if we insert and re-balance on each step, but we can do bulk insert/delete forgetting about the re-balancing for a while. This will make the data structure faster! <a href="http://java.dzone.com/articles/algorithm-week-balancing">more details</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1408,72 +1592,6 @@ public TreeNode latestCommonAncestor(TreeNode node1, TreeNode node2) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/10/Classic-questions-to-memorize/">[Collection] Classic Questions That Needs to Be Memorized</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Question list</h2>
-
-<p><strong>Permutation</strong></p>
-
-<ol>
-<li><p><strong><a href="/blog/2014/05/22/Subsets/">Subsets</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/22/Subsets-II/">Subsets II</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/14/Permutations/">Permutations</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/14/Permutations-II/">Permutations II</a></strong> &ndash; difficult</p></li>
-</ol>
-
-
-<p><strong>Binary Tree</strong></p>
-
-<ol>
-<li><p><strong><a href="/blog/2014/05/24/Binary-Tree-Inorder-Traversal/">Binary Tree Inorder Traversal</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">Binary Tree Postorder Traversal</a></strong> &ndash; difficult</p></li>
-<li><p><strong><a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree/">Lowest Common Ancestor Problem Version 2</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/">Binary Tree Maximum Path Sum</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/26/Convert-Sorted-List-to-Binary-Search-Tree/">Convert Sorted List to Binary Search Tree</a></strong></p></li>
-</ol>
-
-
-<p><strong>Other</strong></p>
-
-<ol>
-<li><p><strong><a href="/blog/2014/05/21/Minimum-Window-Substring/">Minimum Window Substring </a></strong> &ndash; very difficult</p></li>
-<li><p><strong><a href="/blog/2014/04/29/Regular-Expression-Matching/">Regular Expression Matching</a></strong> &ndash; very difficult</p></li>
-<li><p><strong><a href="/blog/2014/05/15/Wildcard-Matching/">Wildcard Matching</a></strong> &ndash; difficult</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/12">&larr; Older</a>
@@ -1491,7 +1609,11 @@ public TreeNode latestCommonAncestor(TreeNode node1, TreeNode node2) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/08/02/Winner-tic-tac-toe/">[Question] Winner of Tic-tac-toe</a>
+        <a href="/blog/2014/08/02/Winner-tic-tac-toe/">[Google] Winner of Tic-tac-toe</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/02/Print-string-comparison-order/">[Google] Print String Comparison Order</a>
       </li>
     
       <li class="post">
@@ -1504,10 +1626,6 @@ public TreeNode latestCommonAncestor(TreeNode node1, TreeNode node2) {
     
       <li class="post">
         <a href="/blog/2014/08/01/Max-Sum-In-2D-Array/">[Question] Max Sum in a 2D Array</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/01/Arranging-Sequence/">[Question] Arranging Sequence</a>
       </li>
     
   </ul>
