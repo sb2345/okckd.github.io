@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Find Top k Queries"
+title: "[BigData] Find Top k Queries"
 comments: true
-category: General
+category: BigData
 tags: [  ]
 ---
 

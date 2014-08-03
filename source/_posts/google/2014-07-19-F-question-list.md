@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Collection] F question list"
+title: "[Collection] F Question List"
 comments: true
-category: collection
+category: Google
 tags: [  ]
 ---
 
