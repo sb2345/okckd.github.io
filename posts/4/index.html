@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link A tree has a special property where leaves are represented with ‘2’ and non-leaf with ‘1’. Each node has either 0 or 2 children. If &hellip;">
+  <meta name="description" content="Question link A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,120 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Sliding-Window-Maximum/">[LeetCode Plus] Sliding Window Maximum</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">link</a></p>
+
+<blockquote><p>A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right. You can only see the w numbers in the window. Each time the sliding window moves rightwards by one position. Following is an example:
+The array is [1 3 -1 -3 5 3 6 7], and w is 3.</p></blockquote>
+
+<pre><code>Window position                Max
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+</code></pre>
+
+<blockquote><p>Input: A long array A[], and a window width w</p>
+
+<p>Output: An array B[], B[i] is the maximum value of from A[i] to A[i+w-1]</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>The  naive approach is using a Heap</strong>. This time complexity is O(n*logn). However, there is a better way using a (double-ended) queue.</p>
+
+<p><strong>We do not need to <a href="http://n00tc0d3r.blogspot.sg/2013/04/sliding-window-maximum.html">keep all numbers</a></strong>. For example, suppose numbers in a window of size 4 are (1, 3, -1, 2). Obviously, no matter what next numbers are, 1 and -1 are never going to be a maximal as the window moving. The queue should look like (3, 2) in this case.</p>
+
+<h3>Solution</h3>
+
+<ol>
+<li>When moves to a new number, iterate through back of the queue, removes all numbers that are not greater than the new one, and then insert the new one to the back.</li>
+<li>FindMax only need to take the first one of the queue.</li>
+<li>To remove a number outside the window, only compare whether the current index is greater than the front of queue. If so, remove it.</li>
+</ol>
+
+
+<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">A natural way</a> most people would think is to try to maintain the queue size the same as the window’s size. Try to break away from this thought and think out of the box.</p>
+
+<h3>Code</h3>
+
+<p>Code by N00tc0d3r.</p>
+
+<pre><code>public int[] windowMax(int[] nums, int window) {
+    int w = (nums.length &lt; window) ? nums.length : window;
+    // A deque allows insertion/deletion on both ends.
+    // Maintain the first as the index of maximal of the window
+    // and elements after it are all smaller and came later than the first.
+    Deque&lt;Integer&gt; que = new ArrayDeque&lt;Integer&gt;();
+
+    // initialize window
+    int i = 0;
+    while (i &lt; w) {
+        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
+            que.removeLast();
+        }
+        que.addLast(i++);
+    }
+
+    // sliding window
+    int[] max = new int[nums.length - w + 1];
+    max[i - w] = que.getFirst();
+    while (i &lt; nums.length) {
+        // add new element
+        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
+            que.removeLast();
+        }
+        que.addLast(i);
+        // remove old element if still in que
+        if (!que.isEmpty() &amp;&amp; i - w &gt;= que.getFirst()) {
+            que.removeFirst();
+        }
+        // get maximal
+        ++i;
+        max[i - w] = que.getFirst();
+    }
+
+    return max;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -838,122 +952,6 @@ int maxMoney(int A[], int N) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/25/Top-k-Smallest-Element/">[Question] Find Top K Smallest Element</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/k-largestor-smallest-elements-in-an-array/">link</a></p>
-
-<blockquote><p>Find Top k smallest element in an array.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>There&rsquo;re 2 solutions.</p>
-
-<p>First solution, <strong>use a max-heap</strong>. O(nlgk) time complexity.</p>
-
-<p>Second solution is called <strong><a href="http://www.geekviewpoint.com/java/search/quickselect">quick select</a></strong>, a type of <a href="http://en.wikipedia.org/wiki/Selection_algorithm">selection algorithm</a> that&rsquo;s based on quicksort. It&rsquo;s averaging O(n) time, but O(n<sup>2</sup>) if pivot selection is poor. The code is posted below. There&rsquo;s also a similar <a href="http://blog.teamleadnet.com/2012/07/quick-select-algorithm-find-kth-element.html">iterative solution</a>.</p>
-
-<p>To <a href="http://www.isnowfy.com/top-k-number/">further optimize this</a>, we can change the pivot selection method by dividing into k group and find median of each. This is called <a href="http://en.wikipedia.org/wiki/Median_of_medians">Median of medians algorithm</a>. The worst case is O(n) time. And this is the best solution for &ldquo;Top k&rdquo; questions.</p>
-
-<h3>Code</h3>
-
-<p><strong>quick select</strong></p>
-
-<pre><code>public static void quickSelect1(int[] list, int k) {
-    selectHelper1(list, 0, list.length - 1, k);
-}
-
-public static void selectHelper1(int[] list, int left, int right, int k) {
-    int pivotIndex = partition(list, left, right);
-    if (pivotIndex == k) {
-        return;
-    } else if (k &lt; pivotIndex) {
-        selectHelper1(list, left, pivotIndex - 1, k);
-    } else {
-        selectHelper1(list, pivotIndex + 1, right, k);
-    }
-}
-
-private static int partition(int[] list, int left, int right) {
-    int pivot = left + (right - left) / 2;
-    swap(list, right, pivot);
-    for (int i = left; i &lt; right; i++) {
-        if (list[i] &lt; list[right]) {
-            swap(list, i, left);
-            left++;
-        }
-    }
-    swap(list, left, right);
-    return left;
-}
-</code></pre>
-
-<p><strong>quick select, iteratively</strong></p>
-
-<pre><code>public static int quickSelect2(int[] arr, int k) {
-    if (arr == null || arr.length &lt;= k)
-        throw new Error();
-    int from = 0, to = arr.length - 1;
-    // if from == to we reached the kth element
-    while (from &lt; to) {
-        int r = from, w = to;
-        int mid = arr[(r + w) / 2];
-        // stop if the reader and writer meets
-        while (r &lt; w) {
-            if (arr[r] &gt;= mid) { // put the large values at the end
-                swap(arr, w, r);
-                w--;
-            } else { // the value is smaller than the pivot, skip
-                r++;
-            }
-        }
-        // if we stepped up (r++) we need to step one down
-        if (arr[r] &gt; mid)
-            r--;
-        // the r pointer is on the end of the first k elements
-        if (k &lt;= r) {
-            to = r;
-        } else {
-            from = r + 1;
-        }
-    }
-    return arr[k];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -987,7 +985,7 @@ private static int partition(int[] list, int left, int right) {
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/03/Multilayered-architecture/">[General] Multilayered Architecture</a>
+        <a href="/blog/2014/08/04/">[Google] Find Occurance Greater Than Index</a>
       </li>
     
   </ul>
