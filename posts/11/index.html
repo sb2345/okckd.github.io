@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="These are some additional questions that are not covered in previous NineChap posts. Some questions are non-standard and difficult to solve, and some &hellip;">
+  <meta name="description" content="Question link1, link2. Variant 1: Given a Binary Search Tree, serialize and deserialize it. Variant 2: Given a Binary Tree, serialize and deserialize &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,142 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/16/Binary-tree-serialize-deserialize/">[LeetCode Plus] Binary Tree Serialize and Deserialize</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2010/09/serializationdeserialization-of-binary.html">link1</a>, <a href="http://leetcode.com/2010/09/saving-binary-search-tree-to-file.html">link2</a>.</p>
+
+<blockquote><p>Variant 1: Given a Binary Search Tree, serialize and deserialize it.</p>
+
+<p>Variant 2: Given a Binary Tree, serialize and deserialize it.</p></blockquote>
+
+<h3>Variant 1 &ndash; Binary search tree</h3>
+
+<p><strong>We must only use pre-order</strong>.</p>
+
+<p>Think about why, or read <a href="http://leetcode.com/2010/09/serializationdeserialization-of-binary.html">link1</a>. So, serialization is simple &ndash; preorder traversal.</p>
+
+<p>The desecialization would make use of the first element, and range validation method. This is very similar to another question &lsquo;validate BST&rsquo;. Rmb the key is:</p>
+
+<blockquote><p>Each time we add a number, we also pass the valid range within which the number can lie between.</p></blockquote>
+
+<h4>Code</h4>
+
+<p>The code is concise, but may not be easy to write:</p>
+
+<pre><code>void readBSTHelper(int min, int max, int &amp;insertVal,
+                   BinaryTree *&amp;p, ifstream &amp;fin) {
+  if (insertVal &gt; min &amp;&amp; insertVal &lt; max) {
+    int val = insertVal;
+    p = new BinaryTree(val);
+    if (fin &gt;&gt; insertVal) {
+      readBSTHelper(min, val, insertVal, p-&gt;left, fin);
+      readBSTHelper(val, max, insertVal, p-&gt;right, fin);
+    }
+  }
+}
+
+void readBST(BinaryTree *&amp;root, ifstream &amp;fin) {
+  int val;
+  fin &gt;&gt; val;
+  readBSTHelper(INT_MIN, INT_MAX, val, root, fin);
+}
+</code></pre>
+
+<h3>Variant 2 &ndash; Binary tree</h3>
+
+<p>For binary tree, we could not use above solution any more. We must use some NULL pointers to fill in empty slots. For this variant, <strong>pre-order and level-order both would work</strong>.</p>
+
+<p>Then which of these 2 is a better choice?</p>
+
+<pre>
+   1
+  / \
+ 2   3
+</pre>
+
+
+<blockquote><p>Given the tree above:</p>
+
+<p>The pre-order serialization is: {1, 2, #, #, 3, #, #}</p>
+
+<p>The level-order serialization is: {1, 2, 3}</p>
+
+<p>We can see that level-order is a better idea, because last level null pointers need not be handled.</p></blockquote>
+
+<h4>Code (preorder)</h4>
+
+<p>The serializaion is a simple traversal.</p>
+
+<pre><code>void writeBinaryTree(BinaryTree *p, ostream &amp;out) {
+  if (!p) {
+    out &lt;&lt; "# ";
+  } else {
+    out &lt;&lt; p-&gt;data &lt;&lt; " ";
+    writeBinaryTree(p-&gt;left, out);
+    writeBinaryTree(p-&gt;right, out);
+  }
+}
+</code></pre>
+
+<p>The deserialization is a little bit like &ldquo;convert linked list to balanced tree&rdquo; (where we use first element of the list as root of the tree).</p>
+
+<pre><code>void readBinaryTree(BinaryTree *&amp;p, ifstream &amp;fin) {
+  int token;
+  bool isNumber;
+  if (!readNextToken(token, fin, isNumber)) 
+    return;
+  if (isNumber) {
+    p = new BinaryTree(token);
+    readBinaryTree(p-&gt;left, fin);
+    readBinaryTree(p-&gt;right, fin);
+  }
+}
+</code></pre>
+
+<p>I did not find any code for level-order, but it&rsquo;s similar to &lsquo;level-order traversal&rsquo;.</p>
+
+<h3>One more thing</h3>
+
+<p>A Binary Search Tree (BST) is useful for storing phone book records in a memory limited device, such as a cell phone. The records are always maintained in sorted order, inserting and deleting a record takes O(lg n) time (slower than linked list, but much better than array).</p>
+
+<h3>One more one-more-thing</h3>
+
+<p><strong>This post we use # as a sentinel</strong>. There is also <strong><a href="http://stackoverflow.com/a/15044868">another idea</a> of doing both Inorder and Preorder traversal</strong> to searialize the tree data, and use the solution to &ldquo;Construct Binary Tree from Preorder and Inorder&rdquo; to deserialize it.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1359,190 +1495,6 @@ private void helper(List&lt;String&gt; ans, String path, String[] pad, String di
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/11/Study-BST-insert-and-delete/">[Collection] a Study of BST Node Insertion / Deletion</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>First Word</h2>
-
-<p>For BST it&rsquo;s very important to do insert and delete (balancing not required).</p>
-
-<p>Insertion is easy, but deletion is very difficult. However, it&rsquo;s a good idea to at least know the principles.</p>
-
-<h3>Insert a node</h3>
-
-<h4>Steps:</h4>
-
-<ol>
-<li><p>check whether new value = current node value. If not, proceed.</p></li>
-<li><p>if new value is less, than:</p>
-
-<ol>
-<li>if current node has no left child, set left to new value, and return</li>
-<li>otherwise, go to left child and start over</li>
-</ol>
-</li>
-<li><p>if new value is greater, than:</p>
-
-<ol>
-<li>if current node has no right child, set right to new value</li>
-<li>otherwise, go to right child and start over</li>
-</ol>
-</li>
-</ol>
-
-
-<h4>Note:</h4>
-
-<p>The BST may not be balanced after the insertion.</p>
-
-<h4>Code</h4>
-
-<p>Code snippet from <a href="http://www.algolist.net/Data_structures/Binary_search_tree/Insertion">this article</a></p>
-
-<pre><code>public boolean add(TreeNode node, int value) {
-    if (value == node.val)
-        return false;
-    if (value &lt; node.val) {
-        if (node.left == null) {
-            node.left = new TreeNode(value);
-            return true;
-        } else {
-            return add(node.left, value);
-        }
-    } else if (value &gt; node.val) {
-        if (node.right == null) {
-            node.right = new TreeNode(value);
-            return true;
-        } else {
-            return add(node.right, value);
-        }
-    }
-    return false;
-}
-</code></pre>
-
-<h3>Delete a node</h3>
-
-<h4>Steps:</h4>
-
-<ol>
-<li>Find the node</li>
-<li>Find the maximum node in the left subtree</li>
-<li>Replace the node with the maximum node in the left subtree.</li>
-</ol>
-
-
-<h4>Special Cases:</h4>
-
-<ol>
-<li>The node doest have a left child.</li>
-<li>The maximum node in the left subtree has a left child.</li>
-<li>The node is the root of the tree</li>
-</ol>
-
-
-<h4>Code</h4>
-
-<p>The source code given by <a href="http://answer.ninechapter.com/solutions/delete-a-node-in-binary-search-tree/">ninechap</a></p>
-
-<pre><code>private void myDeleteNode(TreeNode parent, TreeNode node) {
-    if (node.left == null) {
-        if (parent.right == node) {
-            parent.right = node.right;
-        } else {
-            parent.left = node.right;
-        }
-    } else {
-        TreeNode maxNodeParent = node;
-        TreeNode maxNode = node.left;
-
-        // find the maximum node in the left sub tree
-        while (maxNode.right != null) {
-            maxNodeParent = maxNode;
-            maxNode = maxNode.right;
-        }
-
-        if (maxNodeParent.left == maxNode) {
-            maxNodeParent.left = maxNode.left;
-        } else {
-            maxNodeParent.right = maxNode.left;
-        }
-
-        // move replacedNode to node
-        maxNode.left = node.left;
-        maxNode.right = node.right;
-        if (parent.left == node) {
-            parent.left = maxNode;
-        } else {
-            parent.right = maxNode;
-        }
-    }
-}
-
-private void findAndDelete(TreeNode parent, TreeNode node, int val) {
-    if (node == null) {
-        return;
-    }
-    if (node.val == val) {
-        myDeleteNode(parent, node);
-    } else if (node.val &lt; val) {
-        findAndDelete(node, node.right, val);
-    } else {
-        findAndDelete(node, node.left, val);
-    }
-}
-
-public TreeNode deleteNode(TreeNode root, int val) {
-    TreeNode dummyNode = new TreeNode(0);
-    dummyNode.left = root;
-    findAndDelete(dummyNode, root, val);
-    return dummyNode.left;
-}
-</code></pre>
-
-<h3>A little bit on balancing</h3>
-
-<p>There are 2 ways to balance a tree. <strong>Most common method is tree rotation</strong>:</p>
-
-<p><img class="left" src="/assets/images/rotate-tree.png"></p>
-
-<p>An AVL Trees means a self-balancing search trees. If balance gets out of range −1&hellip;+1, the subtree is rotated to bring into balance.</p>
-
-<p><strong>Second way is to convert tree into a linkedlist</strong>, then build the tree again (we have discussed this algorithm before, pick the middle element).</p>
-
-<p>This method is slow if we insert and re-balance on each step, but we can do bulk insert/delete forgetting about the re-balancing for a while. This will make the data structure faster! <a href="http://java.dzone.com/articles/algorithm-week-balancing">more details</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/12">&larr; Older</a>
@@ -1572,11 +1524,11 @@ public TreeNode deleteNode(TreeNode root, int val) {
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/03/Multilayered-architecture/">[General] Multilayered Architecture</a>
+        <a href="/blog/2014/08/04/Find-occurance-greater-than-index/">[Google] Find Occurance Greater Than Index</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/03/Design-Solar-System/">[Google] Design Solar System</a>
+        <a href="/blog/2014/08/03/Multilayered-architecture/">[General] Multilayered Architecture</a>
       </li>
     
   </ul>
