@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] HashMap vs Hashtable vs HashSet"
+title: "[Design] HashMap vs Hashtable vs HashSet"
 comments: true
 category: Design
 tags: [ General ]

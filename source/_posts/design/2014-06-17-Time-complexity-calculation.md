@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Time complexity calculation (Master theorem)"
+title: "[Design] Time complexity calculation (Master theorem)"
 comments: true
 category: Design
 tags: [  ]

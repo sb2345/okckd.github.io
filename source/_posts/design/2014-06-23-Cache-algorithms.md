@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Cache Algorithms"
+title: "[Design] Cache Algorithms"
 comments: true
 category: Design
 tags: [  ]

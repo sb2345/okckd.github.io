@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Multilayered architecture"
+title: "[Design] Multilayered architecture"
 comments: true
 category: Design
 tags: [  ]

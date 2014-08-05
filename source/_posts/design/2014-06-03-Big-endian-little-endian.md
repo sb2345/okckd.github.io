@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Big Endian and Little Endian"
+title: "[Design] Big Endian and Little Endian"
 comments: true
 category: Design
 tags: [  ]
@@ -17,7 +17,7 @@ Both forms of endianness are in widespread use in computing and networking.
 
 ### Example
 
-{% img left /assets/images/big-endian.png %}
+{% img middle /assets/images/big-endian.png %}
 
 The data word "0A 0B 0C 0D" (a set of 4 bytes written out using left-to-right positional, hexadecimal notation) and the four memory locations with addresses a, a+1, a+2 and a+3. 
 

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Semaphore Mutex Toilet Example"
+title: "[Design] Semaphore Mutex Toilet Example"
 comments: true
 category: Design
 tags: [  ]

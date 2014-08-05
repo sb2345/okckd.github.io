@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Application Server vs. Web Server"
+title: "[Design] Application Server vs. Web Server"
 comments: true
 category: Design
 tags: [  ]
