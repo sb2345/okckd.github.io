@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Question | My Octopress Blog]]></title>
+  <link href="http://okckd.github.io/blog/categories/question/atom.xml" rel="self"/>
+  <link href="http://okckd.github.io/"/>
+  <updated>2014-08-05T12:54:51+08:00</updated>
+  <id>http://okckd.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Shuffle a Given Array]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/01/Shuffle-an-array/"/>
+    <updated>2014-08-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/01/Shuffle-an-array</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.geeksforgeeks.org/shuffle-a-given-array/)
+
+> Given an array, generate a random permutation of array elements. 
+
+### Analysis
+
+This is called __[Fisher–Yates shuffle](http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)__. Proof can be seen at question post: 
+
+> The probability that ith element goes to second last position can be proved to be 1/n by dividing it in two cases.
+
+> Case 1: i = n-1 (index of last element):
+
+> The probability of last element going to second last position is = (probability that last element doesn't stay at its original position) x (probability that the index picked in previous step is picked again so that the last element is swapped)
+
+> So the probability = ((n-1)/n) x (1/(n-1)) = 1/n
+
+> Case 2: 0 < i < n-1 (index of non-last):
+
+> The probability of ith element going to second position = (probability that ith element is not picked in previous iteration) x (probability that ith element is picked in this iteration)
+
+> So the probability = ((n-1)/n) x (1/(n-1)) = 1/n
+
+> We can easily generalize above proof for any other position. 
+
+### Solution
+
+O(n) time complexity. 
+
+	To shuffle an array a of n elements (indices 0..n-1):
+	  for i from n − 1 downto 1 do
+	       j ← random integer with 0 ≤ j ≤ i
+	       exchange a[j] and a[i]
+
+Note the RNG is having limit from 0 to i, and number i keeps decreasing. 
+
+### Code
+
+__not written by me__
+
+	def sattoloCycle(items):
+	    i = len(items)
+	    while i > 1:
+	        i = i - 1
+	        j = randrange(i)  # 0 <= j <= i-1
+	        items[j], items[i] = items[i], items[j]
+	    return
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Overriding Private Method]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/01/Overriding-private-method/"/>
+    <updated>2014-08-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/01/Overriding-private-method</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://stackoverflow.com/questions/2000137/overriding-private-methods-in-java)
+
+> Can we overriding private method in Java? 
+
+### Analysis
+
+> Overriding private methods in Java is invalid because a parent class's private methods are "automatically final, and hidden from the derived class".  [source](http://www.linuxtopia.org/online_books/programming_books/thinking_in_java/TIJ309_006.htm)
+
+### Solution
+
+You can't override a private method, but you can introduce one in a derived class [without a problem](http://stackoverflow.com/a/2000156). Read more below. 
+
+### Code
+
+__not a problem__
+
+	public class OverridePrivateMethod {
+		private void foo() {
+		}
+	}
+	
+	class Child extends OverridePrivateMethod {
+		private void foo() {
+		}
+	}
+
+__add @Override annotation and get error__
+
+	public class OverridePrivateMethod {
+		private void foo() {
+		}
+	}
+	
+	class Child extends OverridePrivateMethod {
+		@Override
+		private void foo() {
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Max Sum in a 2D Array]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/01/Max-Sum-In-2D-Array/"/>
+    <updated>2014-08-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/01/Max-Sum-In-2D-Array</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://tech-queries.blogspot.sg/2010/05/find-max-sum-in-2d-array.html)
+
+> Given a 2D array, find the maximum sum subarray in it. For example, in the following 2D array, the maximum sum subarray is highlighted with blue rectangle and sum of this subarray is 29.
+
+<img class="middle" src="/assets/images/max-sum-2d-matrix.png">
+
+### Analysis
+
+Try convert this question to "__max sum in 1D array__" by sum up all numbers in the same column. (we know that in 1D array, the algo runs O(n) time)
+
+There's in total O(n^2) combinations of ways to sum up a column. So the __total time complexity is O(n^3)__. 
+
+### Solution
+
+1. Traverse matrix at row level.
+
+1. have a temporary 1-D array and initialize all members as 0.
+
+1. For each row do following
+
+    1. add value in temporary array for all rows below current row
+    1. apply 1-D kadane on temporary array
+    1. if your current result is greater than current maximum sum, update.
+
+### Code
+
+__written by me__
+
+	public int maxSum(int[][] A) {
+		int m = A.length;
+		int n = A[0].length;
+		int maxResult = Integer.MIN_VALUE;
+		for (int i = 0; i < m; i++) {
+			int[] temp = new int[n];
+			for (int j = i; j < m; j++) {
+				// from row#i to row#(m-1), add the number into temp[]
+				for (int k = 0; k < n; k++) {
+					temp[k] += A[j][k];
+				}
+				// find max sum for 1D array
+				maxResult = Math.max(maxResult, maxSum(temp));
+			}
+		}
+		return maxResult;
+	}
+
+	private int maxSum(int[] B) {
+		int sumSoFar = 0;
+		int maxSum = Integer.MIN_VALUE;
+		for (int i = 0; i < B.length; i++) {
+			maxSum = Math.max(maxSum, sumSoFar + B[i]);
+			sumSoFar = Math.max(0, sumSoFar + B[i]);
+		}
+		return maxSum;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Arranging Sequence]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/01/Arranging-Sequence/"/>
+    <updated>2014-08-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/01/Arranging-Sequence</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://tech-queries.blogspot.sg/2008/11/arranging-sequence.html)
+
+> We have an array of 2n elements like "a1 a2...an b1 b2...bn". WAP to rearrange the array as "a1 b1 a2 b2...an bn"
+
+> time complexity is O(n) no extra array or memory can be taken.
+
+> Input : 1 2 3 4 5 6 7 8 9 10 11 12 (even number input)
+>
+> Output: 1 7 2 8 3 9 4 10 5 11 6 12
+
+> Input : 1 2 3 4 5 6 7 (odd number input)
+>
+> Output: 1 5 2 6 3 7 4
+
+### Analysis
+
+This is a difficult question. 
+
+I did not find enough resources online, but have come up with 2 solutions.
+
+### Solution
+
+__First is like bubble sort (read it somewhere before)__. Always swap in pairs (starting from the middle): 
+
+	1st: 1 2 3 4 5 6 7
+	2nd: 1 2 3 5 4 6 7
+	3rd: 1 2 5 3 6 4 7
+	4th: 1 5 2 6 3 7 4
+	done
+
+__Second solution is to swap in cycles (put current value in its 'successor' position, and continue from there)__. But in order to identify cycles, additional space is used. I wrote the code (which make use of 'visited' array) is listed below. the time complexity is between O(n) and O(n^2). 
+
+More info on this topic can be found on [wikipedia](http://en.wikipedia.org/wiki/In-place_matrix_transposition). 
+
+### Code
+
+__written by me__
+
+	public void rearrange(int[] A) {
+		int effLength = A.length;
+		if (A.length % 2 == 0) {
+			// for even number of input, last element is unchanged
+			effLength--;
+		}
+		// make sure 'effLength' is an odd number.
+		int half = effLength / 2 + 1;
+		int pos = 1;
+		int posValue = A[pos];
+		int numSwaps = 0;
+		boolean[] visited = new boolean[effLength];
+		// visited is used as flag to avoid repeat swap
+		// eg. when input is { 1, 2, 3, 4, 5, 6, 7 }, repeat swap as below:
+		// 2 -> 3 -> 5 -> 2 -> 3 ...
+		while (numSwaps < effLength - 1) {
+			// swap (effLength - 1) times because 1st position is unchanged
+			int newPos = getNewPosition(A, pos, half);
+			if (visited[newPos]) {
+				// if this new position is swap already, skip it
+				pos = (pos + 1) % effLength;
+				posValue = A[pos];
+				continue;
+			}
+			int temp = A[newPos];
+			A[newPos] = posValue;
+			posValue = temp;
+			pos = newPos;
+
+			visited[newPos] = true;
+			numSwaps++;
+		}
+	}
+
+	private int getNewPosition(int[] array, int pos, int half) {
+		if (pos < half) {
+			return 2 * pos;
+		} else {
+			return 2 * (pos - half) + 1;
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Run-Length Encoding]]></title>
+    <link href="http://okckd.github.io/blog/2014/07/31/Run-Length-Encoding/"/>
+    <updated>2014-07-31T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/07/31/Run-Length-Encoding</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://tech-queries.blogspot.sg/2008/11/run-length-encoding.html)
+
+> You are given a string like "aaaabbbcc", do an in place conversion which write frequency of each charater(which come continuosly) with that character. 
+
+> Example:
+>
+>input: aaabbbcc
+>
+>output: a3b2c2
+
+### Solution
+
+The most important point is __whether or not you find the special cases__, and did you clarify how to handle them. 
+
+__First special case is only 1 character__, should you append a '1' or not. Note that this question requires 'in place' conversion. So '1' is not supposed to be appended after single-occurance character. This is really important to know, if the question does not specify. (though sometimes, the question asks you to apppend a '1', eg. [here](http://www.geeksforgeeks.org/run-length-encoding/)). 
+
+__Second case is when occurance >= 10__. We could not simply append ('0' + numberOfOccurance), because the number could be 12. This is another very important case to take note. 
+
+The code can be seen anywhere. ]]></content>
+  </entry>
+  
+</feed>
