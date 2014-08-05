@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Google] Data Structure for 3 Keys"
+title: "[Google] Three Keys Data Structure"
 comments: true
 category: Google
 tags: [  ]
