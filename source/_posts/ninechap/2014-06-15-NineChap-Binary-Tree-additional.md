@@ -11,9 +11,9 @@ These are some additional questions that are not covered in previous NineChap po
 
 ## Question list
 
-1. __[Binary Search Tree find upper/lower bound]({% post_url /general/2014-06-15-BST-find-upper-lower-bound %})__
+1. __[Binary Search Tree find upper/lower bound]({% post_url /question/2014-06-15-BST-find-upper-lower-bound %})__
 
-1. __[Implement iterator of Binary Search Tree]({% post_url /general/2014-06-14-Iterator-of-Tree %})__
+1. __[Implement iterator of Binary Search Tree]({% post_url /question/2014-06-14-Iterator-of-Tree %})__
 
 1. __[Binary Tree Serialize and Deserialize]({% post_url /leetcode_plus/2014-06-16-Binary-tree-serialize-deserialize %})__
 

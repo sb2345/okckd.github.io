@@ -86,7 +86,7 @@ Additional questions
 
 1. __[Maximum Subarray ]({% post_url /leetcode/2014-05-20-Maximum-Subarray %})__
 
-1. __[Coin Change Problem]({% post_url /general/2014-06-30-Coin-Changing-Problem %})__
+1. __[Coin Change Problem]({% post_url /question/2014-06-30-Coin-Changing-Problem %})__
 
 ## Code
 

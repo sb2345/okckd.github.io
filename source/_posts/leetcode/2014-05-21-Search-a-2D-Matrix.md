@@ -63,7 +63,7 @@ __[Search a 2D Matrix]({% post_url /leetcode/2014-05-21-Search-a-2D-Matrix %})__
 
 __[Searching a 2D Sorted Matrix]({% post_url /leetcode_plus/2014-06-10-Searching-a-2D-Sorted-Matrix %})__. 
 
-__[Count negative in a 2D Sorted Matrix]({% post_url /general/2014-06-14-Count-negative-in-2D-Sorted-Matrix %})__. 
+__[Count negative in a 2D Sorted Matrix]({% post_url /question/2014-06-14-Count-negative-in-2D-Sorted-Matrix %})__. 
 
 ### Analysis
 

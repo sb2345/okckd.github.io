@@ -15,7 +15,7 @@ For graph, there are only 2 high-frequency questions, which is 'clone graph' and
 
 1. __[Clone Graph]({% post_url /leetcode/2014-05-30-Clone-Graph %})__ - difficult
 
-1. __[Topology Sorting]({% post_url /general/2014-06-27-Topology-sorting %})__
+1. __[Topology Sorting]({% post_url /question/2014-06-27-Topology-sorting %})__
 
 ## Search
 

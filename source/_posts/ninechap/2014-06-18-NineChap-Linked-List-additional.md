@@ -9,7 +9,7 @@ tags: [  ]
 
 ## Question list
 
-1. __[Union and Intersection of two Linked Lists]({% post_url /general/2014-06-17-Union-and-intersection-of-linked-list %})__
+1. __[Union and Intersection of two Linked Lists]({% post_url /question/2014-06-17-Union-and-intersection-of-linked-list %})__
 
 1. __[Insertion Sort List]({% post_url /leetcode/2014-05-30-Insertion-Sort-List %})__ - difficult
 
