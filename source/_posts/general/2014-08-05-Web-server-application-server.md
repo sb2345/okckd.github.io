@@ -42,10 +42,11 @@ Web server on the left.
                 </tr><tr class="comparisonRow diff lastRow" id="row5" title="Application Server vs Web Server comparison - Resource utilization"><td class="acol bg-color bg-img font-color">Resource utilization</td>                <td id="valtd5_1" class="vcol bg-color bg-img font-color">High</td>
     <td id="valtd5_2" class="vcol bg-color bg-img font-color">Low</td>
 </tr></tbody></table>
+<br />
 
-#### 
+#### Miscellaneous
 
-[[For J2EE](http://www.geekinterview.com/question_details/17043), Web server is used only for Jsp and Servlets and static functionality. It doesn't support EJB and JMS and JAAS.
+For [J2EE](http://www.geekinterview.com/question_details/17043), Web server is used only for __Jsp and Servlets__ and static functionality. It doesn't support __EJB and JMS and JAAS__.
 
 Application server is basically: 
 
