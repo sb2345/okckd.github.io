@@ -18,7 +18,7 @@ tags: [  ]
 
 __First, OOD part__ is very well covered in [this site](http://www.ehow.com/how_5579338_build-own-solar-system-java.html). There're 2 abstract class: __OrbitalSystem__, where 'Star/Sun' is an instance, and __GravityObject__, where 'Planet/Earch' is an instance. Though this does not take satellite into consideration. 
 
-__Second, the multi-layer structure__. It's cover in another post __[Multilayered architecture]({% post_url /general/2014-08-03-Multilayered-architecture %})__
+__Second, the multi-layer structure__. It's cover in another post __[Multilayered architecture]({% post_url /design/2014-08-03-Multilayered-architecture %})__
 
 __Third, the protocol__. We [use HTTP protocol](http://stackoverflow.com/a/4279218), because: 
 

@@ -17,7 +17,7 @@ __BST__
 
 1. __[Delete a Node in Binary Search Tree]({% post_url /collections/2014-06-11-Study-BST-insert-and-delete %})__
 
-1. __[Search Range in a Binary Search Tree]({% post_url /general/2014-06-13-Search-range-BST-trim-BST %})__
+1. __[Search Range in a Binary Search Tree]({% post_url /question/2014-06-13-Search-range-BST-trim-BST %})__
 
 __Additional__
 

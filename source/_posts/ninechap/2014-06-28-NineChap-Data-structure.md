@@ -12,9 +12,9 @@ Data structure is a way to manage data. It provides some methods to handle data 
 
 ### Stack and Queue
 
-1. __[Min-stack]({% post_url /general/2014-07-01-Min-Stack %})__
+1. __[Min-stack]({% post_url /question/2014-07-01-Min-Stack %})__
 
-1. __[Implement a queue by two stacks]({% post_url /general/2014-07-01-Implement-queue-with-stack %})__
+1. __[Implement a queue by two stacks]({% post_url /question/2014-07-01-Implement-queue-with-stack %})__
 
 1. __[Largest Rectangle in histogram]({% post_url /leetcode/2014-05-23-Largest-Rectangle-in-Histogram %})__
 
@@ -62,9 +62,9 @@ Magic Number:
 
 #### Hash questions:
 
-1. __[Implement a hashmap]({% post_url /general/2014-07-01-Implement-Hashmap %})__
+1. __[Implement a hashmap]({% post_url /question/2014-07-01-Implement-Hashmap %})__
 
-1. __[HashMap vs Hashtable vs HashSet]({% post_url /general/2014-07-01-Hashmap-Hashtable-Hashset %})__
+1. __[HashMap vs Hashtable vs HashSet]({% post_url /design/2014-07-01-Hashmap-Hashtable-Hashset %})__
 
 1. __[LRU Cache]({% post_url /leetcode/2014-06-03-LRU-Cache %})__
 
@@ -116,9 +116,9 @@ Implementation code:
 
 #### Heap questions:
 
-1. __[Median in a stream of integers]({% post_url /general/2014-07-01-Median-in-stream-of-integers %})__
+1. __[Median in a stream of integers]({% post_url /question/2014-07-01-Median-in-stream-of-integers %})__
 
-1. __[The Skyline Problem]({% post_url /general/2014-07-01-The-Skyline-Problem %})__
+1. __[The Skyline Problem]({% post_url /question/2014-07-01-The-Skyline-Problem %})__
 
 ### Interval Tree
 

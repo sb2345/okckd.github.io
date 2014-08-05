@@ -10,8 +10,8 @@ tags: [  ]
 
 1. __[Single Number]({% post_url /leetcode/2014-06-01-Single-Number %})__
 1. __[Single Number II]({% post_url /leetcode/2014-06-01-Single-Number-II %})__
-1. __[Single Number III]({% post_url /general/2014-06-28-Single-Number-III %})__
-1. __[Single Number IV]({% post_url /general/2014-06-28-Single-Number-IV %})__
+1. __[Single Number III]({% post_url /question/2014-06-28-Single-Number-III %})__
+1. __[Single Number IV]({% post_url /question/2014-06-28-Single-Number-IV %})__
 1. __[Majority Number]({% post_url /lintcode/2014-06-28-Majority-Number %})__
 1. __[Majority Number II]({% post_url /lintcode/2014-06-28-Majority-Number-II %})__
 1. __[Majority Number III]({% post_url /lintcode/2014-06-28-Majority-Number-III %})__
@@ -26,9 +26,9 @@ Always using the idea of 前缀和.
 1. __[Maximum Subarray]({% post_url /leetcode/2014-05-20-Maximum-Subarray %})__
 1. __[Minimum Subarray ]({% post_url /lintcode/2014-06-28-Minimum-subarray %})__
 1. __[Maximum Subarray II]({% post_url /lintcode/2014-06-28-Maximum-subarray-II %})__
-1. __[Subarray with 0 Sum]({% post_url /general/2014-07-04-Subarray-with-0-Sum %})__
-1. __[Subarray with Particular Sum]({% post_url /general/2014-07-04-Subarray-with-Particular-Sum %})__
-1. __[Subarray with Sum Closest]({% post_url /general/2014-07-04-Subarray-with-Sum-Closest %})__
+1. __[Subarray with 0 Sum]({% post_url /question/2014-07-04-Subarray-with-0-Sum %})__
+1. __[Subarray with Particular Sum]({% post_url /question/2014-07-04-Subarray-with-Particular-Sum %})__
+1. __[Subarray with Sum Closest]({% post_url /question/2014-07-04-Subarray-with-Sum-Closest %})__
 
 ## N Sum questions
 
@@ -43,7 +43,7 @@ Always using the idea of 前缀和.
 1. __[Pow(x,n)]({% post_url /leetcode/2014-05-15-PowXN %})__
 1. __[Sqrt(x)]({% post_url /leetcode/2014-05-21-SqrtX %})__
 1. __[Trailing Zeros of Factorial]({% post_url /lintcode/2014-07-02-Trailing-Zero-of-Factorial %})__
-1. __[Check Power of 2]({% post_url /general/2014-07-04-Check-Power-of-2 %})__
+1. __[Check Power of 2]({% post_url /question/2014-07-04-Check-Power-of-2 %})__
 
 ## Additional questions
 
