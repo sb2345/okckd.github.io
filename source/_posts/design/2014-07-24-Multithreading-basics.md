@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Multithreading Basics"
+title: "[Design] Multithreading Basics"
 comments: true
 category: Design
 tags: [  ]

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] OOP - 4 major principles"
+title: "[Design] OOP - 4 major principles"
 comments: true
 category: Design
 tags: [  ]

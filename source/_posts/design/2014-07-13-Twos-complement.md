@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Two's complement"
+title: "[Design] Two's complement"
 comments: true
 category: Design
 tags: [  ]

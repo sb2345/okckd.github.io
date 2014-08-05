@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[General] Cryptographic Hash Function (`)"
+title: "[Design] Cryptographic Hash Function (`)"
 comments: true
 category: Design
 tags: [  ]
