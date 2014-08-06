@@ -9,7 +9,9 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link Given two numbers represented as strings, return multiplication of the numbers as a string. Note: The numbers can be arbitrarily large &hellip;">
+  <meta name="description" content="Question link Given a collection of numbers, return all possible permutations. For example,
+[1,2,3] have the following permutations:
+[1,2,3], [1,3,2 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +67,235 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/Permutations/">[LeetCode 46] Permutations</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/permutations/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a collection of numbers, return all possible permutations.
+</p>
+
+<p>
+For example,<br>
+<code>[1,2,3]</code> have the following permutations:<br>
+<code>[1,2,3]</code>, <code>[1,3,2]</code>, <code>[2,1,3]</code>, <code>[2,3,1]</code>, <code>[3,1,2]</code>, and <code>[3,2,1]</code>.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a very classic question</strong>. <strong>The solution is very standard</strong>.</p>
+
+<p><strong>One solution</strong> is to recursively push elements into a list, until all elements are pushed. <strong>Another solution</strong> is using 2 nested for-loops to keep adding next elements. <strong>There is one more solution</strong> which swaps each element with each element after it.</p>
+
+<p><strong>Keep in mind: this type of permutation questions always requires insert/delete before/after a recursion</strong>! See code for details.</p>
+
+<p>I will explain 3 solutions one by one.</p>
+
+<h3>Solution</h3>
+
+<p><strong>First, double nested for-loop method</strong>. This is a very standard way to write code and often seen in solutions. <a href="http://www.programcreek.com/2013/02/leetcode-permutations-java/">This post</a> explains it very well:</p>
+
+<blockquote><p>Loop through the array, in each iteration, a new number is added to different locations of results of previous iteration. Start from an empty List.</p></blockquote>
+
+<p><strong>Second, swap element method</strong>. It is also explained in <a href="http://www.programcreek.com/2013/02/leetcode-permutations-java/">the same post</a>. This is an very interesting idea which I never thought of. <a href="http://blog.csdn.net/u010500263/article/details/18178243">Someone say</a> this solution relates to <strong>N-Queens problem</strong>.</p>
+
+<blockquote><p>Swap each element with each element after it</p></blockquote>
+
+<p><strong>Third solution, which is my solution &ndash; adding elements one by one</strong>. I kept a current list and a remaining element list. Each time I get a new item from remaining list, and add it into current list. This solution is good, however <strong>since remaining elements is array, it&rsquo;s hard to remove elements from it</strong>. I simply convert the array into ArrayList. <a href="http://blog.csdn.net/u010500263/article/details/18178243">Someone else&rsquo;s solution</a> would use another visited array to keep track of remainings. Both works fine.</p>
+
+<p><strong>That&rsquo;s all the solutions</strong>! Look below for code.</p>
+
+<h3>My code</h3>
+
+<p><strong>The double nested for-loop method</strong></p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; permute(int[] num) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+
+    //start from an empty list
+    result.add(new ArrayList&lt;Integer&gt;());
+
+    for (int i = 0; i &lt; num.length; i++) {
+        //list of list in current iteration of the array num
+        ArrayList&lt;ArrayList&lt;Integer&gt;&gt; current = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+
+        for (ArrayList&lt;Integer&gt; l : result) {
+            // # of locations to insert is largest index + 1
+            for (int j = 0; j &lt; l.size()+1; j++) {
+                // + add num[i] to different locations
+                l.add(j, num[i]);
+                ArrayList&lt;Integer&gt; temp = new ArrayList&lt;Integer&gt;(l);
+                current.add(temp);
+                l.remove(j);
+            }
+        }
+        result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;(current);
+    }
+    return result;
+}
+</code></pre>
+
+<p><strong>The swap element method</strong></p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; permute(int[] num) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    permute(num, 0, result);
+    return result;
+}
+
+void permute(int[] num, int start, ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result) {
+
+    if (start &gt;= num.length) {
+        ArrayList&lt;Integer&gt; item = convertArrayToList(num);
+        result.add(item);
+    }
+
+    for (int j = start; j &lt;= num.length - 1; j++) {
+        swap(num, start, j);
+        permute(num, start + 1, result);
+        swap(num, start, j);
+    }
+}
+
+private ArrayList&lt;Integer&gt; convertArrayToList(int[] num) {
+    ArrayList&lt;Integer&gt; item = new ArrayList&lt;Integer&gt;();
+    for (int h = 0; h &lt; num.length; h++) {
+        item.add(num[h]);
+    }
+    return item;
+}
+
+private void swap(int[] a, int i, int j) {
+    int temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+}
+</code></pre>
+
+<p><strong>Adding elements one by one</strong> (my code)</p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; permute(int[] num) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    ArrayList&lt;Integer&gt; remain = new ArrayList&lt;Integer&gt;();
+    for (Integer a: num)
+        remain.add(a);
+    helper(ans, new ArrayList&lt;Integer&gt;(), remain);
+    return ans;
+}
+
+private void helper(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, 
+        ArrayList&lt;Integer&gt; cur, ArrayList&lt;Integer&gt; remain) {
+    int len = remain.size();
+    if (len == 0) {
+        ans.add(new ArrayList(cur));
+        return;
+    }
+    for (int i = 0; i &lt; len; i ++) {
+        int t = remain.remove(i);
+        cur.add(t);
+        helper(ans, cur, remain);
+        remain.add(i, t);
+        cur.remove(cur.size() - 1);
+    }
+}
+</code></pre>
+
+<p><strong>Adding elements one by one</strong> (other people&rsquo;s code). It&rsquo;s very similar.</p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; permute(int[] num) {  
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();  
+    ArrayList&lt;Integer&gt; element = new ArrayList&lt;Integer&gt;();  
+    boolean[] visited = new boolean[num.length];  
+    helper(num, result, element, visited);  
+    return result;  
+}  
+
+public void helper(int[] num, ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result, 
+        ArrayList&lt;Integer&gt; element, boolean[] visited){  
+    if (element.size() == num.length){  
+        // duplicate element and add it to result 
+        // (element would be changed from time to time. 
+        // If directly use element  
+        // only result would be changed when element changed)  
+        result.add(new ArrayList&lt;Integer&gt;(element));   
+        return;  
+    }  
+
+    for(int i=0; i&lt;num.length; i++){  
+        if(!visited[i]){  
+            visited[i] = true;  
+            element.add(num[i]);  
+            helper(num, result, element, visited);  
+
+            // After providing a complete permutation, pull out the last number
+            element.remove(element.size()-1);  
+            visited[i] = false;  
+        }  
+    }  
+}  
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1265,123 +1496,6 @@ public int binarySearch(int[] A, double t) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/12/Search-Insert-Position/">[LeetCode 35] Search Insert Position</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/search-insert-position/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
-
-<p>You may assume no duplicates in the array.</p>
-
-<p>
-Here are few examples.<br>
-<code>[1,3,5,6]</code>, 5 → 2<br>
-<code>[1,3,5,6]</code>, 2 → 1<br>
-<code>[1,3,5,6]</code>, 7 → 4<br>
-<code>[1,3,5,6]</code>, 0 → 0
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a very basic, yet very difficult question</strong>. It is not easy to get it correct within less then 3 attempts.</p>
-
-<h3>Solution</h3>
-
-<p>I post 2 solutions, first written by me, second copied from <a href="http://blog.csdn.net/fightforyourdream/article/details/14216321">this blog</a>. Both works the same.</p>
-
-<h3>My code</h3>
-
-<pre><code>public int searchInsert(int[] A, int target) {
-    int len = A.length;
-    if (len == 0) return 0;
-    int left = 0, right = len - 1;
-    while (left &lt; right) {
-        int mid = (left + right) / 2;
-        if (A[mid] &gt;= target) right = mid;
-        else left = mid + 1;
-    }
-    if (A[left] &lt; target) return left + 1;
-    return left;
-}
-</code></pre>
-
-<p>Another code</p>
-
-<pre><code>public int searchInsert(int[] A, int target) {
-    int len = A.length;
-    if (len == 0) return 0;
-    int left = 0, right = len - 1;
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (A[mid] &gt; target) right = mid - 1;
-        else if (A[mid] &lt; target) left = mid + 1;
-        else return mid;
-    }
-    return left;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/27">&larr; Older</a>
@@ -1399,7 +1513,7 @@ Here are few examples.<br>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (1)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (6)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (19)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (20)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (12)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (152)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1431,7 +1545,7 @@ Here are few examples.<br>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/05/Map-Reduce/">[Design] MapReduce</a>
+        <a href="/blog/2014/08/05/MapReduce-Intro/">[Design] MapReduce Intro</a>
       </li>
     
   </ul>

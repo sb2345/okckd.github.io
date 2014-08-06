@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-05T17:49:41+08:00</updated>
+  <updated>2014-08-06T10:09:44+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -81,7 +81,7 @@ Java permits an object of a __subclass type to be treated as an object of any su
 
 [Example](http://forum.codecall.net/topic/50451-upcasting-downcasting/):
 
-{% img middle /assets/images/java-upcasting-downcasting.jpg %}
+<img class="middle" src="/assets/images/java-upcasting-downcasting.jpg">
 
 	Cat c1 = new Cat();
 	Animal a = c1; //automatic upcasting to Animal
@@ -123,10 +123,10 @@ This will output "Derived".
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Design] MapReduce]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/05/Map-Reduce/"/>
+    <title type="html"><![CDATA[[Design] MapReduce Intro]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/05/MapReduce-Intro/"/>
     <updated>2014-08-05T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/05/Map-Reduce</id>
+    <id>http://okckd.github.io/blog/2014/08/05/MapReduce-Intro</id>
     <content type="html"><![CDATA[### An Overview
 
 __[MapReduce](http://searchcloudcomputing.techtarget.com/definition/MapReduce) is a software framework__, or a __[distributed programming model](http://www.theserverside.com/news/1321219/Why-Should-You-Care-About-MapReduce)__ intended for processing massive amounts of data in large clusters. 
@@ -148,7 +148,104 @@ __From a Senior Software Engineer at Google__:
 ### Why MapReduce
 
 MapReduce is important because it allows ordinary developers to use MapReduce library routines to create parallel programs without having to worry about programming for intra-cluster communication, task monitoring or failure handling.
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] MapReduce Common Friends Example]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/05/MapReduce-Common-Friends/"/>
+    <updated>2014-08-05T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/05/MapReduce-Common-Friends</id>
+    <content type="html"><![CDATA[### Question
 
+[link](http://stackoverflow.com/a/12375878)
+
+> Facebook's "You and Joe have 230 friends in common" feature. Sure you could use a decent caching strategy, but for now, use MapReduce. 
+
+### Analysis
+
+This list doesn't change frequently so it'd be wasteful to recalculate it every time. We're going to use mapreduce to calculate everyone's common friends once a day and store those results.
+
+Note that friends are __bi-directional__. If I'm your friend, you're mine. (follow-up: how to do it for follower system?)
+
+#### Input
+
+Assume the friends are stored as Person->[List of Friends], our friends list is then:
+
+    A -> B C D
+    B -> A C D E
+    C -> A B D E
+    D -> A B C E
+    E -> B C D
+
+#### Map
+
+The mapper will output a key-value pair. The key will be a friend along with the person. The value will be the list of friends. The key will be sorted so that the friends are in order, causing all pairs of friends to go to the same reducer. 
+
+For map(A -> B C D) :
+
+    (A B) -> B C D
+    (A C) -> B C D
+    (A D) -> B C D
+
+For map(B -> A C D E) : (Note that A comes before B in the key)
+
+    (A B) -> A C D E
+    (B C) -> A C D E
+    (B D) -> A C D E
+    (B E) -> A C D E
+
+For map(C -> A B D E) :
+
+    (A C) -> A B D E
+    (B C) -> A B D E
+    (C D) -> A B D E
+    (C E) -> A B D E
+
+For map(D -> A B C E) :
+
+    (A D) -> A B C E
+    (B D) -> A B C E
+    (C D) -> A B C E
+    (D E) -> A B C E
+
+And finally for map(E -> B C D):
+
+    (B E) -> B C D
+    (C E) -> B C D
+    (D E) -> B C D
+
+Before we send these key-value pairs to the reducers, we group them by their keys and get:
+
+    (A B) -> (A C D E) (B C D)
+    (A C) -> (A B D E) (B C D)
+    (A D) -> (A B C E) (B C D)
+    (B C) -> (A B D E) (A C D E)
+    (B D) -> (A B C E) (A C D E)
+    (B E) -> (A C D E) (B C D)
+    (C D) -> (A B C E) (A B D E)
+    (C E) -> (A B D E) (B C D)
+    (D E) -> (A B C E) (B C D)
+
+Each line will be passed as an argument to a reducer.
+
+#### Reduce
+
+The reduce function will simply intersect the lists of values and output the same key with the result of the intersection. After reduction:
+
+    (A B) -> (C D)
+    (A C) -> (B D)
+    (A D) -> (B C)
+    (B C) -> (A D E)
+    (B D) -> (A C E)
+    (B E) -> (C D)
+    (C D) -> (A B E)
+    (C E) -> (B D)
+    (D E) -> (B C)
+
+#### Result
+
+Now when D visits B's profile, we can quickly look up (B D) and see that they have three friends in common, (A C E). 
 ]]></content>
   </entry>
   
@@ -202,41 +299,6 @@ Basically, by moving these services out of your data center and into the cloud, 
 1. __No longer need to run and maintain a data center__. You no longer need the associated staff
 
 1. Get a __more scalable and available infrastructure__ without trying to build it yourself
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Overview of Big Data Technology]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/04/Overview-Big-Data-Tech/"/>
-    <updated>2014-08-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/04/Overview-Big-Data-Tech</id>
-    <content type="html"><![CDATA[[link](https://datajobs.com/what-is-hadoop-and-nosql)
-
-### Traditional RDBMS
-
-Data is organized in a highly-structured manner, following the relational model. 
-
-The need for the data to be well-structured actually becomes a substantial burden at extremely large volumes.
-
-### NoSQL
-
-A completely different framework of databases that allows for high-performance, agile processing of information at massive scale. 
-
-NoSQL centers around the concept of distributed databases. 
-
-It's horizontally scalable; as data continues to explode, just add more hardware to keep up.
-
-### Hadoop
-
-Hadoop is not a type of database, but rather a software ecosystem that allows for massively parallel computing.
-
-Hadoop is [an open source implementation](http://www.javaworld.com/article/2077907/open-source-tools/mapreduce-programming-with-apache-hadoop.html?page=3) of the MapReduce programming model. Hadoop relies not on Google File System (GFS), but on its own Hadoop Distributed File System (HDFS). 
-
-### MapReduce
-
-An example of the Hadoop ecosystem is MapReduce. 
-
-It's a computational model that basically takes intensive data processes and spreads the computation across a potentially endless number of servers. 
 ]]></content>
   </entry>
   
