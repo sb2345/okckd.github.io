@@ -102,7 +102,7 @@ Second variant: Reverse from a node until another node
 
 The comparison: 
 
-{% img left /assets/images/reverse-linked-list-code-compare.png %}
+{% img middle /assets/images/reverse-linked-list-code-compare.png %}
 
 More: there is a way to reverse list recursively. This can be another good interview question. __[Reverse linkedlist recursively]({% post_url /leetcode_plus/2014-06-17-Reverse-linkedlist-recursively %})__
 

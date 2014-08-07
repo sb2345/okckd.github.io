@@ -71,7 +71,7 @@ __There is another solution making use of stack__ from [this blog](http://n00tc0
 
 > We kind of add up level by level, as shown in picture below.
 
-{% img left /assets/images/trapping_rain.png %}
+{% img middle /assets/images/trapping_rain.png %}
 
 1. Use Stack to store the index of a bar;
 2. If the current one is smaller then the top of the stack, push it to stack;

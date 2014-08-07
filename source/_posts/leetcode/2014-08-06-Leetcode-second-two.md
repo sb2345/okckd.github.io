@@ -1,19 +1,19 @@
 ---
 layout: post
-title: "[Collection] Leetcode Second"
+title: "[Leetcode] Leetcode Second Round 2"
 comments: true
-category: collection
+category: Leetcode
 tags: [  ]
 ---
 
-### Question List
+### 2.2 questionlist
 
 1. Integer to Roman
-1. Reverse Linked List II
-1. ZigZag Conversion
-1. Surrounded Regions - constant space
+1. Surrounded Regions - minimize stack usage
+
+### Question List
+
 1. Longest Palindromic Substring
-1. Candy
 1. Rotate List
 1. Remove Duplicates from Sorted Array 
 1. Validate Binary Search Tree - use intervals
@@ -48,10 +48,8 @@ tags: [  ]
 1. Regular Expression Matching
 1. Wildcard Matching
 
-Special 1:
+### Special
 
-water, rain and histogram etc.
+1. water, rain and histogram etc.
 
-Sepecial 2: 
-
-word and string-related
+1. word and string-related

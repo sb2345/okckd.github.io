@@ -15,7 +15,7 @@ Software testing methods are traditionally divided into white-box and black-box 
 
 One of the testing methodologies is "V-model". 
 
-{% img left /assets/images/Testing-V-Model.jpg %}
+{% img middle /assets/images/Testing-V-Model.jpg %}
 
 ## Testing Types and process
 

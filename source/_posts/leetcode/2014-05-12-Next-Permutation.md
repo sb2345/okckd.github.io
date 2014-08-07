@@ -53,7 +53,7 @@ __There is only 1 popular solution on the Internet__, which is same as mine.
 
 The image below explains it very well (for the input number "687432").
 
-{% img left /assets/images/next_permutation.png %}
+{% img middle /assets/images/next_permutation.png %}
 
 ### Solution
 

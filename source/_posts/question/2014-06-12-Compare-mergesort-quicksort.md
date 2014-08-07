@@ -26,7 +26,7 @@ One application for stable sorting algorithms is sorting a list using a primary 
 
 Example: 
 
-{% img left /assets/images/sort-stability.png %}
+{% img middle /assets/images/sort-stability.png %}
 
 Stable sort: first sorting by rank/number (using any sort), and then a stable sort by suit. 
 

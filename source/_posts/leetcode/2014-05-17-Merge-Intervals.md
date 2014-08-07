@@ -56,7 +56,7 @@ __My solution is basically insertion sort it__. Here I did not used traditional 
 
 > The straight insertion algorithm presented in the preceding section does a linear search to find the position in which to do the insertion. However, since the element is inserted into a sequence that is already sorted, we can use a binary search instead of a linear search. Whereas a linear search requires O(n) comparisons in the worst case, a binary search only requires O(logn) comparisons. Therefore, if the cost of a comparison is significant, the binary search may be preferred.
 
-{% img left /assets/images/merge_interval_binary_insertion_sort_algo.png %}
+{% img middle /assets/images/merge_interval_binary_insertion_sort_algo.png %}
 
 __And from__ [wikipedia](http://en.wikipedia.org/wiki/Insertion_sort#Variants)
 

@@ -35,7 +35,7 @@ Time = O(n). Worse case 2n steps.
 
 Note that __this is the best solution__! 
 
-{% img left /assets/images/search_2D_matrix_1.png %}
+{% img middle /assets/images/search_2D_matrix_1.png %}
 
 > begin with the upper right corner, we traverse one step to the left or bottom. For example, the picture below shows the traversed path (the red line) when we search for 13.
     Essentially, each step we are able to eliminate either a row or a column.
@@ -44,7 +44,7 @@ __Solution Two: Quad Partition 四分法__.
 
 Time = O(n^1.58). Analysis can be found in the original question post. 
 
-{% img left /assets/images/search_2D_matrix_2.png %}
+{% img middle /assets/images/search_2D_matrix_2.png %}
 
 Basic idea is like binary search - get mid and divide. We can then discard 1/4 of the matrix. For example: search for 6, we can discard the bottom right sub-matrix. 
 
@@ -52,7 +52,7 @@ __Solution Three: Diagonal-based binary partition__. This is based on previous s
 
 Time = O(nlgn). 
 
-{% img left /assets/images/search_2D_matrix_3.png %}
+{% img middle /assets/images/search_2D_matrix_3.png %}
 
 This is a good solution, but it would fail in a non-square matrix, so...
 

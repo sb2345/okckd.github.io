@@ -19,7 +19,7 @@ tags: [  ]
     1. Then leaf nodes
     1. Then nodes on right edge
 
-{% img left /assets/images/peripheral-of-tree.png %}
+{% img middle /assets/images/peripheral-of-tree.png %}
 
 > For the above tree, peripheral will be: 0 1 3 7 8 9 10 11 12 13 14 6 2
 
