@@ -59,7 +59,7 @@ __This is a very standard interview question of LinkedList__.
 
 __Keep 2 pointers, one of which points to preReversePosition, another one points to finalTailOfTheReversedPart__. Each time, I will get next element and insert it between the 2 pointers mentioned above. See below image for details: 
 
-{% img left /assets/images/reverse-linked-list-ii.png %}
+{% img middle /assets/images/reverse-linked-list-ii.png %}
 
 The coding isn't easy, there can be a lot of details being omitted. Just think of it in this way: in the above picture, 123 is broken away from 45678. Each time, get next element from 45678, and insert it right after 2. Do this 2 times, so that 4,5 are moved. In the end, make 3 point to 6, and solution done. 
 

@@ -81,7 +81,7 @@ __Another note__: by saying 'subclass', it means subclass declared in another pa
 
 Class structure: 
 
-{% img left /assets/images/java-classes-access-level.gif %}
+{% img middle /assets/images/java-classes-access-level.gif %}
 
 For the methods of 'Alpha' class, the visibility is listed below.
 

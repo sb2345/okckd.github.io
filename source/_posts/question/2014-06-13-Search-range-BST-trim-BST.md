@@ -15,11 +15,11 @@ tags: [ unit test needed ]
 
 Input: 
 
-{% img left /assets/images/search-range-input.png %}
+{% img middle /assets/images/search-range-input.png %}
 
 With min value as 5 and max value as 13, the output is:
 
-{% img left /assets/images/search-range-output.png %}
+{% img middle /assets/images/search-range-output.png %}
 
 ### Analysis 
 

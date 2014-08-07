@@ -46,7 +46,7 @@ As explain, read char by char and keep an array of size 256.
 
 __The tricky part is when a repeating char is found__. A pointer is kept to record this position 'k' (which is the last position where repeat happens). Later whenever a repeat happens before k, it shall be ignored. This is one mistake that might happen during coding.
 
-{% img left /assets/images/20130901224716625.png %}
+{% img middle /assets/images/20130901224716625.png %}
 
 ### My code 
 

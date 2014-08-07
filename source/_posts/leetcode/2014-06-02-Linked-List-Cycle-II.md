@@ -54,7 +54,7 @@ __This is an famous question, historically know as the [Tortoise and hare](http:
     <p class="font-color">这就清晰了，X和K的关系是基于Y互补的。等于说，两个指针相遇以后，再往下走X步就回到Cycle的起点了。这就可以有O(n)的实现了。</p>
 </blockquote>
 
-{% img left /assets/images/Linked-List-Cycle-II.png %}
+{% img middle /assets/images/Linked-List-Cycle-II.png %}
 
 ### Code
 

@@ -12,7 +12,7 @@ tags: [  ]
 
 > In how many ways can one tile a 2 X N strip of square cells with 1 X 2 dominos?
 
-{% img left /assets/images/Dominos.png %}
+{% img middle /assets/images/Dominos.png %}
 
 ### Solution
 

@@ -18,7 +18,7 @@ tags: [ unit test needed ]
 
 Canonical application of toposort is to schedule tasks with dependency (project management etc.) It's also used for computing formulas, logic synthesis, order of compilation ('make' command) and data serialization. 
 
-{% img left /assets/images/topology_sort_example.png %}
+{% img middle /assets/images/topology_sort_example.png %}
 
 ### Solution
 
@@ -48,7 +48,7 @@ If the graph is a DAG, __a solution will be contained in the list L__ (the solut
 
 The solution comes from [here](http://codereview.stackexchange.com/questions/44689/topological-sort-in-java). 
 
-{% img left /assets/images/topology_sort.png 250 250 %}
+{% img middle /assets/images/topology_sort.png 250 250 %}
 
     public class Graph {
         private int vertices;

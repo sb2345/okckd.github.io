@@ -132,7 +132,7 @@ The source code given by [ninechap](http://answer.ninechapter.com/solutions/dele
 
 There are 2 ways to balance a tree. __Most common method is tree rotation__: 
 
-{% img left /assets/images/rotate-tree.png %}
+{% img middle /assets/images/rotate-tree.png %}
 
 An AVL Trees means a self-balancing search trees. If balance gets out of range −1...+1, the subtree is rotated to bring into balance. 
 
