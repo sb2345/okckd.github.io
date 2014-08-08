@@ -287,6 +287,86 @@ Consumer()
 <p>An alternative analysis is that if the programming language does not define the semantics of <strong>concurrent accesses to shared variables (in this case itemCount)</strong> without use of synchronization, then the solution is unsatisfactory for that reason, without needing to explicitly demonstrate a race condition.</p>
 
 <p>Solutions are: <strong>semaphores or monitors</strong>.</p>
+
+<h3>Semaphore</h3>
+
+<pre><code>semaphore mutex = 1;
+semaphore fillCount = 0;
+semaphore emptyCount = BUFFER_SIZE;
+
+procedure producer() {
+    while (true) {
+        item = produceItem();
+        down(emptyCount);
+            down(mutex);
+                putItemIntoBuffer(item);
+            up(mutex);
+        up(fillCount);
+    }
+}
+
+procedure consumer() {
+    while (true) {
+        down(fillCount);
+            down(mutex);
+                item = removeItemFromBuffer();
+            up(mutex);
+        up(emptyCount);
+        consumeItem(item);
+    }
+}
+</code></pre>
+
+<h3>Monitor</h3>
+
+<pre><code>monitor ProducerConsumer {
+    int itemCount;
+    condition full;
+    condition empty;
+
+    procedure add(item) {
+        while (itemCount == BUFFER_SIZE) {
+            wait(full);
+        }
+
+        putItemIntoBuffer(item);
+        itemCount = itemCount + 1;
+
+        if (itemCount == BUFFER_SIZE -1) {
+            notify(full);
+        }
+    }
+    procedure remove() {
+        while (itemCount == 0) {
+            wait(empty);
+        }
+
+        item = removeItemFromBuffer();
+        itemCount = itemCount - 1;
+
+        if (itemCount == 1) {
+            notify(empty);
+        }
+
+
+        return item;
+    }
+}
+
+procedure producer() {
+    while (true) {
+        item = produceItem();
+        ProducerConsumer.add(item);
+    }
+}
+
+procedure consumer() {
+    while (true) {
+        item = ProducerConsumer.remove();
+        consumeItem(item);
+    }
+}
+</code></pre>
 </div>
   
   
@@ -428,6 +508,64 @@ public String decToHex(int dec) {
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/08/07/Million-phone-numbers/">[Google] Million Phone Numbers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question 1</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/How-would-you-store-1-million-phone-numbers-QTN_456.htm">link</a></p>
+
+<blockquote><p>How would you store 1 million phone numbers?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>BitMap.</p>
+
+<blockquote><p>The key here is that 1 million phone numbers will be within some range, likely 10 million or so. 10 million bits = 10<sup>7</sup> bits ~ 0.12 GB. Just have a bit array where the first bit being set implies that the first phone number is set (e.g., 10 000 000) and the last bit indicates the last phone number (10 999 999). If you find a number in the list, just set the appropriate bit. You now have a bit vector of size 1million bits, sorted, and to check for a particular number, you just check whether the corresponding bit is set.</p></blockquote>
+
+<h3>Question 2</h3>
+
+<p><a href="http://www.careercup.com/question?id=7997766">link</a></p>
+
+<blockquote><p>How would you sort 1 million phone numbers?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>BitMap or radix sort, both are O(n) complexity.</p>
+
+<p>Read more <a href="http://www.vex.net/~trebla/compsci/sorting-phone-numbers.html">here</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/08/07/Memory-related-debugging-problem/">[Question] Memory-related Debugging Problem</a></h1>
     
     
@@ -548,6 +686,88 @@ public String decToHex(int dec) {
 <p>或者是在public cloud上？</p>
 
 <p>Answer suggested by user <strong>remus</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/07/9-4-sort-large-files/">[CC150] 9.7 Sort Large Files</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p>9.7 If you have a 2 GB file with one string per line, which sorting algorithm would you use to sort the file and why?</p>
+
+<h3>Solution</h3>
+
+<p><strong>External Sorting</strong> and N-way merge.</p>
+
+<ol>
+<li>Divide the file into K chunks, where X * K = 2 GB Bring each chunk into memory and sort the lines as usual using any O(n log n) algorithm Save the lines back to the file</li>
+<li>Now bring the next chunk into memory and sort</li>
+<li>Once we’re done, merge them one by one</li>
+</ol>
+
+
+<h3>Details</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/External_sorting#External_merge_sort">Wiki example</a> of sorting 900 megabytes of data using only 100 megabytes of RAM:</p>
+
+<ol>
+<li><strong>Read 100 MB of the data in main memory and sort</strong> by some conventional method, like quicksort.</li>
+<li>Write the sorted data to disk.</li>
+<li>Repeat steps 1 and 2 until all of the data is in sorted 100 MB chunks (there are 900MB / 100MB = 9 chunks), which now need to be merged into one single output file.</li>
+<li><strong>Read the first 10 MB (= 100MB / (9 chunks + 1)) of each sorted chunk</strong> into input buffers in main memory and allocate the remaining 10 MB for an output buffer. (In practice, it might provide better performance to make the output buffer larger and the input buffers slightly smaller.)</li>
+<li><strong>Perform a 9-way merge</strong> and store the result in the output buffer. Whenever the output buffer fills, write it to the final sorted file and empty it. Whenever any of the 9 input buffers empties, fill it with the next 10 MB of its associated 100 MB sorted chunk until no more data from the chunk is available. <strong>This is the key step that makes external merge sort work externally</strong> &mdash; because the merge algorithm only makes one pass sequentially through each of the chunks, each chunk does not have to be loaded completely; rather, sequential parts of the chunk can be loaded as needed.</li>
+</ol>
+
+
+<h3>Similar Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/Sort-a-million-32-bit-integers-using-only-2MB-of-RAM-QTN_120936.htm">link</a></p>
+
+<blockquote><p>[Google] Sort a million 32 bit integers using only 2MB of RAM.</p></blockquote>
+
+<p>1 million integers = 4MB which is > 2MB RAM.</p>
+
+<p>Solution: external sort &ndash; divide and conquer</p>
+
+<ol>
+<li>read half the list into 2MB ram and sort using quicksort (quicksort uses logn space &ndash; however 0.5m integers is less than 2MB (2000kb v 2048kb) so this should be okay).</li>
+<li>write sorted data to disk</li>
+<li>repeat for next chunk</li>
+<li>merging results: we need an output buffer. lets say this is 1MB. then we read 512KB from each of your chunks into input buffers. we then perform a 2-way merge of the data. when an input buffer becomes empty we can pull in the remainder of the chunk.</li>
+<li>when the output buffer is full we write this to disk.</li>
+<li>when the process completes we are left with 2x 1MB files sorted in the correct order.</li>
+</ol>
+
 </div>
   
   
@@ -732,229 +952,6 @@ public String decToHex(int dec) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/06/Leetcode-second-two/">[Leetcode] Leetcode Second Round 2</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>2.2 questionlist</h3>
-
-<ol>
-<li>Integer to Roman</li>
-<li>Surrounded Regions &ndash; minimize stack usage</li>
-</ol>
-
-
-<h3>Question List</h3>
-
-<ol>
-<li>Longest Palindromic Substring</li>
-<li>Rotate List</li>
-<li>Remove Duplicates from Sorted Array</li>
-<li>Validate Binary Search Tree &ndash; use intervals</li>
-<li>Gray Code</li>
-<li>Combination Sum II</li>
-<li>Add Binary</li>
-<li>Merge Intervals</li>
-<li>Scramble String</li>
-<li>Remove Duplicates from Sorted Array II</li>
-<li>Generate Parentheses</li>
-<li>Permutation Sequence</li>
-<li>Substring with Concatenation of All Words</li>
-<li>String to Integer (atoi)</li>
-</ol>
-
-
-<h3>Difficult</h3>
-
-<ol>
-<li>Gas Station</li>
-<li>Reverse Words in a String</li>
-<li>Word Search</li>
-<li>Container With Most Water</li>
-<li>First Missing Positive &ndash; note there&rsquo;s 1 special case</li>
-<li>Sort List</li>
-<li>Anagrams</li>
-<li>Merge k Sorted Lists &ndash; very difficult</li>
-<li>Permutations II &ndash; use different DS for flagging elements</li>
-<li>Palindrome Partitioning II</li>
-<li>Word Ladder</li>
-<li>Largest Rectangle in Histogram</li>
-<li>Minimum Window Substring &ndash; difficult</li>
-<li>Longest Valid Parentheses &ndash; difficult</li>
-<li>Median of Two Sorted Arrays &ndash; difficult</li>
-<li>Regular Expression Matching</li>
-<li>Wildcard Matching</li>
-</ol>
-
-
-<h3>Special</h3>
-
-<ol>
-<li><p>water, rain and histogram etc.</p></li>
-<li><p>word and string-related</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/06/HTTP-headers/">[Design] HTTP Headers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Overview</h2>
-
-<p><strong>HTTP is an Application Layer protocol</strong> which stands for &ldquo;Hypertext Transfer Protocol&rdquo;. The entire World Wide Web uses it.</p>
-
-<p>There&rsquo;re <strong><a href="http://www.differencebetween.net/technology/internet/difference-between-tcp-and-http/">a series of sessions</a></strong> in HTTP where client sends a request and server sends a reply message back to client including the request, an error message, or another piece of information.</p>
-
-<p><a href="http://code.tutsplus.com/tutorials/http-headers-for-dummies--net-8039">HTTP headers</a> are the core part of these HTTP requests and responses, and they carry information about the client browser, the requested page, the server and more.</p>
-
-<h3>Example HTTP request</h3>
-
-<pre><code>GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1
-Host: net.tutsplus.com
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-Accept-Language: en-us,en;q=0.5
-Accept-Encoding: gzip,deflate
-Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
-Keep-Alive: 300
-Connection: keep-alive
-Cookie: PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120
-Pragma: no-cache
-Cache-Control: no-cache
-</code></pre>
-
-<h3>Example HTTP response</h3>
-
-<pre><code>HTTP/1.x 200 OK
-Transfer-Encoding: chunked
-Date: Sat, 28 Nov 2009 04:36:25 GMT
-Server: LiteSpeed
-Connection: close
-X-Powered-By: W3 Total Cache/0.8
-Pragma: public
-Expires: Sat, 28 Nov 2009 05:36:25 GMT
-Etag: "pub1259380237;gz"
-Cache-Control: max-age=3600, public
-Content-Type: text/html; charset=UTF-8
-Last-Modified: Sat, 28 Nov 2009 03:50:37 GMT
-X-Pingback: http://net.tutsplus.com/xmlrpc.php
-Content-Encoding: gzip
-Vary: Accept-Encoding, Cookie, User-Agent
-
-&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;
-&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
-&lt;head&gt;
-&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
-&lt;title&gt;Top 20+ MySQL Best Practices - Nettuts+&lt;/title&gt;
-&lt;!-- ... rest of the html ... --&gt;
-</code></pre>
-
-<p>These HTTP requests are also sent and received for other things, such as images, CSS files, JavaScript files etc. That is why browser may send 40 or more HTTP requests for 1 article page.</p>
-
-<h3>Request Methods</h3>
-
-<p>The three most commonly used request methods are: GET, POST and HEAD.</p>
-
-<h4>GET: Retrieve a Document</h4>
-
-<p>Get an article site:</p>
-
-<pre><code>GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1
-</code></pre>
-
-<p>Submit a form information:</p>
-
-<pre><code>GET /foo.php?first_name=John&amp;last_name=Doe&amp;action=Submit HTTP/1.1
-</code></pre>
-
-<p>Each input is added in the <strong>query string</strong>.</p>
-
-<h4>POST: Send Data to the Server</h4>
-
-<p>Even though you can send data to the server using GET and the query string, <strong>in many cases POST will be preferable</strong>. Sending large amounts of data using GET is not practical and has limitations.</p>
-
-<pre><code>POST /foo.php HTTP/1.1
-Host: localhost
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-Accept-Language: en-us,en;q=0.5
-Accept-Encoding: gzip,deflate
-Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
-Keep-Alive: 300
-Connection: keep-alive
-Referer: http://localhost/test.php
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 43
-
-first_name=John&amp;last_name=Doe&amp;action=Submit
-</code></pre>
-
-<p>The header contains no query string no more. The last line (data) is the query string.</p>
-
-<h4>HEAD: Retrieve Header Information</h4>
-
-<p>HEAD is identical to GET, except the server does not return the content in the HTTP response. It&rsquo;s faster than GET.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -968,10 +965,10 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150/'>cc150 (1)</a></li>
+    <li class='category'><a href='/blog/categories/cc150/'>cc150 (2)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (25)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (15)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (16)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -1002,7 +999,7 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/07/Memory-related-debugging-problem/">[Question] Memory-related Debugging Problem</a>
+        <a href="/blog/2014/08/07/Million-phone-numbers/">[Google] Million Phone Numbers</a>
       </li>
     
   </ul>

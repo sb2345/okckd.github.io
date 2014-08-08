@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-08T18:29:11+08:00</updated>
+  <updated>2014-08-08T21:52:35+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -184,6 +184,86 @@ Consumer()
 <p>An alternative analysis is that if the programming language does not define the semantics of <strong>concurrent accesses to shared variables (in this case itemCount)</strong> without use of synchronization, then the solution is unsatisfactory for that reason, without needing to explicitly demonstrate a race condition.</p>
 
 <p>Solutions are: <strong>semaphores or monitors</strong>.</p>
+
+<h3>Semaphore</h3>
+
+<pre><code>semaphore mutex = 1;
+semaphore fillCount = 0;
+semaphore emptyCount = BUFFER_SIZE;
+
+procedure producer() {
+    while (true) {
+        item = produceItem();
+        down(emptyCount);
+            down(mutex);
+                putItemIntoBuffer(item);
+            up(mutex);
+        up(fillCount);
+    }
+}
+
+procedure consumer() {
+    while (true) {
+        down(fillCount);
+            down(mutex);
+                item = removeItemFromBuffer();
+            up(mutex);
+        up(emptyCount);
+        consumeItem(item);
+    }
+}
+</code></pre>
+
+<h3>Monitor</h3>
+
+<pre><code>monitor ProducerConsumer {
+    int itemCount;
+    condition full;
+    condition empty;
+
+    procedure add(item) {
+        while (itemCount == BUFFER_SIZE) {
+            wait(full);
+        }
+
+        putItemIntoBuffer(item);
+        itemCount = itemCount + 1;
+
+        if (itemCount == BUFFER_SIZE -1) {
+            notify(full);
+        }
+    }
+    procedure remove() {
+        while (itemCount == 0) {
+            wait(empty);
+        }
+
+        item = removeItemFromBuffer();
+        itemCount = itemCount - 1;
+
+        if (itemCount == 1) {
+            notify(empty);
+        }
+
+
+        return item;
+    }
+}
+
+procedure producer() {
+    while (true) {
+        item = produceItem();
+        ProducerConsumer.add(item);
+    }
+}
+
+procedure consumer() {
+    while (true) {
+        item = ProducerConsumer.remove();
+        consumeItem(item);
+    }
+}
+</code></pre>
 ]]></content>
   </entry>
   
@@ -263,6 +343,37 @@ public String decToHex(int dec) {
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[[Google] Million Phone Numbers]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/07/Million-phone-numbers/"/>
+    <updated>2014-08-07T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/07/Million-phone-numbers</id>
+    <content type="html"><![CDATA[<h3>Question 1</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/How-would-you-store-1-million-phone-numbers-QTN_456.htm">link</a></p>
+
+<blockquote><p>How would you store 1 million phone numbers?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>BitMap.</p>
+
+<blockquote><p>The key here is that 1 million phone numbers will be within some range, likely 10 million or so. 10 million bits = 10<sup>7</sup> bits ~ 0.12 GB. Just have a bit array where the first bit being set implies that the first phone number is set (e.g., 10 000 000) and the last bit indicates the last phone number (10 999 999). If you find a number in the list, just set the appropriate bit. You now have a bit vector of size 1million bits, sorted, and to check for a particular number, you just check whether the corresponding bit is set.</p></blockquote>
+
+<h3>Question 2</h3>
+
+<p><a href="http://www.careercup.com/question?id=7997766">link</a></p>
+
+<blockquote><p>How would you sort 1 million phone numbers?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>BitMap or radix sort, both are O(n) complexity.</p>
+
+<p>Read more <a href="http://www.vex.net/~trebla/compsci/sorting-phone-numbers.html">here</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[[Question] Memory-related Debugging Problem]]></title>
     <link href="http://okckd.github.io/blog/2014/08/07/Memory-related-debugging-problem/"/>
     <updated>2014-08-07T00:00:00+08:00</updated>
@@ -337,6 +448,61 @@ public String decToHex(int dec) {
 <p>或者是在public cloud上？</p>
 
 <p>Answer suggested by user <strong>remus</strong>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150] 9.7 Sort Large Files]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/07/9-4-sort-large-files/"/>
+    <updated>2014-08-07T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/07/9-4-sort-large-files</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p>9.7 If you have a 2 GB file with one string per line, which sorting algorithm would you use to sort the file and why?</p>
+
+<h3>Solution</h3>
+
+<p><strong>External Sorting</strong> and N-way merge.</p>
+
+<ol>
+<li>Divide the file into K chunks, where X * K = 2 GB Bring each chunk into memory and sort the lines as usual using any O(n log n) algorithm Save the lines back to the file</li>
+<li>Now bring the next chunk into memory and sort</li>
+<li>Once we’re done, merge them one by one</li>
+</ol>
+
+
+<h3>Details</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/External_sorting#External_merge_sort">Wiki example</a> of sorting 900 megabytes of data using only 100 megabytes of RAM:</p>
+
+<ol>
+<li><strong>Read 100 MB of the data in main memory and sort</strong> by some conventional method, like quicksort.</li>
+<li>Write the sorted data to disk.</li>
+<li>Repeat steps 1 and 2 until all of the data is in sorted 100 MB chunks (there are 900MB / 100MB = 9 chunks), which now need to be merged into one single output file.</li>
+<li><strong>Read the first 10 MB (= 100MB / (9 chunks + 1)) of each sorted chunk</strong> into input buffers in main memory and allocate the remaining 10 MB for an output buffer. (In practice, it might provide better performance to make the output buffer larger and the input buffers slightly smaller.)</li>
+<li><strong>Perform a 9-way merge</strong> and store the result in the output buffer. Whenever the output buffer fills, write it to the final sorted file and empty it. Whenever any of the 9 input buffers empties, fill it with the next 10 MB of its associated 100 MB sorted chunk until no more data from the chunk is available. <strong>This is the key step that makes external merge sort work externally</strong> &mdash; because the merge algorithm only makes one pass sequentially through each of the chunks, each chunk does not have to be loaded completely; rather, sequential parts of the chunk can be loaded as needed.</li>
+</ol>
+
+
+<h3>Similar Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/Sort-a-million-32-bit-integers-using-only-2MB-of-RAM-QTN_120936.htm">link</a></p>
+
+<blockquote><p>[Google] Sort a million 32 bit integers using only 2MB of RAM.</p></blockquote>
+
+<p>1 million integers = 4MB which is > 2MB RAM.</p>
+
+<p>Solution: external sort &ndash; divide and conquer</p>
+
+<ol>
+<li>read half the list into 2MB ram and sort using quicksort (quicksort uses logn space &ndash; however 0.5m integers is less than 2MB (2000kb v 2048kb) so this should be okay).</li>
+<li>write sorted data to disk</li>
+<li>repeat for next chunk</li>
+<li>merging results: we need an output buffer. lets say this is 1MB. then we read 512KB from each of your chunks into input buffers. we then perform a 2-way merge of the data. when an input buffer becomes empty we can pull in the remainder of the chunk.</li>
+<li>when the output buffer is full we write this to disk.</li>
+<li>when the process completes we are left with 2x 1MB files sorted in the correct order.</li>
+</ol>
+
 ]]></content>
   </entry>
   
@@ -473,6 +639,7 @@ public String decToHex(int dec) {
 <ol>
 <li>Integer to Roman</li>
 <li>Surrounded Regions &ndash; minimize stack usage</li>
+<li>Jump Game II</li>
 </ol>
 
 
@@ -1006,114 +1173,6 @@ E -&gt; B C D
 <h4>Result</h4>
 
 <p>Now when D visits B&rsquo;s profile, we can quickly look up (B D) and see that they have three friends in common, (A C E).</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Amazon Web Services]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/05/AWS-explained/"/>
-    <updated>2014-08-05T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/05/AWS-explained</id>
-    <content type="html"><![CDATA[<h2>Overview</h2>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Amazon_Web_Services">Amazon Web Services</a></strong> (AWS) is a collection of <strong>remote computing services</strong> that together make up a cloud computing platform. AWS provides a large computing capacity much faster and cheaper than building a physical server farm.</p>
-
-<p>The most well-known is Amazon EC2 and Amazon S3.</p>
-
-<p><a href="http://practicalcloudcomputing.com/post/311045887/cloudexplained">Amazon is an example of</a> an <strong>IAAS (Infrastructure as a Service) provider</strong>.</p>
-
-<h3>Terminologies</h3>
-
-<h4>AWS</h4>
-
-<p>Amazon Web Services, a division of Amazon focusing on hosting our applications and data</p>
-
-<h4>SimpleDB</h4>
-
-<p>AWS’s always-available replacement for RDBMSs. Specifically SimpleDB is their hosted, replicated key-value store that is always available and accessible as a web service</p>
-
-<h4>S3</h4>
-
-<p>(a.k.a Simple Storage Service) AWS’s always-available file storage solution accessible as a web service</p>
-
-<h4>SQS</h4>
-
-<p>(a.k.a Simple Queue Service) AWS’s always-available queueing service accessible as a web service</p>
-
-<h4>ELB</h4>
-
-<p>(a.k.a Elastic Load Balancer) AWS’s always-available load balancing service accessible as a web service</p>
-
-<h4>EC2</h4>
-
-<p>(a.k.a Elastic Compute Cloud) AWS’s on-demand server offering accessible as a web service</p>
-
-<h4>CloudFront</h4>
-
-<p>AWS’s CDN (a.k.a Content Delivery Network) offering accessible as a web service</p>
-
-<h3>Benefits</h3>
-
-<p>Basically, by moving these services out of your data center and into the cloud, you:</p>
-
-<ol>
-<li><p><strong>No longer need to run and maintain a data center</strong>. You no longer need the associated staff</p></li>
-<li><p>Get a <strong>more scalable and available infrastructure</strong> without trying to build it yourself</p></li>
-</ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Traveller Path Problem]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/04/Traveller-Path-Problem/"/>
-    <updated>2014-08-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/04/Traveller-Path-Problem</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5147801809846272">link</a></p>
-
-<blockquote><p>Traveler wants to travel from city “A” to city “D”. There is a path from city “A” to city “D”. Path consists of steps, i.e. travel from city “A” to city “B”. Path is encoded as sequence of steps.</p>
-
-<p>Sequence is in incorrect order. Your task is to restore order of steps in the path.</p>
-
-<p>Input (unordered sequence):</p></blockquote>
-
-<pre><code>C -&gt; D 
-A -&gt; B 
-B -&gt; C 
-</code></pre>
-
-<blockquote><p>Output (Correctly ordered list which represents path):</p></blockquote>
-
-<pre><code>A, B, C, D 
-</code></pre>
-
-<blockquote><p>Implement following API:</p></blockquote>
-
-<pre><code>class Step {
-    String start;
-    String finish;
-};
-
-class Node {
-    String value;
-    Node next;
-}
-
-List&lt;String&gt; findPath(List&lt;Step&gt; steps) {
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>This question is not stated clear enough. I found one tentative algorithm:</p>
-
-<blockquote><p>First, initialize a result &ndash; sortedPath, and build 2 maps (String to String) &ndash; startsToFinishes and finishesToStarts (O(N))</p>
-
-<p>Then, find the one key on startsToFinishes, that is not a key in finishesToStarts &ndash; this is the city from which the path begins. (O(N))</p>
-
-<p>Then, iteratively, city by city, build the path.</p></blockquote>
 ]]></content>
   </entry>
   

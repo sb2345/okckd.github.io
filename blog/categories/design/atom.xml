@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-08T18:29:11+08:00</updated>
+  <updated>2014-08-08T21:52:35+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -183,6 +183,83 @@ An alternative analysis is that if the programming language does not define the 
 
 Solutions are: __semaphores or monitors__.
 
+### Semaphore
+
+	semaphore mutex = 1;
+	semaphore fillCount = 0;
+	semaphore emptyCount = BUFFER_SIZE;
+	 
+	procedure producer() {
+	    while (true) {
+	        item = produceItem();
+	        down(emptyCount);
+	            down(mutex);
+	                putItemIntoBuffer(item);
+	            up(mutex);
+	        up(fillCount);
+	    }
+	}
+	 
+	procedure consumer() {
+	    while (true) {
+	        down(fillCount);
+	            down(mutex);
+	                item = removeItemFromBuffer();
+	            up(mutex);
+	        up(emptyCount);
+	        consumeItem(item);
+	    }
+	}
+
+### Monitor
+
+	monitor ProducerConsumer {
+	    int itemCount;
+	    condition full;
+	    condition empty;
+	 
+	    procedure add(item) {
+	        while (itemCount == BUFFER_SIZE) {
+	            wait(full);
+	        }
+	 
+	        putItemIntoBuffer(item);
+	        itemCount = itemCount + 1;
+	 
+	        if (itemCount == BUFFER_SIZE -1) {
+	            notify(full);
+	        }
+	    }
+	    procedure remove() {
+	        while (itemCount == 0) {
+	            wait(empty);
+	        }
+	 
+	        item = removeItemFromBuffer();
+	        itemCount = itemCount - 1;
+	 
+	        if (itemCount == 1) {
+	            notify(empty);
+	        }
+	 
+	 
+	        return item;
+	    }
+	}
+	 
+	procedure producer() {
+	    while (true) {
+	        item = produceItem();
+	        ProducerConsumer.add(item);
+	    }
+	}
+	 
+	procedure consumer() {
+	    while (true) {
+	        item = ProducerConsumer.remove();
+	        consumeItem(item);
+	    }
+	}
 ]]></content>
   </entry>
   
