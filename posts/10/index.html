@@ -9,8 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Overview HashTable HashTable is thread safe synchronized. Only 1 thread can access at a time (compromise speed).
-HashTable does not allow null for &hellip;">
+  <meta name="description" content="Question link Implement a queue by two stacks. Support O (1) push, pop, top. Solution Q.Push(x): S1-Push(x) Q.Pop(): if S2.empty &ndash;> S1->S2 S2. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +65,225 @@ HashTable does not allow null for &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/01/Implement-queue-with-stack/">[Question] Implement Queue Using Stacks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/queue-using-stacks/">link</a></p>
+
+<blockquote><p>Implement a queue by two stacks. Support O (1) push, pop, top.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Q.Push(x): S1-Push(x)</p>
+
+<p>Q.Pop(): if S2.empty &ndash;> S1->S2 S2.pop()</p>
+
+<p>Q.Top(): Similar with Q.Pop()</p>
+
+<h3>Code</h3>
+
+<p>skipped</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/01/Implement-Hashmap/">[Question] Implement a HashMap</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p>Implement a HashMap</p>
+
+<p><strong>Hint</strong>:</p>
+
+<blockquote><p>An instance of HashMap has two parameters that affect its performance: initial capacity and load factor. The capacity is the number of buckets in the hash table, and the initial capacity is simply the capacity at the time the hash table is created. The load factor is a measure of how full the hash table is allowed to get before its capacity is automatically increased. When the number of entries in the hash table exceeds the product of the load factor and the current capacity, the hash table is rehashed (that is, internal data structures are rebuilt) so that the hash table has approximately twice the number of buckets. <a href="http://stackoverflow.com/a/10901821">source</a></p>
+
+<p>Load factor = n/k where n is the number of entries and k is the number of buckets.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Some points to take note:</p>
+
+<ol>
+<li><p>So first of all, we would need 2 important parameters in a Hashmap: <strong>initial capacity and load factor</strong>. In Java, it&rsquo;s default 0.75.</p>
+
+<p> For example the product of capacity and load factor = 16 * 0.75 = 12. This represents that after storing the 12th key – value pair into the HashMap , its capacity will become 32.</p></li>
+<li><p>Then we would need an Entry&lt;Obj, Obj> Class to store <strong>key-value pairs</strong>. Important to note the Entry would have a &lsquo;next&rsquo; pointer, in order to mimic a LinkedList.</p></li>
+<li><p>Except key, value and next pointer, Entry class <strong>also need to store the &lsquo;hash&rsquo; value</strong>, because it will be used during comparison.</p></li>
+<li><p>The main bucket is an array of Entry objects. It should resize when it has to, and this is <strong>done in the addEntry() method</strong>. I skipped this part of code.</p></li>
+<li><p>The code for put() and get() method are similar, because it&rsquo;s bascially <strong>calculate hash</strong>, then <strong>get array index</strong>, using that index to <strong>locate the head Entry object</strong>, and then do a linear search for key. If found, put() will replace it, and get() will return it. Note than after replaced, the old value is returned (Java designed in this way, I personally wouldn&rsquo;t do this).</p></li>
+<li><p>Last important thing is the <strong>indexFor() method</strong>. It looks useless to me at first, then I realize that this method is mapping my hash value into the index in the array. Fine, but this bit operation still looks odd. Look at next section for more.</p></li>
+</ol>
+
+
+<h3>The Niubility Operation: h &amp; (length &ndash; 1)</h3>
+
+<p>This actually equals to the value of (h % length). It converts the hash value into array index.</p>
+
+<blockquote><p>这个方法非常巧妙，它通过 h &amp; (length &ndash; 1) 来得到该对象的保存位，而HashMap底层数组的长度总是 2 的 n 次方，这是HashMap在速度上的优化。</p>
+
+<p>当length总是 2 的n次方时，h &amp; (length &ndash; 1)运算等价于对length取模，也就是h % length，但是 &amp; 比 % 具有更高的效率。<a href="http://www.cnblogs.com/-clq/archive/2012/01/11/2318870.html">source</a></p></blockquote>
+
+<p>That&rsquo;s all about implementing a HashMap. It&rsquo;s difficult, but having a general idea definitely helps.</p>
+
+<p>What&rsquo;s more, know the mod operation &ldquo;h &amp; (length &ndash; 1)&rdquo; would definitely help you grab some attentions!</p>
+
+<h3>Code</h3>
+
+<pre><code>public class MyHashMap {
+
+    Pair[] table;
+    float loadFactor;
+    int size;
+
+    public MyHashMap(int initialCapacity, float loadFactor) {
+        if (initialCapacity &lt; 0 || loadFactor &lt;= 0) {
+            return;
+        }
+        table = new Pair[initialCapacity];
+        this.size = 0;
+        this.loadFactor = loadFactor;
+    }
+
+    public String get(int key) {
+        int hash = hash(key);
+        int i = indexFor(hash, table.length);
+        Pair e = table[i];
+        for (; e != null; e = e.next) {
+            if (e.hash == hash &amp;&amp; key == e.key) {
+                return e.value;
+            }
+        }
+        return null;
+    }
+
+    public String put(int key, String value) {
+        int hash = hash(key);
+        int i = indexFor(hash, table.length);
+        Pair e = table[i];
+        for (; e != null; e = e.next) {
+            if (e.hash == hash &amp;&amp; key == e.key) {
+                String oldValue = e.value;
+                e.value = value;
+                return oldValue;
+            }
+        }
+        addEntry(hash, key, value, i);
+        return null;
+    }
+
+    void addEntry(int hash, int key, String value, int i) {
+        // in charge of resizing here (check the load factor)
+        // resizing code is not written here
+        Pair e = table[i];
+        table[i] = new Pair(hash, key, value, e);
+    }
+
+    int indexFor(int h, int length) {
+        return h &amp; (length - 1);
+    }
+
+    final int hash(int code) {
+        // this is the hash function from java 6 source code
+        code ^= (code &gt;&gt;&gt; 20) ^ (code &gt;&gt;&gt; 12);
+        return code ^ (code &gt;&gt;&gt; 7) ^ (code &gt;&gt;&gt; 4);
+    }
+
+    public static void main(String[] args) {
+        MyHashMap map = new MyHashMap(16, 0.5f);
+        map.put(1, "a");
+        map.put(2, "b");
+        map.put(3, "c");
+        System.out.println(map.get(1));
+        System.out.println(map.get(2));
+        System.out.println(map.get(3));
+        map.put(1, "Spider Man");
+        map.put(4, "d");
+        map.put(3, "Peter Parker");
+        System.out.println(map.get(1));
+        System.out.println(map.get(2));
+        System.out.println(map.get(3));
+        System.out.println(map.get(4));
+        System.out.println(map.get(5));
+    }
+
+    class Pair {
+        int hash;
+        int key;
+        String value;
+        Pair next;
+
+        Pair(int h, int k, String v, Pair n) {
+            hash = h;
+            key = k;
+            value = v;
+            next = n;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1181,308 +1399,6 @@ private void partition(int[] A, int start, int end, int target) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/NineChap-Data-structure/">[NineChap 7] Data Structure</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Data Structure</h2>
-
-<p>Data structure is a way to manage data. It provides some methods to handle data stream. For example, DB is a DS.</p>
-
-<h3>Stack and Queue</h3>
-
-<ol>
-<li><p><strong><a href="/blog/2014/07/01/Min-Stack/">Min-stack</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/07/01/Implement-queue-with-stack/">Implement a queue by two stacks</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/23/Largest-Rectangle-in-Histogram/">Largest Rectangle in histogram</a></strong></p></li>
-</ol>
-
-
-<h3>Hash</h3>
-
-<h4>Hash function</h4>
-
-<ol>
-<li>MD5</li>
-<li>Magic number 33 (<strong>PHP hash function <a href="http://events.ccc.de/congress/2011/Fahrplan/attachments/2007_28C3_Effective_DoS_on_web_application_platforms.pdf">DJBX33A</a></strong>)</li>
-</ol>
-
-
-<p>Magic Number:</p>
-
-<pre><code>int hashfunc(String key) {
-    int sum = 0;
-    for (int i = 0; i &lt; key.length(); i++) {
-        sum = sum * 33 + (int)(key.charAt(i));
-        sum = sum % HASH_TABLE_SIZE;
-    }
-    return sum
-}
-</code></pre>
-
-<h4>Collision</h4>
-
-<ol>
-<li><p><strong>Close hashing (also called Open addressing)</strong></p>
-
-<p> Resolves conflict by probing, or searching through alternate locations in the array</p>
-
-<p> Suck scheme may cause the lookup cost to skyrocket. Not good to use.</p></li>
-<li><p><strong>Open hashing</strong></p>
-
-<p> Keys stored in linked lists attached to cells of the hash table.</p>
-
-<p> Practically, hash size set around 10 times the size of data</p>
-
-<p> Used by Java and most other languages.</p></li>
-</ol>
-
-
-<h4>Rehashing</h4>
-
-<ol>
-<li><p>Memcached is a general-purpose distributed memory caching system. One of its bottleneck is rehashing, which locks down the entire hash.</p></li>
-<li><p>Dynamic resizing (normally size * 2) and copy all elements into the new hash.</p></li>
-<li><p>Extremely slow process, we should try to avoid it by setting a large enough initial size.</p></li>
-</ol>
-
-
-<h4>Hash questions:</h4>
-
-<ol>
-<li><p><strong><a href="/blog/2014/07/01/Implement-Hashmap/">Implement a hashmap</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/07/01/Hashmap-Hashtable-Hashset/">HashMap vs Hashtable vs HashSet</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/06/03/LRU-Cache/">LRU Cache</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/29/Longest-Consecutive-Sequence/">Longest consecutive sequence</a></strong></p></li>
-</ol>
-
-
-<h3>Heap</h3>
-
-<ol>
-<li>Child is always larger than parent</li>
-<li>Heap is not a sorted structure, but it&rsquo;s partially ordered</li>
-<li>Heap is always balanced</li>
-</ol>
-
-
-<p>Heap is better than array because average of 3 operations is O(logn), but array is O(n).</p>
-
-<blockquote><p>Add O(log N)</p>
-
-<p>Remove O(log N)</p>
-
-<p>Min/Max O(1)</p></blockquote>
-
-<h4>Heap implementation:</h4>
-
-<ol>
-<li><p>Low Level: dynamic array, not list</p></li>
-<li><p>Internal Method: Shiftup, Shiftdown operations</p></li>
-<li><p>A heap is a complete binary tree (最优二叉树) <strong>represented by an array</strong></p></li>
-<li><p>When removing element from heap, we actually uses HashMap to find that element.</p></li>
-</ol>
-
-
-<blockquote><p>Heaps are usually implemented in an array, and do not require pointers between elements.</p>
-
-<p>Full and almost full binary heaps may be represented in a very space-efficient way using an array alone. The first element will contain the root. The next two elements of the array contain its children. The next four contain the four children of the two child nodes, etc.</p>
-
-<p>Thus the children of the node at position n would be at positions 2n+1 and 2n+2.</p></blockquote>
-
-<p>So to summarize:</p>
-
-<ol>
-<li>elems[1] &ndash; root, also the minimum elem in elems.</li>
-<li>elems[i]: left child is elems[i<em>2], right child is elems[i</em>2+1]</li>
-</ol>
-
-
-<p>Implementation code:</p>
-
-<pre><code>Add:
-    Push back to elems; size ++; Siftup;
-Remove:
-    Replace the elem to be removed with the last elem; 
-    size --; 
-    Siftup and Siftdown.
-</code></pre>
-
-<h4>Heap questions:</h4>
-
-<ol>
-<li><p><strong><a href="/blog/2014/07/01/Median-in-stream-of-integers/">Median in a stream of integers</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/07/01/The-Skyline-Problem/">The Skyline Problem</a></strong></p></li>
-</ol>
-
-
-<h3>Interval Tree</h3>
-
-<p>Easily find the max/min value in an interval. 2 example questions are:</p>
-
-<ol>
-<li>Find min/max/sum in an interval</li>
-<li>最长的连续1</li>
-</ol>
-
-
-<h2>Code</h2>
-
-<p><strong>Largest Rectangle in histogram</strong></p>
-
-<pre><code>public int largestRectangleArea(int[] height) {
-    if (height == null || height.length == 0) {
-        return 0;
-    }
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    stack.add(0);
-    int len = height.length;
-    int area = 0;
-    for (int i = 1; i &lt;= len; i++) {
-        int h = i == len ? 0 : height[i];
-        // pop a element and calculate its max area
-        // pop until the top element is smaller than h, then push h
-        while (!stack.isEmpty() &amp;&amp; h &lt; height[stack.peek()]) {
-            int pos = stack.pop();
-            int width = stack.isEmpty() ? i : i - stack.peek() - 1;
-            area = Math.max(area, height[pos] * width);
-        }
-        stack.push(i);
-    }
-    return area;
-}
-</code></pre>
-
-<p><strong>LRU Cache</strong></p>
-
-<p>I posted code in the new post.</p>
-
-<p><strong>Longest consecutive sequence</strong></p>
-
-<pre><code>public int longestConsecutive(int[] num) {
-    if (num == null || num.length == 0) {
-        return 0;
-    }
-    HashSet&lt;Integer&gt; set = new HashSet&lt;Integer&gt;();
-    for (Integer i: num) {
-        set.add(i);
-    }
-    int longest = 0;
-    for (Integer i: num) {
-        if (!set.contains(i)) {
-            continue;
-        }
-        int left = i - 1;
-        while (set.contains(left)) {
-            set.remove(left--);
-        }
-        int right = i + 1;
-        while (set.contains(right)) {
-            set.remove(right++);
-        }
-        longest = Math.max(longest, right - left - 1);
-        set.remove(i);
-    }
-    return longest;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Minimum-subarray/">[LintCode] Minimum Subarray</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/minimum-subarray/">link</a></p>
-
-<blockquote><p>Given an array of integers, find the subarray with smallest sum. Return the sum of the subarray.</p>
-
-<p>Note The subarray should contain at least one integer.</p>
-
-<p>Example For [1, -1, -2, 1], return -3</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Same as &ldquo;Max subarray&rdquo;.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int minSubArray(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    if (nums == null || nums.size() == 0) {
-        return 0;
-    }
-    int min = nums.get(0);
-    int pre = Math.min(0, nums.get(0));
-    for (int i = 1; i &lt; nums.size(); i++) {
-        pre += nums.get(i);
-        min = Math.min(min, pre);
-        pre = Math.min(0, pre);
-    }
-    return min;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/11">&larr; Older</a>
@@ -1500,7 +1416,7 @@ Remove:
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (1)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (23)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (25)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (15)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1516,6 +1432,14 @@ Remove:
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/08/Thread-pool-pattern/">[Design] Thread Pool Pattern</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/08/Producer-consumer-problem/">[Design] Producer Consumer Problem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/08/Max-sum-non-consecutive/">[Question] Max Sum of Non-Consecutive Elements</a>
       </li>
     
@@ -1525,14 +1449,6 @@ Remove:
     
       <li class="post">
         <a href="/blog/2014/08/07/Memory-related-debugging-problem/">[Question] Memory-related Debugging Problem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/07/Distributed-network-bottleneck/">[Design] Distributed Network Bottleneck</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/06/Postorder-successor-Binary-Tree/">[Google] Postorder Successor in Binary Tree</a>
       </li>
     
   </ul>
