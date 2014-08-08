@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-08T12:20:56+08:00</updated>
+  <updated>2014-08-08T14:25:29+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,174 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Thread Pool Pattern]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/08/Thread-pool-pattern/"/>
+    <updated>2014-08-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/08/Thread-pool-pattern</id>
+    <content type="html"><![CDATA[<h3>Overview</h3>
+
+<p><a href="http://programmers.stackexchange.com/a/173580">Thread pool</a> is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue.</p>
+
+<p><img class="middle" src="http://okckd.github.io/assets/images/thread-pool.png"></p>
+
+<p><a href="http://en.wikipedia.org/wiki/Thread_pool_pattern">A sample thread pool</a> (green boxes) with waiting tasks (blue) and completed tasks (yellow)</p>
+
+<h3>Why Thread Pool?</h3>
+
+<p><a href="http://www.ibm.com/developerworks/library/j-jtp0730/">Many server applications</a>, such as <strong>Web servers (eg. Tomcat)</strong>, database servers, file servers, or mail servers must process a large number of tasks received from a network protocol. Often, the task is short-lived and the number of requests is large.</p>
+
+<p><strong>Thread Pools are useful when you need to limit the number of threads</strong> running in your application at the same time.</p>
+
+<h3>More details</h3>
+
+<p>A thread pool is a group of pre-instantiated, idle threads which stand ready to be given work. These are preferred over instantiating new threads for each task when there is <strong>a large number of short tasks</strong> to be done <strong>rather than a small number of long ones</strong>.</p>
+
+<p>Instead of starting a new thread for every task to execute concurrently, the <strong>task can be passed to a thread pool</strong>. As soon as the pool has any idle threads the task is assigned to one of them and executed.</p>
+
+<p>Thread pools are often used in multi threaded servers. Each connection <strong>arriving at the server via the network is wrapped as a task</strong> and passed on to a thread pool. The threads in the thread pool will process the requests on the connections concurrently.</p>
+
+<h3>Code</h3>
+
+<p><strong>a <a href="http://tutorials.jenkov.com/java-concurrency/thread-pools.html">simple thread pool implementation</a></strong></p>
+
+<p>Pool Class:</p>
+
+<pre><code>public class ThreadPool {
+
+  private BlockingQueue taskQueue = null;
+  private List&lt;PoolThread&gt; threads = new ArrayList&lt;PoolThread&gt;();
+  private boolean isStopped = false;
+
+  public ThreadPool(int noOfThreads, int maxNoOfTasks){
+    taskQueue = new BlockingQueue(maxNoOfTasks);
+
+    for(int i=0; i&lt;noOfThreads; i++){
+      threads.add(new PoolThread(taskQueue));
+    }
+    for(PoolThread thread : threads){
+      thread.start();
+    }
+  }
+
+  public void synchronized execute(Runnable task){
+    if(this.isStopped) throw
+      new IllegalStateException("ThreadPool is stopped");
+
+    this.taskQueue.enqueue(task);
+  }
+
+  public synchronized void stop(){
+    this.isStopped = true;
+    for(PoolThread thread : threads){
+      thread.stop();
+    }
+  }
+}
+</code></pre>
+
+<p>Thread Class:</p>
+
+<pre><code>public class PoolThread extends Thread {
+
+  private BlockingQueue taskQueue = null;
+  private boolean       isStopped = false;
+
+  public PoolThread(BlockingQueue queue){
+    taskQueue = queue;
+  }
+
+  public void run(){
+    while(!isStopped()){
+      try{
+        Runnable runnable = (Runnable) taskQueue.dequeue();
+        runnable.run();
+      } catch(Exception e){
+        //log or otherwise report exception,
+        //but keep pool thread alive.
+      }
+    }
+  }
+
+  public synchronized void stop(){
+    isStopped = true;
+    this.interrupt(); //break pool thread out of dequeue() call.
+  }
+
+  public synchronized void isStopped(){
+    return isStopped;
+  }
+}
+</code></pre>
+
+<p>An explanation:</p>
+
+<blockquote><p>The thread pool implementation consists of two parts. A ThreadPool class which is the public interface to the thread pool, and a PoolThread class which implements the threads that execute the tasks.</p>
+
+<p>To execute a task the method ThreadPool.execute(Runnable r) is called with a Runnable implementation as parameter. The Runnable is enqueued in the blocking queue internally, waiting to be dequeued.</p>
+
+<p>The Runnable will be dequeued by an idle PoolThread and executed. You can see this in the PoolThread.run() method. After execution the PoolThread loops and tries to dequeue a task again, until stopped.</p>
+
+<p>To stop the ThreadPool the method ThreadPool.stop() is called. The stop called is noted internally in the isStopped member. Then each thread in the pool is stopped by calling PoolThread.stop(). Notice how the execute() method will throw an IllegalStateException if execute() is called after stop() has been called.</p>
+
+<p>The threads will stop after finishing any task they are currently executing. Notice the this.interrupt() call in PoolThread.stop(). This makes sure that a thread blocked in a wait() call inside the taskQueue.dequeue() call breaks out of the wait() call, and leaves the dequeue() method call with an InterruptedException thrown. This exception is caught in the PoolThread.run() method, reported, and then the isStopped variable is checked. Since isStopped is now true, the PoolThread.run() will exit and the thread dies.</p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Producer Consumer Problem]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/08/Producer-consumer-problem/"/>
+    <updated>2014-08-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/08/Producer-consumer-problem</id>
+    <content type="html"><![CDATA[<h3>Overview</h3>
+
+<p>Producer-consumer problem illustrates the need for <strong>synchronization</strong> in systems where <strong>many processes share a resource</strong>.</p>
+
+<p><a href="http://cs.gmu.edu/cne/modules/ipc/aqua/producer.html">In the problem</a>, two processes share a fixed-size buffer. One process produces information and puts it in the buffer, while the other process consumes information from the buffer. These processes do not take turns accessing the buffer, they both work concurrently.</p>
+
+<h3>Solution</h3>
+
+<p><img class="middle" src="http://okckd.github.io/assets/images/producer-workflow.gif"></p>
+
+<p><img class="middle" src="http://okckd.github.io/assets/images/consumer-workflow.gif"></p>
+
+<p><strong>The code might look like this</strong>:</p>
+
+<pre><code>BufferSize = 3;
+  count = 0;
+
+Producer()
+{
+    int widget;
+    WHILE (true) {                   // loop forever
+      make_new(widget);              // create a new widget to put in the buffer
+      IF(count==BufferSize)
+           Sleep();                  // if the buffer is full, sleep
+      put_item(widget);              // put the item in the buffer
+      count = count + 1;             // increment count of items
+      IF (count==1)
+         Wakeup(Consumer);           // if the buffer was previously empty, wake
+   }                                 //  the consumer
+}
+
+Consumer()
+{
+    int widget;
+    WHILE(true) {                    // loop forever
+      IF(count==0)
+           Sleep();                  // if the buffer is empty, sleep
+      remove_item(widget);           // take an item from the buffer
+      count = count + 1;             // decrement count of items
+      IF(count==N-1)
+            Wakeup(Producer);        // if buffer was previously full, wake
+                                     //  the producer
+      Consume_item(widget);          // consume the item
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Question] Max Sum of Non-Consecutive Elements]]></title>
@@ -940,73 +1108,6 @@ List&lt;String&gt; findPath(List&lt;Step&gt; steps) {
 <p>Then, find the one key on startsToFinishes, that is not a key in finishesToStarts &ndash; this is the city from which the path begins. (O(N))</p>
 
 <p>Then, iteratively, city by city, build the path.</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Overview of Big Data Technology]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/04/Overview-Big-Data-Tech/"/>
-    <updated>2014-08-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/04/Overview-Big-Data-Tech</id>
-    <content type="html"><![CDATA[<p><a href="https://datajobs.com/what-is-hadoop-and-nosql">link</a></p>
-
-<h3>Traditional RDBMS</h3>
-
-<p>Data is organized in a highly-structured manner, following the relational model.</p>
-
-<p>The need for the data to be well-structured actually becomes a substantial burden at extremely large volumes.</p>
-
-<h3>NoSQL</h3>
-
-<p>A completely different framework of databases that allows for high-performance, agile processing of information at massive scale.</p>
-
-<p>NoSQL centers around the concept of distributed databases.</p>
-
-<p>It&rsquo;s horizontally scalable; as data continues to explode, just add more hardware to keep up.</p>
-
-<h3>Hadoop</h3>
-
-<p>Hadoop is not a type of database, but rather a software ecosystem that allows for massively parallel computing.</p>
-
-<p>Hadoop is <a href="http://www.javaworld.com/article/2077907/open-source-tools/mapreduce-programming-with-apache-hadoop.html?page=3">an open source implementation</a> of the MapReduce programming model. Hadoop relies not on Google File System (GFS), but on its own Hadoop Distributed File System (HDFS).</p>
-
-<h3>MapReduce</h3>
-
-<p>An example of the Hadoop ecosystem is MapReduce.</p>
-
-<p>It&rsquo;s a computational model that basically takes intensive data processes and spreads the computation across a potentially endless number of servers.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Model–view–controller]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/04/MVC/"/>
-    <updated>2014-08-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/04/MVC</id>
-    <content type="html"><![CDATA[<h3>Overview</h3>
-
-<p><a href="(http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model–view–controller</a> (MVC) is a software architectural pattern for implementing <strong>user interfaces</strong>.</p>
-
-<h3>Components</h3>
-
-<p>The central component of MVC, <strong>the model</strong>, captures the application&rsquo;s behavior in terms of its problem domain, independent of the user interface. The model directly manages the application&rsquo;s data, logic and rules.</p>
-
-<p><strong>A view</strong> can be any output representation of information, such as a chart or a diagram; multiple views of the same information are possible, such as a bar chart for management and a tabular view for accountants.</p>
-
-<p>The third part, <strong>the controller</strong>, accepts input and converts it to commands for the model or view.</p>
-
-<p>Early web MVC frameworks took a thin client approach that placed almost the entire MVC on server. As client technologies have matured, MVC components can be executed partly on the client(AJAX).</p>
-
-<h3>Other good explanation</h3>
-
-<p>MVC is a <a href="http://geekswithblogs.net/gregorymalcolm/archive/2009/07/14/user-interface-patterns.aspx">user interface design pattern</a>.</p>
-
-<ol>
-<li><p>Controller – Represents interactions, typically with the mouse or keyboard, or in the case of web applications, in the form of HTTP requests.</p></li>
-<li><p>View – Renders the graphical output of the application</p></li>
-<li><p>Model – Everything else. In particular this includes <strong>the data and business logic</strong>.</p></li>
-</ol>
-
 ]]></content>
   </entry>
   
