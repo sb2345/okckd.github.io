@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Overview Amazon Web Services (AWS) is a collection of remote computing services that together make up a cloud computing platform. AWS provides a &hellip;">
+  <meta name="description" content="An Overview MapReduce is a software framework, or a distributed programming model intended for processing massive amounts of data in large clusters. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,197 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/05/MapReduce-Intro/">[Design] MapReduce Intro</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>An Overview</h3>
+
+<p><strong><a href="http://searchcloudcomputing.techtarget.com/definition/MapReduce">MapReduce</a> is a software framework</strong>, or a <strong><a href="http://www.theserverside.com/news/1321219/Why-Should-You-Care-About-MapReduce">distributed programming model</a></strong> intended for processing massive amounts of data in large clusters.</p>
+
+<ol>
+<li><p><strong>Map</strong>, a function that parcels out work to different nodes in the distributed cluster.</p></li>
+<li><p><strong>Reduce</strong>, another function that collates the work and resolves the results into a single value.</p></li>
+</ol>
+
+
+<h3>More Info</h3>
+
+<p><strong>MapReduce isn&rsquo;t intended to replace relational databases</strong>: it&rsquo;s intended to provide a lightweight way of programming things so that they can run fast by running in parallel on a lot of machines. Google uses MapReduce for <strong>indexing every Web page</strong> they crawl.</p>
+
+<p>MapReduce framework is <strong>fault-tolerant</strong> because each node in the cluster is expected to report back periodically with completed work and status updates. If a node remains silent for longer than the expected interval, a master node makes note and re-assigns the work to other nodes.</p>
+
+<p><strong>From a Senior Software Engineer at Google</strong>:</p>
+
+<blockquote><p>The key to how MapReduce works is to take input as, conceptually, a list of records. The records are split among the different computers in the cluster by Map. The result of the Map computation is a list of key/value pairs. Reduce then takes each set of values that has the same key and combines them into a single value. So Map takes a set of data chunks and produces key/value pairs and Reduce merges things, so that instead of a set of key/value pair sets, you get one result. You can&rsquo;t tell whether the job was split into 100 pieces or 2 pieces&hellip;</p></blockquote>
+
+<h3>Why MapReduce</h3>
+
+<p>MapReduce is important because it allows ordinary developers to use MapReduce library routines to create parallel programs without having to worry about programming for intra-cluster communication, task monitoring or failure handling.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/05/MapReduce-Common-Friends/">[Design] MapReduce Common Friends Example</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/a/12375878">link</a></p>
+
+<blockquote><p>Facebook&rsquo;s &ldquo;You and Joe have 230 friends in common&rdquo; feature. Sure you could use a decent caching strategy, but for now, use MapReduce.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>This list doesn&rsquo;t change frequently so it&rsquo;d be wasteful to recalculate it every time. We&rsquo;re going to use mapreduce to calculate everyone&rsquo;s common friends once a day and store those results.</p>
+
+<p>Note that friends are <strong>bi-directional</strong>. If I&rsquo;m your friend, you&rsquo;re mine. (follow-up: how to do it for follower system?)</p>
+
+<h4>Input</h4>
+
+<p>Assume the friends are stored as Person->[List of Friends], our friends list is then:</p>
+
+<pre><code>A -&gt; B C D
+B -&gt; A C D E
+C -&gt; A B D E
+D -&gt; A B C E
+E -&gt; B C D
+</code></pre>
+
+<h4>Map</h4>
+
+<p>The mapper will output a key-value pair. The key will be a friend along with the person. The value will be the list of friends. The key will be sorted so that the friends are in order, causing all pairs of friends to go to the same reducer.</p>
+
+<p>For map(A &ndash;> B C D) :</p>
+
+<pre><code>(A B) -&gt; B C D
+(A C) -&gt; B C D
+(A D) -&gt; B C D
+</code></pre>
+
+<p>For map(B &ndash;> A C D E) : (Note that A comes before B in the key)</p>
+
+<pre><code>(A B) -&gt; A C D E
+(B C) -&gt; A C D E
+(B D) -&gt; A C D E
+(B E) -&gt; A C D E
+</code></pre>
+
+<p>For map(C &ndash;> A B D E) :</p>
+
+<pre><code>(A C) -&gt; A B D E
+(B C) -&gt; A B D E
+(C D) -&gt; A B D E
+(C E) -&gt; A B D E
+</code></pre>
+
+<p>For map(D &ndash;> A B C E) :</p>
+
+<pre><code>(A D) -&gt; A B C E
+(B D) -&gt; A B C E
+(C D) -&gt; A B C E
+(D E) -&gt; A B C E
+</code></pre>
+
+<p>And finally for map(E &ndash;> B C D):</p>
+
+<pre><code>(B E) -&gt; B C D
+(C E) -&gt; B C D
+(D E) -&gt; B C D
+</code></pre>
+
+<p>Before we send these key-value pairs to the reducers, we group them by their keys and get:</p>
+
+<pre><code>(A B) -&gt; (A C D E) (B C D)
+(A C) -&gt; (A B D E) (B C D)
+(A D) -&gt; (A B C E) (B C D)
+(B C) -&gt; (A B D E) (A C D E)
+(B D) -&gt; (A B C E) (A C D E)
+(B E) -&gt; (A C D E) (B C D)
+(C D) -&gt; (A B C E) (A B D E)
+(C E) -&gt; (A B D E) (B C D)
+(D E) -&gt; (A B C E) (B C D)
+</code></pre>
+
+<p>Each line will be passed as an argument to a reducer.</p>
+
+<h4>Reduce</h4>
+
+<p>The reduce function will simply intersect the lists of values and output the same key with the result of the intersection. After reduction:</p>
+
+<pre><code>(A B) -&gt; (C D)
+(A C) -&gt; (B D)
+(A D) -&gt; (B C)
+(B C) -&gt; (A D E)
+(B D) -&gt; (A C E)
+(B E) -&gt; (C D)
+(C D) -&gt; (A B E)
+(C E) -&gt; (B D)
+(D E) -&gt; (B C)
+</code></pre>
+
+<h4>Result</h4>
+
+<p>Now when D visits B&rsquo;s profile, we can quickly look up (B D) and see that they have three friends in common, (A C E).</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -628,197 +819,6 @@ List&lt;String&gt; findPath(List&lt;Step&gt; steps) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/03/Multilayered-architecture/">[Design] Multilayered Architecture</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>First Word</h3>
-
-<p>A <a href="http://en.wikipedia.org/wiki/Multilayered_architecture">multilayered software architecture</a> is a software architecture that uses many layers for allocating the different responsibilities of a software product.</p>
-
-<h3>Layers</h3>
-
-<ol>
-<li><strong>Presentation layer</strong>
-
-<ol type="a">
-<li>UI layer, view layer</li>
-<li>presentation tier in multitier architecture</li>
-</ol>
-</li>
-<li><strong>Application layer</strong>
-
-<ol type="a">
-<li>also called service layer/GRASP Controller Layer</li>
-</ol>
-</li>
-<li><strong>Business layer</strong>
-
-<ol type="a">
-<li>also called business logic layer/domain layer</li>
-</ol>
-</li>
-<li>Infrastructure layer
-
-<ol>
-<li>data access layer/<strong>persistence layer</strong></li>
-<li>logging, networking, and other services which are required to support a particular business layer</li>
-</ol>
-</li>
-</ol>
-
-
-<h3>Conventions</h3>
-
-<p><strong>Application layer</strong> (or service layer) is sometimes considered a sublayer of <strong>business layer</strong>.</p>
-
-<p>If there&rsquo;s no explicit distinction between first 3 tiers, then it&rsquo;s a <strong>traditional client-server(two-tier) model</strong>.</p>
-
-<p>The <strong>application/business layers</strong> can, in fact, be further subdivided to emphasize distinct responsibility (eg. MVC).</p>
-
-<p>Sometimes there&rsquo;s <strong>business infrastructure layer(BI)</strong>, located between the business layer and infrastructure layer.</p>
-
-<p>Infrastructure layer can be partitioned into different levels (high-level or low-level). <strong>Developers focus on only the persistence capabilities</strong>, therefore only talk about persistence layer or data access layer.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/03/Design-Solar-System/">[Google] Design Solar System （`)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=14761735">link</a></p>
-
-<blockquote><p>Design a web application to represent hierarchy of solar system.</p>
-
-<p>Give details of Persistence layer, business layer, presentation layer and Client-server protocol.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>First, OOD part</strong> is very well covered in <a href="http://www.ehow.com/how_5579338_build-own-solar-system-java.html">this site</a>. There&rsquo;re 2 abstract class: <strong>OrbitalSystem</strong>, where &lsquo;Star/Sun&rsquo; is an instance, and <strong>GravityObject</strong>, where &lsquo;Planet/Earch&rsquo; is an instance. Though this does not take satellite into consideration.</p>
-
-<p><strong>Second, the multi-layer structure</strong>. It&rsquo;s cover in another post <strong><a href="/blog/2014/08/03/Multilayered-architecture/">Multilayered architecture</a></strong></p>
-
-<p><strong>Third, the protocol</strong>. We <a href="http://stackoverflow.com/a/4279218">use HTTP protocol</a>, because:</p>
-
-<blockquote><p>HTTP(S) is the best protocol to use. The overhead (i.e. headers) is pretty small, the transfer can be gzipped, the connection can be secured (via SSL). Also, ports 80 (HTTP) and 443 (HTTPS) will be open in 99% of cases. Other ports are not &mdash; for example some carriers block all other ports unless you pay extra.</p></blockquote>
-
-<p>More info on HTTP communication comes later.</p>
-
-<h3>Code</h3>
-
-<p>from <a href="http://www.ehow.com/how_5579338_build-own-solar-system-java.html">here</a></p>
-
-<pre><code>public abstract class GravityObject {
-    double xPosition;
-    double yPosition;
-    double degreeInOrbit;
-    double distanceFromParent;
-
-    GravityObject() {
-    this.distance = 0;
-    }
-
-    GravityObject(double distance) {
-    this.distance = distance;
-    }
-}
-
-import java.util.ArrayList;
-
-public abstract class OrbitalSystem extends GravityObject {
-    private ArrayList children = new ArrayList(); // Objects within the system. They will orbit the parent.
-
-    public void add(GravityObject child) { children.add(child); }
-
-    public void tick() {
-        for (int x = 0; x &lt; children.size(); x++) {
-            GravityObject current = children.get(x);
-            current.degree += 1
-            current.xPosition = this.xPosition + Math.cos(degree/180 * Math.PI)* current.distance;
-            current.yPosition = this.yPosition - Math.sin(degree/180 * Math.PI) * current.distance;
-        }
-    }
-}
-
-public class Star extends OrbitalSystem { 
-
-};
-
-public class Planet extends GravityObject { 
-
-};
-
-public static int main(String[] args) {
-    Star s = new Star(); // Create a new star.
-    s.add(new Planet(20)); // Add a planet to the star's orbital system which orbits at a distance of 20 units.
-    s.add(new Planet(66)); // Add another planet to the star's orbital system which orbits at a distance of 66 units.
-
-    while (true) {
-        s.tick();
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -836,13 +836,13 @@ public static int main(String[] args) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (2)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (25)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (26)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (16)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (68)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (69)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (4)</a></li>
 
   </ul>
@@ -868,7 +868,7 @@ public static int main(String[] args) {
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/07/Million-phone-numbers/">[Google] Million Phone Numbers</a>
+        <a href="/blog/2014/08/08/Composition-over-inheritance/">[Design] Composition Over Inheritance</a>
       </li>
     
   </ul>
