@@ -9,8 +9,8 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link Reverse a linked list from position m to n. Do it in-place and in one-pass. For example:
-Given 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL, m = &hellip;">
+  <meta name="description" content="Question link Given a binary tree, return the inorder traversal of its nodes&#8217; values. For example:
+Given binary tree {1,#,2,3}, 1 \ 2 / 3 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,422 @@ Given 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL, m = &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/24/Binary-Tree-Inorder-Traversal/">[LeetCode 94] Binary Tree Inorder Traversal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-inorder-traversal/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a binary tree, return the <i>inorder</i> traversal of its nodes&#8217; values.</p>
+
+<p>
+For example:<br>
+Given binary tree <code>{1,#,2,3}</code>,<br>
+</p><pre>   1
+    \
+     2
+    /
+   3
+</pre>
+<p></p>
+<p>
+return <code>[1,3,2]</code>.
+</p>
+
+<p><b>Note:</b> Recursive solution is trivial, could you do it iteratively?</p>
+
+<p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a classic AND EXTREMELY IMPORTANT question</strong>. I solved it at first attempt, but forget about it and couldn&rsquo;t solve on 2nd time.</p>
+
+<p>About DFS, it is always implemented with a stack, no matter recursion is used or not. See <a href="http://leetcode.com/2010/09/printing-binary-tree-in-level-order.html">here</a></p>
+
+<blockquote><p>DFS uses a data structure called Stack and is commonly implemented using recursion (since function calls are pushed and popped off the memory stack). If recursion is not allowed, we can simulate the recursion by using iterative method with the help of stack.</p></blockquote>
+
+<p><strong>A not-very-intuitive solution is Morris Traversal</strong>. The idea behind this is <a href="http://en.wikipedia.org/wiki/Threaded_binary_tree">Threaded binary tree</a>. I don&rsquo;t like this method, so I will skip.</p>
+
+<p>The idea written below (2nd code) is very interesting, and was never seen before. Should keep it in mind.</p>
+
+<h3>Solution</h3>
+
+<p><strong>The most classic and standard solution for this question</strong> is explained well in <a href="http://leetcode.com/2010/04/binary-search-tree-in-order-traversal.html">this blog</a>.</p>
+
+<blockquote><p>First, the current pointer is initialized to the root. Keep traversing to its left child while pushing visited nodes onto the stack. When you reach a NULL node (ie, you&rsquo;ve reached a leaf node), you would pop off an element from the stack and set it to current. Now is the time to print current&rsquo;s value. Then, current is set to its right child and repeat the process again. When the stack is empty, this means you&rsquo;re done printing.</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>First, my previous code, very good solution</strong>.</p>
+
+<pre><code>public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) {
+    Stack&lt;TreeNode&gt; stk = new Stack&lt;TreeNode&gt;();
+    stk.push(root);
+    ArrayList&lt;Integer&gt; ls = new ArrayList&lt;Integer&gt;();
+
+    if(root == null)
+        return ls;
+    while(stk.size() &gt; 0){
+        TreeNode cur = stk.peek();
+        if (cur == null){
+            stk.pop();
+            if (stk.size() == 0) return ls;
+            TreeNode temp = stk.pop(); 
+            ls.add(temp.val);
+            stk.push(temp.right);
+            // why do I need a temp variable at this step?
+            // this isn't good enough, change it in the future
+        } else if (cur.left != null){
+            stk.push(cur.left);
+        } else {
+            ls.add(cur.val);
+            stk.pop();
+            stk.push(cur.right);
+        }
+    }
+    return ls;
+}
+// Program Logic:
+// If cur is null
+//    Remove cur
+//    Print next stack node
+//    Push next stack node's right
+// Else if cur got left
+//    Push cur.left
+// Else if cur not got left
+//    Print cur
+//    Remove cur
+//    Push cur.right
+// End if
+</code></pre>
+
+<p><strong>Second, standard solution, which is a simplified version of above code</strong></p>
+
+<pre><code>public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) {
+    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    TreeNode p = root;
+    while (p != null || ! stack.isEmpty()) {
+        if (p != null) {
+            stack.push(p);
+            p = p.left;
+        }
+        else if (! stack.isEmpty()) {
+            TreeNode temp = stack.pop();
+            ans.add(temp.val);
+            p = temp.right;
+        }
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/23/Scramble-String/">[LeetCode 87] Scramble String</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/scramble-string/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a string <i>s1</i>, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively.
+</p>
+<p>
+Below is one possible representation of <i>s1</i> = <code>"great"</code>:
+</p>
+<pre>    great
+   /    \
+  gr    eat
+ / \    /  \
+g   r  e   at
+           / \
+          a   t
+</pre>
+<p>
+To scramble the string, we may choose any non-leaf node and swap its two children.
+</p>
+<p>
+For example, if we choose the node <code>"gr"</code> and swap its two children, it produces a scrambled string <code>"rgeat"</code>.
+</p>
+<pre>    rgeat
+   /    \
+  rg    eat
+ / \    /  \
+r   g  e   at
+           / \
+          a   t
+</pre>
+<p>
+We say that <code>"rgeat"</code> is a scrambled string of <code>"great"</code>.
+</p>
+<p>
+Similarly, if we continue to swap the children of nodes <code>"eat"</code> and <code>"at"</code>, it produces a scrambled string <code>"rgtae"</code>.
+</p>
+<pre>    rgtae
+   /    \
+  rg    tae
+ / \    /  \
+r   g  ta  e
+       / \
+      t   a
+</pre>
+<p>
+We say that <code>"rgtae"</code> is a scrambled string of <code>"great"</code>.
+</p>
+<p>
+Given two strings <i>s1</i> and <i>s2</i> of the same length, determine if <i>s2</i> is a scrambled string of <i>s1</i>.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This is problem can be solved by <strong>either DFS or DP.</strong></p>
+
+<p><strong><a href="http://zhaohongze.com/wordpress/2013/12/12/leetcode-scramble-string/">This blog</a> have a very good analysis of the DFS approach</strong>.</p>
+
+<blockquote>
+<p>Note that the binary tree can be constructed arbitrarily. So the general idea to tackle this problem is to enumerate every possible binary trees using DFS to see if two strings are scrambled strings. We can accelerate this process by adding a very efficient pruning.<br>
+Given two strings, s1, s2. First check if they have same letters and same length, denote as len.<br>
+For any l (1 &lt;= l &lt;= len): partition s1 into s11 = s1[0 : l), s12 = s1[l : len). We have two ways to partition s1:</p>
+<ol>
+<li>s21 = s2[0 : 1), s22 = s2[l : len). In this case, check s11 and s21 have same letters and are scrambled strings. And check s12 and s22 have same letters and are scrambled strings</li>
+<li>s21 = s2[0 : len – l), s22 = s2[len – l : len). In this case, check s11 and s22 have same letters and are scrambled strings. Then check s12 and s21 have same letters and are scrambled strings </li>
+</ol>
+</blockquote>
+
+
+<p><strong><a href="http://blog.sina.com.cn/s/blog_b9285de20101gy6n.html">This blog</a> have a very good DP analysis</strong>.</p>
+
+<blockquote>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+dp[i][j][k] 代表了s1从i开始，s2从j开始，长度为k的两个substring是否为scramble
+string。</span><br>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+有三种情况需要考虑：</span><br>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+1. 如果两个substring相等的话，则为true</span><br>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+2. 如果两个substring中间某一个点，左边的substrings为scramble string，
+同时右边的substrings也为scramble string，则为true</span><br>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+3. 如果两个substring中间某一个点，s1左边的substring和s2右边的substring为scramble
+string, 同时s1右边substring和s2左边的substring也为scramble
+string，则为true</span><br>
+</blockquote>
+
+
+<p>For more explanation, <a href="http://yihuad.blogspot.sg/2013/10/scramble-string-leetcode.html">this blog</a> and <a href="http://www.blogjava.net/sandy/archive/2013/05/22/399605.html">this blog</a> and <a href="http://blog.csdn.net/linhuanmars/article/details/24506703">this blog</a> have discussed about it.</p>
+
+<h3>Code</h3>
+
+<p><strong>my code</strong></p>
+
+<pre><code>public boolean isScramble(String s1, String s2) {
+    if (! sameLetters(s1, s2)) return false;
+    if (s1.equals(s2)) return true;
+    for (int i = 1; i &lt; s1.length(); i ++) {
+        String left1 = s1.substring(0,  i);
+        String right1 = s1.substring(i, s1.length());
+        String left2 = s2.substring(0,  i);
+        String right2 = s2.substring(i, s2.length());
+        if (isScramble(left1, left2) &amp;&amp; isScramble(right1, right2))
+            return true;
+        left2 = s2.substring(0, s2.length() - i);
+        right2 = s2.substring(s2.length() - i, s2.length());
+        if (isScramble(left1, right2) &amp;&amp; isScramble(right1, left2))
+            return true;
+    }
+    return false;
+}
+
+private boolean sameLetters(String a, String b) {
+    if (a.length() != b.length()) return false;
+    int[] count = new int[26];
+    for (Character aa: a.toCharArray()) 
+        count[aa - 'a'] ++;
+    for (Character bb: b.toCharArray()) 
+        if (count[bb - 'a'] -- &lt;= 0) 
+            return false;
+    return true;
+}
+</code></pre>
+
+<p><strong>Updated on July 5th, 2014</strong>: written again with less substring operations and more variables inside the method:</p>
+
+<pre><code>public boolean isScramble(String s1, String s2) {
+    if (s1 == null || s2 == null || s1.length() != s2.length()) {
+        return false;
+    }
+    int len = s1.length();
+    return helper(s1, 0, len - 1, s2, 0, len - 1);
+}
+
+private boolean helper(String s1, int a1, int b1, String s2, int a2, int b2) {
+    if (a1 - b1 != a2 - b2) 
+        return false;
+    // check s1[a1, b1] and s2[a2, b2] have same set of letters
+    int[] count = new int[26];
+    for (int i = a1; i &lt;= b1; i++) 
+        count[s1.charAt(i) - 'a'] ++;
+    for (int i = a2; i &lt;= b2; i++) 
+        if (count[s2.charAt(i) - 'a'] -- &lt;= 0) 
+            return false;
+    // check s1[a1, b1] and s2[a2, b2] is scramble or not
+    if (a1 == b1) {
+        return (s1.charAt(a1) == s2.charAt(a2));
+    }
+    for (int i = 0; i &lt; b1 - a1; i++) {
+        boolean check = helper(s1, a1, a1 + i, s2, a2, a2 + i) 
+                    &amp;&amp; helper(s1, a1 + i + 1, b1, s2, a2 + i + 1, b2);
+        if (check) return true;
+        check = helper(s1, a1, a1 + i, s2, b2 - i, b2) 
+                    &amp;&amp; helper(s1, a1 + i + 1, b1, s2, a2, b2 - i - 1);
+        if (check) return true;
+    }
+    return false;
+}
+</code></pre>
+
+<p><strong>DP code</strong>, not written by me</p>
+
+<pre><code>public boolean isScramble(String s1, String s2) {
+    int n = s1.length();
+    boolean[][][] dp = new boolean[n][n][n + 1];
+    for (int i = n - 1; i &gt;= 0; i--)
+        for (int j = n - 1; j &gt;= 0; j--)
+            for (int k = 1; k &lt;= n - Math.max(i, j); k++) {
+                if (s1.substring(i, i + k).equals(s2.substring(j, j + k)))
+                    dp[i][j][k] = true;
+                else {
+                    for (int l = 1; l &lt; k; l++) {
+                        if (dp[i][j][l] &amp;&amp; dp[i + l][j + l][k - l] 
+                            || dp[i][j + k - l][l] &amp;&amp; dp[i + l][j][k - l]) {
+                            dp[i][j][k] = true;
+                            break;
+                        }
+                    }
+                }
+            }
+    return dp[0][0][n];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1242,287 +1658,6 @@ private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; pat
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/22/Search-in-Rotated-Sorted-Array-II/">[LeetCode 81] Search in Rotated Sorted Array II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/search-in-rotated-sorted-array-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Follow up for &#8220;Search in Rotated Sorted Array&#8221;:<br>
-What if <i>duplicates</i> are allowed?</p>
-
-<p>Would this affect the run-time complexity? How and why?</p>
-
-<p>Write a function to determine if a given target is in the array.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This one is based on the solution of previous question</strong>.</p>
-
-<p>The previous question is already very difficult, both the logic and coding part. However, if you solve previous question by yourself, you will do this one easily.</p>
-
-<p>I will pick the 2nd piece of code in previous question, and modify it to solve this problem.</p>
-
-<blockquote><p>Solution for previous question:</p></blockquote>
-
-<pre><code>public int search(int[] A, int target) {
-    int left = 0;
-    int right = A.length - 1;
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (target == A[mid]) return mid;
-        if (A[left] &lt;= A[mid]) {
-            if (A[left] &lt;= target &amp;&amp; target &lt;= A[mid]) right = mid;
-            else left = mid + 1;
-        } else {
-            if (A[mid] &lt;= target &amp;&amp; target &lt;= A[right]) left = mid;
-            else right = mid - 1;
-        }
-    }
-    return -1;
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p><strong>My solution is to skip all duplicated numbers</strong> before the while-loop.</p>
-
-<p><strong>The most standard solution is left-pointer incremental</strong>. A good code is written from <a href="http://www.cnblogs.com/feiling/p/3231196.html">this blog</a>.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my solution</strong></p>
-
-<pre><code>public boolean search(int[] A, int target) {
-    int len = A.length, L = 0, R = len - 1;
-    if (A[L] == A[R]) {
-        int duplicate = A[R];
-        if (duplicate == target) return true;
-        while (L &lt; len &amp;&amp; A[L] == duplicate) L ++;
-        while (R &gt;= 0 &amp;&amp; A[R] == duplicate) R --;
-    }
-    while (L &lt;= R) {
-        // Avoid overflow, same as M=(L+R)/2
-        int M = L + ((R - L) / 2);
-        if (A[M] == target) return true;
-        // the bottom half is sorted
-        if (A[L] &lt;= A[M])
-            if (A[L] &lt;= target &amp;&amp; target &lt; A[M]) R = M - 1;
-            else L = M + 1;
-        // the upper half is sorted
-        else 
-            if (A[M] &lt; target &amp;&amp; target &lt;= A[R]) L = M + 1;
-            else R = M - 1;
-    }
-    return false;
-}
-</code></pre>
-
-<p><strong>Second, standard solution</strong></p>
-
-<pre><code>public boolean search(int[] A, int target) {
-    int len = A.length, L = 0, R = len - 1;
-    while (L &lt;= R) {
-        int M = L + ((R - L) / 2);
-        if (A[M] == target) return true;
-        if (A[L] &lt; A[M])
-            if (A[L] &lt;= target &amp;&amp; target &lt; A[M]) R = M - 1;
-            else L = M + 1;
-        else if (A[L] &gt; A[M])
-            if (A[M] &lt; target &amp;&amp; target &lt;= A[R]) L = M + 1;
-            else R = M - 1;
-        else L ++;
-    }
-    return false;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/22/Remove-Duplicates-from-Sorted-List-II/">[LeetCode 82] Remove Duplicates From Sorted List II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/remove-duplicates-from-sorted-list-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a sorted linked list, delete all nodes that have duplicate numbers, leaving only <i>distinct</i> numbers from the original list.
-</p>
-<p>
-For example,<br>
-Given <code>1-&gt;2-&gt;3-&gt;3-&gt;4-&gt;4-&gt;5</code>, return <code>1-&gt;2-&gt;5</code>.<br>
-Given <code>1-&gt;1-&gt;1-&gt;2-&gt;3</code>, return <code>2-&gt;3</code>.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">15 minutes</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a very important question</strong>. Solution is a little tricky with boundary cases that need consider.</p>
-
-<p>My code works, but there is an <strong>extremely good solution</strong> posted below.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my code</strong></p>
-
-<pre><code>public ListNode deleteDuplicates(ListNode head) {
-    ListNode preHead = new ListNode(0);
-    preHead.next = head;
-    ListNode left = preHead, right = head;
-    while (right != null) {
-        if (right.next == null || right.val != right.next.val) {
-            // next is differnet from previous
-            left = right;
-            right = right.next;
-        }
-        else {
-            // next is same as previous
-            while (right.next != null &amp;&amp; right.val == right.next.val) 
-                right = right.next;
-            left.next = right.next;
-            right = right.next;
-        }
-    }
-    return preHead.next;
-}
-</code></pre>
-
-<p><strong>Second, a great solution from <a href="http://codeganker.blogspot.sg/2014/04/remove-duplicates-from-sorted-list-ii.html">this blog</a>.</strong></p>
-
-<pre><code>public ListNode deleteDuplicates(ListNode head) {
-    if(head == null) return head;
-    ListNode helper = new ListNode(0);
-    helper.next = head;
-    ListNode pre = helper, cur = head;
-    while(cur!=null)
-    {
-        while(cur.next!=null &amp;&amp; pre.next.val==cur.next.val)
-            cur = cur.next;
-        if (pre.next == cur) 
-            pre = pre.next;
-        else 
-            pre.next = cur.next;
-        cur = cur.next;
-    }
-    return helper.next;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/24">&larr; Older</a>
@@ -1540,7 +1675,7 @@ Given <code>1-&gt;1-&gt;1-&gt;2-&gt;3</code>, return <code>2-&gt;3</code>.
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (2)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (27)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (29)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (16)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1560,19 +1695,19 @@ Given <code>1-&gt;1-&gt;1-&gt;2-&gt;3</code>, return <code>2-&gt;3</code>.
       </li>
     
       <li class="post">
+        <a href="/blog/2014/08/09/Process-and-thread/">[Design] Process vs. Thread</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/09/Median-in-distributed-computers/">[Design] Median of Array in Distributed Computers</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/09/Functional-programming/">[Design] Functional Programming</a>
       </li>
     
       <li class="post">
         <a href="/blog/2014/08/08/Thread-pool-pattern/">[Design] Thread Pool Pattern</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/08/Producer-consumer-problem/">[Design] Producer Consumer Problem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/08/Max-sum-non-consecutive/">[Question] Max Sum of Non-Consecutive Elements</a>
       </li>
     
   </ul>
