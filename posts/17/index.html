@@ -9,7 +9,8 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link Given a string s and a dictionary of words dict, add spaces in s to construct a sentence where each word is a valid dictionary word. &hellip;">
+  <meta name="description" content="Question link Given a binary tree, return the postorder traversal of its nodes&#8217; values. For example:
+Given binary tree {1,#,2,3}, 1 \ 2 / 3 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +66,268 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">[LeetCode 145] Binary Tree Postorder Traversal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-postorder-traversal/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">Given a binary tree, return the <i>postorder</i> traversal of its nodes&#8217; values.</p>
+
+<p class="font-color">
+For example:<br>
+Given binary tree <code>{1,#,2,3}</code>,<br>
+</p><pre>   1
+    \
+     2
+    /
+   3
+</pre>
+<p class="font-color"></p>
+<p class="font-color">
+return <code>[3,2,1]</code>.
+</p>
+
+<p class="font-color"><b>Note:</b> Recursive solution is trivial, could you do it iteratively?</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>Unlike pre-order traversal, <strong>this is a very difficult question</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>First, I wrote the solution using a HashSet, and it works</strong>. However, this solution is not good because it uses some space.</p>
+
+<p>For more generalized way to write DFS code, read <a href="/blog/2014/06/03/Study-implement-DFS/">Implement DFS using a Stack</a></p>
+
+<p><strong>The best and most popular solution is proposed by <a href="http://leetcode.com/2010/10/binary-tree-post-order-traversal.html">1337c0d3r</a></strong>. It basically uses 1 more pointer to track the current status (whether I&rsquo;m traversing down, or up, and in which direction etc.). The extra pointer is called &lsquo;prev&rsquo;.</p>
+
+<blockquote><p>We use a prev variable to keep track of the previously-traversed node. Let’s assume curr is the current node that’s on top of the stack. When prev is curr‘s parent, we are traversing down the tree. In this case, we try to traverse to curr‘s left child if available (ie, push left child to the stack). If it is not available, we look at curr‘s right child. If both left and right child do not exist (ie, curr is a leaf node), we print curr‘s value and pop it off the stack.</p>
+
+<p>If prev is curr‘s left child, we are traversing up the tree from the left. We look at curr‘s right child. If it is available, then traverse down the right child (ie, push right child to the stack), otherwise print curr‘s value and pop it off the stack.</p>
+
+<p>If prev is curr‘s right child, we are traversing up the tree from the right. In this case, we print curr‘s value and pop it off the stack.</p></blockquote>
+
+<p>Referring to his code, I wrote the 2nd piece of code below and it works.</p>
+
+<p><strong>Amazingly, that code can be simplified, which becomes the 3rd code</strong> (I thought it won&rsquo;t pass at first). The way that code got simplified is by keeping current pointer steady, so that the 2 pointers can meet. Altough program logic is exactly same, this interesting code is worth reading.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, my solution using HashSet</strong></p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    if (root != null) stack.push(root);
+    HashSet&lt;TreeNode&gt; visited = new HashSet&lt;TreeNode&gt;();
+    while (!stack.isEmpty()) {
+        TreeNode cur = stack.pop();
+        if (visited.contains(cur))
+            ans.add(cur.val);
+        else {
+            stack.push(cur);
+            visited.add(cur);
+            if (cur.right != null) stack.push(cur.right);
+            if (cur.left != null) stack.push(cur.left);
+        }
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Second, using 2 pointers</strong></p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
+    if (root == null) {
+        return ans;
+    }
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    stack.push(root);
+    TreeNode pre = null, cur = null;
+    while (!stack.isEmpty()) {
+        cur = stack.peek();
+        if (pre == null || pre.left == cur || pre.right == cur) {
+            if (cur.left == null &amp;&amp; cur.right == null) {
+                ans.add(stack.pop().val);
+            }
+            else if (cur.left != null) {
+                stack.push(cur.left);
+            }
+            else if (cur.right != null) {
+                stack.push(cur.right);
+            }
+        }
+        else if (cur.left == pre) {
+            if (cur.right != null) {
+                stack.push(cur.right);
+            }
+            else {
+                ans.add(stack.pop().val);
+            }
+        }
+        else if (cur.right == pre) {
+            ans.add(stack.pop().val);
+        }
+        pre = cur;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Third, simplified version of 2nd code</strong></p>
+
+<p><strong>Commented on June 10th</strong>: Note that &lsquo;pre&rsquo; and &lsquo;cur&rsquo; are never going to be apart for more then 1 edge (they can overlap)</p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    TreeNode prev = null; // previously traversed node
+    TreeNode curr = root;
+    if (root == null) {
+        return result;
+    }
+    stack.push(root);
+    while (!stack.empty()) {
+        curr = stack.peek();
+        if (prev == null || prev.left == curr || prev.right == curr) {
+        // traverse down the tree
+            if (curr.left != null) {
+                stack.push(curr.left);
+            } else if (curr.right != null) {
+                stack.push(curr.right);
+            }
+        } else if (curr.left == prev) {
+        // traverse up the tree from the left
+            if (curr.right != null) {
+                stack.push(curr.right);
+            }
+        } else if (curr.right == prev || curr == prev){
+        // traverse up the tree from the right
+        // or at a leaf point
+            result.add(curr.val);
+            stack.pop();
+        }
+        prev = curr;
+    }
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Big-endian-little-endian/">[Design] Big Endian and Little Endian</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Difference</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Endianness">Big-endian</a> systems store the most significant byte of a word in the smallest address</strong> and the least significant byte is stored in the largest address.</p>
+
+<p><strong>Little-endian systems, in contrast, store the least significant byte in the smallest address</strong>.</p>
+
+<p>Both forms of endianness are in widespread use in computing and networking.</p>
+
+<h3>Example</h3>
+
+<p><img class="middle" src="/assets/images/big-endian.png"></p>
+
+<p>The data word &ldquo;0A 0B 0C 0D&rdquo; (a set of 4 bytes written out using left-to-right positional, hexadecimal notation) and the four memory locations with addresses a, a+1, a+2 and a+3.</p>
+
+<p>In Big-endian systems, byte 0A is stored in a, 0B in a+1, 0C in a+2 and 0D in a+3. In Little-endian systems, the order is reversed with 0D stored in memory address a, 0C in a+1, 0B in a+2, and 0A in a+3.</p>
+
+<h3>Why ?</h3>
+
+<p>IBMs and Intel x86 are little endian, while Motorolas and Sun are big endian.</p>
+
+<p><strong>Big-endian</strong> is the most common convention in data <strong>networking (including IPv6)</strong>, and <strong>little-endian</strong> is popular among <strong>microprocessors</strong> in part due to Intel.</p>
+
+<p>Why is endianness so important? Suppose you are storing int values to a file, then you send the file to a machine which uses the opposite endianness and read in the value. You&rsquo;ll run into problems because of endianness. You&rsquo;ll read in reversed values that won&rsquo;t make sense.</p>
+
+<p>Endianness is also a big issue when sending numbers over the network. Again, if you send a value from a machine of one endianness to a machine of the opposite endianness, you&rsquo;ll have problems. This is even worse over the network, because you might not be able to determine the endianness of the machine that sent you the data.</p>
+
+<p>The solution is to send 4 byte quantities using <a href="http://www.tutorialspoint.com/unix_sockets/network_byte_orders.htm">network byte order</a> which is arbitrarily picked to be one of the endianness (not sure if it&rsquo;s big or little, but it&rsquo;s one of them). If your machine has the same endianness as network byte order, then great, no change is needed. If not, then you must reverse the bytes.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -974,277 +1237,6 @@ return <code>[1,2,3]</code>.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/01/Single-Number-II/">[LeetCode 137] Single Number II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/single-number-ii/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-Given an array of integers, every element appears <i>three</i> times except for one. Find that single one.
-</p>
-
-<p class="font-color">
-<b>Note:</b><br>
-Your algorithm should have a linear runtime complexity. Could you implement it without using extra memory?
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>$
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an extremely difficult question</strong>. There are 2 solutions (both are bit manipulation).</p>
-
-<h3>Solution</h3>
-
-<p><strong>First solution comes from <a href="https://oj.leetcode.com/discuss/857/constant-space-solution">this forum</a></strong>.</p>
-
-<blockquote><p>A straightforward implementation is to use an array of size 32 to keep track of the total count of ith bit.</p></blockquote>
-
-<p>A more detailed <a href="http://leetcodesolutions.blogspot.sg/2013/10/single-number-ii.html">explanation</a>:</p>
-
-<blockquote cite="http://leetcodesolutions.blogspot.sg/2013/10/single-number-ii.html">
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">For eg : A = [ 2, 3, 3, 3]</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">We count the number of 1s for each bit position. Then find <i>mod 3 </i>of each of them. The bit positions having <i>mod 3 </i>&nbsp;equal to one are the bits that are set due to the number occurring once.</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">Writing the Binary Representation of the numbers.</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 0 0 1 0</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 0 0 1 1</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 0 0 1 1</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 0 0 1 1</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &#8212;&#8212;&#8212;&#8212;&#8212;-</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">We count the number of 1s for each bit -&gt; &nbsp;0 0 4 3</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">Taking modulo 3 we get &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 0 0 1 0</span>
-    </div>
-    <div >
-        <span style="font-family: Times, Times New Roman, serif;" class="font-color">and that&#8217;s our answer. -&gt; 2</span>
-    </div>
-
-</blockquote>
-
-
-<p><strong>Second solution is different, and very hard to read/write</strong>. I will not cover this solution. An analysis is found <a href="http://zhaohongze.com/wordpress/2013/12/04/leetcode-single-number-ii/">here</a>:</p>
-
-<blockquote><p>The basic idea is use two integer, <strong>ones and twos</strong>. <strong>Ones</strong> is used to record the bits only exist once in current iterated number. <strong>Twos</strong> is used to record the bits only exist twice in all number. If a bit exists up to three times, we should clear it in both ones and twos.</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>my code</strong></p>
-
-<pre><code>public int singleNumber(int[] A) {
-    int result = 0;
-    for (int i = 0; i &lt; 32; i++) {
-        int count = 0;
-        for (Integer in: A) {
-            count += (in &amp; (1 &lt;&lt; i)) == 0 ? 0 : 1;
-        }
-        if (count % 3 != 0) {
-            result = result | (1 &lt;&lt; i);
-        }
-    }
-    return result;
-}
-</code></pre>
-
-<p><strong>a different solution</strong></p>
-
-<pre><code>public int singleNumber(int[] A) {
-    int ones = 0, twos = 0;
-    for (int i = 0; i &lt; A.length; i++) {
-        twos = twos | (ones &amp; A[i]);
-        ones = ones ^ A[i];
-
-        int common_mask = ~(ones &amp; twos);
-        ones &amp;= common_mask;
-        twos &amp;= common_mask;
-    }
-    return ones;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/01/Single-Number/">[LeetCode 136] Single Number</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/single-number/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">Given an array of integers, every element appears <i>twice</i> except for one. Find that single one.</p>
-
-<p class="font-color">
-<b>Note:</b><br>
-Your algorithm should have a linear runtime complexity. Could you implement it without using extra memory?
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>First solutions is bit manipulation</strong>.</p>
-
-<blockquote><p>If two numbers are the same, then XOR result is 0.</p></blockquote>
-
-<p>And for negative integers:</p>
-
-<blockquote><p>A negative number is a <a href="http://en.wikipedia.org/wiki/Bit_field">bit field</a> just like a positive number. XOR doesn&rsquo;t care</p></blockquote>
-
-<p>Follow-up question, what if the input is not an array in interger, but a bunch of Strings? <a href="http://stackoverflow.com/a/35271">This guy</a> have the answer.</p>
-
-<blockquote><p>There are ways of XORing strings by XORing the individual chars &ndash; you would just have to have a temporary variable as large as the largest string.</p>
-
-<p>What wouldn&rsquo;t work is trying to XOR a linked list or some other complicated data structure.</p></blockquote>
-
-<p>Which is to say, a string is just like an array of chars (integers). For every char (integer), just apply the same method and we shall have the answer.</p>
-
-<p><strong>Second solution is HashSet</strong>, but must use more space. Code is posted below as well.</p>
-
-<p>Someone also sort then find, but this takes more time.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, XOR solution</strong></p>
-
-<pre><code>public int singleNumber(int[] A) {
-    int num = A[0];
-    for (int i = 1; i &lt; A.length; i ++)
-        num = num ^ A[i];
-    return num;
-}
-</code></pre>
-
-<p><strong>Second, HashSet solution</strong></p>
-
-<p>The last line &ldquo;return -1&rdquo; is only for compiling purposes, and will not be executed.</p>
-
-<pre><code>public int singleNumber(int[] A) {
-    HashSet&lt;Integer&gt; set = new HashSet&lt;Integer&gt;();
-    for (int i = 0; i &lt; A.length; i ++) {
-        if (set.contains(A[i]))
-            set.remove(A[i]);
-        else
-            set.add(A[i]);
-    }
-    for (Integer a: set)
-        return a;
-    return -1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/18">&larr; Older</a>
@@ -1262,13 +1254,13 @@ Your algorithm should have a linear runtime complexity. Could you implement it w
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (2)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (26)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (27)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (16)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (69)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (70)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (4)</a></li>
 
   </ul>
@@ -1276,6 +1268,14 @@ Your algorithm should have a linear runtime complexity. Could you implement it w
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/08/09/Test-command-line-copy/">[Question] Test Command Line Copy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/09/Functional-programming/">[Design] Functional Programming</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/08/08/Thread-pool-pattern/">[Design] Thread Pool Pattern</a>
@@ -1287,14 +1287,6 @@ Your algorithm should have a linear runtime complexity. Could you implement it w
     
       <li class="post">
         <a href="/blog/2014/08/08/Max-sum-non-consecutive/">[Question] Max Sum of Non-Consecutive Elements</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/08/Decimal-to-Hex/">[Question] Decimal to Hexadecimal</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/08/Composition-over-inheritance/">[Design] Composition Over Inheritance</a>
       </li>
     
   </ul>
