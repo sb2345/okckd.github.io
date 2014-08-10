@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-10T13:33:04+08:00</updated>
+  <updated>2014-08-10T20:37:56+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,214 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Top K Questions (Summarize)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://dongxicheng.org/big-data/select-ten-from-billions/">link</a></p>
+
+<blockquote><p>在海量数据中找出出现频率最高的前K个数，或者从海量数据中找出最大的前K个数，这类问题通常称为“top K”问题，</p>
+
+<ol>
+<li>top K value</li>
+<li>top K frequency</li>
+</ol>
+</blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>Standard solution</strong> is 【分治+trie树/hash+小顶堆】, which I covered in another post <a href="http://okckd.github.io/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>. Briefly it is 3 steps:</p>
+
+<ol>
+<li>先将数据集按照hash方法分解成多个小数据集，</li>
+<li>使用trie树或者hash统计每个小数据集中的query词频，</li>
+<li>用小顶堆求出每个数据集中出频率最高的前K个数</li>
+</ol>
+
+
+<p>But, there&rsquo;re other senarios where different solutions may apply. Consider:</p>
+
+<ol>
+<li><p>Single core vs. multiple core</p></li>
+<li><p>Single PC vs. multiple PC</p></li>
+<li><p>Large RAM vs. limited RAM</p></li>
+<li><p>Distributed system</p></li>
+</ol>
+
+
+<h3>1. 单机+单核+足够大内存</h3>
+
+<p>设每个查询词平均占8Byte，则10亿个查询词所需的内存大约是10<sup>9</sup>*8=8G内存。如果你有这么大的内存，直接在内存中对查询词进行排序，顺序遍历找出10个出现频率最大的10个即可。这种方法简单快速，更加实用。当然，也可以先用HashMap求出每个词出现的频率，然后求出出现频率最大的10个词。</p>
+
+<h3>2. 单机+单核+受限内存</h3>
+
+<p>这种情况下，需要将原数据文件切割成一个一个小文件，如，采用hash(x)%M，将原文件中的数据切割成M小文件，如果小文件仍大于内存大小，继续采用hash的方法对数据文件进行切割，直到每个小文件小于内存大小，这样，每个文件可放到内存中处理。采用3.1节的方法依次处理每个小文件。</p>
+
+<h3>3. 单机+多核+足够大内存</h3>
+
+<p>这时可以直接在内存中实用hash方法将数据划分成n个partition，每个partition交给一个线程处理，线程的处理逻辑是同[1]节类似，最后一个线程将结果归并。</p>
+
+<p>该方法存在一个瓶颈会明显影响效率，即数据倾斜，每个线程的处理速度可能不同，快的线程需要等待慢的线程，最终的处理速度取决于慢的线程。解决方法是，<strong>将数据划分成 (c x n)个partition（c>1），每个线程处理完当前partition后主动取下一个partition继续处理</strong>，直到所有数据处理完毕，最后由一个线程进行归并。</p>
+
+<h3>4. 多机+受限内存</h3>
+
+<p>这种情况下，为了合理利用多台机器的资源，可将数据分发到多台机器上，每台机器采用[3]节中的策略解决本地的数据。可采用<strong>hash + socket</strong>方法进行数据分发。</p>
+
+<h3>5. Distributed</h3>
+
+<p>Top k问题很适合采用<strong>MapReduce框架</strong>解决，用户只需编写一个map函数和两个reduce 函数，然后提交到Hadoop（采用mapchain和reducechain）上即可解决该问题。</p>
+
+<p>A map function. 对于map函数，采用hash算法，将hash值相同的数据交给同一个reduce task.</p>
+
+<p>2 reduce functions. 对于<strong>第一个reduce函数</strong>，采用HashMap统计出每个词出现的频率，对于<strong>第二个reduce函数</strong>，统计所有reduce task输出数据中的top k即可。</p>
+
+<h3>6. Other</h3>
+
+<p>公司一般不会自己写个程序进行计算，而是提交到自己核心的数据处理平台上计算，该平台的计算效率可能不如直接写程序高，但它具有<strong>良好的扩展性和容错性</strong>，而这才是企业最看重的。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Top K Frequency 2]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+
+<blockquote><p>一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>The basic solution for &lsquo;Top K&rsquo; questions</strong> is 【分治+trie树/hash+小顶堆】.</p>
+
+<p>In the previous post <a href="http://okckd.github.io/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>, we used HashMap for calculating query frequency. Now we <strong>use Trie to do it</strong>.</p>
+
+<blockquote><p>这题是考虑时间效率。用trie树统计每个词出现的次数，时间复杂度是O(n x le)（le表示单词的平准长度）。然后是找出出现最频繁的前10个词，可以用堆来实现，前面的题中已经讲到了，时间复杂度是O(n x lg10)。所以总的时间复杂度，是O(n x le)与O(n x lg10)中较大的哪一个。</p></blockquote>
+
+<h4>How to use Trie to calculate word frequency?</h4>
+
+<p>在Trie的node节点中<a href="http://blog.csdn.net/ohmygirl/article/details/7953814">添加count域后</a>，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Fuzzy Search Url]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+
+<blockquote><p>给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？</p></blockquote>
+
+<h3>Bloom Filter</h3>
+
+<p>自从Burton Bloom在70年代提出<a href="http://blog.csdn.net/v_july_v/article/details/6685894">Bloom Filter</a>之后，Bloom Filter就被广泛用于<strong>拼写检查和数据库系统中</strong>。</p>
+
+<h4>基本原理及要点</h4>
+
+<p>An empty Bloom filter is <strong>a bit array of m bits</strong>, all set to 0. There must also be <strong>k different hash functions</strong> defined, each of which maps or hashes some set element to one of the m array positions with a uniform random distribution.</p>
+
+<p>很明显这个过程并不保证查找的结果是100%正确的。同时也不支持删除一个已经插入的关键字，因为该关键字对应的位会牵动到其他的关键字。</p>
+
+<p>所以一个简单的改进就是 counting Bloom filter，用一个counter数组代替位数组，就可以支持删除了。</p>
+
+<h3>Error rate</h3>
+
+<pre><code>m: length of BF array (in bits)
+n: number of input elements
+k: number of hash functions
+</code></pre>
+
+<p>A Bloom filter <a href="http://en.wikipedia.org/wiki/Bloom_filter#Space_and_time_advantages">with 1% error</a> and an optimal value of k, in contrast, requires only about 9.6 bits per element (means m = 9.6 x n).</p>
+
+<h4>Usage</h4>
+
+<p>Bloom Filter可以用来实现数据字典，进行数据的判重，或者集合求交集.</p>
+
+<h3>Solution</h3>
+
+<p>Of course we can always use <strong>【分治+trie树/hash+小顶堆】</strong> standard solution, but for <strong>Fuzzy search, BF is the best</strong>.</p>
+
+<p>4G = 2<sup>32</sup> 大概是40亿 x 8大概是340亿bit，n = 50亿，如果按出错率0.01算需要的大概是480亿个bit。现在可用的是340亿，相差并不多，这样可能会使出错率上升些。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Find Median Numbers]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-find-median/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-find-median</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+
+<blockquote><p>5亿个int找它们的中位数.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Categorized under <strong>双层桶划分</strong>.</p>
+
+<p>Idea: 首先我们将int划分为2<sup>16</sup>个区域，然后读取数据统计落到各个区域里的数的个数，之后我们根据统计结果就可以判断中位数落到那个区域，同时知道这个区域中的第几大数刚好是中位数。然后第二次扫描我们只统计落在这个区域中的那些数就可以了。</p>
+
+<h3>Details</h3>
+
+<p>开一个大小为65536的Int数组，第一遍读取，统计Int32的高16位的情况(就相当于用该数除以65536)。每读取一个数，数组中对应的计数+1。第一遍统计之后，遍历数组，逐个累加统计，看中位数处于哪个区间。</p>
+
+<p>第二遍统计同上面的方法类似，但这次只统计处于区间k的情况，这次计数之后，再统计一下，看中位数所处的区间，最后将高位和低位组合一下就是结果了。</p>
+
+<p>And this can be done more than 2 times, depending on the input size (eg. if input is int64, then do 24/20/20 bits).</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Find Existence of a Number]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-find-existence-of-number/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-find-existence-of-number</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+
+<blockquote><p>给40亿个不重复的unsigned int的整数，没排过序的，然后再给一个数，如何快速判断这个数是否在那40亿个数当中？</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Categorized under <strong>BitMap</strong>.</p>
+
+<p>There&rsquo;re 4.3 billion unsigned integers in Java. This is a perfect question to use BitMap.</p>
+
+<p>申请512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Remove Duplicate Numbers]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-Remove-Duplicate-Numbers</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_JULY_v/article/details/6279498">link</a></p>
+
+<blockquote><p>2.5亿个整数中找出不重复的整数的个数，内存空间不足以容纳这2.5亿个整数。</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Categorized under <strong>双层桶划分</strong> or <strong>BitMap</strong>.</p>
+
+<p>整数个数为2<sup>32</sup>,也就是，我们可以将这2<sup>32</sup>个数，划分为2<sup>8</sup>个区域(比如用单个文件代表一个区域)，然后将数据分离到不同的区域，然后不同的区域在利用bitmap就可以直接解决了。</p>
+
+<p><strong>But how exactly to use BitMap</strong>? 将bit-map扩展一下，用2bit表示一个数即可，0表示未出现，1表示出现一次，2表示出现2次及以上。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Question] Test Command Line Copy]]></title>
@@ -756,354 +964,6 @@ public String decToHex(int dec) {
 <li>when the process completes we are left with 2x 1MB files sorted in the correct order.</li>
 </ol>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Postorder Successor in Binary Tree]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/06/Postorder-successor-Binary-Tree/"/>
-    <updated>2014-08-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/06/Postorder-successor-Binary-Tree</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5173972006076416">link</a></p>
-
-<blockquote><p>Write an algorithm to find the ‘next’ post-order successor of a given node in a binary tree and binary search tree.</p>
-
-<ol>
-<li>where each node has a link to its parent.</li>
-<li>without parent pointer</li>
-</ol>
-
-
-<p>Implement 2 versions of the algorithm: 1.) binary tree 2.) BST</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>In postorder, any node below current node shall be &lsquo;predecessor&rsquo; of current node. Thus we only care about current node&rsquo;s parent.</p>
-
-<p>Suggested by a user:</p>
-
-<pre><code>1) parent pointer is given. 
-- go to the parent of the current node. 
-- if current node is the right child of its parent =&gt; print parent. 
-- else return leftmost node of the right sub-tree of parent. 
-
-2) parent pointer is not given. 
-- traverse the tree and find the parent of the current node 
-- do the same as method (1). 
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Networks and TCP/IP]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/06/Networks-and-TCP-IP/"/>
-    <updated>2014-08-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/06/Networks-and-TCP-IP</id>
-    <content type="html"><![CDATA[<h2>Overview</h2>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Internet_protocol_suite">Internet protocol suite</a></strong> is a networking model and communications protocols used by the Internet. It is commonly known as <strong>TCP/IP</strong>.</p>
-
-<p>Four abstraction layers:</p>
-
-<ol>
-<li>Application layer</li>
-<li>Transport layer</li>
-<li>Internet layer</li>
-<li>Link layer</li>
-</ol>
-
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/network-layers-connected.png"></p>
-
-<p>The protocols are maintained by the <strong>Internet Engineering Task Force</strong> (IETF).</p>
-
-<h3>A summary of four-layer model</h3>
-
-<ol>
-<li>Application: authentication, compression, and end user services</li>
-<li>Transport: handles the flow of data between systems and provides access to the network for applications via the BSD socket library</li>
-<li>Network: packet routing</li>
-<li>Link: Kernel OS/device driver interface to the network interface on the computer.</li>
-</ol>
-
-
-<p><a href="http://searchnetworking.techtarget.com/news/851291/TCP-Internet-Protocol-and-OSI">source</a></p>
-
-<h3>More details</h3>
-
-<p><strong>The Application layer</strong>:</p>
-
-<ol>
-<li>where applications create user data and communicate with other applications on another host (make use of Transport Layer to provide reliable or unreliable pipes to other processes).</li>
-<li>different application architecture, such as the client-server model and peer-to-peer.</li>
-<li>SMTP, FTP, SSH, HTTP all operate above this layer.</li>
-<li>processes are addressed via ports.</li>
-</ol>
-
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/network-ports.gif"></p>
-
-<blockquote><p>Well-known official port numbers are in the range of 0 &ndash; 255. Port 256 &ndash; 1023 are reserved for other well-known services. 1024 &ndash; 65535 are neither in-use nor reserved. They are used when TCP/IP automatically assigns port numbers to client programs.</p></blockquote>
-
-<p><strong>The Transport Layer</strong>:</p>
-
-<ol>
-<li>performs host-to-host communications.</li>
-<li>&ldquo;UDP&rdquo; provides unreliable datagram service.</li>
-<li>&ldquo;<strong>Transmission Control Protocol</strong>&rdquo; provides flow-control, connection establishment, and reliable transmission of data.</li>
-</ol>
-
-
-<p><strong>The Internet layer</strong>:</p>
-
-<ol>
-<li>exchange datagrams across network boundaries.</li>
-<li>establishes internetworking thus establishes the Internet.</li>
-<li>&ldquo;<strong>Internet Protocol</strong>&rdquo;, defines IP addresses and the routing structures used for the TCP/IP protocol suite.</li>
-<li>routing: transport datagrams to the next IP router that has the connectivity to a network closer to the final data destination.</li>
-</ol>
-
-
-<p><strong>The Link layer</strong>:</p>
-
-<ol>
-<li>defines the networking methods within local network link without intervening routers.</li>
-<li>describe local network topology and the interfaces needed to effect transmission of Internet layer datagrams to next-neighbor hosts.</li>
-</ol>
-
-
-<h3>Difference from OSI</h3>
-
-<p>The Internet protocol suite was in use <strong>before the OSI model</strong>, and is well established worldwide.</p>
-
-<p><a href="http://electronicdesign.com/what-s-difference-between/what-s-difference-between-osi-seven-layer-network-model-and-tcpip">The OSI model</a>, however, is a proven concept that is used in all other data communications protocols. It will continue to be used as a guideline for all other communications applications.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Leetcode] Leetcode Second Round (2)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/06/Leetcode-second-two/"/>
-    <updated>2014-08-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/06/Leetcode-second-two</id>
-    <content type="html"><![CDATA[<h3>2.2 question list</h3>
-
-<ol>
-<li>Integer to Roman</li>
-<li>Surrounded Regions &ndash; minimize stack usage</li>
-<li>Jump Game II</li>
-<li>Gas Station</li>
-</ol>
-
-
-<h3>Question List</h3>
-
-<ol>
-<li>Remove Duplicates from Sorted Array</li>
-<li>Validate Binary Search Tree &ndash; use intervals</li>
-<li>Gray Code</li>
-<li>Combination Sum II</li>
-<li>Merge Intervals</li>
-<li>Scramble String</li>
-<li>Remove Duplicates from Sorted Array II</li>
-<li>Generate Parentheses</li>
-<li>Permutation Sequence</li>
-<li>Substring with Concatenation of All Words</li>
-<li>String to Integer (atoi)</li>
-</ol>
-
-
-<h3>Difficult</h3>
-
-<ol>
-<li>Reverse Words in a String</li>
-<li>Word Search</li>
-<li>Container With Most Water</li>
-<li>First Missing Positive &ndash; note there&rsquo;s 1 special case</li>
-<li>Sort List</li>
-<li>Merge k Sorted Lists &ndash; very difficult</li>
-<li>Permutations II &ndash; use different DS for flagging elements</li>
-<li>Palindrome Partitioning II</li>
-<li>Word Ladder</li>
-<li>Largest Rectangle in Histogram</li>
-<li>Minimum Window Substring &ndash; difficult</li>
-<li>Longest Valid Parentheses &ndash; difficult</li>
-<li>Median of Two Sorted Arrays &ndash; difficult</li>
-<li>Regular Expression Matching</li>
-<li>Wildcard Matching</li>
-</ol>
-
-
-<h3>Special</h3>
-
-<ol>
-<li><p>water, rain and histogram etc.</p></li>
-<li><p>word and string-related</p></li>
-</ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] HTTP Headers]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/06/HTTP-headers/"/>
-    <updated>2014-08-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/06/HTTP-headers</id>
-    <content type="html"><![CDATA[<h2>Overview</h2>
-
-<p><strong>HTTP is an Application Layer protocol</strong> which stands for &ldquo;Hypertext Transfer Protocol&rdquo;. The entire World Wide Web uses it.</p>
-
-<p>There&rsquo;re <strong><a href="http://www.differencebetween.net/technology/internet/difference-between-tcp-and-http/">a series of sessions</a></strong> in HTTP where client sends a request and server sends a reply message back to client including the request, an error message, or another piece of information.</p>
-
-<p><a href="http://code.tutsplus.com/tutorials/http-headers-for-dummies--net-8039">HTTP headers</a> are the core part of these HTTP requests and responses, and they carry information about the client browser, the requested page, the server and more.</p>
-
-<h3>Example HTTP request</h3>
-
-<pre><code>GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1
-Host: net.tutsplus.com
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-Accept-Language: en-us,en;q=0.5
-Accept-Encoding: gzip,deflate
-Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
-Keep-Alive: 300
-Connection: keep-alive
-Cookie: PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120
-Pragma: no-cache
-Cache-Control: no-cache
-</code></pre>
-
-<h3>Example HTTP response</h3>
-
-<pre><code>HTTP/1.x 200 OK
-Transfer-Encoding: chunked
-Date: Sat, 28 Nov 2009 04:36:25 GMT
-Server: LiteSpeed
-Connection: close
-X-Powered-By: W3 Total Cache/0.8
-Pragma: public
-Expires: Sat, 28 Nov 2009 05:36:25 GMT
-Etag: "pub1259380237;gz"
-Cache-Control: max-age=3600, public
-Content-Type: text/html; charset=UTF-8
-Last-Modified: Sat, 28 Nov 2009 03:50:37 GMT
-X-Pingback: http://net.tutsplus.com/xmlrpc.php
-Content-Encoding: gzip
-Vary: Accept-Encoding, Cookie, User-Agent
-
-&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;
-&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
-&lt;head&gt;
-&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
-&lt;title&gt;Top 20+ MySQL Best Practices - Nettuts+&lt;/title&gt;
-&lt;!-- ... rest of the html ... --&gt;
-</code></pre>
-
-<p>These HTTP requests are also sent and received for other things, such as images, CSS files, JavaScript files etc. That is why browser may send 40 or more HTTP requests for 1 article page.</p>
-
-<h3>Request Methods</h3>
-
-<p>The three most commonly used request methods are: GET, POST and HEAD.</p>
-
-<h4>GET: Retrieve a Document</h4>
-
-<p>Get an article site:</p>
-
-<pre><code>GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1
-</code></pre>
-
-<p>Submit a form information:</p>
-
-<pre><code>GET /foo.php?first_name=John&amp;last_name=Doe&amp;action=Submit HTTP/1.1
-</code></pre>
-
-<p>Each input is added in the <strong>query string</strong>.</p>
-
-<h4>POST: Send Data to the Server</h4>
-
-<p>Even though you can send data to the server using GET and the query string, <strong>in many cases POST will be preferable</strong>. Sending large amounts of data using GET is not practical and has limitations.</p>
-
-<pre><code>POST /foo.php HTTP/1.1
-Host: localhost
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-Accept-Language: en-us,en;q=0.5
-Accept-Encoding: gzip,deflate
-Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
-Keep-Alive: 300
-Connection: keep-alive
-Referer: http://localhost/test.php
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 43
-
-first_name=John&amp;last_name=Doe&amp;action=Submit
-</code></pre>
-
-<p>The header contains no query string no more. The last line (data) is the query string.</p>
-
-<h4>HEAD: Retrieve Header Information</h4>
-
-<p>HEAD is identical to GET, except the server does not return the content in the HTTP response. It&rsquo;s faster than GET.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Connect Nodes and Avoid Intersect]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/06/Connect-nodes-avoid-intersect/"/>
-    <updated>2014-08-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/06/Connect-nodes-avoid-intersect</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5138832865361920">link</a></p>
-
-<blockquote><p>Draw a graph as a graph. Assume there is graphics library to draw lines and all. Just tell how will you order the vertices such that the edges don&rsquo;t intersect and they seem ordered.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There&rsquo;s no clear solution. Someone suggest the following:</p>
-
-<ol>
-<li>printing topological sort result (refer to post &lsquo;Topology Sort&rsquo;)</li>
-<li>edges should not intersect, finding if a graph is planar</li>
-</ol>
-
-
-<p>There&rsquo;s various <a href="http://en.wikipedia.org/wiki/Planarity_testing">Planarity Testing Algorithms</a>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Ambiguous File Matching]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/06/Ambiguous-File-Matching/"/>
-    <updated>2014-08-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/06/Ambiguous-File-Matching</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5678301561487360">link</a></p>
-
-<blockquote><p>Given 10 files (text files) each of size of 900 Mb.</p>
-
-<p>Given another file named &ldquo;hello&rdquo;. match the contents of this file with other 10 file and return the file whose contents closely match with the contents of file &ldquo;hello&rdquo;.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The solution given on the site is not adequate, but I have to choose one that make a little sense.</p>
-
-<blockquote><p>Score each file&rsquo;s contents on several parameters:</p>
-
-<ol>
-<li>no. of words</li>
-<li>no. of letters</li>
-<li>no. of spaces</li>
-<li>count of each of the letters</li>
-<li>count of each words</li>
-</ol>
-
-
-<p>Give weightage to each of the properties and arrive at a number (score). The closest of the scores is the answer.</p></blockquote>
-
-<p>I think maybe can use <a href="http://en.wikipedia.org/wiki/Bloom_filter#Counting_filters">Counting Bloom Filter</a>, although bloom filter does not record word sequences.</p>
 ]]></content>
   </entry>
   

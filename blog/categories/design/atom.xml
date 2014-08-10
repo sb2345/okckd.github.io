@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-10T13:33:04+08:00</updated>
+  <updated>2014-08-10T20:37:56+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -14,331 +14,182 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[Design] Process vs. Thread]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/09/Process-and-thread/"/>
-    <updated>2014-08-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/09/Process-and-thread</id>
-    <content type="html"><![CDATA[### First difference
+    <title type="html"><![CDATA[[Design] Big Data - Top K Questions (Summarize)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize</id>
+    <content type="html"><![CDATA[### Question 
 
-__[A process](http://www.programmerinterview.com/index.php/operating-systems/thread-vs-process/) can contain multiple threads__. When you open Microsoft Word, you start __a process__ that runs Word. The OS creates a process and begins executing the __primary thread__ of that process. 
+[link](http://dongxicheng.org/big-data/select-ten-from-billions/)
 
-Since a process can consist of multiple threads, a thread could be considered __a ‘lightweight’ process__. 
+> 在海量数据中找出出现频率最高的前K个数，或者从海量数据中找出最大的前K个数，这类问题通常称为“top K”问题，
 
-### Second difference
+> 1. top K value
+> 1. top K frequency
 
-Another difference is that __threads__ within the same process __share the same address space__, whereas different __processes__ do not. 
+### Analysis
 
-This allows threads to read from and write to the same data structures and variables, and also __facilitates communication between threads__. Communication between processes – also known as IPC, or __inter-process communication__ – is quite difficult and resource-intensive.
+__Standard solution__ is 【分治+trie树/hash+小顶堆】, which I covered in another post [Big Data - Top k Frequency](/blog/2014/07/25/big-data-Top-k-frequency/). Briefly it is 3 steps: 
+
+1. 先将数据集按照hash方法分解成多个小数据集，
+1. 使用trie树或者hash统计每个小数据集中的query词频，
+1. 用小顶堆求出每个数据集中出频率最高的前K个数
+
+But, there're other senarios where different solutions may apply. Consider: 
+
+1. Single core vs. multiple core
+
+1. Single PC vs. multiple PC
+
+1. Large RAM vs. limited RAM
+
+1. Distributed system
+
+### 1. 单机+单核+足够大内存
+
+设每个查询词平均占8Byte，则10亿个查询词所需的内存大约是10^9*8=8G内存。如果你有这么大的内存，直接在内存中对查询词进行排序，顺序遍历找出10个出现频率最大的10个即可。这种方法简单快速，更加实用。当然，也可以先用HashMap求出每个词出现的频率，然后求出出现频率最大的10个词。
+
+### 2. 单机+单核+受限内存
+
+这种情况下，需要将原数据文件切割成一个一个小文件，如，采用hash(x)%M，将原文件中的数据切割成M小文件，如果小文件仍大于内存大小，继续采用hash的方法对数据文件进行切割，直到每个小文件小于内存大小，这样，每个文件可放到内存中处理。采用3.1节的方法依次处理每个小文件。
+
+### 3. 单机+多核+足够大内存
+
+这时可以直接在内存中实用hash方法将数据划分成n个partition，每个partition交给一个线程处理，线程的处理逻辑是同[1]节类似，最后一个线程将结果归并。
+
+该方法存在一个瓶颈会明显影响效率，即数据倾斜，每个线程的处理速度可能不同，快的线程需要等待慢的线程，最终的处理速度取决于慢的线程。解决方法是，__将数据划分成 (c x n)个partition（c>1），每个线程处理完当前partition后主动取下一个partition继续处理__，直到所有数据处理完毕，最后由一个线程进行归并。
+
+### 4. 多机+受限内存
+
+这种情况下，为了合理利用多台机器的资源，可将数据分发到多台机器上，每台机器采用[3]节中的策略解决本地的数据。可采用__hash + socket__方法进行数据分发。
+
+### 5. Distributed
+
+Top k问题很适合采用__MapReduce框架__解决，用户只需编写一个map函数和两个reduce 函数，然后提交到Hadoop（采用mapchain和reducechain）上即可解决该问题。
+
+A map function. 对于map函数，采用hash算法，将hash值相同的数据交给同一个reduce task. 
+
+2 reduce functions. 对于__第一个reduce函数__，采用HashMap统计出每个词出现的频率，对于__第二个reduce函数__，统计所有reduce task输出数据中的top k即可。
+
+### 6. Other
+
+公司一般不会自己写个程序进行计算，而是提交到自己核心的数据处理平台上计算，该平台的计算效率可能不如直接写程序高，但它具有__良好的扩展性和容错性__，而这才是企业最看重的。
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Design] Median of Array in Distributed Computers]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/09/Median-in-distributed-computers/"/>
-    <updated>2014-08-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/09/Median-in-distributed-computers</id>
-    <content type="html"><![CDATA[### Question
+    <title type="html"><![CDATA[[Design] Big Data - Top K Frequency 2]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2</id>
+    <content type="html"><![CDATA[### Question 
 
-[link](http://www.quora.com/Distributed-Algorithms/What-is-the-distributed-algorithm-to-determine-the-median-of-arrays-of-integers-located-on-different-computers)
+[link](http://blog.csdn.net/v_july_v/article/details/7382693)
 
-> What is the __distributed algorithm__ to determine the median of arrays of 1 billion integers located on different computers?
+> 一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。
+
+### Analysis
+
+__The basic solution for 'Top K' questions__ is 【分治+trie树/hash+小顶堆】. 
+
+In the previous post [Big Data - Top k Frequency](/blog/2014/07/25/big-data-Top-k-frequency/), we used HashMap for calculating query frequency. Now we __use Trie to do it__. 
+
+> 这题是考虑时间效率。用trie树统计每个词出现的次数，时间复杂度是O(n x le)（le表示单词的平准长度）。然后是找出出现最频繁的前10个词，可以用堆来实现，前面的题中已经讲到了，时间复杂度是O(n x lg10)。所以总的时间复杂度，是O(n x le)与O(n x lg10)中较大的哪一个。
+
+#### How to use Trie to calculate word frequency? 
+
+在Trie的node节点中[添加count域后](http://blog.csdn.net/ohmygirl/article/details/7953814)，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）. 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Fuzzy Search Url]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://blog.csdn.net/v_july_v/article/details/7382693)
+
+> 给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？
+
+### Bloom Filter
+
+自从Burton Bloom在70年代提出[Bloom Filter](http://blog.csdn.net/v_july_v/article/details/6685894)之后，Bloom Filter就被广泛用于__拼写检查和数据库系统中__。
+
+#### 基本原理及要点
+
+An empty Bloom filter is __a bit array of m bits__, all set to 0. There must also be __k different hash functions__ defined, each of which maps or hashes some set element to one of the m array positions with a uniform random distribution. 
+
+很明显这个过程并不保证查找的结果是100%正确的。同时也不支持删除一个已经插入的关键字，因为该关键字对应的位会牵动到其他的关键字。
+
+所以一个简单的改进就是 counting Bloom filter，用一个counter数组代替位数组，就可以支持删除了。 
+
+### Error rate
+
+    m: length of BF array (in bits)
+    n: number of input elements
+    k: number of hash functions
+
+A Bloom filter [with 1% error](http://en.wikipedia.org/wiki/Bloom_filter#Space_and_time_advantages) and an optimal value of k, in contrast, requires only about 9.6 bits per element (means m = 9.6 x n). 
+
+#### Usage
+
+Bloom Filter可以用来实现数据字典，进行数据的判重，或者集合求交集.
 
 ### Solution
 
-1. Suppose you have __a master node__ (or are able to use a consensus protocol to elect a master from among your servers).
+Of course we can always use __【分治+trie树/hash+小顶堆】__ standard solution, but for __Fuzzy search, BF is the best__. 
 
-1. The master queries all servers for the size of their sets of data, so that it knows to look for the k = n/2 largest element.
-
-1. The master then selects a random server and queries __a random element__. 
-
-1. The master broadcasts this element to each server. 
-
-1. Each server partitions its elements into those larger than or equal to the broadcasted element and those smaller than the broadcasted element.
-
-1. Each server returns to the master the __size of the larger-than partition__, call this m. 
-
-    1. If the sum of these sizes is greater than k, the master indicates to each server to disregard the 'less-than' set. 
-    
-    1. If it is less than k, the master indicates to disregard the larger-than sets and updates k = k - m.  
-    
-    1. If it is exactly k, the algorithm terminates and the value returned is the pivot selected at the beginning of the iteration.
-
-1. Recurse beginning with selecting a new random pivot from the remaining elements.
-
-[ref](http://qr.ae/k2DcS)
+4G = 2^32 大概是40亿 x 8大概是340亿bit，n = 50亿，如果按出错率0.01算需要的大概是480亿个bit。现在可用的是340亿，相差并不多，这样可能会使出错率上升些。
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Design] Functional Programming]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/09/Functional-programming/"/>
-    <updated>2014-08-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/09/Functional-programming</id>
-    <content type="html"><![CDATA[### Overview
+    <title type="html"><![CDATA[[Design] Big Data - Find Median Numbers]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-find-median/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-find-median</id>
+    <content type="html"><![CDATA[### Question 
 
-__[A functional language](http://stackoverflow.com/a/23290) allows you to write a mathematical function__, i.e. a function that takes n arguments and returns a value. If the program is executed, this function is evaluated. 
+[link](http://blog.csdn.net/v_july_v/article/details/7382693)
 
-A purely functional program __always yields the same value for an input__, and the order of evaluation is not well-defined; which means that uncertain values like user input or random values are hard to model in purely functional languages. 
+> 5亿个int找它们的中位数.
 
-### One Sentence
+### Analysis
 
-__Functional programming is like describing your [problem to a mathematician](http://stackoverflow.com/a/23475). Imperative programming is like giving instructions to an idiot__. 
+Categorized under __双层桶划分__.
 
-### Pros and Cons
+Idea: 首先我们将int划分为2^16个区域，然后读取数据统计落到各个区域里的数的个数，之后我们根据统计结果就可以判断中位数落到那个区域，同时知道这个区域中的第几大数刚好是中位数。然后第二次扫描我们只统计落在这个区域中的那些数就可以了。
 
-Functional Programming allows coding [with fewer potentials for bugs](http://stackoverflow.com/a/24294) because each component is completely isolated. Also, using recursion and first-class functions allows for __simple proofs of correctness__ which typically mirror the structure of the code.
+### Details
 
-Functional programming languages are typically [less efficient](http://en.wikipedia.org/wiki/Functional_programming#Efficiency_issues) in their use of CPU and memory than imperative languages such as C and Pascal.
+开一个大小为65536的Int数组，第一遍读取，统计Int32的高16位的情况(就相当于用该数除以65536)。每读取一个数，数组中对应的计数+1。第一遍统计之后，遍历数组，逐个累加统计，看中位数处于哪个区间。
+
+第二遍统计同上面的方法类似，但这次只统计处于区间k的情况，这次计数之后，再统计一下，看中位数所处的区间，最后将高位和低位组合一下就是结果了。
+
+And this can be done more than 2 times, depending on the input size (eg. if input is int64, then do 24/20/20 bits).
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Design] Thread Pool Pattern]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/08/Thread-pool-pattern/"/>
-    <updated>2014-08-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/08/Thread-pool-pattern</id>
-    <content type="html"><![CDATA[### Overview
+    <title type="html"><![CDATA[[Design] Big Data - Find Existence of a Number]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-find-existence-of-number/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-find-existence-of-number</id>
+    <content type="html"><![CDATA[### Question 
 
-[Thread pool](http://programmers.stackexchange.com/a/173580) is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue.
+[link](http://blog.csdn.net/v_july_v/article/details/7382693)
 
-<img class="middle" src="/assets/images/thread-pool.png">
+> 给40亿个不重复的unsigned int的整数，没排过序的，然后再给一个数，如何快速判断这个数是否在那40亿个数当中？
 
-[A sample thread pool](http://en.wikipedia.org/wiki/Thread_pool_pattern) (green boxes) with waiting tasks (blue) and completed tasks (yellow)
+### Analysis
 
-### Why Thread Pool?
+Categorized under __BitMap__.
 
-[Many server applications](http://www.ibm.com/developerworks/library/j-jtp0730/), such as __Web servers (eg. Tomcat)__, database servers, file servers, or mail servers must process a large number of tasks received from a network protocol. Often, the task is short-lived and the number of requests is large. 
+There're 4.3 billion unsigned integers in Java. This is a perfect question to use BitMap. 
 
-__Thread Pools are useful when you need to limit the number of threads__ running in your application at the same time. 
-
-### More details
-
-A thread pool is a group of pre-instantiated, idle threads which stand ready to be given work. These are preferred over instantiating new threads for each task when there is __a large number of short tasks__ to be done __rather than a small number of long ones__. 
-
-Instead of starting a new thread for every task to execute concurrently, the __task can be passed to a thread pool__. As soon as the pool has any idle threads the task is assigned to one of them and executed.
-
-Thread pools are often used in multi threaded servers. Each connection __arriving at the server via the network is wrapped as a task__ and passed on to a thread pool. The threads in the thread pool will process the requests on the connections concurrently.
-
-### Code
-
-__a [simple thread pool implementation](http://tutorials.jenkov.com/java-concurrency/thread-pools.html)__
-
-Pool Class: 
-
-	public class ThreadPool {
-
-	  private BlockingQueue taskQueue = null;
-	  private List<PoolThread> threads = new ArrayList<PoolThread>();
-	  private boolean isStopped = false;
-
-	  public ThreadPool(int noOfThreads, int maxNoOfTasks){
-	    taskQueue = new BlockingQueue(maxNoOfTasks);
-
-	    for(int i=0; i<noOfThreads; i++){
-	      threads.add(new PoolThread(taskQueue));
-	    }
-	    for(PoolThread thread : threads){
-	      thread.start();
-	    }
-	  }
-
-	  public void synchronized execute(Runnable task){
-	    if(this.isStopped) throw
-	      new IllegalStateException("ThreadPool is stopped");
-
-	    this.taskQueue.enqueue(task);
-	  }
-
-	  public synchronized void stop(){
-	    this.isStopped = true;
-	    for(PoolThread thread : threads){
-	      thread.stop();
-	    }
-	  }
-	}
-
-Thread Class: 
-
-	public class PoolThread extends Thread {
-
-	  private BlockingQueue taskQueue = null;
-	  private boolean       isStopped = false;
-
-	  public PoolThread(BlockingQueue queue){
-	    taskQueue = queue;
-	  }
-
-	  public void run(){
-	    while(!isStopped()){
-	      try{
-	        Runnable runnable = (Runnable) taskQueue.dequeue();
-	        runnable.run();
-	      } catch(Exception e){
-	        //log or otherwise report exception,
-	        //but keep pool thread alive.
-	      }
-	    }
-	  }
-
-	  public synchronized void stop(){
-	    isStopped = true;
-	    this.interrupt(); //break pool thread out of dequeue() call.
-	  }
-
-	  public synchronized void isStopped(){
-	    return isStopped;
-	  }
-	}
-
-An explanation: 
-
-> The thread pool implementation consists of two parts. A ThreadPool class which is the public interface to the thread pool, and a PoolThread class which implements the threads that execute the tasks.
-
-> To execute a task the method ThreadPool.execute(Runnable r) is called with a Runnable implementation as parameter. The Runnable is enqueued in the blocking queue internally, waiting to be dequeued.
-
-> The Runnable will be dequeued by an idle PoolThread and executed. You can see this in the PoolThread.run() method. After execution the PoolThread loops and tries to dequeue a task again, until stopped.
-
-> To stop the ThreadPool the method ThreadPool.stop() is called. The stop called is noted internally in the isStopped member. Then each thread in the pool is stopped by calling PoolThread.stop(). Notice how the execute() method will throw an IllegalStateException if execute() is called after stop() has been called.
-
-> The threads will stop after finishing any task they are currently executing. Notice the this.interrupt() call in PoolThread.stop(). This makes sure that a thread blocked in a wait() call inside the taskQueue.dequeue() call breaks out of the wait() call, and leaves the dequeue() method call with an InterruptedException thrown. This exception is caught in the PoolThread.run() method, reported, and then the isStopped variable is checked. Since isStopped is now true, the PoolThread.run() will exit and the thread dies.
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Producer Consumer Problem]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/08/Producer-consumer-problem/"/>
-    <updated>2014-08-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/08/Producer-consumer-problem</id>
-    <content type="html"><![CDATA[### Overview
-
-Producer-consumer problem illustrates the need for __synchronization__ in systems where __many processes share a resource__. 
-
-[In the problem](http://cs.gmu.edu/cne/modules/ipc/aqua/producer.html), two processes share a fixed-size buffer. One process produces information and puts it in the buffer, while the other process consumes information from the buffer. These processes do not take turns accessing the buffer, they both work concurrently. 
-
-### Inadequate Solution
-
-<img class="middle" src="/assets/images/producer-workflow.gif">
-
-<img class="middle" src="/assets/images/consumer-workflow.gif">
-
-__The code might look like this__: 
-
-	BufferSize = 3;
-	  count = 0;
-
-	Producer()
-	{
-	    int widget;
-	    WHILE (true) {                   // loop forever
-	      make_new(widget);              // create a new widget to put in the buffer
-	      IF(count==BufferSize)
-	           Sleep();                  // if the buffer is full, sleep
-	      put_item(widget);              // put the item in the buffer
-	      count = count + 1;             // increment count of items
-	      IF (count==1)
-	         Wakeup(Consumer);           // if the buffer was previously empty, wake
-	   }                                 //  the consumer
-	}
-
-	Consumer()
-	{
-	    int widget;
-	    WHILE(true) {                    // loop forever
-	      IF(count==0)
-	           Sleep();                  // if the buffer is empty, sleep
-	      remove_item(widget);           // take an item from the buffer
-	      count = count + 1;             // decrement count of items
-	      IF(count==N-1)
-	            Wakeup(Producer);        // if buffer was previously full, wake
-	                                     //  the producer
-	      Consume_item(widget);          // consume the item
-	    }
-	}
-
-This [will cause problems](http://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem#Inadequate_implementation), because __it contains a race condition__ that can lead to a deadlock. Or in simply words, it has the potential of [losing wakeups](http://cs.gmu.edu/cne/modules/ipc/purple/prodsem.html). 
-
-An alternative analysis is that if the programming language does not define the semantics of __concurrent accesses to shared variables (in this case itemCount)__ without use of synchronization, then the solution is unsatisfactory for that reason, without needing to explicitly demonstrate a race condition.
-
-Solutions are: __semaphores or monitors__.
-
-### Semaphore
-
-	semaphore mutex = 1;
-	semaphore fillCount = 0;
-	semaphore emptyCount = BUFFER_SIZE;
-	 
-	procedure producer() {
-	    while (true) {
-	        item = produceItem();
-	        down(emptyCount);
-	            down(mutex);
-	                putItemIntoBuffer(item);
-	            up(mutex);
-	        up(fillCount);
-	    }
-	}
-	 
-	procedure consumer() {
-	    while (true) {
-	        down(fillCount);
-	            down(mutex);
-	                item = removeItemFromBuffer();
-	            up(mutex);
-	        up(emptyCount);
-	        consumeItem(item);
-	    }
-	}
-
-### Monitor
-
-	monitor ProducerConsumer {
-	    int itemCount;
-	    condition full;
-	    condition empty;
-	 
-	    procedure add(item) {
-	        while (itemCount == BUFFER_SIZE) {
-	            wait(full);
-	        }
-	 
-	        putItemIntoBuffer(item);
-	        itemCount = itemCount + 1;
-	 
-	        if (itemCount == BUFFER_SIZE -1) {
-	            notify(full);
-	        }
-	    }
-	    procedure remove() {
-	        while (itemCount == 0) {
-	            wait(empty);
-	        }
-	 
-	        item = removeItemFromBuffer();
-	        itemCount = itemCount - 1;
-	 
-	        if (itemCount == 1) {
-	            notify(empty);
-	        }
-	 
-	 
-	        return item;
-	    }
-	}
-	 
-	procedure producer() {
-	    while (true) {
-	        item = produceItem();
-	        ProducerConsumer.add(item);
-	    }
-	}
-	 
-	procedure consumer() {
-	    while (true) {
-	        item = ProducerConsumer.remove();
-	        consumeItem(item);
-	    }
-	}
+申请512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。
 ]]></content>
   </entry>
   

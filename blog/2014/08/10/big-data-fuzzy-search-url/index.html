@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[Design] Top K Frequency in Big Data - My Octopress Blog</title>
+  <title>[Design] Big Data - Fuzzy Search Url - My Octopress Blog</title>
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link 搜索引擎会通过日志文件把用户每次检索使用的所有检索串都记录下来，每个查询串的长度为1-255字节。 假设目前有一千万个记录（这些查询串的重复度比较高，虽然总数是1千万，但如果除去重复后，不超过3百万个。一个查询串的重复度越高，说明查询它的用户越多，也就是越热门。）， &hellip;">
+  <meta name="description" content="Question link 给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？ Bloom Filter 自从Burton Bloom在70年代提出Bloom Filter之后，Bloom &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://okckd.github.io/blog/2014/07/25/Top-k-frequency-big-data">
+  <link rel="canonical" href="http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
@@ -68,7 +68,7 @@
   
   <header>
     
-      <h1 class="entry-title">[Design] Top K Frequency in Big Data</h1>
+      <h1 class="entry-title">[Design] Big Data - Fuzzy Search Url</h1>
     
     
       <p class="meta">
@@ -84,7 +84,7 @@
   
 
 
-<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -93,39 +93,40 @@
 
 <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://blog.csdn.net/v_JULY_v/article/details/6256463">link</a></p>
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
 
-<blockquote><p>搜索引擎会通过日志文件把用户每次检索使用的所有检索串都记录下来，每个查询串的长度为1-255字节。</p>
+<blockquote><p>给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？</p></blockquote>
 
-<p>假设目前有一千万个记录（这些查询串的重复度比较高，虽然总数是1千万，但如果除去重复后，不超过3百万个。一个查询串的重复度越高，说明查询它的用户越多，也就是越热门。），请你统计最热门的10个查询串，要求使用的内存不能超过1G。</p></blockquote>
+<h3>Bloom Filter</h3>
 
-<h3>Analysis</h3>
+<p>自从Burton Bloom在70年代提出<a href="http://blog.csdn.net/v_july_v/article/details/6685894">Bloom Filter</a>之后，Bloom Filter就被广泛用于<strong>拼写检查和数据库系统中</strong>。</p>
 
-<p>第一步：Query统计</p>
+<h4>基本原理及要点</h4>
 
-<p>第二步：根据统计结果，找Top 10</p>
+<p>An empty Bloom filter is <strong>a bit array of m bits</strong>, all set to 0. There must also be <strong>k different hash functions</strong> defined, each of which maps or hashes some set element to one of the m array positions with a uniform random distribution.</p>
 
-<p>Be careful: 内存不能超过1G，10 million 条记录，每条记录是255Byte，很显然要占据2.375G内存.</p>
+<p>很明显这个过程并不保证查找的结果是100%正确的。同时也不支持删除一个已经插入的关键字，因为该关键字对应的位会牵动到其他的关键字。</p>
 
-<h3>Query统计</h3>
+<p>所以一个简单的改进就是 counting Bloom filter，用一个counter数组代替位数组，就可以支持删除了。</p>
 
-<p><strong>HashMap</strong>.</p>
+<h3>Error rate</h3>
 
-<p>虽然有一千万个Query，但是由于重复度比较高，因此事实上只有300万的Query，每个Query 255Byte，因此我们可以考虑把他们都放进内存中去。</p>
+<pre><code>m: length of BF array (in bits)
+n: number of input elements
+k: number of hash functions
+</code></pre>
 
-<p>Hash Table绝对是我们优先的选择，因为Hash Table的查询速度非常的快，几乎是O(1)的时间复杂度。我们在O(N)的时间复杂度内完成了对该海量数据的处理。</p>
+<p>A Bloom filter <a href="http://en.wikipedia.org/wiki/Bloom_filter#Space_and_time_advantages">with 1% error</a> and an optimal value of k, in contrast, requires only about 9.6 bits per element (means m = 9.6 x n).</p>
 
-<h3>找Top 10</h3>
+<h4>Usage</h4>
 
-<p><strong>Heap</strong>.</p>
+<p>Bloom Filter可以用来实现数据字典，进行数据的判重，或者集合求交集.</p>
 
-<p>借助堆结构，我们可以在log量级的时间内查找和调整/移动。因此到这里，我们的算法可以改进为这样，维护一个K(该题目中是10)大小的小根堆，然后遍历300万的Query，分别和根元素进行对比。</p>
+<h3>Solution</h3>
 
-<p>查找目标元素的时间复杂度为 O(logK)。</p>
+<p>Of course we can always use <strong>【分治+trie树/hash+小顶堆】</strong> standard solution, but for <strong>Fuzzy search, BF is the best</strong>.</p>
 
-<h3>Conclusion</h3>
-
-<p>至此，算法就完全结束了，经过上述第一步、先用Hash表统计每个Query出现的次数，O（N）；然后第二步、采用堆数据结构找出Top 10，O(NlogK)。所以，我们最终的时间复杂度是：O（N） + O(N&#8217;logK)。</p>
+<p>4G = 2<sup>32</sup> 大概是40亿 x 8大概是340亿bit，n = 50亿，如果按出错率0.01算需要的大概是480亿个bit。现在可用的是340亿，相差并不多，这样可能会使出错率上升些。</p>
 </div>
 
 
@@ -148,7 +149,7 @@
   
 
 
-<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -162,7 +163,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/07/25/Top-k-frequency-big-data/" data-via="" data-counturl="http://okckd.github.io/blog/2014/07/25/Top-k-frequency-big-data/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url/" data-via="" data-counturl="http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url/" >Tweet</a>
   
   
   
@@ -171,10 +172,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/07/25/Top-k-Smallest-Element/" title="Previous Post: [Question] Top k Element (quick select)">&laquo; [Question] Top k Element (quick select)</a>
+        <a class="basic-alignment left" href="/blog/2014/08/10/big-data-find-median/" title="Previous Post: [Design] Big Data - Find Median Numbers">&laquo; [Design] Big Data - Find Median Numbers</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/07/26/Multithreading-Q-and-A/" title="Next Post: [Design] Multithreading Q&A">[Design] Multithreading Q&A &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/08/10/big-data-top-k-frequency-2/" title="Next Post: [Design] Big Data - Top k Frequency 2">[Design] Big Data - Top k Frequency 2 &raquo;</a>
       
     </p>
   </footer>
@@ -189,7 +190,7 @@
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (2)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (29)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (35)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (16)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -205,23 +206,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/08/09/Test-command-line-copy/">[Question] Test Command Line Copy</a>
+        <a href="/blog/2014/08/10/big-data-top-k-questions-summarize/">[Design] Big Data - Top K Questions (Summarize)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/09/Process-and-thread/">[Design] Process vs. Thread</a>
+        <a href="/blog/2014/08/10/big-data-top-k-frequency-2/">[Design] Big Data - Top K Frequency 2</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/09/Median-in-distributed-computers/">[Design] Median of Array in Distributed Computers</a>
+        <a href="/blog/2014/08/10/big-data-fuzzy-search-url/">[Design] Big Data - Fuzzy Search Url</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/09/Functional-programming/">[Design] Functional Programming</a>
+        <a href="/blog/2014/08/10/big-data-find-median/">[Design] Big Data - Find Median Numbers</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/08/Thread-pool-pattern/">[Design] Thread Pool Pattern</a>
+        <a href="/blog/2014/08/10/big-data-find-existence-of-number/">[Design] Big Data - Find Existence of a Number</a>
       </li>
     
   </ul>
