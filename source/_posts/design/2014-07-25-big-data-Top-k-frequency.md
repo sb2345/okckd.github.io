@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Design] Find Top k Queries"
+title: "[Design] Big Data - Top k Frequency"
 comments: true
 category: Design
 tags: [  ]
@@ -40,4 +40,5 @@ __Heap__.
 
 ### Conclusion
 
-至此，算法就完全结束了，经过上述第一步、先用Hash表统计每个Query出现的次数，O（N）；然后第二步、采用堆数据结构找出Top 10，N*O（logK）。所以，我们最终的时间复杂度是：O（N） + N'*O（logK）。
+至此，算法就完全结束了，经过上述第一步、先用Hash表统计每个Query出现的次数，O（N）；然后第二步、采用堆数据结构找出Top 10，O(NlogK)。所以，我们最终的时间复杂度是：O（N） + O(N'logK)。
+

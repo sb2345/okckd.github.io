@@ -15,14 +15,14 @@ tags: [  ]
 1. Longest Palindromic Substring
 1. Candy
 1. Rotate List
-1. Remove Duplicates from Sorted Array 
+1. Remove Duplicates from Sorted Array
+1. Remove Duplicates from Sorted Array II
 1. Validate Binary Search Tree - use intervals
 1. Gray Code 
 1. Combination Sum II
 1. Add Binary
 1. Merge Intervals
 1. Scramble String
-1. Remove Duplicates from Sorted Array II
 1. Generate Parentheses 
 1. Permutation Sequence 
 1. Substring with Concatenation of All Words 
