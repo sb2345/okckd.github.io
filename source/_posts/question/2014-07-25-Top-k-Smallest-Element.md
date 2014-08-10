@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Find Top k Smallest Element"
+title: "[Question] Top k Element (quick select)"
 comments: true
 category: Question
 tags: [ cc150 ]
