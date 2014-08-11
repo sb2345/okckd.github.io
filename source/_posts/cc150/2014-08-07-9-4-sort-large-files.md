@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150] 9.7 Sort Large Files"
+title: "[CC150] 9.4 Sort Large Files"
 comments: true
 category: CC150
 tags: [  ]
@@ -8,7 +8,7 @@ tags: [  ]
 
 ### Question 
 
-9.7 If you have a 2 GB file with one string per line, which sorting algorithm would you use to sort the file and why?
+> If you have a 2 GB file with one string per line, which sorting algorithm would you use to sort the file and why?
 
 ### Solution
 

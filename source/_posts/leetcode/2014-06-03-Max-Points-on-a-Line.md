@@ -6,7 +6,6 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
 [link](https://oj.leetcode.com/problems/max-points-on-a-line/)
 
@@ -68,6 +67,17 @@ One more thing, __how to iterate thru the HashMap__ (value only)? There is an ea
     }
 
 That's all I've found for now. 
+
+__Updated on Aug 12th, 2014__ 
+
+Based on the solution given in CC150 v4 Q10.6 on Page 199, it's a __proper way to solve with HashMap<Line, Integer>__ instead of using HashMap<Double, Integer>. 
+
+The reason is mentioned, it's '__unsafe using floating points to make a hash__'. 
+
+Note that if we were to write our own 'Line' class, __we must override the 2 methods__:
+
+1. public int hashCode() {}
+1. public boolean equals(Object o) {}
 
 ### Code
 
