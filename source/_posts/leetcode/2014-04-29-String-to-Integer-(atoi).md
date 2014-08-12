@@ -6,7 +6,6 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
 [link](http://oj.leetcode.com/problems/string-to-integer-atoi/)
 
@@ -98,4 +97,50 @@ I'm using __one loop to read it through, and in the end do some checking__. I th
         if (num.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0)
             return (sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE);
         return sign * num.intValue();
+    }
+
+__updated on Aug 13th, 2014__. Happy Birthday. 
+
+    public int atoi(String str) {
+        if (str == null || str.length() == 0) {
+            return 0;
+        } 
+        // remove space in heading
+        str = str.trim();
+        if (str.length() == 0) {
+            return 0;
+        }
+        // get the correct +/- sign for the number
+        int sign = 1;
+        if (str.charAt(0) == '+') {
+            str = str.substring(1);
+        } else if (str.charAt(0) == '-') {
+            sign = -1;
+            str = str.substring(1);
+        }
+        // find the first instance of non-number char
+        int p = 0;
+        while (p < str.length()) {
+            char c = str.charAt(p);
+            if (c < '0' || c > '9') {
+                break;
+            } else {
+                p++;
+            }
+        }
+        if (p == 0) {
+            return 0;
+        }
+        // now string (0, p) shall be the absolute value part 
+        String absValStr = str.substring(0, p);
+        long absVal = Long.parseLong(absValStr);
+        long finalVal = sign * absVal;
+        // return the correct value;
+        if (finalVal > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        } else if (finalVal < Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        } else {
+            return (int) finalVal;
+        }
     }
