@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Mutex vs. Semaphore Mutex is a key to a toilet. One person can have the key &ndash; occupy the toilet. When finished, the person gives (frees) the &hellip;">
+  <meta name="description" content="Question link Find Top k smallest element in an array. Analysis There&rsquo;re 2 solutions. First solution, use a max-heap. O(nlgk) time complexity. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,122 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/25/Top-k-Smallest-Element/">[Question] Top K Element (Quick Select)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/k-largestor-smallest-elements-in-an-array/">link</a></p>
+
+<blockquote><p>Find Top k smallest element in an array.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>There&rsquo;re 2 solutions.</p>
+
+<p>First solution, <strong>use a max-heap</strong>. O(nlgk) time complexity.</p>
+
+<p>Second solution is called <strong><a href="http://www.geekviewpoint.com/java/search/quickselect">quick select</a></strong>, a type of <a href="http://en.wikipedia.org/wiki/Selection_algorithm">selection algorithm</a> that&rsquo;s based on quicksort. It&rsquo;s averaging O(n) time, but O(n<sup>2</sup>) if pivot selection is poor. The code is posted below. There&rsquo;s also a similar <a href="http://blog.teamleadnet.com/2012/07/quick-select-algorithm-find-kth-element.html">iterative solution</a>.</p>
+
+<p>To <a href="http://www.isnowfy.com/top-k-number/">further optimize this</a>, we can change the pivot selection method by dividing into k group and find median of each. This is called <a href="http://en.wikipedia.org/wiki/Median_of_medians">Median of medians algorithm</a>. The worst case is O(n) time. And this is the best solution for &ldquo;Top k&rdquo; questions.</p>
+
+<h3>Code</h3>
+
+<p><strong>quick select</strong></p>
+
+<pre><code>public static void quickSelect1(int[] list, int k) {
+    selectHelper1(list, 0, list.length - 1, k);
+}
+
+public static void selectHelper1(int[] list, int left, int right, int k) {
+    int pivotIndex = partition(list, left, right);
+    if (pivotIndex == k) {
+        return;
+    } else if (k &lt; pivotIndex) {
+        selectHelper1(list, left, pivotIndex - 1, k);
+    } else {
+        selectHelper1(list, pivotIndex + 1, right, k);
+    }
+}
+
+private static int partition(int[] list, int left, int right) {
+    int pivot = left + (right - left) / 2;
+    swap(list, right, pivot);
+    for (int i = left; i &lt; right; i++) {
+        if (list[i] &lt; list[right]) {
+            swap(list, i, left);
+            left++;
+        }
+    }
+    swap(list, left, right);
+    return left;
+}
+</code></pre>
+
+<p><strong>quick select, iteratively</strong></p>
+
+<pre><code>public static int quickSelect2(int[] arr, int k) {
+    if (arr == null || arr.length &lt;= k)
+        throw new Error();
+    int from = 0, to = arr.length - 1;
+    // if from == to we reached the kth element
+    while (from &lt; to) {
+        int r = from, w = to;
+        int mid = arr[(r + w) / 2];
+        // stop if the reader and writer meets
+        while (r &lt; w) {
+            if (arr[r] &gt;= mid) { // put the large values at the end
+                swap(arr, w, r);
+                w--;
+            } else { // the value is smaller than the pivot, skip
+                r++;
+            }
+        }
+        // if we stepped up (r++) we need to step one down
+        if (arr[r] &gt; mid)
+            r--;
+        // the r pointer is on the end of the first k elements
+        if (k &lt;= r) {
+            to = r;
+        } else {
+            from = r + 1;
+        }
+    }
+    return arr[k];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -891,95 +1007,6 @@ private static String removeDigit(String number, int digitIndex) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/22/Bucket-Sort/">[Question] Bucket Sort (Bin Sort)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/bucket-sort-2/">link</a></p>
-
-<blockquote><p>Bucket sort is mainly useful when input is uniformly distributed over a range. For example:</p>
-
-<p>Sort a large set of floating point numbers which are in range from 0.0 to 1.0 and are uniformly distributed across the range. How do we sort the numbers efficiently.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>1) Create n empty buckets (Or lists).</p>
-
-<p>2) Insert each arr[i] into bucket[n*array[i]]</p>
-
-<p>3) Sort individual buckets using <strong>insertion sort</strong>.</p>
-
-<p>4) Concatenate all sorted buckets.</p>
-
-<p>Steps 1 and 2 clearly take O(n) time. Step 4 also takes O(n) time.</p>
-
-<p><strong>The main step to analyze is step 3</strong>. This step also takes O(n) time on average if all numbers are uniformly distributed. <strong>Final time complexity: O(n)</strong>.</p>
-
-<h3>Relationship with other sorting algorithms</h3>
-
-<p>There&rsquo;s a algorithm within the bucket. Now if we use <strong>bucket sort itself</strong> as the sorting function, this becomes a <strong>radix sort</strong>.</p>
-
-<p>If we set the <strong>bucket size as 2</strong>, then this becomes a quick sort (with potentially poor pivot choices).</p>
-
-<h3>Code</h3>
-
-<p>C++ code from g4g</p>
-
-<pre><code>void bucketSort(float arr[], int n) {
-    // 1) Create n empty buckets
-    vector&lt;float&gt; b[n];
-
-    // 2) Put array elements in different buckets
-    for (int i=0; i&lt;n; i++)
-    {
-       int bi = n*arr[i]; // Index in bucket
-       b[bi].push_back(arr[i]);
-    }
-
-    // 3) Sort individual buckets
-    for (int i=0; i&lt;n; i++)
-       sort(b[i].begin(), b[i].end());
-
-    // 4) Concatenate all buckets into arr[]
-    int index = 0;
-    for (int i = 0; i &lt; n; i++)
-        for (int j = 0; j &lt; b[i].size(); j++)
-          arr[index++] = b[i][j];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/10">&larr; Older</a>
@@ -997,7 +1024,7 @@ private static String removeDigit(String number, int digitIndex) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (3)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (36)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (37)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (17)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1013,6 +1040,10 @@ private static String removeDigit(String number, int digitIndex) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/12/From-ClientServer-to-Multi-Tier/">[Design]</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/12/9-7-circus-man-ordering/">[CC150] 9.7 Sort Large Files</a>
       </li>
     
@@ -1026,10 +1057,6 @@ private static String removeDigit(String number, int digitIndex) {
     
       <li class="post">
         <a href="/blog/2014/08/11/Count-complete-binary-tree/">[Google] Count Complete Binary Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/10/big-data-top-k-questions-summarize/">[Design] Big Data - Top K Questions (Summarize)</a>
       </li>
     
   </ul>
