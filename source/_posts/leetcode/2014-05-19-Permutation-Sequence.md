@@ -6,7 +6,6 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
 [link](http://oj.leetcode.com/problems/permutation-sequence/)
 
@@ -100,35 +99,7 @@ __Finally I found a readable code from [this blog](http://xiaochongzhang.me/blog
 
 ### My code
 
-__My first code, it works but can't pass becaues TLE__. This is the standard permutation solution. 
-
-
-    public int count = 0; 
-
-    public String getPermutation(int n, int k) {
-        ArrayList<Integer> remain = new ArrayList<Integer>();
-        for (int i = 1; i <= n; i ++)
-            remain.add(i);
-        return helper(new char[n], remain, n, k);
-    }
-
-    public String helper(char[] arr, ArrayList<Integer> remain, int n, int k) {
-        int len = remain.size();
-        if (len == 0) count ++;
-        if (count == k) return new String(arr);
-        for (int i = 0; i < len; i ++) {
-            int num = remain.remove(i);
-            arr[n - len] = (char) (num + '0');
-            String ans = helper(arr, remain, n, k);
-            if (ans != null) return ans;
-            remain.add(i, num);
-        }
-        return null;
-    }
-
-
 __My second code, math recursive solution__. 
-
 
     public String getPermutation(int n, int k) {
         ArrayList<Integer> list = new ArrayList<Integer>();
@@ -150,39 +121,30 @@ __My second code, math recursive solution__.
         return sum;
     }
 
+__updated on Aug 13th, 2014__. OMG it's my birthday, I just realize it! I'm officially 24 years old an hour ago, yeah! 
 
-__Third code, math direct solution__. 
-
-
-Small test case is: 8 milli secs
-Large test case is: 16 milli secs
- 
-    class Solution {
-    public:
-        string getPermutation(int n, int k) {
-            // Start typing your C/C++ solution below
-            // DO NOT write int main() function
-            if(n<0||k<=0)
-                return "";
-            vector<int> num(n);
-            int perMutationNum = 1;
-            for(int i = 0; i <n;++i) //push all numbers into num vector
-            {
-                num[i] = i+1;
-                perMutationNum = perMutationNum*(i+1);
-            }
-            --k; //begin from zero in the vector
-            string res;
-            for(int i = 0; i < n; ++i)
-            {
-                perMutationNum = perMutationNum/(n-i);
-                int choosed = k/perMutationNum;
-                res.push_back(num[choosed]+'0');
-                for(int j = choosed; j < n-i;++j)//delete the deleted one
-                    num[j] = num[j+1];
-                k = k%perMutationNum;
-            }
-            return res;
+    public String getPermutation(int n, int k) {
+        int index = k - 1;
+        List<Integer> nums = new ArrayList<Integer>();
+        for (int i = 1; i <= n; i++) {
+            nums.add(i);
         }
-    };
-
+        String ans = "";
+        for (int i = n - 1; i >= 1; i--) {
+            int fact = factorial(i);
+            int nextIndex = index / fact;
+            index = index % fact;
+            ans += nums.remove(nextIndex);
+        }
+        ans += nums.get(0);
+        return ans;
+    }
+    
+    private int factorial(int x) {
+        if (x == 0) return 0;
+        int ans = 1;
+        for (int i = 2; i <= x; i++) {
+            ans *= i;
+        }
+        return ans;
+    }

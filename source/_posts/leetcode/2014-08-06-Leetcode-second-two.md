@@ -9,26 +9,20 @@ tags: [  ]
 ### 2.2 question list
 
 1. Integer to Roman
-1. Surrounded Regions - minimize stack usage
+1. Surrounded Regions - Must minimize stack usage
 1. Jump Game II
 1. Gas Station
 1. Remove Duplicates from Sorted Array
 1. Remove Duplicates from Sorted Array II
 1. Gray Code 
 1. Combination Sum II
-
-### Question List
-
-1. Merge Intervals
+1. Merge Intervals - Comparator<T> API
 1. Scramble String
-1. Generate Parentheses 
-1. Permutation Sequence 
-1. Substring with Concatenation of All Words 
-1. String to Integer (atoi)
-1. Distinct Subsequences
+1. Permutation Sequence - Avoid indexing errors
 
 ### Difficult
 
+1. Distinct Subsequences
 1. Reverse Words in a String
 1. Word Search
 1. Container With Most Water
