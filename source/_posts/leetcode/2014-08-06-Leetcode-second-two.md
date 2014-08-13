@@ -19,12 +19,11 @@ tags: [  ]
 1. Merge Intervals - Comparator<T> API
 1. Scramble String
 1. Permutation Sequence - Avoid indexing errors
+1. Distinct Subsequences
+1. Word Search
 
 ### Difficult
 
-1. Distinct Subsequences
-1. Reverse Words in a String
-1. Word Search
 1. Container With Most Water
 1. First Missing Positive - note there's 1 special case
 1. Sort List
