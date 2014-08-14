@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link A tree has a special property where leaves are represented with ‘2’ and non-leaf with ‘1’. Each node has either 0 or 2 children. If &hellip;">
+  <meta name="description" content="Question link A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,120 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Sliding-Window-Maximum/">[LeetCode Plus] Sliding Window Maximum</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">link</a></p>
+
+<blockquote><p>A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right. You can only see the w numbers in the window. Each time the sliding window moves rightwards by one position. Following is an example:
+The array is [1 3 -1 -3 5 3 6 7], and w is 3.</p></blockquote>
+
+<pre><code>Window position                Max
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+</code></pre>
+
+<blockquote><p>Input: A long array A[], and a window width w</p>
+
+<p>Output: An array B[], B[i] is the maximum value of from A[i] to A[i+w-1]</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>The  naive approach is using a Heap</strong>. This time complexity is O(n*logn). However, there is a better way using a (double-ended) queue.</p>
+
+<p><strong>We do not need to <a href="http://n00tc0d3r.blogspot.sg/2013/04/sliding-window-maximum.html">keep all numbers</a></strong>. For example, suppose numbers in a window of size 4 are (1, 3, -1, 2). Obviously, no matter what next numbers are, 1 and -1 are never going to be a maximal as the window moving. The queue should look like (3, 2) in this case.</p>
+
+<h3>Solution</h3>
+
+<ol>
+<li>When moves to a new number, iterate through back of the queue, removes all numbers that are not greater than the new one, and then insert the new one to the back.</li>
+<li>FindMax only need to take the first one of the queue.</li>
+<li>To remove a number outside the window, only compare whether the current index is greater than the front of queue. If so, remove it.</li>
+</ol>
+
+
+<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">A natural way</a> most people would think is to try to maintain the queue size the same as the window’s size. Try to break away from this thought and think out of the box.</p>
+
+<h3>Code</h3>
+
+<p>Code by N00tc0d3r.</p>
+
+<pre><code>public int[] windowMax(int[] nums, int window) {
+    int w = (nums.length &lt; window) ? nums.length : window;
+    // A deque allows insertion/deletion on both ends.
+    // Maintain the first as the index of maximal of the window
+    // and elements after it are all smaller and came later than the first.
+    Deque&lt;Integer&gt; que = new ArrayDeque&lt;Integer&gt;();
+
+    // initialize window
+    int i = 0;
+    while (i &lt; w) {
+        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
+            que.removeLast();
+        }
+        que.addLast(i++);
+    }
+
+    // sliding window
+    int[] max = new int[nums.length - w + 1];
+    max[i - w] = que.getFirst();
+    while (i &lt; nums.length) {
+        // add new element
+        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
+            que.removeLast();
+        }
+        que.addLast(i);
+        // remove old element if still in que
+        if (!que.isEmpty() &amp;&amp; i - w &gt;= que.getFirst()) {
+            que.removeFirst();
+        }
+        // get maximal
+        ++i;
+        max[i - w] = que.getFirst();
+    }
+
+    return max;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -838,76 +952,6 @@ int maxMoney(int A[], int N) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/25/big-data-Top-k-frequency/">[Design] Big Data - Top K Frequency</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_JULY_v/article/details/6256463">link</a></p>
-
-<blockquote><p>搜索引擎会通过日志文件把用户每次检索使用的所有检索串都记录下来，每个查询串的长度为1-255字节。</p>
-
-<p>假设目前有一千万个记录（这些查询串的重复度比较高，虽然总数是1千万，但如果除去重复后，不超过3百万个。一个查询串的重复度越高，说明查询它的用户越多，也就是越热门。），请你统计最热门的10个查询串，要求使用的内存不能超过1G。</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>第一步：Query统计</p>
-
-<p>第二步：根据统计结果，找Top 10</p>
-
-<p>Be careful: 内存不能超过1G，10 million 条记录，每条记录是255Byte，很显然要占据2.375G内存.</p>
-
-<h3>Query统计</h3>
-
-<p><strong>HashMap</strong>.</p>
-
-<p>虽然有一千万个Query，但是由于重复度比较高，因此事实上只有300万的Query，每个Query 255Byte，因此我们可以考虑把他们都放进内存中去。</p>
-
-<p>Hash Table绝对是我们优先的选择，因为Hash Table的查询速度非常的快，几乎是O(1)的时间复杂度。我们在O(N)的时间复杂度内完成了对该海量数据的处理。</p>
-
-<h3>找Top 10</h3>
-
-<p><strong>Heap</strong>.</p>
-
-<p>借助堆结构，我们可以在log量级的时间内查找和调整/移动。因此到这里，我们的算法可以改进为这样，维护一个K(该题目中是10)大小的小根堆，然后遍历300万的Query，分别和根元素进行对比。</p>
-
-<p>查找目标元素的时间复杂度为 O(logK)。</p>
-
-<h3>Conclusion</h3>
-
-<p>至此，算法就完全结束了，经过上述第一步、先用Hash表统计每个Query出现的次数，O（N）；然后第二步、采用堆数据结构找出Top 10，O(NlogK)。所以，我们最终的时间复杂度是：O（N） + O(N&#8217;logK)。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/9">&larr; Older</a>
@@ -926,6 +970,7 @@ int maxMoney(int A[], int N) {
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (3)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (37)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (1)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (17)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -941,7 +986,11 @@ int maxMoney(int A[], int N) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/08/12/From-ClientServer-to-Multi-Tier/">[Design]</a>
+        <a href="/blog/2014/08/14/Large-string-find-substring/">[Facebook] Large String Find Substring</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/12/From-ClientServer-to-Multi-Tier/">[Design] From Client/Server to Multi-Tier</a>
       </li>
     
       <li class="post">
@@ -954,10 +1003,6 @@ int maxMoney(int A[], int N) {
     
       <li class="post">
         <a href="/blog/2014/08/11/Tcp-3way-handshake/">[Design] TCP 3-Way Handshake</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/11/Count-complete-binary-tree/">[Google] Count Complete Binary Tree</a>
       </li>
     
   </ul>
