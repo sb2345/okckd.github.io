@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Google] Product All 1s"
+title: "[Google] Product All 1s (`)"
 comments: true
 category: Google
 tags: [  ]
@@ -16,7 +16,18 @@ tags: [  ]
 
 ### Solution
 
-
+http://www.itint5.com/discuss/136/%E8%BF%99%E9%A2%98%E6%88%91%E8%B6%85%E6%97%B6%E4%BA%86%EF%BC%8C%E8%AF%B7%E9%97%AE%E5%A6%82%E4%BD%95%E7%BC%A9%E7%9F%AD%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4
 
 ### Code
 
+	int findMinAllOne(int a) {
+		if (a < 0 || (a % 10) % 2 == 0 || a % 10 == 5)
+			return -1;
+
+		int ans = 1;
+		for (int p = 1; p != 0; p %= a) {
+			p = 10 * p + 1;
+			++ans;
+		}
+		return a == 1 ? ans - 1 : ans;
+	}
