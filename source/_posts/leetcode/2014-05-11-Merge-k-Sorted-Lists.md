@@ -6,7 +6,6 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
 [link](http://oj.leetcode.com/problems/merge-k-sorted-lists/)
 
@@ -99,7 +98,7 @@ Second solution, however, is not as easy. __Especially when we have to write Com
 
 ### My code 
 
-Merge sort code.
+__Merge sort code, written by me__
 
     public ListNode mergeKLists(List<ListNode> lists) {
         if (lists == null || lists.size() == 0) {
@@ -140,36 +139,36 @@ Merge sort code.
     	return dummy.next;
     }
 
-Heap sort code, written by me. [source](http://answer.ninechapter.com/solutions/merge-k-sorted-lists/)
+__Heap sort code, written by me__. [source](http://answer.ninechapter.com/solutions/merge-k-sorted-lists/)
 
-__Look at how a Comparator is implemented__! 
-
-	private Comparator<ListNode> listNodeComparator = new Comparator<ListNode>() {
-		public int compare(ListNode o1, ListNode o2) {
-			return o1.val - o2.val;
-		}
-	};
-
-	public ListNode mergeKLists(List<ListNode> lists) {
-		if (lists == null || lists.size() == 0) {
-			return null;
-		}
-		Queue<ListNode> heap = new PriorityQueue<ListNode>(lists.size(),
-				listNodeComparator);
-		for (ListNode node : lists) {
-			if (node != null) {
-				heap.add(node);
+    public ListNode mergeKLists(List<ListNode> lists) {
+        if (lists == null || lists.size() == 0) {
+            return null;
+        }
+		int size = lists.size();
+		NodeComparator comparator = new NodeComparator();
+		Queue<ListNode> queue = new PriorityQueue<ListNode>(size, comparator);
+		for (ListNode node: lists) {
+			if (node == null) {
+				continue;
 			}
+			queue.offer(node);
 		}
 		ListNode dummy = new ListNode(0);
 		ListNode p = dummy;
-		while (!heap.isEmpty()) {
-			ListNode smallest = heap.poll();
-			p.next = smallest;
+		while (!queue.isEmpty()) {
+			p.next = queue.poll();
 			p = p.next;
-			if (smallest.next != null) {
-				heap.add(smallest.next);
+			if (p.next != null) {
+				queue.offer(p.next);
 			}
 		}
+		p.next = null;
 		return dummy.next;
+    }
+	
+	class NodeComparator implements Comparator<ListNode> {
+		public int compare(ListNode o1, ListNode o2) {
+			return o1.val - o2.val;
+		}
 	}
