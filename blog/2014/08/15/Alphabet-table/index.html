@@ -104,11 +104,83 @@
 <p><a href="http://page.renren.com/601882592/channel-noteshow-927705419">http://page.renren.com/601882592/channel-noteshow-927705419</a></p>
 
 <ol>
-<li>C 2. CAC 3. CB 4. BCC 5. BA 经过分析，得到字母表为C->A->B。 分析 字典序相邻的位置的字符串，只会有如下两种情况： （1）排在前面的字符串是下一个串的子串，如C与CAC （2）两个字符串具有第一对不相同的字符对，如CAC和CBB，第一个不相同的字符对为（A，B），这是就要求A在字母表中的顺序在B前面。对于后面字符并没有要求，如并不要求第二个不相同的字符对（C，B）中的C在字母表中的顺序在B前面。 所以按照第（2）种情况建图，然后对该有向无环图求拓扑排序即可。</li>
+<li>C 2. CAC 3. CB 4. BCC 5. BA 经过分析，得到字母表为C->A->B。</li>
 </ol>
 
 
+<p>分析 字典序相邻的位置的字符串，只会有如下两种情况：</p>
+
+<p>（1）排在前面的字符串是下一个串的子串，如C与CAC</p>
+
+<p>（2）两个字符串具有第一对不相同的字符对，如CAC和CBB，第一个不相同的字符对为（A，B），这是就要求A在字母表中的顺序在B前面。对于后面字符并没有要求，如并不要求第二个不相同的字符对（C，B）中的C在字母表中的顺序在B前面。</p>
+
+<p>所以按照第（2）种情况建图，然后对该有向无环图求拓扑排序即可。</p>
+
+<p>So this becomes a Topology Sorting question.</p>
+
 <h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>pair&lt;char,char&gt;  constructEdge(const string &amp; src1, const string &amp; src2)
+{
+     int min_len = min(src1.length(), src2.length());
+     int i = 0;
+     while(i &lt; min_len &amp;&amp; src1[i] == src2[i]){
+           i++;
+     }
+     if(i &lt; min_len){
+           return  make_pair(src1[i], src2[i]);
+     }else{
+           return  make_pair('\0','\0');
+     }
+}
+//-1, 0, 1
+int  alphaTable(const vector&lt;string&gt; &amp;  dict, vector&lt;char&gt; &amp; alpha_table)
+{
+     unordered_map&lt;char,set&lt;char&gt; &gt;  edges;
+     set&lt;char&gt; nodes;
+     for(const string &amp; word : dict){
+          for(char c : word){
+              nodes.insert(c);
+          }
+     }
+     unordered_map&lt;char,int&gt;  in_degree;
+     for(int i = 1; i &lt; dict.length(); i++){
+          pair edge = constructEdge(dict[i-1],dict[i]);
+          if(edge.first != '\0'){
+              edges[edge.first].insert(edge.second);
+              in_degree[edge.second]++;
+          }
+     }
+     queue&lt;char&gt;  q;
+     for(char node : nodes){
+         if(in_degree[node] == 0){
+              q.push(node);
+         }
+     }
+     alpha_table.clear();
+     int result = 0;
+     while(!q.empty()){
+        if(q.size() &gt; 1){
+            result = 1;
+        }
+        char  c = q.front();
+        q.pop();
+        alpha_table.push_back(c);
+        for(char node : edges[c]){
+             in_degree[node] --;
+             if(in_degree[node] == 0){
+                  q.push(node);
+             }
+         }
+     }//while
+     if(alpha_table.size() &lt; nodes.size()){
+         result = -1;
+     }
+     return result;    
+}
+</code></pre>
 </div>
 
 
@@ -173,13 +245,13 @@
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (3)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (37)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (1)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (2)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (20)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (73)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (74)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (4)</a></li>
 
   </ul>
@@ -189,23 +261,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/08/15/Task-scheduling-question/">[Google] Task Scheduling Question (`)</a>
+        <a href="/blog/2014/08/16/orthogonal-traverse-map/">[Google] Orthogonal Traverse the Map (`)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/15/Product-all-ones/">[Google] Product All 1s (`)</a>
+        <a href="/blog/2014/08/16/Excel-decimal-conversion/">[Question] Excel Decimal Conversion</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/15/Task-scheduling-question/">[Facebook] Task Scheduling Question (`)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/15/Product-all-ones/">[Google] Product All 1s</a>
       </li>
     
       <li class="post">
         <a href="/blog/2014/08/15/Knight-tour-jumpable-question/">[Question] 跳马问题加强版</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/15/Greatest-common-divisor/">[Question] Greatest Common Divisor</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/15/Alphabet-table/">[Google] Alphabet Table (`)</a>
       </li>
     
   </ul>
