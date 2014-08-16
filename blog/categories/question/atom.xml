@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Question | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/question/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-16T17:41:23+08:00</updated>
+  <updated>2014-08-17T01:49:43+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,65 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Number of Valid Trees Given Preorder and Postorder]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/17/Number-of-tree-given-preorder-postorder/"/>
+    <updated>2014-08-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/17/Number-of-tree-given-preorder-postorder</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.itint5.com/oj/#28)
+
+> 对于包含n个结点的二叉树（树中结点编号从1到n），已知前序和后序遍历序列，我们知道不一定能唯一的恢复这棵树。请计算出满足条件的二叉树的总数。
+
+> Example
+
+    前序遍历序列preorder：1 2
+    后序遍历序列postorder：2 1
+
+    一共有2棵满足条件的二叉树：
+        1       1
+       /         \
+      2           2
+
+### Solution
+
+> 先看两种遍历的性质:
+
+> pre-order: root, left *************, right #########
+>
+> post-order: **************left, ########right, root
+
+> 所以 pre-order 的第一个元素一定等于 post-order 的最后一个元素. 然后在post-order中由前往后找, 找出等于pre-oder中第二个元素的位置, 也就是 left 的位置. 
+
+> 1. 如果post-order中的这个位置不是倒数第二个, 说明左右子树都非空, 那么对左右子树递归__调用后用乘法原理__.
+> 1. 如果是倒数第二个, 说明有一个子树为空, return的值就是 __2*递归调用非空子树__.
+
+[ref](http://www.itint5.com/discuss/94/%E8%AF%B7%E5%A4%A7%E5%AE%B6%E6%8F%90%E4%B8%80%E4%BA%9B%E6%94%B9%E8%BF%9B%E6%84%8F%E8%A7%81)
+
+### Code
+
+__not written by me__. This code is REALLY 叼炸天。
+
+    int helper(vector<int>& preorder, vector<int>& posorder, 
+             int i1, int j1, int i2, int j2){
+        if(i1 == j1) return 1;
+        if(preorder[i1+1] == posorder[j2-1]){
+            return 2*helper(preorder, posorder, i1+1, j1, i2, j2-1);
+        }
+        int k = i2;
+        while(posorder[k] != preorder[i1+1]){ k++; }
+        return helper(preorder, posorder, i1+1,i1+1+k-i2 ,i2 , k)
+             * helper(preorder, posorder, i1+2+k-i2, j1, k+1, j2-1);
+    }
+
+    int countValidTrees(vector<int>& preorder, vector<int>& posorder) {
+        int n = preorder.size();
+        return helper(preorder, posorder, 0, n-1, 0, n-1);
+    }
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Question] Excel Decimal Conversion]]></title>
@@ -69,6 +128,28 @@ __written by me__
         }
         return sum;
     }
+
+__updated code__: we can actually do it recursively. The code is much more concise (the code is found in the eclipse project). 
+
+    //将十进制数转换为excel数
+	public String decToExcel(int decNum) {
+		if (decNum == 0) {
+			return "";
+		}
+		decNum--;
+		char last = (char) ('A' + decNum % 26);
+		return decToExcel(decNum / 26) + last;
+	}
+    
+    //将excel数转换为十进制数
+	public int excelToDec(String excelNum) {
+		if (excelNum.equals("")) {
+			return 0;
+		}
+		int len = excelNum.length();
+		int last = 1 + excelNum.charAt(len - 1) - 'A';
+		return excelToDec(excelNum.substring(0, len - 1)) * 26 + last;
+	}
 ]]></content>
   </entry>
   
@@ -193,88 +274,6 @@ __written by me__
 		}
 		return Math.max(max, totalSum - min);
     }
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Test Command Line Copy]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/09/Test-command-line-copy/"/>
-    <updated>2014-08-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/09/Test-command-line-copy</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://stackoverflow.com/questions/6591652/how-do-i-test-the-copy-command-in-the-windows-environment)
-
-> testing the copy command in windows environment 
-
-### Solution
-
-[The most important point](http://stackoverflow.com/a/6591999) is to __come up with different domains of inputs and scenarios__. 
-
-### Copying between:
-
-1. network share
-1. A really slow network share across the Internet
-1. partitions
-1. disks
-1. disks of different types (flash, usb, external sata, SSD, etc...)
-1. directories
-1. within the same directory
-
-### Naming
-
-1. Normal file name
-1. Filename that exceeds 8.3 (verylongfilename.whatever)
-1. Copying a very long file name, but referencing it by it's 8.3 name (copy verylo~1.wha d:\)
-1. A full directory path that exeeds MAX_PATH (260) characters (e.g. c:\a\very\long\directory\name\that\goes\on\forever\in\length......foo.txt)
-1. By absolute addressing (\\?\\c:\foo\foo.txt)
-1. wildcards (e.g. *.* *.txt foo?.txt )
-1. A filename with unicode characters
-1. A filename with illegal characters in it (there are creative ways to get these files on disk)
-
-### Attributes
-
-1. Testing with different file attributes (read-only, hidden, system, archive, etc...)
-1. Validate timestamp is preserved across copies
-1. Validate timestamp is preserved across network file share copies when the destination machine is in another timezone
-1. NTFS ACLs are preserved
-
-### Addressing types
-
-1. reference by absolute path (e.g. copy c:\some\directory\foo.txt c:\other\place\foo.txt)
-1. reference by relative path (e.g. copy ..\..\documents\whatever\foo.txt subdirectory/foo.txt)
-1. By absolute drive letter into current working directoroy of destination (with no path (e.g. copy foo.txt d:)
-1. Network share mounted to a drive letter
-
-### Failure cases, edge cases, and hack attacks
-
-1. Try to copy a file onto itself (e.g copy c:\foo.txt c:\foo.txt)
-1. Copy when the network share is down.
-1. Unplug the network cable in the middle of a network file copy
-1. copy to a read only directory
-1. copy when the source file is locked.
-1. copy the when destination file exists but the destination file exists and is read only
-1. Detach the external disk right before the file copy starts
-1. disk is near full (But would be full before the entire copy finishes)
-1. disk is full
-1. Unplug the power cable in the middle of the copy!
-1. During a very long copy, start another copy with the same source file, but to another destination
-1. During a very long copy, start another copy with a different source file, but the the same destination
-1. During a very long copy, start another copy with the same source and destination files!
-
-### File types
-
-1. ascii file
-1. unicode file
-1. binary file
-
-### Environments
-
-1. RAID configurations
-1. FAT and NTFS
-1. Windows XP, Vista, 7, Server 2003, etc... (you can quantify this by asking the requirement of "which OS" up front)
-1. Virtual Machine (VMWare, virtual PC, hypervisor, etc...)
-1. Intel and AMD
 ]]></content>
   </entry>
   

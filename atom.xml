@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-16T17:41:23+08:00</updated>
+  <updated>2014-08-17T01:49:43+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,147 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Number of Valid Trees Given Preorder and Postorder]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/17/Number-of-tree-given-preorder-postorder/"/>
+    <updated>2014-08-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/17/Number-of-tree-given-preorder-postorder</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#28">link</a></p>
+
+<blockquote><p>对于包含n个结点的二叉树（树中结点编号从1到n），已知前序和后序遍历序列，我们知道不一定能唯一的恢复这棵树。请计算出满足条件的二叉树的总数。</p>
+
+<p>Example</p></blockquote>
+
+<pre><code>前序遍历序列preorder：1 2
+后序遍历序列postorder：2 1
+
+一共有2棵满足条件的二叉树：
+    1       1
+   /         \
+  2           2
+</code></pre>
+
+<h3>Solution</h3>
+
+<blockquote><p>先看两种遍历的性质:</p>
+
+<p>pre-order: root, left *************, right #########</p>
+
+<p>post-order: **************left, ########right, root</p>
+
+<p>所以 pre-order 的第一个元素一定等于 post-order 的最后一个元素. 然后在post-order中由前往后找, 找出等于pre-oder中第二个元素的位置, 也就是 left 的位置.</p>
+
+<ol>
+<li>如果post-order中的这个位置不是倒数第二个, 说明左右子树都非空, 那么对左右子树递归<strong>调用后用乘法原理</strong>.</li>
+<li>如果是倒数第二个, 说明有一个子树为空, return的值就是 <strong>2*递归调用非空子树</strong>.</li>
+</ol>
+</blockquote>
+
+<p><a href="http://www.itint5.com/discuss/94/%E8%AF%B7%E5%A4%A7%E5%AE%B6%E6%8F%90%E4%B8%80%E4%BA%9B%E6%94%B9%E8%BF%9B%E6%84%8F%E8%A7%81">ref</a></p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong>. This code is REALLY 叼炸天。</p>
+
+<pre><code>int helper(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; posorder, 
+         int i1, int j1, int i2, int j2){
+    if(i1 == j1) return 1;
+    if(preorder[i1+1] == posorder[j2-1]){
+        return 2*helper(preorder, posorder, i1+1, j1, i2, j2-1);
+    }
+    int k = i2;
+    while(posorder[k] != preorder[i1+1]){ k++; }
+    return helper(preorder, posorder, i1+1,i1+1+k-i2 ,i2 , k)
+         * helper(preorder, posorder, i1+2+k-i2, j1, k+1, j2-1);
+}
+
+int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; posorder) {
+    int n = preorder.size();
+    return helper(preorder, posorder, 0, n-1, 0, n-1);
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Twitter] Arithmetic Expression Evaluation]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/17/Expression-evaluation/"/>
+    <updated>2014-08-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/17/Expression-evaluation</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#26">link</a></p>
+
+<blockquote><p>给定一个表达式字符串，其中只包含非负整数，加法，减法以及乘法符号，例如7+3<em>4</em>5+2+4-3-1。请写程序计算该表达式的值。</p>
+
+<p>提示：可以尝试使用递归算法，程序将非常简洁易写，很适用于面试场合。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Trying to solve this problem iteratively is like suicide</strong>. The code would be lengthy and buggy, and very hard to make it right.</p>
+
+<p><strong>The most important point about this question, is how to handle minus(&ndash;) sign</strong>. We know that when we see * and /, we evaluate immediately, and when sees + and &ndash;, we postpone it. However this case:</p>
+
+<blockquote><p>1 &ndash; 2 &ndash; 3</p></blockquote>
+
+<p>If we postpone the first minus sign, we would end up getting:</p>
+
+<blockquote><p>1 &ndash; (-1)</p></blockquote>
+
+<p>So it&rsquo;s wrong (outputing 2 in this case).</p>
+
+<p><strong>The solution to this issue is, consider (a &ndash; b) as (a + (-b))</strong>. That&rsquo;s why later in the code, you&rsquo;ll see a variable <strong>preNum</strong> being modified.</p>
+
+<p><a href="http://www.itint5.com/discuss/50/case%E9%87%8C%E9%9D%A2%E6%9C%89%E4%B8%80%E4%B8%AA%E5%B8%A6%E8%B4%9F%E6%95%B4%E6%95%B0%E7%9A%84%EF%BC%8C%E5%B9%B6%E6%B1%82%E9%80%92%E5%BD%92%E5%AE%9E%E7%8E%B0">ref</a></p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>int p;
+
+public int evaluate(String expr) {
+    p = 0;
+    int firstNum = getNumber(expr);
+    return helper(firstNum, expr);
+}
+
+private int helper(int preNum, String expr) {
+    // now p points to a operator (or end of string)
+    if (p == expr.length()) {
+        return preNum;
+    }
+    char operator = expr.charAt(p);
+    p++;
+    int nextNum = getNumber(expr);
+    switch (operator) {
+    case '+':
+        return preNum + helper(nextNum, expr);
+    case '-':
+        return preNum + helper(-1 * nextNum, expr);
+    case '*':
+        return helper(preNum * nextNum, expr);
+    default:
+        return helper(preNum / nextNum, expr);
+    }
+}
+
+private int getNumber(String expr) {
+    // now p points to a number
+    int num = 0;
+    while (p &lt; expr.length() &amp;&amp; expr.charAt(p) &gt;= '0'
+            &amp;&amp; expr.charAt(p) &lt;= '9') {
+        num = num * 10 + expr.charAt(p) - '0';
+        p++;
+    }
+    return num;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Orthogonal Traverse the Map (`)]]></title>
@@ -99,6 +240,29 @@ public int excelToDec(String excelNum) {
         total /= 26;
     }
     return sum;
+}
+</code></pre>
+
+<p><strong>updated code</strong>: we can actually do it recursively. The code is much more concise (the code is found in the eclipse project).</p>
+
+<pre><code>//将十进制数转换为excel数
+public String decToExcel(int decNum) {
+    if (decNum == 0) {
+        return "";
+    }
+    decNum--;
+    char last = (char) ('A' + decNum % 26);
+    return decToExcel(decNum / 26) + last;
+}
+
+//将excel数转换为十进制数
+public int excelToDec(String excelNum) {
+    if (excelNum.equals("")) {
+        return 0;
+    }
+    int len = excelNum.length();
+    int last = 1 + excelNum.charAt(len - 1) - 'A';
+    return excelToDec(excelNum.substring(0, len - 1)) * 26 + last;
 }
 </code></pre>
 ]]></content>
@@ -850,130 +1014,6 @@ k: number of hash functions
 <p>There&rsquo;re 4.3 billion unsigned integers in Java. This is a perfect question to use BitMap.</p>
 
 <p>申请512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Big Data - Remove Duplicate Numbers]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/"/>
-    <updated>2014-08-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/10/big-data-Remove-Duplicate-Numbers</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_JULY_v/article/details/6279498">link</a></p>
-
-<blockquote><p>2.5亿个整数中找出不重复的整数的个数，内存空间不足以容纳这2.5亿个整数。</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Categorized under <strong>双层桶划分</strong> or <strong>BitMap</strong>.</p>
-
-<p>整数个数为2<sup>32</sup>,也就是，我们可以将这2<sup>32</sup>个数，划分为2<sup>8</sup>个区域(比如用单个文件代表一个区域)，然后将数据分离到不同的区域，然后不同的区域在利用bitmap就可以直接解决了。</p>
-
-<p><strong>But how exactly to use BitMap</strong>? 将bit-map扩展一下，用2bit表示一个数即可，0表示未出现，1表示出现一次，2表示出现2次及以上。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Test Command Line Copy]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/09/Test-command-line-copy/"/>
-    <updated>2014-08-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/09/Test-command-line-copy</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/6591652/how-do-i-test-the-copy-command-in-the-windows-environment">link</a></p>
-
-<blockquote><p>testing the copy command in windows environment</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><a href="http://stackoverflow.com/a/6591999">The most important point</a> is to <strong>come up with different domains of inputs and scenarios</strong>.</p>
-
-<h3>Copying between:</h3>
-
-<ol>
-<li>network share</li>
-<li>A really slow network share across the Internet</li>
-<li>partitions</li>
-<li>disks</li>
-<li>disks of different types (flash, usb, external sata, SSD, etc&hellip;)</li>
-<li>directories</li>
-<li>within the same directory</li>
-</ol>
-
-
-<h3>Naming</h3>
-
-<ol>
-<li>Normal file name</li>
-<li>Filename that exceeds 8.3 (verylongfilename.whatever)</li>
-<li>Copying a very long file name, but referencing it by it&rsquo;s 8.3 name (copy verylo~1.wha d:)</li>
-<li>A full directory path that exeeds MAX_PATH (260) characters (e.g. c:\a\very\long\directory\name\that\goes\on\forever\in\length&hellip;&hellip;foo.txt)</li>
-<li>By absolute addressing (\?\c:\foo\foo.txt)</li>
-<li>wildcards (e.g. <em>.</em> *.txt foo?.txt )</li>
-<li>A filename with unicode characters</li>
-<li>A filename with illegal characters in it (there are creative ways to get these files on disk)</li>
-</ol>
-
-
-<h3>Attributes</h3>
-
-<ol>
-<li>Testing with different file attributes (read-only, hidden, system, archive, etc&hellip;)</li>
-<li>Validate timestamp is preserved across copies</li>
-<li>Validate timestamp is preserved across network file share copies when the destination machine is in another timezone</li>
-<li>NTFS ACLs are preserved</li>
-</ol>
-
-
-<h3>Addressing types</h3>
-
-<ol>
-<li>reference by absolute path (e.g. copy c:\some\directory\foo.txt c:\other\place\foo.txt)</li>
-<li>reference by relative path (e.g. copy &#8230;.\documents\whatever\foo.txt subdirectory/foo.txt)</li>
-<li>By absolute drive letter into current working directoroy of destination (with no path (e.g. copy foo.txt d:)</li>
-<li>Network share mounted to a drive letter</li>
-</ol>
-
-
-<h3>Failure cases, edge cases, and hack attacks</h3>
-
-<ol>
-<li>Try to copy a file onto itself (e.g copy c:\foo.txt c:\foo.txt)</li>
-<li>Copy when the network share is down.</li>
-<li>Unplug the network cable in the middle of a network file copy</li>
-<li>copy to a read only directory</li>
-<li>copy when the source file is locked.</li>
-<li>copy the when destination file exists but the destination file exists and is read only</li>
-<li>Detach the external disk right before the file copy starts</li>
-<li>disk is near full (But would be full before the entire copy finishes)</li>
-<li>disk is full</li>
-<li>Unplug the power cable in the middle of the copy!</li>
-<li>During a very long copy, start another copy with the same source file, but to another destination</li>
-<li>During a very long copy, start another copy with a different source file, but the the same destination</li>
-<li>During a very long copy, start another copy with the same source and destination files!</li>
-</ol>
-
-
-<h3>File types</h3>
-
-<ol>
-<li>ascii file</li>
-<li>unicode file</li>
-<li>binary file</li>
-</ol>
-
-
-<h3>Environments</h3>
-
-<ol>
-<li>RAID configurations</li>
-<li>FAT and NTFS</li>
-<li>Windows XP, Vista, 7, Server 2003, etc&hellip; (you can quantify this by asking the requirement of &ldquo;which OS&rdquo; up front)</li>
-<li>Virtual Machine (VMWare, virtual PC, hypervisor, etc&hellip;)</li>
-<li>Intel and AMD</li>
-</ol>
-
 ]]></content>
   </entry>
   
