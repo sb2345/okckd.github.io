@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[Question] Binary Search Tree Find Upper/lower Bound - My Octopress Blog</title>
+  <title>[Question] Numbers Concatenation to Get Max Value - My Octopress Blog</title>
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question Given a BST, find the node that is larger/smaller than particular number Or the question can be: Given a binary search tree and a value k, &hellip;">
+  <meta name="description" content="Question link 数组nums中有n个非负整数（整数用字符串表示），将它们以一定的顺序拼接，得到最大的整数。 样例： nums: [&ldquo;54&rdquo;, &ldquo;546&rdquo;, &ldquo;548&rdquo;, &ldquo;60&rdquo;] &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://okckd.github.io/blog/2014/06/15/BST-find-upper-lower-bound">
+  <link rel="canonical" href="http://okckd.github.io/blog/2014/08/17/Numbers-Concatenation-Max">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
@@ -68,7 +68,7 @@
   
   <header>
     
-      <h1 class="entry-title">[Question] Binary Search Tree Find Upper/lower Bound</h1>
+      <h1 class="entry-title">[Question] Numbers Concatenation to Get Max Value</h1>
     
     
       <p class="meta">
@@ -84,7 +84,7 @@
   
 
 
-<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-17T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -93,49 +93,60 @@
 
 <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>Given a BST, find the node that is larger/smaller than particular number</p></blockquote>
+<p><a href="http://www.itint5.com/oj/#45">link</a></p>
 
-<p>Or the question can be:</p>
+<blockquote><p>数组nums中有n个非负整数（整数用字符串表示），将它们以一定的顺序拼接，得到最大的整数。</p>
 
-<blockquote><p>Given a binary search tree and a value k, please find a node in the binary search tree whose value is closest to k. <a href="http://codercareer.blogspot.sg/2013/03/no-45-closest-node-in-binary-search-tree_2.html">link</a></p></blockquote>
+<p>样例：</p>
 
-<h3>Analysis</h3>
+<p>nums: [&ldquo;54&rdquo;, &ldquo;546&rdquo;, &ldquo;548&rdquo;, &ldquo;60&rdquo;]</p>
 
-<p><strong>This post is based on the second question above</strong>.</p>
+<p>可以拼接得到的最大整数为&#8221;6054854654&#8221;，因此函数应该返回&#8221;6054854654&#8221;。</p></blockquote>
 
-<ol>
-<li>Traverse the tree top-down.</li>
-<li>While traversing, record values that are closer to target than previously-found value.</li>
-<li>If found, the target, break and return. <a href="http://stackoverflow.com/a/6209372">source</a></li>
-</ol>
+<h3>Solution</h3>
 
+<p><strong>I will first list out 2 special cases</strong>:</p>
+
+<blockquote><p>{40, 20, 201} => 4020201</p>
+
+<p>{40, 20, 203} => 4020320</p></blockquote>
+
+<p>Knowing about this 2 cases helps us to come up with a sorting-based algorithm. We only need to achieve this:</p>
+
+<blockquote><p>201 &lt; 20</p>
+
+<p>20 &lt; 203</p></blockquote>
+
+<p>By reading <a href="http://www.itint5.com/discuss/183/%E8%B0%81%E8%83%BD%E5%B8%AE%E6%88%91%E7%9C%8B%E4%B8%80%E4%B8%8B%E6%88%91%E7%9A%84%E4%BB%A3%E7%A0%81%EF%BC%8Cn-200%E6%97%B6%E6%8F%90%E7%A4%BAsegmentation">this post</a>, I found the best comparator solution, defined as below:</p>
+
+<pre><code>String firstNum = s1 + s2;
+String secondNum = s2 + s1;
+return firstNum.compareTo(secondNum);
+</code></pre>
 
 <h3>Code</h3>
 
-<p>From <a href="http://codercareer.blogspot.sg/2013/03/no-45-closest-node-in-binary-search-tree_2.html">this post</a>.</p>
+<p><strong>written by me</strong>.</p>
 
-<pre><code>BinaryTreeNode* getClosestNode(BinaryTreeNode* pRoot, int value)
-{
-    BinaryTreeNode* pClosest = NULL;
-    int minDistance = 0x7FFFFFFF;
-    BinaryTreeNode* pNode = pRoot;
-    while(pNode != NULL){
-        int distance = abs(pNode-&gt;m_nValue - value);
-        if(distance &lt; minDistance){
-            minDistance = distance;
-            pClosest = pNode;
-        }
-
-        if(distance == 0)
-            break;
-
-        if(pNode-&gt;m_nValue &gt; value)
-            pNode = pNode-&gt;m_pLeft;
-        else if(pNode-&gt;m_nValue &lt; value)
-            pNode = pNode-&gt;m_pRight;
+<pre><code>public String biggestNum(String[] nums) {
+    Arrays.sort(nums, new SpecialComparator());
+    StringBuilder sb = new StringBuilder();
+    for (int i = nums.length - 1; i &gt;= 0; i--) {
+        sb.append(nums[i]);
     }
+    return sb.toString();
+}
 
-    return pClosest;
+class SpecialComparator implements Comparator&lt;String&gt; {
+    public int compare(String s1, String s2) {
+        // eg.
+        // 40 &gt; 20
+        // 20 &gt; 201
+        // 203 &gt; 20
+        String firstNum = s1 + s2;
+        String secondNum = s2 + s1;
+        return firstNum.compareTo(secondNum);
+    }
 }
 </code></pre>
 </div>
@@ -160,7 +171,7 @@
   
 
 
-<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-17T00:00:00+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -174,7 +185,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/06/15/BST-find-upper-lower-bound/" data-via="" data-counturl="http://okckd.github.io/blog/2014/06/15/BST-find-upper-lower-bound/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/08/17/Numbers-Concatenation-Max/" data-via="" data-counturl="http://okckd.github.io/blog/2014/08/17/Numbers-Concatenation-Max/" >Tweet</a>
   
   
   
@@ -183,10 +194,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/06/14/Java-modifier-and-access-level/" title="Previous Post: [Question] Java modifier and Access Level">&laquo; [Question] Java modifier and Access Level</a>
+        <a class="basic-alignment left" href="/blog/2014/08/17/Number-of-tree-given-preorder-postorder/" title="Previous Post: [Question] Number of Valid Trees Given Preorder and Postorder">&laquo; [Question] Number of Valid Trees Given Preorder and Postorder</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/06/15/Java-Global-Variable/" title="Next Post: [Question] Java Global Variable">[Question] Java Global Variable &raquo;</a>
       
     </p>
   </footer>
