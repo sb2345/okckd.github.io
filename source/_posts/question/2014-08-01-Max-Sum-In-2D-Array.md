@@ -16,6 +16,8 @@ tags: [ cc150 ]
 
 ### Analysis
 
+__Note that this is a difficult(and high-frequency) question__.
+
 Try convert this question to "__max sum in 1D array__" by sum up all numbers in the same column. (we know that in 1D array, the algo runs O(n) time)
 
 There's in total O(n^2) combinations of ways to sum up a column. So the __total time complexity is O(n^3)__. 
