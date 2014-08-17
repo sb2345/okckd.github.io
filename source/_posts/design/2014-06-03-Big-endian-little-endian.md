@@ -6,7 +6,6 @@ category: Design
 tags: [  ]
 ---
 
-
 ### Difference
 
 __[Big-endian](http://en.wikipedia.org/wiki/Endianness) systems store the most significant byte of a word in the smallest address__ and the least significant byte is stored in the largest address.
