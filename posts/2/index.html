@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link 有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。 注意：query是动态的输入进行查询的，预先并不知道所有的query。 Solution Basic idea of the solution is to &hellip;">
+  <meta name="description" content="Question link 每一种语言，都有自己的字母表，类似英文的a-z，但是顺序不相同。例如，有的语言可能是z是第一个之类的。现在给定这个语言的字典，请分析这个字典，得到这个语言的字母表的顺序。 例如：有如下的字母：C CAC CB BCC BA。 经过分析，得到字母表为C->A->B。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,131 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Alphabet-table/">[Google] Alphabet Table (`)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.sina.com.cn/s/blog_979956cc0101i67x.html">link</a></p>
+
+<blockquote><p>每一种语言，都有自己的字母表，类似英文的a-z，但是顺序不相同。例如，有的语言可能是z是第一个之类的。现在给定这个语言的字典，请分析这个字典，得到这个语言的字母表的顺序。</p>
+
+<p>例如：有如下的字母：C CAC CB BCC BA。 经过分析，得到字母表为C->A->B。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><a href="http://page.renren.com/601882592/channel-noteshow-927705419">http://page.renren.com/601882592/channel-noteshow-927705419</a></p>
+
+<ol>
+<li>C 2. CAC 3. CB 4. BCC 5. BA 经过分析，得到字母表为C->A->B。</li>
+</ol>
+
+
+<p>分析 字典序相邻的位置的字符串，只会有如下两种情况：</p>
+
+<p>（1）排在前面的字符串是下一个串的子串，如C与CAC</p>
+
+<p>（2）两个字符串具有第一对不相同的字符对，如CAC和CBB，第一个不相同的字符对为（A，B），这是就要求A在字母表中的顺序在B前面。对于后面字符并没有要求，如并不要求第二个不相同的字符对（C，B）中的C在字母表中的顺序在B前面。</p>
+
+<p>所以按照第（2）种情况建图，然后对该有向无环图求拓扑排序即可。</p>
+
+<p>So this becomes a Topology Sorting question.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>pair&lt;char,char&gt;  constructEdge(const string &amp; src1, const string &amp; src2)
+{
+     int min_len = min(src1.length(), src2.length());
+     int i = 0;
+     while(i &lt; min_len &amp;&amp; src1[i] == src2[i]){
+           i++;
+     }
+     if(i &lt; min_len){
+           return  make_pair(src1[i], src2[i]);
+     }else{
+           return  make_pair('\0','\0');
+     }
+}
+//-1, 0, 1
+int  alphaTable(const vector&lt;string&gt; &amp;  dict, vector&lt;char&gt; &amp; alpha_table)
+{
+     unordered_map&lt;char,set&lt;char&gt; &gt;  edges;
+     set&lt;char&gt; nodes;
+     for(const string &amp; word : dict){
+          for(char c : word){
+              nodes.insert(c);
+          }
+     }
+     unordered_map&lt;char,int&gt;  in_degree;
+     for(int i = 1; i &lt; dict.length(); i++){
+          pair edge = constructEdge(dict[i-1],dict[i]);
+          if(edge.first != '\0'){
+              edges[edge.first].insert(edge.second);
+              in_degree[edge.second]++;
+          }
+     }
+     queue&lt;char&gt;  q;
+     for(char node : nodes){
+         if(in_degree[node] == 0){
+              q.push(node);
+         }
+     }
+     alpha_table.clear();
+     int result = 0;
+     while(!q.empty()){
+        if(q.size() &gt; 1){
+            result = 1;
+        }
+        char  c = q.front();
+        q.pop();
+        alpha_table.push_back(c);
+        for(char node : edges[c]){
+             in_degree[node] --;
+             if(in_degree[node] == 0){
+                  q.push(node);
+             }
+         }
+     }//while
+     if(alpha_table.size() &lt; nodes.size()){
+         result = -1;
+     }
+     return result;    
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -762,60 +887,6 @@ k: number of hash functions
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-median/">[Design] Big Data - Find Median Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
-
-<blockquote><p>5亿个int找它们的中位数.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Categorized under <strong>双层桶划分</strong>.</p>
-
-<p>Idea: 首先我们将int划分为2<sup>16</sup>个区域，然后读取数据统计落到各个区域里的数的个数，之后我们根据统计结果就可以判断中位数落到那个区域，同时知道这个区域中的第几大数刚好是中位数。然后第二次扫描我们只统计落在这个区域中的那些数就可以了。</p>
-
-<h3>Details</h3>
-
-<p>开一个大小为65536的Int数组，第一遍读取，统计Int32的高16位的情况(就相当于用该数除以65536)。每读取一个数，数组中对应的计数+1。第一遍统计之后，遍历数组，逐个累加统计，看中位数处于哪个区间。</p>
-
-<p>第二遍统计同上面的方法类似，但这次只统计处于区间k的情况，这次计数之后，再统计一下，看中位数所处的区间，最后将高位和低位组合一下就是结果了。</p>
-
-<p>And this can be done more than 2 times, depending on the input size (eg. if input is int64, then do 24/20/20 bits).</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -836,7 +907,7 @@ k: number of hash functions
 <li class='category'><a href='/blog/categories/design/'>design (37)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (2)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (20)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (154)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
@@ -849,6 +920,10 @@ k: number of hash functions
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/08/18/Leetcode-second-third/">[Leetcode] Leetcode Second Round (3)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/08/17/Numbers-Concatenation-Max/">[Question] Numbers Concatenation to Get Max Value</a>
@@ -864,10 +939,6 @@ k: number of hash functions
     
       <li class="post">
         <a href="/blog/2014/08/16/orthogonal-traverse-map/">[Google] Orthogonal Traverse the Map (`)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/16/Excel-decimal-conversion/">[Question] Excel Decimal Conversion</a>
       </li>
     
   </ul>
