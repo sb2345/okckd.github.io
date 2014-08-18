@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-19T01:51:47+08:00</updated>
+  <updated>2014-08-19T03:00:08+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,94 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Design Pattern - Singleton & Factory]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/19/design-pattern-basic-singleton-factory/"/>
+    <updated>2014-08-19T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/19/design-pattern-basic-singleton-factory</id>
+    <content type="html"><![CDATA[<h3>Singleton Pattern</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Singleton_pattern">Singleton pattern</a></strong> is a design pattern that restricts the instantiation of a class to one object.</p>
+
+<h4>in Java</h4>
+
+<p>Since Java 5.0, the easiest way to create a Singleton is the <strong><a href="http://en.wikipedia.org/wiki/Singleton_pattern#The_Enum_way">enum type approach</a></strong>. Here the code is not given.</p>
+
+<p>We will instead cover a very popular implementation: <strong><a href="http://en.wikipedia.org/wiki/Singleton_pattern#Lazy_initialization">Lazy initialization</a></strong>.</p>
+
+<pre><code>public class SingletonDemo {
+    private static volatile SingletonDemo instance = null;
+    private SingletonDemo() { }
+    public static SingletonDemo getInstance() {
+        if (instance == null) {
+            synchronized (SingletonDemo.class) {
+                if (instance == null) {
+                    instance = new SingletonDemo();
+                }
+            }
+        }
+        return instance;
+    }
+}
+</code></pre>
+
+<p>An alternate simpler version:</p>
+
+<pre><code>public class SingletonDemo {
+    private static SingletonDemo instance = null;
+    private SingletonDemo() { }
+    public static synchronized SingletonDemo getInstance() {
+        if (instance == null) {
+            instance = new SingletonDemo();
+        }
+        return instance;
+    }
+}
+</code></pre>
+
+<h3>Factory Method Pattern</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Factory_method_pattern">Factory method pattern</a></strong> is a creational pattern which uses <strong>factory methods</strong> to deal with the problem of creating objects without specifying the exact class of object that will be created.</p>
+
+<p>This is done by creating objects via factory method, either:</p>
+
+<ol>
+<li>specified in an interface/abstract class and implemente (differently)</li>
+<li>implemented in a base class, and be overridden in derived classes</li>
+</ol>
+
+
+<h4>in Java</h4>
+
+<p>A normal Maze Game:</p>
+
+<pre><code>public class MazeGame {
+    public MazeGame() {
+        Room room1 = makeRoom();
+        Room room2 = makeRoom();
+        room1.connect(room2);
+        this.addRoom(room1);
+        this.addRoom(room2);
+    }
+
+    protected Room makeRoom() {
+        return new OrdinaryRoom();
+    }
+}
+</code></pre>
+
+<p>A magic game:</p>
+
+<pre><code>public class MagicMazeGame extends MazeGame {
+    @Override
+    protected Room makeRoom() {
+        return new MagicRoom();
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[A Random Thought]]></title>
@@ -1014,31 +1102,6 @@ public class CountCompleteBinayTreeNodes {
 <h3>6. Other</h3>
 
 <p>公司一般不会自己写个程序进行计算，而是提交到自己核心的数据处理平台上计算，该平台的计算效率可能不如直接写程序高，但它具有<strong>良好的扩展性和容错性</strong>，而这才是企业最看重的。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Big Data - Top K Frequency 2]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2/"/>
-    <updated>2014-08-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
-
-<blockquote><p>一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>The basic solution for &lsquo;Top K&rsquo; questions</strong> is 【分治+trie树/hash+小顶堆】.</p>
-
-<p>In the previous post <a href="http://okckd.github.io/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>, we used HashMap for calculating query frequency. Now we <strong>use Trie to do it</strong>.</p>
-
-<blockquote><p>这题是考虑时间效率。用trie树统计每个词出现的次数，时间复杂度是O(n x le)（le表示单词的平准长度）。然后是找出出现最频繁的前10个词，可以用堆来实现，前面的题中已经讲到了，时间复杂度是O(n x lg10)。所以总的时间复杂度，是O(n x le)与O(n x lg10)中较大的哪一个。</p></blockquote>
-
-<h4>How to use Trie to calculate word frequency?</h4>
-
-<p>在Trie的node节点中<a href="http://blog.csdn.net/ohmygirl/article/details/7953814">添加count域后</a>，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）.</p>
 ]]></content>
   </entry>
   
