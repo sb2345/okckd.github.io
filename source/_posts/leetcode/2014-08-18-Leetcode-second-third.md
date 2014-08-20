@@ -17,7 +17,6 @@ tags: [  ]
 
 ### 2.2
 
-1. Median of Two Sorted Arrays - note the main logic conditions
-1. Largest Rectangle in Histogram - be careful when coding
+1. Largest Rectangle in Histogram
 1. Regular Expression Matching
 1. Wildcard Matching
