@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-18T10:32:13+08:00</updated>
+  <updated>2014-08-20T12:07:32+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,91 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Design Pattern - Singleton & Factory]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/19/design-pattern-basic-singleton-factory/"/>
+    <updated>2014-08-19T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/19/design-pattern-basic-singleton-factory</id>
+    <content type="html"><![CDATA[### First Word
+
+__Singleton__ and __Factory Method__ design pattern are the __2 most frequent topics__ for OOD. 
+
+### Singleton Pattern
+
+__[Singleton pattern](http://en.wikipedia.org/wiki/Singleton_pattern)__ is a design pattern that restricts the instantiation of a class to one object. 
+
+#### in Java
+
+Since Java 5.0, the easiest way to create a Singleton is the __[enum type approach](http://en.wikipedia.org/wiki/Singleton_pattern#The_Enum_way)__. Here the code is not given. 
+
+We will instead cover a very popular implementation: __[Lazy initialization](http://en.wikipedia.org/wiki/Singleton_pattern#Lazy_initialization)__. 
+
+    public class SingletonDemo {
+        private static volatile SingletonDemo instance = null;
+        private SingletonDemo() { }
+        public static SingletonDemo getInstance() {
+            if (instance == null) {
+                synchronized (SingletonDemo.class) {
+                    if (instance == null) {
+                        instance = new SingletonDemo();
+                    }
+                }
+            }
+            return instance;
+        }
+    }
+
+An alternate simpler version (non-sync):
+
+    public class SingletonDemo {
+        private static SingletonDemo instance = null;
+        private SingletonDemo() { }
+        public static synchronized SingletonDemo getInstance() {
+            if (instance == null) {
+                instance = new SingletonDemo();
+            }
+            return instance;
+        }
+    }
+
+### Factory Method Pattern
+
+__[Factory method pattern](http://en.wikipedia.org/wiki/Factory_method_pattern)__ is a creational pattern which uses __factory methods__ to deal with the problem of creating objects without specifying the exact class of object that will be created. 
+
+This is done by creating objects via factory method, either:
+
+1. specified in an interface/abstract class and implemente (differently)
+1. implemented in a base class, and be overridden in derived classes
+
+#### in Java
+
+A normal [Maze Game](http://en.wikipedia.org/wiki/Factory_method_pattern#Java):
+
+    public class MazeGame {
+        public MazeGame() {
+            Room room1 = makeRoom();
+            Room room2 = makeRoom();
+            room1.connect(room2);
+            this.addRoom(room1);
+            this.addRoom(room2);
+        }
+
+        protected Room makeRoom() {
+            return new OrdinaryRoom();
+        }
+    }
+
+A magic game:
+
+    public class MagicMazeGame extends MazeGame {
+        @Override
+        protected Room makeRoom() {
+            return new MagicRoom();
+        }
+    }
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] From Client/Server to Multi-Tier]]></title>
@@ -176,49 +261,6 @@ In the previous post [Big Data - Top k Frequency](/blog/2014/07/25/big-data-Top-
 #### How to use Trie to calculate word frequency? 
 
 在Trie的node节点中[添加count域后](http://blog.csdn.net/ohmygirl/article/details/7953814)，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Big Data - Fuzzy Search Url]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url/"/>
-    <updated>2014-08-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://blog.csdn.net/v_july_v/article/details/7382693)
-
-> 给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？
-
-### Bloom Filter
-
-自从Burton Bloom在70年代提出[Bloom Filter](http://blog.csdn.net/v_july_v/article/details/6685894)之后，Bloom Filter就被广泛用于__拼写检查和数据库系统中__。
-
-#### 基本原理及要点
-
-An empty Bloom filter is __a bit array of m bits__, all set to 0. There must also be __k different hash functions__ defined, each of which maps or hashes some set element to one of the m array positions with a uniform random distribution. 
-
-很明显这个过程并不保证查找的结果是100%正确的。同时也不支持删除一个已经插入的关键字，因为该关键字对应的位会牵动到其他的关键字。
-
-所以一个简单的改进就是 counting Bloom filter，用一个counter数组代替位数组，就可以支持删除了。 
-
-### Error rate
-
-    m: length of BF array (in bits)
-    n: number of input elements
-    k: number of hash functions
-
-A Bloom filter [with 1% error](http://en.wikipedia.org/wiki/Bloom_filter#Space_and_time_advantages) and an optimal value of k, in contrast, requires only about 9.6 bits per element (means m = 9.6 x n). 
-
-#### Usage
-
-Bloom Filter可以用来实现数据字典，进行数据的判重，或者集合求交集.
-
-### Solution
-
-Of course we can always use __【分治+trie树/hash+小顶堆】__ standard solution, but for __Fuzzy search, BF is the best__. 
-
-4G = 2^32 大概是40亿 x 8大概是340亿bit，n = 50亿，如果按出错率0.01算需要的大概是480亿个bit。现在可用的是340亿，相差并不多，这样可能会使出错率上升些。
 ]]></content>
   </entry>
   
