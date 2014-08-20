@@ -36,7 +36,7 @@ If we set the __bucket size as 2__, then this becomes a quick sort (with potenti
 
 ### Code
 
-C++ code from g4g
+C++ code from G4G
 
     void bucketSort(float arr[], int n) {
         // 1) Create n empty buckets
