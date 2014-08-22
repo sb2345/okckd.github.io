@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-21T10:31:40+08:00</updated>
+  <updated>2014-08-22T19:43:12+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,165 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150] v4.7.1 Design a Generic Deck of Cards]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/22/design-deck-card/"/>
+    <updated>2014-08-22T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/22/design-deck-card</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Design a Generic Deck of Cards</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>A simple design:</p>
+
+<pre><code>enum Suit {
+    HEART, DIAMOND, SPADES, CLUBS;
+}
+
+class Deck {
+    List&lt;Card&gt; deck;
+}
+
+class Card {
+    Suit suit;
+    int num;
+}
+</code></pre>
+
+<p>A more complex design:</p>
+
+<pre><code>enum Suit {
+    HEART, DIAMOND, SPADES, CLUBS;
+}
+
+class Deck&lt;T extends Card&gt; {
+    List&lt;Card&gt; deck;
+
+    public void shuffle() {
+    };
+}
+
+abstract class Card {
+    boolean available;
+    Suit suit;
+    int num;
+
+    public boolean isAvailable() {
+        return available;
+    };
+}
+
+class Hand&lt;T extends Card&gt; {
+    List&lt;Card&gt; cards;
+
+    public int score() {
+        int score = 0;
+        for (Card c : cards) {
+            score += c.num;
+        }
+        return score;
+    }
+
+    public void addCard(T card) {
+        cards.add(card);
+    }
+}
+
+// Now use the above generic Data Structure to make a
+// Blackjack Game
+class Blackjack extends Hand&lt;BlackJackCard&gt; {
+}
+
+class BlackJackCard extends Card {
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] About Singleton]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/20/Talk-about-singleton/"/>
+    <updated>2014-08-20T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/20/Talk-about-singleton</id>
+    <content type="html"><![CDATA[<h3>Implement Singlton</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
+
+<h4>using Enum</h4>
+
+<p>This is only available since Java 6.</p>
+
+<pre><code>public enum Singleton_Enum {
+    INSTANCE;
+}
+</code></pre>
+
+<h4>using double checked locking</h4>
+
+<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
+
+<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
+    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
+
+    private Singleton_DoubleCheckedLocking() {
+    }
+
+    public static Singleton_DoubleCheckedLocking getInstance() {
+        if (INSTANCE == null) {
+            synchronized (Singleton_DoubleCheckedLocking.class) {
+                // double checking Singleton instance
+                if (INSTANCE == null) {
+                    INSTANCE = new Singleton_DoubleCheckedLocking();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h4>using static factory method</h4>
+
+<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
+
+<pre><code>public class Singleton_StaticFactory {
+    // initailzed during class loading
+    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
+
+    // to prevent creating another instance of Singleton
+    private Singleton_StaticFactory() {
+    }
+
+    public static Singleton_StaticFactory getSingleton() {
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h3>About thread-saft</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
+
+<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
+
+<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
+
+<ol>
+<li>using static field</li>
+<li>using Enum</li>
+</ol>
+
+
+<h3>Q &amp; A</h3>
+
+<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
+
+<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Question] Square Count of Matchstick Graph]]></title>
@@ -238,88 +397,6 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Design] About Singleton]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/19/Talk-about-singleton/"/>
-    <updated>2014-08-19T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/19/Talk-about-singleton</id>
-    <content type="html"><![CDATA[<h3>Implement Singlton</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
-
-<h4>using Enum</h4>
-
-<p>This is only available since Java 6.</p>
-
-<pre><code>public enum Singleton_Enum {
-    INSTANCE;
-}
-</code></pre>
-
-<h4>using double checked locking</h4>
-
-<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
-
-<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
-    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
-
-    private Singleton_DoubleCheckedLocking() {
-    }
-
-    public static Singleton_DoubleCheckedLocking getInstance() {
-        if (INSTANCE == null) {
-            synchronized (Singleton_DoubleCheckedLocking.class) {
-                // double checking Singleton instance
-                if (INSTANCE == null) {
-                    INSTANCE = new Singleton_DoubleCheckedLocking();
-                }
-            }
-        }
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h4>using static factory method</h4>
-
-<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
-
-<pre><code>public class Singleton_StaticFactory {
-    // initailzed during class loading
-    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
-
-    // to prevent creating another instance of Singleton
-    private Singleton_StaticFactory() {
-    }
-
-    public static Singleton_StaticFactory getSingleton() {
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h3>About thread-saft</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
-
-<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
-
-<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
-
-<ol>
-<li>using static field</li>
-<li>using Enum</li>
-</ol>
-
-
-<h3>Q &amp; A</h3>
-
-<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
-
-<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
-]]></content>
-  </entry>
-  
-  <entry>
     <title type="html"><![CDATA[[Question] Count Level in Perfect Binary Tree]]></title>
     <link href="http://okckd.github.io/blog/2014/08/19/Count-level-in-perfect-BT/"/>
     <updated>2014-08-19T00:00:00+08:00</updated>
@@ -390,15 +467,10 @@
 <li>Palindrome Partitioning II</li>
 <li>Word Ladder</li>
 <li>Minimum Window Substring</li>
-</ol>
-
-
-<h3>2.2</h3>
-
-<ol>
 <li>Largest Rectangle in Histogram</li>
-<li>Regular Expression Matching</li>
-<li>Wildcard Matching</li>
+<li>LRU Cache</li>
+<li>Regular Expression Matching &ndash; difficult</li>
+<li>Wildcard Matching &ndash; very difficult, still</li>
 </ol>
 
 ]]></content>
@@ -1044,35 +1116,6 @@ public boolean existSubString(String query) {
     return false;
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] From Client/Server to Multi-Tier]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/12/From-ClientServer-to-Multi-Tier/"/>
-    <updated>2014-08-12T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/12/From-ClientServer-to-Multi-Tier</id>
-    <content type="html"><![CDATA[<h3>Client/Server</h3>
-
-<p><a href="http://wiki.remobjects.com/wiki/From_Client/Server_to_Multi-Tier">link</a></p>
-
-<p>Client have <strong>direct and full access to the physical database</strong> based on their login string. This is the major weakness of the Client/Server paradigm. The system is vulnerable to attacks.</p>
-
-<p>Because all business logic was <strong>implemented on the client application</strong>, changes to business logic means redeploying new client software to all users again.</p>
-
-<p>Another drawback is that the network interface provided by most back-end database systems has been designed for access over the local network, using fast connections and no firewalls. Nowadays, many clients’ software needs to run from employee&rsquo;s home offices or from airport lounges. In many cases such connections <strong>will be unreliable or inefficient</strong> to work on.</p>
-
-<h3>Multi-Tier</h3>
-
-<p>The communication between clients and middle-tier server is <strong>no longer tied to a protocol dictated by the database</strong> (no database drivers or connection string on the client). Client applications can authenticate with <strong>a username and password (compare to login string)</strong>.</p>
-
-<p>Communication can be done via HTTP or HTTPS, alternatively or additionally, open standards such as <strong>SOAP, OData and JSON can be used to expose a middle tier</strong> to different clients using protocols that are widely understood.</p>
-
-<p>Biggest advantage is that <strong>all the business logic is transferred from client application into the middle tier</strong>. And the middle tier holds the final control over what data goes in or out.</p>
-
-<p>Still, there&rsquo;re still some business logic on the client tier as well. But it only <strong>complement the rules</strong> that are enforced on the server. Eg. Twitter enforce the 140 character limit locally, and stop you from sending a tweet that is too long (by graying out the Send button).</p>
-
-<p>That means, client side checks are for convenience, and for convenience only; the middle tier server is and must be authoritative for what is allowed and what is not.</p>
 ]]></content>
   </entry>
   
