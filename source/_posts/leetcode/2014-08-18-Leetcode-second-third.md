@@ -14,9 +14,7 @@ tags: [  ]
 1. Palindrome Partitioning II
 1. Word Ladder
 1. Minimum Window Substring
-
-### 2.2
-
 1. Largest Rectangle in Histogram
-1. Regular Expression Matching
-1. Wildcard Matching
+1. LRU Cache
+1. Regular Expression Matching - difficult
+1. Wildcard Matching - very difficult, still

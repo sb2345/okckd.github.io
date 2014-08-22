@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150] 9.7 Circus Tower Routine"
+title: "[CC150] v4.9.7 Circus Tower Routine"
 comments: true
 category: CC150
 tags: [ cc150 ]
