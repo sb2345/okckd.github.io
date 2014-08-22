@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question A circus is designing a tower routine consisting of people standing atop one another’s shoulders. For practical and aesthetic reasons, each &hellip;">
+  <meta name="description" content="Question link 每一种语言，都有自己的字母表，类似英文的a-z，但是顺序不相同。例如，有的语言可能是z是第一个之类的。现在给定这个语言的字典，请分析这个字典，得到这个语言的字母表的顺序。 例如：有如下的字母：C CAC CB BCC BA。 经过分析，得到字母表为C->A->B。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,232 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Alphabet-table/">[Google] Alphabet Table (`)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.sina.com.cn/s/blog_979956cc0101i67x.html">link</a></p>
+
+<blockquote><p>每一种语言，都有自己的字母表，类似英文的a-z，但是顺序不相同。例如，有的语言可能是z是第一个之类的。现在给定这个语言的字典，请分析这个字典，得到这个语言的字母表的顺序。</p>
+
+<p>例如：有如下的字母：C CAC CB BCC BA。 经过分析，得到字母表为C->A->B。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><a href="http://page.renren.com/601882592/channel-noteshow-927705419">http://page.renren.com/601882592/channel-noteshow-927705419</a></p>
+
+<ol>
+<li>C 2. CAC 3. CB 4. BCC 5. BA 经过分析，得到字母表为C->A->B。</li>
+</ol>
+
+
+<p>分析 字典序相邻的位置的字符串，只会有如下两种情况：</p>
+
+<p>（1）排在前面的字符串是下一个串的子串，如C与CAC</p>
+
+<p>（2）两个字符串具有第一对不相同的字符对，如CAC和CBB，第一个不相同的字符对为（A，B），这是就要求A在字母表中的顺序在B前面。对于后面字符并没有要求，如并不要求第二个不相同的字符对（C，B）中的C在字母表中的顺序在B前面。</p>
+
+<p>所以按照第（2）种情况建图，然后对该有向无环图求拓扑排序即可。</p>
+
+<p>So this becomes a Topology Sorting question.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>pair&lt;char,char&gt;  constructEdge(const string &amp; src1, const string &amp; src2)
+{
+     int min_len = min(src1.length(), src2.length());
+     int i = 0;
+     while(i &lt; min_len &amp;&amp; src1[i] == src2[i]){
+           i++;
+     }
+     if(i &lt; min_len){
+           return  make_pair(src1[i], src2[i]);
+     }else{
+           return  make_pair('\0','\0');
+     }
+}
+//-1, 0, 1
+int  alphaTable(const vector&lt;string&gt; &amp;  dict, vector&lt;char&gt; &amp; alpha_table)
+{
+     unordered_map&lt;char,set&lt;char&gt; &gt;  edges;
+     set&lt;char&gt; nodes;
+     for(const string &amp; word : dict){
+          for(char c : word){
+              nodes.insert(c);
+          }
+     }
+     unordered_map&lt;char,int&gt;  in_degree;
+     for(int i = 1; i &lt; dict.length(); i++){
+          pair edge = constructEdge(dict[i-1],dict[i]);
+          if(edge.first != '\0'){
+              edges[edge.first].insert(edge.second);
+              in_degree[edge.second]++;
+          }
+     }
+     queue&lt;char&gt;  q;
+     for(char node : nodes){
+         if(in_degree[node] == 0){
+              q.push(node);
+         }
+     }
+     alpha_table.clear();
+     int result = 0;
+     while(!q.empty()){
+        if(q.size() &gt; 1){
+            result = 1;
+        }
+        char  c = q.front();
+        q.pop();
+        alpha_table.push_back(c);
+        for(char node : edges[c]){
+             in_degree[node] --;
+             if(in_degree[node] == 0){
+                  q.push(node);
+             }
+         }
+     }//while
+     if(alpha_table.size() &lt; nodes.size()){
+         result = -1;
+     }
+     return result;    
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/14/Large-string-find-substring/">[Facebook] Large String Find Substring</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#15">link</a></p>
+
+<blockquote><p>有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。</p>
+
+<p>注意：query是动态的输入进行查询的，预先并不知道所有的query。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Basic idea of the solution is to use Prefix Tree (Trie)</strong> and similar alternatives.</p>
+
+<p><strong>Solution 1</strong> is <a href="http://www.itint5.com/discuss/27/%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E9%A2%84%E5%A4%84%E7%90%86">an nice idea using HashMap</a>.</p>
+
+<blockquote><p>我是把所有长度&lt; =10的子串，哈希一下存放到10个哈希表中。</p>
+
+<p>至于哈希函数的选取，随便选一个应该都不会超时。</p></blockquote>
+
+<p><strong>Solution 2</strong> is using so-called &lsquo;<strong>prefix array</strong>&rsquo;. The most important point of this idea is to only make a substring instance <strong>for every 10 characters</strong>.</p>
+
+<blockquote><p>只用=10的子串。然后二分查找</p>
+
+<p>用=10的字串排序即可，如包含更短的串会使得预处理变成O(10nlg(10n))。 查找的复杂度可能没什么变化，使用&lt;=10会是O(lg(10n))，而只使用=10子串初始化的话，因为可能还要进行短query跟长子串间的前缀比较，复杂度会是O(10lgn)，稍微有点提高。</p></blockquote>
+
+<p>Which is to say, using substring length == 10, we comsume <strong>less time for pre-processing</strong>, and a little <strong>more time when querying</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>read it from <a href="http://www.itint5.com/discuss/203/%E8%B6%85%E7%AE%80%E5%8D%95%E7%9A%84prefix-array-java-code">here</a></strong>, note written by me</p>
+
+<pre><code>private List&lt;String&gt; prefixList;
+
+// pre-process the large string
+public void initWithString(String str) {
+    Set&lt;String&gt; strs = new HashSet&lt;String&gt;();
+
+    for(int i = 0; i &lt; str.length(); ++i) {
+        strs.add(str.substring(i, Math.min(str.length(), i + 10)));
+    }
+    prefixList = new ArrayList&lt;String&gt;(strs);
+    Collections.sort(prefixList);
+}
+
+// find the query substring
+public boolean existSubString(String query) {
+    int low = 0;
+    int high = prefixList.size() - 1;
+    while(low &lt;= high) {
+        int mid = (low + high) / 2;
+        int comp = prefixList.get(mid).compareTo(query);
+        if(comp == 0)  {
+            return true;
+        }
+        if(prefixList.get(mid).startsWith(query)) {
+            return true;
+        }
+        if(comp &gt; 0) //mid &gt; query
+        {
+            high = mid - 1;
+        }else{
+            low = mid + 1;
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -673,108 +899,6 @@ k: number of hash functions
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-median/">[Design] Big Data - Find Median Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
-
-<blockquote><p>5亿个int找它们的中位数.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Categorized under <strong>双层桶划分</strong>.</p>
-
-<p>Idea: 首先我们将int划分为2<sup>16</sup>个区域，然后读取数据统计落到各个区域里的数的个数，之后我们根据统计结果就可以判断中位数落到那个区域，同时知道这个区域中的第几大数刚好是中位数。然后第二次扫描我们只统计落在这个区域中的那些数就可以了。</p>
-
-<h3>Details</h3>
-
-<p>开一个大小为65536的Int数组，第一遍读取，统计Int32的高16位的情况(就相当于用该数除以65536)。每读取一个数，数组中对应的计数+1。第一遍统计之后，遍历数组，逐个累加统计，看中位数处于哪个区间。</p>
-
-<p>第二遍统计同上面的方法类似，但这次只统计处于区间k的情况，这次计数之后，再统计一下，看中位数所处的区间，最后将高位和低位组合一下就是结果了。</p>
-
-<p>And this can be done more than 2 times, depending on the input size (eg. if input is int64, then do 24/20/20 bits).</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-existence-of-number/">[Design] Big Data - Find Existence of a Number</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
-
-<blockquote><p>给40亿个不重复的unsigned int的整数，没排过序的，然后再给一个数，如何快速判断这个数是否在那40亿个数当中？</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Categorized under <strong>BitMap</strong>.</p>
-
-<p>There&rsquo;re 4.3 billion unsigned integers in Java. This is a perfect question to use BitMap.</p>
-
-<p>申请512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -792,7 +916,7 @@ k: number of hash functions
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (4)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (39)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (41)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (2)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (20)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
@@ -810,6 +934,14 @@ k: number of hash functions
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/23/stack-and-heap/">[Design] Stack and Heap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/23/BST-over-hashmap/">[Design] Binary Search Trees Over Hash Tables</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/22/design-deck-card/">[CC150] v4.7.1 Design a Generic Deck of Cards</a>
       </li>
     
@@ -819,14 +951,6 @@ k: number of hash functions
     
       <li class="post">
         <a href="/blog/2014/08/20/Square-count-in-matchstick-graph/">[Question] Square Count of Matchstick Graph</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/20/Dice-roll-DP-question/">[Question] Ways of Dice Throw</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/20/Count-set-bit-in-binary-number/">[Question] Count Set Bit in Binary Number</a>
       </li>
     
   </ul>

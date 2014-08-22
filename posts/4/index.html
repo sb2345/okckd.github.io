@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link 2.5亿个整数中找出不重复的整数的个数，内存空间不足以容纳这2.5亿个整数。 Analysis Categorized under 双层桶划分 or BitMap. 整数个数为232,也就是，我们可以将这232个数，划分为28个区域(比如用单个文件代表一个区域)， &hellip;">
+  <meta name="description" content="Question link 5亿个int找它们的中位数. Analysis Categorized under 双层桶划分. Idea: 首先我们将int划分为216个区域，然后读取数据统计落到各个区域里的数的个数，之后我们根据统计结果就可以判断中位数落到那个区域， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,108 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-median/">[Design] Big Data - Find Median Numbers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+
+<blockquote><p>5亿个int找它们的中位数.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Categorized under <strong>双层桶划分</strong>.</p>
+
+<p>Idea: 首先我们将int划分为2<sup>16</sup>个区域，然后读取数据统计落到各个区域里的数的个数，之后我们根据统计结果就可以判断中位数落到那个区域，同时知道这个区域中的第几大数刚好是中位数。然后第二次扫描我们只统计落在这个区域中的那些数就可以了。</p>
+
+<h3>Details</h3>
+
+<p>开一个大小为65536的Int数组，第一遍读取，统计Int32的高16位的情况(就相当于用该数除以65536)。每读取一个数，数组中对应的计数+1。第一遍统计之后，遍历数组，逐个累加统计，看中位数处于哪个区间。</p>
+
+<p>第二遍统计同上面的方法类似，但这次只统计处于区间k的情况，这次计数之后，再统计一下，看中位数所处的区间，最后将高位和低位组合一下就是结果了。</p>
+
+<p>And this can be done more than 2 times, depending on the input size (eg. if input is int64, then do 24/20/20 bits).</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-existence-of-number/">[Design] Big Data - Find Existence of a Number</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+
+<blockquote><p>给40亿个不重复的unsigned int的整数，没排过序的，然后再给一个数，如何快速判断这个数是否在那40亿个数当中？</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Categorized under <strong>BitMap</strong>.</p>
+
+<p>There&rsquo;re 4.3 billion unsigned integers in Java. This is a perfect question to use BitMap.</p>
+
+<p>申请512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -786,123 +888,6 @@ procedure consumer() {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Decimal-to-Hex/">[Question] Decimal to Hexadecimal</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/13465098/decimal-to-hexadecimal-converter-in-java">link</a></p>
-
-<blockquote><p>Decimal to Hexadecimal conversion.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Convert binary to hex as a group of 4 bits.</p>
-
-<p>Read code.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>private final char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7',
-        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-private final int flag = 0x0F;
-
-public String decToHex(int dec) {
-    char[] hex = new char[8];
-    for (int i = 7; i &gt;= 0; i--) {
-        int oneDigit = flag &amp; dec;
-        dec &gt;&gt;= 4;
-        hex[i] = hexDigits[oneDigit];
-    }
-    return String.valueOf(hex);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Composition-over-inheritance/">[Design] Composition Over Inheritance</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Composition_over_inheritance">Composition over inheritance</a> in OOP is a technique by which classes achieve <strong>polymorphic behavior and code reuse</strong> by containing other classes <strong>instead of</strong> through inheritance.</p>
-
-<h3>Benefits</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Composition_over_inheritance#Benefits">It gives</a> the design <strong>higher flexibility</strong>, giving business-domain classes and more stable business domain in the long term. In other words, HAS-A can be better than an IS-A relationship.</p>
-
-<p><strong>And inheritance <a href="http://stackoverflow.com/a/891908">breaks encapsulation</a></strong>! This post also points out these (which is hard to understand):</p>
-
-<blockquote><ol>
-<li><p>You can&rsquo;t change the implementation inherited from super classes at runtime (obviously because inheritance is defined at compile time).</p></li>
-<li><p>Inheritance exposes a subclass to details of its parent&rsquo;s class implementation, that&rsquo;s why it&rsquo;s often said that inheritance breaks encapsulation (in a sense that you really need to focus on interfaces only not implementation, so reusing by sub classing is not always preferred).</p></li>
-<li><p>The tight coupling provided by inheritance makes the implementation of a subclass very bound up with the implementation of a super class that any change in the parent implementation will force the sub class to change.</p></li>
-<li><p>Excessive reusing by sub-classing can make the inheritance stack very deep and very confusing too.</p></li>
-</ol>
-</blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -920,7 +905,7 @@ public String decToHex(int dec) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (4)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (39)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (41)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (2)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (20)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
@@ -938,6 +923,14 @@ public String decToHex(int dec) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/23/stack-and-heap/">[Design] Stack and Heap</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/23/BST-over-hashmap/">[Design] Binary Search Trees Over Hash Tables</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/22/design-deck-card/">[CC150] v4.7.1 Design a Generic Deck of Cards</a>
       </li>
     
@@ -947,14 +940,6 @@ public String decToHex(int dec) {
     
       <li class="post">
         <a href="/blog/2014/08/20/Square-count-in-matchstick-graph/">[Question] Square Count of Matchstick Graph</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/20/Dice-roll-DP-question/">[Question] Ways of Dice Throw</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/20/Count-set-bit-in-binary-number/">[Question] Count Set Bit in Binary Number</a>
       </li>
     
   </ul>

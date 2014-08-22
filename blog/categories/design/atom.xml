@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-22T19:43:12+08:00</updated>
+  <updated>2014-08-23T03:00:27+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,82 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Stack and Heap]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/23/stack-and-heap/"/>
+    <updated>2014-08-23T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/23/stack-and-heap</id>
+    <content type="html"><![CDATA[### Overview
+
+Value types are created on the stack, and reference types are created on the heap. 
+
+__Both are stored in computer RAM__. 
+
+__Each thread gets a stack__, while there's typically only one heap for the application. 
+
+#### Stack
+
+[When a function](http://stackoverflow.com/a/80113) is called, a block is reserved __on the top of the stack__ for local variables and some bookkeeping data in a LIFO order. Freeing a block from the stack is nothing more than adjusting one pointer. 
+
+#### Heap
+
+Unlike the stack, there's no enforced pattern to the allocation and deallocation of blocks from the heap; you can allocate a block at any time and free it at any time. This makes it much more complex to keep track of which parts of the heap are allocated or free at any given time; there are many custom heap allocators available to tune heap performance for different usage patterns. 
+
+### Q & A
+
+#### What is their scope?
+
+The stack is attached to a thread, so __when the thread exits__ the stack is reclaimed. 
+
+The heap is typically allocated at application startup by the runtime, and is reclaimed __when the application (technically process) exits__. 
+
+#### What determines the size of each of them?
+
+The size of the stack is set when a thread is created. 
+
+The size of the heap is set on application startup, but can grow as space is needed (the allocator requests more memory from the operating system).
+
+#### What makes one faster? 
+
+__The stack is faster__ because the access pattern makes it trivial to allocate and deallocate memory from it, while the heap has much more complex bookkeeping involved in an allocation or free. 
+
+Each byte in the stack tends to be reused very frequently which means it tends to be mapped to the processor's cache, making it very fast. 
+
+Another performance hit for the heap is that the heap, being mostly a global resource, typically has to be multi-threading safe, i.e. each allocation and deallocation needs to be (typically) synchronized.
+
+<img class="middle" src="/assets/images/stack-and-heap.png">
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Binary Search Trees Over Hash Tables]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/23/BST-over-hashmap/"/>
+    <updated>2014-08-23T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/23/BST-over-hashmap</id>
+    <content type="html"><![CDATA[### Question 
+
+[What are the advantages](http://stackoverflow.com/questions/4128546/advantages-of-binary-search-trees-over-hash-tables) of binary search trees over hash tables? 
+
+### Answer
+
+1. __More memory-efficient__. (They do not reserve more memory than they need to)
+
+    For instance, if a hash function has a range R(h) = 0...100, then you need to allocate an array of 100 (pointers-to) elements, even if you are just hashing 20 elements. 
+
+1. [Inorder traverse](http://stackoverflow.com/a/4128585). 
+
+1. Collision might hamper HashMap's performance. 
+
+1. [Resizing issue](http://stackoverflow.com/a/4129272)
+
+    When the hash table pressure grows too much, you often tend to enlargen and reallocate the hash table. The BST has simpler behavior here and does not tend to suddenly allocate a lot of data and do a rehashing operation. 
+
+1. Binary search tree do range searches efficiently.
+
+__Trees tend to be the [ultimate average data structure](http://stackoverflow.com/a/19896875)__. They can act as lists, can easily be split for parallel operation, have fast removal, insertion and lookup on the order of O(lgn). They do nothing particularly well, but they don't have any excessively bad behavior either. 
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] About Singleton]]></title>
@@ -201,117 +277,6 @@ Still, there're still some business logic on the client tier as well. But it onl
 
 That means, client side checks are for convenience, and for convenience only; the middle tier server is and must be authoritative for what is allowed and what is not.
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] TCP 3-Way Handshake]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/11/Tcp-3way-handshake/"/>
-    <updated>2014-08-11T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/11/Tcp-3way-handshake</id>
-    <content type="html"><![CDATA[### Handshaking
-
-__[Handshaking](http://en.wikipedia.org/wiki/Handshaking) is an automated process of negotiation__ that dynamically sets parameters of a communications channel established between two entities before normal communication over the channel begins. 
-
-It is usually a process that takes place when a computer is about to communicate with a foreign device to establish rules for communication. 
-
-### TCP three-way handshake
-
-__[TCP three-way handshake](http://www.inetdaemon.com/tutorials/internet/tcp/3-way_handshake.shtml)__ is the method used by TCP set up a TCP/IP connection over an Internet Protocol based network. 
-
-It's commonly referred to as "__SYN-SYN-ACK__". 
-
-<img class="middle" src="/assets/images/3way-Tcp-handshake.png">
-
-### Process
-
-1. Host A sends a TCP __SYN__chronize packet to Host B
-1. Host B receives A's SYN
-1. Host B sends a __SYN__chronize-__ACK__nowledgement 
-1. Host A receives B's SYN-ACK
-1. Host A sends __ACK__nowledge
-1. Host B receives ACK. 
-1. TCP socket connection is ESTABLISHED.
-
-Alternatively, there's a good illustration on [wiki](http://en.wikipedia.org/wiki/Handshaking): 
-
-> Establishing a normal TCP connection requires three separate steps:
-
-> 1. The first host (Alice) sends the second host (Bob) a "synchronize" (SYN) message with its own sequence number x, which Bob receives.
->
-> 1. Bob replies with a synchronize-acknowledgment (SYN-ACK) message with its own sequence number y and acknowledgement number x + 1, which Alice receives.
->
-> 1. Alice replies with an acknowledgment message with acknowledgement number y + 1, which Bob receives and to which he doesn't need to reply.
-
-### Two more thing
-
-Note that __FTP, Telnet, HTTP, HTTPS, SMTP, POP3, IMAP, SSH__ and any other protocol that rides over TCP __also has a three way handshake__ performed as connection is opened.
-
-TCP 'rides' on top of Internet Protocol (IP) in the protocol stack. IP handles __IP addressing and routing__ and gets the packets from one place to another, but TCP manages the __actual communication sockets__ between endpoints. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Big Data - Top K Questions (Summarize)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize/"/>
-    <updated>2014-08-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://dongxicheng.org/big-data/select-ten-from-billions/)
-
-> 在海量数据中找出出现频率最高的前K个数，或者从海量数据中找出最大的前K个数，这类问题通常称为“top K”问题，
-
-> 1. top K value
-> 1. top K frequency
-
-### Analysis
-
-__Standard solution__ is 【分治+trie树/hash+小顶堆】, which I covered in another post [Big Data - Top k Frequency](/blog/2014/07/25/big-data-Top-k-frequency/). Briefly it is 3 steps: 
-
-1. 先将数据集按照hash方法分解成多个小数据集，
-1. 使用trie树或者hash统计每个小数据集中的query词频，
-1. 用小顶堆求出每个数据集中出频率最高的前K个数
-
-But, there're other senarios where different solutions may apply. Consider: 
-
-1. Single core vs. multiple core
-
-1. Single PC vs. multiple PC
-
-1. Large RAM vs. limited RAM
-
-1. Distributed system
-
-### 1. 单机+单核+足够大内存
-
-设每个查询词平均占8Byte，则10亿个查询词所需的内存大约是10^9*8=8G内存。如果你有这么大的内存，直接在内存中对查询词进行排序，顺序遍历找出10个出现频率最大的10个即可。这种方法简单快速，更加实用。当然，也可以先用HashMap求出每个词出现的频率，然后求出出现频率最大的10个词。
-
-### 2. 单机+单核+受限内存
-
-这种情况下，需要将原数据文件切割成一个一个小文件，如，采用hash(x)%M，将原文件中的数据切割成M小文件，如果小文件仍大于内存大小，继续采用hash的方法对数据文件进行切割，直到每个小文件小于内存大小，这样，每个文件可放到内存中处理。采用3.1节的方法依次处理每个小文件。
-
-### 3. 单机+多核+足够大内存
-
-这时可以直接在内存中实用hash方法将数据划分成n个partition，每个partition交给一个线程处理，线程的处理逻辑是同[1]节类似，最后一个线程将结果归并。
-
-该方法存在一个瓶颈会明显影响效率，即数据倾斜，每个线程的处理速度可能不同，快的线程需要等待慢的线程，最终的处理速度取决于慢的线程。解决方法是，__将数据划分成 (c x n)个partition（c>1），每个线程处理完当前partition后主动取下一个partition继续处理__，直到所有数据处理完毕，最后由一个线程进行归并。
-
-### 4. 多机+受限内存
-
-这种情况下，为了合理利用多台机器的资源，可将数据分发到多台机器上，每台机器采用[3]节中的策略解决本地的数据。可采用__hash + socket__方法进行数据分发。
-
-### 5. Distributed
-
-Top k问题很适合采用__MapReduce框架__解决，用户只需编写一个map函数和两个reduce 函数，然后提交到Hadoop（采用mapchain和reducechain）上即可解决该问题。
-
-A map function. 对于map函数，采用hash算法，将hash值相同的数据交给同一个reduce task. 
-
-2 reduce functions. 对于__第一个reduce函数__，采用HashMap统计出每个词出现的频率，对于__第二个reduce函数__，统计所有reduce task输出数据中的top k即可。
-
-### 6. Other
-
-公司一般不会自己写个程序进行计算，而是提交到自己核心的数据处理平台上计算，该平台的计算效率可能不如直接写程序高，但它具有__良好的扩展性和容错性__，而这才是企业最看重的。
 ]]></content>
   </entry>
   
