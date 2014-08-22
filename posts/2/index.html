@@ -9,7 +9,8 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link 给定一个表达式字符串，其中只包含非负整数，加法，减法以及乘法符号，例如7+345+2+4-3-1。请写程序计算该表达式的值。 提示：可以尝试使用递归算法，程序将非常简洁易写，很适用于面试场合。 Solution Trying to solve this problem &hellip;">
+  <meta name="description" content="Question link 对于包含n个结点的二叉树（树中结点编号从1到n），已知前序和后序遍历序列，我们知道不一定能唯一的恢复这棵树。请计算出满足条件的二叉树的总数。 Example 前序遍历序列preorder：1 2
+后序遍历序列postorder：2 1 一共有2棵满足条件的二叉树： 1 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +78,97 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/17/Number-of-tree-given-preorder-postorder/">[Question] Number of Valid Trees Given Preorder and Postorder</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#28">link</a></p>
+
+<blockquote><p>对于包含n个结点的二叉树（树中结点编号从1到n），已知前序和后序遍历序列，我们知道不一定能唯一的恢复这棵树。请计算出满足条件的二叉树的总数。</p>
+
+<p>Example</p></blockquote>
+
+<pre><code>前序遍历序列preorder：1 2
+后序遍历序列postorder：2 1
+
+一共有2棵满足条件的二叉树：
+    1       1
+   /         \
+  2           2
+</code></pre>
+
+<h3>Solution</h3>
+
+<blockquote><p>先看两种遍历的性质:</p>
+
+<p>pre-order: root, left *************, right #########</p>
+
+<p>post-order: **************left, ########right, root</p>
+
+<p>所以 pre-order 的第一个元素一定等于 post-order 的最后一个元素. 然后在post-order中由前往后找, 找出等于pre-oder中第二个元素的位置, 也就是 left 的位置.</p>
+
+<ol>
+<li>如果post-order中的这个位置不是倒数第二个, 说明左右子树都非空, 那么对左右子树递归<strong>调用后用乘法原理</strong>.</li>
+<li>如果是倒数第二个, 说明有一个子树为空, return的值就是 <strong>2*递归调用非空子树</strong>.</li>
+</ol>
+</blockquote>
+
+<p><a href="http://www.itint5.com/discuss/94/%E8%AF%B7%E5%A4%A7%E5%AE%B6%E6%8F%90%E4%B8%80%E4%BA%9B%E6%94%B9%E8%BF%9B%E6%84%8F%E8%A7%81">ref</a></p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong>. This code is REALLY 叼炸天。</p>
+
+<pre><code>int helper(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; posorder, 
+         int i1, int j1, int i2, int j2){
+    if(i1 == j1) return 1;
+    if(preorder[i1+1] == posorder[j2-1]){
+        return 2*helper(preorder, posorder, i1+1, j1, i2, j2-1);
+    }
+    int k = i2;
+    while(posorder[k] != preorder[i1+1]){ k++; }
+    return helper(preorder, posorder, i1+1,i1+1+k-i2 ,i2 , k)
+         * helper(preorder, posorder, i1+2+k-i2, j1, k+1, j2-1);
+}
+
+int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; posorder) {
+    int n = preorder.size();
+    return helper(preorder, posorder, 0, n-1, 0, n-1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -834,62 +926,6 @@ public boolean existSubString(String query) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/12/From-ClientServer-to-Multi-Tier/">[Design] From Client/Server to Multi-Tier</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Client/Server</h3>
-
-<p><a href="http://wiki.remobjects.com/wiki/From_Client/Server_to_Multi-Tier">link</a></p>
-
-<p>Client have <strong>direct and full access to the physical database</strong> based on their login string. This is the major weakness of the Client/Server paradigm. The system is vulnerable to attacks.</p>
-
-<p>Because all business logic was <strong>implemented on the client application</strong>, changes to business logic means redeploying new client software to all users again.</p>
-
-<p>Another drawback is that the network interface provided by most back-end database systems has been designed for access over the local network, using fast connections and no firewalls. Nowadays, many clients’ software needs to run from employee&rsquo;s home offices or from airport lounges. In many cases such connections <strong>will be unreliable or inefficient</strong> to work on.</p>
-
-<h3>Multi-Tier</h3>
-
-<p>The communication between clients and middle-tier server is <strong>no longer tied to a protocol dictated by the database</strong> (no database drivers or connection string on the client). Client applications can authenticate with <strong>a username and password (compare to login string)</strong>.</p>
-
-<p>Communication can be done via HTTP or HTTPS, alternatively or additionally, open standards such as <strong>SOAP, OData and JSON can be used to expose a middle tier</strong> to different clients using protocols that are widely understood.</p>
-
-<p>Biggest advantage is that <strong>all the business logic is transferred from client application into the middle tier</strong>. And the middle tier holds the final control over what data goes in or out.</p>
-
-<p>Still, there&rsquo;re still some business logic on the client tier as well. But it only <strong>complement the rules</strong> that are enforced on the server. Eg. Twitter enforce the 140 character limit locally, and stop you from sending a tweet that is too long (by graying out the Send button).</p>
-
-<p>That means, client side checks are for convenience, and for convenience only; the middle tier server is and must be authoritative for what is allowed and what is not.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -905,7 +941,7 @@ public boolean existSubString(String query) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150/'>cc150 (3)</a></li>
+    <li class='category'><a href='/blog/categories/cc150/'>cc150 (4)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (39)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (2)</a></li>
@@ -925,6 +961,14 @@ public boolean existSubString(String query) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/22/design-deck-card/">[CC150] v4.7.1 Design a Generic Deck of Cards</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/20/Talk-about-singleton/">[Design] About Singleton</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/20/Square-count-in-matchstick-graph/">[Question] Square Count of Matchstick Graph</a>
       </li>
     
@@ -934,14 +978,6 @@ public boolean existSubString(String query) {
     
       <li class="post">
         <a href="/blog/2014/08/20/Count-set-bit-in-binary-number/">[Question] Count Set Bit in Binary Number</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/19/design-pattern-basic-singleton-factory/">[Design] Design Pattern - Singleton & Factory</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/19/Talk-about-singleton/">[Design] About Singleton</a>
       </li>
     
   </ul>
