@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Cc150v5 | My Octopress Blog]]></title>
+  <link href="http://okckd.github.io/blog/categories/cc150v5/atom.xml" rel="self"/>
+  <link href="http://okckd.github.io/"/>
+  <updated>2014-08-24T23:33:55+08:00</updated>
+  <id>http://okckd.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.8 Design Othello Game]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/24/design-othello-game/"/>
+    <updated>2014-08-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/24/design-othello-game</id>
+    <content type="html"><![CDATA[### Question
+
+> Othello is played as follows: Each Othello piece is white on one side and black on the other. When a piece is surrounded by its opponents on both the left and right sides, or both the top and bottom, it is said to be captured and its color is flipped. 
+
+> The win is assigned to the person with the most pieces. Implement the object-oriented design for Othello. 
+
+### Class
+
+1. Game
+	1. Two Player objects
+	1. a board object
+	1. singleton class (unless otherwise specified, this needs to be discussed)
+1. Board
+	1. Keep the score (black/white count). Of course we can put score in Game Class as well, it seems logically related to the board a bit more. 
+	1. Array of Piece objects
+	1. getScore() method
+1. Piece
+	1. stores color info
+	1. flip() function
+1. Player
+	1. stores color info
+	1. playPiece() method
+1. Color Enum
+1. Direction Enum
+
+### Functions 
+
+1. placePiece() by the Player (which triggers the following 2 methods)
+1. private flipSection(Position fromWhere, Color c, Direction up/down/left/right) by the board
+1. private updateScore() by the board
+1. getScore() by the board
+
+#### Follow up: Do we need separate Board and Game classes?
+
+Strictly speaking, no. The drawback is adding an extra layers. A function that calls Game class is immediately calling Board class. 
+
+But keeping the objects separate allows us to have a logical separation between the board (which contains just logic involving placing pieces) and the game (which involves times, game flow, etc.). 
+
+### Conclusion
+
+This is an easy, and very standard OOD question. Keep the logic clear, design the layers and object hierarchy, and the rest of things will come naturally. 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.7 Design Online Chat Server (2)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2/"/>
+    <updated>2014-08-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2</id>
+    <content type="html"><![CDATA[... Continued from previous post. 
+
+### Overall view
+
+The system consists of a database, a set of clients, and a set of servers. This is not about OOD, but we need to know. 
+
+1. DB stores user list, chat archive. An SQL DB would be good, __unless we want BigTable for scalability purpose__. 
+
+1. __We use XML for server-client communication__. Because it's debugging friendly. 
+
+1. __A set of servers__. 
+
+	1. Data will be __divided up across machines__, requiring us to potentially hop from machine to machine. 
+	1. When possible, we will try to __replicate some data__ across machines to minimize the lookups. 
+	1. One major design constraint here is to __prevent having a single point of failure__. For instance, if one machine controlled all the user sign-ins, then we'd cut off millions of users potentially if a single machine lost network connectivity.
+
+### Hardest problems
+
+Or the most interesting questions.
+
+#### Q1: How do we know if someone is online?
+
+While we would like users to tell us when they sign off, we can't know for sure. A user's connection might have died, for example. To make sure that we know when a user has signed off, we might try regularly pinging the client to make sure it's still there.
+
+#### Q2: How do we deal with conflicting information?
+
+We have some information stored in the computer's memory and some in the database. What happens if they get out of sync? Which one is "right"?
+
+#### Q3: How do we make our server scale?
+
+While we designed out chat server without worrying—too much- about scalability, in real life this would be a concern. We'd need to split our data across many servers, which would increase our concern about out-of-sync data. 
+
+#### Q4: How we do prevent denial of service attacks?
+
+Clients can push data to us —- what if they try to DOS (denial of service) us? How do we prevent that? 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.7 Design Online Chat Server (1)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-1/"/>
+    <updated>2014-08-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/24/design-online-chat-server-1</id>
+    <content type="html"><![CDATA[### Question 
+
+> Explain how you would design a chat server. In particular, provide details about the various back end components, classes, and methods. 
+
+> What would be the hardest problems to solve?
+
+### Solution
+
+First, decide the objects and methods. Here we'll focus on the core user management and conversation aspects.
+
+#### Class
+
+1. UserMgmt (business logic)
+1. User (includes basic info, UserStatus, a map of conversation, a map of requests)
+1. UserStatus (on/offline, status message)
+1. Conversation Abstract Class (a list of user and a list of messages)
+	1. PrivateChat (private conversation)
+	1. GroupChat
+1. Message (a string and a date/time) 
+1. Request (add request and delete request, involves 2 Users)
+
+#### Functions 
+
+1. Sign in and log off (update availability)
+1. update status message
+1. add/delete request
+1. send/accept/reject a request
+1. create a conversation (group or private)
+1. add a new message (group or private)
+
+### Code
+
+The most important classes is User and UserMgmt. The others are simply data containers. 
+
+UserManager.java
+
+	public class UserManager {
+		private static UserManager instance;
+		private HashMap<Integer, User> usersById = new HashMap<Integer, User>();
+		private HashMap<String, User> usersByAccountName = new HashMap<String, User>();
+		private HashMap<Integer, User> onlineUsers = new HashMap<Integer, User>();
+		
+		public static UserManager getInstance() {
+			if (instance == null) {
+				instance = new UserManager();
+			}
+			return instance;
+		}
+		
+		public void addUser(User fromUser, String toAccountName) {
+			User toUser = usersByAccountName.get(toAccountName);
+			AddRequest req = new AddRequest(fromUser, toUser, new Date());
+			toUser.receivedAddRequest(req);
+			fromUser.sentAddRequest(req);
+		}
+		
+		public void approveAddRequest(AddRequest req) {
+			req.status = RequestStatus.Accepted;
+			User from = req.getFromUser();
+			User to = req.getToUser();
+			from.addContact(to);
+			to.addContact(from);
+		}
+		
+		public void rejectAddRequest(AddRequest req) {
+			req.status = RequestStatus.Rejected;
+			User from = req.getFromUser();
+			User to = req.getToUser();
+			from.removeAddRequest(req);
+			to.removeAddRequest(req);		
+		}
+		
+		public void userSignedOn(String accountName) {
+			User user = usersByAccountName.get(accountName);
+			if (user != null) {
+				user.setStatus(new UserStatus(UserStatusType.Available, ""));			
+				onlineUsers.put(user.getId(), user);
+			}
+		}
+		
+		public void userSignedOff(String accountName) {
+			User user = usersByAccountName.get(accountName);
+			if (user != null) {
+				user.setStatus(new UserStatus(UserStatusType.Offline, ""));
+				onlineUsers.remove(user.getId());
+			}
+		}	
+	}
+
+User.java
+
+Property: 
+
+1. id and name
+1. a map of conversations
+1. a map of sent request
+1. a map of received request
+1. a map of friends list
+
+Methods: 
+
+1. sendMessageToUser(User)
+1. addContact(User)
+1. receivedAddRequest(Request)
+1. sentAddRequest(Request)
+1. removeAddRequest(Request)
+1. addConversation(Conversation)
+
+Note that all user actions are controlled by the UserManager Class. For example, when adding a friend: 
+
+1. User A clicks "add user" on the client. 
+2. User A calls requestAddUser (User B).
+3. This method calls UserManager.addUser(User a, userBid).
+4. UserManager calls both User A.sentAddRequest() and User B.receivedAddRequest().
+
+	public class User {
+		private int id;
+		private UserStatus status = null;
+		private HashMap<Integer, PrivateChat> privateChats = new HashMap<Integer, PrivateChat>();
+		private ArrayList<GroupChat> groupChats = new ArrayList<GroupChat>();
+		private HashMap<Integer, AddRequest> receivedAddRequests = new HashMap<Integer, AddRequest>();
+		private HashMap<Integer, AddRequest> sentAddRequests = new HashMap<Integer, AddRequest>();
+		
+		private HashMap<Integer, User> contacts = new HashMap<Integer, User>();
+		private String accountName;
+		private String fullName;
+		
+		public User(int id, String accountName, String fullName) {
+			this.accountName = accountName;
+			this.fullName = fullName;
+			this.id = id;
+		}
+		
+		public boolean sendMessageToUser(User toUser, String content) {
+			PrivateChat chat = privateChats.get(toUser.getId());
+			if (chat == null) {
+				chat = new PrivateChat(this, toUser);
+				privateChats.put(toUser.getId(), chat);
+			}
+			Message message = new Message(content, new Date());
+			return chat.addMessage(message);
+		}
+		
+		public boolean sendMessageToGroupChat(int groupId, String content) {
+			GroupChat chat = groupChats.get(groupId);
+			if (chat != null) {
+				Message message = new Message(content, new Date());
+				return chat.addMessage(message);
+			}
+			return false;
+		}
+		
+		public void setStatus(UserStatus status) {
+			this.status = status;
+		}
+		
+		public UserStatus getStatus() {
+			return status;
+		}
+		
+		public boolean addContact(User user) {
+			if (contacts.containsKey(user.getId())) {
+				return false;
+			} else {
+				contacts.put(user.getId(), user);
+				return true;
+			}
+		}
+		
+		public void receivedAddRequest(AddRequest req) {
+			int senderId = req.getFromUser().getId();
+			if (!receivedAddRequests.containsKey(senderId)) {
+				receivedAddRequests.put(senderId, req);
+			}		
+		}
+		
+		public void sentAddRequest(AddRequest req) {
+			int receiverId = req.getFromUser().getId();
+			if (!sentAddRequests.containsKey(receiverId)) {
+				sentAddRequests.put(receiverId, req);
+			}		
+		}
+		
+		public void removeAddRequest(AddRequest req) {
+			if (req.getToUser() == this) {
+				receivedAddRequests.remove(req);
+			} else if (req.getFromUser() == this) {
+				sentAddRequests.remove(req);
+			}
+		}
+		
+		public void requestAddUser(String accountName) {
+			UserManager.getInstance().addUser(this, accountName);
+		}
+		
+		public void addConversation(PrivateChat conversation) {
+			User otherUser = conversation.getOtherParticipant(this);
+			privateChats.put(otherUser.getId(), conversation);
+		}
+
+		public void addConversation(GroupChat conversation) {
+			groupChats.add(conversation);
+		}	
+		
+		public int getId() {
+			return id;
+		}
+		
+		public String getAccountName() {
+			return accountName;
+		}
+		
+		public String getFullName() {
+			return fullName;
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.1 Design a Generic Deck of Cards]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/22/design-deck-card/"/>
+    <updated>2014-08-22T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/22/design-deck-card</id>
+    <content type="html"><![CDATA[### Question 
+
+> Design a Generic Deck of Cards
+
+### Solution
+
+A simple design: 
+
+	enum Suit {
+		HEART, DIAMOND, SPADES, CLUBS;
+	}
+
+	class Deck {
+		List<Card> deck;
+	}
+
+	class Card {
+		Suit suit;
+		int num;
+	}
+
+A more complex design: 
+
+	enum Suit {
+		HEART, DIAMOND, SPADES, CLUBS;
+	}
+
+	class Deck<T extends Card> {
+		List<Card> deck;
+
+		public void shuffle() {
+		};
+	}
+
+	abstract class Card {
+		boolean available;
+		Suit suit;
+		int num;
+
+		public boolean isAvailable() {
+			return available;
+		};
+	}
+
+	class Hand<T extends Card> {
+		List<Card> cards;
+
+		public int score() {
+			int score = 0;
+			for (Card c : cards) {
+				score += c.num;
+			}
+			return score;
+		}
+
+		public void addCard(T card) {
+			cards.add(card);
+		}
+	}
+
+	// Now use the above generic Data Structure to make a
+	// Blackjack Game
+	class Blackjack extends Hand<BlackJackCard> {
+	}
+
+	class BlackJackCard extends Card {
+	}
+]]></content>
+  </entry>
+  
+</feed>

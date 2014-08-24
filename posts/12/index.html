@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link Please get the least number after deleting k digits from the input number. For example, if the input number is 24635, the least number &hellip;">
+  <meta name="description" content="Question link Convert a BST to a sorted circular doubly-linked list in-place. Think of the left and right pointers as synonymous to the previous and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,274 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/Convert-BST-To-Circular-DLL/">[LeetCode Plus] Convert Binary Search Tree to Circular Doubly-Linked List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">link</a></p>
+
+<blockquote><p>Convert a BST to a sorted circular doubly-linked list in-place.</p>
+
+<p>Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.</p></blockquote>
+
+<h3>Inorder solution</h3>
+
+<p>This question can be solved with <strong>inorder traversal with the help of a &lsquo;pre&rsquo; pointer</strong>.</p>
+
+<p>This solution is recommended by L33tcode, but not very intuitive, and difficult to write. The C++ code is attached below. <a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">source</a>.</p>
+
+<pre><code>void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
+  if (!p) return;
+  treeToDoublyList(p-&gt;left, prev, head);
+  // current node's left points to previous node
+  p-&gt;left = prev;
+  if (prev)
+    prev-&gt;right = p;  // previous node's right points to current node
+  else
+    head = p; // current node (smallest element) is head of
+              // the list if previous node is not available
+  // as soon as the recursion ends, the head's left pointer 
+  // points to the last node, and the last node's right pointer
+  // points to the head pointer.
+  Node *right = p-&gt;right;
+  head-&gt;left = p;
+  p-&gt;right = head;
+  // updates previous node
+  prev = p;
+  treeToDoublyList(right, prev, head);
+}
+
+// Given an ordered binary tree, returns a sorted circular
+// doubly-linked list. The conversion is done in-place.
+Node* treeToDoublyList(Node *root) {
+  Node *prev = NULL;
+  Node *head = NULL;
+  treeToDoublyList(root, prev, head);
+  return head;
+}
+</code></pre>
+
+<h3>Divide and conquer solution</h3>
+
+<p>The good and intuitive solution is to do D&amp;C and <strong>solve left and right recursively</strong>. Do note how the circular linked lists are merged, and be careful when replacing the pointers.</p>
+
+<p>The Java code is posted below. <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">source</a></p>
+
+<pre><code>public static TreeNode treeToList(TreeNode root) {
+    if (root == null)
+        return (null);
+
+    // Recursively do the subtrees (leap of faith!)
+    TreeNode aList = treeToList(root.left);
+    TreeNode bList = treeToList(root.right);
+
+    // Make root a circular DLL
+    root.left = root;
+    root.right = root;
+
+    // At this point we have three lists, merge them
+    aList = append(aList, root);
+    aList = append(aList, bList);
+
+    return (aList);
+}
+
+/*
+ * given two circular doubly linked lists, append them and return the new
+ * list.
+ */
+public static TreeNode append(TreeNode a, TreeNode b) {
+    if (a == null)
+        return (b);
+    if (b == null)
+        return (a);
+
+    TreeNode aLast = a.left;
+    TreeNode bLast = b.left;
+
+    aLast.right = b;
+    b.left = aLast;
+    bLast.right = a;
+    a.left = bLast;
+
+    return (a);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/23/Stack-with-2-queues/">[Question] Implement Stack Using Two Queues</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/688276/implement-stack-using-two-queues">link</a></p>
+
+<blockquote><p>Given two queues with their standard operations (enqueue, dequeue, isempty, size), implement a stack with its standard operations (pop, push, isempty, size).</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>There should be TWO versions of the solution.</p>
+
+<p><strong>Version A</strong>: The stack should be efficient when pushing an item.</p>
+
+<p><strong>Version B</strong>: The stack should be efficient when popping an item.</p>
+
+<h3>Solution</h3>
+
+<h4>Version A</h4>
+
+<p>push:</p>
+
+<ol>
+<li>enqueue in queue1</li>
+</ol>
+
+
+<p>pop:</p>
+
+<ol>
+<li>while size of queue1 is bigger than 1, pipe dequeued items from queue1 into queue2</li>
+<li>dequeue and return the last item of queue1, then switch the names of queue1 and queue2</li>
+</ol>
+
+
+<h4>Version B</h4>
+
+<p>push:</p>
+
+<ol>
+<li>enqueue in queue2</li>
+<li>enqueue all items of queue1 in queue2, then switch the names of queue1 and queue2</li>
+</ol>
+
+
+<p>pop:</p>
+
+<ol>
+<li>deqeue from queue1</li>
+</ol>
+
+
+<p><a href="http://stackoverflow.com/a/688299">reference</a></p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong>, Version A.</p>
+
+<pre><code>public class StackBuiltWithTwoQueue {
+
+    // http://stackoverflow.com/questions/688276/implement-stack-using-two-queues
+
+    Queue&lt;Integer&gt; q1 = new LinkedList&lt;Integer&gt;();
+    Queue&lt;Integer&gt; q2 = new LinkedList&lt;Integer&gt;();
+
+    public static void main(String[] args) {
+        StackBuiltWithTwoQueue stack = new StackBuiltWithTwoQueue();
+        stack.push(1);
+        stack.push(2);
+        stack.push(3);
+        System.out.println(stack.pop());
+        stack.push(4);
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        stack.push(5);
+        stack.push(6);
+        stack.push(7);
+        stack.push(8);
+        stack.push(9);
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+    }
+
+    public void push(int val) {
+        q1.offer(val);
+    }
+
+    public int pop() {
+        if (q1.isEmpty()) {
+            System.out.print("Stack is empty now ");
+            return -1;
+        }
+        while (q1.size() &gt; 1) {
+            q2.offer(q1.poll());
+        }
+        int topVal = q1.poll();
+        Queue&lt;Integer&gt; temp = q1;
+        q1 = q2;
+        q2 = temp;
+        return topVal;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -730,122 +998,6 @@ private static String removeDigit(String number, int digitIndex) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Clone-octopress-blog-from-a-different-computer/">[Octopress] Clone Octopress Blog From a Different Computer</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&rsquo;ve had a little confusions about how to develop my Octopress blog on 2 different computers. Some solutions posted online does not work, and it turns out that some commands have changed its functions in new version of Octopress. So, I write this post to clarify these confusions.</p>
-
-<p>To set up a new local repository from an online github octopress blog repo, follow the instructions:</p>
-
-<ol>
-<li><p><strong>clone the source branch to the local octopress folder</strong></p>
-
-<blockquote><p>git clone -b source git@github.com:willran168/willran168.github.io.git octopress</p></blockquote></li>
-<li><p><strong>run the rake installation to configure everything</strong></p>
-
-<blockquote><p>cd octopress
-gem install bundler
-rbenv rehash    (I think this is optional)
-bundle install
-rake setup_github_pages</p></blockquote></li>
-<li><p><strong>enter repository URL</strong></p>
-
-<blockquote><p>git@github.com:willran168/willran168.github.io.git</p></blockquote></li>
-<li><p><strong>clone the master branch to the _deploy subfolder</strong></p>
-
-<blockquote><p>git clone git@github.com:willran168/willran168.github.io.git _deploy</p></blockquote></li>
-</ol>
-
-
-<p>Clone master branch is the last step. Because running <code>rake setup_github_pages</code> will remove previous _deploy folder and init a new repo inside of it. So master have to be cloned after this step.</p>
-
-<p>It&rsquo;s done. Now we can do &lsquo;rake gen_deploy&rsquo;, or &lsquo;git commit or push origin source&rsquo;.</p>
-
-<p><a href="http://blog.zerosharp.com/clone-your-octopress-to-blog-from-two-places/">reference</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/19/F-question-list/">[Collection] F Question List</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Leetcode Questions</h3>
-
-<ol>
-<li>Inverse Integer</li>
-<li>Anagrams</li>
-<li>Edit distance</li>
-</ol>
-
-
-<h3>Difficult Questions</h3>
-
-<ol>
-<li>Binary hamming code</li>
-<li>有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。</li>
-<li>Given a dictionary and some words. Check whether these words exists in the dictionary.</li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/13">&larr; Older</a>
@@ -863,7 +1015,7 @@ rake setup_github_pages</p></blockquote></li>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150/'>cc150 (4)</a></li>
 <li class='category'><a href='/blog/categories/collection/'>collection (5)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (41)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (43)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (2)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (20)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
@@ -885,19 +1037,19 @@ rake setup_github_pages</p></blockquote></li>
       </li>
     
       <li class="post">
+        <a href="/blog/2014/08/23/Web-hosting-shared-and-vps/">[Design] Shared Hosting vs. VPS Hosting</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/23/Design-scalable-system/">[Design] Designing Scalable Systems (`)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/23/BST-over-hashmap/">[Design] Binary Search Trees Over Hash Tables</a>
       </li>
     
       <li class="post">
         <a href="/blog/2014/08/22/design-deck-card/">[CC150] v4.7.1 Design a Generic Deck of Cards</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/20/Talk-about-singleton/">[Design] About Singleton</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/20/Square-count-in-matchstick-graph/">[Question] Square Count of Matchstick Graph</a>
       </li>
     
   </ul>
