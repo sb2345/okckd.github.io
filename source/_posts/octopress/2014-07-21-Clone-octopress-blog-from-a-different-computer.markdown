@@ -2,8 +2,8 @@
 layout: post
 title: "[Octopress] Clone Octopress Blog From A Different Computer"
 comments: true
-category: Design
-tags: [ src ]
+category: octopress
+tags: [  ]
 ---
 
 ### Before we start

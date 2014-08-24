@@ -121,6 +121,8 @@ Note that all user actions are controlled by the UserManager Class. For example,
 3. This method calls UserManager.addUser(User a, userBid).
 4. UserManager calls both User A.sentAddRequest() and User B.receivedAddRequest().
 
+Code:
+
 	public class User {
 		private int id;
 		private UserStatus status = null;
@@ -128,7 +130,7 @@ Note that all user actions are controlled by the UserManager Class. For example,
 		private ArrayList<GroupChat> groupChats = new ArrayList<GroupChat>();
 		private HashMap<Integer, AddRequest> receivedAddRequests = new HashMap<Integer, AddRequest>();
 		private HashMap<Integer, AddRequest> sentAddRequests = new HashMap<Integer, AddRequest>();
-		
+    
 		private HashMap<Integer, User> contacts = new HashMap<Integer, User>();
 		private String accountName;
 		private String fullName;

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Collection] G Question List"
+title: "[Google] G Question List"
 comments: true
 category: Google
 tags: [  ]

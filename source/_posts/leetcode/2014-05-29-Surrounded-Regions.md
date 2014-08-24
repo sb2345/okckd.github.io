@@ -76,7 +76,7 @@ __For super-large test cases, it gets 'java.lang.StackOverflowError' exception__
 
 > Recursive dfs would take too much resource (too many calls which require space to store the calling state) than bfs for long long case. Considering one of test case with 200x200 matrix, in worst case the longest path (number of calls) might take 200x200 = 40,000 long. While with bfs, the maximal calls are about less than 400. 
 
-One more thing, so __DFS with stack, or BFS with queue, which one would consume less space__? I think BFS. The difference is DFS space usage is max depth, while BFS is the max width. However in this question, each node have 4 adjacent nodes, so the DFS space usage would be increased to 3 x (max depth). More details on this topic, please refer to __[A Study of DFS, BFS and space efficiency]({% post_url /collections/2014-05-29-Study-DFS-BFS-space %})__. 
+One more thing, so __DFS with stack, or BFS with queue, which one would consume less space__? I think BFS. The difference is DFS space usage is max depth, while BFS is the max width. However in this question, each node have 4 adjacent nodes, so the DFS space usage would be increased to 3 x (max depth). More details on this topic, please refer to __DFS, BFS and space efficiency__. 
 
 If any reader have an idea on this, please comment!
 

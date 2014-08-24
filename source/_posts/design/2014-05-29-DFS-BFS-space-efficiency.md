@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Collection] DFS, BFS and space efficiency"
+title: "[Design] DFS, BFS and space efficiency"
 comments: true
-category: collection
+category: Design
 tags: [  ]
 ---
 
