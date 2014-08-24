@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: Collection - My Octopress Blog</title>
+  <title>[CC150v5] 8.7 Design Online Chat Server (2) - My Octopress Blog</title>
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Category: collection">
+  <meta name="description" content="&hellip; Continued from previous post. Overall view The system consists of a database, a set of clients, and a set of servers. This is not about OOD &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://okckd.github.io/blog/categories/collection">
+  <link rel="canonical" href="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
@@ -76,63 +76,124 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: Collection</h1>
+    
+      <h1 class="entry-title">[CC150v5] 8.7 Design Online Chat Server (2)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>&hellip; Continued from previous post.</p>
 
-  
-  <h2>2014</h2>
+<h3>Overall view</h3>
 
-<article>
-  
-<h1><a href="/blog/2014/06/11/BST-insert-and-delete/">[Collection] BST Node Insertion / Deletion</a></h1>
-<time datetime="2014-06-11T00:00:00+08:00" pubdate><span class='month'>Jun</span> <span class='day'>11</span> <span class='year'>2014</span></time>
+<p>The system consists of a database, a set of clients, and a set of servers. This is not about OOD, but we need to know.</p>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/collection/'>collection</a></span>
-</footer>
+<ol>
+<li><p>DB stores user list, chat archive. An SQL DB would be good, <strong>unless we want BigTable for scalability purpose</strong>.</p></li>
+<li><p><strong>We use XML for server-client communication</strong>. Because it&rsquo;s debugging friendly.</p></li>
+<li><p><strong>A set of servers</strong>.</p>
 
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2014/06/03/Implement-DFS-using-stack/">[Collection] Implemention of DFS Using a Stack</a></h1>
-<time datetime="2014-06-03T00:00:00+08:00" pubdate><span class='month'>Jun</span> <span class='day'>03</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/collection/'>collection</a></span>
-</footer>
+<ol>
+<li>Data will be <strong>divided up across machines</strong>, requiring us to potentially hop from machine to machine.</li>
+<li>When possible, we will try to <strong>replicate some data</strong> across machines to minimize the lookups.</li>
+<li>One major design constraint here is to <strong>prevent having a single point of failure</strong>. For instance, if one machine controlled all the user sign-ins, then we&rsquo;d cut off millions of users potentially if a single machine lost network connectivity.</li>
+</ol>
+</li>
+</ol>
 
 
-</article>
+<h3>Hardest problems</h3>
 
+<p>Or the most interesting questions.</p>
 
+<h4>Q1: How do we know if someone is online?</h4>
 
-<article>
-  
-<h1><a href="/blog/2014/05/29/DFS-BFS-space-efficiency/">[Collection] DFS, BFS and Space Efficiency</a></h1>
-<time datetime="2014-05-29T00:00:00+08:00" pubdate><span class='month'>May</span> <span class='day'>29</span> <span class='year'>2014</span></time>
+<p>While we would like users to tell us when they sign off, we can&rsquo;t know for sure. A user&rsquo;s connection might have died, for example. To make sure that we know when a user has signed off, we might try regularly pinging the client to make sure it&rsquo;s still there.</p>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/collection/'>collection</a></span>
-</footer>
+<h4>Q2: How do we deal with conflicting information?</h4>
 
+<p>We have some information stored in the computer&rsquo;s memory and some in the database. What happens if they get out of sync? Which one is &ldquo;right&rdquo;?</p>
 
-</article>
+<h4>Q3: How do we make our server scale?</h4>
 
+<p>While we designed out chat server without worrying—too much- about scalability, in real life this would be a concern. We&rsquo;d need to split our data across many servers, which would increase our concern about out-of-sync data.</p>
+
+<h4>Q4: How we do prevent denial of service attacks?</h4>
+
+<p>Clients can push data to us —- what if they try to DOS (denial of service) us? How do we prevent that?</p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-24T00:00:00+08:00" pubdate data-updated="true"></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/cc150v5/'>cc150v5</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2/" data-via="" data-counturl="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/08/24/design-online-chat-server-1/" title="Previous Post: [CC150v5] 8.7 Design Online Chat Server (1)">&laquo; [CC150v5] 8.7 Design Online Chat Server (1)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/08/24/design-othello-game/" title="Next Post: [CC150v5] 8.8 Design Othello Game ">[CC150v5] 8.8 Design Othello Game  &raquo;</a>
+      
+    </p>
+  </footer>
 </article>
 
 </div>
@@ -144,14 +205,14 @@
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (3)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (4)</a></li>
-<li class='category'><a href='/blog/categories/collection/'>collection (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (43)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (45)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (2)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (20)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
+<li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (80)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (1)</a></li>
