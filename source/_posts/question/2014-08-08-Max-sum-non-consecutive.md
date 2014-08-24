@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Max Sum Of Non-Consecutive Elements"
 comments: true
 category: Question
-tags: [ cc150 ]
+tags: [ src ]
 ---
 
 ### Question 

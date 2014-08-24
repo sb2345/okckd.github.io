@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Quick Sort"
 comments: true
 category: Question
-tags: [ cc150 ]
+tags: [ src ]
 ---
 
 ### Question 

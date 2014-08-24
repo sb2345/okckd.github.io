@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Inorder Successor in Binary Search Tree"
 comments: true
 category: Question
-tags: [ cc150 ]
+tags: [ src ]
 ---
 
 ### Question 

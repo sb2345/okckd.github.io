@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Reconstruct Tree From Pre-Order Traversal"
 comments: true
 category: Question
-tags: [ cc150 ]
+tags: [ src ]
 ---
 
 ### Question 

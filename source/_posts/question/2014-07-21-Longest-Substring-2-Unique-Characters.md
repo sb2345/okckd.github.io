@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Longest Substring Which Contains 2 Unique Characters"
 comments: true
 category: Question
-tags: [ cc150 ]
+tags: [ src ]
 ---
 
 ### Question 
