@@ -51,8 +51,7 @@ Unlike pre-order traversal, __this is a very difficult question__.
 ### Solution
 
 __First, I wrote the solution using a HashSet, and it works__. However, this solution is not good because it uses some space. 
-
-For more generalized way to write DFS code, read [Implement DFS using a Stack]({% post_url /collections/2014-06-03-Study-implement-DFS %})
+For more generalized way to write DFS code, read another post __Implement DFS using a Stack__. 
 
 __The best and most popular solution is proposed by [1337c0d3r](http://leetcode.com/2010/10/binary-tree-post-order-traversal.html)__. It basically uses 1 more pointer to track the current status (whether I'm traversing down, or up, and in which direction etc.). The extra pointer is called 'prev'. 
 

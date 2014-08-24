@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Collection] F Question List"
+title: "[Facebook] F Question List"
 comments: true
-category: Google
+category: Facebook
 tags: [  ]
 ---
 

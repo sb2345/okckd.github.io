@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Collection] Implemention of DFS using a Stack"
+title: "[Design] Implemention of DFS using a Stack"
 comments: true
-category: collection
+category: Design
 tags: [  ]
 ---
 
@@ -11,7 +11,7 @@ tags: [  ]
 
 This post talks about how to implement DFS without recursion. 
 
-__We have studied 2 kinds of DFS in the post [A Study of DFS, BFS and space efficiency]({% post_url /collections/2014-05-29-Study-DFS-BFS-space %})__. We will skip "true DFS" here, and only talk about "pseudo-DFS" implementation. 
+We have studied 2 kinds of DFS in the post __DFS, BFS and space efficiency__. We will skip "true DFS" here, and only talk about "pseudo-DFS" implementation. 
 
 Remember, __space usage of psudo-DFS is O(depth x branching factor)__. 
 
