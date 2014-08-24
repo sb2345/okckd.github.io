@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-25T00:34:01+08:00</updated>
+  <updated>2014-08-25T01:09:23+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,203 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.9 Design a In-memory File System]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/25/design-in-memory-file-system/"/>
+    <updated>2014-08-25T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/25/design-in-memory-file-system</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Explain the data structures and algorithms that you would use to design an in-memory file system. Illustrate with an example in code where possible.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>A file system consists of Files and Directories</strong>. Each Directory contains a set of Files and Directories.</p>
+
+<p>Since Files and Directories share so many characteristics, we&rsquo;ve implemented them such that they <strong>inherit from the same class</strong> &mdash; Entry.</p>
+
+<h3>Code</h3>
+
+<p>Entry.java</p>
+
+<pre><code>public abstract class Entry {
+    protected Directory parent;
+    protected long created;
+    protected long lastUpdated;
+    protected long lastAccessed;
+    protected String name;
+
+    public Entry(String n, Directory p) {
+        name = n;
+        parent = p;
+        created = System.currentTimeMillis();
+    }
+
+    public boolean delete() {
+        if (parent == null) {
+            return false;
+        }
+        return parent.deleteEntry(this);
+    }
+
+    public abstract int size();
+
+    public String getFullPath() {
+        if (parent == null) {
+            return name;
+        } else {
+            return parent.getFullPath() + "/" + name;
+        }
+    }
+
+    public long getCreationTime() {
+        return created;
+    }
+
+    public long getLastUpdatedTime() {
+        return lastUpdated;
+    }
+
+    public long getLastAccessedTime() {
+        return lastAccessed;
+    }
+
+    public void changeName(String n) {
+        name = n;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+</code></pre>
+
+<p>Directory.java</p>
+
+<pre><code>public class Directory extends Entry {
+    protected ArrayList&lt;Entry&gt; contents;
+
+    public Directory(String n, Directory p) {
+        super(n, p);
+        contents = new ArrayList&lt;Entry&gt;();
+    }
+
+    protected ArrayList&lt;Entry&gt; getContents() {
+        return contents;
+    }
+
+    public int size() {
+        int size = 0;
+        for (Entry e : contents) {
+            size += e.size();
+        }
+        return size;
+    }
+
+    public int numberOfFiles() {
+        int count = 0;
+        for (Entry e : contents) {
+            if (e instanceof Directory) {
+                count++; // Directory counts as a file
+                Directory d = (Directory) e;
+                count += d.numberOfFiles();
+            } else if (e instanceof File) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public boolean deleteEntry(Entry entry) {
+        return contents.remove(entry);
+    }
+
+    public void addEntry(Entry entry) {
+        contents.add(entry);
+    }
+}
+</code></pre>
+
+<p>File.java</p>
+
+<pre><code>public class File extends Entry {
+    private String content;
+    private int size;
+
+    public File(String n, Directory p, int sz) {
+        super(n, p);
+        size = sz;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public String getContents() {
+        return content;
+    }
+
+    public void setContents(String c) {
+        content = c;
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.10 Implement a Hashmap (`)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/25/Implement-HashMap/"/>
+    <updated>2014-08-25T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/25/Implement-HashMap</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Design and implement a hash table which uses chaining (linked lists) to handle collisions.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>I wrote this topic before (using Java source code as a reference). This time, I would like to take another (easier) approach.</p>
+
+<p>The main part of this is to use an array of list structure like this:</p>
+
+<pre><code>LinkedList&lt;Cell&lt;K, V&gt;&gt;[] items;
+</code></pre>
+
+<p>And the Cell Class looks like this:</p>
+
+<pre><code>public class Cell&lt;K, V&gt; {
+    private K key;
+    private V value;
+
+    public Cell(K k, V v) {
+        key = k;
+        value = v;
+    }
+
+    public boolean equivalent(Cell&lt;K, V&gt; c) {
+        return equivalent(c.getKey());
+    }
+
+    public boolean equivalent(K k) {
+        return key.equals(k);
+    }
+
+    public K getKey() {
+        return key;
+    }
+
+    public V getValue() {
+        return value;
+    }
+}
+</code></pre>
+
+<h3>Code</h3>
+
+<p>undone</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CC150v5] 8.8 Design Othello Game]]></title>
@@ -1292,114 +1489,6 @@ int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; poso
     return helper(preorder, posorder, 0, n-1, 0, n-1);
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Twitter] Arithmetic Expression Evaluation]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/17/Expression-evaluation/"/>
-    <updated>2014-08-17T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/17/Expression-evaluation</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#26">link</a></p>
-
-<blockquote><p>给定一个表达式字符串，其中只包含非负整数，加法，减法以及乘法符号，例如7+3<em>4</em>5+2+4-3-1。请写程序计算该表达式的值。</p>
-
-<p>提示：可以尝试使用递归算法，程序将非常简洁易写，很适用于面试场合。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Trying to solve this problem iteratively is like suicide</strong>. The code would be lengthy and buggy, and very hard to make it right.</p>
-
-<p><strong>The most important point about this question, is how to handle minus(&ndash;) sign</strong>. We know that when we see * and /, we evaluate immediately, and when sees + and &ndash;, we postpone it. However this case:</p>
-
-<blockquote><p>1 &ndash; 2 &ndash; 3</p></blockquote>
-
-<p>If we postpone the first minus sign, we would end up getting:</p>
-
-<blockquote><p>1 &ndash; (-1)</p></blockquote>
-
-<p>So it&rsquo;s wrong (outputing 2 in this case).</p>
-
-<p><strong>The solution to this issue is, consider (a &ndash; b) as (a + (-b))</strong>. That&rsquo;s why later in the code, you&rsquo;ll see a variable <strong>preNum</strong> being modified.</p>
-
-<p><a href="http://www.itint5.com/discuss/50/case%E9%87%8C%E9%9D%A2%E6%9C%89%E4%B8%80%E4%B8%AA%E5%B8%A6%E8%B4%9F%E6%95%B4%E6%95%B0%E7%9A%84%EF%BC%8C%E5%B9%B6%E6%B1%82%E9%80%92%E5%BD%92%E5%AE%9E%E7%8E%B0">ref</a></p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>int p;
-
-public int evaluate(String expr) {
-    p = 0;
-    int firstNum = getNumber(expr);
-    return helper(firstNum, expr);
-}
-
-private int helper(int preNum, String expr) {
-    // now p points to a operator (or end of string)
-    if (p == expr.length()) {
-        return preNum;
-    }
-    char operator = expr.charAt(p);
-    p++;
-    int nextNum = getNumber(expr);
-    switch (operator) {
-    case '+':
-        return preNum + helper(nextNum, expr);
-    case '-':
-        return preNum + helper(-1 * nextNum, expr);
-    case '*':
-        return helper(preNum * nextNum, expr);
-    default:
-        return helper(preNum / nextNum, expr);
-    }
-}
-
-private int getNumber(String expr) {
-    // now p points to a number
-    int num = 0;
-    while (p &lt; expr.length() &amp;&amp; expr.charAt(p) &gt;= '0'
-            &amp;&amp; expr.charAt(p) &lt;= '9') {
-        num = num * 10 + expr.charAt(p) - '0';
-        p++;
-    }
-    return num;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Orthogonal Traverse the Map (`)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map/"/>
-    <updated>2014-08-16T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#22">link</a></p>
-
-<blockquote><p>有一个n*m（n和m都不超过50）的棋盘，有k个目标格子需要访问。需要访问的格子的横纵坐标存放在数组x[]和y[]中(0&lt;=x[i]&lt;n, 0&lt;=y[i]&lt;m)。</p>
-
-<p>遍历的规则为：</p>
-
-<p>每一步只能从一个目标格子水平或者竖直跳跃移动到另一个目标格子。</p>
-
-<p>连续的两步必须形成直角。即如果前一步是水平移动，那么下一步只能竖直移动。</p>
-
-<p>问是否存在一种遍历顺序，使得每个目标格子有且仅被访问一次。</p>
-
-<p>样例：k=8, x=[0, 0, 0, 0, 2, 2, 4, 4], y=[0, 2, 4, 6, 4, 6, 2, 4],对应于下图中A, B, C, D, F, E, G, H 8个目标格子，存在满足条件的遍历A->D->E->F->C->B->G->H。</p></blockquote>
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/orthogonal-map.jpg"></p>
-
-<h3>Solution</h3>
-
-<blockquote><p>n,m的棋盘，<a href="http://www.itint5.com/discuss/22/%E7%9B%B4%E8%A7%92%E8%B7%AF%E7%BA%BF%E9%81%8D%E5%8E%86%E6%A3%8B%E7%9B%98">建一个包含n+m个顶点的图G</a>（为了方便说明，类似二分图将其分为两列，左边n个顶点，右边m个顶点，分别代表n行和n列）。</p>
-
-<p>对于目标格子(i,j)，左边第i个顶点和右边第j个顶点连一条边。最后的问题其实就是问转换之后的图G是否存在欧拉欧拉回路或者欧拉路径。</p></blockquote>
 ]]></content>
   </entry>
   
