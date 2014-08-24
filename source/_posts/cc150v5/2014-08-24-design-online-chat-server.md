@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "[CC150] v4.7.1 Design a Generic Deck of Cards"
+title: "[CC150v5] 8.7 Design Online Chat Server"
 comments: true
-category: CC150
-tags: [ cc150 ]
+category: CC150v5
+tags: [  ]
 ---
 
 ### Question 

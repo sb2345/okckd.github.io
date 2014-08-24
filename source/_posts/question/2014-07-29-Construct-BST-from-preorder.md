@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Construct a BST from Preorder Traversal"
 comments: true
 category: Question
-tags: [ cc150 ]
+tags: [ src ]
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Product All 1s"
 comments: true
 category: Google
-tags: [ cc150 ]
+tags: [ src ]
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Count Level in Perfect Binary Tree"
 comments: true
 category: Question
-tags: [ cc150 ]
+tags: [ src ]
 ---
 
 ### Question 
