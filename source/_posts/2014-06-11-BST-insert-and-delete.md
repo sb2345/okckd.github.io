@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Collection] A Study of BST Node Insertion / Deletion"
+title: "[Collection] BST Node Insertion / Deletion"
 comments: true
 category: collection
 tags: [ unit test needed ]

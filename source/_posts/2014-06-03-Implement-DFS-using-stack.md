@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Collection] A Study of implemention of DFS using a Stack"
+title: "[Collection] Implemention of DFS using a Stack"
 comments: true
 category: collection
 tags: [  ]

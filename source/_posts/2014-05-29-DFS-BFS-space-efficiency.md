@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Collection] A Study of DFS, BFS and space efficiency"
+title: "[Collection] DFS, BFS and space efficiency"
 comments: true
 category: collection
 tags: [  ]

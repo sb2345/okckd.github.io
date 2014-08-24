@@ -8,7 +8,7 @@ tags: [  ]
 
 The following questions does not appear in NineChap, but they all worth reading. 
 
-### Phase 1: 
+### Question List 
 
 1. __[Longest Substring Without Repeating Characters ]({% post_url /leetcode/2014-04-27-longest-substring-without-repeating %})__
 
@@ -29,4 +29,3 @@ The following questions does not appear in NineChap, but they all worth reading.
 1. __[Regular Expression Matching]({% post_url /leetcode/2014-04-29-Regular-Expression-Matching %})__ - very difficult
 
 1. __[Wildcard Matching]({% post_url /leetcode/2014-05-15-Wildcard-Matching %})__ - difficult
-
