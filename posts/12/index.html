@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Mutex vs. Semaphore Mutex is a key to a toilet. One person can have the key &ndash; occupy the toilet. When finished, the person gives (frees) the &hellip;">
+  <meta name="description" content="Question link 搜索引擎会通过日志文件把用户每次检索使用的所有检索串都记录下来，每个查询串的长度为1-255字节。 假设目前有一千万个记录（这些查询串的重复度比较高，虽然总数是1千万，但如果除去重复后，不超过3百万个。一个查询串的重复度越高，说明查询它的用户越多，也就是越热门。）， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,192 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/25/big-data-Top-k-frequency/">[Design] Big Data - Top K Frequency</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_JULY_v/article/details/6256463">link</a></p>
+
+<blockquote><p>搜索引擎会通过日志文件把用户每次检索使用的所有检索串都记录下来，每个查询串的长度为1-255字节。</p>
+
+<p>假设目前有一千万个记录（这些查询串的重复度比较高，虽然总数是1千万，但如果除去重复后，不超过3百万个。一个查询串的重复度越高，说明查询它的用户越多，也就是越热门。），请你统计最热门的10个查询串，要求使用的内存不能超过1G。</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>第一步：Query统计</p>
+
+<p>第二步：根据统计结果，找Top 10</p>
+
+<p>Be careful: 内存不能超过1G，10 million 条记录，每条记录是255Byte，很显然要占据2.375G内存.</p>
+
+<h3>Query统计</h3>
+
+<p><strong>HashMap</strong>.</p>
+
+<p>虽然有一千万个Query，但是由于重复度比较高，因此事实上只有300万的Query，每个Query 255Byte，因此我们可以考虑把他们都放进内存中去。</p>
+
+<p>Hash Table绝对是我们优先的选择，因为Hash Table的查询速度非常的快，几乎是O(1)的时间复杂度。我们在O(N)的时间复杂度内完成了对该海量数据的处理。</p>
+
+<h3>找Top 10</h3>
+
+<p><strong>Heap</strong>.</p>
+
+<p>借助堆结构，我们可以在log量级的时间内查找和调整/移动。因此到这里，我们的算法可以改进为这样，维护一个K(该题目中是10)大小的小根堆，然后遍历300万的Query，分别和根元素进行对比。</p>
+
+<p>查找目标元素的时间复杂度为 O(logK)。</p>
+
+<h3>Conclusion</h3>
+
+<p>至此，算法就完全结束了，经过上述第一步、先用Hash表统计每个Query出现的次数，O（N）；然后第二步、采用堆数据结构找出Top 10，O(NlogK)。所以，我们最终的时间复杂度是：O（N） + O(N&#8217;logK)。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/25/Top-k-Smallest-Element/">[Question] Top K Element (Quick Select)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/k-largestor-smallest-elements-in-an-array/">link</a></p>
+
+<blockquote><p>Find Top k smallest element in an array.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>There&rsquo;re 2 solutions.</p>
+
+<p>First solution, <strong>use a max-heap</strong>. O(nlgk) time complexity.</p>
+
+<p>Second solution is called <strong><a href="http://www.geekviewpoint.com/java/search/quickselect">quick select</a></strong>, a type of <a href="http://en.wikipedia.org/wiki/Selection_algorithm">selection algorithm</a> that&rsquo;s based on quicksort. It&rsquo;s averaging O(n) time, but O(n<sup>2</sup>) if pivot selection is poor. The code is posted below. There&rsquo;s also a similar <a href="http://blog.teamleadnet.com/2012/07/quick-select-algorithm-find-kth-element.html">iterative solution</a>.</p>
+
+<p>To <a href="http://www.isnowfy.com/top-k-number/">further optimize this</a>, we can change the pivot selection method by dividing into k group and find median of each. This is called <a href="http://en.wikipedia.org/wiki/Median_of_medians">Median of medians algorithm</a>. The worst case is O(n) time. And this is the best solution for &ldquo;Top k&rdquo; questions.</p>
+
+<h3>Code</h3>
+
+<p><strong>quick select</strong></p>
+
+<pre><code>public static void quickSelect1(int[] list, int k) {
+    selectHelper1(list, 0, list.length - 1, k);
+}
+
+public static void selectHelper1(int[] list, int left, int right, int k) {
+    int pivotIndex = partition(list, left, right);
+    if (pivotIndex == k) {
+        return;
+    } else if (k &lt; pivotIndex) {
+        selectHelper1(list, left, pivotIndex - 1, k);
+    } else {
+        selectHelper1(list, pivotIndex + 1, right, k);
+    }
+}
+
+private static int partition(int[] list, int left, int right) {
+    int pivot = left + (right - left) / 2;
+    swap(list, right, pivot);
+    for (int i = left; i &lt; right; i++) {
+        if (list[i] &lt; list[right]) {
+            swap(list, i, left);
+            left++;
+        }
+    }
+    swap(list, left, right);
+    return left;
+}
+</code></pre>
+
+<p><strong>quick select, iteratively</strong></p>
+
+<pre><code>public static int quickSelect2(int[] arr, int k) {
+    if (arr == null || arr.length &lt;= k)
+        throw new Error();
+    int from = 0, to = arr.length - 1;
+    // if from == to we reached the kth element
+    while (from &lt; to) {
+        int r = from, w = to;
+        int mid = arr[(r + w) / 2];
+        // stop if the reader and writer meets
+        while (r &lt; w) {
+            if (arr[r] &gt;= mid) { // put the large values at the end
+                swap(arr, w, r);
+                w--;
+            } else { // the value is smaller than the pivot, skip
+                r++;
+            }
+        }
+        // if we stepped up (r++) we need to step one down
+        if (arr[r] &gt; mid)
+            r--;
+        // the r pointer is on the end of the first k elements
+        if (k &lt;= r) {
+            to = r;
+        } else {
+            from = r + 1;
+        }
+    }
+    return arr[k];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -795,203 +981,6 @@ private static String removeDigit(String number, int digitIndex) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/23/Largest-palindrome-product/">[Question] Largest Palindrome Product</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://projecteuler.net/problem=4">link</a></p>
-
-<blockquote><p>The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 × 99.</p>
-
-<p>Find the largest palindrome made from the product of two 3-digit numbers.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>We suppose the largest such palindrome will have six digits rather than five, because 143*777 = 111111 is a palindrome. And we can tell that 6-digit base-10 palindrome <strong>must be a multiple of 11</strong>.</p>
-
-<p>So the question becomes finding the largest palindrome under a million that is a <strong>product of two 3-digit numbers</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>We now declare variable m and n:</p>
-
-<ol>
-<li>step m down from 999 to 100 by 1</li>
-<li>step n down from 999 to 100 by:
-
-<ol>
-<li>if m is divisible by 11, then step n down by 11</li>
-<li>if m is indivisible by 11, then step n down by 1</li>
-</ol>
-</li>
-<li>keep track of the largest product found so far: p = r * s
-
-<ol>
-<li>next time when we found such product value (m * n), it must be m &lt;= r. So n have to be really large in order to make the final product larger than p.</li>
-<li>i.e. n >= p/m.</li>
-<li>As larger palindromes are found, the range of n gets more restricted</li>
-</ol>
-</li>
-</ol>
-
-
-<p><a href="http://stackoverflow.com/a/7198175">reference</a></p>
-
-<h3>Code</h3>
-
-<p>C++ code from stackoverflow</p>
-
-<pre><code>int main(void) {
-  enum { A=100000, B=10000, C=1000, c=100, b=10, a=1, T=10 };
-  int m, n, p, q=111111, r=143, s=777;
-  int nDel, nLo, nHi, inner=0, n11=(999/11)*11;
-
-  for (m=999; m&gt;99; --m) {
-    nHi = n11;  nDel = 11;
-    if (m%11==0) {
-      nHi = 999;  nDel = 1;
-    }
-    nLo = q/m-1;
-    if (nLo &lt; m) nLo = m-1;
-
-    for (n=nHi; n&gt;nLo; n -= nDel) {
-      ++inner;
-      // Check if p = product is a palindrome
-      p = m * n;
-      if (p%T==p/A &amp;&amp; (p/B)%T==(p/b)%T &amp;&amp; (p/C)%T==(p/c)%T) {
-    q=p; r=m; s=n;
-    printf ("%d at %d * %d\n", q, r, s);
-    break;          // We're done with this value of m
-      }
-
-    }
-  }
-  printf ("Final result:  %d at %d * %d   inner=%d\n", q, r, s, inner);
-  return 0;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/22/Bucket-Sort/">[Question] Bucket Sort (Bin Sort)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/bucket-sort-2/">link</a></p>
-
-<blockquote><p>Bucket sort is mainly useful when input is uniformly distributed over a range. For example:</p>
-
-<p>Sort a large set of floating point numbers which are in range from 0.0 to 1.0 and are uniformly distributed across the range. How do we sort the numbers efficiently.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>1) Create n empty buckets (Or lists).</p>
-
-<p>2) Insert each arr[i] into bucket[n*array[i]]</p>
-
-<p>3) Sort individual buckets using <strong>insertion sort</strong>.</p>
-
-<p>4) Concatenate all sorted buckets.</p>
-
-<p>Steps 1 and 2 clearly take O(n) time. Step 4 also takes O(n) time.</p>
-
-<p><strong>The main step to analyze is step 3</strong>. This step also takes O(n) time on average if all numbers are uniformly distributed. <strong>Final time complexity: O(n)</strong>.</p>
-
-<h3>Relationship with other sorting algorithms</h3>
-
-<p>There&rsquo;s a algorithm within the bucket. Now if we use <strong>bucket sort itself</strong> as the sorting function, this becomes a <strong>radix sort</strong>.</p>
-
-<p>If we set the <strong>bucket size as 2</strong>, then this becomes a quick sort (with potentially poor pivot choices).</p>
-
-<h3>Code</h3>
-
-<p>C++ code from G4G</p>
-
-<pre><code>void bucketSort(float arr[], int n) {
-    // 1) Create n empty buckets
-    vector&lt;float&gt; b[n];
-
-    // 2) Put array elements in different buckets
-    for (int i=0; i&lt;n; i++)
-    {
-       int bi = n*arr[i]; // Index in bucket
-       b[bi].push_back(arr[i]);
-    }
-
-    // 3) Sort individual buckets
-    for (int i=0; i&lt;n; i++)
-       sort(b[i].begin(), b[i].end());
-
-    // 4) Concatenate all buckets into arr[]
-    int index = 0;
-    for (int i = 0; i &lt; n; i++)
-        for (int j = 0; j &lt; b[i].size(); j++)
-          arr[index++] = b[i][j];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/13">&larr; Older</a>
@@ -1008,8 +997,8 @@ private static String removeDigit(String number, int digitIndex) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (3)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (6)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (45)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (7)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (46)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (3)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
@@ -1028,6 +1017,14 @@ private static String removeDigit(String number, int digitIndex) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/26/Design-OOD-elevator/">[Design] OOD Design of Elevator</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/25/design-parking-lot/">[CC150v5] 8.4 Design a Parking Lot</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/25/design-in-memory-file-system/">[CC150v5] 8.9 Design a In-memory File System</a>
       </li>
     
@@ -1037,14 +1034,6 @@ private static String removeDigit(String number, int digitIndex) {
     
       <li class="post">
         <a href="/blog/2014/08/24/design-othello-game/">[CC150v5] 8.8 Design Othello Game</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/24/design-online-chat-server-2/">[CC150v5] 8.7 Design Online Chat Server (2)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/24/design-online-chat-server-1/">[CC150v5] 8.7 Design Online Chat Server (1)</a>
       </li>
     
   </ul>

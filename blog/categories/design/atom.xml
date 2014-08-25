@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-25T20:35:51+08:00</updated>
+  <updated>2014-08-26T01:35:35+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,58 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] OOD Design of Elevator]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/26/Design-OOD-elevator/"/>
+    <updated>2014-08-26T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/26/Design-OOD-elevator</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://thought-works.blogspot.sg/2012/11/object-oriented-design-for-elevator-in.html)
+
+> Object Oriented design for Elevator in a multi-storied apartment 
+
+### A Single Elevator
+
+Use Case: 
+
+1. User
+    1. press a button to summon the lift
+    1. press a button to get to a specific floor
+1. Button
+    1. floor button and level button
+    1. illuminates when pressed
+    1. place an 'elevator request' when pressed
+1. Elevator
+    1. moves up/down
+    1. open/close the door
+
+<img class="middle" src="/assets/images/elevator-class-diagram.png">
+
+__ElevatorRequests Class__
+
+Each button press results in an elevator request which has to be served. Each of these requests is tracked at a global place. ElevatorRequests, the class which stores elevator requests can use different strategies to schedule the elevator requests. 
+
+__ElevatorController__
+
+The elevator is controlled by a controller class which we call ElevatorController. The elevator controller instructs the elevator what to do and also can shutdown/start up the elevator of the building. The elevator controller reads the next elevator request to be processed and serves it. 
+
+__Button (Abstract) Class__
+
+Button is abstract class defining common behavior like illuminate, doNotIlluminate. FloorButton, ElevatorButton extend Button type and define placeRequest() which is invoked when the button is pressed. 
+
+In conclusion, __ElevatorController__ runs the show by reading the __ElevatorRequests__ to process and instructing the __Elevator__ what to do. User send request by pressing __Buttons__. 
+
+### Extend the answer to multiple elevators
+
+1. Each elevator have 1 controller. 
+
+1. Floor based requests can be served by any elevator, thus these requests are added to a common area accessible by all controllers. 
+
+1. Each elevator controller runs as a separate thread and checks if it can process a floor request. Mind synchronization issues. 
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] Stack and Heap]]></title>
@@ -135,82 +187,6 @@ all backend server must have identical information (the price you pay for scalab
 ### One more thing
 
 __Trees tend to be the [ultimate average data structure](http://stackoverflow.com/a/19896875)__. They can act as lists, can easily be split for parallel operation, have fast removal, insertion and lookup on the order of O(lgn). They do nothing particularly well, but they don't have any excessively bad behavior either. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] About Singleton]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/20/Talk-about-singleton/"/>
-    <updated>2014-08-20T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/20/Talk-about-singleton</id>
-    <content type="html"><![CDATA[### Implement Singlton
-
-[3 ways](http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html) of writing Singleton. 
-
-#### using Enum
-
-This is only available since Java 6.
-
-	public enum Singleton_Enum {
-		INSTANCE;
-	}
-
-#### using double checked locking
-
-This is __lazy loaded thread-safe__ Singleton, which is popular during Java 5 (with the use of Volatile variable). 
-
-	public class Singleton_DoubleCheckedLocking implements Cloneable {
-		private static volatile Singleton_DoubleCheckedLocking INSTANCE;
-
-		private Singleton_DoubleCheckedLocking() {
-		}
-
-		public static Singleton_DoubleCheckedLocking getInstance() {
-			if (INSTANCE == null) {
-				synchronized (Singleton_DoubleCheckedLocking.class) {
-					// double checking Singleton instance
-					if (INSTANCE == null) {
-						INSTANCE = new Singleton_DoubleCheckedLocking();
-					}
-				}
-			}
-			return INSTANCE;
-		}
-	}
-
-#### using static factory method
-
-Singleton instance is [static and final variable](http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html) it initialized when class is first loaded into memeory so creation of instance is inherently __thread-safe__. 
-
-	public class Singleton_StaticFactory {
-		// initailzed during class loading
-		private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
-
-		// to prevent creating another instance of Singleton
-		private Singleton_StaticFactory() {
-		}
-
-		public static Singleton_StaticFactory getSingleton() {
-			return INSTANCE;
-		}
-	}
-
-### About thread-saft
-
-[Prior to Java 5](http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html) __double checked locking__ mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn't see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class. 
-
-From Java 5 onwards __volatile variable__ guarantee can be used to write thread safe singleton by using double checked locking pattern. 
-
-I personally don't prefer that way as there are many other simpler alternatives like: 
-
-1. using static field
-1. using Enum 
-
-### Q & A
-
-Question: How do you prevent for creating another instance of Singleton using clone() method?
-
-Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as "Can not create clone of Singleton class". 
 ]]></content>
   </entry>
   
