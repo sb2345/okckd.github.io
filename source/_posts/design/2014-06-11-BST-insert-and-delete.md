@@ -20,11 +20,15 @@ Insertion is easy, but deletion is very difficult. However, it's a good idea to 
 1. check whether new value = current node value. If not, proceed.
 
 2. if new value is less, than:
+
     1. if current node has no left child, set left to new value, and return
+
     2. otherwise, go to left child and start over
 
 3. if new value is greater, than:
+    
     1. if current node has no right child, set right to new value
+    
     2. otherwise, go to right child and start over
 
 #### Note:

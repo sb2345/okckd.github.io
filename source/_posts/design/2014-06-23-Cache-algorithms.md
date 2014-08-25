@@ -97,6 +97,6 @@ What is Distributed cache?
 
 A distributed cache may __span multiple servers__ so that it can grow in size and in transactional capacity. It is mainly used to store __application data residing in database and web session data__. 
 
-The idea of distributed caching has become feasible now because main memory has become very cheap and network cards have become very fast, with 1 Gbit now standard everywhere and 10 Gbit gaining traction. 
+The idea of distributed caching has become feasible now because main memory has become very cheap and network cards have become very fast (speed of 1 Gbit is now standard, and 10 Gbit is gaining traction). 
 
 Also, a distributed cache works well on __lower cost machines usually employed for web servers__ as opposed to __database servers__ which require expensive hardware.

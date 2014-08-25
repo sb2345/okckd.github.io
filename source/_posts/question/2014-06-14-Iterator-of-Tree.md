@@ -40,33 +40,31 @@ The most standard way is to do an inorder traversal (by storing a pointer to the
 
 ### Code
 
-    class TreeIterator implements Iterator<TreeNode> {
-        TreeNode root, cursor;
-        Stack<TreeNode> iteratorStack;
+    public class BinaryTreeIterator {
 
-        public TreeIterator(TreeNode root) {
-            this.root = root;
-            this.cursor = root;
-            this.iteratorStack = new Stack<TreeNode>();
+        private Stack<TreeNode> stack = new Stack<TreeNode>();
+
+        public BinaryTreeIterator(TreeNode root) {
+            if (root == null) {
+                throw new NoSuchElementException("Empty tree");
+            }
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
         }
 
         public boolean hasNext() {
-            return (!iteratorStack.empty() || cursor != null);
+            return !stack.isEmpty();
         }
 
         public TreeNode next() {
-            TreeNode nextNodeValue;
-            while (cursor != null) {
-                iteratorStack.push(cursor);
-                cursor = cursor.left;
+            TreeNode top = stack.pop();
+            TreeNode right = top.right;
+            while (right != null) {
+                stack.push(right);
+                right = right.left;
             }
-            cursor = iteratorStack.pop();
-            nextNodeValue = cursor;
-            cursor = cursor.right;
-            return nextNodeValue;
-        }
-
-        @Override
-        public void remove() {
+            return top;
         }
     }
