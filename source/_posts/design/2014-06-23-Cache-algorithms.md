@@ -1,13 +1,14 @@
 ---
 layout: post
-title: "[Design] Cache Algorithms"
+title: "[Design] Cache and Page Replacement Algorithms"
 comments: true
 category: Design
 tags: [  ]
 ---
 
-
 ### Cache Algorithms
+
+This post is originally written for __Cache Algo__ only, before I found out this 2 topics are very similar, so I changed the title to "Cache and Page Replacement Algorithms". 
 
 #### Equation 
 
