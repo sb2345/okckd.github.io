@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="link Traditional RDBMS Data is organized in a highly-structured manner, following the relational model. The need for the data to be well-structured &hellip;">
+  <meta name="description" content="Question link Facebook&rsquo;s &ldquo;You and Joe have 230 friends in common&rdquo; feature. Sure you could use a decent caching strategy, but for &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,301 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/05/MapReduce-Common-Friends/">[Design] MapReduce Common Friends Example</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/a/12375878">link</a></p>
+
+<blockquote><p>Facebook&rsquo;s &ldquo;You and Joe have 230 friends in common&rdquo; feature. Sure you could use a decent caching strategy, but for now, use MapReduce.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>This list doesn&rsquo;t change frequently so it&rsquo;d be wasteful to recalculate it every time. We&rsquo;re going to use mapreduce to calculate everyone&rsquo;s common friends once a day and store those results.</p>
+
+<p>Note that friends are <strong>bi-directional</strong>. If I&rsquo;m your friend, you&rsquo;re mine. (follow-up: how to do it for follower system?)</p>
+
+<h4>Input</h4>
+
+<p>Assume the friends are stored as Person->[List of Friends], our friends list is then:</p>
+
+<pre><code>A -&gt; B C D
+B -&gt; A C D E
+C -&gt; A B D E
+D -&gt; A B C E
+E -&gt; B C D
+</code></pre>
+
+<h4>Map</h4>
+
+<p>The mapper will output a key-value pair. The key will be a friend along with the person. The value will be the list of friends. The key will be sorted so that the friends are in order, causing all pairs of friends to go to the same reducer.</p>
+
+<p>For map(A &ndash;> B C D) :</p>
+
+<pre><code>(A B) -&gt; B C D
+(A C) -&gt; B C D
+(A D) -&gt; B C D
+</code></pre>
+
+<p>For map(B &ndash;> A C D E) : (Note that A comes before B in the key)</p>
+
+<pre><code>(A B) -&gt; A C D E
+(B C) -&gt; A C D E
+(B D) -&gt; A C D E
+(B E) -&gt; A C D E
+</code></pre>
+
+<p>For map(C &ndash;> A B D E) :</p>
+
+<pre><code>(A C) -&gt; A B D E
+(B C) -&gt; A B D E
+(C D) -&gt; A B D E
+(C E) -&gt; A B D E
+</code></pre>
+
+<p>For map(D &ndash;> A B C E) :</p>
+
+<pre><code>(A D) -&gt; A B C E
+(B D) -&gt; A B C E
+(C D) -&gt; A B C E
+(D E) -&gt; A B C E
+</code></pre>
+
+<p>And finally for map(E &ndash;> B C D):</p>
+
+<pre><code>(B E) -&gt; B C D
+(C E) -&gt; B C D
+(D E) -&gt; B C D
+</code></pre>
+
+<p>Before we send these key-value pairs to the reducers, we group them by their keys and get:</p>
+
+<pre><code>(A B) -&gt; (A C D E) (B C D)
+(A C) -&gt; (A B D E) (B C D)
+(A D) -&gt; (A B C E) (B C D)
+(B C) -&gt; (A B D E) (A C D E)
+(B D) -&gt; (A B C E) (A C D E)
+(B E) -&gt; (A C D E) (B C D)
+(C D) -&gt; (A B C E) (A B D E)
+(C E) -&gt; (A B D E) (B C D)
+(D E) -&gt; (A B C E) (B C D)
+</code></pre>
+
+<p>Each line will be passed as an argument to a reducer.</p>
+
+<h4>Reduce</h4>
+
+<p>The reduce function will simply intersect the lists of values and output the same key with the result of the intersection. After reduction:</p>
+
+<pre><code>(A B) -&gt; (C D)
+(A C) -&gt; (B D)
+(A D) -&gt; (B C)
+(B C) -&gt; (A D E)
+(B D) -&gt; (A C E)
+(B E) -&gt; (C D)
+(C D) -&gt; (A B E)
+(C E) -&gt; (B D)
+(D E) -&gt; (B C)
+</code></pre>
+
+<h4>Result</h4>
+
+<p>Now when D visits B&rsquo;s profile, we can quickly look up (B D) and see that they have three friends in common, (A C E).</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/05/AWS-explained/">[Design] Amazon Web Services</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Overview</h2>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Amazon_Web_Services">Amazon Web Services</a></strong> (AWS) is a collection of <strong>remote computing services</strong> that together make up a cloud computing platform. AWS provides a large computing capacity much faster and cheaper than building a physical server farm.</p>
+
+<p>The most well-known is Amazon EC2 and Amazon S3.</p>
+
+<p><a href="http://practicalcloudcomputing.com/post/311045887/cloudexplained">Amazon is an example of</a> an <strong>IAAS (Infrastructure as a Service) provider</strong>.</p>
+
+<h3>Terminologies</h3>
+
+<h4>AWS</h4>
+
+<p>Amazon Web Services, a division of Amazon focusing on hosting our applications and data</p>
+
+<h4>SimpleDB</h4>
+
+<p>AWS’s always-available replacement for RDBMSs. Specifically SimpleDB is their hosted, replicated key-value store that is always available and accessible as a web service</p>
+
+<h4>S3</h4>
+
+<p>(a.k.a Simple Storage Service) AWS’s always-available file storage solution accessible as a web service</p>
+
+<h4>SQS</h4>
+
+<p>(a.k.a Simple Queue Service) AWS’s always-available queueing service accessible as a web service</p>
+
+<h4>ELB</h4>
+
+<p>(a.k.a Elastic Load Balancer) AWS’s always-available load balancing service accessible as a web service</p>
+
+<h4>EC2</h4>
+
+<p>(a.k.a Elastic Compute Cloud) AWS’s on-demand server offering accessible as a web service</p>
+
+<h4>CloudFront</h4>
+
+<p>AWS’s CDN (a.k.a Content Delivery Network) offering accessible as a web service</p>
+
+<h3>Benefits</h3>
+
+<p>Basically, by moving these services out of your data center and into the cloud, you:</p>
+
+<ol>
+<li><p><strong>No longer need to run and maintain a data center</strong>. You no longer need the associated staff</p></li>
+<li><p>Get a <strong>more scalable and available infrastructure</strong> without trying to build it yourself</p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/04/Traveller-Path-Problem/">[Google] Traveller Path Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5147801809846272">link</a></p>
+
+<blockquote><p>Traveler wants to travel from city “A” to city “D”. There is a path from city “A” to city “D”. Path consists of steps, i.e. travel from city “A” to city “B”. Path is encoded as sequence of steps.</p>
+
+<p>Sequence is in incorrect order. Your task is to restore order of steps in the path.</p>
+
+<p>Input (unordered sequence):</p></blockquote>
+
+<pre><code>C -&gt; D 
+A -&gt; B 
+B -&gt; C 
+</code></pre>
+
+<blockquote><p>Output (Correctly ordered list which represents path):</p></blockquote>
+
+<pre><code>A, B, C, D 
+</code></pre>
+
+<blockquote><p>Implement following API:</p></blockquote>
+
+<pre><code>class Step {
+    String start;
+    String finish;
+};
+
+class Node {
+    String value;
+    Node next;
+}
+
+List&lt;String&gt; findPath(List&lt;Step&gt; steps) {
+}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>This question is not stated clear enough. I found one tentative algorithm:</p>
+
+<blockquote><p>First, initialize a result &ndash; sortedPath, and build 2 maps (String to String) &ndash; startsToFinishes and finishesToStarts (O(N))</p>
+
+<p>Then, find the one key on startsToFinishes, that is not a key in finishesToStarts &ndash; this is the city from which the path begins. (O(N))</p>
+
+<p>Then, iteratively, city by city, build the path.</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -560,271 +855,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/03/How-Web-Works/">[CC150v4] 17.1 How Web Works</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p>17.1 Explain what happens, step by step, after you type a URL into a browser Use as much detail as possible.</p>
-
-<h3>Short Answer</h3>
-
-<ol>
-<li>Browser contacts the DNS server to find the IP address of URL</li>
-<li>DNS returns back the IP address of the site</li>
-<li>Browser opens TCP connection to the web server at port 80</li>
-<li>The browser sends a GET request to the server, asking for the file</li>
-<li>Browser fetches the html code</li>
-<li>Browser renders the HTML in the display window</li>
-<li>Browser terminates the connection when window is closed</li>
-</ol>
-
-
-<p><a href="http://superuser.com/q/157408">ref</a></p>
-
-<h3>More Details</h3>
-
-<p>Phase 1:</p>
-
-<ol>
-<li>browser checks cache; if requested object is in cache and is fresh, skip to Phase 3 #4</li>
-<li>browser asks OS for server&rsquo;s IP address</li>
-<li>OS makes a DNS lookup and replies the IP address to the browser</li>
-<li>browser opens a TCP connection to server (this step is much more complex with HTTPS)</li>
-<li>browser sends the HTTP request through TCP connection</li>
-</ol>
-
-
-<p><a href="http://stackoverflow.com/a/2092602">ref</a></p>
-
-<p>Phase 2:</p>
-
-<ol>
-<li>That computer receives the HTTP request from the TCP/IP connection and passes it to the web server program.</li>
-<li>Web server reads the hostname and path and finds or generates the data that you&rsquo;ve asked for.</li>
-<li>Web server generates an HTTP response containing that data.</li>
-<li>Web server sends that HTTP response back down the TCP/IP connection to your machine.</li>
-</ol>
-
-
-<p><a href="http://superuser.com/a/31474">ref</a></p>
-
-<p>Phase 3:</p>
-
-<ol>
-<li>browser receives HTTP response and may close the TCP connection, or reuse it for another request</li>
-<li>browser checks if the response is a redirect (3xx result status codes), authorization request (401), error (4xx and 5xx), etc.; these are handled differently from normal responses (2xx)</li>
-<li>if cacheable, response is stored in cache</li>
-<li>browser decodes response (e.g. if it&rsquo;s gzipped)</li>
-<li>browser determines what to do with response (e.g. is it a HTML page, is it an image, is it a sound clip?)</li>
-<li>browser renders response, or offers a download dialog for unrecognized types</li>
-</ol>
-
-
-<h3>Miscellaneous:</h3>
-
-<p>Each domain name server is divided into zones A single server may only be responsible for knowing the host names and IP addresses for a small subset of a zone, but DNS servers can work together to map all domain names to their IP addresses That means if one domain name server is unable to find the IP addresses of a requested domain then it requests the information from other domain name servers</p>
-
-<p>The firewall will control connections to &amp; from your computer. For the most part it will just be controlling who can connect to your computer and on what ports. For web browsing your firewall generally won&rsquo;t be doing a whole lot.</p>
-
-<p>Your router essentially guides your request through the network, helping the packets get from computer to computer and potentially doing some NAT (Network Address Tranlator) to translate IP addresses along the way (so your internat LAN request can be transitioned onto the wider internet and back).</p>
-
-<h3>Even more</h3>
-
-<p>An even more detailed article can be found <a href="http://www.garshol.priv.no/download/text/http-tut.html">here</a>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/03/Design-Solar-System/">[Google] Design Solar System （`)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=14761735">link</a></p>
-
-<blockquote><p>Design a web application to represent hierarchy of solar system.</p>
-
-<p>Give details of Persistence layer, business layer, presentation layer and Client-server protocol.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>First, OOD part</strong> is very well covered in <a href="http://www.ehow.com/how_5579338_build-own-solar-system-java.html">this site</a>. There&rsquo;re 2 abstract class: <strong>OrbitalSystem</strong>, where &lsquo;Star/Sun&rsquo; is an instance, and <strong>GravityObject</strong>, where &lsquo;Planet/Earch&rsquo; is an instance. Though this does not take satellite into consideration.</p>
-
-<p><strong>Second, the multi-layer structure</strong>. It&rsquo;s cover in another post <strong><a href="/blog/2014/08/03/Multilayered-architecture/">Multilayered architecture</a></strong></p>
-
-<p><strong>Third, the protocol</strong>. We <a href="http://stackoverflow.com/a/4279218">use HTTP protocol</a>, because:</p>
-
-<blockquote><p>HTTP(S) is the best protocol to use. The overhead (i.e. headers) is pretty small, the transfer can be gzipped, the connection can be secured (via SSL). Also, ports 80 (HTTP) and 443 (HTTPS) will be open in 99% of cases. Other ports are not &mdash; for example some carriers block all other ports unless you pay extra.</p></blockquote>
-
-<p>More info on HTTP communication comes later.</p>
-
-<h3>Code</h3>
-
-<p>from <a href="http://www.ehow.com/how_5579338_build-own-solar-system-java.html">here</a></p>
-
-<pre><code>public abstract class GravityObject {
-    double xPosition;
-    double yPosition;
-    double degreeInOrbit;
-    double distanceFromParent;
-
-    GravityObject() {
-    this.distance = 0;
-    }
-
-    GravityObject(double distance) {
-    this.distance = distance;
-    }
-}
-
-import java.util.ArrayList;
-
-public abstract class OrbitalSystem extends GravityObject {
-    private ArrayList children = new ArrayList(); // Objects within the system. They will orbit the parent.
-
-    public void add(GravityObject child) { children.add(child); }
-
-    public void tick() {
-        for (int x = 0; x &lt; children.size(); x++) {
-            GravityObject current = children.get(x);
-            current.degree += 1
-            current.xPosition = this.xPosition + Math.cos(degree/180 * Math.PI)* current.distance;
-            current.yPosition = this.yPosition - Math.sin(degree/180 * Math.PI) * current.distance;
-        }
-    }
-}
-
-public class Star extends OrbitalSystem { 
-
-};
-
-public class Planet extends GravityObject { 
-
-};
-
-public static int main(String[] args) {
-    Star s = new Star(); // Create a new star.
-    s.add(new Planet(20)); // Add a planet to the star's orbital system which orbits at a distance of 20 units.
-    s.add(new Planet(66)); // Add another planet to the star's orbital system which orbits at a distance of 66 units.
-
-    while (true) {
-        s.tick();
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/02/Winner-tic-tac-toe/">[Google] Winner of Tic-tac-toe</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">link</a></p>
-
-<blockquote><p>How would you determine if someone has won a game of tic-tac-toe on a board of any size?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>First, confirm that when the number of pieces in a line equals to the dimension of the board, one person wins. Eg. for 10 * 10 board, 10 pieces need to be in 1 line.</p>
-
-<p>__<a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">We can determine</a> if someone has won during a game in real time, as in checking after every move.</p>
-
-<blockquote><p>Create an array of size 2n+2 at the beginning of the game and fill it with zeros. Each spot in the array will be a sum of X&rsquo;s or O&rsquo;s horizontally (the first n places in the array), vertically (the second n places in the array) and diagonally (the last 2 places). Then with every move, you add 1 to the 2 places (or 3 if on a diagnol) of the array if X, and subtract 1 if its an O. After adding you check and see if the value of the array is equal to n or -n, if it is, n mean X has won and -n means O has won.</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/9">&larr; Older</a>
@@ -842,7 +872,7 @@ public static int main(String[] args) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (3)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (7)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (46)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (47)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (3)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
@@ -850,8 +880,8 @@ public static int main(String[] args) {
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (80)</a></li>
-<li class='category'><a href='/blog/categories/thoughts/'>thoughts (5)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (81)</a></li>
+<li class='category'><a href='/blog/categories/thoughts/'>thoughts (6)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (1)</a></li>
 
   </ul>
@@ -861,23 +891,23 @@ public static int main(String[] args) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/26/Virtual-memory-page-fault-thrashing/">[Design] Virtual Memory, Page Fault and Thrashing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/26/Test-hashcode-function/">[Question] Test hashCode() Function</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/26/Ten-years-is-a-long-time/">Ten Years Is a Long Time</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/26/Design-OOD-elevator/">[Design] OOD Design of Elevator</a>
       </li>
     
       <li class="post">
         <a href="/blog/2014/08/25/design-parking-lot/">[CC150v5] 8.4 Design a Parking Lot</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/25/design-in-memory-file-system/">[CC150v5] 8.9 Design a In-memory File System</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/25/Implement-HashMap/">[CC150v5] 8.10 Implement a Hashmap</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/24/design-othello-game/">[CC150v5] 8.8 Design Othello Game</a>
       </li>
     
   </ul>
