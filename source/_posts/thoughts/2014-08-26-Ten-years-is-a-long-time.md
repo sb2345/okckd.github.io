@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Ten years is a long time"
+title: "[Thoughts] Ten years is a long time"
 comments: true
 category: Thoughts
 tags: [thoughts]
 ---
 
 ### Life isn't always going along nicely. 
+
+Remember this. 
+
+Keep Holding On of Avril Lavigne. 
 
 	You're not alone, together we stand
 	I'll be by your side you know I'll take your hand

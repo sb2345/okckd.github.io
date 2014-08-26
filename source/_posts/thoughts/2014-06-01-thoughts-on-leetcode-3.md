@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Some thoughts on LeetCode questions III"
+title: "[Thoughts] Some thoughts on LeetCode questions III"
 comments: true
 category: Thoughts
 tags: [thoughts]
