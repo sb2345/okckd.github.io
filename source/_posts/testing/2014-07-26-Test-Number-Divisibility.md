@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Test Number Divisibility"
+title: "[Testing] Test Number Divisibility"
 comments: true
-category: Question
+category: Testing
 tags: [  ]
 ---
 

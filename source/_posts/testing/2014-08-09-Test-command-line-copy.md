@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Test Command Line Copy"
+title: "[Testing] Test Command Line Copy"
 comments: true
-category: Question
+category: Testing
 tags: [  ]
 ---
 

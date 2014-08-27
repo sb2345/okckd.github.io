@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Test hashCode() function"
+title: "[Testing] Test hashCode() function"
 comments: true
-category: Question
+category: Testing
 tags: [  ]
 ---
 
