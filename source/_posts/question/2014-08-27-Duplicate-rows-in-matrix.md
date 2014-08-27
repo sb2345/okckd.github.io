@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Duplicate Rows in Matrix (`)"
+title: "[Question] Duplicate Rows in Matrix"
 comments: true
 category: Question
 tags: [ src ]
@@ -43,5 +43,54 @@ We (probably) can also use Trie.
 
 Different from __Question 1__, this input is only 0 and 1. 
 
-__The solution is to use Trie__. 
+__The solution is to use Trie__. Each node [only have 2 children](http://www.geeksforgeeks.org/print-unique-rows/) (that's why Trie is perfect solution here). 
 
+### Code
+
+__Using binary trie node__, refactored by me.
+
+	public int[][] getUniqueRows(int[][] matrix) {
+		int m = matrix.length;
+		int n = matrix[0].length;
+
+		TrieNode root = new TrieNode();
+		TrieNode p;
+		int uniqueCount = 0;
+		boolean[] isUnique = new boolean[m];
+		// isUnique is used to mark the lines that would appear in final result
+
+		// start to build the trie
+		for (int i = 0; i < m; i++) {
+			// insert number matrix[i][] into the trie
+			p = root;
+			// root element would be an empty heading for all numbers
+			for (int j = 0; j < n; j++) {
+				int digit = matrix[i][j];
+				if (p.kids == null) {
+					p.kids = new TrieNode[2];
+				}
+				if (p.kids[digit] == null) {
+					// this is a whole new branch, create a new node here
+					p.kids[digit] = new TrieNode();
+					if (j == n - 1) {
+						uniqueCount++;
+						isUnique[i] = true;
+					}
+				}
+				p = p.kids[digit];
+			}
+		}
+		System.out.println("uniqueCount is " + uniqueCount);
+		int[][] result = new int[uniqueCount][];
+		int k = 0;
+		for (int w = 0; w < isUnique.length; w++) {
+			if (isUnique[w]) {
+				result[k++] = matrix[w];
+			}
+		}
+		return result;
+	}
+
+	class TrieNode {
+		TrieNode[] kids = null;
+	}

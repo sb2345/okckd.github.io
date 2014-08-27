@@ -6,7 +6,6 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
 [link](http://oj.leetcode.com/problems/trapping-rain-water/)
 
@@ -87,7 +86,6 @@ Coding part is easy.
 
 My solution.
 
-
     public int trap(int[] A) {
         int len = A.length;
         if (len <= 2) return 0;
@@ -105,9 +103,7 @@ My solution.
         return sum;
     }
 
-
 DP solution.
-
 
     public int trap(int[] A) {
         if (A == null ||A.length == 0) return 0;
@@ -126,9 +122,7 @@ DP solution.
         return totalVolume;
     }
 
-
 Stack Solution.
-
 
     public int trap(int[] A) {
         int cur = 0;
@@ -145,4 +139,37 @@ Stack Solution.
             cur ++;
         }
         return vol;
+    }
+
+__updated on Aug 27th, 2014__, there is a very very good 2 pointer solution which reads the input only __once__! 
+
+[This post](http://qandwhat.runkite.com/i-failed-a-twitter-interview/) wrote about it, and [source code](https://gist.github.com/mkozakov/59af0fd5bddbed1a0399) available. 
+
+    public int trap(int[] A) {
+        if (A == null || A.length == 0) {
+			return 0;
+		}
+		
+		int len = A.length;
+		int left = 0;
+		int right = len - 1;
+		int leftHeight = 0;
+		int rightHeight = 0;
+		int water = 0;
+		
+		while (left < right) {
+			leftHeight = Math.max(leftHeight, A[left]);
+			rightHeight = Math.max(rightHeight, A[right]);
+			// Two ways to write the following if-condition 
+			// This would also work: if (A[left] < A[right]) {
+			if (leftHeight < rightHeight) {
+				// increase left pointer
+				water += leftHeight - A[left];
+				left++;
+			} else {
+				water += rightHeight - A[right];
+				right--;
+			}
+		}
+		return water;
     }
