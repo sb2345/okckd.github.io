@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Google | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-27T15:11:40+08:00</updated>
+  <updated>2014-08-27T20:59:38+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,70 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Google API Read4096 (read4K)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/27/google-api-read-4096/"/>
+    <updated>2014-08-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/27/google-api-read-4096</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.careercup.com/question?id=14424684)
+
+> Given API: int Read4096(char* buf); 
+
+> It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read. 
+
+> Use above API to Implement API "int Read(char* buf, int n)" which reads any number of chars from the file. 
+
+### Solution
+
+Since the nature of C++ and Java is different, I changed the api to: 
+
+	GoogleApi.read4096(){}
+	GoogleRead4096.read(int n){}
+
+As [suggested](http://www.careercup.com/question?id=14424684), the solution is to keep __one local buffer__, and 1 pointer within the buffer. 
+
+### Code
+
+	String buffer = null;
+	int p = 0;
+
+	public String read(int n) {
+		if (n < 0) {
+			return null;
+		} else if (n == 0) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		while (n > 0) {
+			// there is (LENGTH - p) chars left in the local buffer
+			if (buffer == null || p == buffer.length()) {
+				// no char left in buffer, update buffer
+				buffer = GoogleApi.read4096();
+				p = 0;
+				if (buffer.length() == 0) {
+					// finish reading the file (no more input chars)
+					break;
+				}
+			} else {
+				int numChars = buffer.length() - p;
+				if (numChars >= n) {
+					sb.append(buffer.substring(p, p + n));
+					p = p + n;
+					n = 0;
+				} else {
+					sb.append(buffer.substring(p));
+					p = buffer.length();
+					n -= numChars;
+				}
+			}
+		}
+		return sb.toString();
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Orthogonal Traverse the Map (`)]]></title>
@@ -226,37 +290,6 @@ __read it from [here](http://www.itint5.com/discuss/125/%E5%A4%A7%E7%89%9B%E8%AF
 			return count;
 		}
 	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Million Phone Numbers]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/07/Million-phone-numbers/"/>
-    <updated>2014-08-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/07/Million-phone-numbers</id>
-    <content type="html"><![CDATA[### Question 1
-
-[link](http://www.glassdoor.com/Interview/How-would-you-store-1-million-phone-numbers-QTN_456.htm)
-
-> How would you store 1 million phone numbers? 
-
-### Solution
-
-BitMap.
-
-> The key here is that 1 million phone numbers will be within some range, likely 10 million or so. 10 million bits = 10^7 bits ~ 0.12 GB. Just have a bit array where the first bit being set implies that the first phone number is set (e.g., 10 000 000) and the last bit indicates the last phone number (10 999 999). If you find a number in the list, just set the appropriate bit. You now have a bit vector of size 1million bits, sorted, and to check for a particular number, you just check whether the corresponding bit is set.
-
-### Question 2
-
-[link](http://www.careercup.com/question?id=7997766)
-
-> How would you sort 1 million phone numbers? 
-
-### Solution
-
-BitMap or radix sort, both are O(n) complexity.
-
-Read more [here](http://www.vex.net/~trebla/compsci/sorting-phone-numbers.html). 
 ]]></content>
   </entry>
   
