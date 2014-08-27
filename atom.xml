@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-27T15:11:40+08:00</updated>
+  <updated>2014-08-27T20:59:38+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -43,6 +43,72 @@
 <p>We continue doing this until <strong>all numbers of value v is in the (v)th position</strong>, we should know the largest length of cycle during this process.</p>
 
 <p>I did not write code for this, and there&rsquo;s little resource online that&rsquo;s relevant.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Google API Read4096 (read4K)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/27/google-api-read-4096/"/>
+    <updated>2014-08-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/27/google-api-read-4096</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14424684">link</a></p>
+
+<blockquote><p>Given API: int Read4096(char* buf);</p>
+
+<p>It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read.</p>
+
+<p>Use above API to Implement API &ldquo;int Read(char* buf, int n)&rdquo; which reads any number of chars from the file.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Since the nature of C++ and Java is different, I changed the api to:</p>
+
+<pre><code>GoogleApi.read4096(){}
+GoogleRead4096.read(int n){}
+</code></pre>
+
+<p>As <a href="http://www.careercup.com/question?id=14424684">suggested</a>, the solution is to keep <strong>one local buffer</strong>, and 1 pointer within the buffer.</p>
+
+<h3>Code</h3>
+
+<pre><code>String buffer = null;
+int p = 0;
+
+public String read(int n) {
+    if (n &lt; 0) {
+        return null;
+    } else if (n == 0) {
+        return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    while (n &gt; 0) {
+        // there is (LENGTH - p) chars left in the local buffer
+        if (buffer == null || p == buffer.length()) {
+            // no char left in buffer, update buffer
+            buffer = GoogleApi.read4096();
+            p = 0;
+            if (buffer.length() == 0) {
+                // finish reading the file (no more input chars)
+                break;
+            }
+        } else {
+            int numChars = buffer.length() - p;
+            if (numChars &gt;= n) {
+                sb.append(buffer.substring(p, p + n));
+                p = p + n;
+                n = 0;
+            } else {
+                sb.append(buffer.substring(p));
+                p = buffer.length();
+                n -= numChars;
+            }
+        }
+    }
+    return sb.toString();
+}
+</code></pre>
 ]]></content>
   </entry>
   
@@ -194,6 +260,53 @@ ans:
 
 class TrieNode {
     TrieNode[] kids = null;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Twitter] Count Visible Nodes in Binary Tree]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/27/Count-visible-nodes-binary-tree/"/>
+    <updated>2014-08-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/27/Count-visible-nodes-binary-tree</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://codesays.com/2014/solution-to-count-visible-nodes-in-binary-tree/">link</a></p>
+
+<blockquote><p> In a binary tree, if in the path from root to the node A, there is no node with greater value than A’s, this node A is visible. We need to count the number of visible nodes in a binary tree. For example, in the following tree:</p></blockquote>
+
+<pre><code>        5
+     /     \
+   3        10
+  / \      /
+20   21   1
+</code></pre>
+
+<blockquote><p>There are four (4) visible nodes: 5, 20, 21, and 10.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is an easy question. A solution is available <a href="http://codesays.com/2014/solution-to-count-visible-nodes-in-binary-tree/">here</a>.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int countVisible(TreeNode root) {
+    return helper(root, Integer.MIN_VALUE);
+}
+
+private int helper(TreeNode node, int ancesterMax) {
+    if (node == null) {
+        return 0;
+    }
+    int newMax = Math.max(ancesterMax, node.val);
+    if (node.val &gt; ancesterMax) {
+        return 1 + helper(node.left, newMax) + helper(node.right, newMax);
+    } else {
+        return helper(node.left, newMax) + helper(node.right, newMax);
+    }
 }
 </code></pre>
 ]]></content>
@@ -1692,122 +1805,6 @@ class Blackjack extends Hand&lt;BlackJackCard&gt; {
 class BlackJackCard extends Card {
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] About Singleton]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/20/Talk-about-singleton/"/>
-    <updated>2014-08-20T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/20/Talk-about-singleton</id>
-    <content type="html"><![CDATA[<h3>Implement Singlton</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
-
-<h4>using Enum</h4>
-
-<p>This is only available since Java 6.</p>
-
-<pre><code>public enum Singleton_Enum {
-    INSTANCE;
-}
-</code></pre>
-
-<h4>using double checked locking</h4>
-
-<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
-
-<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
-    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
-
-    private Singleton_DoubleCheckedLocking() {
-    }
-
-    public static Singleton_DoubleCheckedLocking getInstance() {
-        if (INSTANCE == null) {
-            synchronized (Singleton_DoubleCheckedLocking.class) {
-                // double checking Singleton instance
-                if (INSTANCE == null) {
-                    INSTANCE = new Singleton_DoubleCheckedLocking();
-                }
-            }
-        }
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h4>using static factory method</h4>
-
-<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
-
-<pre><code>public class Singleton_StaticFactory {
-    // initailzed during class loading
-    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
-
-    // to prevent creating another instance of Singleton
-    private Singleton_StaticFactory() {
-    }
-
-    public static Singleton_StaticFactory getSingleton() {
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h3>About thread-saft</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
-
-<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
-
-<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
-
-<ol>
-<li>using static field</li>
-<li>using Enum</li>
-</ol>
-
-
-<h3>Q &amp; A</h3>
-
-<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
-
-<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Square Count of Matchstick Graph]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/20/Square-count-in-matchstick-graph/"/>
-    <updated>2014-08-20T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/20/Square-count-in-matchstick-graph</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>给出下面这个图 设计数据结构和算法求出图中<strong>所有的正方形数量</strong> (count the number of squares).</p></blockquote>
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/matchstick-square-count.jpg"></p>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p><strong>Pre-processing</strong>: 从每一个点开始存储上下左右四个方向最多延伸到的位置</p></li>
-<li><p><strong>Main algorithm</strong>: 枚举右下角位置 然后枚举正方形边长</p></li>
-<li><p>根据预处理的延伸情况判断是否能够有一个正方形被构造出来</p></li>
-</ol>
-
-
-<p>Total time complexity is O(n<sup>3</sup>).</p>
-
-<blockquote><p>预处理可以O(n<sup>2</sup>) 预处理是有递推关系的</p>
-
-<p>但是后面枚举的部分，只能O(n<sup>3</sup>)</p>
-
-<p><strong>不能动态规划的原因是</strong>：他给定了一个可以变化的图，这个图上规模为n的图和规模为n-1的图中正方形个数之间不存在递推关系。</p></blockquote>
-
-<p>And 一般来说处理矩阵的问题，大部分都是O(n<sup>3</sup>)</p>
-
-<h3>Code</h3>
 ]]></content>
   </entry>
   

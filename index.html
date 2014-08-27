@@ -143,6 +143,99 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/08/27/google-api-read-4096/">[Google] Google API Read4096 (read4K)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14424684">link</a></p>
+
+<blockquote><p>Given API: int Read4096(char* buf);</p>
+
+<p>It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read.</p>
+
+<p>Use above API to Implement API &ldquo;int Read(char* buf, int n)&rdquo; which reads any number of chars from the file.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Since the nature of C++ and Java is different, I changed the api to:</p>
+
+<pre><code>GoogleApi.read4096(){}
+GoogleRead4096.read(int n){}
+</code></pre>
+
+<p>As <a href="http://www.careercup.com/question?id=14424684">suggested</a>, the solution is to keep <strong>one local buffer</strong>, and 1 pointer within the buffer.</p>
+
+<h3>Code</h3>
+
+<pre><code>String buffer = null;
+int p = 0;
+
+public String read(int n) {
+    if (n &lt; 0) {
+        return null;
+    } else if (n == 0) {
+        return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    while (n &gt; 0) {
+        // there is (LENGTH - p) chars left in the local buffer
+        if (buffer == null || p == buffer.length()) {
+            // no char left in buffer, update buffer
+            buffer = GoogleApi.read4096();
+            p = 0;
+            if (buffer.length() == 0) {
+                // finish reading the file (no more input chars)
+                break;
+            }
+        } else {
+            int numChars = buffer.length() - p;
+            if (numChars &gt;= n) {
+                sb.append(buffer.substring(p, p + n));
+                p = p + n;
+                n = 0;
+            } else {
+                sb.append(buffer.substring(p));
+                p = buffer.length();
+                n -= numChars;
+            }
+        }
+    }
+    return sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/08/27/equilibrium-points-in-2d-array/">[Question] Equilibrium Points in 2D Array</a></h1>
     
     
@@ -336,6 +429,80 @@ ans:
 
 class TrieNode {
     TrieNode[] kids = null;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/27/Count-visible-nodes-binary-tree/">[Twitter] Count Visible Nodes in Binary Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://codesays.com/2014/solution-to-count-visible-nodes-in-binary-tree/">link</a></p>
+
+<blockquote><p> In a binary tree, if in the path from root to the node A, there is no node with greater value than A’s, this node A is visible. We need to count the number of visible nodes in a binary tree. For example, in the following tree:</p></blockquote>
+
+<pre><code>        5
+     /     \
+   3        10
+  / \      /
+20   21   1
+</code></pre>
+
+<blockquote><p>There are four (4) visible nodes: 5, 20, 21, and 10.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is an easy question. A solution is available <a href="http://codesays.com/2014/solution-to-count-visible-nodes-in-binary-tree/">here</a>.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int countVisible(TreeNode root) {
+    return helper(root, Integer.MIN_VALUE);
+}
+
+private int helper(TreeNode node, int ancesterMax) {
+    if (node == null) {
+        return 0;
+    }
+    int newMax = Math.max(ancesterMax, node.val);
+    if (node.val &gt; ancesterMax) {
+        return 1 + helper(node.left, newMax) + helper(node.right, newMax);
+    } else {
+        return helper(node.left, newMax) + helper(node.right, newMax);
+    }
 }
 </code></pre>
 </div>
@@ -920,350 +1087,6 @@ public class Level {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/25/design-in-memory-file-system/">[CC150v5] 8.9 Design a In-memory File System</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Explain the data structures and algorithms that you would use to design an in-memory file system. Illustrate with an example in code where possible.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>A file system consists of Files and Directories</strong>. Each Directory contains a set of Files and Directories.</p>
-
-<p>Since Files and Directories share so many characteristics, we&rsquo;ve implemented them such that they <strong>inherit from the same class</strong> &mdash; Entry.</p>
-
-<h3>Code</h3>
-
-<p>Entry.java</p>
-
-<pre><code>public abstract class Entry {
-    protected Directory parent;
-    protected long created;
-    protected long lastUpdated;
-    protected long lastAccessed;
-    protected String name;
-
-    public Entry(String n, Directory p) {
-        name = n;
-        parent = p;
-        created = System.currentTimeMillis();
-    }
-
-    public boolean delete() {
-        if (parent == null) {
-            return false;
-        }
-        return parent.deleteEntry(this);
-    }
-
-    public abstract int size();
-
-    public String getFullPath() {
-        if (parent == null) {
-            return name;
-        } else {
-            return parent.getFullPath() + "/" + name;
-        }
-    }
-
-    public long getCreationTime() {
-        return created;
-    }
-
-    public long getLastUpdatedTime() {
-        return lastUpdated;
-    }
-
-    public long getLastAccessedTime() {
-        return lastAccessed;
-    }
-
-    public void changeName(String n) {
-        name = n;
-    }
-
-    public String getName() {
-        return name;
-    }
-}
-</code></pre>
-
-<p>Directory.java</p>
-
-<pre><code>public class Directory extends Entry {
-    protected ArrayList&lt;Entry&gt; contents;
-
-    public Directory(String n, Directory p) {
-        super(n, p);
-        contents = new ArrayList&lt;Entry&gt;();
-    }
-
-    protected ArrayList&lt;Entry&gt; getContents() {
-        return contents;
-    }
-
-    public int size() {
-        int size = 0;
-        for (Entry e : contents) {
-            size += e.size();
-        }
-        return size;
-    }
-
-    public int numberOfFiles() {
-        int count = 0;
-        for (Entry e : contents) {
-            if (e instanceof Directory) {
-                count++; // Directory counts as a file
-                Directory d = (Directory) e;
-                count += d.numberOfFiles();
-            } else if (e instanceof File) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public boolean deleteEntry(Entry entry) {
-        return contents.remove(entry);
-    }
-
-    public void addEntry(Entry entry) {
-        contents.add(entry);
-    }
-}
-</code></pre>
-
-<p>File.java</p>
-
-<pre><code>public class File extends Entry {
-    private String content;
-    private int size;
-
-    public File(String n, Directory p, int sz) {
-        super(n, p);
-        size = sz;
-    }
-
-    public int size() {
-        return size;
-    }
-
-    public String getContents() {
-        return content;
-    }
-
-    public void setContents(String c) {
-        content = c;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/25/Implement-HashMap/">[CC150v5] 8.10 Implement a Hashmap</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Design and implement a hash table which uses chaining (linked lists) to handle collisions.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>I wrote this topic before (using Java source code as a reference). This time, I would like to take another (easier) approach.</p>
-
-<p>The main part of this is to use an array of list structure like this:</p>
-
-<pre><code>LinkedList&lt;Cell&lt;K, V&gt;&gt;[] items;
-</code></pre>
-
-<p>And the Cell Class looks like this:</p>
-
-<pre><code>public class Cell&lt;K, V&gt; {
-    private K key;
-    private V value;
-
-    public Cell(K k, V v) {
-        key = k;
-        value = v;
-    }
-
-    public boolean equivalent(Cell&lt;K, V&gt; c) {
-        return equivalent(c.getKey());
-    }
-
-    public boolean equivalent(K k) {
-        return key.equals(k);
-    }
-
-    public K getKey() {
-        return key;
-    }
-
-    public V getValue() {
-        return value;
-    }
-}
-</code></pre>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public class HashMapCC150&lt;K, V&gt; {
-
-    int size;
-    LinkedList&lt;Cell&lt;K, V&gt;&gt;[] items;
-
-    public HashMapCC150(int num) {
-        this.size = num;
-        items = (LinkedList&lt;Cell&lt;K, V&gt;&gt;[]) new LinkedList[10];
-    }
-
-    public V get(K k) {
-        int hashValue = this.calculateHashCode(k);
-        if (items[hashValue] == null) {
-            items[hashValue] = new LinkedList&lt;Cell&lt;K, V&gt;&gt;();
-            return null;
-        }
-        for (Cell&lt;K, V&gt; cell : items[hashValue]) {
-            if (k.equals(cell.getKey())) {
-                return cell.getValue();
-            }
-        }
-        return null;
-    }
-
-    public V put(K k, V v) {
-        int hashValue = this.calculateHashCode(k);
-        if (items[hashValue] == null) {
-            items[hashValue] = new LinkedList&lt;Cell&lt;K, V&gt;&gt;();
-        }
-        for (Cell&lt;K, V&gt; cell : items[hashValue]) {
-            if (k.equals(cell.getKey())) {
-                items[hashValue].remove(cell);
-                break;
-            }
-        }
-        Cell&lt;K, V&gt; newItem = new Cell&lt;K, V&gt;(k, v);
-        items[hashValue].add(newItem);
-        return null;
-    }
-
-    public V remove(K k) {
-        // not written
-        return null;
-    }
-
-    private int calculateHashCode(K k) {
-        return k.toString().length() % size;
-    }
-
-    public static void main(String[] args) {
-        HashMapCC150&lt;String, String&gt; map = new HashMapCC150&lt;String, String&gt;(10);
-        map.put("kevin", "durant");
-        map.put("steven", "curry");
-        map.put("al", "jefferson");
-        System.out.println(map.get("kevin"));
-        System.out.println(map.get("steven"));
-        System.out.println(map.get("al"));
-        map.put("kevin", "martin");
-        map.put("steven", "nash");
-        map.put("kevin", "braynt");
-        System.out.println(map.get("kevin"));
-        System.out.println(map.get("steven"));
-        System.out.println(map.get("al"));
-    }
-}
-
-class Cell&lt;K, V&gt; {
-    private K key;
-    private V value;
-
-    public Cell(K k, V v) {
-        key = k;
-        value = v;
-    }
-
-    public boolean equivalent(Cell&lt;K, V&gt; c) {
-        return equivalent(c.getKey());
-    }
-
-    public boolean equivalent(K k) {
-        return key.equals(k);
-    }
-
-    public K getKey() {
-        return key;
-    }
-
-    public V getValue() {
-        return value;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1281,7 +1104,7 @@ class Cell&lt;K, V&gt; {
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (7)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (47)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (3)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (19)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (20)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -1289,7 +1112,7 @@ class Cell&lt;K, V&gt; {
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (83)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (6)</a></li>
-<li class='category'><a href='/blog/categories/twitter/'>twitter (2)</a></li>
+<li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
   </ul>
 </section>
@@ -1302,6 +1125,10 @@ class Cell&lt;K, V&gt; {
       </li>
     
       <li class="post">
+        <a href="/blog/2014/08/27/google-api-read-4096/">[Google] Google API Read4096 (read4K)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/27/equilibrium-points-in-2d-array/">[Question] Equilibrium Points in 2D Array</a>
       </li>
     
@@ -1310,11 +1137,7 @@ class Cell&lt;K, V&gt; {
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/26/Virtual-memory-page-fault-thrashing/">[Design] Virtual Memory, Page Fault and Thrashing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/26/Test-hashcode-function/">[Question] Test hashCode() Function</a>
+        <a href="/blog/2014/08/27/Count-visible-nodes-binary-tree/">[Twitter] Count Visible Nodes in Binary Tree</a>
       </li>
     
   </ul>
