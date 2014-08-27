@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Memory-related Debugging Problem"
+title: "[Testing] Random error debugging "
 comments: true
-category: Question
+category: Testing
 tags: [  ]
 ---
 
@@ -16,7 +16,7 @@ tags: [  ]
 
 ### Analysis
 
-1. code depends on timer/RNG
+1. code depends on __system time or RNG__
 
 1. disk full, i.e. other processes may delete a different file causing more space to be available
 
@@ -24,5 +24,4 @@ tags: [  ]
 
 1. a pointer points to a random location in memory that is changed by another process causing some values be "valid" (very rare though)
 
-[In general](http://stackoverflow.com/a/4531769) a situation with other process is likely.
-
+[In general](http://stackoverflow.com/a/4531769) a situation __with other process__ is likely.

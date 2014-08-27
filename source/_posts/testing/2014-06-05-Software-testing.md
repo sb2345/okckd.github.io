@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Software Testing"
+title: "[Testing] Software Testing"
 comments: true
-category: Question
+category: Testing
 tags: [  ]
 ---
 
