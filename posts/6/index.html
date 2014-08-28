@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link 给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？ Bloom Filter 自从Burton Bloom在70年代提出Bloom Filter之后，Bloom &hellip;">
+  <meta name="description" content="Question link 一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。 Analysis The basic solution for &lsquo;Top K&rsquo; questions is 【分治+trie树/hash &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,58 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-top-k-frequency-2/">[Design] Big Data - Top K Frequency 2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+
+<blockquote><p>一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>The basic solution for &lsquo;Top K&rsquo; questions</strong> is 【分治+trie树/hash+小顶堆】.</p>
+
+<p>In the previous post <a href="/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>, we used HashMap for calculating query frequency. Now we <strong>use Trie to do it</strong>.</p>
+
+<blockquote><p>这题是考虑时间效率。用trie树统计每个词出现的次数，时间复杂度是O(n x le)（le表示单词的平准长度）。然后是找出出现最频繁的前10个词，可以用堆来实现，前面的题中已经讲到了，时间复杂度是O(n x lg10)。所以总的时间复杂度，是O(n x le)与O(n x lg10)中较大的哪一个。</p></blockquote>
+
+<h4>How to use Trie to calculate word frequency?</h4>
+
+<p>在Trie的node节点中<a href="http://blog.csdn.net/ohmygirl/article/details/7953814">添加count域后</a>，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -728,173 +780,6 @@ k: number of hash functions
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Producer-consumer-problem/">[Design] Producer Consumer Problem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p>Producer-consumer problem illustrates the need for <strong>synchronization</strong> in systems where <strong>many processes share a resource</strong>.</p>
-
-<p><a href="http://cs.gmu.edu/cne/modules/ipc/aqua/producer.html">In the problem</a>, two processes share a fixed-size buffer. One process produces information and puts it in the buffer, while the other process consumes information from the buffer. These processes do not take turns accessing the buffer, they both work concurrently.</p>
-
-<h3>Inadequate Solution</h3>
-
-<p><img class="middle" src="/assets/images/producer-workflow.gif"></p>
-
-<p><img class="middle" src="/assets/images/consumer-workflow.gif"></p>
-
-<p><strong>The code might look like this</strong>:</p>
-
-<pre><code>BufferSize = 3;
-  count = 0;
-
-Producer()
-{
-    int widget;
-    WHILE (true) {                   // loop forever
-      make_new(widget);              // create a new widget to put in the buffer
-      IF(count==BufferSize)
-           Sleep();                  // if the buffer is full, sleep
-      put_item(widget);              // put the item in the buffer
-      count = count + 1;             // increment count of items
-      IF (count==1)
-         Wakeup(Consumer);           // if the buffer was previously empty, wake
-   }                                 //  the consumer
-}
-
-Consumer()
-{
-    int widget;
-    WHILE(true) {                    // loop forever
-      IF(count==0)
-           Sleep();                  // if the buffer is empty, sleep
-      remove_item(widget);           // take an item from the buffer
-      count = count + 1;             // decrement count of items
-      IF(count==N-1)
-            Wakeup(Producer);        // if buffer was previously full, wake
-                                     //  the producer
-      Consume_item(widget);          // consume the item
-    }
-}
-</code></pre>
-
-<p>This <a href="http://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem#Inadequate_implementation">will cause problems</a>, because <strong>it contains a race condition</strong> that can lead to a deadlock. Or in simply words, it has the potential of <a href="http://cs.gmu.edu/cne/modules/ipc/purple/prodsem.html">losing wakeups</a>.</p>
-
-<p>An alternative analysis is that if the programming language does not define the semantics of <strong>concurrent accesses to shared variables (in this case itemCount)</strong> without use of synchronization, then the solution is unsatisfactory for that reason, without needing to explicitly demonstrate a race condition.</p>
-
-<p>Solutions are: <strong>semaphores or monitors</strong>.</p>
-
-<h3>Semaphore</h3>
-
-<pre><code>semaphore mutex = 1;
-semaphore fillCount = 0;
-semaphore emptyCount = BUFFER_SIZE;
-
-procedure producer() {
-    while (true) {
-        item = produceItem();
-        down(emptyCount);
-            down(mutex);
-                putItemIntoBuffer(item);
-            up(mutex);
-        up(fillCount);
-    }
-}
-
-procedure consumer() {
-    while (true) {
-        down(fillCount);
-            down(mutex);
-                item = removeItemFromBuffer();
-            up(mutex);
-        up(emptyCount);
-        consumeItem(item);
-    }
-}
-</code></pre>
-
-<h3>Monitor</h3>
-
-<pre><code>monitor ProducerConsumer {
-    int itemCount;
-    condition full;
-    condition empty;
-
-    procedure add(item) {
-        while (itemCount == BUFFER_SIZE) {
-            wait(full);
-        }
-
-        putItemIntoBuffer(item);
-        itemCount = itemCount + 1;
-
-        if (itemCount == BUFFER_SIZE -1) {
-            notify(full);
-        }
-    }
-    procedure remove() {
-        while (itemCount == 0) {
-            wait(empty);
-        }
-
-        item = removeItemFromBuffer();
-        itemCount = itemCount - 1;
-
-        if (itemCount == 1) {
-            notify(empty);
-        }
-
-
-        return item;
-    }
-}
-
-procedure producer() {
-    while (true) {
-        item = produceItem();
-        ProducerConsumer.add(item);
-    }
-}
-
-procedure consumer() {
-    while (true) {
-        item = ProducerConsumer.remove();
-        consumeItem(item);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/7">&larr; Older</a>
@@ -910,7 +795,7 @@ procedure consumer() {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (3)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (4)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (7)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (48)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (3)</a></li>
@@ -936,6 +821,10 @@ procedure consumer() {
       </li>
     
       <li class="post">
+        <a href="/blog/2014/08/28/Ugly-numbers/">[CC150v4] 10.7 Ugly Numbers (Hamming Numbers)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/28/My-world/">[Thoughts] My World</a>
       </li>
     
@@ -945,10 +834,6 @@ procedure consumer() {
     
       <li class="post">
         <a href="/blog/2014/08/27/largest-cycle-in-permutation/">[Twitter] Largest Cycle in Permutation</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/27/google-api-read-4096/">[Google] Google API Read4096 (read4K)</a>
       </li>
     
   </ul>

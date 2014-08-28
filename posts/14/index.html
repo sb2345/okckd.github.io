@@ -9,7 +9,7 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Question link Given two queues with their standard operations (enqueue, dequeue, isempty, size), implement a stack with its standard operations (pop &hellip;">
+  <meta name="description" content="Question link Convert a BST to a sorted circular doubly-linked list in-place. Think of the left and right pointers as synonymous to the previous and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,132 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/Convert-BST-To-Circular-DLL/">[LeetCode Plus] Convert Binary Search Tree to Circular Doubly-Linked List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">link</a></p>
+
+<blockquote><p>Convert a BST to a sorted circular doubly-linked list in-place.</p>
+
+<p>Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.</p></blockquote>
+
+<h3>Inorder solution</h3>
+
+<p>This question can be solved with <strong>inorder traversal with the help of a &lsquo;pre&rsquo; pointer</strong>.</p>
+
+<p>This solution is recommended by L33tcode, but not very intuitive, and difficult to write. The C++ code is attached below. <a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">source</a>.</p>
+
+<pre><code>void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
+  if (!p) return;
+  treeToDoublyList(p-&gt;left, prev, head);
+  // current node's left points to previous node
+  p-&gt;left = prev;
+  if (prev)
+    prev-&gt;right = p;  // previous node's right points to current node
+  else
+    head = p; // current node (smallest element) is head of
+              // the list if previous node is not available
+  // as soon as the recursion ends, the head's left pointer 
+  // points to the last node, and the last node's right pointer
+  // points to the head pointer.
+  Node *right = p-&gt;right;
+  head-&gt;left = p;
+  p-&gt;right = head;
+  // updates previous node
+  prev = p;
+  treeToDoublyList(right, prev, head);
+}
+
+// Given an ordered binary tree, returns a sorted circular
+// doubly-linked list. The conversion is done in-place.
+Node* treeToDoublyList(Node *root) {
+  Node *prev = NULL;
+  Node *head = NULL;
+  treeToDoublyList(root, prev, head);
+  return head;
+}
+</code></pre>
+
+<h3>Divide and conquer solution</h3>
+
+<p>The good and intuitive solution is to do D&amp;C and <strong>solve left and right recursively</strong>. Do note how the circular linked lists are merged, and be careful when replacing the pointers.</p>
+
+<p>The Java code is posted below. <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">source</a></p>
+
+<pre><code>public static TreeNode treeToList(TreeNode root) {
+    if (root == null)
+        return (null);
+
+    // Recursively do the subtrees (leap of faith!)
+    TreeNode aList = treeToList(root.left);
+    TreeNode bList = treeToList(root.right);
+
+    // Make root a circular DLL
+    root.left = root;
+    root.right = root;
+
+    // At this point we have three lists, merge them
+    aList = append(aList, root);
+    aList = append(aList, bList);
+
+    return (aList);
+}
+
+/*
+ * given two circular doubly linked lists, append them and return the new
+ * list.
+ */
+public static TreeNode append(TreeNode a, TreeNode b) {
+    if (a == null)
+        return (b);
+    if (b == null)
+        return (a);
+
+    TreeNode aLast = a.left;
+    TreeNode bLast = b.left;
+
+    aLast.right = b;
+    b.left = aLast;
+    bLast.right = a;
+    a.left = bLast;
+
+    return (a);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -872,90 +998,6 @@ private static String removeDigit(String number, int digitIndex) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Clone-octopress-blog-from-a-different-computer/">[Octopress] Clone Octopress Blog From a Different Computer</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Before we start</h3>
-
-<p>Well first of all, we must have Ruby, DevKit, gem, bundler and dependencies installed. Simply follow <a href="http://www.techelex.org/setup-octopress-on-windows7/">this tutorial</a>.</p>
-
-<p>Remember to set the <strong>Ruby directory</strong> (C:\Ruby193\bin) in the <strong>System Variable Settings</strong>.</p>
-
-<h3>Now, start</h3>
-
-<p>I&rsquo;ve had a little confusions about how to develop my Octopress blog on 2 different computers. Some solutions posted online does not work, and it turns out that some commands have changed its functions in new version of Octopress. So, I write this post to clarify these confusions.</p>
-
-<p>To set up a new local repository from an online github octopress blog repo, follow the instructions:</p>
-
-<ol>
-<li><p><strong>clone the source branch to the local octopress folder</strong></p>
-
-<blockquote><p>git clone -b source git@github.com:willran168/willran168.github.io.git octopress</p></blockquote></li>
-<li><p><strong>run the rake installation to configure everything</strong></p></li>
-</ol>
-
-
-<blockquote><p>cd octopress</p>
-
-<p>gem install bundler</p>
-
-<p>rbenv rehash    (I think this is optional)</p>
-
-<p>bundle install</p>
-
-<p>rake setup_github_pages</p></blockquote>
-
-<ol>
-<li><strong>enter repository URL</strong></li>
-</ol>
-
-
-<blockquote><p>git@github.com:willran168/willran168.github.io.git</p></blockquote>
-
-<ol>
-<li><strong>clone the master branch to the _deploy subfolder</strong></li>
-</ol>
-
-
-<blockquote><p>git clone git@github.com:willran168/willran168.github.io.git _deploy</p></blockquote>
-
-<p>Clone master branch is the last step. Because running <code>rake setup_github_pages</code> will remove previous _deploy folder and init a new repo inside of it. So master have to be cloned after this step.</p>
-
-<p>It&rsquo;s done. Now we can do &lsquo;rake gen_deploy&rsquo;, or &lsquo;git commit or push origin source&rsquo;.</p>
-
-<p><a href="http://blog.zerosharp.com/clone-your-octopress-to-blog-from-two-places/">reference</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/15">&larr; Older</a>
@@ -971,7 +1013,7 @@ private static String removeDigit(String number, int digitIndex) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (3)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (4)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (7)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (48)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (3)</a></li>
@@ -997,6 +1039,10 @@ private static String removeDigit(String number, int digitIndex) {
       </li>
     
       <li class="post">
+        <a href="/blog/2014/08/28/Ugly-numbers/">[CC150v4] 10.7 Ugly Numbers (Hamming Numbers)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/28/My-world/">[Thoughts] My World</a>
       </li>
     
@@ -1006,10 +1052,6 @@ private static String removeDigit(String number, int digitIndex) {
     
       <li class="post">
         <a href="/blog/2014/08/27/largest-cycle-in-permutation/">[Twitter] Largest Cycle in Permutation</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/27/google-api-read-4096/">[Google] Google API Read4096 (read4K)</a>
       </li>
     
   </ul>
