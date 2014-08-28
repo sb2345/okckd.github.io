@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Thoughts] A Random Thought"
+title: "[Thoughts] Some Random Thought"
 comments: true
 category: Thoughts
 tags: [thoughts]
