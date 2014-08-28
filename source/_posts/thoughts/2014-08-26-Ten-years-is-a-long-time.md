@@ -10,7 +10,7 @@ tags: [thoughts]
 
 Remember this. 
 
-Keep Holding On of Avril Lavigne. 
+Keep Holding On
 
 	You're not alone, together we stand
 	I'll be by your side you know I'll take your hand
