@@ -35,7 +35,7 @@ Follow the following process:
 
 ### Code it
 
-
+Write code now, skip.
 
 ### Last words
 
