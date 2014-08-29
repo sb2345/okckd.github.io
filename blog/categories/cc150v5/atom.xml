@@ -1,0 +1,748 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Cc150v5 | My Octopress Blog]]></title>
+  <link href="http://okckd.github.io/blog/categories/cc150v5/atom.xml" rel="self"/>
+  <link href="http://okckd.github.io/"/>
+  <updated>2014-08-29T00:08:15+08:00</updated>
+  <id>http://okckd.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.4 Design a Parking Lot]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/25/design-parking-lot/"/>
+    <updated>2014-08-25T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/25/design-parking-lot</id>
+    <content type="html"><![CDATA[### Question
+
+> Design a Parking Lot. 
+
+### Solution
+
+Class hierarchy:
+
+1. A parking lot has multiple Levels.
+1. A Level has multiple Parking Spot.
+1. A Spot can park motorcycle, car or bus, which all belongs to Vehicle. 
+
+Implement methods:
+
+1. Vehicle.parkInSpot(Spot s)
+1. Vehicle.leaveSpot(Spot s)
+1. Vehicle.canFitIn(Spot s)
+1. ParkingLot.parkVehicle(Vehicle v)
+1. Level.parkVehicle(Vehicle v)
+1. Level.parkVehicleAtSpot(Vehicle v, Spot s)
+1. Level.findAvailableSpot(VehicleType vt)
+
+__ParkingLot Class is just a wrapper class of Levels__. By doing this, we seperated out parking logic from other broader actions (like Spot management). 
+
+The code below is from CC150v5. __Its design is a bit strange__ (a car can occupy multiple spots), so just use this code as a guide but not a reference. 
+
+### Code 
+
+ParkingLot.java
+
+    public class ParkingLot {
+        private Level[] levels;
+        private final int NUM_LEVELS = 5;
+        
+        public ParkingLot() {
+            levels = new Level[NUM_LEVELS];
+            for (int i = 0; i < NUM_LEVELS; i++) {
+                levels[i] = new Level(i, 30);
+            }
+        }
+        
+        /* Park the vehicle in a spot (or multiple spots). Return false if failed. */
+        public boolean parkVehicle(Vehicle vehicle) {
+            for (int i = 0; i < levels.length; i++) {
+                if (levels[i].parkVehicle(vehicle)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void print() {
+            for (int i = 0; i < levels.length; i++) {
+                System.out.print("Level" + i + ": ");
+                levels[i].print();
+                System.out.println("");
+            }
+            System.out.println("");
+        }
+    }
+
+Level.java
+
+    /* Represents a level in a parking garage */
+    public class Level {
+        private int floor;
+        private ParkingSpot[] spots;
+        private int availableSpots = 0; // number of free spots
+        private static final int SPOTS_PER_ROW = 10;
+
+        public Level(int flr, int numberSpots) {
+            floor = flr;
+            spots = new ParkingSpot[numberSpots];
+            int largeSpots = numberSpots / 4;
+            int bikeSpots = numberSpots / 4;
+            int compactSpots = numberSpots - largeSpots - bikeSpots;
+            for (int i = 0; i < numberSpots; i++) {
+                VehicleSize sz = VehicleSize.Motorcycle;
+                if (i < largeSpots) {
+                    sz = VehicleSize.Large;
+                } else if (i < largeSpots + compactSpots) {
+                    sz = VehicleSize.Compact;
+                }
+                int row = i / SPOTS_PER_ROW;
+                spots[i] = new ParkingSpot(this, row, i, sz);
+            }
+            availableSpots = numberSpots;
+        }
+
+        public int availableSpots() {
+            return availableSpots;
+        }
+
+        /* Try to find a place to park this vehicle. Return false if failed. */
+        public boolean parkVehicle(Vehicle vehicle) {
+            if (availableSpots() < vehicle.getSpotsNeeded()) {
+                return false;
+            }
+            int spotNumber = findAvailableSpots(vehicle);
+            if (spotNumber < 0) {
+                return false;
+            }
+            return parkStartingAtSpot(spotNumber, vehicle);
+        }
+
+        /* Park a vehicle starting at the spot spotNumber, and continuing until vehicle.spotsNeeded. */
+        private boolean parkStartingAtSpot(int spotNumber, Vehicle vehicle) {
+            vehicle.clearSpots();
+            boolean success = true;
+            for (int i = spotNumber; i < spotNumber + vehicle.spotsNeeded; i++) {
+                 success &= spots[i].park(vehicle);
+            }
+            availableSpots -= vehicle.spotsNeeded;
+            return success;
+        }
+
+        /* find a spot to park this vehicle. Return index of spot, or -1 on failure. */
+        private int findAvailableSpots(Vehicle vehicle) {
+            int spotsNeeded = vehicle.getSpotsNeeded();
+            int lastRow = -1;
+            int spotsFound = 0;
+            for (int i = 0; i < spots.length; i++) {
+                ParkingSpot spot = spots[i];
+                if (lastRow != spot.getRow()) {
+                    spotsFound = 0;
+                    lastRow = spot.getRow();
+                }
+                if (spot.canFitVehicle(vehicle)) {
+                    spotsFound++;
+                } else {
+                    spotsFound = 0;
+                }
+                if (spotsFound == spotsNeeded) {
+                    return i - (spotsNeeded - 1);
+                }
+            }
+            return -1;
+        }
+
+        public void print() {
+            int lastRow = -1;
+            for (int i = 0; i < spots.length; i++) {
+                ParkingSpot spot = spots[i];
+                if (spot.getRow() != lastRow) {
+                    System.out.print("  ");
+                    lastRow = spot.getRow();
+                }
+                spot.print();
+            }
+        }
+
+        /* When a car was removed from the spot, increment availableSpots */
+        public void spotFreed() {
+            availableSpots++;
+        }
+    }
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.9 Design a In-memory File System]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/25/design-in-memory-file-system/"/>
+    <updated>2014-08-25T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/25/design-in-memory-file-system</id>
+    <content type="html"><![CDATA[### Question
+
+> Explain the data structures and algorithms that you would use to design an in-memory file system. Illustrate with an example in code where possible. 
+
+### Solution
+
+__A file system consists of Files and Directories__. Each Directory contains a set of Files and Directories. 
+
+Since Files and Directories share so many characteristics, we've implemented them such that they __inherit from the same class__ -- Entry. 
+
+### Code
+
+Entry.java
+
+    public abstract class Entry {
+        protected Directory parent;
+        protected long created;
+        protected long lastUpdated;
+        protected long lastAccessed;
+        protected String name;
+
+        public Entry(String n, Directory p) {
+            name = n;
+            parent = p;
+            created = System.currentTimeMillis();
+        }
+
+        public boolean delete() {
+            if (parent == null) {
+                return false;
+            }
+            return parent.deleteEntry(this);
+        }
+
+        public abstract int size();
+
+        public String getFullPath() {
+            if (parent == null) {
+                return name;
+            } else {
+                return parent.getFullPath() + "/" + name;
+            }
+        }
+
+        public long getCreationTime() {
+            return created;
+        }
+
+        public long getLastUpdatedTime() {
+            return lastUpdated;
+        }
+
+        public long getLastAccessedTime() {
+            return lastAccessed;
+        }
+
+        public void changeName(String n) {
+            name = n;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+Directory.java
+
+    public class Directory extends Entry {
+        protected ArrayList<Entry> contents;
+
+        public Directory(String n, Directory p) {
+            super(n, p);
+            contents = new ArrayList<Entry>();
+        }
+
+        protected ArrayList<Entry> getContents() {
+            return contents;
+        }
+
+        public int size() {
+            int size = 0;
+            for (Entry e : contents) {
+                size += e.size();
+            }
+            return size;
+        }
+
+        public int numberOfFiles() {
+            int count = 0;
+            for (Entry e : contents) {
+                if (e instanceof Directory) {
+                    count++; // Directory counts as a file
+                    Directory d = (Directory) e;
+                    count += d.numberOfFiles();
+                } else if (e instanceof File) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        public boolean deleteEntry(Entry entry) {
+            return contents.remove(entry);
+        }
+
+        public void addEntry(Entry entry) {
+            contents.add(entry);
+        }
+    }
+
+File.java
+
+    public class File extends Entry {
+        private String content;
+        private int size;
+
+        public File(String n, Directory p, int sz) {
+            super(n, p);
+            size = sz;
+        }
+
+        public int size() {
+            return size;
+        }
+
+        public String getContents() {
+            return content;
+        }
+
+        public void setContents(String c) {
+            content = c;
+        }
+    }
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.10 Implement a Hashmap]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/25/Implement-HashMap/"/>
+    <updated>2014-08-25T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/25/Implement-HashMap</id>
+    <content type="html"><![CDATA[### Question
+
+> Design and implement a hash table which uses chaining (linked lists) to handle collisions.
+
+### Solution
+
+I wrote this topic before (using Java source code as a reference). This time, I would like to take another (easier) approach. 
+
+The main part of this is to use an array of list structure like this: 
+
+	LinkedList<Cell<K, V>>[] items;
+
+And the Cell Class looks like this: 
+
+    public class Cell<K, V> {
+        private K key;
+        private V value;
+
+        public Cell(K k, V v) {
+            key = k;
+            value = v;
+        }
+
+        public boolean equivalent(Cell<K, V> c) {
+            return equivalent(c.getKey());
+        }
+
+        public boolean equivalent(K k) {
+            return key.equals(k);
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+    }
+
+### Code
+
+__written by me__
+
+    public class HashMapCC150<K, V> {
+
+        int size;
+        LinkedList<Cell<K, V>>[] items;
+
+        public HashMapCC150(int num) {
+            this.size = num;
+            items = (LinkedList<Cell<K, V>>[]) new LinkedList[10];
+        }
+
+        public V get(K k) {
+            int hashValue = this.calculateHashCode(k);
+            if (items[hashValue] == null) {
+                items[hashValue] = new LinkedList<Cell<K, V>>();
+                return null;
+            }
+            for (Cell<K, V> cell : items[hashValue]) {
+                if (k.equals(cell.getKey())) {
+                    return cell.getValue();
+                }
+            }
+            return null;
+        }
+
+        public V put(K k, V v) {
+            int hashValue = this.calculateHashCode(k);
+            if (items[hashValue] == null) {
+                items[hashValue] = new LinkedList<Cell<K, V>>();
+            }
+            for (Cell<K, V> cell : items[hashValue]) {
+                if (k.equals(cell.getKey())) {
+                    items[hashValue].remove(cell);
+                    break;
+                }
+            }
+            Cell<K, V> newItem = new Cell<K, V>(k, v);
+            items[hashValue].add(newItem);
+            return null;
+        }
+
+        public V remove(K k) {
+            // not written
+            return null;
+        }
+
+        private int calculateHashCode(K k) {
+            return k.toString().length() % size;
+        }
+
+        public static void main(String[] args) {
+            HashMapCC150<String, String> map = new HashMapCC150<String, String>(10);
+            map.put("kevin", "durant");
+            map.put("steven", "curry");
+            map.put("al", "jefferson");
+            System.out.println(map.get("kevin"));
+            System.out.println(map.get("steven"));
+            System.out.println(map.get("al"));
+            map.put("kevin", "martin");
+            map.put("steven", "nash");
+            map.put("kevin", "braynt");
+            System.out.println(map.get("kevin"));
+            System.out.println(map.get("steven"));
+            System.out.println(map.get("al"));
+        }
+    }
+
+    class Cell<K, V> {
+        private K key;
+        private V value;
+
+        public Cell(K k, V v) {
+            key = k;
+            value = v;
+        }
+
+        public boolean equivalent(Cell<K, V> c) {
+            return equivalent(c.getKey());
+        }
+
+        public boolean equivalent(K k) {
+            return key.equals(k);
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+    }
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.8 Design Othello Game]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/24/design-othello-game/"/>
+    <updated>2014-08-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/24/design-othello-game</id>
+    <content type="html"><![CDATA[### Question
+
+> Othello is played as follows: Each Othello piece is white on one side and black on the other. When a piece is surrounded by its opponents on both the left and right sides, or both the top and bottom, it is said to be captured and its color is flipped. 
+
+> The win is assigned to the person with the most pieces. Implement the object-oriented design for Othello. 
+
+### Class
+
+1. Game
+	1. Two Player objects
+	1. a board object
+	1. singleton class (unless otherwise specified, this needs to be discussed)
+1. Board
+	1. Keep the score (black/white count). Of course we can put score in Game Class as well, it seems logically related to the board a bit more. 
+	1. Array of Piece objects
+	1. getScore() method
+1. Piece
+	1. stores color info
+	1. flip() function
+1. Player
+	1. stores color info
+	1. playPiece() method
+1. Color Enum
+1. Direction Enum
+
+### Functions 
+
+1. placePiece() by the Player (which triggers the following 2 methods)
+1. private flipSection(Position fromWhere, Color c, Direction up/down/left/right) by the board
+1. private updateScore() by the board
+1. getScore() by the board
+
+#### Follow up: Do we need separate Board and Game classes?
+
+Strictly speaking, no. The drawback is adding an extra layers. A function that calls Game class is immediately calling Board class. 
+
+But keeping the objects separate allows us to have a logical separation between the board (which contains just logic involving placing pieces) and the game (which involves times, game flow, etc.). 
+
+### Conclusion
+
+This is an easy, and very standard OOD question. Keep the logic clear, design the layers and object hierarchy, and the rest of things will come naturally. 
+
+### Code 
+
+Game.java
+
+    public class Game {
+        private Player[] players;
+        private static Game instance;
+        private Board board;
+        private final int ROWS = 10;
+        private final int COLUMNS = 10;
+
+        private Game() {
+            board = new Board(ROWS, COLUMNS);
+            players = new Player[2];
+            players[0] = new Player(Color.Black);
+            players[1] = new Player(Color.White);
+            Automator.getInstance().initialize(players); // used for testing
+        }
+
+        public static Game getInstance() {
+            if (instance == null) {
+                instance = new Game();
+            }
+            return instance;
+        }
+
+        public Board getBoard() {
+            return board;
+        }
+    }
+
+Board.java
+
+    public class Board {
+        private int blackCount = 0;
+        private int whiteCount = 0;
+        private Piece[][] board;
+
+        public Board(int rows, int columns) {
+            board = new Piece[rows][columns];
+        }
+
+        public void initialize() {
+            /* initial board has a grid like the following in the center:
+             *     WB
+             *     BW
+             */
+            int middleRow = board.length / 2;
+            int middleColumn = board[middleRow].length / 2;
+            board[middleRow][middleColumn] = new Piece(Color.White);
+            board[middleRow + 1][middleColumn] = new Piece(Color.Black);
+            board[middleRow + 1][middleColumn + 1] = new Piece(Color.White);
+            board[middleRow][middleColumn + 1] = new Piece(Color.Black);
+            blackCount = 2;
+            whiteCount = 2;
+        }
+
+        public boolean placeColor(int row, int column, Color color) {
+            if (board[row][column] != null) {
+                return false;
+            }
+
+            /* attempt to flip each of the four directions */
+            int[] results = new int[4];
+            results[0] = flipSection(row - 1, column, color, Direction.up);
+            results[1] = flipSection(row + 1, column, color, Direction.down);
+            results[2] = flipSection(row, column + 1, color, Direction.right);
+            results[3] = flipSection(row, column - 1, color, Direction.left);
+
+            /* compute how many pieces were flipped */
+            int flipped = 0;
+            for (int result : results) {
+                if (result > 0) {
+                    flipped += result;
+                }
+            }
+
+            /* if nothing was flipped, then it's an invalid move */
+            if (flipped < 0) {
+                return false;
+            }
+
+            /* flip the piece, and update the score */
+            board[row][column] = new Piece(color);
+            updateScore(color, flipped + 1);
+            return true;
+        }
+
+        private int flipSection(int row, int column, Color color, Direction d) {
+            /* Compute the delta for the row and the column. At all times, only the row or the column
+             * will have a delta, since we're only moving in one direction at a time.
+             */
+            int r = 0;
+            int c = 0;
+            switch (d) {
+            case up:
+                r = -1;
+                break;
+            case down:
+                r = 1;
+                break;
+            case left:
+                c = -1;
+                break;
+            case right:
+                c = 1;
+                break;
+            }
+
+            /* If out of bounds, or nothing to flip, return an error (-1) */
+            if (row < 0 || row >= board.length || column < 0 || column >= board[row].length || board[row][column] == null) {
+                return -1;
+            }
+
+            /* Found same color - return nothing flipped */
+            if (board[row][column].getColor() == color) {
+                return 0;
+            }
+
+            /* Recursively flip the remainder of the row. If -1 is returned, then we know we hit the boundary
+             * of the row (or a null piece) before we found our own color, so there's nothing to flip. Return
+             * the error code.
+             */
+            int flipped = flipSection(row + r, column + c, color, d);
+            if (flipped < 0) {
+                return -1;
+            }
+
+            /* flip our own color */
+            board[row][column].flip();
+            return flipped + 1;
+        }
+
+        public int getScoreForColor(Color c) {
+            if (c == Color.Black) {
+                return blackCount;
+            } else {
+                return whiteCount;
+            }
+        }
+
+        private void updateScore(Color newColor, int newPieces) {
+            /* If we added x pieces of a color, then we actually removed x - 1 pieces of the other
+             * color. The -1 is because one of the new pieces was the just-placed one.
+             */
+            if (newColor == Color.Black) {
+                whiteCount -= newPieces - 1;
+                blackCount += newPieces;
+            } else {
+                blackCount -= newPieces - 1;			
+                whiteCount += newPieces;
+            }
+        }
+
+        public void printBoard() {
+            for (int r = 0; r < board.length; r++) {
+                for (int c = 0; c < board[r].length; c++) {
+                    if (board[r][c] == null) {
+                        System.out.print("_");
+                    } else if (board[r][c].getColor() == Color.White) {
+                        System.out.print("W");
+                    } else {
+                        System.out.print("B");
+                    }
+                }
+                System.out.println();
+            }
+        }
+    }
+
+Player.java
+
+    public class Player {
+        private Color color;
+        public Player(Color c) {
+            color = c;
+        }
+
+        public int getScore() {
+            return Game.getInstance().getBoard().getScoreForColor(color);
+        }
+
+        public boolean playPiece(int row, int column) {
+            return Game.getInstance().getBoard().placeColor(row, column, color);
+        }
+
+        public Color getColor() {
+            return color;
+        }
+    }
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 8.7 Design Online Chat Server (2)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2/"/>
+    <updated>2014-08-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2</id>
+    <content type="html"><![CDATA[... Continued from previous post. 
+
+### Overall view
+
+The system consists of a database, a set of clients, and a set of servers. This is not about OOD, but we need to know. 
+
+1. DB stores user list, chat archive. An SQL DB would be good, __unless we want BigTable for scalability purpose__. 
+
+1. __We use XML for server-client communication__. Because it's debugging friendly. 
+
+1. __A set of servers__. 
+
+	1. Data will be __divided up across machines__, requiring us to potentially hop from machine to machine. 
+	1. When possible, we will try to __replicate some data__ across machines to minimize the lookups. 
+	1. One major design constraint here is to __prevent having a single point of failure__. For instance, if one machine controlled all the user sign-ins, then we'd cut off millions of users potentially if a single machine lost network connectivity.
+
+### Hardest problems
+
+Or the most interesting questions.
+
+#### Q1: How do we know if someone is online?
+
+While we would like users to tell us when they sign off, we can't know for sure. A user's connection might have died, for example. To make sure that we know when a user has signed off, we might try regularly pinging the client to make sure it's still there.
+
+#### Q2: How do we deal with conflicting information?
+
+We have some information stored in the computer's memory and some in the database. What happens if they get out of sync? Which one is "right"?
+
+#### Q3: How do we make our server scale?
+
+While we designed out chat server without worrying—too much- about scalability, in real life this would be a concern. We'd need to split our data across many servers, which would increase our concern about out-of-sync data. 
+
+#### Q4: How we do prevent denial of service attacks?
+
+Clients can push data to us —- what if they try to DOS (denial of service) us? How do we prevent that? 
+]]></content>
+  </entry>
+  
+</feed>

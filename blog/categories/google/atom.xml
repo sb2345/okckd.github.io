@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Google | My Octopress Blog]]></title>
+  <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
+  <link href="http://okckd.github.io/"/>
+  <updated>2014-08-29T00:08:15+08:00</updated>
+  <id>http://okckd.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Google Pre-interview Coaching]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/28/google-pre-interview-coaching/"/>
+    <updated>2014-08-28T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/28/google-pre-interview-coaching</id>
+    <content type="html"><![CDATA[### Question
+
+> Write a program that breaks up a string of words with no spaces into a string with the appropriate spaces. 
+
+Follow the following process:
+
+1. Clarify the problem
+1. Refine the solution
+1. Code it
+1. Last words
+
+### Clarify the problem
+
+1. Consider a general case, like "fastman"
+1. Disambiguate expected result
+1. State the key assumptions
+1. clarify function signature
+
+2 words? null input? where is the words from? We might use a dictionary. 
+
+### Refine the solution
+
+1. what if the dictionary cannot fit in RAM
+1. how would you print the most likely of multiple choices
+1. what if the words are not spelled correctly?
+1. Testing 
+
+### Code it
+
+
+
+### Last words
+
+Talk naive solution, then come up with a reasonably better one. 
+
+Time/Space tradeoff. (like pre-processing or something) 
+
+For very big/small input. 
+
+White-board practise is important! 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Google API Read4096 (read4K)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/27/google-api-read-4096/"/>
+    <updated>2014-08-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/27/google-api-read-4096</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.careercup.com/question?id=14424684)
+
+> Given API: int Read4096(char* buf); 
+
+> It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read. 
+
+> Use above API to Implement API "int Read(char* buf, int n)" which reads any number of chars from the file. 
+
+### Solution
+
+Since the nature of C++ and Java is different, I changed the api to: 
+
+	GoogleApi.read4096(){}
+	GoogleRead4096.read(int n){}
+
+As [suggested](http://www.careercup.com/question?id=14424684), the solution is to keep __one local buffer__, and 1 pointer within the buffer. 
+
+### Code
+
+	String buffer = null;
+	int p = 0;
+
+	public String read(int n) {
+		if (n < 0) {
+			return null;
+		} else if (n == 0) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		while (n > 0) {
+			// there is (LENGTH - p) chars left in the local buffer
+			if (buffer == null || p == buffer.length()) {
+				// no char left in buffer, update buffer
+				buffer = GoogleApi.read4096();
+				p = 0;
+				if (buffer.length() == 0) {
+					// finish reading the file (no more input chars)
+					break;
+				}
+			} else {
+				int numChars = buffer.length() - p;
+				if (numChars >= n) {
+					sb.append(buffer.substring(p, p + n));
+					p = p + n;
+					n = 0;
+				} else {
+					sb.append(buffer.substring(p));
+					p = buffer.length();
+					n -= numChars;
+				}
+			}
+		}
+		return sb.toString();
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Orthogonal Traverse the Map (`)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map/"/>
+    <updated>2014-08-16T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.itint5.com/oj/#22)
+
+> 有一个n*m（n和m都不超过50）的棋盘，有k个目标格子需要访问。需要访问的格子的横纵坐标存放在数组x[]和y[]中(0<=x[i]<n, 0<=y[i]<m)。
+
+> 遍历的规则为：
+>
+> 每一步只能从一个目标格子水平或者竖直跳跃移动到另一个目标格子。
+>
+> 连续的两步必须形成直角。即如果前一步是水平移动，那么下一步只能竖直移动。
+>
+> 问是否存在一种遍历顺序，使得每个目标格子有且仅被访问一次。
+
+> 样例：k=8, x=[0, 0, 0, 0, 2, 2, 4, 4], y=[0, 2, 4, 6, 4, 6, 2, 4],对应于下图中A, B, C, D, F, E, G, H 8个目标格子，存在满足条件的遍历A->D->E->F->C->B->G->H。
+
+<img class="middle" src="/assets/images/orthogonal-map.jpg">
+
+### Solution
+
+> n,m的棋盘，[建一个包含n+m个顶点的图G](http://www.itint5.com/discuss/22/%E7%9B%B4%E8%A7%92%E8%B7%AF%E7%BA%BF%E9%81%8D%E5%8E%86%E6%A3%8B%E7%9B%98)（为了方便说明，类似二分图将其分为两列，左边n个顶点，右边m个顶点，分别代表n行和n列）。
+
+> 对于目标格子(i,j)，左边第i个顶点和右边第j个顶点连一条边。最后的问题其实就是问转换之后的图G是否存在欧拉欧拉回路或者欧拉路径。
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Product All 1s]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/15/Product-all-ones/"/>
+    <updated>2014-08-15T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/15/Product-all-ones</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.itint5.com/oj/#18)
+
+> 给定一个非负整数a（不超过10^6），是否存在整数b，使得a和b的乘积全为1。如果存在，返回最小的乘积的位数。如果不存在，返回-1。
+
+> 样例：a=3，存在b=37，使得3*37=111，则函数应返回3（111的位数）。
+
+### Solution
+
+There's 1 equation of mod operation, which is helpful: 
+
+> (a * b) mod x = ((mx+a') * (nx+b')) mod x = (a' mod x) * (b' mod x) = (a mod x) * (b mod x)
+>
+> i.e.  (a * b) mod x = (a mod x) * (b mod x)
+
+Altough [I don't understand why](http://www.itint5.com/discuss/136/%E8%BF%99%E9%A2%98%E6%88%91%E8%B6%85%E6%97%B6%E4%BA%86%EF%BC%8C%E8%AF%B7%E9%97%AE%E5%A6%82%E4%BD%95%E7%BC%A9%E7%9F%AD%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4) does it contribute to the incredibly short solution code posted below. I can't solve this question, freakly speaking. 
+
+### Code
+
+	int findMinAllOne(int a) {
+		if (a < 0 || (a % 10) % 2 == 0 || a % 10 == 5)
+			return -1;
+
+		int ans = 1;
+		for (int p = 1; p != 0; p %= a) {
+			p = 10 * p + 1;
+			++ans;
+		}
+		return a == 1 ? ans - 1 : ans;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Alphabet Table (`)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/15/Alphabet-table/"/>
+    <updated>2014-08-15T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/15/Alphabet-table</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://blog.sina.com.cn/s/blog_979956cc0101i67x.html)
+
+> 每一种语言，都有自己的字母表，类似英文的a-z，但是顺序不相同。例如，有的语言可能是z是第一个之类的。现在给定这个语言的字典，请分析这个字典，得到这个语言的字母表的顺序。 
+
+> 例如：有如下的字母：C CAC CB BCC BA。 经过分析，得到字母表为C->A->B。
+
+### Solution
+
+http://page.renren.com/601882592/channel-noteshow-927705419
+
+1. C 2. CAC 3. CB 4. BCC 5. BA 经过分析，得到字母表为C->A->B。 
+
+分析 字典序相邻的位置的字符串，只会有如下两种情况： 
+
+（1）排在前面的字符串是下一个串的子串，如C与CAC
+
+（2）两个字符串具有第一对不相同的字符对，如CAC和CBB，第一个不相同的字符对为（A，B），这是就要求A在字母表中的顺序在B前面。对于后面字符并没有要求，如并不要求第二个不相同的字符对（C，B）中的C在字母表中的顺序在B前面。
+
+所以按照第（2）种情况建图，然后对该有向无环图求拓扑排序即可。
+
+So this becomes a Topology Sorting question. 
+
+### Code
+
+__not written by me__
+
+    pair<char,char>  constructEdge(const string & src1, const string & src2)
+    {
+         int min_len = min(src1.length(), src2.length());
+         int i = 0;
+         while(i < min_len && src1[i] == src2[i]){
+               i++;
+         }
+         if(i < min_len){
+               return  make_pair(src1[i], src2[i]);
+         }else{
+               return  make_pair('\0','\0');
+         }
+    }
+    //-1, 0, 1
+    int  alphaTable(const vector<string> &  dict, vector<char> & alpha_table)
+    {
+         unordered_map<char,set<char> >  edges;
+         set<char> nodes;
+         for(const string & word : dict){
+              for(char c : word){
+                  nodes.insert(c);
+              }
+         }
+         unordered_map<char,int>  in_degree;
+         for(int i = 1; i < dict.length(); i++){
+              pair edge = constructEdge(dict[i-1],dict[i]);
+              if(edge.first != '\0'){
+                  edges[edge.first].insert(edge.second);
+                  in_degree[edge.second]++;
+              }
+         }
+         queue<char>  q;
+         for(char node : nodes){
+             if(in_degree[node] == 0){
+                  q.push(node);
+             }
+         }
+         alpha_table.clear();
+         int result = 0;
+         while(!q.empty()){
+            if(q.size() > 1){
+                result = 1;
+            }
+            char  c = q.front();
+            q.pop();
+            alpha_table.push_back(c);
+            for(char node : edges[c]){
+                 in_degree[node] --;
+                 if(in_degree[node] == 0){
+                      q.push(node);
+                 }
+             }
+         }//while
+         if(alpha_table.size() < nodes.size()){
+             result = -1;
+         }
+         return result;    
+    }
+]]></content>
+  </entry>
+  
+</feed>
