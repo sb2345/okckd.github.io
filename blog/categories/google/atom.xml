@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Google | My Octopress Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-29T00:08:15+08:00</updated>
+  <updated>2014-08-29T20:34:56+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,6 +12,249 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Boggle Solver (Search Words From Matrix)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/29/Boggle-solver/"/>
+    <updated>2014-08-29T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/29/Boggle-solver</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://stackoverflow.com/questions/746082/how-to-find-list-of-possible-words-from-a-letter-matrix-boggle-solver)
+
+> Boggle Game: 
+
+    F X I E
+    A M L O
+    E W B X
+    A S T U
+
+> The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference. 
+
+### Solution
+
+__[The best solution](http://stackoverflow.com/a/4314056) is to use Trie__, then do DFS search. However it might not be as intuitive as it seems. 
+
+The idea is from [this answer](http://stackoverflow.com/a/746102). We need to first define a class called Item: 
+
+    class Item {
+        public final int x, y;
+        public final String prefix;
+
+        public Item(int row, int column, String prefix) {
+            this.x = row;
+            this.y = column;
+            this.prefix = prefix;
+        }
+    }
+
+So when we start doing DFS, we pass in an Item object which stores 2 information: 
+
+1. The next position that we're going to visit.
+1. The prefix string that we have validated so far (before visiting this position).
+
+For example: 
+
+    F X I E
+    A M L O
+    E W B X
+    A S T U
+
+We'll have Items objects like (0, 0, ""), (0, 1, "F"), (0, 2, "FA") ... We guarantee that the prefix must be a valid prefix by searching them in the Trie. 
+
+How to tell whether a string is a prefix of word, or it's an actual word? We have a property in TrieNode called TrieNode.isWord() to help us. 
+
+That's about it. I spend quite some time writing the code below, by refering to [this code](http://stackoverflow.com/a/11698898).
+
+### Code
+
+BoggleSolver.java
+
+    public class BoggleSolver {
+
+        private static BufferedReader in = null;
+        private static final String INPUT_FILE = "dictionary.txt";
+
+        public static void beginFileReader() {
+            try {
+                in = new BufferedReader(new FileReader(new File(BoggleSolver.class
+                        .getResource(INPUT_FILE).toURI())));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private Trie buildTrie() {
+            Trie trie = new Trie();
+            beginFileReader();
+            String line = null;
+            try {
+                while ((line = in.readLine()) != null) {
+                    String[] words = line.split(" ");
+                    for (String word : words) {
+                        word = word.trim().toLowerCase();
+                        trie.addWord(word);
+                    }
+                }
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            return trie;
+        }
+
+        public Set<String> findWords(char[][] map, Trie dict) {
+            Set<String> ans = new TreeSet<String>();
+            int m = map.length;
+            int n = map[0].length;
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    boolean[][] visited = new boolean[m][n];
+                    findWordsDfs(ans, dict, map, visited, new Item(i, j, ""));
+                    // item have 3 parameters:
+                    // location x,y and the prefix string before reaching (i.j)
+                }
+            }
+            return ans;
+        }
+
+        public void findWordsDfs(Set<String> ans, Trie dict, char[][] map,
+                boolean[][] visited, Item item) {
+            // item: the location that we're going to test
+            // item.prefix is the word prefix before reaching (x, y)
+
+            int m = map.length;
+            int n = map[0].length;
+            int x = item.x;
+            int y = item.y;
+
+            // check whether cur.(x,y) is a valid position
+            if (x < 0 || x >= m || y < 0 || y >= n) {
+                return;
+            } else if (visited[x][y]) {
+                return;
+            }
+            String newWord = item.prefix + map[x][y];
+            // check whether cur.prefix is a valid prefix
+            TrieNode findWord = dict.match(newWord);
+            if (findWord == null) {
+                // up to this position (x, y), the word dont' exists
+                return;
+            }
+            // now cur is in a valid position, with a valid prefix
+            if (findWord.isWord()) {
+                ans.add(newWord);
+            }
+            // visit this position, and continue in 4 different directions
+            visited[x][y] = true;
+            findWordsDfs(ans, dict, map, visited, new Item(x, y - 1, newWord));
+            findWordsDfs(ans, dict, map, visited, new Item(x, y + 1, newWord));
+            findWordsDfs(ans, dict, map, visited, new Item(x - 1, y, newWord));
+            findWordsDfs(ans, dict, map, visited, new Item(x + 1, y, newWord));
+            visited[x][y] = false;
+        }
+
+        public static void main(String[] args) {
+            String[] rows = "eela,elps,weut,korn".split(",");
+            char[][] input = new char[4][4];
+            for (int i = 0; i < 4; i++) {
+                input[i] = rows[i].toCharArray();
+            }
+
+            // prepare test data
+            BoggleSolver solver = new BoggleSolver();
+            Trie dictionary = solver.buildTrie();
+            // start finding words
+            Set<String> set = solver.findWords(input, dictionary);
+            // present the result
+            System.out.println(set.size() + " words are found, they are: ");
+            for (String str : set) {
+                System.out.println(str);
+            }
+        }
+
+        class Item {
+            public final int x, y;
+            public final String prefix;
+
+            public Item(int row, int column, String prefix) {
+                this.x = row;
+                this.y = column;
+                this.prefix = prefix;
+            }
+        }
+    }
+
+Trie.java
+
+    public class Trie {
+        private TrieNode root;
+
+        public Trie() {
+            this.root = new TrieNode();
+        }
+
+        public void addWord(String word) {
+            TrieNode node = this.root;
+            for (char c : word.toCharArray()) {
+                node = node.addChild(c);
+                if (node == null)
+                    return;
+            }
+            node.setWord(true);
+        }
+
+        public TrieNode match(String s) {
+            TrieNode node = this.root;
+            for (char c : s.toCharArray()) {
+                node = node.get(c);
+                if (node == null)
+                    return null;
+            }
+            return node;
+        }
+    }
+
+TrieNode.java
+
+    public class TrieNode {
+        private TrieNode[] children;
+        private boolean isWord = false;
+
+        public TrieNode() {
+            this.children = new TrieNode[26];
+        }
+
+        public TrieNode addChild(char child) {
+            if (child < 'a' || child > 'z')
+                return null;
+
+            int offset = child - 'a';
+            if (this.children[offset] == null) {
+                this.children[offset] = new TrieNode();
+            }
+            return this.children[offset];
+        }
+
+        public boolean isWord() {
+            return isWord;
+        }
+
+        public void setWord(boolean isWord) {
+            this.isWord = isWord;
+        }
+
+        public TrieNode get(char c) {
+            int offset = c - 'a';
+            return this.children[offset];
+        }
+    }
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Google Pre-interview Coaching]]></title>
@@ -47,7 +290,7 @@ Follow the following process:
 
 ### Code it
 
-
+Write code now, skip.
 
 ### Last words
 
@@ -192,100 +435,6 @@ Altough [I don't understand why](http://www.itint5.com/discuss/136/%E8%BF%99%E9%
 		}
 		return a == 1 ? ans - 1 : ans;
 	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Alphabet Table (`)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/15/Alphabet-table/"/>
-    <updated>2014-08-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/15/Alphabet-table</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://blog.sina.com.cn/s/blog_979956cc0101i67x.html)
-
-> 每一种语言，都有自己的字母表，类似英文的a-z，但是顺序不相同。例如，有的语言可能是z是第一个之类的。现在给定这个语言的字典，请分析这个字典，得到这个语言的字母表的顺序。 
-
-> 例如：有如下的字母：C CAC CB BCC BA。 经过分析，得到字母表为C->A->B。
-
-### Solution
-
-http://page.renren.com/601882592/channel-noteshow-927705419
-
-1. C 2. CAC 3. CB 4. BCC 5. BA 经过分析，得到字母表为C->A->B。 
-
-分析 字典序相邻的位置的字符串，只会有如下两种情况： 
-
-（1）排在前面的字符串是下一个串的子串，如C与CAC
-
-（2）两个字符串具有第一对不相同的字符对，如CAC和CBB，第一个不相同的字符对为（A，B），这是就要求A在字母表中的顺序在B前面。对于后面字符并没有要求，如并不要求第二个不相同的字符对（C，B）中的C在字母表中的顺序在B前面。
-
-所以按照第（2）种情况建图，然后对该有向无环图求拓扑排序即可。
-
-So this becomes a Topology Sorting question. 
-
-### Code
-
-__not written by me__
-
-    pair<char,char>  constructEdge(const string & src1, const string & src2)
-    {
-         int min_len = min(src1.length(), src2.length());
-         int i = 0;
-         while(i < min_len && src1[i] == src2[i]){
-               i++;
-         }
-         if(i < min_len){
-               return  make_pair(src1[i], src2[i]);
-         }else{
-               return  make_pair('\0','\0');
-         }
-    }
-    //-1, 0, 1
-    int  alphaTable(const vector<string> &  dict, vector<char> & alpha_table)
-    {
-         unordered_map<char,set<char> >  edges;
-         set<char> nodes;
-         for(const string & word : dict){
-              for(char c : word){
-                  nodes.insert(c);
-              }
-         }
-         unordered_map<char,int>  in_degree;
-         for(int i = 1; i < dict.length(); i++){
-              pair edge = constructEdge(dict[i-1],dict[i]);
-              if(edge.first != '\0'){
-                  edges[edge.first].insert(edge.second);
-                  in_degree[edge.second]++;
-              }
-         }
-         queue<char>  q;
-         for(char node : nodes){
-             if(in_degree[node] == 0){
-                  q.push(node);
-             }
-         }
-         alpha_table.clear();
-         int result = 0;
-         while(!q.empty()){
-            if(q.size() > 1){
-                result = 1;
-            }
-            char  c = q.front();
-            q.pop();
-            alpha_table.push_back(c);
-            for(char node : edges[c]){
-                 in_degree[node] --;
-                 if(in_degree[node] == 0){
-                      q.push(node);
-                 }
-             }
-         }//while
-         if(alpha_table.size() < nodes.size()){
-             result = -1;
-         }
-         return result;    
-    }
 ]]></content>
   </entry>
   
