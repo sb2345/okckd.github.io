@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Google] Travelling salesman problem "
+title: "[Classic] Travelling salesman problem "
 comments: true
-category: Google
+category: Classic
 tags: [  ]
 ---
 
