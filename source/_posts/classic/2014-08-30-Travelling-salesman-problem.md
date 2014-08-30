@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Classic] Travelling salesman problem "
+title: "[Classic] Travelling salesman problem (`)"
 comments: true
 category: Classic
 tags: [  ]
@@ -15,5 +15,3 @@ tags: [  ]
 > It is an NP-hard problem in combinatorial optimization. 
 
 ### Solution
-
-
