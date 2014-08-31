@@ -8,7 +8,7 @@ tags: [  ]
 
 ### Question 
 
-[link](http://www.careercup.com/question?id=5147801809846272)
+[link](http://www.careercup.com/question?id=5749537700315136)
 
 > Traveler wants to travel from city “A” to city “D”. There is a path from city “A” to city “D”. Path consists of steps, i.e. travel from city “A” to city “B”. Path is encoded as sequence of steps. 
 
