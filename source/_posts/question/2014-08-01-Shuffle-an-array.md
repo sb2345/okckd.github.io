@@ -12,7 +12,18 @@ tags: [  ]
 
 > Given an array, generate a random permutation of array elements. 
 
-### Analysis
+### Solution
+
+O(n) time complexity. 
+
+	To shuffle an array a of n elements (indices 0..n-1):
+	  for i from n − 1 downto 1 do
+	       j ← random integer with 0 ≤ j ≤ i
+	       exchange a[j] and a[i]
+
+Note the RNG is having limit from 0 to i, and number i keeps decreasing. 
+
+### Proof
 
 This is called __[Fisher–Yates shuffle](http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)__. Proof can be seen at question post: 
 
@@ -31,17 +42,6 @@ This is called __[Fisher–Yates shuffle](http://en.wikipedia.org/wiki/Fisher%E2
 > So the probability = ((n-1)/n) x (1/(n-1)) = 1/n
 
 > We can easily generalize above proof for any other position. 
-
-### Solution
-
-O(n) time complexity. 
-
-	To shuffle an array a of n elements (indices 0..n-1):
-	  for i from n − 1 downto 1 do
-	       j ← random integer with 0 ≤ j ≤ i
-	       exchange a[j] and a[i]
-
-Note the RNG is having limit from 0 to i, and number i keeps decreasing. 
 
 ### Code
 
