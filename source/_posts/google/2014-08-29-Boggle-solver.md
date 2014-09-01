@@ -19,6 +19,14 @@ tags: [  ]
 
 > The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference. 
 
+### Variation
+
+__Another version of questions states in [here](http://www.glassdoor.com/Interview/I-was-asked-to-write-an-algorithm-to-solve-a-crossword-like-puzzle-I-forget-the-name-but-started-with-a-B-As-opposed-QTN_435641.htm)__
+
+> ... Boggle Game. As opposed to simply vertical, horizontal, and diagonal placement of words, they were allowed to snake around the grid in any way. 
+
+For this version of question, no 'visited' memory needs to be stored. In other words, it's a simpler version of above question. 
+
 ### Solution
 
 __[The best solution](http://stackoverflow.com/a/4314056) is to use Trie__, then do DFS search. However it might not be as intuitive as it seems. 
