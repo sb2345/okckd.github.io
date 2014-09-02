@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Google | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-01T22:23:34+08:00</updated>
+  <updated>2014-09-02T21:30:27+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,212 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Find Anagrams in Dictionary]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/02/Find-anagrams-in-dictionary/"/>
+    <updated>2014-09-02T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/02/Find-anagrams-in-dictionary</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.careercup.com/question?id=3088)
+
+> Imagine you had a dictionary. How would you print all anagrams of a word? What if you had to do this repeatedly? Could you optimize it?
+
+### Solution
+
+A very [nice solution](http://stackoverflow.com/a/12477976): 
+
+1. Open dictionary
+
+1. Create empty hashmap H
+
+1. For each word in dictionary:
+
+    1. Create a key that is the word's letters sorted alphabetically (and forced to one case)
+    
+    1. Add the word to the list of words accessed by the hash key in H
+
+There's another [very interesting idea](http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html), if the length of the word is not too long. 
+
+> Another approach could be we can assign each letters from a..z a prime numbers (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, .. so on)
+>
+> and then for any word, we can calculate its key as the multiples of all the prime number corresponding to characters in the word. 
+>
+> The char -> int assignment may look like: 
+
+    a=2, b=3, c=5, d=7, e=11, f=13, g=17, h=19, i=23, j=29, 
+    k=31, l=37, m=41, n=43, o=47, p=53, q=59, r=61, s=67, t=71, 
+    u=73, v=79, w=83, x=89, y=97, z=101
+
+### Code
+
+__not written by me__, [link](http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html)
+
+	private static HashMap<String, ArrayList<String>> anagramMap = new HashMap<String, ArrayList<String>>();
+
+	public static void findAnagrams(String[] dictionary) {
+		int len = dictionary.length;
+
+		for (int i = 0; i < len; i++) {
+			String sortedWord = sortWordLexicographically(dictionary[i]);
+			ArrayList<String> wordList = anagramMap.get(sortedWord);
+			if (wordList == null) {
+				wordList = new ArrayList<String>();
+			}
+			wordList.add(dictionary[i]);
+			anagramMap.put(sortedWord, wordList);
+		}
+	}
+
+	public ArrayList<String> getAnagrams(String word) {
+		if (word == null) {
+			return null;
+		}
+
+		String sortedWord = sortWordLexicographically(word);
+		return anagramMap.get(sortedWord);
+	}
+
+	public void printAnagrams(String word) {
+		if (word == null) {
+			System.out.println("Input word is null!");
+		} else {
+			ArrayList<String> wordList = getAnagrams(word);
+			if (wordList == null) {
+				System.out.println("No anagrams exists for : " + word);
+			} else {
+				Iterator<String> iter = wordList.iterator();
+				while (iter.hasNext()) {
+					System.out.print(iter.next());
+				}
+			}
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Array Distance A(i)+A(j)+(j-i)]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)/"/>
+    <updated>2014-09-02T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.mitbbs.com/article/JobHunting/32772225_3.html)
+
+> Given an int array A[], define: 
+
+> distance = A[i] + A[j] + (j-i), j >= i. 
+
+> Find max distance in A[]
+
+### Solution
+
+Solution suggested on floor 8 of [this post](http://www.mitbbs.com/mitbbs_article_t.php?board=JobHunting&gid=32772225&ftype=0). 
+
+1. distance = (A[i] - i) + (A[j] + j), so we do 2 iteration in the array and calculate (A[i] - i) and (A[j] + j) respectively. 
+
+1. save the max value of (A[i] - i) from left to right
+
+1. save the max value of (A[j] + j) from right to left
+
+1. last iteration, calculate result. 
+
+Eg. input = {3, 3, 3, 5, 6, 4}
+
+> max value of (A[i] - i) from left to right: {3, 3, 3, 3, 3, 3}
+>
+> max value of (A[j] + j) from right to left: {10, 10, 10, 10, 10, 9}
+>
+> final result: 13
+
+### Code
+
+__written by me__
+
+	public int distance(int[] A) {
+		int len = A.length;
+		int[] arrayI = new int[len];
+		int[] arrayJ = new int[len];
+
+		arrayI[0] = A[0] - 0;
+		// arrayI stores max value of (A[i]-i) from left to right
+		arrayJ[len - 1] = A[len - 1] + (len - 1);
+		// arrayJ stores max value of (A[i]+i) from right to left
+
+		for (int i = 1; i < len; i++) {
+			arrayI[i] = Math.max(arrayI[i - 1], A[i] - i);
+		}
+
+		for (int i = len - 2; i >= 0; i--) {
+			arrayJ[i] = Math.max(arrayJ[i + 1], A[i] + i);
+		}
+
+		Common.printArray(arrayI);
+		Common.printArray(arrayJ);
+
+		int max = Integer.MIN_VALUE;
+		for (int i = 0; i < len; i++) {
+			max = Math.max(max, arrayI[i] + arrayJ[i]);
+		}
+		return max;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Crosswod Solver]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/01/Crossword-solver/"/>
+    <updated>2014-09-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/01/Crossword-solver</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://stackoverflow.com/questions/8585090/algorithm-for-crossword-puzzle-with-given-grid)
+
+> Given a wordlist like this:
+
+    1. ccaa
+    1. baca
+    1. baaa
+    1. bbbb
+
+> and a Grid like this: 
+
+    X X 
+    XXXX
+    X X 
+    XXXX
+
+> Now solve this crossword. One possible solution: 
+
+    b c 
+    baca
+    b a 
+    baaa
+
+### Solution
+
+[The corssword problem](http://stackoverflow.com/a/8586102) is NP-Complete, so your best shot is brute force: just try all possibilities, and stop when a possibility is a valid. Return failure when you exhausted all possible solutions.
+
+### Code
+
+__Pseudo code for brute force__. (this just serve as a guide, not a complete/correct solution)
+
+    solve(words,grid):
+       if words is empty:
+           if grid.isValudSol():
+              return grid
+           else:
+              return None
+       for each word in words:
+           possibleSol <- grid.fillFirst(word)
+           ret <- solve(words\{word},possibleSol)
+           if (ret != None):
+              return ret
+       return None
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Boggle Solver (Search Words From Matrix)]]></title>
@@ -30,6 +236,14 @@
     A S T U
 
 > The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference. 
+
+### Variation
+
+__Another version of questions states in [here](http://www.glassdoor.com/Interview/I-was-asked-to-write-an-algorithm-to-solve-a-crossword-like-puzzle-I-forget-the-name-but-started-with-a-B-As-opposed-QTN_435641.htm)__
+
+> ... Boggle Game. As opposed to simply vertical, horizontal, and diagonal placement of words, they were allowed to snake around the grid in any way. 
+
+For this version of question, no 'visited' memory needs to be stored. In other words, it's a simpler version of above question. 
 
 ### Solution
 
@@ -303,140 +517,6 @@ Time/Space tradeoff. (like pre-processing or something)
 For very big/small input. 
 
 White-board practise is important! 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Google API Read4096 (read4K)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/27/google-api-read-4096/"/>
-    <updated>2014-08-27T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/27/google-api-read-4096</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.careercup.com/question?id=14424684)
-
-> Given API: int Read4096(char* buf); 
-
-> It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read. 
-
-> Use above API to Implement API "int Read(char* buf, int n)" which reads any number of chars from the file. 
-
-### Solution
-
-Since the nature of C++ and Java is different, I changed the api to: 
-
-	GoogleApi.read4096(){}
-	GoogleRead4096.read(int n){}
-
-As [suggested](http://www.careercup.com/question?id=14424684), the solution is to keep __one local buffer__, and 1 pointer within the buffer. 
-
-### Code
-
-	String buffer = null;
-	int p = 0;
-
-	public String read(int n) {
-		if (n < 0) {
-			return null;
-		} else if (n == 0) {
-			return "";
-		}
-		StringBuilder sb = new StringBuilder();
-		while (n > 0) {
-			// there is (LENGTH - p) chars left in the local buffer
-			if (buffer == null || p == buffer.length()) {
-				// no char left in buffer, update buffer
-				buffer = GoogleApi.read4096();
-				p = 0;
-				if (buffer.length() == 0) {
-					// finish reading the file (no more input chars)
-					break;
-				}
-			} else {
-				int numChars = buffer.length() - p;
-				if (numChars >= n) {
-					sb.append(buffer.substring(p, p + n));
-					p = p + n;
-					n = 0;
-				} else {
-					sb.append(buffer.substring(p));
-					p = buffer.length();
-					n -= numChars;
-				}
-			}
-		}
-		return sb.toString();
-	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Orthogonal Traverse the Map (`)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map/"/>
-    <updated>2014-08-16T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.itint5.com/oj/#22)
-
-> 有一个n*m（n和m都不超过50）的棋盘，有k个目标格子需要访问。需要访问的格子的横纵坐标存放在数组x[]和y[]中(0<=x[i]<n, 0<=y[i]<m)。
-
-> 遍历的规则为：
->
-> 每一步只能从一个目标格子水平或者竖直跳跃移动到另一个目标格子。
->
-> 连续的两步必须形成直角。即如果前一步是水平移动，那么下一步只能竖直移动。
->
-> 问是否存在一种遍历顺序，使得每个目标格子有且仅被访问一次。
-
-> 样例：k=8, x=[0, 0, 0, 0, 2, 2, 4, 4], y=[0, 2, 4, 6, 4, 6, 2, 4],对应于下图中A, B, C, D, F, E, G, H 8个目标格子，存在满足条件的遍历A->D->E->F->C->B->G->H。
-
-<img class="middle" src="/assets/images/orthogonal-map.jpg">
-
-### Solution
-
-> n,m的棋盘，[建一个包含n+m个顶点的图G](http://www.itint5.com/discuss/22/%E7%9B%B4%E8%A7%92%E8%B7%AF%E7%BA%BF%E9%81%8D%E5%8E%86%E6%A3%8B%E7%9B%98)（为了方便说明，类似二分图将其分为两列，左边n个顶点，右边m个顶点，分别代表n行和n列）。
-
-> 对于目标格子(i,j)，左边第i个顶点和右边第j个顶点连一条边。最后的问题其实就是问转换之后的图G是否存在欧拉欧拉回路或者欧拉路径。
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Product All 1s]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/15/Product-all-ones/"/>
-    <updated>2014-08-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/15/Product-all-ones</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.itint5.com/oj/#18)
-
-> 给定一个非负整数a（不超过10^6），是否存在整数b，使得a和b的乘积全为1。如果存在，返回最小的乘积的位数。如果不存在，返回-1。
-
-> 样例：a=3，存在b=37，使得3*37=111，则函数应返回3（111的位数）。
-
-### Solution
-
-There's 1 equation of mod operation, which is helpful: 
-
-> (a * b) mod x = ((mx+a') * (nx+b')) mod x = (a' mod x) * (b' mod x) = (a mod x) * (b mod x)
->
-> i.e.  (a * b) mod x = (a mod x) * (b mod x)
-
-Altough [I don't understand why](http://www.itint5.com/discuss/136/%E8%BF%99%E9%A2%98%E6%88%91%E8%B6%85%E6%97%B6%E4%BA%86%EF%BC%8C%E8%AF%B7%E9%97%AE%E5%A6%82%E4%BD%95%E7%BC%A9%E7%9F%AD%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4) does it contribute to the incredibly short solution code posted below. I can't solve this question, freakly speaking. 
-
-### Code
-
-	int findMinAllOne(int a) {
-		if (a < 0 || (a % 10) % 2 == 0 || a % 10 == 5)
-			return -1;
-
-		int ans = 1;
-		for (int p = 1; p != 0; p %= a) {
-			p = 10 * p + 1;
-			++ans;
-		}
-		return a == 1 ? ans - 1 : ans;
-	}
 ]]></content>
   </entry>
   

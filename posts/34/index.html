@@ -9,8 +9,8 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a collection of numbers that might contain duplicates, return all possible unique permutations. For example,
-[1,1,2] have the &hellip;">
+  <meta name="description" content="Question link Implement wildcard pattern matching with support for '?' and '*'. '?' Matches any single character.
+'*' Matches any sequence of &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,994 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/15/Wildcard-Matching/">[LeetCode 44] Wildcard Matching</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/wildcard-matching/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Implement wildcard pattern matching with support for <code>'?'</code> and <code>'*'</code>.</p>
+
+<pre>'?' Matches any single character.
+'*' Matches any sequence of characters (including the empty sequence).
+
+The matching should cover the <b>entire</b> input string (not partial).
+
+The function prototype should be:
+bool isMatch(const char *s, const char *p)
+
+Some examples:
+isMatch("aa","a") → false
+isMatch("aa","aa") → true
+isMatch("aaa","aa") → false
+isMatch("aa", "*") → true
+isMatch("aa", "a*") → true
+isMatch("ab", "?*") → true
+isMatch("aab", "c*a*b") → false
+</pre><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">did not solve</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This question is similar to &ldquo;Regex Matching&rdquo;, and in fact can be solved using similar (DFS recursion) approach. <a href="http://n00tc0d3r.blogspot.sg/2013/05/wildcard-matching.html">This blog</a> has the best coverage of analysis and solutions overall.</p>
+
+<p><strong>The solution is DP</strong>. The equation is not very difficult to write, but keep in mind to <strong>check character count before entering the algorithm</strong>. Failing to do so results in TLE!</p>
+
+<h3>My code</h3>
+
+<p><strong>Updated on July 8th</strong>, my DP solution. 1200 ms.</p>
+
+<pre><code>public boolean isMatch(String s, String p) {
+    int len1 = s.length();
+    int len2 = p.length();
+
+    int count = 0;
+    for (int i = 0; i &lt; p.length(); i++) {
+        if (p.charAt(i)!='*')
+            count++;
+    }
+    if(count &gt; s.length()) {
+        return false;  
+    }
+
+    boolean[][] dp = new boolean[len2 + 1][len1 + 1];
+    for (int i = 0; i &lt;= len2; i++) {
+        for (int j = 0; j &lt;= len1; j++) {
+            if (i == 0 &amp;&amp; j == 0) {
+                dp[i][j] = true;
+            } else if (i == 0) {
+                dp[i][j] = false;
+            } else if (j == 0) {
+                if (p.charAt(i - 1) == '*') {
+                    dp[i][j] = dp[i - 1][j];
+                } else {
+                    dp[i][j] = false;
+                }
+            } else {
+                if (p.charAt(i - 1) == '*') {
+                    for (int k = j; k &gt;= 0; k--) {
+                        if(dp[i - 1][k]) {
+                            dp[i][j] = true;
+                            break;
+                        }
+                    }
+                } else if (p.charAt(i - 1) == '?') {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = dp[i - 1][j - 1] 
+                        &amp; p.charAt(i - 1) == s.charAt(j - 1);
+                }
+            }
+        }
+    }
+    return dp[len2][len1];
+}
+</code></pre>
+
+<p><strong>Updated on July 23th</strong>, optimized DP solution. 700 ms.</p>
+
+<pre><code>public boolean isMatch(String s, String p) {
+    int len1 = s.length();
+    int len2 = p.length();
+
+    int count = 0;
+    for (int i = 0; i &lt; p.length(); i++) {
+        if (p.charAt(i)!='*')
+            count++;
+    }
+    if(count &gt; s.length()) {
+        return false;  
+    }
+
+    boolean[][] dp = new boolean[len1 + 1][len2 + 1];
+    for (int j = 0; j &lt;= len2; j++) {
+        for (int i = 0; i &lt;= len1; i++) {
+            if (i == 0 &amp;&amp; j == 0) {
+                dp[i][j] = true;
+            } else if (j == 0) {
+                dp[i][j] = false;
+            } else if (i == 0) {
+                dp[i][j] = p.charAt(j - 1) == '*' &amp;&amp; dp[i][j - 1];
+            }else {
+                char wildCardChar = p.charAt(j - 1);
+                if (wildCardChar == '*') {
+                    // find the first match between dp[0][j-1] and dp[len1][j-1]
+                    int q = 0;
+                    while (q &lt;= len1 &amp;&amp; !dp[q][j-1]) {
+                        q++;
+                    }
+                    while (q &lt;= len1) {
+                        dp[q][j] = true;
+                        q++;
+                    }
+                    break;
+                } else if (wildCardChar == '?') {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = s.charAt(i - 1) == p.charAt(j - 1)
+                            &amp;&amp; dp[i - 1][j - 1];
+                }
+            }
+        }
+    }
+    return dp[len1][len2];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/15/PowXN/">[LeetCode 50] Pow(x, N)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/powx-n/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Implement pow(<i>x</i>, <i>n</i>).
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">25 minutes</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This question have many interesting solutions</strong>. The main idea is solving in O(lgn) time, but implementation differs.</p>
+
+<p>I will post 3 of the best solutions that I found.</p>
+
+<h3>Solution</h3>
+
+<p><strong>First, is keep calculating power(x, 2 ^ n)</strong>. This is my initial solution and I spent a little more than 20 minutes to write it.</p>
+
+<p>The code is a bit troublesome to write. Note that I was having overflow problems when I use:</p>
+
+<blockquote><p>while (m * 2 &lt;= n)</p></blockquote>
+
+<p>So I changed to</p>
+
+<blockquote><p>while (m &lt;= n / 2)</p></blockquote>
+
+<p>And then I passed. This needs to take note.</p>
+
+<p><strong>Second, divide and conquer</strong> which is explained in <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-powx-n.html">this blog</a>. The code is easier to write.</p>
+
+<p><strong>Third, is the best solution I ever found online</strong>. It is from <a href="https://github.com/yuanx/leetcode/blob/master/Pow.java">this repo</a>. It is similar to divide and conquer, but no more special case for negative n, and no additional method used.</p>
+
+<h3>My code</h3>
+
+<p>My first solution</p>
+
+<p><strong>One, keep calculating power(x, 2<sup>n</sup>)</strong></p>
+
+<pre><code>public double pow(double x, int n) {
+    if (n &lt; 0) return 1 / helper(x, 0-n);
+    else return helper(x, n);
+}
+
+private double helper(double x, int n) {
+    // n must be &gt;= 1, Now get x^m which m &lt;= n
+    if (n == 0) return 1;
+    int m = 1;
+    double sum = x;
+    while (m &lt;= n / 2) {
+        m &lt;&lt;= 1;
+        sum *= sum;
+    }
+    return sum * helper(x, n - m);
+}
+</code></pre>
+
+<p><strong>Two, divide and conquer</strong></p>
+
+<pre><code>public double pow(double x, int n) {
+    if (n &lt; 0) return 1 / helper(x, 0-n);
+    else return helper(x, n);
+}
+
+private double helper(double x, int n) {
+    if (n == 0) return 1;
+    double half = helper(x, n / 2);
+    return n % 2 == 1 ? x * half * half : half * half;
+}
+</code></pre>
+
+<p><strong>Three, best solution</strong></p>
+
+<pre><code>public double pow(double x, int n) {
+    if (n == 0) return 1;
+    if (n == 2) return x * x;
+
+    if (n % 2 == 0) return pow(pow(x, n / 2), 2);
+    else if (n &gt; 0) return x * pow(pow(x, n / 2), 2);
+    else return 1 / x * pow(pow(x, n / 2), 2);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/15/Anagrams/">[LeetCode 49] Anagrams</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/anagrams/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given an array of strings, return all groups of strings that are anagrams.
+</p>
+
+<p>Note: All inputs will be in lower-case.</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is not an extremely difficult question, but I always get TLE error</strong> (Time limit exceeded), before I realize that I have to use HashMap.</p>
+
+<h3>Solution</h3>
+
+<p><strong>First, my solution is checking the number of occurance of each letter</strong> in every single string. This will become an array of size 26 * (size of input list). After I get this huge 2D array, do brute force check for same arrays. <strong>This solution sometimes works, and sometimes not, because runtime = 1900ms</strong>.</p>
+
+<p><strong>The most popular solution on the Internet</strong> is making use of HashMap and sorting to check anagrams. For example, <a href="http://blog.csdn.net/xudli/article/details/8550425">this blog</a>.</p>
+
+<h3>My code</h3>
+
+<p><strong>My first solution, runtime = 1900ms</strong></p>
+
+<pre><code>public ArrayList&lt;String&gt; anagrams(String[] strs) {
+    int len = strs.length;
+    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    if (len == 0)
+        return ans;
+    int[][] map = new int[len][27];
+    for (int i = 0; i &lt; len; i++) {
+        for (int j = 0; j &lt; strs[i].length(); j++) {
+            map[i][strs[i].charAt(j) - 'a']++;
+        }
+        map[i][26] = strs[i].length(); // this is the sum of letters for line#i
+    }
+    // the entire map is filled in with occurance of each letter
+    int[] flag = new int[len];
+    for (int i = 0; i &lt; len; i++) {
+        if (flag[i] == 1)
+            continue;
+        for (int j = i + 1; j &lt; len; j++) {
+            if (flag[j] == 1) continue;
+            if (map[i][26] != map[j][26]) continue;
+            // compare line#i and line#j of the map
+            int k = 0;
+            for (k = 0; k &lt; 26; k++)
+                if (map[i][k] != map[j][k])
+                    break;
+            if (k == 26) {
+                flag[i] = 1;
+                flag[j] = 1;
+            }
+        }
+    }
+    // the flag array marks the indexes of strs that matches occurance
+    // (which mean is anagram)
+    for (int i = 0; i &lt; len; i++) {
+        if (flag[i] == 1)
+            ans.add(strs[i]);
+    }
+    return ans;
+}   
+</code></pre>
+
+<p><strong>Most popular solution on Internet</strong>, written by me on July 15th.</p>
+
+<pre><code>public List&lt;String&gt; anagrams(String[] strs) {
+    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    HashMap&lt;String, List&lt;String&gt;&gt; map = new HashMap&lt;String, List&lt;String&gt;&gt;();
+    for (String s: strs) {
+        char[] letters = s.toCharArray();
+        Arrays.sort(letters);
+        String sortedLetters = String.valueOf(letters);
+        if (!map.containsKey(sortedLetters)) {
+            List&lt;String&gt; list = new ArrayList&lt;String&gt;();
+            list.add(s);
+            map.put(sortedLetters, list);
+        } else {
+            map.get(sortedLetters).add(s);
+        }
+    }
+    for (String k: map.keySet()) {
+        if (map.get(k).size() &gt; 1) {
+            ans.addAll(map.get(k));
+        }
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/Trapping-Rain-Water/">[LeetCode 42] Trapping Rain Water</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/trapping-rain-water/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given <i>n</i> non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it is able to trap after raining. 
+</p>
+
+<p>
+For example, <br>
+Given <code>[0,1,0,2,1,0,1,3,2,1,2,1]</code>, return <code>6</code>.
+</p>
+
+<p>
+<img src="http://www.leetcode.com/wp-content/uploads/2012/08/rainwatertrap.png"><br>
+</p><p style="font-size: 11px">The above elevation map is represented by array [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped. <b>Thanks Marcos</b> for contributing this image!</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is an interesting question</strong>.</p>
+
+<p>I come up with a great solution, which is different from most online solutions.</p>
+
+<p><strong>My solution of using 2 iterations</strong>. First, find the point of max height (m). Second, iterate from 0 to right side, until reach m, while filling in the trapped water. Third, iterate from last to left side, until reach m.</p>
+
+<p><strong>The most popular solution online is DP</strong>. The explanation from <a href="http://rleetcode.blogspot.sg/2014/03/trapping-rain-water-java-python.html">this blog</a> is slightly confusing, so I will explain it here. <strong>Basic idea is to do 2 iteration</strong>. First time get the heighest bound to the left of every point. Second time get the heighest bound to the right.</p>
+
+<blockquote><p>Example: input = [0,1,0,2,1,0,1,3,2,1,2,1].</p>
+
+<p>Assume the 2 DP arrays are called highestLeftSoFar and highestRightSoFar.</p>
+
+<p>highestLeftSoFar  = 0,1,1,2,2,2,2,3,3,3,3,3</p>
+
+<p>highestRightSoFar = 3,3,3,3,3,3,3,3,2,2,2,1</p>
+
+<p>For each point, get the lowest bound (of the 2 bounds), and calculate water.</p></blockquote>
+
+<p><strong>There is another solution making use of stack</strong> from <a href="http://n00tc0d3r.blogspot.sg/2013/06/trapping-rain-water.html">this blog</a>. This idea is IMHO not very good, but it can be a good thinking/coding excercise. (I put the code in next section, but I did not write it)</p>
+
+<blockquote><p>We kind of add up level by level, as shown in picture below.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/trapping_rain.png"></p>
+
+<ol>
+<li>Use Stack to store the index of a bar;</li>
+<li>If the current one is smaller then the top of the stack, push it to stack;</li>
+<li>Otherwise, pop up the top until stack is empty or top is greater than the current one, add up the volume, push the current one to stack.</li>
+</ol>
+
+
+<blockquote><p>The tricky part is what is the volume to be added each time when we pop up a value from the stack.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Coding part is easy.</p>
+
+<h3>My code</h3>
+
+<p>My solution.</p>
+
+<pre><code>public int trap(int[] A) {
+    int len = A.length;
+    if (len &lt;= 2) return 0;
+    int m = 0, left = 0, right = 0, sum = 0;
+    for (int i = 0; i &lt; len; i ++) if (A[m] &lt; A[i]) m = i;
+    // now m points to the max height of the entire array
+    for (int i = 0; i &lt; m; i ++) {
+        sum += Math.max(0, left - A[i]);
+        left = Math.max(left, A[i]);
+    }
+    for (int i = len - 1; i &gt; m; i --) {
+        sum += Math.max(0, right - A[i]);
+        right = Math.max(right, A[i]);
+    }
+    return sum;
+}
+</code></pre>
+
+<p>DP solution.</p>
+
+<pre><code>public int trap(int[] A) {
+    if (A == null ||A.length == 0) return 0;
+    int[] highestLeftSoFar = new int[A.length];
+    int[] highestRightSoFar = new int[A.length];
+    for (int i = 0; i &lt; highestLeftSoFar.length; i ++)
+        highestLeftSoFar[i] = i == 0 ? 
+            A[i] : Math.max(A[i], highestLeftSoFar[i-1]);
+    for (int i = A.length - 1; i &gt;= 0; i --)
+        highestRightSoFar[i] = i == A.length-1 ? 
+            A[i] : Math.max(A[i], highestRightSoFar[i+1]);
+    int totalVolume=0;
+    for (int i = 0; i &lt; A.length; i ++)
+        totalVolume += Math.max(0, 
+            Math.min(highestLeftSoFar[i], highestRightSoFar[i]) - A[i]);
+    return totalVolume;
+}
+</code></pre>
+
+<p>Stack Solution.</p>
+
+<pre><code>public int trap(int[] A) {
+    int cur = 0;
+    while (cur &lt; A.length &amp;&amp; A[cur] == 0) cur ++;
+    int vol = 0;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    while (cur &lt; A.length) {
+        while (!stack.isEmpty() &amp;&amp; A[cur] &gt;= A[stack.peek()]) {
+            int b = stack.pop();
+            if (stack.isEmpty()) break;
+            vol += ((cur - stack.peek() - 1) * (Math.min(A[cur], A[stack.peek()]) - A[b]));
+        }
+        stack.push(cur ++);
+        cur ++;
+    }
+    return vol;
+}
+</code></pre>
+
+<p><strong>updated on Aug 27th, 2014</strong>, there is a very very good 2 pointer solution which reads the input only <strong>once</strong>!</p>
+
+<p><a href="http://qandwhat.runkite.com/i-failed-a-twitter-interview/">This post</a> wrote about it, and <a href="https://gist.github.com/mkozakov/59af0fd5bddbed1a0399">source code</a> available.</p>
+
+<pre><code>public int trap(int[] A) {
+    if (A == null || A.length == 0) {
+        return 0;
+    }
+
+    int len = A.length;
+    int left = 0;
+    int right = len - 1;
+    int leftHeight = 0;
+    int rightHeight = 0;
+    int water = 0;
+
+    while (left &lt; right) {
+        leftHeight = Math.max(leftHeight, A[left]);
+        rightHeight = Math.max(rightHeight, A[right]);
+        // Two ways to write the following if-condition 
+        // This would also work: if (A[left] &lt; A[right]) {
+        if (leftHeight &lt; rightHeight) {
+            // increase left pointer
+            water += leftHeight - A[left];
+            left++;
+        } else {
+            water += rightHeight - A[right];
+            right--;
+        }
+    }
+    return water;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/Sudoku-Solver/">[LeetCode 37] Sudoku Solver</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/sudoku-solver/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Write a program to solve a Sudoku puzzle by filling the empty cells.</p>
+
+<p>Empty cells are indicated by the character <code>'.'</code>.</p>
+
+<p>You may assume that there will be only one unique solution.
+
+</p><p>
+<img src="http://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Sudoku-by-L2G-20050714.svg/250px-Sudoku-by-L2G-20050714.svg.png"><br>
+</p><p style="font-size: 11px">A sudoku puzzle&#8230;</p>
+<p></p>
+
+<p>
+<img src="http://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Sudoku-by-L2G-20050714_solution.svg/250px-Sudoku-by-L2G-20050714_solution.svg.png"><br>
+</p><p style="font-size: 11px">&#8230;and its solution numbers marked in red.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">Difficult</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a very classic DFS search problem</strong>, and it is not easy!</p>
+
+<h3>Solution</h3>
+
+<p><strong>The solution simply brute force DFS</strong>.</p>
+
+<h3>My code</h3>
+
+<p>The following solution is from <a href="http://xixiaogualu.blogspot.sg/2013/09/leetcode-sudoku-solver.html">this blog</a></p>
+
+<pre><code>public void solveSudoku(char[][] board) {
+    helper(board, 0, 0);
+}
+
+private boolean helper(char[][] board, int i, int j) {
+    if (j &gt;= 9) return helper(board, i + 1, 0);
+    if (i == 9) return true;
+    if (board[i][j] == '.') {
+        for (int k = 1; k &lt;= 9; k++) {
+            board[i][j] = (char) (k + '0');
+            if (isValid(board, i, j)) 
+                if (helper(board, i, j + 1))
+                    return true;
+            board[i][j] = '.';
+        }
+    } else return helper(board, i, j + 1);
+    return false;
+}
+
+private boolean isValid(char[][] board, int i, int j) {
+    boolean[] map = new boolean[9];
+    for (int k = 0; k &lt; 9; k++) 
+        if (k != j &amp;&amp; board[i][k] == board[i][j])
+            return false;
+    for (int k = 0; k &lt; 9; k++) 
+        if (k != i &amp;&amp; board[k][j] == board[i][j])
+            return false;
+    for (int row = i / 3 * 3; row &lt; i / 3 * 3 + 3; row++) 
+        for (int col = j / 3 * 3; col &lt; j / 3 * 3 + 3; col++) 
+            if ((row != i || col != j) &amp;&amp; board[row][col] == board[i][j])
+                return false;
+    return true;
+}
+</code></pre>
+
+<p><strong>Updated on July 7th</strong>, code:</p>
+
+<pre><code>public void solveSudoku(char[][] board) {
+    helper(board, 0, 0);
+}
+
+private boolean helper(char[][] b, int m, int n) {
+    if (n == 9) {
+        m += 1;
+        n = 0;
+    }
+    if (m == 9) {
+        return true;
+    }
+    if (b[m][n] != '.') {
+        return helper(b, m, n + 1);
+    }
+    for (int i = 1; i &lt;= 9; i++) {
+        b[m][n] = (char) ('0' + i);
+        if (!validate(b, m, n)) {
+            continue;
+        }
+        if (helper(b, m, n + 1)) {
+            return true;
+        }
+    }
+    b[m][n] = '.';
+    return false;
+}
+
+private boolean validate(char[][] board, int i, int j) {
+    for (int k = 0; k &lt; 9; k++) 
+        if (k != j &amp;&amp; board[i][k] == board[i][j])
+            return false;
+    for (int k = 0; k &lt; 9; k++) 
+        if (k != i &amp;&amp; board[k][j] == board[i][j])
+            return false;
+    for (int row = i / 3 * 3; row &lt; i / 3 * 3 + 3; row++) 
+        for (int col = j / 3 * 3; col &lt; j / 3 * 3 + 3; col++) 
+            if ((row != i || col != j) &amp;&amp; board[row][col] == board[i][j])
+                return false;
+    return true;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/Rotate-Image/">[LeetCode 48] Rotate Image</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/rotate-image/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>You are given an <i>n</i> x <i>n</i> 2D matrix representing an image.</p>
+<p>Rotate the image by 90 degrees (clockwise).</p>
+<p>Follow up:<br>
+Could you do this in-place?</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This question is easy, just swap numbers in place.</p>
+
+<h3>Solution</h3>
+
+<p>Code is easy.</p>
+
+<h3>My code</h3>
+
+<p>My solution</p>
+
+<pre><code>public void rotate(int[][] matrix) {
+    int n = matrix.length;
+    for (int a = 0; a &lt;= n / 2 - 1; a ++) {
+        for (int b = 0; b &lt;= (n - 1) / 2; b ++){
+            int temp = matrix[a][b];
+            matrix[a][b] = matrix[n-1-b][a];
+            matrix[n-1-b][a] = matrix[n-1-a][n-1-b];
+            matrix[n-1-a][n-1-b] = matrix[b][n-1-a];
+            matrix[b][n-1-a] = temp;
+        }
+    }
+}
+</code></pre>
+
+<p>A cleaner version from <a href="http://blog.csdn.net/kenden23/article/details/17200067">this blog</a>.</p>
+
+<p>This code is very concise and beautiful, but actually it just <strong>added 2 more variables</strong> compared to my solution.</p>
+
+<blockquote><p>x = n-1-a</p>
+
+<p>y = n-1-b</p></blockquote>
+
+<pre><code>public void rotate(int[][] matrix) {
+    for (int a = 0, x = matrix.length - 1; a &lt; x; a++, x--) {
+        for (int b = a, y = x; b &lt; x; b++, y--) {
+            int t = matrix[a][b];
+            matrix[a][b] = matrix[y][a];
+            matrix[y][a] = matrix[x][y];
+            matrix[x][y] = matrix[b][x];
+            matrix[b][x] = t;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -777,804 +1765,6 @@ The minimum number of jumps to reach the last index is <code>2</code>. (Jump <co
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/14/First-Missing-Positive/">[LeetCode 41] First Missing Positive</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/first-missing-positive/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given an unsorted integer array, find the first missing positive integer.
-</p>
-
-<p>
-For example,<br>
-Given <code>[1,2,0]</code> return <code>3</code>,<br>
-and <code>[3,4,-1,1]</code> return <code>2</code>.
-</p>
-
-<p>
-Your algorithm should run in <i>O</i>(<i>n</i>) time and uses constant space.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a very difficult question</strong>!</p>
-
-<p>The tricky part of this question is the limit in space/time. If we sort and check, the space is constent, but time is increased.</p>
-
-<p><strong>The key to solve this problem is to make use of the position index of the array</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>The basic idea of the solution is to <strong>make sure that (i)th item of the array stores value (i+1)</strong>. The image below and the quoted text from <a href="http://tianrunhe.wordpress.com/2012/07/15/finding-the-1st-missing-positive-int-in-an-array-first-missing-positive/">this blog</a> are very good explanations.</p>
-
-<p><img class="middle" src="/assets/images/first_missing_pos.jpg"></p>
-
-<blockquote><p>The idea is simple. What is the most desired array we want to see? Something like [1,2,3] then we know 4 is missing, or [1, 8, 3, 4] then we know 2 is missing. In other word, “all the numbers are in their correct positions”. What are correct positions? For any i, A[i] = i+1. So our goal is to rearrange those numbers (in place) to their correct positions. We then need to decide how to arrange them. Let’s take the [3, 4, -1, 1] as an example. The 1st number, 3, we know it should stay in position 2. So we swap A[0] = 3 with A[2]. We then get [-1, 4, 3, 1]. We can’t do anything about -1 so we leave it there. The 2nd number, 4, we know it should sit in A[3]. So we swap A[1] = 4 with A[3]. We then get [-1, 1, 3, 4]. Now 1 should stay in A[0], so we keep swapping and we get [1, -1, 3, 4]. Notice now every positive number is staying in their correct position (A[0]=1, A[2]=3 and A[3]=4). We then need one more scan to find out 2 is missing.</p></blockquote>
-
-<h3>My code</h3>
-
-<p>Code below is written by me. It is slightly different from the code in that blog, but quite good also.</p>
-
-<pre><code>public int firstMissingPositive(int[] A) {
-    int len = A.length, i = 0;
-    while (i &lt; len) {
-        if (A[i] == i + 1 || A[i] &lt;= 0 || A[i] &gt; len || A[i] == A[A[i] - 1])
-            i ++;
-        else { // swap (i)th element with (A[i]-1)th element
-            int temp = A[i];
-            A[i] = A[temp - 1];
-            A[temp - 1] = temp;
-        }
-    }
-    for (i = 0; i &lt; len; i ++)
-        if (A[i] != i + 1) return i + 1;
-    return len + 1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/13/Count-And-Say/">[LeetCode 38] Count and Say</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-13T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/count-and-say/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>The count-and-say sequence is the sequence of integers beginning as follows:<br>
-<code>1, 11, 21, 1211, 111221, ...</code>
-</p>
-
-<p>
-<code>1</code> is read off as <code>"one 1"</code> or <code>11</code>.<br>
-<code>11</code> is read off as <code>"two 1s"</code> or <code>21</code>.<br>
-<code>21</code> is read off as <code>"one 2</code>, then <code>one 1"</code> or <code>1211</code>.<br>
-</p>
-
-<p>
-Given an integer <i>n</i>, generate the <i>n</i><sup>th</sup> sequence.
-</p>
-
-<p>
-Note: The sequence of integers will be represented as a string.
-</p>
-<p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="white">15 minutes</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a implementation question, not difficult</strong>. I did it with one go.</p>
-
-<h3>Solution</h3>
-
-<p>The following code is my code. All online solutions are same.</p>
-
-<h3>My code</h3>
-
-<pre><code>public String countAndSay(int n) {
-    String s = "1";
-    for (int i = 2; i &lt;= n; i ++) {
-        char[] nums = s.toCharArray();
-        String newS = "";
-        int len = nums.length, left = 0, right = 0;
-        while (right &lt; len) {
-            while (right &lt; len &amp;&amp; nums[left] == nums[right]) right ++;
-            newS += (right - left) + "" + nums[left];
-            left = right;
-        }
-        s = newS;
-    }
-    return s;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/13/Combination-Sum-II/">[LeetCode 40] Combination Sum II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-13T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/combination-sum-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a collection of candidate numbers (<b><i>C</i></b>) and a target number (<b><i>T</i></b>), find all unique combinations in <b><i>C</i></b> where the candidate numbers sums to <b><i>T</i></b>.
-</p>
-
-<p>Each number in <b><i>C</i></b> may only be used <b>once</b> in the combination.
-</p>
-<p><b>Note:</b><br>
-</p><ul>
-<li>All numbers (including target) will be positive integers.</li>
-<li>Elements in a combination (<i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>, … , <i>a</i><sub>k</sub>) must be in non-descending order. (ie, <i>a</i><sub>1</sub> ≤ <i>a</i><sub>2</sub> ≤ … ≤ <i>a</i><sub>k</sub>).</li>
-<li>The solution set must not contain duplicate combinations.</li>
-</ul>
-<p></p>
-
-<p>
-For example, given candidate set <code>10,1,2,7,6,1,5</code> and target <code>8</code>, <br>
-A solution set is: <br>
-<code>[1, 7]</code> <br>
-<code>[1, 2, 5]</code> <br>
-<code>[2, 6]</code> <br>
-<code>[1, 1, 6]</code> <br>
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This problem is derived from the &ldquo;Combination Sum&rdquo; problem</strong>.</p>
-
-<p>The solution is the &ldquo;Combination Sum&rdquo; solution plus some duplication avoidance technique.</p>
-
-<h3>Solution</h3>
-
-<p><strong>Main part of this solution is same as &ldquo;Combination Sum&rdquo;</strong>. There is only 2 lines of code that needs to be added/modified.</p>
-
-<p><strong>First change</strong>, When go into the next recursive call, instead of:</p>
-
-<blockquote><p>helper(cand, ans, i, &hellip; )</p></blockquote>
-
-<p>Change it to</p>
-
-<blockquote><p>helper(cand, ans, i + 1, &hellip; )</p></blockquote>
-
-<p><strong>Second change</strong>, inside the for-loop, instead of getting next element from array, get the next element with different value. The 2 types of modifications below both works:</p>
-
-<blockquote><p>At the beginning of the for-loop: if (i > start &amp;&amp; cand[i] == cand[i-1]) continue;</p>
-
-<p>At the end of the for-loop: while(i &lt; cand.length &ndash; 1 &amp;&amp; cand[i] == cand[i + 1]) i++;</p></blockquote>
-
-<p>The 2 kinds of code are shown below.</p>
-
-<h3>My code</h3>
-
-<p>This idea is from <a href="http://fisherlei.blogspot.sg/2013/01/leetcode-combination-sum-ii-solution.html">this blog</a>. This is also the most popular solution online.</p>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; combinationSum2(int[] num, int target) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    Arrays.sort(num);
-    helper(num, ans, 0, new ArrayList&lt;Integer&gt;(), target);
-    return ans;
-}
-
-private void helper(int[] cand, ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, 
-                    int start, ArrayList&lt;Integer&gt; items, int target) {
-    if (start &gt;= cand.length || target &lt; cand[start]) return;
-    for (int i = start; i &lt; cand.length; i ++) {
-        if (cand[i] &gt; target) break;
-        items.add(cand[i]);
-        if (cand[i] == target) ans.add(new ArrayList&lt;Integer&gt;(items));
-        else helper(cand, ans, i + 1, items, target - cand[i]);
-        items.remove(items.size() - 1);
-        while(i &lt; cand.length - 1 &amp;&amp; cand[i] == cand[i + 1]) i++;
-    }
-}
-</code></pre>
-
-<p>The idea from <a href="http://blog.csdn.net/linhuanmars/article/details/20829099">this blog</a>. Only difference is the way to remove duplications (no while-loop at the end, instead, a checking method at the beginning of the for-loop).</p>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; combinationSum2(int[] num, int target) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    Arrays.sort(num);
-    helper(num, ans, 0, new ArrayList&lt;Integer&gt;(), target);
-    return ans;
-}
-
-private void helper(int[] cand, ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, 
-                    int start, ArrayList&lt;Integer&gt; items, int target) {
-    if (start &gt;= cand.length || target &lt; cand[start]) return;
-    for (int i = start; i &lt; cand.length; i ++) {
-        if (i &gt; start &amp;&amp; cand[i] == cand[i-1]) continue;
-        if (cand[i] &gt; target) break;
-        items.add(cand[i]);
-        if (cand[i] == target) ans.add(new ArrayList&lt;Integer&gt;(items));
-        else helper(cand, ans, i + 1, items, target - cand[i]);
-        items.remove(items.size() - 1);
-        // while(i &lt; cand.length - 1 &amp;&amp; cand[i] == cand[i + 1]) i++;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/13/Combination-Sum/">[LeetCode 39] Combination Sum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-13T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/combination-sum/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a set of candidate numbers (<b><i>C</i></b>) and a target number (<b><i>T</i></b>), find all unique combinations in <b><i>C</i></b> where the candidate numbers sums to <b><i>T</i></b>. 
-</p>
-
-<p>The <b>same</b> repeated number may be chosen from <b><i>C</i></b> unlimited number of times.
-</p>
-
-<p><b>Note:</b><br>
-</p><ul>
-<li>All numbers (including target) will be positive integers.</li>
-<li>Elements in a combination (<i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>, … , <i>a</i><sub>k</sub>) must be in non-descending order. (ie, <i>a</i><sub>1</sub> ≤ <i>a</i><sub>2</sub> ≤ … ≤ <i>a</i><sub>k</sub>).</li>
-<li>The solution set must not contain duplicate combinations.</li>
-</ul>
-<p></p>
-
-<p>
-For example, given candidate set <code>2,3,6,7</code> and target <code>7</code>, <br>
-A solution set is: <br>
-<code>[7]</code> <br>
-<code>[2, 2, 3]</code> <br>
-</p>
-<p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">20 min coding only</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an NP problem</strong>.</p>
-
-<p>It can be solved with basic recursion methods. I refered to <a href="http://blog.csdn.net/linhuanmars/article/details/20828631">this blog</a> for the idea.</p>
-
-<h3>Solution</h3>
-
-<p><strong>Recursively fetch the next element and subtract the value from the target</strong>. In the end, if target happen to be 0, then 1 solution is found. If target result to be less than 0, return. If larger than 0, continue.</p>
-
-<h3>My code</h3>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; combinationSum(int[] candidates, int target) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    Arrays.sort(candidates);
-    helper(candidates, ans, 0, new ArrayList&lt;Integer&gt;(), target);
-    return ans;
-}
-
-private void helper(int[] cand, ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, 
-                    int start, ArrayList&lt;Integer&gt; items, int target) {
-    if (target &lt; cand[start]) return;
-    for (int i = start; i &lt; cand.length; i ++) {
-        if (cand[i] &gt; target) break;
-        items.add(cand[i]);
-        if (cand[i] == target) ans.add(new ArrayList&lt;Integer&gt;(items));
-        else helper(cand, ans, i, items, target - cand[i]);
-        items.remove(items.size() - 1);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/12/Valid-Sudoku/">[LeetCode 36] Valid Sudoku</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/valid-sudoku/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Determine if a Sudoku is valid, according to: <a href="http://sudoku.com.au/TheRules.aspx">Sudoku Puzzles - The Rules</a>.</p>
-
-<p>The Sudoku board could be partially filled, where empty cells are filled with the character <code>'.'</code>.</p>
-
-<p>
-<img src="http://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Sudoku-by-L2G-20050714.svg/250px-Sudoku-by-L2G-20050714.svg.png"><br>
-</p><p style="font-size: 11px">A partially filled sudoku which is valid.</p>
-<p></p>
-
-<p><b>Note:</b><br>
-A valid Sudoku board (partially filled) is not necessarily solvable. Only the filled cells need to be validated.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is not a difficult problem</strong>.</p>
-
-<p>Most online solutions are same as mine, which make use of <strong>three for-loops</strong> and <strong>nine arrays of length 9</strong> (for each loop) to mark the status.</p>
-
-<p>However, <strong>I also found a tricky solution</strong>. See code for details.</p>
-
-<h3>Solution</h3>
-
-<p>Both code are straight-forward.</p>
-
-<h3>My code</h3>
-
-<p>Below is my code.</p>
-
-<pre><code>public boolean isValidSudoku(char[][] board) {
-    // first, validate rows
-    for (int i = 0; i &lt; 9; i ++) {
-        int[] mark = new int[9];
-        for(char a: board[i]) 
-            if (a != '.') mark[a-'1'] ++;
-        for (int b: mark) if (b &gt; 1) return false;
-    }
-    // second, validate columns
-    for (int i = 0; i &lt; 9; i ++) {
-        int[] mark = new int[9];
-        for(char[] a: board) 
-            if (a[i] != '.') mark[a[i]-'1'] ++;
-        for (int b: mark) if (b &gt; 1) return false;
-    }
-    // third, validate box
-    for (int a = 0; a &lt;= 6; a += 3) {
-        for (int b = 0; b &lt;= 6; b += 3) {
-            int[] mark = new int[9];
-            for (int i = 0; i &lt;= 2; i ++) 
-                for (int j = 0; j &lt;= 2; j ++) 
-                    // the 9 values are represented at (a+i, b+j)
-                    if (board[a+i][b+j] != '.') mark[board[a+i][b+j]-'1'] ++;
-            for (int c: mark) if (c &gt; 1) return false;
-        }
-    }
-    // finished validation. if still survives at this point of time, congratulations!
-    return true;
-}
-</code></pre>
-
-<p><strong>The following solution</strong> is from <a href="http://www.cnblogs.com/zhaolizhen/p/Sudoku.html">this blog</a>. It&rsquo;s a very clever and tricky solution!</p>
-
-<p><strong>Note that default value of Java boolean type is false</strong>, so no need to set value after declaration.</p>
-
-<pre><code>public boolean isValidSudoku(char[][] board) {
-    boolean[][] rows = new boolean[9][9];
-    boolean[][] cols = new boolean[9][9];
-    boolean[][] blocks = new boolean[9][9];
-    for (int i = 0; i &lt; 9; ++i) {
-        for (int j = 0; j &lt; 9; ++j) {
-            int c = board[i][j] - '1';
-            if (board[i][j] == '.') continue;
-            if (rows[i][c] || cols[j][c] || blocks[i - i % 3 + j / 3][c])
-                return false;
-            rows[i][c] = cols[j][c] = blocks[i - i % 3 + j / 3][c] = true;
-        }
-    }
-    return true;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/12/Search-in-Rotated-Sorted-Array/">[LeetCode 33] Search in Rotated Sorted Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/search-in-rotated-sorted-array/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Suppose a sorted array is rotated at some pivot unknown to you beforehand.</p>
-
-<p>(i.e., <code>0 1 2 4 5 6 7</code> might become <code>4 5 6 7 0 1 2</code>).</p>
-
-<p>You are given a target value to search. If found in the array return its index, otherwise return -1.</p>
-
-<p>You may assume no duplicate exists in the array.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">Did not solved</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This question is actually not difficult</strong>.</p>
-
-<p>There are 2 ways to solve using binary search.</p>
-
-<p><strong>First solution, find the pivot and then decide on</strong> which side of the sorted array shall I continue searching. I implmented this code.</p>
-
-<p><strong>Second solution is a very clever way to solve this problem</strong>. Without having any knowledge of pivot, directly check the mid-point against left number and right number. The idea is from <a href="http://leetcode.com/2010/04/searching-element-in-rotated-array.html">this blog</a>.</p>
-
-<h3>Solution</h3>
-
-<p>The code is easy to understand.</p>
-
-<h3>My code</h3>
-
-<p>Find pivot and then binary search (written by me)</p>
-
-<pre><code>public int search(int[] A, int target) {
-    int len = A.length;
-    if (len == 0) return 0;
-    int left = 0, right = len - 1;
-    while (right - left &gt; 1) {
-        int mid = (left + right) / 2;
-        if (A[mid] &gt; A[left]) left = mid;
-        else right = mid;
-    }
-    // left now points to max value, and right the min value
-    if (target &gt;= A[0]) {
-        right = left;
-        left = 0;
-    } else {
-        left = right;
-        right = len - 1;
-    }
-    // now search for target between left and right
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (A[mid] == target) return mid;
-        else if (A[mid] &gt; target) right = mid - 1;
-        else if (A[mid] &lt; target) left = mid + 1;
-    }
-    if (right &gt;= 0 &amp;&amp; left &lt; len &amp;&amp; A[left] == target) return left;
-    else return -1;
-}
-</code></pre>
-
-<p><strong>Without knowledge of pivot</strong>, a great solution.</p>
-
-<p>Pay special attention to different larger/smaller conditions. It&rsquo;s very easy to miss a equal sign or something.</p>
-
-<pre><code>public int search(int[] A, int target) {
-    int left = 0;
-    int right = A.length - 1;
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (target == A[mid]) return mid;
-        if (A[left] &lt;= A[mid]) {
-            if (A[left] &lt;= target &amp;&amp; target &lt;= A[mid]) right = mid;
-            else left = mid + 1;
-        } else {
-            if (A[mid] &lt;= target &amp;&amp; target &lt;= A[right]) left = mid;
-            else right = mid - 1;
-        }
-    }
-    return -1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/35">&larr; Older</a>
@@ -1591,17 +1781,17 @@ A valid Sudoku board (partially filled) is not necessarily solvable. Only the fi
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (4)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (7)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (49)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (50)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (22)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (81)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (82)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
@@ -1613,23 +1803,23 @@ A valid Sudoku board (partially filled) is not necessarily solvable. Only the fi
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/01/Multithreading-deadlock-prevention/">[Design] Multithreading - Deadlock Prevention</a>
+        <a href="/blog/2014/09/02/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/01/Hamming-distance-of-array/">[Facebook] Hamming Distance of Array</a>
+        <a href="/blog/2014/09/02/Listener-Observer-pattern/">[Design] Listener / Observer Pattern</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/01/Find-row-with-most-1s/">[Question] Find Row With Most 1s</a>
+        <a href="/blog/2014/09/02/Find-anagrams-in-dictionary/">[Google] Find Anagrams in Dictionary</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/30/multiples-of-3-and-5/">[Question] Multiples of 3 and 5</a>
+        <a href="/blog/2014/09/02/Axis-aligned-rectangle/">[Question] Axis Aligned Rectangles</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/30/Travelling-salesman-problem/">[Classic] Travelling Salesman Problem</a>
+        <a href="/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)/">[Google] Array Distance A(i)+A(j)+(j-i)</a>
       </li>
     
   </ul>
