@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Google] Traveller Path Problem (`)"
+title: "[Google] Traveller Path Problem "
 comments: true
 category: Google
 tags: [  ]
@@ -48,3 +48,7 @@ This question is not stated clear enough. I found one tentative algorithm:
 > Then, find the one key on startsToFinishes, that is not a key in finishesToStarts - this is the city from which the path begins. (O(N)) 
 
 > Then, iteratively, city by city, build the path. 
+
+__Follow up on Sep 2nd, 2014__: 
+
+[This post](http://www.mitbbs.com/article_t/JobHunting/32772275.html) talks about this question. The answer would be similar to what's writtne above. 
