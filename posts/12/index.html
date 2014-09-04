@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My Octopress Blog</title>
-  <meta name="author" content="Your Name">
+  <title>Woodstock Blog</title>
+  <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link You are given a collection of nuts of different size and corresponding bolts. You can choose any nut &amp; any bolt together, from &hellip;">
+  <meta name="description" content="Question link Design a web application to represent hierarchy of solar system. Give details of Persistence layer, business layer, presentation layer &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +21,7 @@
   <link rel="canonical" href="http://okckd.github.io/posts/12">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="Woodstock Blog" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
@@ -48,9 +48,9 @@
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">My Octopress Blog</a></h1>
+  <h1><a href="/">Woodstock Blog</a></h1>
   
-    <h2>A blogging framework for hackers.</h2>
+    <h2>What's the good of living if you don't try a few things?</h2>
   
 </hgroup>
 
@@ -83,7 +83,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/28/Matching-Nuts-And-Bolts/">[Question] Matching Nuts and Bolts</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/03/Design-Solar-System/">[Google] Design Solar System (`)</a></h1>
     
     
       <p class="meta">
@@ -99,7 +99,7 @@
   
 
 
-<time datetime="2014-07-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-03T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -108,29 +108,78 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://tech-queries.blogspot.sg/2011/01/nuts-and-bolts-algorithm.html">link</a></p>
+<p><a href="http://www.careercup.com/question?id=14761735">link</a></p>
 
-<blockquote><p>You are given a collection of nuts of different size and corresponding bolts. You can choose any nut &amp; any bolt together, from which you can determine whether the nut is larger than bolt, smaller than bolt or matches the bolt exactly. However there is no way to compare two nuts together or two bolts together. Suggest an algorithm to match each bolt to its matching nut.</p></blockquote>
+<blockquote><p>Design a web application to represent hierarchy of solar system.</p>
 
-<h3>Analysis</h3>
-
-<p>Use the idea of quicksort. Find pivot and divide.</p>
+<p>Give details of Persistence layer, business layer, presentation layer and Client-server protocol.</p></blockquote>
 
 <h3>Solution</h3>
 
-<ol>
-<li>Take a nut from the nuts pile</li>
-<li>Divide bolts around it in 2 parts, which are smaller and larger than this.</li>
-<li>Find a matching bolt to this nut.</li>
-<li>Divide nuts in 2 parts, which are smaller and larger than matching bolt.</li>
-</ol>
+<p><strong>First, OOD part</strong> is very well covered in <a href="http://www.ehow.com/how_5579338_build-own-solar-system-java.html">this site</a>. There&rsquo;re 2 abstract class: <strong>OrbitalSystem</strong>, where &lsquo;Star/Sun&rsquo; is an instance, and <strong>GravityObject</strong>, where &lsquo;Planet/Earch&rsquo; is an instance. Though this does not take satellite into consideration.</p>
 
+<p><strong>Second, the multi-layer structure</strong>. It&rsquo;s cover in another post <strong><a href="/blog/2014/08/03/Multilayered-architecture/">Multilayered architecture</a></strong></p>
 
-<p>Now we have 2 subsets of Nuts and Bolts.</p>
+<p><strong>Third, the protocol</strong>. We <a href="http://stackoverflow.com/a/4279218">use HTTP protocol</a>, because:</p>
 
-<p>At every step, we will be able to divide these piles in 2 halves and reduce complexity by a factor of 2.</p>
+<blockquote><p>HTTP(S) is the best protocol to use. The overhead (i.e. headers) is pretty small, the transfer can be gzipped, the connection can be secured (via SSL). Also, ports 80 (HTTP) and 443 (HTTPS) will be open in 99% of cases. Other ports are not &mdash; for example some carriers block all other ports unless you pay extra.</p></blockquote>
 
-<p><strong>Average case time complexity will be O(nlogn)</strong>, but O(n<sup>2</sup>) when pivot is selection poor.</p>
+<p>More info on HTTP communication comes later.</p>
+
+<h3>Code</h3>
+
+<p>from <a href="http://www.ehow.com/how_5579338_build-own-solar-system-java.html">here</a></p>
+
+<pre><code>public abstract class GravityObject {
+    double xPosition;
+    double yPosition;
+    double degreeInOrbit;
+    double distanceFromParent;
+
+    GravityObject() {
+    this.distance = 0;
+    }
+
+    GravityObject(double distance) {
+    this.distance = distance;
+    }
+}
+
+import java.util.ArrayList;
+
+public abstract class OrbitalSystem extends GravityObject {
+    private ArrayList children = new ArrayList(); // Objects within the system. They will orbit the parent.
+
+    public void add(GravityObject child) { children.add(child); }
+
+    public void tick() {
+        for (int x = 0; x &lt; children.size(); x++) {
+            GravityObject current = children.get(x);
+            current.degree += 1
+            current.xPosition = this.xPosition + Math.cos(degree/180 * Math.PI)* current.distance;
+            current.yPosition = this.yPosition - Math.sin(degree/180 * Math.PI) * current.distance;
+        }
+    }
+}
+
+public class Star extends OrbitalSystem { 
+
+};
+
+public class Planet extends GravityObject { 
+
+};
+
+public static int main(String[] args) {
+    Star s = new Star(); // Create a new star.
+    s.add(new Planet(20)); // Add a planet to the star's orbital system which orbits at a distance of 20 units.
+    s.add(new Planet(66)); // Add another planet to the star's orbital system which orbits at a distance of 66 units.
+
+    while (true) {
+        s.tick();
+    }
+}
+</code></pre>
 </div>
   
   
@@ -143,7 +192,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/28/Check-Number-Exists/">[Question] Check if Number Exists</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/02/Winner-tic-tac-toe/">[Google] Winner of Tic-tac-toe</a></h1>
     
     
       <p class="meta">
@@ -159,7 +208,7 @@
   
 
 
-<time datetime="2014-07-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-02T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -168,53 +217,274 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://tech-queries.blogspot.sg/2011/02/check-if-number-exist.html">link</a></p>
+<p><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">link</a></p>
 
-<blockquote><p>There is long list of natural numbers. Remove every 2nd no from list in 1st pass. Remove every 3rd no from list in 2nd pass. Find whether Nth natural no will exist after P passes. N and P are inputs.</p></blockquote>
+<blockquote><p>How would you determine if someone has won a game of tic-tac-toe on a board of any size?</p></blockquote>
 
-<pre><code>Example: N is 15 and p is 3.
-Initial: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
-After 1st pass: 1 3 5 7 9 11 13 15 17 19
-After 2nd pass: 1 3 7 9 13 15 19
-After 3rd pass: 1 3 7 13 15 19
-After 4th pass: 1 3 7 13 19
+<h3>Solution</h3>
+
+<p>First, confirm that when the number of pieces in a line equals to the dimension of the board, one person wins. Eg. for 10 * 10 board, 10 pieces need to be in 1 line.</p>
+
+<p>__<a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">We can determine</a> if someone has won during a game in real time, as in checking after every move.</p>
+
+<blockquote><p>Create an array of size 2n+2 at the beginning of the game and fill it with zeros. Each spot in the array will be a sum of X&rsquo;s or O&rsquo;s horizontally (the first n places in the array), vertically (the second n places in the array) and diagonally (the last 2 places). Then with every move, you add 1 to the 2 places (or 3 if on a diagnol) of the array if X, and subtract 1 if its an O. After adding you check and see if the value of the array is equal to n or -n, if it is, n mean X has won and -n means O has won.</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>not written</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/02/Special-increasing-adjacent-sequence/">[Google] Special Increasing Adjacent Sequence</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5147801809846272">link</a></p>
+
+<blockquote><p>Given a NxN matrix which contains all distinct 1 to n<sup>2</sup> numbers, write code to print sequence of increasing adjacent sequential numbers.</p></blockquote>
+
+<pre><code>ex: 
+1 5 9 
+2 3 8 
+4 6 7 
 </code></pre>
 
-<blockquote><p>So we see that 15 exists after 3 passes but vanishes after 4th pass.</p></blockquote>
+<blockquote><p>should print: 6 7 8 9</p></blockquote>
 
-<h3>Analysis</h3>
+<h3>Solution</h3>
 
-<p>We see that in any of the pass <strong>new position will be decreased by no of elements deleted</strong> between 1 and current position.</p>
+<blockquote><p>Make an array of booleans (or bits) of same size as the input, where arr[i-1] indicates whether i is adjacent to i+1. Then, iterate over the matrix, checking for each cell the four neighbors and populating the relevant entry in the boolean array.</p></blockquote>
 
-<p>Example: originally number is 15. After 1st pass, it becomes 8th element. After 2nd pass, it becomes 8 &ndash; (8 / 3) = 6th element.</p>
+<p>Last, look for the longest run of &ldquo;true&rdquo; values in the boolean array, which can be done with one pass. O(n) time.</p>
 
-<p>We stop when either P(i-1)/(i+1) is an integer, or when number is smaller than pass.</p>
+<p><strong>Note that this algorithm is valid only if input integers are distinct</strong>, which is true here.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/02/Print-string-comparison-order/">[Google] Print String Comparison Order</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5680043955060736">link</a></p>
+
+<blockquote><p>Output top N positive integer in string comparison order. For example, let&rsquo;s say N=1000, then you need to output in string comparison order as below:</p>
+
+<p>1, 10, 100, 1000, 101, 102, &hellip; 109, 11, 110, &hellip; 998, 999.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Thought for a while, and realize it&rsquo;s stanard DFS.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static void main(String args[]) {
+    for (int i = 1; i &lt; 10; i++) {
+        dfs("" + i);
+    }
+}
+
+public static void dfs(String path) {
+    if (Integer.parseInt(path) &gt; 1000) {
+        return;
+    }
+    System.out.println(path);
+    for (int i = 0; i &lt; 10; i++) {
+        dfs(path + i);
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/02/G-Question-List/">[Google] G Question List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question List</h3>
+
+<ol>
+<li><p><a href="/blog/2014/05/01/Longest-Common-Prefix/">Longest Common Prefix</a></p></li>
+<li><p><a href="/blog/2014/05/14/Multiply-Strings/">Multiply Strings </a></p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/01/Shuffle-an-array/">[Question] Shuffle a Given Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/shuffle-a-given-array/">link</a></p>
+
+<blockquote><p>Given an array, generate a random permutation of array elements.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>O(n) time complexity.</p>
+
+<pre><code>To shuffle an array a of n elements (indices 0..n-1):
+  for i from n − 1 downto 1 do
+       j ← random integer with 0 ≤ j ≤ i
+       exchange a[j] and a[i]
+</code></pre>
+
+<p>Note the RNG is having limit from 0 to i, and number i keeps decreasing.</p>
+
+<h3>Proof</h3>
+
+<p>This is called <strong><a href="http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher–Yates shuffle</a></strong>. Proof can be seen at question post:</p>
+
+<blockquote><p>The probability that ith element goes to second last position can be proved to be 1/n by dividing it in two cases.</p>
+
+<p>Case 1: i = n-1 (index of last element):</p>
+
+<p>The probability of last element going to second last position is = (probability that last element doesn&rsquo;t stay at its original position) x (probability that the index picked in previous step is picked again so that the last element is swapped)</p>
+
+<p>So the probability = ((n-1)/n) x (1/(n-1)) = 1/n</p>
+
+<p>Case 2: 0 &lt; i &lt; n-1 (index of non-last):</p>
+
+<p>The probability of ith element going to second position = (probability that ith element is not picked in previous iteration) x (probability that ith element is picked in this iteration)</p>
+
+<p>So the probability = ((n-1)/n) x (1/(n-1)) = 1/n</p>
+
+<p>We can easily generalize above proof for any other position.</p></blockquote>
 
 <h3>Code</h3>
 
 <p><strong>not written by me</strong></p>
 
-<pre><code>bool check_posiiton(int n, int p)  
-{  
- int cur = n;  
- int i = 0;  
- while (i &lt;= p)  
- {  
-     i++;  
-     if (cur%(i+1) == 0)  
-     {  
-         //Vanishes in this pass  
-         return false;  
-     }  
-     else if (cur &lt; (i+1))  
-     {  
-         //Number exist denominator is greater than numerator  
-         return true;  
-     }  
-     cur = cur - cur/(i+1);  
- }  
- return true;  
-}  
+<pre><code>def sattoloCycle(items):
+    i = len(items)
+    while i &gt; 1:
+        i = i - 1
+        j = randrange(i)  # 0 &lt;= j &lt;= i-1
+        items[j], items[i] = items[i], items[j]
+    return
 </code></pre>
 </div>
   
@@ -228,7 +498,7 @@ After 4th pass: 1 3 7 13 19
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/28/Breaking-Chocolate-Bars/">[Question] Breaking Chocolate Bars</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/01/Overriding-private-method/">[Question] Overriding Private Method</a></h1>
     
     
       <p class="meta">
@@ -244,96 +514,7 @@ After 4th pass: 1 3 7 13 19
   
 
 
-<time datetime="2014-07-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Game #1</h3>
-
-<p><a href="http://www.cut-the-knot.org/proofs/chocolad.shtml">link</a></p>
-
-<blockquote><p>Two players take turns breaking a chacolate bar (rectangle-shaped consist of squares). The last to break a piece wins the game.</p>
-
-<p>Design the strategy.</p></blockquote>
-
-<h4>Solution</h4>
-
-<p>Each time the bar is broken, <strong>total number of pieces increase by 1</strong>. Suppose there&rsquo;re even number of squares, 1st player wins regardless of breaking strategy. And vice versa.</p>
-
-<h3>Problem #2</h3>
-
-<p><a href="http://www.cut-the-knot.org/proofs/chocolad.shtml">link</a></p>
-
-<blockquote><p>75 teams took part in a competition where teams met 1-on-1. Each time the defeated team drops out.</p>
-
-<p>How many meets are needed to before one team is declared a winner?</p></blockquote>
-
-<h4>Solution</h4>
-
-<p>Each game will eliminate 1 game, so it needs 74 games.</p>
-
-<h3>Splitting Piles</h3>
-
-<p><a href="http://www.cut-the-knot.org/arithmetic/rapid/piles.shtml">link</a></p>
-
-<blockquote><p>Given a random number of items in a pile. Ask an audience to split a pile into two piles, multiply the numbers of items in the two new piles and keep adding the results. The process stops when there is no pile with more than 1 chip.</p>
-
-<p>For example, let start with 9 chips:</p></blockquote>
-
-<table cellpadding="10">
-<tbody><tr><td align="center">Piles</td><td align="center">Which is broken</td><td align="center">What&#8217;s added</td><td align="center">Total</td></tr>
-<tr><td colspan="4"><hr></td></tr>
-<tr><td align="center">9</td><td align="center">9</td><td align="center">3*6</td><td align="center">18</td></tr>
-<tr><td align="center">3,6</td><td align="center">3</td><td align="center">1*2</td><td align="center">20</td></tr>
-<tr><td align="center">1,2,6</td><td align="center">6</td><td align="center">3*3</td><td align="center">29</td></tr>
-<tr><td align="center">1,2,3,3</td><td align="center">3</td><td align="center">1*2</td><td align="center">31</td></tr>
-<tr><td align="center">1,2,1,2,3</td><td align="center">2</td><td align="center">1*1</td><td align="center">32</td></tr>
-<tr><td align="center">1,1,1,1,2,3</td><td align="center">2</td><td align="center">1*1</td><td align="center">33</td></tr>
-<tr><td align="center">1,1,1,1,1,1,3</td><td align="center">3</td><td align="center">1*2</td><td align="center">35</td></tr>
-<tr><td align="center">1,1,1,1,1,1,1,2</td><td align="center">2</td><td align="center">1*1</td><td align="center"><b>36</b></td></tr>
-<tr><td align="center">1,1,1,1,1,1,1,1,1</td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-</tbody></table>
-
-
-<blockquote><p>Before the audience told the final number, you immediately guess it&rsquo;s 36. How did you do it?</p></blockquote>
-
-<h4>Solution</h4>
-
-<p>The result does not depend on how the piles are split; but only on the initial size of the very first pile. <strong>Answer is always N(N &ndash; 1)/2</strong>.</p>
-
-<p>This can be proved by <a href="http://www.cut-the-knot.org/arithmetic/rapid/piles.shtml">mathematical induction</a>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Sliding-Window-Maximum/">[LeetCode Plus] Sliding Window Maximum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-01T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -342,475 +523,143 @@ After 4th pass: 1 3 7 13 19
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">link</a></p>
+<p><a href="http://stackoverflow.com/questions/2000137/overriding-private-methods-in-java">link</a></p>
 
-<blockquote><p>A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right. You can only see the w numbers in the window. Each time the sliding window moves rightwards by one position. Following is an example:
-The array is [1 3 -1 -3 5 3 6 7], and w is 3.</p></blockquote>
-
-<pre><code>Window position                Max
----------------               -----
-[1  3  -1] -3  5  3  6  7       3
- 1 [3  -1  -3] 5  3  6  7       3
- 1  3 [-1  -3  5] 3  6  7       5
- 1  3  -1 [-3  5  3] 6  7       5
- 1  3  -1  -3 [5  3  6] 7       6
- 1  3  -1  -3  5 [3  6  7]      7
-</code></pre>
-
-<blockquote><p>Input: A long array A[], and a window width w</p>
-
-<p>Output: An array B[], B[i] is the maximum value of from A[i] to A[i+w-1]</p></blockquote>
+<blockquote><p>Can we overriding private method in Java?</p></blockquote>
 
 <h3>Analysis</h3>
 
-<p><strong>The  naive approach is using a Heap</strong>. This time complexity is O(n*logn). However, there is a better way using a (double-ended) queue.</p>
+<blockquote><p>Overriding private methods in Java is invalid because a parent class&rsquo;s private methods are &ldquo;automatically final, and hidden from the derived class&rdquo;.  <a href="http://www.linuxtopia.org/online_books/programming_books/thinking_in_java/TIJ309_006.htm">source</a></p></blockquote>
 
-<p><strong>We do not need to <a href="http://n00tc0d3r.blogspot.sg/2013/04/sliding-window-maximum.html">keep all numbers</a></strong>. For example, suppose numbers in a window of size 4 are (1, 3, -1, 2). Obviously, no matter what next numbers are, 1 and -1 are never going to be a maximal as the window moving. The queue should look like (3, 2) in this case.</p>
+<h3>Solution</h3>
+
+<p>You can&rsquo;t override a private method, but you can introduce one in a derived class <a href="http://stackoverflow.com/a/2000156">without a problem</a>. Read more below.</p>
+
+<h3>Code</h3>
+
+<p><strong>not a problem</strong></p>
+
+<pre><code>public class OverridePrivateMethod {
+    private void foo() {
+    }
+}
+
+class Child extends OverridePrivateMethod {
+    private void foo() {
+    }
+}
+</code></pre>
+
+<p><strong>add @Override annotation and get error</strong></p>
+
+<pre><code>public class OverridePrivateMethod {
+    private void foo() {
+    }
+}
+
+class Child extends OverridePrivateMethod {
+    @Override
+    private void foo() {
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/01/Max-Sum-In-2D-Array/">[Question] Max Sum in a 2D Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://tech-queries.blogspot.sg/2010/05/find-max-sum-in-2d-array.html">link</a></p>
+
+<blockquote><p>Given a 2D array, find the maximum sum subarray in it. For example, in the following 2D array, the maximum sum subarray is highlighted with blue rectangle and sum of this subarray is 29.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/max-sum-2d-matrix.png"></p>
+
+<h3>Analysis</h3>
+
+<p><strong>Note that this is a difficult(and high-frequency) question</strong>.</p>
+
+<p>Try convert this question to &ldquo;<strong>max sum in 1D array</strong>&rdquo; by sum up all numbers in the same column. (we know that in 1D array, the algo runs O(n) time)</p>
+
+<p>There&rsquo;s in total O(n<sup>2</sup>) combinations of ways to sum up a column. So the <strong>total time complexity is O(n<sup>3</sup>)</strong>.</p>
 
 <h3>Solution</h3>
 
 <ol>
-<li>When moves to a new number, iterate through back of the queue, removes all numbers that are not greater than the new one, and then insert the new one to the back.</li>
-<li>FindMax only need to take the first one of the queue.</li>
-<li>To remove a number outside the window, only compare whether the current index is greater than the front of queue. If so, remove it.</li>
-</ol>
-
-
-<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">A natural way</a> most people would think is to try to maintain the queue size the same as the window’s size. Try to break away from this thought and think out of the box.</p>
-
-<h3>Code</h3>
-
-<p>Code by N00tc0d3r.</p>
-
-<pre><code>public int[] windowMax(int[] nums, int window) {
-    int w = (nums.length &lt; window) ? nums.length : window;
-    // A deque allows insertion/deletion on both ends.
-    // Maintain the first as the index of maximal of the window
-    // and elements after it are all smaller and came later than the first.
-    Deque&lt;Integer&gt; que = new ArrayDeque&lt;Integer&gt;();
-
-    // initialize window
-    int i = 0;
-    while (i &lt; w) {
-        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
-            que.removeLast();
-        }
-        que.addLast(i++);
-    }
-
-    // sliding window
-    int[] max = new int[nums.length - w + 1];
-    max[i - w] = que.getFirst();
-    while (i &lt; nums.length) {
-        // add new element
-        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
-            que.removeLast();
-        }
-        que.addLast(i);
-        // remove old element if still in que
-        if (!que.isEmpty() &amp;&amp; i - w &gt;= que.getFirst()) {
-            que.removeFirst();
-        }
-        // get maximal
-        ++i;
-        max[i - w] = que.getFirst();
-    }
-
-    return max;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Reconstruct-Tree-From-PreOrder-Traversal/">[Question] Reconstruct Tree From Pre-Order Traversal</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2011/06/reconstruct-tree-from-pre-order.html">link</a></p>
-
-<blockquote><p>A tree has a special property where leaves are represented with ‘2’ and non-leaf with ‘1’. Each node has either 0 or 2 children. If given preorder traversal of this tree, construct the tree.</p>
-
-<p>Example: Given Pre Order string => 12122, output:</p></blockquote>
-
-<pre><code>       1
-      / \
-     2   1
-        / \
-       2   2
-</code></pre>
-
-<h3>Analysis</h3>
-
-<blockquote><p><a href="http://tech-queries.blogspot.sg/2011/06/reconstruct-tree-from-pre-order.html">In normal scenario</a>, it’s not possible to detect where left subtree ends and right subtree starts using only pre-order traversal. But here, we are given a special property. Since every node has either 2 children or no child, we can surely say that if a node exists then its sibling also exists.</p></blockquote>
-
-<p>Keep a public variable and build the tree recursively until the list finishes.</p>
-
-<h3>Code</h3>
-
-<pre><code>ListNode list = null; // this is the input list public variable
-
-public TreeNode main(ListNode input) {
-    list = input;
-    return constructTree();
-}
-
-private TreeNode constructTree() {
-    if (list == null) {
-        return null;
-    }
-    TreeNode root = new TreeNode(list.val);
-    list = list.next;
-
-    if (root.val == 1) {
-        root.left = constructTree();
-        root.right = constructTree();
-    }
-    return root;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Knapsack-problem-with-duplication/">[Question] Knapsack Problem With Duplications</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2011/04/integer-knapsack-problem-duplicate.html">link</a></p>
-
-<blockquote><p>You have n types of items, where the ith item type has an integer size si and a real value vi. You need to ﬁll a knapsack of total capacity C with a selection of items of maximum value. You can add multiple items of the same type to the knapsack.</p>
-
-<p>This is similar to &ldquo;0-1 Knapsack Problem&rdquo;, but duplication is allowed for this question.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Of course this is DP, and it&rsquo;s 1-D DP. However, <strong>there is one very tricky special case</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>Using &rsquo;M(j)&lsquo; to denote the max value for total weight j, &#8216;w&rsquo; to denote weight, and &lsquo;v&rsquo; to denote value, the equation is:</p>
-
-<blockquote><p>M(j) = max{M(j − 1), max(i=1&hellip;n) M(j − wi) + vi}</p></blockquote>
-
-<p><strong>Note the 2 cases are</strong>:</p>
+<li><p>Traverse matrix at row level.</p></li>
+<li><p>have a temporary 1-D array and initialize all members as 0.</p></li>
+<li><p>For each row do following</p>
 
 <ol>
-<li>when (j)th spot is not filled, the max value is <strong>M(j-1)</strong></li>
-<li>when (j)th spot is filled, the max value is <strong>max(i=1&hellip;n) M(j − wi) + vi</strong></li>
+<li>add value in temporary array for all rows below current row</li>
+<li>apply 1-D kadane on temporary array</li>
+<li>if your current result is greater than current maximum sum, update.</li>
+</ol>
+</li>
 </ol>
 
 
-<p>This question is trickier than &ldquo;0-1 Knapsack Problem&rdquo;, if not more difficult. <strong>Study the 2 question together</strong>.</p>
-
 <h3>Code</h3>
 
-<p><strong>not written by me</strong></p>
-
-<pre><code>int knapsack(int value[], int weight[], int n, int C, vector&lt;int&gt; backtrack) {
- int *M = new int[C+1];  
- int i, j, tmp, pos;  
- for(i=1; i&lt;= C; i++) {  
-     M[i] = M[i-1];  
-     pos = i-1;               
-     for(j=0; j&lt; n; j++)  
-     {  
-         if (i &gt;= weight[j])  
-             tmp = M[i-weight[j]] + value[j];  
-         if (tmp &gt; M[i]){  
-             M[i] = tmp;  
-             pos = i - weight[j];  
-         }  
-     }  
-     backtrack.push_back(pos);  
- }   
- int ans = M[C];  
- delete[] M;        
- return ans;  
-}  
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Fit-dominos-in-strip/">[Question] Fit 1*2 Dominos in 2*N Strip</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2011/07/fit-12-dominos-in-2n-strip.html">link</a></p>
-
-<blockquote><p>In how many ways can one tile a 2 X N strip of square cells with 1 X 2 dominos?</p></blockquote>
-
-<p><img class="middle" src="/assets/images/Dominos.png"></p>
-
-<h3>Solution</h3>
-
-<p><strong>X(n+1) = X(n) + X(n-1)</strong></p>
-
-<p>It&rsquo;s a Fibonacci Series with X(1) = 1 and X(2) = 2.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Elephant-And-Bananas/">[Question] Elephant and Bananas</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2011/04/elephant-and-banana.html">link</a></p>
-
-<blockquote><p>There&rsquo;s a elephant, which can carry max 1000 bananas. The elephant eats a banana every 1 Km (both forward and back).</p>
-
-<p>Now we want to transfer 3000 bananas to a place 1000 Km away. How many bananas can be left?</p>
-
-<p>Also solved to generalized problem (write code for solution).</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>If we subdivide distances for each kilometer</strong>. Notice if elephant wants to shift all the bananas 1 km, <strong>you will loose 5 bananas every km</strong>.</p>
-
-<p>So we transferred 2995 (998+998+999) to one km distance. This process continues until after 200 km, we have only 2000 bananas left with remaining distance of 800 km.</p>
-
-<p><strong>Start from here, we only loose 3 bananas every km</strong>. This goes on for another 334 km, we will have 998 bananas left, and the rest of the bananas can be transfered in a single journey.</p>
-
-<h3>Solution</h3>
-
-<p><strong>532 bananas</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong></p>
-
-<pre><code>double transferBananas(double N, double D, double C, double F) {  
-    // base case: remaining bananas &lt;= C,  
-    // so carry all the bananas in one trip  
-    // at this point if distance is more than N/F,  
-    // elephant can never reach destination, return 0  
-    if (N &lt;= C) {
-        double bananasAtDestination = N - D*F;  
-        return (bananasAtDestination &gt;= 0.0) ?  
-            bananasAtDestination :  0.0;    // out of bananas!  
-    }  
-
-    // # trips you would travel back and forth  
-    int numTrips = 2*(ceil(N/C) - 1) + 1;  
-
-    // how many bananas you consume per km  
-    double costPerKm = numTrips * F;  
-
-    // remaining number of bananas after consumption, we want it  
-    // as an integer multiple of C.  
-    double remainingBananas = C*(ceil(N/C) - 1.0);  
-
-    // this is the distance you are able to travel before you  
-    // reach ONE LESS round trip fetching bananas  
-    // derived from eq: N - costPerKm * traveled = remaining bananas  
-
-    double traveled = (N - remainingBananas) / costPerKm;  
-
-    // we are able to travel greater (or equal) than the remaining  
-    // distance, so fetch the bananas right to the destination  
-    if (traveled &gt;= D)
-        return N - D*costPerKm;  
-
-    // calculate recursively as we travel ONE less round trip now.  
-    return transferBananas(remainingBananas, D-traveled, C, F);  
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Coins-in-Line/">[LeetCode Plus] Coins in a Line</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://leetcode.com/2011/02/coins-in-line.html">link</a></p>
-
-<blockquote><p>There are n coins in a line. Two players take turns to take a coin from one of the ends of the line until there are no more coins left. The player with the larger amount of money wins. Assume that you go first, describe an algorithm to compute the maximum amount of money you can win.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>There&rsquo;s a guaranteed &lsquo;win strategy&rsquo;</strong>, if the input array is even size. Find the sum of coins at even and odd positions respectively. Then, make sure you always take coin from even (or odd, whichever sum is bigger) position.</p>
-
-<p>This strategy is clever and simple, but <strong>DOES NOT maximize your total sum</strong>.</p>
-
-<h3>Solution</h3>
-
-<p><strong>The optimized solution is to use <a href="http://tech-queries.blogspot.sg/2011/06/get-maximum-sum-from-coins-in-line.html">2-D DP</a></strong>. Now we have array A and C(i, j) which is the maximum sum possible when remaining coins are from i to j.</p>
-
-<p>You can take either i or j. Since the opponent is as smart as you, he would have chosen the choice that yields the minimum amount to you.</p>
-
-<p>So, the final equation is:</p>
-
-<blockquote><p>C(i, j) = max { Ai + min{C(i+2, j), C(i+1, j-1)}, Aj + min{C(i+1, j-1), C(i, j-2)} }</p></blockquote>
-
-<h3>Code</h3>
-
-<p>C++ code</p>
-
-<pre><code>#define MAX 100  
-int maxMoney(int A[], int N) {
-    int C[MAX][MAX] = {0};  
-    int x, y, z; //x = C[m+2][n], y = C[m+1][n-1], z = C[m][n-2]  
-    for (int i = 0; i &lt; N; i++) {
-        for (int m = 0, n = i; n &lt; N; m++, n++) {
-          //calculate x, y, z  
-          x = (m+2 &lt; N)                         ? C[m+2][n] : 0;  
-          y = (m+1 &lt; N &amp;&amp; n-1 &gt;= 0)    ? C[m+1][n-1] : 0;  
-          z = (n-1 &gt; 0)                            ? C[m][n-2] : 0;  
-          C[m][n] = max(A[m] + min(x,y),  
-                                 A[n] + min(y,z));  
-          //For Debugging        
-          cout &lt;&lt; x &lt;&lt; ", " &lt;&lt; y &lt;&lt; ", " &lt;&lt; z &lt;&lt; endl;  
-          cout &lt;&lt; m &lt;&lt; ", " &lt;&lt; n &lt;&lt; ", " &lt;&lt; C[m][n] &lt;&lt; endl;  
+<p><strong>written by me</strong></p>
+
+<pre><code>public int maxSum(int[][] A) {
+    int m = A.length;
+    int n = A[0].length;
+    int maxResult = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; m; i++) {
+        int[] temp = new int[n];
+        for (int j = i; j &lt; m; j++) {
+            // from row#i to row#(m-1), add the number into temp[]
+            for (int k = 0; k &lt; n; k++) {
+                temp[k] += A[j][k];
+            }
+            // find max sum for 1D array
+            maxResult = Math.max(maxResult, maxSum(temp));
         }
     }
-    return C[0][N-1];
+    return maxResult;
+}
+
+private int maxSum(int[] B) {
+    int sumSoFar = 0;
+    int maxSum = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; B.length; i++) {
+        maxSum = Math.max(maxSum, sumSoFar + B[i]);
+        sumSoFar = Math.max(0, sumSoFar + B[i]);
+    }
+    return maxSum;
 }
 </code></pre>
 </div>
@@ -825,7 +674,7 @@ int maxMoney(int A[], int N) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/26/True-tell-brain-teaser/">[Question] Truth Tell Brain Teaser</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/01/Arranging-Sequence/">[Question] Arranging Sequence</a></h1>
     
     
       <p class="meta">
@@ -841,7 +690,7 @@ int maxMoney(int A[], int N) {
   
 
 
-<time datetime="2014-07-26T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-01T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -850,39 +699,143 @@ int maxMoney(int A[], int N) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://tech-queries.blogspot.sg/2011/07/truth-or-lie.html">link</a></p>
+<p><a href="http://tech-queries.blogspot.sg/2008/11/arranging-sequence.html">link</a></p>
 
-<blockquote><p>There are 100 people in a room. A person always speaks either lie or truth.</p>
+<blockquote><p>We have an array of 2n elements like &ldquo;a1 a2&hellip;an b1 b2&hellip;bn&rdquo;. WAP to rearrange the array as &ldquo;a1 b1 a2 b2&hellip;an bn&rdquo;</p>
 
-<p>When asked:</p></blockquote>
+<p>time complexity is O(n) no extra array or memory can be taken.</p>
 
-<pre><code>1st person says =&gt; all are liars
-2nd person says =&gt; at most 1 speaks truth
-3rd person says =&gt; at most 2 speak truth
-4th person says =&gt; at most 3 speak truth
-.
-.
-.
-100th person says =&gt; at most 99 speak truth
-</code></pre>
+<p>Input : 1 2 3 4 5 6 7 8 9 10 11 12 (even number input)</p>
 
-<blockquote><p>&ldquo;At most N&rdquo; means &ldquo;there&rsquo;re N or less than N&rdquo;.</p>
+<p>Output: 1 7 2 8 3 9 4 10 5 11 6 12</p>
 
-<p>How many people speak only truth?</p></blockquote>
+<p>Input : 1 2 3 4 5 6 7 (odd number input)</p>
+
+<p>Output: 1 5 2 6 3 7 4</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>This is a difficult question.</p>
+
+<p>I did not find enough resources online, but have come up with 2 solutions.</p>
 
 <h3>Solution</h3>
 
-<ol>
-<li></li>
-<li><p>Assume 1st person speaks truth, then all including him should be liar. It means he doesn’t speak truth.</p></li>
-<li><p>Assume 2nd person speaks truth, then he is the only person who speaks truth. But if this statement is true then statements by all others are also true. I.e. if “at most 1 person speaks truth” is true then “at most N speak truth” is also true. So person 2 is also a liar.</p></li>
-<li><p>Assume 3rd person is speaking truth. But then the statements of person 4-100 are also true, which contradicts his own statement. It means that person 3 is also a liar.</p></li>
-<li><p>This process will continue since 50th person. So 1-50 people are liars.</p></li>
-<li><p>51st person says “at most 50 speak truth”. Lets say he is speaking truth. “at most 50” means any number from 0-50. It means that statements like “at most 51 speak truth” and “at most 70 speak truth” are also true. It means that people from 51 to 100 are speaking truth.</p></li>
-</ol>
+<p><strong>First is like bubble sort (read it somewhere before)</strong>. Always swap in pairs (starting from the middle):</p>
+
+<pre><code>1st: 1 2 3 4 5 6 7
+2nd: 1 2 3 5 4 6 7
+3rd: 1 2 5 3 6 4 7
+4th: 1 5 2 6 3 7 4
+done
+</code></pre>
+
+<p><strong>Second solution is to swap in cycles (put current value in its &lsquo;successor&rsquo; position, and continue from there)</strong>. But in order to identify cycles, additional space is used. I wrote the code (which make use of &lsquo;visited&rsquo; array) is listed below. the time complexity is between O(n) and O(n<sup>2</sup>).</p>
+
+<p>More info on this topic can be found on <a href="http://en.wikipedia.org/wiki/In-place_matrix_transposition">wikipedia</a>.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public void rearrange(int[] A) {
+    int effLength = A.length;
+    if (A.length % 2 == 0) {
+        // for even number of input, last element is unchanged
+        effLength--;
+    }
+    // make sure 'effLength' is an odd number.
+    int half = effLength / 2 + 1;
+    int pos = 1;
+    int posValue = A[pos];
+    int numSwaps = 0;
+    boolean[] visited = new boolean[effLength];
+    // visited is used as flag to avoid repeat swap
+    // eg. when input is { 1, 2, 3, 4, 5, 6, 7 }, repeat swap as below:
+    // 2 -&gt; 3 -&gt; 5 -&gt; 2 -&gt; 3 ...
+    while (numSwaps &lt; effLength - 1) {
+        // swap (effLength - 1) times because 1st position is unchanged
+        int newPos = getNewPosition(A, pos, half);
+        if (visited[newPos]) {
+            // if this new position is swap already, skip it
+            pos = (pos + 1) % effLength;
+            posValue = A[pos];
+            continue;
+        }
+        int temp = A[newPos];
+        A[newPos] = posValue;
+        posValue = temp;
+        pos = newPos;
+
+        visited[newPos] = true;
+        numSwaps++;
+    }
+}
+
+private int getNewPosition(int[] array, int pos, int half) {
+    if (pos &lt; half) {
+        return 2 * pos;
+    } else {
+        return 2 * (pos - half) + 1;
+    }
+}
+</code></pre>
+</div>
+  
+  
 
 
-<p><strong>Hence, 50 people speak truth</strong>.</p>
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/31/Run-Length-Encoding/">[Question] Run-Length Encoding</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-31T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://tech-queries.blogspot.sg/2008/11/run-length-encoding.html">link</a></p>
+
+<blockquote><p>You are given a string like &ldquo;aaaabbbcc&rdquo;, do an in place conversion which write frequency of each charater(which come continuosly) with that character.</p>
+
+<p>Example:</p>
+
+<p>input: aaabbbcc</p>
+
+<p>output: a3b2c2</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The most important point is <strong>whether or not you find the special cases</strong>, and did you clarify how to handle them.</p>
+
+<p><strong>First special case is only 1 character</strong>, should you append a &lsquo;1&rsquo; or not. Note that this question requires &lsquo;in place&rsquo; conversion. So &lsquo;1&rsquo; is not supposed to be appended after single-occurance character. This is really important to know, if the question does not specify. (though sometimes, the question asks you to apppend a &lsquo;1&rsquo;, eg. <a href="http://www.geeksforgeeks.org/run-length-encoding/">here</a>).</p>
+
+<p><strong>Second case is when occurance >= 10</strong>. We could not simply append (&lsquo;0&rsquo; + numberOfOccurance), because the number could be 12. This is another very important case to take note.</p>
+
+<p>The code can be seen anywhere.</p>
 </div>
   
   
@@ -905,17 +858,18 @@ int maxMoney(int A[], int N) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (3)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (7)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (48)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (3)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (22)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (4)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
+<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (27)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (79)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (84)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
@@ -927,23 +881,23 @@ int maxMoney(int A[], int N) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/08/29/Boggle-solver/">[Google] Boggle Solver (Search Words From Matrix)</a>
+        <a href="/blog/2014/09/04/print-numbers-containing-5/">[Question] Print Numbers Containing 5</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/28/google-pre-interview-coaching/">[Google] Google Pre-interview Coaching</a>
+        <a href="/blog/2014/09/03/weird-sort-array/">[Google] Weird Sort Array</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/28/My-world/">[Thoughts] My World</a>
+        <a href="/blog/2014/09/03/String-replacement-question/">[Google] String Replacement Question</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/28/Http-cookie/">[Design] HTTP Cookie</a>
+        <a href="/blog/2014/09/03/Leader-election/">[Design] Leader Election</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/27/largest-cycle-in-permutation/">[Twitter] Largest Cycle in Permutation</a>
+        <a href="/blog/2014/09/02/Split-an-integer-or-coin/">[Question] Split an Integer or Coin</a>
       </li>
     
   </ul>
@@ -959,7 +913,7 @@ int maxMoney(int A[], int N) {
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Your Name -
+  Copyright &copy; 2014 - Charlie Brown -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

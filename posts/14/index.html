@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My Octopress Blog</title>
-  <meta name="author" content="Your Name">
+  <title>Woodstock Blog</title>
+  <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Convert a BST to a sorted circular doubly-linked list in-place. Think of the left and right pointers as synonymous to the previous and &hellip;">
+  <meta name="description" content="Question link There is long list of natural numbers. Remove every 2nd no from list in 1st pass. Remove every 3rd no from list in 2nd pass. Find &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +21,7 @@
   <link rel="canonical" href="http://okckd.github.io/posts/14">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="Woodstock Blog" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
@@ -48,9 +48,9 @@
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">My Octopress Blog</a></h1>
+  <h1><a href="/">Woodstock Blog</a></h1>
   
-    <h2>A blogging framework for hackers.</h2>
+    <h2>What's the good of living if you don't try a few things?</h2>
   
 </hgroup>
 
@@ -83,7 +83,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/24/Convert-BST-To-Circular-DLL/">[LeetCode Plus] Convert Binary Search Tree to Circular Doubly-Linked List</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/07/28/Check-Number-Exists/">[Question] Check if Number Exists</a></h1>
     
     
       <p class="meta">
@@ -99,7 +99,7 @@
   
 
 
-<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-07-28T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -108,236 +108,53 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">link</a></p>
+<p><a href="http://tech-queries.blogspot.sg/2011/02/check-if-number-exist.html">link</a></p>
 
-<blockquote><p>Convert a BST to a sorted circular doubly-linked list in-place.</p>
+<blockquote><p>There is long list of natural numbers. Remove every 2nd no from list in 1st pass. Remove every 3rd no from list in 2nd pass. Find whether Nth natural no will exist after P passes. N and P are inputs.</p></blockquote>
 
-<p>Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.</p></blockquote>
-
-<h3>Inorder solution</h3>
-
-<p>This question can be solved with <strong>inorder traversal with the help of a &lsquo;pre&rsquo; pointer</strong>.</p>
-
-<p>This solution is recommended by L33tcode, but not very intuitive, and difficult to write. The C++ code is attached below. <a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">source</a>.</p>
-
-<pre><code>void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
-  if (!p) return;
-  treeToDoublyList(p-&gt;left, prev, head);
-  // current node's left points to previous node
-  p-&gt;left = prev;
-  if (prev)
-    prev-&gt;right = p;  // previous node's right points to current node
-  else
-    head = p; // current node (smallest element) is head of
-              // the list if previous node is not available
-  // as soon as the recursion ends, the head's left pointer 
-  // points to the last node, and the last node's right pointer
-  // points to the head pointer.
-  Node *right = p-&gt;right;
-  head-&gt;left = p;
-  p-&gt;right = head;
-  // updates previous node
-  prev = p;
-  treeToDoublyList(right, prev, head);
-}
-
-// Given an ordered binary tree, returns a sorted circular
-// doubly-linked list. The conversion is done in-place.
-Node* treeToDoublyList(Node *root) {
-  Node *prev = NULL;
-  Node *head = NULL;
-  treeToDoublyList(root, prev, head);
-  return head;
-}
+<pre><code>Example: N is 15 and p is 3.
+Initial: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+After 1st pass: 1 3 5 7 9 11 13 15 17 19
+After 2nd pass: 1 3 7 9 13 15 19
+After 3rd pass: 1 3 7 13 15 19
+After 4th pass: 1 3 7 13 19
 </code></pre>
 
-<h3>Divide and conquer solution</h3>
-
-<p>The good and intuitive solution is to do D&amp;C and <strong>solve left and right recursively</strong>. Do note how the circular linked lists are merged, and be careful when replacing the pointers.</p>
-
-<p>The Java code is posted below. <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">source</a></p>
-
-<pre><code>public static TreeNode treeToList(TreeNode root) {
-    if (root == null)
-        return (null);
-
-    // Recursively do the subtrees (leap of faith!)
-    TreeNode aList = treeToList(root.left);
-    TreeNode bList = treeToList(root.right);
-
-    // Make root a circular DLL
-    root.left = root;
-    root.right = root;
-
-    // At this point we have three lists, merge them
-    aList = append(aList, root);
-    aList = append(aList, bList);
-
-    return (aList);
-}
-
-/*
- * given two circular doubly linked lists, append them and return the new
- * list.
- */
-public static TreeNode append(TreeNode a, TreeNode b) {
-    if (a == null)
-        return (b);
-    if (b == null)
-        return (a);
-
-    TreeNode aLast = a.left;
-    TreeNode bLast = b.left;
-
-    aLast.right = b;
-    b.left = aLast;
-    bLast.right = a;
-    a.left = bLast;
-
-    return (a);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/23/Stack-with-2-queues/">[Question] Implement Stack Using Two Queues</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/688276/implement-stack-using-two-queues">link</a></p>
-
-<blockquote><p>Given two queues with their standard operations (enqueue, dequeue, isempty, size), implement a stack with its standard operations (pop, push, isempty, size).</p></blockquote>
+<blockquote><p>So we see that 15 exists after 3 passes but vanishes after 4th pass.</p></blockquote>
 
 <h3>Analysis</h3>
 
-<p>There should be TWO versions of the solution.</p>
+<p>We see that in any of the pass <strong>new position will be decreased by no of elements deleted</strong> between 1 and current position.</p>
 
-<p><strong>Version A</strong>: The stack should be efficient when pushing an item.</p>
+<p>Example: originally number is 15. After 1st pass, it becomes 8th element. After 2nd pass, it becomes 8 &ndash; (8 / 3) = 6th element.</p>
 
-<p><strong>Version B</strong>: The stack should be efficient when popping an item.</p>
-
-<h3>Solution</h3>
-
-<h4>Version A</h4>
-
-<p>push:</p>
-
-<ol>
-<li>enqueue in queue1</li>
-</ol>
-
-
-<p>pop:</p>
-
-<ol>
-<li>while size of queue1 is bigger than 1, pipe dequeued items from queue1 into queue2</li>
-<li>dequeue and return the last item of queue1, then switch the names of queue1 and queue2</li>
-</ol>
-
-
-<h4>Version B</h4>
-
-<p>push:</p>
-
-<ol>
-<li>enqueue in queue2</li>
-<li>enqueue all items of queue1 in queue2, then switch the names of queue1 and queue2</li>
-</ol>
-
-
-<p>pop:</p>
-
-<ol>
-<li>deqeue from queue1</li>
-</ol>
-
-
-<p><a href="http://stackoverflow.com/a/688299">reference</a></p>
+<p>We stop when either P(i-1)/(i+1) is an integer, or when number is smaller than pass.</p>
 
 <h3>Code</h3>
 
-<p><strong>written by me</strong>, Version A.</p>
+<p><strong>not written by me</strong></p>
 
-<pre><code>public class StackBuiltWithTwoQueue {
-
-    // http://stackoverflow.com/questions/688276/implement-stack-using-two-queues
-
-    Queue&lt;Integer&gt; q1 = new LinkedList&lt;Integer&gt;();
-    Queue&lt;Integer&gt; q2 = new LinkedList&lt;Integer&gt;();
-
-    public static void main(String[] args) {
-        StackBuiltWithTwoQueue stack = new StackBuiltWithTwoQueue();
-        stack.push(1);
-        stack.push(2);
-        stack.push(3);
-        System.out.println(stack.pop());
-        stack.push(4);
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        stack.push(5);
-        stack.push(6);
-        stack.push(7);
-        stack.push(8);
-        stack.push(9);
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-        System.out.println(stack.pop());
-    }
-
-    public void push(int val) {
-        q1.offer(val);
-    }
-
-    public int pop() {
-        if (q1.isEmpty()) {
-            System.out.print("Stack is empty now ");
-            return -1;
-        }
-        while (q1.size() &gt; 1) {
-            q2.offer(q1.poll());
-        }
-        int topVal = q1.poll();
-        Queue&lt;Integer&gt; temp = q1;
-        q1 = q2;
-        q2 = temp;
-        return topVal;
-    }
-}
+<pre><code>bool check_posiiton(int n, int p)  
+{  
+ int cur = n;  
+ int i = 0;  
+ while (i &lt;= p)  
+ {  
+     i++;  
+     if (cur%(i+1) == 0)  
+     {  
+         //Vanishes in this pass  
+         return false;  
+     }  
+     else if (cur &lt; (i+1))  
+     {  
+         //Number exist denominator is greater than numerator  
+         return true;  
+     }  
+     cur = cur - cur/(i+1);  
+ }  
+ return true;  
+}  
 </code></pre>
 </div>
   
@@ -351,7 +168,7 @@ public static TreeNode append(TreeNode a, TreeNode b) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/23/Least-Number-after-Deleting-Digits/">[Question] Least Number After Deleting Digits</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/07/28/Breaking-Chocolate-Bars/">[Question] Breaking Chocolate Bars</a></h1>
     
     
       <p class="meta">
@@ -367,7 +184,96 @@ public static TreeNode append(TreeNode a, TreeNode b) {
   
 
 
-<time datetime="2014-07-23T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-07-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Game #1</h3>
+
+<p><a href="http://www.cut-the-knot.org/proofs/chocolad.shtml">link</a></p>
+
+<blockquote><p>Two players take turns breaking a chacolate bar (rectangle-shaped consist of squares). The last to break a piece wins the game.</p>
+
+<p>Design the strategy.</p></blockquote>
+
+<h4>Solution</h4>
+
+<p>Each time the bar is broken, <strong>total number of pieces increase by 1</strong>. Suppose there&rsquo;re even number of squares, 1st player wins regardless of breaking strategy. And vice versa.</p>
+
+<h3>Problem #2</h3>
+
+<p><a href="http://www.cut-the-knot.org/proofs/chocolad.shtml">link</a></p>
+
+<blockquote><p>75 teams took part in a competition where teams met 1-on-1. Each time the defeated team drops out.</p>
+
+<p>How many meets are needed to before one team is declared a winner?</p></blockquote>
+
+<h4>Solution</h4>
+
+<p>Each game will eliminate 1 game, so it needs 74 games.</p>
+
+<h3>Splitting Piles</h3>
+
+<p><a href="http://www.cut-the-knot.org/arithmetic/rapid/piles.shtml">link</a></p>
+
+<blockquote><p>Given a random number of items in a pile. Ask an audience to split a pile into two piles, multiply the numbers of items in the two new piles and keep adding the results. The process stops when there is no pile with more than 1 chip.</p>
+
+<p>For example, let start with 9 chips:</p></blockquote>
+
+<table cellpadding="10">
+<tbody><tr><td align="center">Piles</td><td align="center">Which is broken</td><td align="center">What&#8217;s added</td><td align="center">Total</td></tr>
+<tr><td colspan="4"><hr></td></tr>
+<tr><td align="center">9</td><td align="center">9</td><td align="center">3*6</td><td align="center">18</td></tr>
+<tr><td align="center">3,6</td><td align="center">3</td><td align="center">1*2</td><td align="center">20</td></tr>
+<tr><td align="center">1,2,6</td><td align="center">6</td><td align="center">3*3</td><td align="center">29</td></tr>
+<tr><td align="center">1,2,3,3</td><td align="center">3</td><td align="center">1*2</td><td align="center">31</td></tr>
+<tr><td align="center">1,2,1,2,3</td><td align="center">2</td><td align="center">1*1</td><td align="center">32</td></tr>
+<tr><td align="center">1,1,1,1,2,3</td><td align="center">2</td><td align="center">1*1</td><td align="center">33</td></tr>
+<tr><td align="center">1,1,1,1,1,1,3</td><td align="center">3</td><td align="center">1*2</td><td align="center">35</td></tr>
+<tr><td align="center">1,1,1,1,1,1,1,2</td><td align="center">2</td><td align="center">1*1</td><td align="center"><b>36</b></td></tr>
+<tr><td align="center">1,1,1,1,1,1,1,1,1</td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
+</tbody></table>
+
+
+<blockquote><p>Before the audience told the final number, you immediately guess it&rsquo;s 36. How did you do it?</p></blockquote>
+
+<h4>Solution</h4>
+
+<p>The result does not depend on how the piles are split; but only on the initial size of the very first pile. <strong>Answer is always N(N &ndash; 1)/2</strong>.</p>
+
+<p>This can be proved by <a href="http://www.cut-the-knot.org/arithmetic/rapid/piles.shtml">mathematical induction</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Sliding-Window-Maximum/">[LeetCode Plus] Sliding Window Maximum</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -376,342 +282,80 @@ public static TreeNode append(TreeNode a, TreeNode b) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://codercareer.blogspot.sg/2013/11/no-48-least-number-after-deleting-digits.html">link</a></p>
+<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">link</a></p>
 
-<blockquote><p>Please get the least number after deleting k digits from the input number.</p>
+<blockquote><p>A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right. You can only see the w numbers in the window. Each time the sliding window moves rightwards by one position. Following is an example:
+The array is [1 3 -1 -3 5 3 6 7], and w is 3.</p></blockquote>
 
-<p>For example, if the input number is 24635, the least number is 23 after deleting 3 digits.</p></blockquote>
+<pre><code>Window position                Max
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+</code></pre>
+
+<blockquote><p>Input: A long array A[], and a window width w</p>
+
+<p>Output: An array B[], B[i] is the maximum value of from A[i] to A[i+w-1]</p></blockquote>
 
 <h3>Analysis</h3>
 
-<p>There&rsquo;s a solution which instead of &lsquo;delete k&rsquo;, find the smallest number by &lsquo;keeping (n-k) numbers&rsquo;. It&rsquo;s more strightforward.</p>
+<p><strong>The  naive approach is using a Heap</strong>. This time complexity is O(n*logn). However, there is a better way using a (double-ended) queue.</p>
+
+<p><strong>We do not need to <a href="http://n00tc0d3r.blogspot.sg/2013/04/sliding-window-maximum.html">keep all numbers</a></strong>. For example, suppose numbers in a window of size 4 are (1, 3, -1, 2). Obviously, no matter what next numbers are, 1 and -1 are never going to be a maximal as the window moving. The queue should look like (3, 2) in this case.</p>
 
 <h3>Solution</h3>
 
 <ol>
-<li>From the start, search till the end.
-
-<ol>
-<li>If a digit is greater than next one, delete it.</li>
-<li>If all digits are increasingly sorted, delete last.</li>
-</ol>
-</li>
-<li>Each time go back to start to search again.</li>
+<li>When moves to a new number, iterate through back of the queue, removes all numbers that are not greater than the new one, and then insert the new one to the back.</li>
+<li>FindMax only need to take the first one of the queue.</li>
+<li>To remove a number outside the window, only compare whether the current index is greater than the front of queue. If so, remove it.</li>
 </ol>
 
 
-<p>Example</p>
-
-<blockquote><p>24635 &ndash;> 2435 &ndash;> 235 &ndash;> 23</p></blockquote>
+<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">A natural way</a> most people would think is to try to maintain the queue size the same as the window’s size. Try to break away from this thought and think out of the box.</p>
 
 <h3>Code</h3>
 
-<p>from Harry He</p>
+<p>Code by N00tc0d3r.</p>
 
-<pre><code>public static String getLeastNumberDeletingDigits_1(String number, int k) {
-    String leastNumber = number;
-    while(k &gt; 0 &amp;&amp; leastNumber.length() &gt; 0) {
-        int firstDecreasingDigit = getFirstDecreasing(leastNumber);
-        if(firstDecreasingDigit &gt;= 0) {
-            leastNumber = removeDigit(leastNumber, firstDecreasingDigit);
+<pre><code>public int[] windowMax(int[] nums, int window) {
+    int w = (nums.length &lt; window) ? nums.length : window;
+    // A deque allows insertion/deletion on both ends.
+    // Maintain the first as the index of maximal of the window
+    // and elements after it are all smaller and came later than the first.
+    Deque&lt;Integer&gt; que = new ArrayDeque&lt;Integer&gt;();
+
+    // initialize window
+    int i = 0;
+    while (i &lt; w) {
+        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
+            que.removeLast();
         }
-        else {
-            leastNumber = removeDigit(leastNumber, leastNumber.length() - 1);
+        que.addLast(i++);
+    }
+
+    // sliding window
+    int[] max = new int[nums.length - w + 1];
+    max[i - w] = que.getFirst();
+    while (i &lt; nums.length) {
+        // add new element
+        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
+            que.removeLast();
         }
-
-        --k;
-    }
-
-    return leastNumber;
-}
-
-private static int getFirstDecreasing(String number) {
-    for(int i = 0; i &lt; number.length() - 1; ++i) {
-        int curDigit = number.charAt(i) - '0';
-        int nextDigit = number.charAt(i + 1) - '0';
-        if(curDigit &gt; nextDigit) {
-            return i;
+        que.addLast(i);
+        // remove old element if still in que
+        if (!que.isEmpty() &amp;&amp; i - w &gt;= que.getFirst()) {
+            que.removeFirst();
         }
+        // get maximal
+        ++i;
+        max[i - w] = que.getFirst();
     }
 
-    return -1;
-}
-
-private static String removeDigit(String number, int digitIndex) {
-    String result = "";
-    if(digitIndex &gt; 0) {
-        result = number.substring(0, digitIndex);
-    }
-    if(digitIndex &lt; number.length() - 1) {
-        result += number.substring(digitIndex + 1);
-    }
-
-    return result;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/23/Largest-palindrome-product/">[Question] Largest Palindrome Product</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://projecteuler.net/problem=4">link</a></p>
-
-<blockquote><p>The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 × 99.</p>
-
-<p>Find the largest palindrome made from the product of two 3-digit numbers.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>We suppose the largest such palindrome will have six digits rather than five, because 143*777 = 111111 is a palindrome. And we can tell that 6-digit base-10 palindrome <strong>must be a multiple of 11</strong>.</p>
-
-<p>So the question becomes finding the largest palindrome under a million that is a <strong>product of two 3-digit numbers</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>We now declare variable m and n:</p>
-
-<ol>
-<li>step m down from 999 to 100 by 1</li>
-<li>step n down from 999 to 100 by:
-
-<ol>
-<li>if m is divisible by 11, then step n down by 11</li>
-<li>if m is indivisible by 11, then step n down by 1</li>
-</ol>
-</li>
-<li>keep track of the largest product found so far: p = r * s
-
-<ol>
-<li>next time when we found such product value (m * n), it must be m &lt;= r. So n have to be really large in order to make the final product larger than p.</li>
-<li>i.e. n >= p/m.</li>
-<li>As larger palindromes are found, the range of n gets more restricted</li>
-</ol>
-</li>
-</ol>
-
-
-<p><a href="http://stackoverflow.com/a/7198175">reference</a></p>
-
-<h3>Code</h3>
-
-<p>C++ code from stackoverflow</p>
-
-<pre><code>int main(void) {
-  enum { A=100000, B=10000, C=1000, c=100, b=10, a=1, T=10 };
-  int m, n, p, q=111111, r=143, s=777;
-  int nDel, nLo, nHi, inner=0, n11=(999/11)*11;
-
-  for (m=999; m&gt;99; --m) {
-    nHi = n11;  nDel = 11;
-    if (m%11==0) {
-      nHi = 999;  nDel = 1;
-    }
-    nLo = q/m-1;
-    if (nLo &lt; m) nLo = m-1;
-
-    for (n=nHi; n&gt;nLo; n -= nDel) {
-      ++inner;
-      // Check if p = product is a palindrome
-      p = m * n;
-      if (p%T==p/A &amp;&amp; (p/B)%T==(p/b)%T &amp;&amp; (p/C)%T==(p/c)%T) {
-    q=p; r=m; s=n;
-    printf ("%d at %d * %d\n", q, r, s);
-    break;          // We're done with this value of m
-      }
-
-    }
-  }
-  printf ("Final result:  %d at %d * %d   inner=%d\n", q, r, s, inner);
-  return 0;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/22/Bucket-Sort/">[Question] Bucket Sort (Bin Sort)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/bucket-sort-2/">link</a></p>
-
-<blockquote><p>Bucket sort is mainly useful when input is uniformly distributed over a range. For example:</p>
-
-<p>Sort a large set of floating point numbers which are in range from 0.0 to 1.0 and are uniformly distributed across the range. How do we sort the numbers efficiently.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>1) Create n empty buckets (Or lists).</p>
-
-<p>2) Insert each arr[i] into bucket[n*array[i]]</p>
-
-<p>3) Sort individual buckets using <strong>insertion sort</strong>.</p>
-
-<p>4) Concatenate all sorted buckets.</p>
-
-<p>Steps 1 and 2 clearly take O(n) time. Step 4 also takes O(n) time.</p>
-
-<p><strong>The main step to analyze is step 3</strong>. This step also takes O(n) time on average if all numbers are uniformly distributed. <strong>Final time complexity: O(n)</strong>.</p>
-
-<h3>Relationship with other sorting algorithms</h3>
-
-<p>There&rsquo;s a algorithm within the bucket. Now if we use <strong>bucket sort itself</strong> as the sorting function, this becomes a <strong>radix sort</strong>.</p>
-
-<p>If we set the <strong>bucket size as 2</strong>, then this becomes a quick sort (with potentially poor pivot choices).</p>
-
-<h3>Code</h3>
-
-<p>C++ code from G4G</p>
-
-<pre><code>void bucketSort(float arr[], int n) {
-    // 1) Create n empty buckets
-    vector&lt;float&gt; b[n];
-
-    // 2) Put array elements in different buckets
-    for (int i=0; i&lt;n; i++)
-    {
-       int bi = n*arr[i]; // Index in bucket
-       b[bi].push_back(arr[i]);
-    }
-
-    // 3) Sort individual buckets
-    for (int i=0; i&lt;n; i++)
-       sort(b[i].begin(), b[i].end());
-
-    // 4) Concatenate all buckets into arr[]
-    int index = 0;
-    for (int i = 0; i &lt; n; i++)
-        for (int j = 0; j &lt; b[i].size(); j++)
-          arr[index++] = b[i][j];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/max-binary-gap/">[Question] Max Binary Gap</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.programcreek.com/2013/02/twitter-codility-problem-max-binary-gap/">link</a></p>
-
-<blockquote><p>Problem: Get maximum binary Gap.</p>
-
-<p>For example, 9&rsquo;s binary form is 1001, the gap is 2.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This question is a good practise of binary operations.</p>
-
-<h3>Code</h3>
-
-<p><strong>writen by me</strong></p>
-
-<pre><code>private int solution(int num) {
-    int max = 0;
-    int boundary = -1;
-    for (int i = 0; i &lt; 32; i++) {
-        int t = num &amp; 1;
-        num = num &gt;&gt; 1;
-        if (t == 1) {
-            if (boundary == -1) {
-                boundary = i;
-            } else {
-                max = Math.max(max, i - boundary - 1);
-                boundary = i;
-            }
-        }
-    }
     return max;
 }
 </code></pre>
@@ -727,7 +371,7 @@ private static String removeDigit(String number, int digitIndex) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Thoughts-on-leetcode-4/">[Thoughts] Some Thoughts on LeetCode Questions IV</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Reconstruct-Tree-From-PreOrder-Traversal/">[Question] Reconstruct Tree From Pre-Order Traversal</a></h1>
     
     
       <p class="meta">
@@ -743,53 +387,7 @@ private static String removeDigit(String number, int digitIndex) {
   
 
 
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Some stats</h3>
-
-<p>I started Leetcode <strong>4 month ago</strong>, and I took me around <strong>2 month</strong> to finish most of the questions. I spent another <strong>1 month</strong> to re-solve many questions, following the instructions from NineChap. Until 2 weeks ago, there&rsquo;re <strong>in total 1861 submissions (or 18 submission per day)</strong>.</p>
-
-<p>From 2 weeks ago till today, I registed a new Leetcode account and solved <strong>144/151 questions</strong> using <strong>427 submission (or 35 submissions per day)</strong>. I will probably finish up everything in 1 or 2 days&#8217; time.</p>
-
-<p>The AC/submission rate shall be used as a benchmark for future improvement.</p>
-
-<h3>Thoughts</h3>
-
-<p>Keep up the hard work!</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Quick-Sort/">[Question] Quick Sort</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -798,40 +396,46 @@ private static String removeDigit(String number, int digitIndex) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.programcreek.com/2012/11/quicksort-array-in-java/">link</a></p>
+<p><a href="http://tech-queries.blogspot.sg/2011/06/reconstruct-tree-from-pre-order.html">link</a></p>
 
-<blockquote><p>Quicksort is a divide and conquer algorithm. It first divides a large list into two smaller sub-lists and then recursively sort the two sub-lists. If we want to sort an array without any extra space, Quicksort is a good option. On average, time complexity is O(n log(n)).</p></blockquote>
+<blockquote><p>A tree has a special property where leaves are represented with ‘2’ and non-leaf with ‘1’. Each node has either 0 or 2 children. If given preorder traversal of this tree, construct the tree.</p>
 
-<h3>Solution</h3>
+<p>Example: Given Pre Order string => 12122, output:</p></blockquote>
 
-<p>This question is not easy. Practise more!</p>
+<pre><code>       1
+      / \
+     2   1
+        / \
+       2   2
+</code></pre>
+
+<h3>Analysis</h3>
+
+<blockquote><p><a href="http://tech-queries.blogspot.sg/2011/06/reconstruct-tree-from-pre-order.html">In normal scenario</a>, it’s not possible to detect where left subtree ends and right subtree starts using only pre-order traversal. But here, we are given a special property. Since every node has either 2 children or no child, we can surely say that if a node exists then its sibling also exists.</p></blockquote>
+
+<p>Keep a public variable and build the tree recursively until the list finishes.</p>
 
 <h3>Code</h3>
 
-<pre><code>public static void quickSortRan(int[] arr, int low, int high) {
-    if (low &gt;= high) {
-        return;
+<pre><code>ListNode list = null; // this is the input list public variable
+
+public TreeNode main(ListNode input) {
+    list = input;
+    return constructTree();
+}
+
+private TreeNode constructTree() {
+    if (list == null) {
+        return null;
     }
-    int pivot = arr[low + (high - low) / 2];
-    int left = low;
-    int right = high;
-    while (left &lt; right) {
-        while (arr[left] &lt; pivot) {
-            left++;
-        }
-        while (arr[right] &gt; pivot) {
-            right--;
-        }
-        if (left &lt;= right) {
-            int temp = arr[left];
-            arr[left] = arr[right];
-            arr[right] = temp;
-            left++;
-            right--;
-        }
+    TreeNode root = new TreeNode(list.val);
+    list = list.next;
+
+    if (root.val == 1) {
+        root.left = constructTree();
+        root.right = constructTree();
     }
-    quickSortRan(arr, low, right);
-    quickSortRan(arr, left, high);
+    return root;
 }
 </code></pre>
 </div>
@@ -846,7 +450,7 @@ private static String removeDigit(String number, int digitIndex) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/21/OOP-principles/">[Design] OOP - 4 Major Principles</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Knapsack-problem-with-duplication/">[Question] Knapsack Problem With Duplications</a></h1>
     
     
       <p class="meta">
@@ -862,50 +466,67 @@ private static String removeDigit(String number, int digitIndex) {
   
 
 
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>4 Principles</h3>
+  <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://codebetter.com/raymondlewallen/2005/07/19/4-major-principles-of-object-oriented-programming/">link</a></p>
+<p><a href="http://tech-queries.blogspot.sg/2011/04/integer-knapsack-problem-duplicate.html">link</a></p>
+
+<blockquote><p>You have n types of items, where the ith item type has an integer size si and a real value vi. You need to ﬁll a knapsack of total capacity C with a selection of items of maximum value. You can add multiple items of the same type to the knapsack.</p>
+
+<p>This is similar to &ldquo;0-1 Knapsack Problem&rdquo;, but duplication is allowed for this question.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Of course this is DP, and it&rsquo;s 1-D DP. However, <strong>there is one very tricky special case</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>Using &rsquo;M(j)&lsquo; to denote the max value for total weight j, &#8216;w&rsquo; to denote weight, and &lsquo;v&rsquo; to denote value, the equation is:</p>
+
+<blockquote><p>M(j) = max{M(j − 1), max(i=1&hellip;n) M(j − wi) + vi}</p></blockquote>
+
+<p><strong>Note the 2 cases are</strong>:</p>
 
 <ol>
-<li><p>Encapsulation</p></li>
-<li><p>Abstraction</p></li>
-<li><p>Inheritance</p></li>
-<li><p>Polymorphism</p></li>
+<li>when (j)th spot is not filled, the max value is <strong>M(j-1)</strong></li>
+<li>when (j)th spot is filled, the max value is <strong>max(i=1&hellip;n) M(j − wi) + vi</strong></li>
 </ol>
 
 
-<h3>Encapsulation</h3>
+<p>This question is trickier than &ldquo;0-1 Knapsack Problem&rdquo;, if not more difficult. <strong>Study the 2 question together</strong>.</p>
 
-<p><strong>The hiding of data implementation</strong> by restricting access to accessors and mutators.</p>
+<h3>Code</h3>
 
-<h3>Abstraction</h3>
+<p><strong>not written by me</strong></p>
 
-<p><strong>Representation of data in which the implementation details are hidden</strong>.</p>
-
-<p>For examplem, the development of classes, objects, types in terms of their interfaces and functionality, instead of their implementation details.</p>
-
-<p>Abstraction is used to manage complexity (decompose complex systems into smaller components).</p>
-
-<h3>Inheritance</h3>
-
-<p><strong>The ability to derive new classes from existing classes</strong>.</p>
-
-<h3>Polymorphism</h3>
-
-<p>Polymorphism describes a pattern in object oriented programming in which classes have different functionality while sharing a common interface.</p>
-
-<p>Eg. shape object.</p>
-
-<h3>Read more</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/SOLID_">http://en.wikipedia.org/wiki/SOLID_</a>(object-oriented_design)</p>
+<pre><code>int knapsack(int value[], int weight[], int n, int C, vector&lt;int&gt; backtrack) {
+ int *M = new int[C+1];  
+ int i, j, tmp, pos;  
+ for(i=1; i&lt;= C; i++) {  
+     M[i] = M[i-1];  
+     pos = i-1;               
+     for(j=0; j&lt; n; j++)  
+     {  
+         if (i &gt;= weight[j])  
+             tmp = M[i-weight[j]] + value[j];  
+         if (tmp &gt; M[i]){  
+             M[i] = tmp;  
+             pos = i - weight[j];  
+         }  
+     }  
+     backtrack.push_back(pos);  
+ }   
+ int ans = M[C];  
+ delete[] M;        
+ return ans;  
+}  
+</code></pre>
 </div>
   
   
@@ -918,7 +539,7 @@ private static String removeDigit(String number, int digitIndex) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Longest-Substring-2-Unique-Characters/">[Question] Longest Substring Which Contains 2 Unique Characters</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Fit-dominos-in-strip/">[Question] Fit 1*2 Dominos in 2*N Strip</a></h1>
     
     
       <p class="meta">
@@ -934,7 +555,7 @@ private static String removeDigit(String number, int digitIndex) {
   
 
 
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -943,54 +564,413 @@ private static String removeDigit(String number, int digitIndex) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.programcreek.com/2013/02/longest-substring-which-contains-2-unique-characters/">link</a></p>
+<p><a href="http://tech-queries.blogspot.sg/2011/07/fit-12-dominos-in-2n-strip.html">link</a></p>
 
-<blockquote><p>Given a string, find the longest substring that contains only two unique characters. For example, given &ldquo;abcbbbbcccbdddadacb&rdquo;, the longest substring that contains 2 unique character is &ldquo;bcbbbbcccb&rdquo;.</p></blockquote>
+<blockquote><p>In how many ways can one tile a 2 X N strip of square cells with 1 X 2 dominos?</p></blockquote>
+
+<p><img class="middle" src="/assets/images/Dominos.png"></p>
 
 <h3>Solution</h3>
 
-<p><strong>This is a naive solution</strong>, which we use 2 pointers and 1 hashset. The code is very readable (written by me).</p>
+<p><strong>X(n+1) = X(n) + X(n-1)</strong></p>
 
-<p>What if the question change from &lsquo;2 unique chars&rsquo; to &lsquo;N unique chars&rsquo;? I think we can <strong>use HashMap instead of HashSet</strong> (for searching of start pointer). The rest of the is very similar.</p>
+<p>It&rsquo;s a Fibonacci Series with X(1) = 1 and X(2) = 2.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Elephant-And-Bananas/">[Question] Elephant and Bananas</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://tech-queries.blogspot.sg/2011/04/elephant-and-banana.html">link</a></p>
+
+<blockquote><p>There&rsquo;s a elephant, which can carry max 1000 bananas. The elephant eats a banana every 1 Km (both forward and back).</p>
+
+<p>Now we want to transfer 3000 bananas to a place 1000 Km away. How many bananas can be left?</p>
+
+<p>Also solved to generalized problem (write code for solution).</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>If we subdivide distances for each kilometer</strong>. Notice if elephant wants to shift all the bananas 1 km, <strong>you will loose 5 bananas every km</strong>.</p>
+
+<p>So we transferred 2995 (998+998+999) to one km distance. This process continues until after 200 km, we have only 2000 bananas left with remaining distance of 800 km.</p>
+
+<p><strong>Start from here, we only loose 3 bananas every km</strong>. This goes on for another 334 km, we will have 998 bananas left, and the rest of the bananas can be transfered in a single journey.</p>
+
+<h3>Solution</h3>
+
+<p><strong>532 bananas</strong>.</p>
 
 <h3>Code</h3>
 
-<p><strong>writen by me</strong></p>
+<p><strong>not written by me</strong></p>
 
-<pre><code>private String solution(String input) {
-    HashSet&lt;Character&gt; set = new HashSet&lt;Character&gt;();
-    char[] letters = input.toCharArray();
-    set.add(letters[0]);
+<pre><code>double transferBananas(double N, double D, double C, double F) {  
+    // base case: remaining bananas &lt;= C,  
+    // so carry all the bananas in one trip  
+    // at this point if distance is more than N/F,  
+    // elephant can never reach destination, return 0  
+    if (N &lt;= C) {
+        double bananasAtDestination = N - D*F;  
+        return (bananasAtDestination &gt;= 0.0) ?  
+            bananasAtDestination :  0.0;    // out of bananas!  
+    }  
 
-    int start = 0;
-    String longest = input.substring(0, 1);
+    // # trips you would travel back and forth  
+    int numTrips = 2*(ceil(N/C) - 1) + 1;  
 
-    for (int i = 1; i &lt; input.length(); i++) {
-        if (set.add(letters[i])) {
-            if (set.size() &gt; 2) {
-                // first, update the longest substring that exists before i
-                if (i - start &gt; longest.length()) {
-                    longest = input.substring(start, i);
-                }
-                // clear and rebuild the HashSet
-                set.clear();
-                set.add(letters[i]);
-                set.add(letters[i - 1]);
-                // remove 1 char entirely from current substring
-                int p = i - 1;
-                while (p &gt; 0 &amp;&amp; letters[p] == letters[p - 1]) {
-                    p--;
-                }
-                start = p;
-            }
-        }
-    }
-    if (input.length() - start &gt; longest.length()) {
-        longest = input.substring(start);
-    }
-    return longest;
+    // how many bananas you consume per km  
+    double costPerKm = numTrips * F;  
+
+    // remaining number of bananas after consumption, we want it  
+    // as an integer multiple of C.  
+    double remainingBananas = C*(ceil(N/C) - 1.0);  
+
+    // this is the distance you are able to travel before you  
+    // reach ONE LESS round trip fetching bananas  
+    // derived from eq: N - costPerKm * traveled = remaining bananas  
+
+    double traveled = (N - remainingBananas) / costPerKm;  
+
+    // we are able to travel greater (or equal) than the remaining  
+    // distance, so fetch the bananas right to the destination  
+    if (traveled &gt;= D)
+        return N - D*costPerKm;  
+
+    // calculate recursively as we travel ONE less round trip now.  
+    return transferBananas(remainingBananas, D-traveled, C, F);  
 }
 </code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Coins-in-Line/">[LeetCode Plus] Coins in a Line</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/02/coins-in-line.html">link</a></p>
+
+<blockquote><p>There are n coins in a line. Two players take turns to take a coin from one of the ends of the line until there are no more coins left. The player with the larger amount of money wins. Assume that you go first, describe an algorithm to compute the maximum amount of money you can win.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>There&rsquo;s a guaranteed &lsquo;win strategy&rsquo;</strong>, if the input array is even size. Find the sum of coins at even and odd positions respectively. Then, make sure you always take coin from even (or odd, whichever sum is bigger) position.</p>
+
+<p>This strategy is clever and simple, but <strong>DOES NOT maximize your total sum</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>The optimized solution is to use <a href="http://tech-queries.blogspot.sg/2011/06/get-maximum-sum-from-coins-in-line.html">2-D DP</a></strong>. Now we have array A and C(i, j) which is the maximum sum possible when remaining coins are from i to j.</p>
+
+<p>You can take either i or j. Since the opponent is as smart as you, he would have chosen the choice that yields the minimum amount to you.</p>
+
+<p>So, the final equation is:</p>
+
+<blockquote><p>C(i, j) = max { Ai + min{C(i+2, j), C(i+1, j-1)}, Aj + min{C(i+1, j-1), C(i, j-2)} }</p></blockquote>
+
+<h3>Code</h3>
+
+<p>C++ code</p>
+
+<pre><code>#define MAX 100  
+int maxMoney(int A[], int N) {
+    int C[MAX][MAX] = {0};  
+    int x, y, z; //x = C[m+2][n], y = C[m+1][n-1], z = C[m][n-2]  
+    for (int i = 0; i &lt; N; i++) {
+        for (int m = 0, n = i; n &lt; N; m++, n++) {
+          //calculate x, y, z  
+          x = (m+2 &lt; N)                         ? C[m+2][n] : 0;  
+          y = (m+1 &lt; N &amp;&amp; n-1 &gt;= 0)    ? C[m+1][n-1] : 0;  
+          z = (n-1 &gt; 0)                            ? C[m][n-2] : 0;  
+          C[m][n] = max(A[m] + min(x,y),  
+                                 A[n] + min(y,z));  
+          //For Debugging        
+          cout &lt;&lt; x &lt;&lt; ", " &lt;&lt; y &lt;&lt; ", " &lt;&lt; z &lt;&lt; endl;  
+          cout &lt;&lt; m &lt;&lt; ", " &lt;&lt; n &lt;&lt; ", " &lt;&lt; C[m][n] &lt;&lt; endl;  
+        }
+    }
+    return C[0][N-1];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/26/True-tell-brain-teaser/">[Question] Truth Tell Brain Teaser</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://tech-queries.blogspot.sg/2011/07/truth-or-lie.html">link</a></p>
+
+<blockquote><p>There are 100 people in a room. A person always speaks either lie or truth.</p>
+
+<p>When asked:</p></blockquote>
+
+<pre><code>1st person says =&gt; all are liars
+2nd person says =&gt; at most 1 speaks truth
+3rd person says =&gt; at most 2 speak truth
+4th person says =&gt; at most 3 speak truth
+.
+.
+.
+100th person says =&gt; at most 99 speak truth
+</code></pre>
+
+<blockquote><p>&ldquo;At most N&rdquo; means &ldquo;there&rsquo;re N or less than N&rdquo;.</p>
+
+<p>How many people speak only truth?</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li></li>
+<li><p>Assume 1st person speaks truth, then all including him should be liar. It means he doesn’t speak truth.</p></li>
+<li><p>Assume 2nd person speaks truth, then he is the only person who speaks truth. But if this statement is true then statements by all others are also true. I.e. if “at most 1 person speaks truth” is true then “at most N speak truth” is also true. So person 2 is also a liar.</p></li>
+<li><p>Assume 3rd person is speaking truth. But then the statements of person 4-100 are also true, which contradicts his own statement. It means that person 3 is also a liar.</p></li>
+<li><p>This process will continue since 50th person. So 1-50 people are liars.</p></li>
+<li><p>51st person says “at most 50 speak truth”. Lets say he is speaking truth. “at most 50” means any number from 0-50. It means that statements like “at most 51 speak truth” and “at most 70 speak truth” are also true. It means that people from 51 to 100 are speaking truth.</p></li>
+</ol>
+
+
+<p><strong>Hence, 50 people speak truth</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/26/Test-Number-Divisibility/">[Testing] Test Number Divisibility</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mathsisfun.com/divisibility-rules.html">link</a></p>
+
+<blockquote><p>Pay attention on Number 3, 7, 9 and 11.</p></blockquote>
+
+<h3>The Divisibility Rules</h3>
+
+<table border="0" align="center" style='border:1px solid black'>
+                                <tbody><tr align="center">
+                                    <th width="100" class="bg-color bg-img font-color">Divisible by:</th>
+                                    <th width="300" class="bg-color bg-img font-color">If:</th>
+                                    <th width="300" class="bg-color bg-img font-color">Examples:</th>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">2</td>
+                                    <td class="bg-color bg-img font-color">The last digit is even (0,2,4,6,8)</td>
+                                    <td class="bg-color bg-img font-color">12<b>8</b> is<br>
+                                    12<b>9</b> is not                               </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">3</td>
+                                    <td class="bg-color bg-img font-color">The sum of the digits is divisible by 3</td>
+                                    <td class="bg-color bg-img font-color">
+                                        <p class="font-color">381 (3+8+1=12, and 12÷3 = 4) <b>Yes</b><br>
+                                    </p>
+                                        <p class="font-color">217 (2+1+7=10, and 10÷3 = 3&nbsp;<span class="frac font-color"><sup>1</sup>/<sub>3</sub></span>) <b>No</b></p>                                   </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">4</td>
+                                    <td class="bg-color bg-img font-color">The last 2 digits are divisible by 4</td>
+                                    <td class="bg-color bg-img font-color">
+                                        <p class="font-color">13<b>12</b> is<b></b> (12÷4=3)<br>
+                                    70<b>19</b> is not </p>                               </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">5</td>
+                                    <td class="bg-color bg-img font-color">The last digit is 0 or 5</td>
+                                    <td class="bg-color bg-img font-color">17<b>5</b> is<br>
+                                    80<b>9</b> is not                               </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">6</td>
+                                    <td class="bg-color bg-img font-color">The number is divisible by both 2 <i>and</i> 3</td>
+                                    <td class="bg-color bg-img font-color">
+                                        114 (it is even, and 1+1+4=6 and 6÷3 = 2) <b>Yes</b><br>
+                                        <br>
+                                        308 (it is even, but 3+0+8=11 and 11÷3 = 3&nbsp;<span class="frac font-color"><sup>2</sup>/<sub>3</sub></span>) <b>No</b>                                  </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">7</td>
+                                    <td class="bg-color bg-img font-color">If you double the last digit and subtract it from the rest of the number and 
+                                      the answer  is:
+                                      <ul class="bg-color bg-img font-color">
+                                        <li><b>0</b>, or </li>
+                                        <li><b>divisible by 7</b></li>
+                                  </ul>
+                                      (Note: you can apply this rule to that answer again if you want)</td>
+                                    <td class="bg-color bg-img font-color">
+                                        <p class="font-color">672 (Double 2 is 4, 67-4=63, and 63÷7=9) <b>Yes</b></p>
+                                        <p class="font-color">905 (Double 5 is 10, 90-10=80, and 80÷7=11&nbsp;<span class="frac font-color"><sup>3</sup>/<sub>7</sub></span>) <b>No<br>
+                                      </b></p>                                  </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">8</td>
+                                    <td class="bg-color bg-img font-color">The last three digits are divisible by 8</td>
+                                    <td class="bg-color bg-img font-color">
+                                        <p class="font-color">109<b>816</b> (816÷8=102) <b>Yes</b></p>
+                                        <p class="font-color">216<b>302</b> (302÷8=37&nbsp;<span class="frac font-color"><sup>3</sup>/<sub>4</sub></span>) <b>No</b></p>                                   </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">9</td>
+                                    <td class="bg-color bg-img font-color">The sum of the digits is divisible by 9<br>
+                                      <br>
+                                  (Note: you can apply this rule to that answer again if you want)</td>
+                                    <td class="bg-color bg-img font-color">
+                                        <p class="font-color">1629 (1+6+2+9=18, and again, 1+8=9) <b>Yes</b></p>
+                                        <p class="font-color">2013 (2+0+1+3=6) <b>No</b></p>                                  </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">10</td>
+                                    <td class="bg-color bg-img font-color">The number ends in 0</td>
+                                    <td class="bg-color bg-img font-color">
+                                        <p class="font-color">22<b>0</b> is<br>
+                                            22<b>1</b> is not                                     </p>                                </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center">11</td>
+                                    <td class="bg-color bg-img font-color"><p class="font-color">If you sum every second digit and then subtract all other digits and the answer  is:</p>
+                                      <ul class="bg-color bg-img font-color">
+                                        <li><b>0</b>, or </li>
+                                        <li><b>divisible by 11</b></li>
+                      </ul>                                 </td>
+                                    <td class="bg-color bg-img font-color">
+                                        <p class="font-color">1<b>3</b>6<b>4</b> ((3+4) - (1+6) = <b>0</b>) <b>Yes</b></p>
+                                        <p class="font-color">3<b>7</b>2<b>9</b> ((7+9) - (3+2) = <b>11</b>) <b>Yes</b></p>
+                                      <p class="font-color">2<b>5</b>1<b>7</b>6 ((5+7) - (2+1+6) = <b>3</b>) <b>No</b></p>                                </td>
+                                </tr>
+                                <tr>
+                                    <td class="large bg-color bg-img font-color" align="center" height="16">12</td>
+                                    <td height="16" class="bg-color bg-img font-color">The number is divisible by both 3 <i><b>and</b></i> 4</td>
+                                    <td height="16" class="bg-color bg-img font-color">
+                                        <p class="font-color">648 <br>
+                                        (<i>By 3?</i> 6+4+8=18 and 18÷3=6 Yes. <br>
+                                        <i>By 4?</i> 48÷4=12 Yes) <b>Yes</b></p>
+                                        <p class="font-color">524 <br>
+                                        (<i>By 3?</i> 5+2+4=11, 11÷3= 3&nbsp;<span class="frac font-color"><sup>2</sup>/<sub>3</sub></span> No. <br>
+                                        Don&#8217;t need to check by 4.) <b>No</b></p>
+</td>
+</tr>
+</tbody>
+</table>
+
 </div>
   
   
@@ -1013,17 +993,18 @@ private static String removeDigit(String number, int digitIndex) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (3)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (7)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (48)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (3)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (22)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (4)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
+<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (27)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (79)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (84)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
@@ -1035,23 +1016,23 @@ private static String removeDigit(String number, int digitIndex) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/08/29/Boggle-solver/">[Google] Boggle Solver (Search Words From Matrix)</a>
+        <a href="/blog/2014/09/04/print-numbers-containing-5/">[Question] Print Numbers Containing 5</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/28/google-pre-interview-coaching/">[Google] Google Pre-interview Coaching</a>
+        <a href="/blog/2014/09/03/weird-sort-array/">[Google] Weird Sort Array</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/28/My-world/">[Thoughts] My World</a>
+        <a href="/blog/2014/09/03/String-replacement-question/">[Google] String Replacement Question</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/28/Http-cookie/">[Design] HTTP Cookie</a>
+        <a href="/blog/2014/09/03/Leader-election/">[Design] Leader Election</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/08/27/largest-cycle-in-permutation/">[Twitter] Largest Cycle in Permutation</a>
+        <a href="/blog/2014/09/02/Split-an-integer-or-coin/">[Question] Split an Integer or Coin</a>
       </li>
     
   </ul>
@@ -1067,7 +1048,7 @@ private static String removeDigit(String number, int digitIndex) {
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Your Name -
+  Copyright &copy; 2014 - Charlie Brown -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

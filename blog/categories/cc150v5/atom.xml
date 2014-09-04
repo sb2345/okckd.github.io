@@ -1,17 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Cc150v5 | My Octopress Blog]]></title>
+  <title><![CDATA[Category: Cc150v5 | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/cc150v5/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-29T20:34:56+08:00</updated>
+  <updated>2014-09-04T12:20:21+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[Charlie Brown]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 17.6 Order an Array by Sorting Middle]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/02/Order-array-by-sorting-middle/"/>
+    <updated>2014-09-02T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/02/Order-array-by-sorting-middle</id>
+    <content type="html"><![CDATA[### Question
+
+> Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).
+
+### Solution
+
+Referring to [this guy](http://www.mitbbs.com/article_t/JobHunting/32772399.html): 
+
+> 1. 找到heading的最长递增序列
+>
+> 1. 找到tailing的最长的递增序列
+
+After that: 
+
+> 1. 用中间部分的min去shrink左边 更新max
+>
+> 1. 根据更新后的max shrink右边 更新min
+>
+> 1. 再一次shrink左边
+
+### Code
+
+	public static int findEndOfLeftSubsequence(int[] array) {
+		for (int i = 1; i < array.length; i++) {
+			if (array[i] < array[i - 1]) {
+				return i - 1;
+			}
+		}
+		return array.length - 1;
+	}
+
+	public static int findStartOfRightSubsequence(int[] array) {
+		for (int i = array.length - 2; i >= 0; i--) {
+			if (array[i] > array[i + 1]) {
+				return i + 1;
+			}
+		}
+		return 0;
+	}
+
+	public static int shrinkLeft(int[] array, int min_index, int start) {
+		int comp = array[min_index];
+		for (int i = start - 1; i >= 0; i--) {
+			if (array[i] <= comp) {
+				return i + 1;
+			}
+		}
+		return 0;
+	}
+
+	public static int shrinkRight(int[] array, int max_index, int start) {
+		int comp = array[max_index];
+		for (int i = start; i < array.length; i++) {
+			if (array[i] >= comp) {
+				return i - 1;
+			}
+		}
+		return array.length - 1;
+	}
+
+	public static void findUnsortedSequence(int[] array) {
+		// find left subsequence
+		int end_left = findEndOfLeftSubsequence(array);
+
+		if (end_left >= array.length - 1) {
+			// System.out.println("The array is already sorted.");
+			return; // Already sorted
+		}
+
+		// find right subsequence
+		int start_right = findStartOfRightSubsequence(array);
+
+		int max_index = end_left; // max of left side
+		int min_index = start_right; // min of right side
+		for (int i = end_left + 1; i < start_right; i++) {
+			if (array[i] < array[min_index]) {
+				min_index = i;
+			}
+			if (array[i] > array[max_index]) {
+				max_index = i;
+			}
+		}
+
+		// slide left until less than array[min_index]
+		int left_index = shrinkLeft(array, min_index, end_left);
+
+		// slide right until greater than array[max_index]
+		int right_index = shrinkRight(array, max_index, start_right);
+
+		if (validate(array, left_index, right_index)) {
+			System.out.println("TRUE: " + left_index + " " + right_index);
+		} else {
+			System.out.println("FALSE: " + left_index + " " + right_index);
+		}
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CC150v5] 8.4 Design a Parking Lot]]></title>
@@ -699,49 +802,6 @@ Player.java
             return color;
         }
     }
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 8.7 Design Online Chat Server (2)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2/"/>
-    <updated>2014-08-24T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2</id>
-    <content type="html"><![CDATA[... Continued from previous post. 
-
-### Overall view
-
-The system consists of a database, a set of clients, and a set of servers. This is not about OOD, but we need to know. 
-
-1. DB stores user list, chat archive. An SQL DB would be good, __unless we want BigTable for scalability purpose__. 
-
-1. __We use XML for server-client communication__. Because it's debugging friendly. 
-
-1. __A set of servers__. 
-
-	1. Data will be __divided up across machines__, requiring us to potentially hop from machine to machine. 
-	1. When possible, we will try to __replicate some data__ across machines to minimize the lookups. 
-	1. One major design constraint here is to __prevent having a single point of failure__. For instance, if one machine controlled all the user sign-ins, then we'd cut off millions of users potentially if a single machine lost network connectivity.
-
-### Hardest problems
-
-Or the most interesting questions.
-
-#### Q1: How do we know if someone is online?
-
-While we would like users to tell us when they sign off, we can't know for sure. A user's connection might have died, for example. To make sure that we know when a user has signed off, we might try regularly pinging the client to make sure it's still there.
-
-#### Q2: How do we deal with conflicting information?
-
-We have some information stored in the computer's memory and some in the database. What happens if they get out of sync? Which one is "right"?
-
-#### Q3: How do we make our server scale?
-
-While we designed out chat server without worrying—too much- about scalability, in real life this would be a concern. We'd need to split our data across many servers, which would increase our concern about out-of-sync data. 
-
-#### Q4: How we do prevent denial of service attacks?
-
-Clients can push data to us —- what if they try to DOS (denial of service) us? How do we prevent that? 
 ]]></content>
   </entry>
   

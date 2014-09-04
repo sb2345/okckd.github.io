@@ -1,440 +1,337 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Google | My Octopress Blog]]></title>
+  <title><![CDATA[Category: Google | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-08-29T20:34:56+08:00</updated>
+  <updated>2014-09-04T12:20:21+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[Charlie Brown]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
   
   <entry>
-    <title type="html"><![CDATA[[Google] Boggle Solver (Search Words From Matrix)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/29/Boggle-solver/"/>
-    <updated>2014-08-29T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/29/Boggle-solver</id>
+    <title type="html"><![CDATA[[Google] Weird Sort Array]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/03/weird-sort-array/"/>
+    <updated>2014-09-03T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/03/weird-sort-array</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://stackoverflow.com/questions/746082/how-to-find-list-of-possible-words-from-a-letter-matrix-boggle-solver)
+[link](http://www.mitbbs.com/article_t0/JobHunting/32772813.html)
 
-> Boggle Game: 
-
-    F X I E
-    A M L O
-    E W B X
-    A S T U
-
-> The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference. 
+> 数组排序， 排成 a1<a2>a3<a4>a5。。。这种形式。
 
 ### Solution
 
-__[The best solution](http://stackoverflow.com/a/4314056) is to use Trie__, then do DFS search. However it might not be as intuitive as it seems. 
+__The are 2 solutions__. The easy one is this: 
 
-The idea is from [this answer](http://stackoverflow.com/a/746102). We need to first define a class called Item: 
+> sort first, then 把临近的奇数换到偶数(index)上, O(nlog n). 
 
-    class Item {
-        public final int x, y;
-        public final String prefix;
+__There's a great O(n) solution however__, not easy to think: 
 
-        public Item(int row, int column, String prefix) {
-            this.x = row;
-            this.y = column;
-            this.prefix = prefix;
-        }
-    }
-
-So when we start doing DFS, we pass in an Item object which stores 2 information: 
-
-1. The next position that we're going to visit.
-1. The prefix string that we have validated so far (before visiting this position).
-
-For example: 
-
-    F X I E
-    A M L O
-    E W B X
-    A S T U
-
-We'll have Items objects like (0, 0, ""), (0, 1, "F"), (0, 2, "FA") ... We guarantee that the prefix must be a valid prefix by searching them in the Trie. 
-
-How to tell whether a string is a prefix of word, or it's an actual word? We have a property in TrieNode called TrieNode.isWord() to help us. 
-
-That's about it. I spend quite some time writing the code below, by refering to [this code](http://stackoverflow.com/a/11698898).
+> 两两比较相邻数字，把大的数字放到下标为奇数的位置。 O(n). 
 
 ### Code
 
-BoggleSolver.java
+__O(nlgn) solution__
 
-    public class BoggleSolver {
-
-        private static BufferedReader in = null;
-        private static final String INPUT_FILE = "dictionary.txt";
-
-        public static void beginFileReader() {
-            try {
-                in = new BufferedReader(new FileReader(new File(BoggleSolver.class
-                        .getResource(INPUT_FILE).toURI())));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-        }
-
-        private Trie buildTrie() {
-            Trie trie = new Trie();
-            beginFileReader();
-            String line = null;
-            try {
-                while ((line = in.readLine()) != null) {
-                    String[] words = line.split(" ");
-                    for (String word : words) {
-                        word = word.trim().toLowerCase();
-                        trie.addWord(word);
-                    }
-                }
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return trie;
-        }
-
-        public Set<String> findWords(char[][] map, Trie dict) {
-            Set<String> ans = new TreeSet<String>();
-            int m = map.length;
-            int n = map[0].length;
-            for (int i = 0; i < m; i++) {
-                for (int j = 0; j < n; j++) {
-                    boolean[][] visited = new boolean[m][n];
-                    findWordsDfs(ans, dict, map, visited, new Item(i, j, ""));
-                    // item have 3 parameters:
-                    // location x,y and the prefix string before reaching (i.j)
-                }
-            }
-            return ans;
-        }
-
-        public void findWordsDfs(Set<String> ans, Trie dict, char[][] map,
-                boolean[][] visited, Item item) {
-            // item: the location that we're going to test
-            // item.prefix is the word prefix before reaching (x, y)
-
-            int m = map.length;
-            int n = map[0].length;
-            int x = item.x;
-            int y = item.y;
-
-            // check whether cur.(x,y) is a valid position
-            if (x < 0 || x >= m || y < 0 || y >= n) {
-                return;
-            } else if (visited[x][y]) {
-                return;
-            }
-            String newWord = item.prefix + map[x][y];
-            // check whether cur.prefix is a valid prefix
-            TrieNode findWord = dict.match(newWord);
-            if (findWord == null) {
-                // up to this position (x, y), the word dont' exists
-                return;
-            }
-            // now cur is in a valid position, with a valid prefix
-            if (findWord.isWord()) {
-                ans.add(newWord);
-            }
-            // visit this position, and continue in 4 different directions
-            visited[x][y] = true;
-            findWordsDfs(ans, dict, map, visited, new Item(x, y - 1, newWord));
-            findWordsDfs(ans, dict, map, visited, new Item(x, y + 1, newWord));
-            findWordsDfs(ans, dict, map, visited, new Item(x - 1, y, newWord));
-            findWordsDfs(ans, dict, map, visited, new Item(x + 1, y, newWord));
-            visited[x][y] = false;
-        }
-
-        public static void main(String[] args) {
-            String[] rows = "eela,elps,weut,korn".split(",");
-            char[][] input = new char[4][4];
-            for (int i = 0; i < 4; i++) {
-                input[i] = rows[i].toCharArray();
-            }
-
-            // prepare test data
-            BoggleSolver solver = new BoggleSolver();
-            Trie dictionary = solver.buildTrie();
-            // start finding words
-            Set<String> set = solver.findWords(input, dictionary);
-            // present the result
-            System.out.println(set.size() + " words are found, they are: ");
-            for (String str : set) {
-                System.out.println(str);
-            }
-        }
-
-        class Item {
-            public final int x, y;
-            public final String prefix;
-
-            public Item(int row, int column, String prefix) {
-                this.x = row;
-                this.y = column;
-                this.prefix = prefix;
-            }
-        }
-    }
-
-Trie.java
-
-    public class Trie {
-        private TrieNode root;
-
-        public Trie() {
-            this.root = new TrieNode();
-        }
-
-        public void addWord(String word) {
-            TrieNode node = this.root;
-            for (char c : word.toCharArray()) {
-                node = node.addChild(c);
-                if (node == null)
-                    return;
-            }
-            node.setWord(true);
-        }
-
-        public TrieNode match(String s) {
-            TrieNode node = this.root;
-            for (char c : s.toCharArray()) {
-                node = node.get(c);
-                if (node == null)
-                    return null;
-            }
-            return node;
-        }
-    }
-
-TrieNode.java
-
-    public class TrieNode {
-        private TrieNode[] children;
-        private boolean isWord = false;
-
-        public TrieNode() {
-            this.children = new TrieNode[26];
-        }
-
-        public TrieNode addChild(char child) {
-            if (child < 'a' || child > 'z')
-                return null;
-
-            int offset = child - 'a';
-            if (this.children[offset] == null) {
-                this.children[offset] = new TrieNode();
-            }
-            return this.children[offset];
-        }
-
-        public boolean isWord() {
-            return isWord;
-        }
-
-        public void setWord(boolean isWord) {
-            this.isWord = isWord;
-        }
-
-        public TrieNode get(char c) {
-            int offset = c - 'a';
-            return this.children[offset];
-        }
-    }
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Google Pre-interview Coaching]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/28/google-pre-interview-coaching/"/>
-    <updated>2014-08-28T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/28/google-pre-interview-coaching</id>
-    <content type="html"><![CDATA[### Question
-
-> Write a program that breaks up a string of words with no spaces into a string with the appropriate spaces. 
-
-Follow the following process:
-
-1. Clarify the problem
-1. Refine the solution
-1. Code it
-1. Last words
-
-### Clarify the problem
-
-1. Consider a general case, like "fastman"
-1. Disambiguate expected result
-1. State the key assumptions
-1. clarify function signature
-
-2 words? null input? where is the words from? We might use a dictionary. 
-
-### Refine the solution
-
-1. what if the dictionary cannot fit in RAM
-1. how would you print the most likely of multiple choices
-1. what if the words are not spelled correctly?
-1. Testing 
-
-### Code it
-
-Write code now, skip.
-
-### Last words
-
-Talk naive solution, then come up with a reasonably better one. 
-
-Time/Space tradeoff. (like pre-processing or something) 
-
-For very big/small input. 
-
-White-board practise is important! 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Google API Read4096 (read4K)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/27/google-api-read-4096/"/>
-    <updated>2014-08-27T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/27/google-api-read-4096</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.careercup.com/question?id=14424684)
-
-> Given API: int Read4096(char* buf); 
-
-> It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read. 
-
-> Use above API to Implement API "int Read(char* buf, int n)" which reads any number of chars from the file. 
-
-### Solution
-
-Since the nature of C++ and Java is different, I changed the api to: 
-
-	GoogleApi.read4096(){}
-	GoogleRead4096.read(int n){}
-
-As [suggested](http://www.careercup.com/question?id=14424684), the solution is to keep __one local buffer__, and 1 pointer within the buffer. 
-
-### Code
-
-	String buffer = null;
-	int p = 0;
-
-	public String read(int n) {
-		if (n < 0) {
-			return null;
-		} else if (n == 0) {
-			return "";
+	public void solutionOnlgn(int[] A) {
+		// this is a O(nlgn) solution
+		Arrays.sort(A);
+		for (int i = 2; i < A.length; i += 2) {
+			swap(A, i - 1, i);
 		}
-		StringBuilder sb = new StringBuilder();
-		while (n > 0) {
-			// there is (LENGTH - p) chars left in the local buffer
-			if (buffer == null || p == buffer.length()) {
-				// no char left in buffer, update buffer
-				buffer = GoogleApi.read4096();
-				p = 0;
-				if (buffer.length() == 0) {
-					// finish reading the file (no more input chars)
-					break;
-				}
+	}
+
+	private void swap(int[] A, int a, int b) {
+		A[a] ^= A[b];
+		A[b] ^= A[a];
+		A[a] ^= A[b];
+	}
+
+__O(n) solution__
+
+	public void solutionOn(int[] A) {
+		// this is a O(n) solution
+		for (int i = 1; i < A.length; i++) {
+			// compare (i)th with (i-1)th, and put the large value
+			// at odd-indexed positions
+			if ((A[i - 1] < A[i] && i % 2 == 0)
+					|| (A[i - 1] > A[i] && i % 2 == 1)) {
+				swap(A, i - 1, i);
+			}
+		}
+	}
+
+	private void swap(int[] A, int a, int b) {
+		A[a] ^= A[b];
+		A[b] ^= A[a];
+		A[a] ^= A[b];
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] String Replacement Question]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/03/String-replacement-question/"/>
+    <updated>2014-09-03T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/03/String-replacement-question</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.mitbbs.com/article_t/JobHunting/32766461.html)
+
+> String replace, 给一个原string，一个target，一个替换的新str，把所有出现
+target str的地方都换成新的str， 长度可以任意. 
+
+### Solution
+
+If the question asks for an in-place algo, then we can refer to __Question 1.5 in CC150v4__. 
+
+### Question 
+
+> 1.5 Write a method to replace all spaces in a string with ‘%20’. 
+
+### Solution
+
+1. __pre-processing__, count the number of spaces in string
+2. parse the string from end to beginning. 
+
+Need 2 pass.
+
+### Code
+
+__not written by me__
+
+	public static void ReplaceFun(char[] str, int length) {
+		int spaceCount = 0, newLength, i = 0;
+		for (i = 0; i < length; i++) {
+			if (str[i] == ' ') {
+				spaceCount++;
+			}
+		}
+		newLength = length + spaceCount * 2;
+		str[newLength] = '\0';
+		for (i = length - 1; i >= 0; i--) {
+			if (str[i] == ' ') {
+				str[newLength - 1] = '0';
+				str[newLength - 2] = '2';
+				str[newLength - 3] = '%';
+				newLength = newLength - 3;
 			} else {
-				int numChars = buffer.length() - p;
-				if (numChars >= n) {
-					sb.append(buffer.substring(p, p + n));
-					p = p + n;
-					n = 0;
-				} else {
-					sb.append(buffer.substring(p));
-					p = buffer.length();
-					n -= numChars;
+				str[newLength - 1] = str[i];
+				newLength = newLength - 1;
+			}
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Find Anagrams in Dictionary]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/02/Find-anagrams-in-dictionary/"/>
+    <updated>2014-09-02T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/02/Find-anagrams-in-dictionary</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.careercup.com/question?id=3088)
+
+> Imagine you had a dictionary. How would you print all anagrams of a word? What if you had to do this repeatedly? Could you optimize it?
+
+### Solution
+
+A very [nice solution](http://stackoverflow.com/a/12477976): 
+
+1. Open dictionary
+
+1. Create empty hashmap H
+
+1. For each word in dictionary:
+
+    1. Create a key that is the word's letters sorted alphabetically (and forced to one case)
+    
+    1. Add the word to the list of words accessed by the hash key in H
+
+There's another [very interesting idea](http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html), if the length of the word is not too long. 
+
+> Another approach could be we can assign each letters from a..z a prime numbers (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, .. so on)
+>
+> and then for any word, we can calculate its key as the multiples of all the prime number corresponding to characters in the word. 
+>
+> The char -> int assignment may look like: 
+
+    a=2, b=3, c=5, d=7, e=11, f=13, g=17, h=19, i=23, j=29, 
+    k=31, l=37, m=41, n=43, o=47, p=53, q=59, r=61, s=67, t=71, 
+    u=73, v=79, w=83, x=89, y=97, z=101
+
+### Code
+
+__not written by me__, [link](http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html)
+
+	private static HashMap<String, ArrayList<String>> anagramMap = new HashMap<String, ArrayList<String>>();
+
+	public static void findAnagrams(String[] dictionary) {
+		int len = dictionary.length;
+
+		for (int i = 0; i < len; i++) {
+			String sortedWord = sortWordLexicographically(dictionary[i]);
+			ArrayList<String> wordList = anagramMap.get(sortedWord);
+			if (wordList == null) {
+				wordList = new ArrayList<String>();
+			}
+			wordList.add(dictionary[i]);
+			anagramMap.put(sortedWord, wordList);
+		}
+	}
+
+	public ArrayList<String> getAnagrams(String word) {
+		if (word == null) {
+			return null;
+		}
+
+		String sortedWord = sortWordLexicographically(word);
+		return anagramMap.get(sortedWord);
+	}
+
+	public void printAnagrams(String word) {
+		if (word == null) {
+			System.out.println("Input word is null!");
+		} else {
+			ArrayList<String> wordList = getAnagrams(word);
+			if (wordList == null) {
+				System.out.println("No anagrams exists for : " + word);
+			} else {
+				Iterator<String> iter = wordList.iterator();
+				while (iter.hasNext()) {
+					System.out.print(iter.next());
 				}
 			}
 		}
-		return sb.toString();
 	}
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Google] Orthogonal Traverse the Map (`)]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map/"/>
-    <updated>2014-08-16T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map</id>
+    <title type="html"><![CDATA[[Google] Array Distance A(i)+A(j)+(j-i)]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)/"/>
+    <updated>2014-09-02T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.itint5.com/oj/#22)
+[link](http://www.mitbbs.com/article/JobHunting/32772225_3.html)
 
-> 有一个n*m（n和m都不超过50）的棋盘，有k个目标格子需要访问。需要访问的格子的横纵坐标存放在数组x[]和y[]中(0<=x[i]<n, 0<=y[i]<m)。
+> Given an int array A[], define: 
 
-> 遍历的规则为：
->
-> 每一步只能从一个目标格子水平或者竖直跳跃移动到另一个目标格子。
->
-> 连续的两步必须形成直角。即如果前一步是水平移动，那么下一步只能竖直移动。
->
-> 问是否存在一种遍历顺序，使得每个目标格子有且仅被访问一次。
+> distance = A[i] + A[j] + (j-i), j >= i. 
 
-> 样例：k=8, x=[0, 0, 0, 0, 2, 2, 4, 4], y=[0, 2, 4, 6, 4, 6, 2, 4],对应于下图中A, B, C, D, F, E, G, H 8个目标格子，存在满足条件的遍历A->D->E->F->C->B->G->H。
-
-<img class="middle" src="/assets/images/orthogonal-map.jpg">
+> Find max distance in A[]
 
 ### Solution
 
-> n,m的棋盘，[建一个包含n+m个顶点的图G](http://www.itint5.com/discuss/22/%E7%9B%B4%E8%A7%92%E8%B7%AF%E7%BA%BF%E9%81%8D%E5%8E%86%E6%A3%8B%E7%9B%98)（为了方便说明，类似二分图将其分为两列，左边n个顶点，右边m个顶点，分别代表n行和n列）。
+Solution suggested on floor 8 of [this post](http://www.mitbbs.com/mitbbs_article_t.php?board=JobHunting&gid=32772225&ftype=0). 
 
-> 对于目标格子(i,j)，左边第i个顶点和右边第j个顶点连一条边。最后的问题其实就是问转换之后的图G是否存在欧拉欧拉回路或者欧拉路径。
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Product All 1s]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/15/Product-all-ones/"/>
-    <updated>2014-08-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/15/Product-all-ones</id>
-    <content type="html"><![CDATA[### Question 
+1. distance = (A[i] - i) + (A[j] + j), so we do 2 iteration in the array and calculate (A[i] - i) and (A[j] + j) respectively. 
 
-[link](http://www.itint5.com/oj/#18)
+1. save the max value of (A[i] - i) from left to right
 
-> 给定一个非负整数a（不超过10^6），是否存在整数b，使得a和b的乘积全为1。如果存在，返回最小的乘积的位数。如果不存在，返回-1。
+1. save the max value of (A[j] + j) from right to left
 
-> 样例：a=3，存在b=37，使得3*37=111，则函数应返回3（111的位数）。
+1. last iteration, calculate result. 
 
-### Solution
+Eg. input = {3, 3, 3, 5, 6, 4}
 
-There's 1 equation of mod operation, which is helpful: 
-
-> (a * b) mod x = ((mx+a') * (nx+b')) mod x = (a' mod x) * (b' mod x) = (a mod x) * (b mod x)
+> max value of (A[i] - i) from left to right: {3, 3, 3, 3, 3, 3}
 >
-> i.e.  (a * b) mod x = (a mod x) * (b mod x)
-
-Altough [I don't understand why](http://www.itint5.com/discuss/136/%E8%BF%99%E9%A2%98%E6%88%91%E8%B6%85%E6%97%B6%E4%BA%86%EF%BC%8C%E8%AF%B7%E9%97%AE%E5%A6%82%E4%BD%95%E7%BC%A9%E7%9F%AD%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4) does it contribute to the incredibly short solution code posted below. I can't solve this question, freakly speaking. 
+> max value of (A[j] + j) from right to left: {10, 10, 10, 10, 10, 9}
+>
+> final result: 13
 
 ### Code
 
-	int findMinAllOne(int a) {
-		if (a < 0 || (a % 10) % 2 == 0 || a % 10 == 5)
-			return -1;
+__written by me__
 
-		int ans = 1;
-		for (int p = 1; p != 0; p %= a) {
-			p = 10 * p + 1;
-			++ans;
+	public int distance(int[] A) {
+		int len = A.length;
+		int[] arrayI = new int[len];
+		int[] arrayJ = new int[len];
+
+		arrayI[0] = A[0] - 0;
+		// arrayI stores max value of (A[i]-i) from left to right
+		arrayJ[len - 1] = A[len - 1] + (len - 1);
+		// arrayJ stores max value of (A[i]+i) from right to left
+
+		for (int i = 1; i < len; i++) {
+			arrayI[i] = Math.max(arrayI[i - 1], A[i] - i);
 		}
-		return a == 1 ? ans - 1 : ans;
+
+		for (int i = len - 2; i >= 0; i--) {
+			arrayJ[i] = Math.max(arrayJ[i + 1], A[i] + i);
+		}
+
+		Common.printArray(arrayI);
+		Common.printArray(arrayJ);
+
+		int max = Integer.MIN_VALUE;
+		for (int i = 0; i < len; i++) {
+			max = Math.max(max, arrayI[i] + arrayJ[i]);
+		}
+		return max;
 	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Crosswod Solver]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/01/Crossword-solver/"/>
+    <updated>2014-09-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/01/Crossword-solver</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://stackoverflow.com/questions/8585090/algorithm-for-crossword-puzzle-with-given-grid)
+
+> Given a wordlist like this:
+
+    1. ccaa
+    1. baca
+    1. baaa
+    1. bbbb
+
+> and a Grid like this: 
+
+    X X 
+    XXXX
+    X X 
+    XXXX
+
+> Now solve this crossword. One possible solution: 
+
+    b c 
+    baca
+    b a 
+    baaa
+
+### Solution
+
+[The corssword problem](http://stackoverflow.com/a/8586102) is NP-Complete, so your best shot is brute force: just try all possibilities, and stop when a possibility is a valid. Return failure when you exhausted all possible solutions.
+
+### Code
+
+__Pseudo code for brute force__. (this just serve as a guide, not a complete/correct solution)
+
+    solve(words,grid):
+       if words is empty:
+           if grid.isValudSol():
+              return grid
+           else:
+              return None
+       for each word in words:
+           possibleSol <- grid.fillFirst(word)
+           ret <- solve(words\{word},possibleSol)
+           if (ret != None):
+              return ret
+       return None
 ]]></content>
   </entry>
   
