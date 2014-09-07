@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Problem: Get maximum binary Gap. For example, 9&rsquo;s binary form is 1001, the gap is 2. Solution This question is a good practise of &hellip;">
+  <meta name="description" content="Question link Please get the least number after deleting k digits from the input number. For example, if the input number is 24635, the least number &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,313 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/23/Least-Number-after-Deleting-Digits/">[Question] Least Number After Deleting Digits</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://codercareer.blogspot.sg/2013/11/no-48-least-number-after-deleting-digits.html">link</a></p>
+
+<blockquote><p>Please get the least number after deleting k digits from the input number.</p>
+
+<p>For example, if the input number is 24635, the least number is 23 after deleting 3 digits.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>There&rsquo;s a solution which instead of &lsquo;delete k&rsquo;, find the smallest number by &lsquo;keeping (n-k) numbers&rsquo;. It&rsquo;s more strightforward.</p>
+
+<h3>Solution</h3>
+
+<ol>
+<li>From the start, search till the end.
+
+<ol>
+<li>If a digit is greater than next one, delete it.</li>
+<li>If all digits are increasingly sorted, delete last.</li>
+</ol>
+</li>
+<li>Each time go back to start to search again.</li>
+</ol>
+
+
+<p>Example</p>
+
+<blockquote><p>24635 &ndash;> 2435 &ndash;> 235 &ndash;> 23</p></blockquote>
+
+<h3>Code</h3>
+
+<p>from Harry He</p>
+
+<pre><code>public static String getLeastNumberDeletingDigits_1(String number, int k) {
+    String leastNumber = number;
+    while(k &gt; 0 &amp;&amp; leastNumber.length() &gt; 0) {
+        int firstDecreasingDigit = getFirstDecreasing(leastNumber);
+        if(firstDecreasingDigit &gt;= 0) {
+            leastNumber = removeDigit(leastNumber, firstDecreasingDigit);
+        }
+        else {
+            leastNumber = removeDigit(leastNumber, leastNumber.length() - 1);
+        }
+
+        --k;
+    }
+
+    return leastNumber;
+}
+
+private static int getFirstDecreasing(String number) {
+    for(int i = 0; i &lt; number.length() - 1; ++i) {
+        int curDigit = number.charAt(i) - '0';
+        int nextDigit = number.charAt(i + 1) - '0';
+        if(curDigit &gt; nextDigit) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+private static String removeDigit(String number, int digitIndex) {
+    String result = "";
+    if(digitIndex &gt; 0) {
+        result = number.substring(0, digitIndex);
+    }
+    if(digitIndex &lt; number.length() - 1) {
+        result += number.substring(digitIndex + 1);
+    }
+
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/23/Largest-palindrome-product/">[Question] Largest Palindrome Product</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://projecteuler.net/problem=4">link</a></p>
+
+<blockquote><p>The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 × 99.</p>
+
+<p>Find the largest palindrome made from the product of two 3-digit numbers.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>We suppose the largest such palindrome will have six digits rather than five, because 143*777 = 111111 is a palindrome. And we can tell that 6-digit base-10 palindrome <strong>must be a multiple of 11</strong>.</p>
+
+<p>So the question becomes finding the largest palindrome under a million that is a <strong>product of two 3-digit numbers</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>We now declare variable m and n:</p>
+
+<ol>
+<li>step m down from 999 to 100 by 1</li>
+<li>step n down from 999 to 100 by:
+
+<ol>
+<li>if m is divisible by 11, then step n down by 11</li>
+<li>if m is indivisible by 11, then step n down by 1</li>
+</ol>
+</li>
+<li>keep track of the largest product found so far: p = r * s
+
+<ol>
+<li>next time when we found such product value (m * n), it must be m &lt;= r. So n have to be really large in order to make the final product larger than p.</li>
+<li>i.e. n >= p/m.</li>
+<li>As larger palindromes are found, the range of n gets more restricted</li>
+</ol>
+</li>
+</ol>
+
+
+<p><a href="http://stackoverflow.com/a/7198175">reference</a></p>
+
+<h3>Code</h3>
+
+<p>C++ code from stackoverflow</p>
+
+<pre><code>int main(void) {
+  enum { A=100000, B=10000, C=1000, c=100, b=10, a=1, T=10 };
+  int m, n, p, q=111111, r=143, s=777;
+  int nDel, nLo, nHi, inner=0, n11=(999/11)*11;
+
+  for (m=999; m&gt;99; --m) {
+    nHi = n11;  nDel = 11;
+    if (m%11==0) {
+      nHi = 999;  nDel = 1;
+    }
+    nLo = q/m-1;
+    if (nLo &lt; m) nLo = m-1;
+
+    for (n=nHi; n&gt;nLo; n -= nDel) {
+      ++inner;
+      // Check if p = product is a palindrome
+      p = m * n;
+      if (p%T==p/A &amp;&amp; (p/B)%T==(p/b)%T &amp;&amp; (p/C)%T==(p/c)%T) {
+    q=p; r=m; s=n;
+    printf ("%d at %d * %d\n", q, r, s);
+    break;          // We're done with this value of m
+      }
+
+    }
+  }
+  printf ("Final result:  %d at %d * %d   inner=%d\n", q, r, s, inner);
+  return 0;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/22/Bucket-Sort/">[Question] Bucket Sort (Bin Sort)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-22T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/bucket-sort-2/">link</a></p>
+
+<blockquote><p>Bucket sort is mainly useful when input is uniformly distributed over a range. For example:</p>
+
+<p>Sort a large set of floating point numbers which are in range from 0.0 to 1.0 and are uniformly distributed across the range. How do we sort the numbers efficiently.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>1) Create n empty buckets (Or lists).</p>
+
+<p>2) Insert each arr[i] into bucket[n*array[i]]</p>
+
+<p>3) Sort individual buckets using <strong>insertion sort</strong>.</p>
+
+<p>4) Concatenate all sorted buckets.</p>
+
+<p>Steps 1 and 2 clearly take O(n) time. Step 4 also takes O(n) time.</p>
+
+<p><strong>The main step to analyze is step 3</strong>. This step also takes O(n) time on average if all numbers are uniformly distributed. <strong>Final time complexity: O(n)</strong>.</p>
+
+<h3>Relationship with other sorting algorithms</h3>
+
+<p>There&rsquo;s a algorithm within the bucket. Now if we use <strong>bucket sort itself</strong> as the sorting function, this becomes a <strong>radix sort</strong>.</p>
+
+<p>If we set the <strong>bucket size as 2</strong>, then this becomes a quick sort (with potentially poor pivot choices).</p>
+
+<h3>Code</h3>
+
+<p>C++ code from G4G</p>
+
+<pre><code>void bucketSort(float arr[], int n) {
+    // 1) Create n empty buckets
+    vector&lt;float&gt; b[n];
+
+    // 2) Put array elements in different buckets
+    for (int i=0; i&lt;n; i++)
+    {
+       int bi = n*arr[i]; // Index in bucket
+       b[bi].push_back(arr[i]);
+    }
+
+    // 3) Sort individual buckets
+    for (int i=0; i&lt;n; i++)
+       sort(b[i].begin(), b[i].end());
+
+    // 4) Concatenate all buckets into arr[]
+    int index = 0;
+    for (int i = 0; i &lt; n; i++)
+        for (int j = 0; j &lt; b[i].size(); j++)
+          arr[index++] = b[i][j];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -559,254 +866,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/13/Twos-complement/">[Design] Two&#8217;s Complement</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-13T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p>Two&rsquo;s complement is a binary signed number representation.</p>
-
-<p>Negative values are taken by subtracting the number from 2<sup>n</sup>. This is the most common method of representing signed integers on computers.</p>
-
-<h3>Example</h3>
-
-<table class="wikitable sortable jquery-tablesorter" style="text-align: center;">
-<thead><tr>
-<th class="headerSort bg-color bg-img font-color" tabindex="0" role="columnheader button" title="Sort ascending">Bits</th>
-<th class="headerSort bg-color bg-img font-color" tabindex="0" role="columnheader button" title="Sort ascending">Unsigned value</th>
-<th class="headerSort bg-color bg-img font-color" tabindex="0" role="columnheader button" title="Sort ascending">2&#8217;s complement value</th>
-</tr></thead><tbody>
-<tr>
-<td class="bg-color bg-img font-color">0111 1111</td>
-<td align="right" class="bg-color bg-img font-color">127 </td>
-<td align="right" class="bg-color bg-img font-color">127 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">0111 1110</td>
-<td align="right" class="bg-color bg-img font-color">126 </td>
-<td align="right" class="bg-color bg-img font-color">126 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">0000 0010</td>
-<td align="right" class="bg-color bg-img font-color">2 </td>
-<td align="right" class="bg-color bg-img font-color">2 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">0000 0001</td>
-<td align="right" class="bg-color bg-img font-color">1 </td>
-<td align="right" class="bg-color bg-img font-color">1 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">0000&nbsp;0000</td>
-<td align="right" class="bg-color bg-img font-color">0 </td>
-<td align="right" class="bg-color bg-img font-color">0 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1111 1111</td>
-<td align="right" class="bg-color bg-img font-color">255 </td>
-<td align="right" class="bg-color bg-img font-color">−1 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1111 1110</td>
-<td align="right" class="bg-color bg-img font-color">254 </td>
-<td align="right" class="bg-color bg-img font-color">−2 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1000 0010</td>
-<td align="right" class="bg-color bg-img font-color">130 </td>
-<td align="right" class="bg-color bg-img font-color">−126 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1000 0001</td>
-<td align="right" class="bg-color bg-img font-color">129 </td>
-<td align="right" class="bg-color bg-img font-color">−127 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1000 0000</td>
-<td align="right" class="bg-color bg-img font-color">128 </td>
-<td align="right" class="bg-color bg-img font-color">−128 </td>
-</tr>
-</tbody><tfoot></tfoot></table>
-
-
-<br/>
-
-
-<p>So basically &lsquo;1111 1111&rsquo; means -1, and &lsquo;1000 0000&rsquo; means -128.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/08/Leetcode-second-round/">[Leetcode] Leetcode Second Round</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question List</h3>
-
-<ol>
-<li>Integer to Roman</li>
-<li>Reverse Linked List II</li>
-<li>ZigZag Conversion</li>
-<li>Surrounded Regions &ndash; constant space</li>
-<li>Longest Palindromic Substring</li>
-<li>Candy</li>
-<li>Rotate List</li>
-<li>Remove Duplicates from Sorted Array</li>
-<li>Remove Duplicates from Sorted Array II</li>
-<li>Validate Binary Search Tree &ndash; use intervals</li>
-<li>Gray Code</li>
-<li>Combination Sum II</li>
-<li>Add Binary</li>
-<li>Merge Intervals</li>
-<li>Scramble String</li>
-<li>Generate Parentheses</li>
-<li>Permutation Sequence</li>
-<li>Substring with Concatenation of All Words</li>
-<li>String to Integer (atoi)</li>
-</ol>
-
-
-<h3>Difficult</h3>
-
-<ol>
-<li>Gas Station</li>
-<li>Reverse Words in a String</li>
-<li>Word Search</li>
-<li>Container With Most Water</li>
-<li>First Missing Positive &ndash; note there&rsquo;s 1 special case</li>
-<li>Sort List</li>
-<li>Anagrams</li>
-<li>Merge k Sorted Lists &ndash; very difficult</li>
-<li>Permutations II &ndash; use different DS for flagging elements</li>
-<li>Palindrome Partitioning II</li>
-<li>Word Ladder</li>
-<li>Largest Rectangle in Histogram</li>
-<li>Minimum Window Substring &ndash; difficult</li>
-<li>Longest Valid Parentheses &ndash; difficult</li>
-<li>Median of Two Sorted Arrays &ndash; difficult</li>
-<li>Regular Expression Matching</li>
-<li>Wildcard Matching</li>
-</ol>
-
-
-<h3>Special</h3>
-
-<ol>
-<li><p>water, rain and histogram etc.</p></li>
-<li><p>word and string-related</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/07/NineChap-additional/">[NineChap 10] Additional Questions</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>The following questions does not appear in NineChap, but they all worth reading.</p>
-
-<h3>Question List</h3>
-
-<ol>
-<li><p><strong><a href="/blog/2014/04/27/longest-substring-without-repeating/">Longest Substring Without Repeating Characters </a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/21/Minimum-Window-Substring/">Minimum Window Substring </a></strong> &ndash; very difficult</p></li>
-<li><p><strong><a href="/blog/2014/05/23/Scramble-String/">Scramble String </a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/25/Recover-Binary-Search-Tree/">Recover Binary Search Tree </a></strong></p></li>
-<li><p><strong><a href="/blog/2014/04/26/Median-of-Two-Sorted-Arrays/">Median of Two Sorted Arrays </a></strong> &ndash; difficult</p></li>
-<li><p><strong><a href="/blog/2014/05/14/Sudoku-Solver/">Sudoku Solver </a></strong> &ndash; difficult</p></li>
-<li><p><strong><a href="/blog/2014/05/21/Word-Search/">Word Search </a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/21/Simplify-Path/">Simplify Path</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/04/29/Regular-Expression-Matching/">Regular Expression Matching</a></strong> &ndash; very difficult</p></li>
-<li><p><strong><a href="/blog/2014/05/15/Wildcard-Matching/">Wildcard Matching</a></strong> &ndash; difficult</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/19">&larr; Older</a>
@@ -822,7 +881,7 @@
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (16)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (19)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
@@ -845,23 +904,23 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/08/test-webpage-without-tool/">[CC150v4] 11.4 Test Webpage Without Tools (`)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/08/random-error-debugging-2/">[CC150v4] 11.2 Random Error Debugging 2</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a>
       </li>
     
       <li class="post">
+        <a href="/blog/2014/09/08/find-coliner-in-2d-plane/">[CC150v4] 10.6 Find Collinear in 2D Plane (`)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/search-array-containing-empty-string/">[CC150v4] 9.5 Search Array Containing Empty String</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/generate-permutation-recursively/">[CC150v4] 8.4 Generate Permutation Recursively</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a>
       </li>
     
   </ul>

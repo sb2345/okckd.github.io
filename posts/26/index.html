@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Evaluate the value of an arithmetic expression in Reverse Polish Notation. Valid operators are +, -, *, /. Each operand may be an &hellip;">
+  <meta name="description" content="Question link Given n points on a 2D plane, find the maximum number of points that lie on the same straight line. Stats Adjusted Difficulty 5 Time to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,416 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Max-Points-on-a-Line/">[LeetCode 149] Max Points on a Line</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/max-points-on-a-line/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">Given <i>n</i> points on a 2D plane, find the maximum number of points that lie on the same straight line.</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a difficult coding question</strong>.</p>
+
+<p>The idea is simple. For n points, there are n * (n-1) lines. Check slopes and then count total, we would get the answer.</p>
+
+<p>However, coding of this idea is very difficult.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Firstly, there are 2 special cases when calculating the slope</strong>. The 2 points may locate in same position. And when point1.x = point2.x, slope = infinity. It&rsquo;s easy to omit these 2 cases and result in mistake.</p>
+
+<p>Secondly, when we count, we declare 2 variables: samePointNumber and maxPointCountWithSameSlope. <strong>It&rsquo;s very important to initialize both values to 1 instead of 0</strong>! Why? Because these values just can&rsquo;t be 0. I failed my 2nd version code when input = {(0,0), (0,0)}, the program shows result of 0, instead of 2.</p>
+
+<p><strong>Thirdly, about what data structure to use for counting</strong>. There is a discussion about this at <a href="https://oj.leetcode.com/discuss/2573/better-way-to-use-hashmap-for-this-question">here</a></p>
+
+<blockquote><ol>
+<li>storing the vertical slopes as Double.NaN. That allows Double to represent every slope uniquely as (y/x).</li>
+<li>It is unsafe using floating points to make a hash, and -0.0 != 0.0</li>
+</ol>
+</blockquote>
+
+<p>It&rsquo;s great that using <strong>Double.NaN</strong>, it saves us time and effort to count vertical points. Second point is very valid, but it turns out that using HashMap&lt;Double, Integer> can AC.</p>
+
+<p>P.S. It is always not a good practise to use Double as hash key. See <a href="http://stackoverflow.com/questions/1074781/double-in-hashmap">here</a>.</p>
+
+<p><strong>Fourthly, I made a mistake here</strong>:</p>
+
+<blockquote><p>double slope = (p.y &ndash; q.y) / (p.x &ndash; q.x);</p></blockquote>
+
+<p>And it&rsquo;s wrong. Why? Note that <strong>Point.x and Point.y are both integers</strong>. Integer division will return integer. We must cast it.</p>
+
+<blockquote><p>double slope = (double) (p.y &ndash; q.y) / (p.x &ndash; q.x);</p></blockquote>
+
+<p><strong>Last, OMG I wish this is last, but not least, we can reduce execution time to half</strong> by checking only the points with larger index than the anchor point (that&rsquo;s the name for &lsquo;current point&rsquo;). Good idea, right?</p>
+
+<p>One more thing, <strong>how to iterate thru the HashMap</strong> (value only)? There is an easy way:</p>
+
+<pre><code>for (Integer a : map.values()) {
+    a;
+}
+</code></pre>
+
+<p>That&rsquo;s all I&rsquo;ve found for now.</p>
+
+<p><strong>Updated on Aug 12th, 2014</strong></p>
+
+<p>Based on the solution given in CC150 v4 Q10.6 on Page 199, it&rsquo;s a <strong>proper way to solve with HashMap&lt;Line, Integer></strong> instead of using HashMap&lt;Double, Integer>.</p>
+
+<p>The reason is mentioned, it&rsquo;s &lsquo;<strong>unsafe using floating points to make a hash</strong>&rsquo;.</p>
+
+<p>Note that if we were to write our own &lsquo;Line&rsquo; class, <strong>we must override the 2 methods</strong>:</p>
+
+<ol>
+<li>public int hashCode() {}</li>
+<li>public boolean equals(Object o) {}</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me, version 3 using HashMap</strong></p>
+
+<pre><code>public int maxPoints(Point[] points) {
+    if (points.length &lt;= 1)
+        return points.length;
+    HashMap&lt;Double, Integer&gt; map = null;
+    int totalMax = 0;
+    for (Point p : points) {
+        int samePoint = 1;
+        map = new HashMap&lt;Double, Integer&gt;();
+        for (Point q : points) {
+            if (q == p || p.x &gt; q.x) {
+            } else if (p.x == q.x &amp;&amp; p.y == q.y) {
+                samePoint++;
+            } else {
+                double slope = Double.NaN;
+                if (p.x != q.x) {
+                    slope = (double) (p.y - q.y) / (p.x - q.x);
+                }
+                if (!map.containsKey(slope)) {
+                    map.put(slope, 1);
+                }
+                map.put(slope, map.get(slope) + 1);
+            }
+        }
+        int pointMax = 1;
+        for (Integer a : map.values()) {
+            pointMax = Math.max(pointMax, a);
+        }
+        totalMax = Math.max(totalMax, pointMax + samePoint - 1);
+    }
+    return totalMax;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/LRU-Cache/">[LeetCode 146] LRU Cache</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/lru-cache/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">
+Design and implement a data structure for Least Recently Used (LRU) cache. It should support the following operations: <code>get</code> and <code>set</code>.
+</p>
+
+<p class="font-color">
+<code>get(key)</code> - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1.<br>
+<code>set(key, value)</code> - Set or insert the value if the key is not already present. When the cache reached its capacity, it should invalidate the least recently used item before inserting a new item.
+</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">Very difficult</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a difficult question</strong>, I can&rsquo;t write the solution easily even after a month.</p>
+
+<h3>Solution</h3>
+
+<p>The solution is to use a Doubly-linked-list and a HashMap. Doing this allows O(1) search, remove and insert. A very nice and sophisticated data structure example, and very high frequency in interviews.</p>
+
+<p><strong>2 important things to note while coding</strong>:</p>
+
+<ol>
+<li><p>We need 2 helper methods: removeNode() and setNodeAsHead().</p>
+
+<p> Because we reuse both methods for get() and set() methods.</p></li>
+<li><p>Initialization of LRU</p>
+
+<p> We need 5 variables: capacity, current size(optional but good to have), hashmap, head, tail.</p></li>
+<li><p>Initialization of DoubleLinkedListNode</p>
+
+<p> This is easy, but <strong>do not forget about both key and value variable</strong>. We must use DoubleLinkedListNode.key when we want to delete tail.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>Updated on July 1st, 2014</strong>.</p>
+
+<p>This question tests your ability to write some DS by yourself, eg. DoubleLinkedList.</p>
+
+<pre><code>public class LRUCache {
+
+    int size;
+    int capacity;
+
+    DoubleLinkedList head;
+    DoubleLinkedList tail;
+    HashMap&lt;Integer, DoubleLinkedList&gt; map;
+
+    public LRUCache(int capacity) {
+        this.size = 0;
+        this.capacity = capacity;
+        head = null;
+        tail = null;
+        map = new HashMap&lt;Integer, DoubleLinkedList&gt;();
+    }
+
+    public void remove(DoubleLinkedList node) {
+        if (node == head &amp;&amp; node == tail) {
+            head = null;
+            tail = null;
+        } else if (node == head) {
+            head.next.prev = null;
+            head = head.next;
+        } else if (node == tail) {
+            tail.prev.next = null;
+            tail = tail.prev;
+        } else {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+        }
+        node.prev = null;
+        node.next = null;
+    }
+
+    public void setHead(DoubleLinkedList node) {
+        node.next = head;
+        node.prev = null;
+        if (head != null) {
+            head.prev = node;
+        }
+
+        head = node;
+        if (tail == null) {
+            tail = node;
+        }
+    }
+
+    public int get(int key) {
+        if (!map.containsKey(key)) {
+            // if key is not found
+            return -1;
+        } else {
+            // if key is found
+            DoubleLinkedList target = map.get(key);
+            remove(target);
+            setHead(target);
+            return head.val;
+        }
+    }
+
+    public void set(int key, int value) {
+        if (this.get(key) != -1) {
+            // key exist before, just replace the old value
+            DoubleLinkedList old = map.get(key);
+            old.val = value;
+        } else {
+            // this is a new key-value pair, insert it
+            DoubleLinkedList newHead = new DoubleLinkedList(key, value);
+            map.put(key, newHead);
+            setHead(newHead);
+            if (size == capacity) {
+                // delete tail
+                map.remove(tail.key);
+                remove(tail);
+            } else {
+                size++;
+            }
+        }
+    }
+
+    class DoubleLinkedList {
+        int key;
+        int val;
+        DoubleLinkedList prev;
+        DoubleLinkedList next;
+        public DoubleLinkedList(int k, int v) {
+            this.key = k;
+            this.val = v;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Implement-DFS-using-stack/">[Design] Implemention of DFS Using a Stack</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>First Word</h3>
+
+<p>This post talks about how to implement DFS without recursion.</p>
+
+<p>We have studied 2 kinds of DFS in the post <strong>DFS, BFS and space efficiency</strong>. We will skip &ldquo;true DFS&rdquo; here, and only talk about &ldquo;pseudo-DFS&rdquo; implementation.</p>
+
+<p>Remember, <strong>space usage of psudo-DFS is O(depth x branching factor)</strong>.</p>
+
+<h3>Analysis</h3>
+
+<p>A DFS without recursion is basically the same as BFS &ndash; but use a stack instead of a queue as the data structure.</p>
+
+<p>More details are discussed in <a href="http://stackoverflow.com/questions/21508765/how-to-implement-depth-first-search-for-graph-with-non-recursive-aprroach">this thread</a>.</p>
+
+<h3>Implementation</h3>
+
+<p>The following code come from <a href="http://stackoverflow.com/a/21508819">this post</a>.</p>
+
+<pre><code>DFS(source):
+  s &lt;- new stack
+  visited &lt;- {} //empty set
+  s.push(source)
+  while (s.empty() == false):
+    current &lt;- s.pop()
+    if (current is in visited):
+        continue
+    visited.add(current)
+    //do something with current
+    for each node v such that (source,v) is an edge:
+        s.push(v)
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -937,354 +1347,6 @@ Can you solve it without using extra space?
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/02/Linked-List-Cycle/">[LeetCode 141] Linked List Cycle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/linked-list-cycle/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-Given a linked list, determine if it has a cycle in it.
-</p>
-
-<p class="font-color">
-Follow up:<br>
-Can you solve it without using extra space?
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an famous question, historically know as the <a href="http://en.wikipedia.org/wiki/Cycle_detection#Tortoise_and_hare">Tortoise and hare</a></strong>.</p>
-
-<h3>Solution</h3>
-
-<p><a href="http://www.programcreek.com/2012/12/leetcode-linked-list-cycle/">This blog</a> has a great solution.</p>
-
-<blockquote><p>Use fast and low pointer. The advantage about fast/slow pointers is that when a circle is located, the fast one will catch the slow one for sure.</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public boolean hasCycle(ListNode head) {
-    if (head == null || head.next == null) 
-        return false;
-    ListNode first = head.next, second = first.next;
-    while (first != null &amp;&amp; second != null) {
-        if (first == second) return true;
-        first = first.next;
-        second = second.next;
-        if (second == null) return false;
-        second = second.next;
-    }
-    return false;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/02/Copy-List-with-Random-Pointer/">[LeetCode 138] Copy List With Random Pointer</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/copy-list-with-random-pointer/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-A linked list is given such that each node contains an additional random pointer which could point to any node in the list or null.
-</p>
-
-<p class="font-color">
-Return a deep copy of the list.
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">20 minutes</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is not a difficult question</strong>, however I mark it as difficulty level &ldquo;4&rdquo; because there are 2 solution, the second of which is hard to think of.</p>
-
-<h3>Solution</h3>
-
-<p><strong>Solution 1 which is my initial idea is using HashMap</strong> to store mappings from original nodes to copied nodes. This solution become exactly same as another question &ldquo;Clone Graph&rdquo;, only easier. It works fine.</p>
-
-<p>However such solution uses O(n) extra space. Can we do it with less space?</p>
-
-<p><strong>Solution 2 is a in-place method</strong> which directly creates the copied list. It is well explained in <a href="http://www.geeksforgeeks.org/a-linked-list-with-next-and-arbit-pointer/">here</a>:</p>
-
-<blockquote><ol>
-<li>Create a copy of first node and insert it between Node 1 &amp; Node 2 in original list. Then create a copy of second node and insert it between Node 2 &amp; Node 3&hellip; Continue in this fashion</li>
-<li>Set random link of the copied nodes (by referring to <strong>original.random.next</strong>)</li>
-<li>Restore the original and copied lists (and return answer)</li>
-</ol>
-</blockquote>
-
-<p>This solution (although uses 3 while-loops) is O(n) and O(1) extra space.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my solution using HashMap</strong></p>
-
-<pre><code>public RandomListNode copyRandomList(RandomListNode head) {
-    if (head == null) return null;
-    RandomListNode newHead = new RandomListNode(head.label);
-    HashMap&lt;RandomListNode, RandomListNode&gt; map = 
-            new HashMap&lt;RandomListNode, RandomListNode&gt;();
-    map.put(head, newHead);
-    RandomListNode orin = head, cp = newHead;
-    while (orin != null) {
-        if (orin.next != null) {
-            if (!map.containsKey(orin.next))
-                map.put(orin.next, new RandomListNode(orin.next.label));
-            cp.next = map.get(orin.next);
-        }
-        if (orin.random != null) {
-            if (!map.containsKey(orin.random))
-                map.put(orin.random, new RandomListNode(orin.random.label));
-            cp.random = map.get(orin.random);
-        }
-        orin = orin.next;
-        cp = cp.next;
-    }
-    return newHead;
-}
-</code></pre>
-
-<p><strong>Second, constent space solution</strong></p>
-
-<pre><code>public RandomListNode copyRandomList(RandomListNode head)  {
-    if (head == null)  {
-        return null;
-    }
-    // copy each node and append right after original node
-    RandomListNode p = head;
-    while (p != null)  {
-        RandomListNode cp = new RandomListNode(p.label);
-        cp.next = p.next;
-        p.next = cp;
-        p = p.next.next;
-    }
-    // now set random pointer of all copied nodes
-    p = head;
-    while (p != null)  {
-        if (p.random != null)  {
-            p.next.random = p.random.next;
-        }
-        p = p.next.next;
-    }
-    // now restore original list, and connected all copied nodes
-    RandomListNode ans = head.next;
-    RandomListNode m = head, n = head.next;
-    while (m != null)  {
-        if (n.next == null)  {
-            m.next = null;
-            m = null;
-        }
-        else  {
-            m.next = n.next;
-            n.next = n.next.next;
-            m = m.next;
-            n = n.next;
-        }
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/02/Binary-Tree-Preorder-Traversal/">[LeetCode 144] Binary Tree Preorder Traversal</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/binary-tree-preorder-traversal/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">Given a binary tree, return the <i>preorder</i> traversal of its nodes&#8217; values.</p>
-
-<p class="font-color">
-For example:<br>
-Given binary tree <code>{1,#,2,3}</code>,<br>
-</p><pre>   1
-    \
-     2
-    /
-   3
-</pre>
-<p class="font-color"></p>
-<p class="font-color">
-return <code>[1,2,3]</code>.
-</p>
-
-<p class="font-color"><b>Note:</b> Recursive solution is trivial, could you do it iteratively?</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is the easiest question of this series</strong>.</p>
-
-<p>In-order and post-order are not easy at all!</p>
-
-<h3>Code</h3>
-
-<pre><code>public List&lt;Integer&gt; preorderTraversal(TreeNode root) {
-    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
-    if (root == null) return ans;
-    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
-    stack.push(root);
-    while (!stack.isEmpty()) {
-        TreeNode cur = stack.pop();
-        ans.add(cur.val);
-        // should it do reversely, right?
-        if (cur.right != null) stack.push(cur.right);
-        if (cur.left != null) stack.push(cur.left);
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/27">&larr; Older</a>
@@ -1300,7 +1362,7 @@ return <code>[1,2,3]</code>.
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (16)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (19)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
@@ -1323,23 +1385,23 @@ return <code>[1,2,3]</code>.
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/08/test-webpage-without-tool/">[CC150v4] 11.4 Test Webpage Without Tools (`)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/08/random-error-debugging-2/">[CC150v4] 11.2 Random Error Debugging 2</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a>
       </li>
     
       <li class="post">
+        <a href="/blog/2014/09/08/find-coliner-in-2d-plane/">[CC150v4] 10.6 Find Collinear in 2D Plane (`)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/search-array-containing-empty-string/">[CC150v4] 9.5 Search Array Containing Empty String</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/generate-permutation-recursively/">[CC150v4] 8.4 Generate Permutation Recursively</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a>
       </li>
     
   </ul>
