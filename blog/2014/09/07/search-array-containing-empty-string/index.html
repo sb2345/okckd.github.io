@@ -113,7 +113,55 @@
 
 <h3>Solution</h3>
 
+<p>The solution is binary search, but when reads empty, <strong>advance to the next non-empty string</strong>.</p>
+
+<p>But wait, <strong>there can be a very big problem that causes looping forever</strong>. Eg.</p>
+
+<blockquote><p>&ldquo;a&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;c&rdquo; (5 items), look for &ldquo;b&rdquo;</p>
+
+<p>Now &lsquo;left&rsquo; points to 1st string(&ldquo;a&rdquo;) and &lsquo;right&rsquo; points to 4th(&ldquo;&rdquo;). If we read read &lsquo;mid&rsquo; value and advance to the next non-empty string, it&rsquo;ll be &ldquo;c&rdquo;.</p>
+
+<p>since &ldquo;c&rdquo; is large than &ldquo;b&rdquo;, &lsquo;right&rsquo; is set to the 4th index. It&rsquo;s a endless loop!</p></blockquote>
+
+<p>There&rsquo;re various ways to solve this. The book suggests</p>
+
+<p>My approach is to use 2 instances of &lsquo;mid&rsquo;:</p>
+
+<ol>
+<li>calculatedMid</li>
+<li>comparisonMid</li>
+</ol>
+
+
 <h3>Code</h3>
+
+<pre><code>public static int search(String[] input, String target) {
+    if (target == null || target.length() == 0) {
+        return -1;
+    }
+    int len = input.length;
+    int left = 0, right = len - 1;
+    while (left &lt; right) {
+        int calculatedMid = left + (right - left) / 2;
+        int comparisonMid = calculatedMid;
+        while (comparisonMid &lt; len &amp;&amp; input[comparisonMid].length() == 0) {
+            comparisonMid++;
+        }
+        if (input[comparisonMid].equals(target)) {
+            return comparisonMid;
+        } else if (input[comparisonMid].compareTo(target) &lt; 0) {
+            left = comparisonMid + 1;
+        } else {
+            right = calculatedMid - 1;
+        }
+    }
+    if (left &lt; len &amp;&amp; input[left].equals(target)) {
+        return left;
+    } else {
+        return -1;
+    }
+}
+</code></pre>
 </div>
 
 
@@ -175,7 +223,7 @@
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (15)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (16)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
@@ -198,6 +246,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
       </li>
     
@@ -211,10 +263,6 @@
     
       <li class="post">
         <a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/cover-the-chess-board/">[CC150v4] 6.2 Cover the Chess Board</a>
       </li>
     
   </ul>

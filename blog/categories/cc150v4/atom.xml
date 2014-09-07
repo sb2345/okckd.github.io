@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Cc150v4 | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/cc150v4/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-07T23:36:23+08:00</updated>
+  <updated>2014-09-08T01:36:05+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,108 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 10.4 Implement Mathematical Operators]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/implement-math-operators/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/implement-math-operators</id>
+    <content type="html"><![CDATA[### Question
+
+> Write a method to implement *, - , / operations You should use only the + operator. 
+
+### Solution
+
+__First it's important to write a 'negate' operator__. This is used in all other operations. 
+
+	public static int FnNegate(int a) {
+		int neg = 0;
+		int d = a < 0 ? 1 : -1;
+		while (a != 0) {
+			neg += d;
+			a += d;
+		}
+		return neg;
+	}
+
+Although we can only use +, the author also used > and < comparison operators. 
+
+This is a borning question, I did not write code myself. 
+
+### Code
+
+__not written by me__
+
+	/* Flip a positive sign to negative, or a negative sign to pos */
+	public static int FnNegate(int a) {
+		int neg = 0;
+		int d = a < 0 ? 1 : -1;
+		while (a != 0) {
+			neg += d;
+			a += d;
+		}
+		return neg;
+	}
+
+	/* Subtract two numbers by negating b and adding them */
+	public static int FnMinus(int a, int b) {
+		return a + FnNegate(b);
+	}
+
+	/* Check if a and b are different signs */
+	public static boolean DifferentSigns(int a, int b) {
+		return ((a < 0 && b > 0) || (a > 0 && b < 0)) ? true : false;
+	}
+
+	/* Return absolute value */
+	public static int abs(int a) {
+		if (a < 0)
+			return FnNegate(a);
+		else
+			return a;
+	}
+
+	/* Multiply a by b by adding a to itself b times */
+	public static int FnTimes(int a, int b) {
+		if (a < b)
+			return FnTimes(b, a); // algo is faster if b < a
+		int sum = 0;
+		for (int iter = abs(b); iter > 0; --iter)
+			sum += a;
+		if (b < 0)
+			sum = FnNegate(sum);
+		return sum;
+	}
+
+	// returns 1, if a/b >= 0.5, and 0 otherwise
+	public static int DefineAndRoundFraction(int a, int b) {
+		if (FnTimes(abs(a), 2) >= abs(b))
+			return 1;
+		else
+			return 0;
+	}
+
+	/*
+	 * Divide a by b by literally counting how many times does b go into a. That
+	 * is, count how many times you can subtract b from a until you hit 0.
+	 */
+	public static int FnDivide(int a, int b)
+			throws java.lang.ArithmeticException {
+		if (b == 0) {
+			throw new java.lang.ArithmeticException("ERROR: Divide by zero.");
+		}
+		int quotient = 0;
+		int divisor = FnNegate(abs(b));
+		int divend; /* dividend */
+		for (divend = abs(a); divend >= abs(divisor); divend += divisor) {
+			++quotient;
+		}
+		if (DifferentSigns(a, b))
+			quotient = FnNegate(quotient);
+		return quotient;
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CC150v4] Chap9 Example - Sort Persons]]></title>
@@ -47,11 +149,51 @@ __This exactly matches the charasteristics of Bucket Sort__. Time complexity in 
 
 ### Solution
 
+The solution is binary search, but when reads empty, __advance to the next non-empty string__. 
 
+But wait, __there can be a very big problem that causes looping forever__. Eg. 
+
+> "a", "", "", "", "c" (5 items), look for "b"
+
+> Now 'left' points to 1st string("a") and 'right' points to 4th(""). If we read read 'mid' value and advance to the next non-empty string, it'll be "c". 
+
+> since "c" is large than "b", 'right' is set to the 4th index. It's a endless loop!
+
+There're various ways to solve this. The book suggests 
+
+My approach is to use 2 instances of 'mid': 
+
+1. calculatedMid
+1. comparisonMid
 
 ### Code
 
-
+	public static int search(String[] input, String target) {
+		if (target == null || target.length() == 0) {
+			return -1;
+		}
+		int len = input.length;
+		int left = 0, right = len - 1;
+		while (left < right) {
+			int calculatedMid = left + (right - left) / 2;
+			int comparisonMid = calculatedMid;
+			while (comparisonMid < len && input[comparisonMid].length() == 0) {
+				comparisonMid++;
+			}
+			if (input[comparisonMid].equals(target)) {
+				return comparisonMid;
+			} else if (input[comparisonMid].compareTo(target) < 0) {
+				left = comparisonMid + 1;
+			} else {
+				right = calculatedMid - 1;
+			}
+		}
+		if (left < len && input[left].equals(target)) {
+			return left;
+		} else {
+			return -1;
+		}
+	}
 ]]></content>
   </entry>
   
@@ -158,27 +300,6 @@ __hard to write__
 			return helper(oneList, col - 1) << 1 | 1;
 		}
 	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 6.2 Cover the Chess Board]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/cover-the-chess-board/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/cover-the-chess-board</id>
-    <content type="html"><![CDATA[### Question
-
-> There is an 8x8 chess board in which two diagonally opposite squares have been cut off. You are given 31 dominos, and a single domino can cover exactly two squares. 
-
-> Can you use the 31 dominos to cover the entire board? Prove your answer (by providing an example, or showing why it’s impossible). 
-
-### Solution
-
-The chess board initially has 32 black and 32 white squares. By removing opposite corners, we're left with 30 of one color and 32 of the other color. 
-
-31 dominos must cover 31 of one color and 31 of the other color. 
-
-So, impossible. 
 ]]></content>
   </entry>
   

@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Design and implement a hash table which uses chaining (linked lists) to handle collisions. Solution I wrote this topic before (using Java &hellip;">
+  <meta name="description" content="Question Explain the data structures and algorithms that you would use to design an in-memory file system. Illustrate with an example in code where &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,177 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/25/design-in-memory-file-system/">[CC150v5] 8.9 Design a In-memory File System</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Explain the data structures and algorithms that you would use to design an in-memory file system. Illustrate with an example in code where possible.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>A file system consists of Files and Directories</strong>. Each Directory contains a set of Files and Directories.</p>
+
+<p>Since Files and Directories share so many characteristics, we&rsquo;ve implemented them such that they <strong>inherit from the same class</strong> &mdash; Entry.</p>
+
+<h3>Code</h3>
+
+<p>Entry.java</p>
+
+<pre><code>public abstract class Entry {
+    protected Directory parent;
+    protected long created;
+    protected long lastUpdated;
+    protected long lastAccessed;
+    protected String name;
+
+    public Entry(String n, Directory p) {
+        name = n;
+        parent = p;
+        created = System.currentTimeMillis();
+    }
+
+    public boolean delete() {
+        if (parent == null) {
+            return false;
+        }
+        return parent.deleteEntry(this);
+    }
+
+    public abstract int size();
+
+    public String getFullPath() {
+        if (parent == null) {
+            return name;
+        } else {
+            return parent.getFullPath() + "/" + name;
+        }
+    }
+
+    public long getCreationTime() {
+        return created;
+    }
+
+    public long getLastUpdatedTime() {
+        return lastUpdated;
+    }
+
+    public long getLastAccessedTime() {
+        return lastAccessed;
+    }
+
+    public void changeName(String n) {
+        name = n;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+</code></pre>
+
+<p>Directory.java</p>
+
+<pre><code>public class Directory extends Entry {
+    protected ArrayList&lt;Entry&gt; contents;
+
+    public Directory(String n, Directory p) {
+        super(n, p);
+        contents = new ArrayList&lt;Entry&gt;();
+    }
+
+    protected ArrayList&lt;Entry&gt; getContents() {
+        return contents;
+    }
+
+    public int size() {
+        int size = 0;
+        for (Entry e : contents) {
+            size += e.size();
+        }
+        return size;
+    }
+
+    public int numberOfFiles() {
+        int count = 0;
+        for (Entry e : contents) {
+            if (e instanceof Directory) {
+                count++; // Directory counts as a file
+                Directory d = (Directory) e;
+                count += d.numberOfFiles();
+            } else if (e instanceof File) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public boolean deleteEntry(Entry entry) {
+        return contents.remove(entry);
+    }
+
+    public void addEntry(Entry entry) {
+        contents.add(entry);
+    }
+}
+</code></pre>
+
+<p>File.java</p>
+
+<pre><code>public class File extends Entry {
+    private String content;
+    private int size;
+
+    public File(String n, Directory p, int sz) {
+        super(n, p);
+        size = sz;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public String getContents() {
+        return content;
+    }
+
+    public void setContents(String c) {
+        content = c;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1233,115 +1404,6 @@ class BlackJackCard extends Card {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/20/Talk-about-singleton/">[Design] About Singleton</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-20T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Implement Singlton</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
-
-<h4>using Enum</h4>
-
-<p>This is only available since Java 6.</p>
-
-<pre><code>public enum Singleton_Enum {
-    INSTANCE;
-}
-</code></pre>
-
-<h4>using double checked locking</h4>
-
-<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
-
-<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
-    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
-
-    private Singleton_DoubleCheckedLocking() {
-    }
-
-    public static Singleton_DoubleCheckedLocking getInstance() {
-        if (INSTANCE == null) {
-            synchronized (Singleton_DoubleCheckedLocking.class) {
-                // double checking Singleton instance
-                if (INSTANCE == null) {
-                    INSTANCE = new Singleton_DoubleCheckedLocking();
-                }
-            }
-        }
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h4>using static factory method</h4>
-
-<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
-
-<pre><code>public class Singleton_StaticFactory {
-    // initailzed during class loading
-    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
-
-    // to prevent creating another instance of Singleton
-    private Singleton_StaticFactory() {
-    }
-
-    public static Singleton_StaticFactory getSingleton() {
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h3>About thread-saft</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
-
-<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
-
-<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
-
-<ol>
-<li>using static field</li>
-<li>using Enum</li>
-</ol>
-
-
-<h3>Q &amp; A</h3>
-
-<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
-
-<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/7">&larr; Older</a>
@@ -1357,7 +1419,7 @@ class BlackJackCard extends Card {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (15)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (16)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
@@ -1380,6 +1442,10 @@ class BlackJackCard extends Card {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
       </li>
     
@@ -1393,10 +1459,6 @@ class BlackJackCard extends Card {
     
       <li class="post">
         <a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/cover-the-chess-board/">[CC150v4] 6.2 Cover the Chess Board</a>
       </li>
     
   </ul>

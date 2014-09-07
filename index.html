@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question You have a very large array of ‘Person’ objects. Sort the people in increasing order of age. Solution First we look at the nature of this &hellip;">
+  <meta name="description" content="Question Write a method to implement *, &ndash; , / operations You should use only the + operator. Solution First it&rsquo;s important to write a & &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,137 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a method to implement *, &ndash; , / operations You should use only the + operator.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>First it&rsquo;s important to write a &lsquo;negate&rsquo; operator</strong>. This is used in all other operations.</p>
+
+<pre><code>public static int FnNegate(int a) {
+    int neg = 0;
+    int d = a &lt; 0 ? 1 : -1;
+    while (a != 0) {
+        neg += d;
+        a += d;
+    }
+    return neg;
+}
+</code></pre>
+
+<p>Although we can only use +, the author also used > and &lt; comparison operators.</p>
+
+<p>This is a borning question, I did not write code myself.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>/* Flip a positive sign to negative, or a negative sign to pos */
+public static int FnNegate(int a) {
+    int neg = 0;
+    int d = a &lt; 0 ? 1 : -1;
+    while (a != 0) {
+        neg += d;
+        a += d;
+    }
+    return neg;
+}
+
+/* Subtract two numbers by negating b and adding them */
+public static int FnMinus(int a, int b) {
+    return a + FnNegate(b);
+}
+
+/* Check if a and b are different signs */
+public static boolean DifferentSigns(int a, int b) {
+    return ((a &lt; 0 &amp;&amp; b &gt; 0) || (a &gt; 0 &amp;&amp; b &lt; 0)) ? true : false;
+}
+
+/* Return absolute value */
+public static int abs(int a) {
+    if (a &lt; 0)
+        return FnNegate(a);
+    else
+        return a;
+}
+
+/* Multiply a by b by adding a to itself b times */
+public static int FnTimes(int a, int b) {
+    if (a &lt; b)
+        return FnTimes(b, a); // algo is faster if b &lt; a
+    int sum = 0;
+    for (int iter = abs(b); iter &gt; 0; --iter)
+        sum += a;
+    if (b &lt; 0)
+        sum = FnNegate(sum);
+    return sum;
+}
+
+// returns 1, if a/b &gt;= 0.5, and 0 otherwise
+public static int DefineAndRoundFraction(int a, int b) {
+    if (FnTimes(abs(a), 2) &gt;= abs(b))
+        return 1;
+    else
+        return 0;
+}
+
+/*
+ * Divide a by b by literally counting how many times does b go into a. That
+ * is, count how many times you can subtract b from a until you hit 0.
+ */
+public static int FnDivide(int a, int b)
+        throws java.lang.ArithmeticException {
+    if (b == 0) {
+        throw new java.lang.ArithmeticException("ERROR: Divide by zero.");
+    }
+    int quotient = 0;
+    int divisor = FnNegate(abs(b));
+    int divend; /* dividend */
+    for (divend = abs(a); divend &gt;= abs(divisor); divend += divisor) {
+        ++quotient;
+    }
+    if (DifferentSigns(a, b))
+        quotient = FnNegate(quotient);
+    return quotient;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -166,7 +297,55 @@
 
 <h3>Solution</h3>
 
+<p>The solution is binary search, but when reads empty, <strong>advance to the next non-empty string</strong>.</p>
+
+<p>But wait, <strong>there can be a very big problem that causes looping forever</strong>. Eg.</p>
+
+<blockquote><p>&ldquo;a&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;c&rdquo; (5 items), look for &ldquo;b&rdquo;</p>
+
+<p>Now &lsquo;left&rsquo; points to 1st string(&ldquo;a&rdquo;) and &lsquo;right&rsquo; points to 4th(&ldquo;&rdquo;). If we read read &lsquo;mid&rsquo; value and advance to the next non-empty string, it&rsquo;ll be &ldquo;c&rdquo;.</p>
+
+<p>since &ldquo;c&rdquo; is large than &ldquo;b&rdquo;, &lsquo;right&rsquo; is set to the 4th index. It&rsquo;s a endless loop!</p></blockquote>
+
+<p>There&rsquo;re various ways to solve this. The book suggests</p>
+
+<p>My approach is to use 2 instances of &lsquo;mid&rsquo;:</p>
+
+<ol>
+<li>calculatedMid</li>
+<li>comparisonMid</li>
+</ol>
+
+
 <h3>Code</h3>
+
+<pre><code>public static int search(String[] input, String target) {
+    if (target == null || target.length() == 0) {
+        return -1;
+    }
+    int len = input.length;
+    int left = 0, right = len - 1;
+    while (left &lt; right) {
+        int calculatedMid = left + (right - left) / 2;
+        int comparisonMid = calculatedMid;
+        while (comparisonMid &lt; len &amp;&amp; input[comparisonMid].length() == 0) {
+            comparisonMid++;
+        }
+        if (input[comparisonMid].equals(target)) {
+            return comparisonMid;
+        } else if (input[comparisonMid].compareTo(target) &lt; 0) {
+            left = comparisonMid + 1;
+        } else {
+            right = calculatedMid - 1;
+        }
+    }
+    if (left &lt; len &amp;&amp; input[left].equals(target)) {
+        return left;
+    } else {
+        return -1;
+    }
+}
+</code></pre>
 </div>
   
   
@@ -737,83 +916,6 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/06/find-next-node-bst/">[CC150v4] 4.5 Find Next Node in BST</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write an algorithm to find the ‘next’ node (i.e., in-order successor) of a given node in a binary search tree where each node has a link to its parent.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p><strong>If current node have a right child</strong>, return the leftmost leaf of right child.</p></li>
-<li><p><strong>If current node have no right child</strong>:</p>
-
-<ol>
-<li><p>If current is parent&rsquo;s left child, then return parent node.</p></li>
-<li><p>If current is parent&rsquo;s right child, look all the way up until find a right-turning parent.</p></li>
-<li><p>If all parent is not right-turning. Return null.</p></li>
-</ol>
-</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static TreeNode inorderSucc(TreeNode e) {
-    if (e == null)
-        return null;
-    if (e.right != null) {
-        TreeNode p = e.right;
-        while (p.left != null) {
-            p = p.left;
-        }
-        return p;
-    } else {
-        TreeNode p = e.parent;
-        while (p != null &amp;&amp; p.right == e) {
-            e = p;
-            p = e.parent;
-        }
-        return p;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -827,7 +929,7 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (15)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (16)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
@@ -850,6 +952,10 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
       </li>
     
@@ -863,10 +969,6 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
     
       <li class="post">
         <a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/07/cover-the-chess-board/">[CC150v4] 6.2 Cover the Chess Board</a>
       </li>
     
   </ul>
