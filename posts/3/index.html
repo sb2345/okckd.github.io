@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Definition A* is a computer algorithm that is widely used in pathfinding and graph traversal. It uses a knowledge-plus-heuristic cost function like &hellip;">
+  <meta name="description" content="Question Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,7 +83,806 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/30/A-start-search/">[Classic] A-Star Search</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/09/02/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
+
+<blockquote><ol>
+<li><p>找到heading的最长递增序列</p></li>
+<li><p>找到tailing的最长的递增序列</p></li>
+</ol>
+</blockquote>
+
+<p>After that:</p>
+
+<blockquote><ol>
+<li><p>用中间部分的min去shrink左边 更新max</p></li>
+<li><p>根据更新后的max shrink右边 更新min</p></li>
+<li><p>再一次shrink左边</p></li>
+</ol>
+</blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public static int findEndOfLeftSubsequence(int[] array) {
+    for (int i = 1; i &lt; array.length; i++) {
+        if (array[i] &lt; array[i - 1]) {
+            return i - 1;
+        }
+    }
+    return array.length - 1;
+}
+
+public static int findStartOfRightSubsequence(int[] array) {
+    for (int i = array.length - 2; i &gt;= 0; i--) {
+        if (array[i] &gt; array[i + 1]) {
+            return i + 1;
+        }
+    }
+    return 0;
+}
+
+public static int shrinkLeft(int[] array, int min_index, int start) {
+    int comp = array[min_index];
+    for (int i = start - 1; i &gt;= 0; i--) {
+        if (array[i] &lt;= comp) {
+            return i + 1;
+        }
+    }
+    return 0;
+}
+
+public static int shrinkRight(int[] array, int max_index, int start) {
+    int comp = array[max_index];
+    for (int i = start; i &lt; array.length; i++) {
+        if (array[i] &gt;= comp) {
+            return i - 1;
+        }
+    }
+    return array.length - 1;
+}
+
+public static void findUnsortedSequence(int[] array) {
+    // find left subsequence
+    int end_left = findEndOfLeftSubsequence(array);
+
+    if (end_left &gt;= array.length - 1) {
+        // System.out.println("The array is already sorted.");
+        return; // Already sorted
+    }
+
+    // find right subsequence
+    int start_right = findStartOfRightSubsequence(array);
+
+    int max_index = end_left; // max of left side
+    int min_index = start_right; // min of right side
+    for (int i = end_left + 1; i &lt; start_right; i++) {
+        if (array[i] &lt; array[min_index]) {
+            min_index = i;
+        }
+        if (array[i] &gt; array[max_index]) {
+            max_index = i;
+        }
+    }
+
+    // slide left until less than array[min_index]
+    int left_index = shrinkLeft(array, min_index, end_left);
+
+    // slide right until greater than array[max_index]
+    int right_index = shrinkRight(array, max_index, start_right);
+
+    if (validate(array, left_index, right_index)) {
+        System.out.println("TRUE: " + left_index + " " + right_index);
+    } else {
+        System.out.println("FALSE: " + left_index + " " + right_index);
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/02/Listener-Observer-pattern/">[Design] Listener / Observer Pattern</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Observer pattern</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Observer_pattern">The observer pattern</a></strong> is a software design pattern in which an object(subject) maintains a list of dependents(observers), and notifies them automatically of any state changes (usually by calling one of their methods).</p>
+
+<p>The Observer pattern is mainly used to implement distributed event handling systems. It&rsquo;s also a key part in MVC architectural.</p>
+
+<h3>Example</h3>
+
+<p>A mailing list example.</p>
+
+<p>Each student in the mailing list would be a listener/observer, and teacher would be announcer/subject.</p>
+
+<p>So in the code, there&rsquo;s a Listener Interface that all students implement. There&rsquo;s a update() method in the interface, where each student define their own implementation.</p>
+
+<p>Teacher would keep a list of Listeners. When there&rsquo;s any news, teacher would call update() on each object.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/02/Find-anagrams-in-dictionary/">[Google] Find Anagrams in Dictionary</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=3088">link</a></p>
+
+<blockquote><p>Imagine you had a dictionary. How would you print all anagrams of a word? What if you had to do this repeatedly? Could you optimize it?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>A very <a href="http://stackoverflow.com/a/12477976">nice solution</a>:</p>
+
+<ol>
+<li><p>Open dictionary</p></li>
+<li><p>Create empty hashmap H</p></li>
+<li><p>For each word in dictionary:</p>
+
+<ol>
+<li><p>Create a key that is the word&rsquo;s letters sorted alphabetically (and forced to one case)</p></li>
+<li><p>Add the word to the list of words accessed by the hash key in H</p></li>
+</ol>
+</li>
+</ol>
+
+
+<p>There&rsquo;s another <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">very interesting idea</a>, if the length of the word is not too long.</p>
+
+<blockquote><p>Another approach could be we can assign each letters from a..z a prime numbers (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, .. so on)</p>
+
+<p>and then for any word, we can calculate its key as the multiples of all the prime number corresponding to characters in the word.</p>
+
+<p>The char &ndash;> int assignment may look like:</p></blockquote>
+
+<pre><code>a=2, b=3, c=5, d=7, e=11, f=13, g=17, h=19, i=23, j=29, 
+k=31, l=37, m=41, n=43, o=47, p=53, q=59, r=61, s=67, t=71, 
+u=73, v=79, w=83, x=89, y=97, z=101
+</code></pre>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong>, <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">link</a></p>
+
+<pre><code>private static HashMap&lt;String, ArrayList&lt;String&gt;&gt; anagramMap = new HashMap&lt;String, ArrayList&lt;String&gt;&gt;();
+
+public static void findAnagrams(String[] dictionary) {
+    int len = dictionary.length;
+
+    for (int i = 0; i &lt; len; i++) {
+        String sortedWord = sortWordLexicographically(dictionary[i]);
+        ArrayList&lt;String&gt; wordList = anagramMap.get(sortedWord);
+        if (wordList == null) {
+            wordList = new ArrayList&lt;String&gt;();
+        }
+        wordList.add(dictionary[i]);
+        anagramMap.put(sortedWord, wordList);
+    }
+}
+
+public ArrayList&lt;String&gt; getAnagrams(String word) {
+    if (word == null) {
+        return null;
+    }
+
+    String sortedWord = sortWordLexicographically(word);
+    return anagramMap.get(sortedWord);
+}
+
+public void printAnagrams(String word) {
+    if (word == null) {
+        System.out.println("Input word is null!");
+    } else {
+        ArrayList&lt;String&gt; wordList = getAnagrams(word);
+        if (wordList == null) {
+            System.out.println("No anagrams exists for : " + word);
+        } else {
+            Iterator&lt;String&gt; iter = wordList.iterator();
+            while (iter.hasNext()) {
+                System.out.print(iter.next());
+            }
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/02/Axis-aligned-rectangle/">[Question] Axis Aligned Rectangles</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://ankitsambyal.blogspot.sg/2013/10/finding-overlapping-rectangles-in-given.html">link</a>, MIT handouts Person_A</p>
+
+<blockquote><p>Describe an algorithm that takes an unsorted array of axis-aligned rectangles and returns <strong>any pair of</strong> rectangles that overlaps, if there is such a pair.</p>
+
+<p>Axis-aligned means that all the rectangle sides are either parallel or perpendicular to the x- and y-axis.</p>
+
+<p>Each rectangle object has two variables: the x-y coordinates of the upper-left corner and the bottom-right corner.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>A lot of different solutions on the internet, <a href="http://www.quora.com/Algorithms/Given-a-set-of-n-axis-aligned-rectangles-in-the-plane-find-how-big-is-the-largest-subset-of-these-rectangles-that-contain-a-common-point-in-O-n-3-and-then-in-order-O-nlogn">eg</a> and <a href="http://ankitsambyal.blogspot.sg/2013/10/finding-overlapping-rectangles-in-given.html">eg</a>, and some questions asks you to return all overlapping pairs. For now, we just return <strong>any pair</strong> that overlaps.</p>
+
+<h3>Solution</h3>
+
+<p>I concluded some solution and come up with this (the idea of BST is covered in the end of <a href="http://www.cs.princeton.edu/~rs/AlgsDS07/17GeometricSearch.pdf">this pdf</a>):</p>
+
+<ol>
+<li>Sort the input by left edge.</li>
+<li>One by one, get one rectangle from the sorted input, and make a pair (rect.top, rect.bottom).</li>
+<li>Insert this pair into a <strong>Interval Search Tree</strong>.</li>
+<li>This tree is a BST, and use first value of the pair as BST key.</li>
+<li>Insert pair at the correct BST location. If conflicts, we&rsquo;ve found 1 overlapping pair.</li>
+</ol>
+
+
+<p>The code for searching a intersect, and insert a pair looks like this:</p>
+
+<pre><code>Node x = root;
+while (x != null) {
+    if (x.interval.intersects(lo, hi)) 
+        return x.interval;
+    else if (x.left == null)  x = x.right;
+    else if (x.left.max &lt; lo) x = x.right;
+    else                      x = x.left;
+}
+return null;
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)/">[Google] Array Distance A(i)+A(j)+(j-i)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article/JobHunting/32772225_3.html">link</a></p>
+
+<blockquote><p>Given an int array A[], define:</p>
+
+<p>distance = A[i] + A[j] + (j-i), j >= i.</p>
+
+<p>Find max distance in A[]</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Solution suggested on floor 8 of <a href="http://www.mitbbs.com/mitbbs_article_t.php?board=JobHunting&amp;gid=32772225&amp;ftype=0">this post</a>.</p>
+
+<ol>
+<li><p>distance = (A[i] &ndash; i) + (A[j] + j), so we do 2 iteration in the array and calculate (A[i] &ndash; i) and (A[j] + j) respectively.</p></li>
+<li><p>save the max value of (A[i] &ndash; i) from left to right</p></li>
+<li><p>save the max value of (A[j] + j) from right to left</p></li>
+<li><p>last iteration, calculate result.</p></li>
+</ol>
+
+
+<p>Eg. input = {3, 3, 3, 5, 6, 4}</p>
+
+<blockquote><p>max value of (A[i] &ndash; i) from left to right: {3, 3, 3, 3, 3, 3}</p>
+
+<p>max value of (A[j] + j) from right to left: {10, 10, 10, 10, 10, 9}</p>
+
+<p>final result: 13</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int distance(int[] A) {
+    int len = A.length;
+    int[] arrayI = new int[len];
+    int[] arrayJ = new int[len];
+
+    arrayI[0] = A[0] - 0;
+    // arrayI stores max value of (A[i]-i) from left to right
+    arrayJ[len - 1] = A[len - 1] + (len - 1);
+    // arrayJ stores max value of (A[i]+i) from right to left
+
+    for (int i = 1; i &lt; len; i++) {
+        arrayI[i] = Math.max(arrayI[i - 1], A[i] - i);
+    }
+
+    for (int i = len - 2; i &gt;= 0; i--) {
+        arrayJ[i] = Math.max(arrayJ[i + 1], A[i] + i);
+    }
+
+    Common.printArray(arrayI);
+    Common.printArray(arrayJ);
+
+    int max = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; len; i++) {
+        max = Math.max(max, arrayI[i] + arrayJ[i]);
+    }
+    return max;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/01/Multithreading-deadlock-prevention/">[Design] Multithreading - Deadlock Prevention</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>How to prevent deadlock? (question from MIT handouts 1)</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Preventing one of the 4 conditions will prevent deadlock:</p>
+
+<ol>
+<li><p>Removing the <strong>mutual exclusion condition</strong>, but not very possible.</p></li>
+<li><p>The <strong>hold and wait</strong> conditions may be removed by requiring processes to request all the resources they will need before starting up.</p></li>
+<li><p>The <strong>no preemption condition</strong> may also be difficult or impossible to avoid as a process has to be able to have a resource for a certain amount of time, or the processing outcome may be inconsistent or thrashing may occur.</p></li>
+<li><p>The final condition is the <strong>circular wait condition</strong>. Approaches that avoid circular waits include disabling interrupts during critical sections and using a hierarchy to determine a partial ordering of resources.</p></li>
+</ol>
+
+
+<h3>Answer</h3>
+
+<p><strong>Assign an order to our locks</strong> (require that the locks always acquired in order).</p>
+
+<p>This prevent 2 thread waiting to get the resource in each other&rsquo;s hand.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/01/Hamming-distance-of-array/">[Facebook] Hamming Distance of Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/-a-first-write-a-function-to-calculate-the-hamming-distance-between-two-binary-numbers-b-write-a-function-that-takes-QTN_450885.htm">link</a></p>
+
+<blockquote><p><a href="http://en.wikipedia.org/wiki/Hamming_distance">Hamming distance</a> between two strings of equal length is the number of positions at which the corresponding symbols are different.</p>
+
+<p>Write a function that takes a list of binary numbers and returns the sum of the hamming distances for each pair.</p>
+
+<p>Do it in O(n) time.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The naive solution is O(n<sup>2</sup>), so we simplify this question by using {0,0,0,1,1} as input. The output in this case would be 6. Why? Because 3 x 2 = 6.</p>
+
+<p>So the equation for solution would be:</p>
+
+<blockquote><p>distance (for a bit) = number of &lsquo;1&rsquo;s * number of &#8216;0&rsquo;s</p></blockquote>
+
+<p>The final answer would be the sum of distances for all bits. The solution is from <a href="http://se7so.blogspot.sg/2014/02/how-to-prepare-for-interview-9.html">this blog</a>.</p>
+
+<h3>Code</h3>
+
+<p>Great solution, <strong>not written by me</strong></p>
+
+<pre><code>int hammingDist(int[] nums) {
+
+    int[] bits = new int[32];
+
+    for (int i = 0; i &lt; nums.length; i++) {
+        int one = 1;
+        int j = 0;
+
+        while (nums[i] != 0) {
+            if ((nums[i] &amp; one) != 0)
+                bits[j]++;
+            j++;
+            nums[i] = nums[i] &gt;&gt; 1;
+        }
+    }
+
+    int ans = 0;
+    for (int i = 0; i &lt; 32; i++) {
+        ans += bits[i] * (nums.length - bits[i]);
+    }
+
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/01/Find-row-with-most-1s/">[Question] Find Row With Most 1s</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/find-the-row-with-maximum-number-1s/">link</a></p>
+
+<blockquote><p>Given a 2D array with only 1s and 0s, where each row is sorted.</p>
+
+<p>Find the row with the maximum number of 1s. Input matrix:</p></blockquote>
+
+<pre><code>0 1 1 1
+0 0 1 1
+1 1 1 1  // this row has maximum 1s
+0 0 0 0
+</code></pre>
+
+<blockquote><p>Output: 2</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>By using a modified version of binary search, we can achieve <strong><a href="http://www.geeksforgeeks.org/find-the-row-with-maximum-number-1s/">a O(mLogn) solution</a></strong> where m is number of rows and n is number of columns in matrix.</p>
+
+<p><strong>However, there&rsquo;s better solution that works in linear time</strong>!</p>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Get the index of first (or leftmost) 1 in the first row.</p></li>
+<li><p>Do following for every row after the first row:</p>
+
+<ol>
+<li><p>IF the element on left of previous leftmost 1 is 0, ignore this row.</p></li>
+<li><p>ELSE Move left until a 0 is found. Update the leftmost index to this index and max_row_index to be the current row.</p></li>
+</ol>
+</li>
+</ol>
+
+
+<p>The time complexity is O(m+n).</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int solution(int[][] matrix) {
+    int m = matrix.length;
+    int n = matrix[0].length;
+    int p = n;
+    int row = -1;
+    for (int i = 0; i &lt; m; i++) {
+        // now p is larger than 0, otherwise it's already terminated
+        if (matrix[i][p - 1] == 0) {
+            continue;
+        }
+        // p points to a 1, now search to the left direction
+        for (int j = p - 1; j &gt;= 0; j--) {
+            if (matrix[i][j] == 1) {
+                p = j;
+            } else {
+                break;
+            }
+        }
+        // p have a new value now
+        if (p == 0) {
+            return i;
+        } else {
+            row = i;
+        }
+    }
+    return row;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/01/Crossword-solver/">[Google] Crosswod Solver</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/8585090/algorithm-for-crossword-puzzle-with-given-grid">link</a></p>
+
+<blockquote><p>Given a wordlist like this:</p></blockquote>
+
+<pre><code>1. ccaa
+1. baca
+1. baaa
+1. bbbb
+</code></pre>
+
+<blockquote><p>and a Grid like this:</p></blockquote>
+
+<pre><code>X X 
+XXXX
+X X 
+XXXX
+</code></pre>
+
+<blockquote><p>Now solve this crossword. One possible solution:</p></blockquote>
+
+<pre><code>b c 
+baca
+b a 
+baaa
+</code></pre>
+
+<h3>Solution</h3>
+
+<p><a href="http://stackoverflow.com/a/8586102">The corssword problem</a> is NP-Complete, so your best shot is brute force: just try all possibilities, and stop when a possibility is a valid. Return failure when you exhausted all possible solutions.</p>
+
+<h3>Code</h3>
+
+<p><strong>Pseudo code for brute force</strong>. (this just serve as a guide, not a complete/correct solution)</p>
+
+<pre><code>solve(words,grid):
+   if words is empty:
+       if grid.isValudSol():
+          return grid
+       else:
+          return None
+   for each word in words:
+       possibleSol &lt;- grid.fillFirst(word)
+       ret &lt;- solve(words\{word},possibleSol)
+       if (ret != None):
+          return ret
+   return None
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/30/multiples-of-3-and-5/">[Question] Multiples of 3 and 5</a></h1>
     
     
       <p class="meta">
@@ -106,959 +905,25 @@
   </header>
 
 
-  <div class="entry-content"><h3>Definition</h3>
-
-<p>A* is a computer algorithm that is widely used in pathfinding and graph traversal.</p>
-
-<p>It uses a knowledge-plus-heuristic cost function like this:</p>
-
-<blockquote><p>f (n) = g(n) + h(n)</p>
-
-<p>f (n): estimated total cost of path through n to goal</p>
-
-<p>g(x) = past path-cost function</p>
-
-<p>h(x) = future path-cost function, which is an admissible &ldquo;heuristic estimate&rdquo; of the distance from x to the goal</p></blockquote>
-
-<p>What sets A* <strong>apart from a greedy best-first search</strong> is that it also takes the distance already traveled into account.</p>
-
-<h3>Implementation</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/A*_search_algorithm#Process">Maintains a priority queue</a> (lower f(x) means higher priority). At each step, node with the lowest f(x) value is removed from the queue, and neighbors are added to the queue.</p>
-
-<p>This continues until a goal node has a lower f value than any node in the queue. Goal found!</p>
-
-<h3>Relationship with Dijkstra</h3>
-
-<p><strong><a href="http://stackoverflow.com/a/1332478">Dijkstra is a special case</a> for A*</strong> (when the <a href="http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Algorithm">heuristics is 0</a>).</p>
-
-<p>Illustration (I wish you can view the gif below):</p>
-
-<p><img class="middle" src="/assets/images/path-find-Astar.gif"></p>
-
-<p><img class="middle" src="/assets/images/path-find-Dijkstras.gif"></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/29/Boggle-solver/">[Google] Boggle Solver (Search Words From Matrix)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-29T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://stackoverflow.com/questions/746082/how-to-find-list-of-possible-words-from-a-letter-matrix-boggle-solver">link</a></p>
+<p><a href="http://projecteuler.net/problem=1">link</a></p>
 
-<blockquote><p>Boggle Game:</p></blockquote>
+<blockquote><p>If we list all the natural numbers below 10 that are multiples of 3 or 5, we get 3, 5, 6 and 9. The sum of these multiples is 23.</p>
 
-<pre><code>F X I E
-A M L O
-E W B X
-A S T U
-</code></pre>
-
-<blockquote><p>The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference.</p></blockquote>
-
-<h3>Variation</h3>
-
-<p><strong>Another version of questions states in <a href="http://www.glassdoor.com/Interview/I-was-asked-to-write-an-algorithm-to-solve-a-crossword-like-puzzle-I-forget-the-name-but-started-with-a-B-As-opposed-QTN_435641.htm">here</a></strong></p>
-
-<blockquote><p>&hellip; Boggle Game. As opposed to simply vertical, horizontal, and diagonal placement of words, they were allowed to snake around the grid in any way.</p></blockquote>
-
-<p>For this version of question, no &lsquo;visited&rsquo; memory needs to be stored. In other words, it&rsquo;s a simpler version of above question.</p>
+<p>Find the sum of all the multiples of 3 or 5 below 1000.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong><a href="http://stackoverflow.com/a/4314056">The best solution</a> is to use Trie</strong>, then do DFS search. However it might not be as intuitive as it seems.</p>
+<blockquote><p>The multiples of 3 are 3,6,9,12,15,18,21,24,27,30,&hellip;.</p>
 
-<p>The idea is from <a href="http://stackoverflow.com/a/746102">this answer</a> (However this guy admits that his solution does not handle &lsquo;visited&rsquo; nodes properly, means the same char might be visited again to produce a word).</p>
+<p>The multiples of 5 are 5,10,15,20,25,30,35,40,45,&hellip;.</p>
 
-<p>We need to first define a class called Item:</p>
+<p>The intersection of these two sequences is 15,30,45,&hellip;</p></blockquote>
 
-<pre><code>class Item {
-    public final int x, y;
-    public final String prefix;
+<p><img class="middle" src="/assets/images/multiples-of-3-5.png"></p>
 
-    public Item(int row, int column, String prefix) {
-        this.x = row;
-        this.y = column;
-        this.prefix = prefix;
-    }
-}
-</code></pre>
-
-<p>So when we start doing DFS, we pass in an Item object which stores 2 information:</p>
-
-<ol>
-<li>The next position that we&rsquo;re going to visit.</li>
-<li>The prefix string that we have validated so far (before visiting this position).</li>
-</ol>
-
-
-<p>For example:</p>
-
-<pre><code>F X I E
-A M L O
-E W B X
-A S T U
-</code></pre>
-
-<p>We&rsquo;ll have Items objects like (0, 0, &ldquo;&rdquo;), (0, 1, &ldquo;F&rdquo;), (0, 2, &ldquo;FA&rdquo;) &hellip; We guarantee that the prefix must be a valid prefix by searching them in the Trie.</p>
-
-<p>How to tell whether a string is a prefix of word, or it&rsquo;s an actual word? We have a property in TrieNode called TrieNode.isWord() to help us.</p>
-
-<p>That&rsquo;s about it. I spend quite some time writing the code below, by refering to the Java solution by <a href="http://stackoverflow.com/a/11698898">zouzhile</a>.</p>
-
-<h3>Code</h3>
-
-<p>BoggleSolver.java</p>
-
-<pre><code>public class BoggleSolver {
-
-    private static BufferedReader in = null;
-    private static final String INPUT_FILE = "dictionary.txt";
-
-    public static void beginFileReader() {
-        try {
-            in = new BufferedReader(new FileReader(new File(BoggleSolver.class
-                    .getResource(INPUT_FILE).toURI())));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Trie buildTrie() {
-        Trie trie = new Trie();
-        beginFileReader();
-        String line = null;
-        try {
-            while ((line = in.readLine()) != null) {
-                String[] words = line.split(" ");
-                for (String word : words) {
-                    word = word.trim().toLowerCase();
-                    trie.addWord(word);
-                }
-            }
-            if (in != null) {
-                in.close();
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        return trie;
-    }
-
-    public Set&lt;String&gt; findWords(char[][] map, Trie dict) {
-        Set&lt;String&gt; ans = new TreeSet&lt;String&gt;();
-        int m = map.length;
-        int n = map[0].length;
-        for (int i = 0; i &lt; m; i++) {
-            for (int j = 0; j &lt; n; j++) {
-                boolean[][] visited = new boolean[m][n];
-                findWordsDfs(ans, dict, map, visited, new Item(i, j, ""));
-                // item have 3 parameters:
-                // location x,y and the prefix string before reaching (i.j)
-            }
-        }
-        return ans;
-    }
-
-    public void findWordsDfs(Set&lt;String&gt; ans, Trie dict, char[][] map,
-            boolean[][] visited, Item item) {
-        // item: the location that we're going to test
-        // item.prefix is the word prefix before reaching (x, y)
-
-        int m = map.length;
-        int n = map[0].length;
-        int x = item.x;
-        int y = item.y;
-
-        // check whether cur.(x,y) is a valid position
-        if (x &lt; 0 || x &gt;= m || y &lt; 0 || y &gt;= n) {
-            return;
-        } else if (visited[x][y]) {
-            return;
-        }
-        String newWord = item.prefix + map[x][y];
-        // check whether cur.prefix is a valid prefix
-        TrieNode findWord = dict.match(newWord);
-        if (findWord == null) {
-            // up to this position (x, y), the word dont' exists
-            return;
-        }
-        // now cur is in a valid position, with a valid prefix
-        if (findWord.isWord()) {
-            ans.add(newWord);
-        }
-        // visit this position, and continue in 4 different directions
-        visited[x][y] = true;
-        findWordsDfs(ans, dict, map, visited, new Item(x, y - 1, newWord));
-        findWordsDfs(ans, dict, map, visited, new Item(x, y + 1, newWord));
-        findWordsDfs(ans, dict, map, visited, new Item(x - 1, y, newWord));
-        findWordsDfs(ans, dict, map, visited, new Item(x + 1, y, newWord));
-        visited[x][y] = false;
-    }
-
-    public static void main(String[] args) {
-        String[] rows = "eela,elps,weut,korn".split(",");
-        char[][] input = new char[4][4];
-        for (int i = 0; i &lt; 4; i++) {
-            input[i] = rows[i].toCharArray();
-        }
-
-        // prepare test data
-        BoggleSolver solver = new BoggleSolver();
-        Trie dictionary = solver.buildTrie();
-        // start finding words
-        Set&lt;String&gt; set = solver.findWords(input, dictionary);
-        // present the result
-        System.out.println(set.size() + " words are found, they are: ");
-        for (String str : set) {
-            System.out.println(str);
-        }
-    }
-
-    class Item {
-        public final int x, y;
-        public final String prefix;
-
-        public Item(int row, int column, String prefix) {
-            this.x = row;
-            this.y = column;
-            this.prefix = prefix;
-        }
-    }
-}
-</code></pre>
-
-<p>Trie.java</p>
-
-<pre><code>public class Trie {
-    private TrieNode root;
-
-    public Trie() {
-        this.root = new TrieNode();
-    }
-
-    public void addWord(String word) {
-        TrieNode node = this.root;
-        for (char c : word.toCharArray()) {
-            node = node.addChild(c);
-            if (node == null)
-                return;
-        }
-        node.setWord(true);
-    }
-
-    public TrieNode match(String s) {
-        TrieNode node = this.root;
-        for (char c : s.toCharArray()) {
-            node = node.get(c);
-            if (node == null)
-                return null;
-        }
-        return node;
-    }
-}
-</code></pre>
-
-<p>TrieNode.java</p>
-
-<pre><code>public class TrieNode {
-    private TrieNode[] children;
-    private boolean isWord = false;
-
-    public TrieNode() {
-        this.children = new TrieNode[26];
-    }
-
-    public TrieNode addChild(char child) {
-        if (child &lt; 'a' || child &gt; 'z')
-            return null;
-
-        int offset = child - 'a';
-        if (this.children[offset] == null) {
-            this.children[offset] = new TrieNode();
-        }
-        return this.children[offset];
-    }
-
-    public boolean isWord() {
-        return isWord;
-    }
-
-    public void setWord(boolean isWord) {
-        this.isWord = isWord;
-    }
-
-    public TrieNode get(char c) {
-        int offset = c - 'a';
-        return this.children[offset];
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/28/google-pre-interview-coaching/">[Google] Google Pre-interview Coaching</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a program that breaks up a string of words with no spaces into a string with the appropriate spaces.</p></blockquote>
-
-<p>Follow the following process:</p>
-
-<ol>
-<li>Clarify the problem</li>
-<li>Refine the solution</li>
-<li>Code it</li>
-<li>Last words</li>
-</ol>
-
-
-<h3>Clarify the problem</h3>
-
-<ol>
-<li>Consider a general case, like &ldquo;fastman&rdquo;</li>
-<li>Disambiguate expected result</li>
-<li>State the key assumptions</li>
-<li>clarify function signature</li>
-</ol>
-
-
-<p>2 words? null input? where is the words from? We might use a dictionary.</p>
-
-<h3>Refine the solution</h3>
-
-<ol>
-<li>what if the dictionary cannot fit in RAM</li>
-<li>how would you print the most likely of multiple choices</li>
-<li>what if the words are not spelled correctly?</li>
-<li>Testing</li>
-</ol>
-
-
-<h3>Code it</h3>
-
-<p>Write code now, skip.</p>
-
-<h3>Last words</h3>
-
-<p>Talk naive solution, then come up with a reasonably better one.</p>
-
-<p>Time/Space tradeoff. (like pre-processing or something)</p>
-
-<p>For very big/small input.</p>
-
-<p>White-board practise is important!</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/28/Ugly-numbers/">[CC150v4] 10.7 Ugly Numbers (Hamming Numbers)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Design an algorithm to find the kth number such that the only prime factors are 3, 5, and 7.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is very difficult question</strong>. All I can say is, just memorize this solution.</p>
-
-<p>It works like this:</p>
-
-<ol>
-<li>Init 3 queues, with initial value of 3, 5 and 7 respectively.</li>
-<li>Fetch the smallest element x at the head of 3 queues.</li>
-<li>Add number x to the result list, then:
-
-<ol>
-<li>if number x comes from queue3, add 3x, 5x and 7x into 3 queues</li>
-<li>if number x comes from queue5, add 5x and 7x into queue5 and queue7</li>
-<li>if number x comes from queue7, add 7x into queue7</li>
-</ol>
-</li>
-<li>Fetch next smallest element and do this recursively.</li>
-</ol>
-
-
-<p>A <a href="http://www.geeksforgeeks.org/ugly-numbers/">dp solution</a> is available. It&rsquo;s using the same method actually, but less intuitive.</p>
-
-<h3>Code</h3>
-
-<p>not written</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/28/My-world/">[Thoughts] My World</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><pre><code>Please tell me what is taking place,
-Cause I can't seem to find a trace,
-Guess it must've got erased somehow,
-Probably cause I always forget,
-Everytime someone tells me their name,
-It's always gotta be the same.
-(In my World)
-Never wore cover-up,
-Always beat the boys up,
-Grew up in a 5000 population town,
-Made my money by cutting grass,
-Got fired by fried chicken ass,
-All in a small town, Napanee.
-
-You know I always stay up without sleepin',
-And think to myself,
-Where do I belong forever,
-In whose arms, the time and place?
-
-[Chorus:]
-Can't help if I space in a daze,
-My eyes tune out the other way,
-I may switch off and go in a daydream,
-In this head my thoughts are deep,
-But sometimes I can't even speak,
-Would someone be and not pretend? 
-I'm off again in my World
-
-I never spend less than an hour,
-Washin' my hair in the shower,
-It always takes 5 hours to make it straight,
-So I'll braid it in a zillion braids,
-Though it may take all friggen day,
-There's nothin' else better to do anyway.
-
-When you're all alone in the lands of forever,
-Lay under the milky way,
-On and on it's getting too late out,
-I'm not in love this time this night.
-
-[Chorus:] x1
-
-Take some time,
-Mellow out,
-Party up,
-But don't fall down,
-Don't get caught,
-Sneak out of the house.
-
-[Chorus:] x2
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/28/Http-cookie/">[Design] HTTP Cookie</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>First Word</h3>
-
-<p>A cookie is <strong>a small text file</strong> that is stored by a browser on the user’s machine. Cookies are plain text; they contain no executable code.</p>
-
-<p>Every time the user loads the website, the <strong>browser sends the cookie back to the server</strong> to notify the website of the user&rsquo;s previous activity.</p>
-
-<ol>
-<li><p>Stateful information</p>
-
-<p> Such as shopping cart</p></li>
-<li><p>browsing activity</p>
-
-<p> Such as log in, which button is clicked, and which page is visited</p></li>
-</ol>
-
-
-<h3>Security</h3>
-
-<p>A secure cookie will only be sent to the server when a request is made using SSL and the HTTPS protocol. However, the entire mechanism is inherently insecure.</p>
-
-<p>The cookie just contains data and <strong>isn’t harmful</strong> in and of itself. However, tracking cookies and especially third-party tracking cookies are commonly used as ways to compile long-term records of individuals&#8217; browsing history, which is a potential privacy concern.</p>
-
-<h3>Types of HTTP Cookie</h3>
-
-<p>Common cookie types:</p>
-
-<h4>Session cookie</h4>
-
-<p>It&rsquo;s <strong>while browsing</strong>. (Normally) deleted by browser when the user closes the browser.</p>
-
-<h4>Persistent cookie</h4>
-
-<p>Max-age 1 year. The value set in that cookie would be sent back to the server every time the user visited the server. Also called <strong>tracking cookies</strong></p>
-
-<h4>Secure cookie</h4>
-
-<p>The secure attribute is enabled, and is only used via HTTPS.</p>
-
-<h4>Third-party cookie</h4>
-
-<p><strong>First-party cookies</strong> are cookies that belong to the same domain that is shown in the browser&rsquo;s address bar. <strong>Third-party cookies</strong> are cookies that belong to domains different from the one shown in the address bar.</p>
-
-<p>It opens up the potential for <strong>tracking the user&rsquo;s browsing history</strong>. An example of 3rd-party:</p>
-
-<blockquote><p>As an example, suppose a user visits www.example1.com. This web site contains an advert from ad.foxytracking.com, which, when downloaded, sets a cookie belonging to the advert&rsquo;s domain (ad.foxytracking.com). Then, the user visits another website, www.example2.com, which also contains an advert from ad.foxytracking.com, and which also sets a cookie belonging to that domain (ad.foxytracking.com). Eventually, both of these cookies will be sent to the advertiser when loading their ads or visiting their website. The advertiser can then use these cookies to build up a browsing history of the user across all the websites that have ads from this advertiser.</p></blockquote>
-
-<h4>One more thing</h4>
-
-<p>Nowadays ther&#8217;e a new kind of <strong>HttpOnly cookie</strong> (used only when transmitting HTTP (or HTTPS) requests, thus restricting access from other, non-HTTP APIs such as JavaScript).</p>
-
-<p><a href="http://www.nczonline.net/blog/2009/05/05/http-cookies-explained/">source1</a></p>
-
-<p><a href="http://en.wikipedia.org/wiki/HTTP_cookie">source2</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/largest-cycle-in-permutation/">[Twitter] Largest Cycle in Permutation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://get-that-job-at-google.blogspot.sg/2013/01/twitter-programming-test.html">link</a></p>
-
-<blockquote><p>Given a permutation which contains numbers in the range [1, N], return the length of the largest cycle in the permutation.</p>
-
-<p>A <a href="http://mathworld.wolfram.com/PermutationCycle.html">permutation cycle</a> is a subset of a permutation whose elements trade places with one another.</p>
-
-<p>Sample Testcases:</p>
-
-<p>a) longestCycle([2 3 1]) returns 3, since only cycle is (1 2 3) whose length is 3</p>
-
-<p>b) longestCycle([5 4 3 2 1]) returns 2, since the permutation can be decomposed into (1 5), (2 4), (3)</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is just an idea.</p>
-
-<p>Now first of all, its important to understand <strong>what is a cycle in permutation</strong>.</p>
-
-<p>Keeping that in mind, I take (5,4,3,2,1) as an example. First, we fetch 5, and we swap number 5 with the 5th element of the array (which is 1). After this swap, value 1 is in the 1st position, so this cycle is done, the length is 2.</p>
-
-<p>We continue doing this until <strong>all numbers of value v is in the (v)th position</strong>, we should know the largest length of cycle during this process.</p>
-
-<p>I did not write code for this, and there&rsquo;s little resource online that&rsquo;s relevant.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/google-api-read-4096/">[Google] Google API Read4096 (read4K)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=14424684">link</a></p>
-
-<blockquote><p>Given API: int Read4096(char* buf);</p>
-
-<p>It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read.</p>
-
-<p>Use above API to Implement API &ldquo;int Read(char* buf, int n)&rdquo; which reads any number of chars from the file.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Since the nature of C++ and Java is different, I changed the api to:</p>
-
-<pre><code>GoogleApi.read4096(){}
-GoogleRead4096.read(int n){}
-</code></pre>
-
-<p>As <a href="http://www.careercup.com/question?id=14424684">suggested</a>, the solution is to keep <strong>one local buffer</strong>, and 1 pointer within the buffer.</p>
-
-<h3>Code</h3>
-
-<pre><code>String buffer = null;
-int p = 0;
-
-public String read(int n) {
-    if (n &lt; 0) {
-        return null;
-    } else if (n == 0) {
-        return "";
-    }
-    StringBuilder sb = new StringBuilder();
-    while (n &gt; 0) {
-        // there is (LENGTH - p) chars left in the local buffer
-        if (buffer == null || p == buffer.length()) {
-            // no char left in buffer, update buffer
-            buffer = GoogleApi.read4096();
-            p = 0;
-            if (buffer.length() == 0) {
-                // finish reading the file (no more input chars)
-                break;
-            }
-        } else {
-            int numChars = buffer.length() - p;
-            if (numChars &gt;= n) {
-                sb.append(buffer.substring(p, p + n));
-                p = p + n;
-                n = 0;
-            } else {
-                sb.append(buffer.substring(p));
-                p = buffer.length();
-                n -= numChars;
-            }
-        }
-    }
-    return sb.toString();
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/equilibrium-points-in-2d-array/">[Question] Equilibrium Points in 2D Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://get-that-job-at-google.blogspot.sg/2013/01/twitter-programming-test.html">link</a></p>
-
-<blockquote><p>In a 2D matrix of dimensions M*N, find number of &ldquo;equilibrium&rdquo; points.  A point (i, j) is said to be an &ldquo;equilibrium&rdquo; point only if all following conditions hold:</p>
-
-<p>a) sum of rows 1&hellip;(i-1) =  sum of rows (i+1)&hellip;M</p>
-
-<p>b) sum of columns 1&hellip;(j-1)  = sum of columns (j+1)&hellip;N</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is <strong>a generalize question of </strong>Equilibrium index__. For now, I got no better idea then checking Equilibrium index for every single node in the matrix.</p>
-
-<p>So this question literally becomes <a href="http://www.geeksforgeeks.org/equilibrium-index-of-an-array/">this</a>:</p>
-
-<blockquote><p>Equilibrium index of an array is an index such that the sum of elements at lower indexes is equal to the sum of elements at higher indexes. For example, in an arrya A:</p>
-
-<p>A[0] = -7, A[1] = 1, A[2] = 5, A[3] = 2, A[4] = -4, A[5] = 3, A[6]=0</p>
-
-<p>3 is an equilibrium index, because:
-A[0] + A[1] + A[2] = A[4] + A[5] + A[6]</p>
-
-<p>6 is also an equilibrium index, because sum of zero elements is zero, i.e., A[0] + A[1] + A[2] + A[3] + A[4] + A[5]=0</p></blockquote>
-
-<p><strong>The idea</strong> is to get total sum of array first. Then Iterate through the array and keep updating the left sum.</p>
-
-<h3>Code</h3>
-
-<p><strong>code for <a href="http://rosettacode.org/wiki/Equilibrium_index#Java">findning EI in 1-D array</a></strong></p>
-
-<pre><code>public List&lt;Integer&gt; findEI(int[] array) {
-    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    int sum = 0;
-    for (int i = 0; i &lt; array.length; i++) {
-        sum += array[i];
-    }
-    int runningSum = 0;
-    for (int i = 0; i &lt; array.length; i++) {
-        if (2 * runningSum + array[i] == sum) {
-            ans.add(i);
-        }
-        runningSum += array[i];
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/Word-that-has-most-letters-given/">[Question] Find Word That Has the Most Letters Given</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://programmers.stackexchange.com/questions/188687/try-to-find-a-word-in-the-dictionary-that-has-most-letters-given">link</a></p>
-
-<blockquote><p>Given some random letters, for example &ldquo;a,e,o,g,z,k,l,j,w,n&rdquo; and a dictionary.</p>
-
-<p>Try to find a word in the dictionary that has most letters given.</p>
-
-<p>Example: &ldquo;abbee&rdquo; &ndash;> 3 occurance.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Make an array that marks all given chars. Like this:</p>
-
-<p> index={a:1, b:0, c:0, d:0, e:1, f:0, g:1&hellip;}</p></li>
-<li><p>Iterate over each word of dictionary.</p>
-
-<p> The array gives an easy way to search a char&rsquo;s existance. I did not write code for this question.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>max=0;
-max_index=0;
-
-foreach(dictionary as position=&gt;word) {
-    sum=0;
-    foreach(word as letter)
-    {
-      sum += index[letter];
-    }
-    if(sum &gt; max)
-    {
-        max = sum;
-        max_index = position;
-    }
-}
-</code></pre>
+<p><a href="http://math.stackexchange.com/a/9260">source</a></p>
 </div>
   
   
@@ -1081,12 +946,12 @@ foreach(dictionary as position=&gt;word) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (4)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (15)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (30)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (31)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -1104,23 +969,23 @@ foreach(dictionary as position=&gt;word) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/04/unsolved-mystery-of-utf8/">[Google] Unsolved Mystery of UTF8 Encoding</a>
+        <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/04/print-numbers-containing-5/">[Question] Print Numbers Containing 5</a>
+        <a href="/blog/2014/09/07/search-array-containing-empty-string/">[CC150v4] 9.5 Search Array Containing Empty String</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/04/Find-second-shortest-path/">[Google] Find Second Shortest Path</a>
+        <a href="/blog/2014/09/07/generate-permutation-recursively/">[CC150v4] 8.4 Generate Permutation Recursively</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/04/Code-a-hashmap/">[Google] Code a HashMap</a>
+        <a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/03/weird-sort-array/">[Google] Weird Sort Array</a>
+        <a href="/blog/2014/09/07/cover-the-chess-board/">[CC150v4] 6.2 Cover the Chess Board</a>
       </li>
     
   </ul>
