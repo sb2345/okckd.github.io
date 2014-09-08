@@ -26,12 +26,14 @@ But wait, __there can be a very big problem that causes looping forever__. Eg.
 
 > since "c" is large than "b", 'right' is set to the 4th index. It's a endless loop!
 
-There're various ways to solve this. The book suggests 
+There're various ways to solve this. The book suggests __locate 'right' pointer at non-empty string__ by moving left, and then __locate 'mid' pointer at non-empty__ by moving right. This avoids endless loop. 
 
 My approach is to use 2 instances of 'mid': 
 
 1. calculatedMid
 1. comparisonMid
+
+Both ways are fine.
 
 ### Code
 
