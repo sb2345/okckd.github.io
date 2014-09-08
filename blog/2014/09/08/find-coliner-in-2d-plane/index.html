@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[CC150v4] 10.6 Find Collinear in 2D Plane (`) - Woodstock Blog</title>
+  <title>[CC150v4] 10.6 Find Collinear in 2D Plane - Woodstock Blog</title>
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Given a two dimensional graph with points on it, find a line which passes the most number of points. Solution Code
-">
+  <meta name="description" content="Question Given a two dimensional graph with points on it, find a line which passes the most number of points. Solution For this question, we used to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,7 +80,7 @@
   
   <header>
     
-      <h1 class="entry-title">[CC150v4] 10.6 Find Collinear in 2D Plane (`)</h1>
+      <h1 class="entry-title">[CC150v4] 10.6 Find Collinear in 2D Plane</h1>
     
     
       <p class="meta">
@@ -110,7 +109,95 @@
 
 <h3>Solution</h3>
 
+<p>For this question, we used to use HashMap(Double, Integer) to do. However, the answer suggested in the book define its own Line Class, and uses HashMap(Line, Intger).</p>
+
+<p>This is a much better solution, however, I failed to write it, don&rsquo;t know why.</p>
+
+<p><strong>The key is to override the 2 methods</strong>:</p>
+
+<pre><code>@override
+public int hashCode() {}
+
+@override
+public boolean equals(Object o) {}
+</code></pre>
+
 <h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<p>Line.java</p>
+
+<pre><code>public class Line {
+
+    private static double epsilon = .0001;
+
+    public double slope;
+    public double intercept;
+    private boolean infinite_slope = false;
+
+    public Line(GraphPoint p, GraphPoint q) {
+        if (Math.abs(p.x - q.x) &gt; epsilon) { // if x痴 are different
+            slope = (p.y - q.y) / (p.x - q.x); // compute slope
+            intercept = p.y - slope * p.x; // y intercept from y=mx+b
+        } else {
+            infinite_slope = true;
+            intercept = p.x; // x-intercept, since slope is infinite
+        }
+    }
+
+    public boolean isEqual(double a, double b) {
+        return (Math.abs(a - b) &lt; epsilon);
+    }
+
+    public void Print() {
+        System.out.println("slope = " + slope + "\nintercept = " + intercept);
+    }
+
+    @Override
+    public int hashCode() {
+        int sl = (int) (slope * 1000);
+        int in = (int) (intercept * 1000);
+        return sl | in;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Line l = (Line) o;
+        if (isEqual(l.slope, slope) &amp;&amp; isEqual(l.intercept, intercept)
+                &amp;&amp; (infinite_slope == l.infinite_slope)) {
+            return true;
+        }
+        return false;
+    }
+}
+</code></pre>
+
+<p>Main method:</p>
+
+<pre><code>public static Line findBestLine(GraphPoint[] points) {
+
+    Line bestLine = null;
+    HashMap&lt;Line, Integer&gt; line_count = new HashMap&lt;Line, Integer&gt;();
+
+    for (int i = 0; i &lt; points.length; i++) {
+        for (int j = i + 1; j &lt; points.length; j++) {
+            Line line = new Line(points[i], points[j]);
+            if (!line_count.containsKey(line)) {
+                line_count.put(line, 0);
+            }
+            line_count.put(line, line_count.get(line) + 1);
+            if (bestLine == null
+                    || line_count.get(line) &gt; line_count.get(bestLine)) {
+                bestLine = line;
+                System.out.println("bestLine upodated! count = "
+                        + line_count.get(line));
+            }
+        }
+    }
+    return bestLine;
+}
+</code></pre>
 </div>
 
 
@@ -172,7 +259,7 @@
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (19)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (24)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
@@ -195,7 +282,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/08/test-webpage-without-tool/">[CC150v4] 11.4 Test Webpage Without Tools (`)</a>
+        <a href="/blog/2014/09/08/test-webpage-without-tool/">[CC150v4] 11.4 Test Webpage Without Tools</a>
       </li>
     
       <li class="post">
@@ -203,15 +290,15 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a>
+        <a href="/blog/2014/09/08/java-reflection/">[CC150v4] 14.5 Java Reflection</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/08/find-coliner-in-2d-plane/">[CC150v4] 10.6 Find Collinear in 2D Plane (`)</a>
+        <a href="/blog/2014/09/08/java-private-constructor/">[CC150v4] 14.1 Java Private Constructor</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
+        <a href="/blog/2014/09/08/java-hashmap-counter/">[CC150v4] 14.6 Java HashMap Counter</a>
       </li>
     
   </ul>

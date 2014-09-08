@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Cc150v4 | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/cc150v4/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-08T01:53:11+08:00</updated>
+  <updated>2014-09-08T17:34:26+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[CC150v4] 11.4 Test Webpage Without Tools (`)]]></title>
+    <title type="html"><![CDATA[[CC150v4] 11.4 Test Webpage Without Tools]]></title>
     <link href="http://okckd.github.io/blog/2014/09/08/test-webpage-without-tool/"/>
     <updated>2014-09-08T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/09/08/test-webpage-without-tool</id>
@@ -24,7 +24,20 @@
 
 ### Solution
 
+#### Load testing
 
+__[Load testing](http://en.wikipedia.org/wiki/Load_testing)__ is testing under normal and peak load condition. It's also called software performance testing, reliability testing, and volume testing.
+
+#### Steps
+
+__First identify the performance-critical scenarios__, which might include: 
+
+1. response time
+1. throughput
+1. resource utilization
+1. max load that system can bear
+
+__Then, design tests to simulate the load__: we can create virtual users by a multi-threaded program with 1000 thread, each acting as a user loading the page. We measure response time of each user. 
 ]]></content>
   </entry>
   
@@ -60,143 +73,120 @@ In general, __Web server is more prone to Memory Leak__, and program that runs _
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v4] 10.4 Implement Mathematical Operators]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/08/implement-math-operators/"/>
+    <title type="html"><![CDATA[[CC150v4] 14.5 Java Reflection]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/java-reflection/"/>
     <updated>2014-09-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/08/implement-math-operators</id>
+    <id>http://okckd.github.io/blog/2014/09/08/java-reflection</id>
     <content type="html"><![CDATA[### Question
 
-> Write a method to implement *, - , / operations You should use only the + operator. 
+> Explain what object reflection is in Java and why it is useful. 
 
 ### Solution
 
-__First it's important to write a 'negate' operator__. This is used in all other operations. 
+__[Java Reflection](http://tutorials.jenkov.com/java-reflection/index.html) makes it possible to inspect classes, interfaces, fields and methods at runtime__, without knowing the names of the classes, methods etc. at compile time. It is also possible to instantiate new objects, invoke methods and get/set field values using reflection.
 
-	public static int FnNegate(int a) {
-		int neg = 0;
-		int d = a < 0 ? 1 : -1;
-		while (a != 0) {
-			neg += d;
-			a += d;
-		}
-		return neg;
-	}
+For example, say you have an object of [an unknown type in Java](http://stackoverflow.com/a/37632), and __you would like to call a 'doSomething' method on it if one exists__. Java's static typing system isn't really designed to support this unless the object conforms to a known interface, __but using reflection__, your code can look at the object and find out if it has a method called 'doSomething' and then call it if you want to. Like this:
 
-Although we can only use +, the author also used > and < comparison operators. 
+	Method method = foo.getClass().getMethod("doSomething", null);
+	method.invoke(foo, null);
 
-This is a borning question, I did not write code myself. 
+#### Usage in Junit
+
+One very common use case in Java is the usage with annotations. JUnit 4, for example, will use reflection to __look through your classes for methods tagged with the @Test annotation__, and will then call them when running the unit test. 
 
 ### Code
 
-__not written by me__
+The following example code is covered in [this post](http://tutorials.jenkov.com/java-reflection/index.html): 
 
-	/* Flip a positive sign to negative, or a negative sign to pos */
-	public static int FnNegate(int a) {
-		int neg = 0;
-		int d = a < 0 ? 1 : -1;
-		while (a != 0) {
-			neg += d;
-			a += d;
+	public class JavaReflection {
+
+		public static void main(String[] args) {
+			Method[] methods;
+
+			methods = ListNode.class.getMethods();
+
+			for (Method method : methods) {
+				System.out.println(formatMethodName(method.getName() + "()")
+						+ method.getDeclaringClass());
+			}
 		}
-		return neg;
-	}
 
-	/* Subtract two numbers by negating b and adding them */
-	public static int FnMinus(int a, int b) {
-		return a + FnNegate(b);
-	}
-
-	/* Check if a and b are different signs */
-	public static boolean DifferentSigns(int a, int b) {
-		return ((a < 0 && b > 0) || (a > 0 && b < 0)) ? true : false;
-	}
-
-	/* Return absolute value */
-	public static int abs(int a) {
-		if (a < 0)
-			return FnNegate(a);
-		else
-			return a;
-	}
-
-	/* Multiply a by b by adding a to itself b times */
-	public static int FnTimes(int a, int b) {
-		if (a < b)
-			return FnTimes(b, a); // algo is faster if b < a
-		int sum = 0;
-		for (int iter = abs(b); iter > 0; --iter)
-			sum += a;
-		if (b < 0)
-			sum = FnNegate(sum);
-		return sum;
-	}
-
-	// returns 1, if a/b >= 0.5, and 0 otherwise
-	public static int DefineAndRoundFraction(int a, int b) {
-		if (FnTimes(abs(a), 2) >= abs(b))
-			return 1;
-		else
-			return 0;
-	}
-
-	/*
-	 * Divide a by b by literally counting how many times does b go into a. That
-	 * is, count how many times you can subtract b from a until you hit 0.
-	 */
-	public static int FnDivide(int a, int b)
-			throws java.lang.ArithmeticException {
-		if (b == 0) {
-			throw new java.lang.ArithmeticException("ERROR: Divide by zero.");
+		private static String formatMethodName(String methodName) {
+			for (int i = methodName.length(); i < 30; i++) {
+				methodName += ".";
+			}
+			return methodName;
 		}
-		int quotient = 0;
-		int divisor = FnNegate(abs(b));
-		int divend; /* dividend */
-		for (divend = abs(a); divend >= abs(divisor); divend += divisor) {
-			++quotient;
-		}
-		if (DifferentSigns(a, b))
-			quotient = FnNegate(quotient);
-		return quotient;
 	}
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v4] 10.6 Find Collinear in 2D Plane (`)]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/08/find-coliner-in-2d-plane/"/>
+    <title type="html"><![CDATA[[CC150v4] 14.1 Java Private Constructor]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/java-private-constructor/"/>
     <updated>2014-09-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/08/find-coliner-in-2d-plane</id>
+    <id>http://okckd.github.io/blog/2014/09/08/java-private-constructor</id>
     <content type="html"><![CDATA[### Question
 
-> Given a two dimensional graph with points on it, find a line which passes the most number of points. 
+> In terms of inheritance, what is the effect of keeping a constructor private? 
 
 ### Solution
 
+[If the programmer](http://www.javapractices.com/topic/TopicAction.do?Id=40) does not provide a constructor for a class, __the system will always provide a default, public no-argument constructor__. 
 
+To disable this default constructor, simply add a private no-argument constructor to the class. 
 
-### Code
+Two categories of usage: 
 
+1. Object construction is entirely forbidden
+	
+	1. class offers only static members (sometimes called __[utility class](http://stackoverflow.com/a/17342889)__) 
 
+1. Object construction is private only
+
+	1. a class needs to prevent the caller from creating objects, like Singleton
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v4] Chap9 Example - Sort Persons]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/sort-persons/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/sort-persons</id>
+    <title type="html"><![CDATA[[CC150v4] 14.6 Java HashMap Counter]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/java-hashmap-counter/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/java-hashmap-counter</id>
     <content type="html"><![CDATA[### Question
 
-> You have a very large array of ‘Person’ objects. Sort the people in increasing order of age. 
+> Suppose you are using a map in your program, how would you count the number of times the program calls the put() and get() functions? 
 
 ### Solution
 
-First we look at the nature of this question: 
+__Write a wrapper class upon the HashMap Class__, and override the ger() and put() methods. 
 
-1. large input array
-1. sort based on age (__which is between 1 and 100__, this is important)
+However, what if we have multiple instance of hashmap? __Solution is to use a static variable to count__. Some answers are found [here](http://stackoverflow.com/a/20027116). 
 
-__This exactly matches the charasteristics of Bucket Sort__. Time complexity in average case is O(n + k) where k is the number of buckets. ]]></content>
+Good question this is! 
+
+### Code 
+
+	public static class MyHashMap<K, V> extends HashMap<K, V> {
+
+		private static final long serialVersionUID = 1L;
+		private static int count = 0;
+
+		public V put(K key, V value) {
+			count++;
+			return super.put(key, value);
+		}
+
+		public V get(Object key) {
+			count++;
+			return super.get(key);
+		}
+
+		public static int getCount() {
+			return count;
+		}
+	}
+]]></content>
   </entry>
   
 </feed>

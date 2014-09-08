@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Write a program to sort a stack in ascending order. You should not make any assumptions about how the stack is implemented. The following &hellip;">
+  <meta name="description" content="Question Given a sorted array of strings which is interspersed with empty strings, write a method to find the location of a given string. Example: &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,402 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/search-array-containing-empty-string/">[CC150v4] 9.5 Search Array Containing Empty String</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given a sorted array of strings which is interspersed with empty strings, write a method to find the location of a given string.</p>
+
+<p>Example: find “ball” in [“at”, “”, “”, “”, “ball”, “”, “”, “car”, “”, “”, “dad”, “”, “”] will return 4</p>
+
+<p>Example: find “ballcar” in [“at”, “”, “”, “”, “”, “ball”, “car”, “”, “”, “dad”, “”, “”] will return -1</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The solution is binary search, but when reads empty, <strong>advance to the next non-empty string</strong>.</p>
+
+<p>But wait, <strong>there can be a very big problem that causes looping forever</strong>. Eg.</p>
+
+<blockquote><p>&ldquo;a&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;c&rdquo; (5 items), look for &ldquo;b&rdquo;</p>
+
+<p>Now &lsquo;left&rsquo; points to 1st string(&ldquo;a&rdquo;) and &lsquo;right&rsquo; points to 4th(&ldquo;&rdquo;). If we read read &lsquo;mid&rsquo; value and advance to the next non-empty string, it&rsquo;ll be &ldquo;c&rdquo;.</p>
+
+<p>since &ldquo;c&rdquo; is large than &ldquo;b&rdquo;, &lsquo;right&rsquo; is set to the 4th index. It&rsquo;s a endless loop!</p></blockquote>
+
+<p>There&rsquo;re various ways to solve this. The book suggests <strong>locate &lsquo;right&rsquo; pointer at non-empty string</strong> by moving left, and then <strong>locate &lsquo;mid&rsquo; pointer at non-empty</strong> by moving right. This avoids endless loop.</p>
+
+<p>My approach is to use 2 instances of &lsquo;mid&rsquo;:</p>
+
+<ol>
+<li>calculatedMid</li>
+<li>comparisonMid</li>
+</ol>
+
+
+<p>Both ways are fine.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int search(String[] input, String target) {
+    if (target == null || target.length() == 0) {
+        return -1;
+    }
+    int len = input.length;
+    int left = 0, right = len - 1;
+    while (left &lt; right) {
+        int calculatedMid = left + (right - left) / 2;
+        int comparisonMid = calculatedMid;
+        while (comparisonMid &lt; len &amp;&amp; input[comparisonMid].length() == 0) {
+            comparisonMid++;
+        }
+        if (input[comparisonMid].equals(target)) {
+            return comparisonMid;
+        } else if (input[comparisonMid].compareTo(target) &lt; 0) {
+            left = comparisonMid + 1;
+        } else {
+            right = calculatedMid - 1;
+        }
+    }
+    if (left &lt; len &amp;&amp; input[left].equals(target)) {
+        return left;
+    } else {
+        return -1;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/generate-permutation-recursively/">[CC150v4] 8.4 Generate Permutation Recursively</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a method to compute all permutations of a string.</p>
+
+<p>Do it recursively.</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Get first char.</p></li>
+<li><p>Permute the reminder of the string.</p></li>
+<li><p>Insert that char into all possible positions.</p></li>
+</ol>
+
+
+<p>The code is more concise that doing it iteratively, <strong>and no visited array needed</strong>!</p>
+
+<h3>Code</h3>
+
+<pre><code>public static ArrayList&lt;String&gt; getPerms(String s) {
+    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    if (s.length() == 1) {
+        ans.add(s);
+        return ans;
+    }
+    char single = s.charAt(0);
+    ArrayList&lt;String&gt; partialPerms = getPerms(s.substring(1));
+    for (String part : partialPerms) {
+        for (int i = 0; i &lt;= part.length(); i++) {
+            ans.add(part.substring(0, i) + single + part.substring(i));
+        }
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>An array A[1&hellip;n] contains all the integers from 0 to n except for one number which is missing. In this problem, we cannot access an entire integer in A with a single operation.</p>
+
+<p>The elements of A are represented in binary, and the only operation we can use to access them is “fetch the jth bit of A[i]”, which takes constant time. Write code to find the missing integer. Can you do it in O(n) time?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult bit operation question</strong>.</p>
+
+<p>The main thing to understand is, for a particular bit:</p>
+
+<blockquote><p>if the bit value of the removed number is 0, then count(0) &lt;= count(1)</p>
+
+<p>if the bit value of the removed number is 1, then count(0) > count(1)</p></blockquote>
+
+<p>By using this principle, we can easily find the missing value for each bit.</p>
+
+<p><strong>However, we must know when to stop checking</strong>. For example:</p>
+
+<blockquote><p>input: 000, 001, 011</p></blockquote>
+
+<p>We know that the last bit is 0, second last is 1. We shall stop here and return the result &ldquo;010&rdquo;. If we did not stop, the result value would be &ldquo;110&rdquo;, which is wrong. How this is handled is by <strong>passing only half of the input list each time</strong>, and we also add one condition at the beginning:</p>
+
+<pre><code>if (list.size() == 0)
+    return 0;
+</code></pre>
+
+<p>By doing this, we always limit the input list to a smaller range, until we finish finding all bits.</p>
+
+<h3>Code</h3>
+
+<p><strong>hard to write</strong></p>
+
+<pre><code>public static int findMissing(List&lt;BitInteger&gt; list) {
+    return helper(list, BitInteger.INTEGER_SIZE - 1);
+}
+
+private static int helper(List&lt;BitInteger&gt; list, int col) {
+    if (list.size() == 0)
+        return 0;
+    List&lt;BitInteger&gt; zeroList = new ArrayList&lt;BitInteger&gt;();
+    List&lt;BitInteger&gt; oneList = new ArrayList&lt;BitInteger&gt;();
+    for (BitInteger bit : list) {
+        if (bit.fetch(col) == 0) {
+            zeroList.add(bit);
+        } else {
+            oneList.add(bit);
+        }
+    }
+    if (zeroList.size() &lt;= oneList.size()) {
+        // this means the missing value contains a 0
+        return helper(zeroList, col - 1) &lt;&lt; 1;
+    } else {
+        // the missing value contains 1
+        return helper(oneList, col - 1) &lt;&lt; 1 | 1;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/cover-the-chess-board/">[CC150v4] 6.2 Cover the Chess Board</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>There is an 8x8 chess board in which two diagonally opposite squares have been cut off. You are given 31 dominos, and a single domino can cover exactly two squares.</p>
+
+<p>Can you use the 31 dominos to cover the entire board? Prove your answer (by providing an example, or showing why it’s impossible).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The chess board initially has 32 black and 32 white squares. By removing opposite corners, we&rsquo;re left with 30 of one color and 32 of the other color.</p>
+
+<p>31 dominos must cover 31 of one color and 31 of the other color.</p>
+
+<p>So, impossible.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/convert-integer-to-binary/">[CC150v4] 5.2 Convert Integer to Binary Form</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given a (decimal &ndash; e.g. 3.72) number that is passed in as a string, print the binary representation.</p>
+
+<p>If the number can not be represented accurately in binary, print “ERROR”</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Convert the integer part is easy.</p>
+
+<p><strong>The difficulty is how to convert a floating point (the decimal part) to binary form</strong>. The idea suggested in the book is to keep x2, and subtract 1 when necessary. Eg.</p>
+
+<blockquote><p>0.625 x 2 = 1.25, append 1</p>
+
+<p>0.25 x 2 = 0.5, append 0</p>
+
+<p>0.5 x 2 = 1, append 1</p>
+
+<p>the binary form of 0.625 would be 0.101.</p></blockquote>
+
+<p>We must declarify the max number of digits in the decimal part. In the book, <strong>the answer assumes a maximum digits of 32 bits</strong> (i.e. when binary length grows more than 32 bits, return &ldquo;Error&rdquo;).</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static String printBinary(String n) {
+    String[] num = n.split("\\.");
+    int integer = Integer.parseInt(num[0]);
+    double decimal = Double.parseDouble("0." + num[1]);
+
+    // now convert decimal part, if can't convert, return ERROR
+    StringBuilder sb = new StringBuilder();
+    while (decimal != 0) {
+        if (sb.length() &gt; 32) {
+            return "ERROR";
+        }
+        double newDoub = 2 * decimal;
+        sb.append(newDoub &gt;= 1 ? "1" : "0");
+        decimal = newDoub % 1;
+    }
+
+    // now convert integer part
+    String intStr = "";
+    while (integer != 0) {
+        intStr = ((integer &amp; 1) == 1 ? "1" : "0") + intStr;
+        integer = integer &gt;&gt; 1;
+    }
+
+    // return the 2 parts connected with a dot
+    return intStr + "." + sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -495,368 +891,6 @@ private static boolean matchTree(TreeNode t1, TreeNode t2) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/06/Form-palindrome-with-insertion/">[Google] Form a Palindrome With Insertion</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Given-a-string-convert-it-into-a-palindrome-with-the-lease-number-of-insertions-possible-QTN_729122.htm">link</a></p>
-
-<blockquote><p>Given a string, convert it into a palindrome with the lease number of insertions possible.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a DP question. There&rsquo;re 2 approaches.</p>
-
-<p><strong>First, is direct DP</strong>. This is the nicest solution, not intuitive at first, but actually good.</p>
-
-<blockquote><p>P[i, j] = P[i+1, j-1], if S[i] = S[j]</p>
-
-<p>P[i, j] = 1 + min(P[i,j-1], P[i+1,j]), otherwise</p></blockquote>
-
-<p>contributed by <a href="http://stackoverflow.com/a/10732879">this guy</a>.</p>
-
-<p><strong>Second approach is to calculate the longest palindrome subsequence</strong>, and the answer would be string length minus this value.</p>
-
-<p>I wrote code for both apporaches.</p>
-
-<p>According to <a href="http://www.geeksforgeeks.org/dynamic-programming-set-28-minimum-insertions-to-form-a-palindrome/">G4G</a>, we can actually calculate the <strong>Longest Common Subsequence of the string and its reverse</strong>, and this value shall be same as the longest palindrome subsequence that we got in second approach. It&rsquo;s nice to know this idea.</p>
-
-<h3>Code</h3>
-
-<p><strong>direct</strong></p>
-
-<pre><code>public int solve1(String str) {
-    // direct dp
-    if (str == null)
-        return 0;
-    int len = str.length();
-    int[][] dp = new int[len][len];
-    for (int i = len - 1; i &gt;= 0; i--) {
-        for (int j = i; j &lt; len; j++) {
-            if (i == j) {
-                dp[i][j] = 0;
-            } else if (i + 1 == j) {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 0 : 1;
-            } else {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? dp[i + 1][j - 1]
-                        : 1 + Math.min(dp[i + 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-    return dp[0][len - 1];
-}
-</code></pre>
-
-<p><strong>longest palindrome subsequence</strong></p>
-
-<pre><code>public int solve2(String str) {
-    // longest palindrome subsequence
-    if (str == null)
-        return 0;
-    int len = str.length();
-    int[][] dp = new int[len][len];
-    for (int i = len - 1; i &gt;= 0; i--) {
-        for (int j = i; j &lt; len; j++) {
-            if (i == j) {
-                dp[i][j] = 1;
-            } else if (i + 1 == j) {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 2 : 1;
-            } else {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 2 + dp[i + 1][j - 1]
-                        : Math.max(dp[i + 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-    return len - dp[0][len - 1];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/04/unsolved-mystery-of-utf8/">[Google] Unsolved Mystery of UTF8 Encoding</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-04T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://algorithmguru.com/blog/?p=148">link</a></p>
-
-<blockquote><p>UTF-8 is a variable-length encoding of letters or runes. If the most significant bit of the first byte is 0, the letter is 1 byte long. Otherwise, its length is the number of leading 1’s in the first byte. If a letter is more than one byte long, all subsequent runes start with 10. Here’s a chart:</p>
-
-<p>UTF-8 encoding scheme is described below:</p></blockquote>
-
-<pre><code>0XXXXXXX = this is the entire rune
-10XXXXXX = this is a continuation of the rune from the previous byte
-110XXXXX = this is the start of a 2-byte rune.
-1110XXXX = this is the start of a 3-byte rune.
-11110XXX = this is the start of a 4-byte rune.
-111110XX = this is the start of a 5-byte rune.
-1111110X = this is the start of a 6-byte rune.
-11111110 = this is the start of a 7-byte rune.
-11111111 = this is the start of a 8-byte rune.
-</code></pre>
-
-<blockquote><p>For example, a 3-byte rune would be 1110XXXX 10XXXXXX 10XXXXXX.</p>
-
-<p>Write a function that decides whether a given byte array (or string) is valid UTF-8 encoded text.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is an easy question, just put here for reference.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/04/print-numbers-containing-5/">[Question] Print Numbers Containing 5</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-04T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32651839.html">link</a></p>
-
-<blockquote><p>写一个function，对于参数n，输出从0到n之间所有含5的数字。eg. func(30) 应该输出5，15，25</p>
-
-<p>this is Groupon interview question</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Suggested by level 10 of <a href="http://www.mitbbs.com/article_t/JobHunting/32651839.html">this forum</a>. It&rsquo;s (surprisingly) a DFS question.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public void mySolution(int num) {
-    if (num &gt;= 5) {
-        String str = String.valueOf(num);
-        helper(num, "", 0, str.length(), false);
-    }
-}
-
-private void helper(int max, String prefix, int pos, int len, boolean have5) {
-    if (pos == len) {
-        int cur = Integer.parseInt(prefix);
-        if (cur &lt;= max) {
-            System.out.print(cur + ", ");
-        }
-        return;
-    }
-    for (int i = 0; i &lt; 10; i++) {
-        if (pos == len - 1 &amp;&amp; !have5 &amp;&amp; i != 5) {
-            continue;
-        }
-        helper(max, prefix + i, pos + 1, len, have5 || i == 5);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/04/Find-second-shortest-path/">[Google] Find Second Shortest Path</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-04T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=16922663">link</a></p>
-
-<blockquote><p>You are given a graph and an algorithm that can find the shortest path b/w any two nodes.</p>
-
-<p>Now you have to find the second shortest path between same two nodes.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>From the top answer:</p>
-
-<blockquote><p><strong>Find the shortest path</strong> between any two nodes. Let them be A and B.</p>
-
-<p>Now to get second shortest path between the same nodes, <strong>remove any one edge that is involved in the shortest path</strong> between the same nodes and calculate the shortest path.</p>
-
-<p>Do the above process for each of the node involved in shortest path and keep track of the minimum second shortest path found.</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/04/Code-a-hashmap/">[Google] Code a HashMap</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-04T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
-
-<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We already write 2 post before:</p>
-
-<ol>
-<li><p><strong>[Question] Implement a HashMap</strong></p></li>
-<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
-</ol>
-
-
-<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
-
-<ol>
-<li>The basic structure is an array. It can be:
-
-<ol>
-<li>An array of linked nodes (with a next pointer).</li>
-<li>An array of linked list.</li>
-</ol>
-</li>
-<li>There should be a hash function.</li>
-<li>There should be a function to convert the hash value to corresponding array index.</li>
-<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
-<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -872,7 +906,7 @@ private void helper(int max, String prefix, int pos, int len, boolean have5) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (19)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (24)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
@@ -895,7 +929,7 @@ private void helper(int max, String prefix, int pos, int len, boolean have5) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/08/test-webpage-without-tool/">[CC150v4] 11.4 Test Webpage Without Tools (`)</a>
+        <a href="/blog/2014/09/08/test-webpage-without-tool/">[CC150v4] 11.4 Test Webpage Without Tools</a>
       </li>
     
       <li class="post">
@@ -903,15 +937,15 @@ private void helper(int max, String prefix, int pos, int len, boolean have5) {
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a>
+        <a href="/blog/2014/09/08/java-reflection/">[CC150v4] 14.5 Java Reflection</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/08/find-coliner-in-2d-plane/">[CC150v4] 10.6 Find Collinear in 2D Plane (`)</a>
+        <a href="/blog/2014/09/08/java-private-constructor/">[CC150v4] 14.1 Java Private Constructor</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
+        <a href="/blog/2014/09/08/java-hashmap-counter/">[CC150v4] 14.6 Java HashMap Counter</a>
       </li>
     
   </ul>
