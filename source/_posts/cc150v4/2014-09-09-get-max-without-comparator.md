@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v4] 19.4 Get Max Number with >, < operator "
+title: "[CC150v4] 19.4 Get Max Number without Comparator "
 comments: true
 category: CC150v4
 tags: [  ]

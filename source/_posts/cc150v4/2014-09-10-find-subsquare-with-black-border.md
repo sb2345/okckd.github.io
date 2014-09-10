@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v4] 20.11 Find Subsquare with Same Border "
+title: "[CC150v4] 20.11 Find Subsquare with Black Border "
 comments: true
 category: CC150v4
 tags: [  ]
