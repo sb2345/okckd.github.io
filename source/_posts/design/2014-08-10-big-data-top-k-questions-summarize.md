@@ -2,7 +2,9 @@
 layout: post
 title: "[Design] Big Data - Top k Questions (summarize)"
 comments: true
-category: Design
+categories:
+- Design
+- Top K
 tags: [  ]
 ---
 
