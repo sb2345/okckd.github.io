@@ -9,10 +9,8 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given s1, s2, s3, find whether s3 is formed by the interleaving of s1 and s2. For example,
-Given:
-s1 = "aabcc",
-s2 = "dbbca", When s3 &hellip;">
+  <meta name="description" content="Question link Given inorder and postorder traversal of a tree, construct the binary tree. Note:
+You may assume that duplicates do not exist in the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -86,7 +84,7 @@ s2 = "dbbca", When s3 &hellip;">
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/24/Interleaving-String/">[LeetCode 97] Interleaving String</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Inorder-and-Postorder/">[LeetCode 106] Construct Binary Tree From Inorder and Postorder</a></h1>
     
     
       <p class="meta">
@@ -102,7 +100,7 @@ s2 = "dbbca", When s3 &hellip;">
   
 
 
-<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -111,22 +109,13 @@ s2 = "dbbca", When s3 &hellip;">
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/interleaving-string/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/">link</a></p>
 
 <div class="question-content">
-            <p></p><p>
-Given <i>s1</i>, <i>s2</i>, <i>s3</i>, find whether <i>s3</i> is formed by the interleaving of <i>s1</i> and <i>s2</i>.
-</p>
+            <p></p><p>Given inorder and postorder traversal of a tree, construct the binary tree.</p>
 
-<p>
-For example,<br>
-Given:<br>
-<i>s1</i> = <code>"aabcc"</code>,<br>
-<i>s2</i> = <code>"dbbca"</code>,
-</p>
-<p>
-When <i>s3</i> = <code>"aadbbcbcac"</code>, return true.<br>
-When <i>s3</i> = <code>"aadbbbaccc"</code>, return false.
+<p><b>Note:</b><br>
+You may assume that duplicates do not exist in the tree.
 </p><p></p>
           </div>
 
@@ -136,11 +125,11 @@ When <i>s3</i> = <code>"aadbbbaccc"</code>, return false.
 <table border="2">
     <tr>
         <td>Frequency</td>
-        <td bgcolor="lime">2</td>
+        <td bgcolor="yellow">3</td>
     </tr>
     <tr>
         <td>Difficulty</td>
-        <td bgcolor="red">5</td>
+        <td bgcolor="yellow">3</td>
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
@@ -157,42 +146,38 @@ When <i>s3</i> = <code>"aadbbbaccc"</code>, return false.
 
 <h3>Analysis</h3>
 
-<p><strong>This is a DP question</strong>.</p>
-
-<p>At first look it might look like very easily solved by DFS. It it, but TLE exception.</p>
-
-<p>So, I learnt the idea from <a href="http://blog.csdn.net/u011095253/article/details/9248073">this blog</a>. It&rsquo;s easy to realize this is a <strong>very standard DP question</strong>.</p>
+<p><strong>This is exactly the same question as</strong> &ldquo;Construct Binary Tree from Preorder and Inorder&rdquo;.</p>
 
 <h3>Solution</h3>
 
-<p>Declare a 2-D array for DP, and dp(i)(j) denotes whether it&rsquo;s possible to construct s3 (of length i+j) by using s1 (of length i) and s2 (of length j).</p>
-
-<p>Only thing needs to mention is the size of dp is (m+1)*(n+1), because i = [0, m] and j = [0, n].</p>
+<p>I post the code from <a href="http://www.programcreek.com/2013/01/construct-binary-tree-from-inorder-and-postorder-traversal/">this article</a>.</p>
 
 <h3>Code</h3>
 
-<p><strong>DP solution</strong></p>
+<pre><code>public TreeNode buildTree(int[] inorder, int[] postorder) {
+    int inStart = 0, inEnd = inorder.length-1;
+    int postStart =0, postEnd = postorder.length-1;
+    return buildTree(inorder, inStart, inEnd, postorder, postStart, postEnd);
+}
 
-<pre><code>public boolean isInterleave(String s1, String s2, String s3) {
-    int len1 = s1.length();
-    int len2 = s2.length();
-    int len3 = s3.length();
-    if (len1 + len2 != len3) return false;
-    boolean[][] dp = new boolean[len1 + 1][len2 + 1];
-    dp[0][0] = true;
-    for (int i = 1; i &lt;= len2; i ++)
-        dp[0][i] = dp[0][i - 1] &amp; s2.charAt(i-1) == s3.charAt(i-1);
-    for (int i = 1; i &lt;= len1; i ++)
-        dp[i][0] = dp[i-1][0] &amp; s1.charAt(i-1) == s3.charAt(i-1);
-    for (int i = 1; i &lt;= len1; i ++) {
-        for (int j = 1; j &lt;= len2; j ++) {
-            if (s1.charAt(i-1) == s3.charAt(i+j-1) &amp;&amp; dp[i-1][j])
-                dp[i][j] = true;
-            if (s2.charAt(j-1) == s3.charAt(i+j-1) &amp;&amp; dp[i][j-1])
-                dp[i][j] = true;
+public TreeNode buildTree(int[] inorder, int inStart, int inEnd, 
+                          int[] postorder, int postStart, int postEnd){
+    if(inStart &gt; inEnd || postStart &gt; postEnd)
+        return null;
+    int rootValue = postorder[postEnd];
+    TreeNode root = new TreeNode(rootValue);
+    int k=0;
+    for(int i=0; i&lt; inorder.length; i++){
+        if(inorder[i]==rootValue){
+            k = i;
+            break;
         }
     }
-    return dp[len1][len2];
+    root.left = buildTree(inorder, inStart, k-1, 
+        postorder, postStart, postStart+k-(inStart+1));
+    root.right = buildTree(inorder, k+1, inEnd, 
+        postorder, postStart+k-inStart, postEnd-1);
+    return root;
 }
 </code></pre>
 </div>
@@ -207,7 +192,7 @@ When <i>s3</i> = <code>"aadbbbaccc"</code>, return false.
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/24/Binary-Tree-Inorder-Traversal/">[LeetCode 94] Binary Tree Inorder Traversal</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/26/Validate-Binary-Search-Tree/">[LeetCode 98] Validate Binary Search Tree</a></h1>
     
     
       <p class="meta">
@@ -223,7 +208,7 @@ When <i>s3</i> = <code>"aadbbbaccc"</code>, return false.
   
 
 
-<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -232,27 +217,21 @@ When <i>s3</i> = <code>"aadbbbaccc"</code>, return false.
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/binary-tree-inorder-traversal/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/validate-binary-search-tree/">link</a></p>
 
 <div class="question-content">
-            <p></p><p>Given a binary tree, return the <i>inorder</i> traversal of its nodes&#8217; values.</p>
-
-<p>
-For example:<br>
-Given binary tree <code>{1,#,2,3}</code>,<br>
-</p><pre>   1
-    \
-     2
-    /
-   3
-</pre>
-<p></p>
-<p>
-return <code>[1,3,2]</code>.
+            <p></p><p>
+Given a binary tree, determine if it is a valid binary search tree (BST).
 </p>
 
-<p><b>Note:</b> Recursive solution is trivial, could you do it iteratively?</p>
-
+<p>
+Assume a BST is defined as follows:
+</p><ul>
+<li>The left subtree of a node contains only nodes with keys <b>less than</b> the node&#8217;s key.</li>
+<li>The right subtree of a node contains only nodes with keys <b>greater than</b> the node&#8217;s key.</li>
+<li>Both the left and right subtrees must also be binary search trees.</li>
+</ul>
+<p></p>
 <p></p>
           </div>
 
@@ -262,7 +241,7 @@ return <code>[1,3,2]</code>.
 <table border="2">
     <tr>
         <td>Frequency</td>
-        <td bgcolor="red">4</td>
+        <td bgcolor="red">5</td>
     </tr>
     <tr>
         <td>Difficulty</td>
@@ -270,11 +249,11 @@ return <code>[1,3,2]</code>.
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
+        <td bgcolor="yellow">3</td>
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
@@ -283,332 +262,38 @@ return <code>[1,3,2]</code>.
 
 <h3>Analysis</h3>
 
-<p><strong>This is a classic AND EXTREMELY IMPORTANT question</strong>. I solved it at first attempt, but forget about it and couldn&rsquo;t solve on 2nd time.</p>
+<p><strong>This is a textbook-like example of recursion</strong>.</p>
 
-<p>About DFS, it is always implemented with a stack, no matter recursion is used or not. See <a href="http://leetcode.com/2010/09/printing-binary-tree-in-level-order.html">here</a></p>
-
-<blockquote><p>DFS uses a data structure called Stack and is commonly implemented using recursion (since function calls are pushed and popped off the memory stack). If recursion is not allowed, we can simulate the recursion by using iterative method with the help of stack.</p></blockquote>
-
-<p><strong>A not-very-intuitive solution is Morris Traversal</strong>. The idea behind this is <a href="http://en.wikipedia.org/wiki/Threaded_binary_tree">Threaded binary tree</a>. I don&rsquo;t like this method, so I will skip.</p>
-
-<p>The idea written below (2nd code) is very interesting, and was never seen before. Should keep it in mind.</p>
-
-<h3>Solution</h3>
-
-<p><strong>The most classic and standard solution for this question</strong> is explained well in <a href="http://leetcode.com/2010/04/binary-search-tree-in-order-traversal.html">this blog</a>.</p>
-
-<blockquote><p>First, the current pointer is initialized to the root. Keep traversing to its left child while pushing visited nodes onto the stack. When you reach a NULL node (ie, you&rsquo;ve reached a leaf node), you would pop off an element from the stack and set it to current. Now is the time to print current&rsquo;s value. Then, current is set to its right child and repeat the process again. When the stack is empty, this means you&rsquo;re done printing.</p></blockquote>
+<p>I solved it using DFS, but there is actually a much more concise solution.</p>
 
 <h3>Code</h3>
 
-<p><strong>First, my previous code, very good solution</strong>.</p>
+<p><strong>First, my code</strong>, it&rsquo;s basically a in-order traversal.</p>
 
-<pre><code>public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) {
-    Stack&lt;TreeNode&gt; stk = new Stack&lt;TreeNode&gt;();
-    stk.push(root);
-    ArrayList&lt;Integer&gt; ls = new ArrayList&lt;Integer&gt;();
+<pre><code>int num = Integer.MIN_VALUE;
 
-    if(root == null)
-        return ls;
-    while(stk.size() &gt; 0){
-        TreeNode cur = stk.peek();
-        if (cur == null){
-            stk.pop();
-            if (stk.size() == 0) return ls;
-            TreeNode temp = stk.pop(); 
-            ls.add(temp.val);
-            stk.push(temp.right);
-            // why do I need a temp variable at this step?
-            // this isn't good enough, change it in the future
-        } else if (cur.left != null){
-            stk.push(cur.left);
-        } else {
-            ls.add(cur.val);
-            stk.pop();
-            stk.push(cur.right);
-        }
-    }
-    return ls;
-}
-// Program Logic:
-// If cur is null
-//    Remove cur
-//    Print next stack node
-//    Push next stack node's right
-// Else if cur got left
-//    Push cur.left
-// Else if cur not got left
-//    Print cur
-//    Remove cur
-//    Push cur.right
-// End if
-</code></pre>
-
-<p><strong>Second, standard solution, which is a simplified version of above code</strong></p>
-
-<pre><code>public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
-    TreeNode p = root;
-    while (p != null || ! stack.isEmpty()) {
-        if (p != null) {
-            stack.push(p);
-            p = p.left;
-        }
-        else if (! stack.isEmpty()) {
-            TreeNode temp = stack.pop();
-            ans.add(temp.val);
-            p = temp.right;
-        }
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Scramble-String/">[LeetCode 87] Scramble String</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/scramble-string/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a string <i>s1</i>, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively.
-</p>
-<p>
-Below is one possible representation of <i>s1</i> = <code>"great"</code>:
-</p>
-<pre>    great
-   /    \
-  gr    eat
- / \    /  \
-g   r  e   at
-           / \
-          a   t
-</pre>
-<p>
-To scramble the string, we may choose any non-leaf node and swap its two children.
-</p>
-<p>
-For example, if we choose the node <code>"gr"</code> and swap its two children, it produces a scrambled string <code>"rgeat"</code>.
-</p>
-<pre>    rgeat
-   /    \
-  rg    eat
- / \    /  \
-r   g  e   at
-           / \
-          a   t
-</pre>
-<p>
-We say that <code>"rgeat"</code> is a scrambled string of <code>"great"</code>.
-</p>
-<p>
-Similarly, if we continue to swap the children of nodes <code>"eat"</code> and <code>"at"</code>, it produces a scrambled string <code>"rgtae"</code>.
-</p>
-<pre>    rgtae
-   /    \
-  rg    tae
- / \    /  \
-r   g  ta  e
-       / \
-      t   a
-</pre>
-<p>
-We say that <code>"rgtae"</code> is a scrambled string of <code>"great"</code>.
-</p>
-<p>
-Given two strings <i>s1</i> and <i>s2</i> of the same length, determine if <i>s2</i> is a scrambled string of <i>s1</i>.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>This is problem can be solved by <strong>either DFS or DP.</strong></p>
-
-<p><strong><a href="http://zhaohongze.com/wordpress/2013/12/12/leetcode-scramble-string/">This blog</a> have a very good analysis of the DFS approach</strong>.</p>
-
-<blockquote>
-<p>Note that the binary tree can be constructed arbitrarily. So the general idea to tackle this problem is to enumerate every possible binary trees using DFS to see if two strings are scrambled strings. We can accelerate this process by adding a very efficient pruning.<br>
-Given two strings, s1, s2. First check if they have same letters and same length, denote as len.<br>
-For any l (1 &lt;= l &lt;= len): partition s1 into s11 = s1[0 : l), s12 = s1[l : len). We have two ways to partition s1:</p>
-<ol>
-<li>s21 = s2[0 : 1), s22 = s2[l : len). In this case, check s11 and s21 have same letters and are scrambled strings. And check s12 and s22 have same letters and are scrambled strings</li>
-<li>s21 = s2[0 : len – l), s22 = s2[len – l : len). In this case, check s11 and s22 have same letters and are scrambled strings. Then check s12 and s21 have same letters and are scrambled strings </li>
-</ol>
-</blockquote>
-
-
-<p><strong><a href="http://blog.sina.com.cn/s/blog_b9285de20101gy6n.html">This blog</a> have a very good DP analysis</strong>.</p>
-
-<blockquote>
-<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
-dp[i][j][k] 代表了s1从i开始，s2从j开始，长度为k的两个substring是否为scramble
-string。</span><br>
-<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
-有三种情况需要考虑：</span><br>
-<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
-1. 如果两个substring相等的话，则为true</span><br>
-<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
-2. 如果两个substring中间某一个点，左边的substrings为scramble string，
-同时右边的substrings也为scramble string，则为true</span><br>
-<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
-3. 如果两个substring中间某一个点，s1左边的substring和s2右边的substring为scramble
-string, 同时s1右边substring和s2左边的substring也为scramble
-string，则为true</span><br>
-</blockquote>
-
-
-<p>For more explanation, <a href="http://yihuad.blogspot.sg/2013/10/scramble-string-leetcode.html">this blog</a> and <a href="http://www.blogjava.net/sandy/archive/2013/05/22/399605.html">this blog</a> and <a href="http://blog.csdn.net/linhuanmars/article/details/24506703">this blog</a> have discussed about it.</p>
-
-<h3>Code</h3>
-
-<p><strong>my code</strong></p>
-
-<pre><code>public boolean isScramble(String s1, String s2) {
-    if (! sameLetters(s1, s2)) return false;
-    if (s1.equals(s2)) return true;
-    for (int i = 1; i &lt; s1.length(); i ++) {
-        String left1 = s1.substring(0,  i);
-        String right1 = s1.substring(i, s1.length());
-        String left2 = s2.substring(0,  i);
-        String right2 = s2.substring(i, s2.length());
-        if (isScramble(left1, left2) &amp;&amp; isScramble(right1, right2))
-            return true;
-        left2 = s2.substring(0, s2.length() - i);
-        right2 = s2.substring(s2.length() - i, s2.length());
-        if (isScramble(left1, right2) &amp;&amp; isScramble(right1, left2))
-            return true;
-    }
-    return false;
-}
-
-private boolean sameLetters(String a, String b) {
-    if (a.length() != b.length()) return false;
-    int[] count = new int[26];
-    for (Character aa: a.toCharArray()) 
-        count[aa - 'a'] ++;
-    for (Character bb: b.toCharArray()) 
-        if (count[bb - 'a'] -- &lt;= 0) 
-            return false;
+public boolean isValidBST(TreeNode root) {
+    if (root == null) return true;
+    if(! isValidBST(root.left)) return false;
+    if (num &gt;= root.val) return false;
+    num = root.val;
+    if(! isValidBST(root.right)) return false;
     return true;
 }
 </code></pre>
 
-<p><strong>Updated on July 5th, 2014</strong>: written again with less substring operations and more variables inside the method:</p>
+<p><strong>Second, great solution I found from <a href="http://www.programcreek.com/2012/12/leetcode-validate-binary-search-tree-java/">this post</a></strong></p>
 
-<pre><code>public boolean isScramble(String s1, String s2) {
-    if (s1 == null || s2 == null || s1.length() != s2.length()) {
-        return false;
-    }
-    int len = s1.length();
-    return helper(s1, 0, len - 1, s2, 0, len - 1);
+<pre><code>public static boolean isValidBST(TreeNode root) {
+    return validate(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
 }
 
-private boolean helper(String s1, int a1, int b1, String s2, int a2, int b2) {
-    if (a1 - b1 != a2 - b2) 
+public static boolean validate(TreeNode root, int min, int max) {
+    if (root == null) return true;
+    if (root.val &lt;= min || root.val &gt;= max)
         return false;
-    // check s1[a1, b1] and s2[a2, b2] have same set of letters
-    int[] count = new int[26];
-    for (int i = a1; i &lt;= b1; i++) 
-        count[s1.charAt(i) - 'a'] ++;
-    for (int i = a2; i &lt;= b2; i++) 
-        if (count[s2.charAt(i) - 'a'] -- &lt;= 0) 
-            return false;
-    // check s1[a1, b1] and s2[a2, b2] is scramble or not
-    if (a1 == b1) {
-        return (s1.charAt(a1) == s2.charAt(a2));
-    }
-    for (int i = 0; i &lt; b1 - a1; i++) {
-        boolean check = helper(s1, a1, a1 + i, s2, a2, a2 + i) 
-                    &amp;&amp; helper(s1, a1 + i + 1, b1, s2, a2 + i + 1, b2);
-        if (check) return true;
-        check = helper(s1, a1, a1 + i, s2, b2 - i, b2) 
-                    &amp;&amp; helper(s1, a1 + i + 1, b1, s2, a2, b2 - i - 1);
-        if (check) return true;
-    }
-    return false;
-}
-</code></pre>
-
-<p><strong>DP code</strong>, not written by me</p>
-
-<pre><code>public boolean isScramble(String s1, String s2) {
-    int n = s1.length();
-    boolean[][][] dp = new boolean[n][n][n + 1];
-    for (int i = n - 1; i &gt;= 0; i--)
-        for (int j = n - 1; j &gt;= 0; j--)
-            for (int k = 1; k &lt;= n - Math.max(i, j); k++) {
-                if (s1.substring(i, i + k).equals(s2.substring(j, j + k)))
-                    dp[i][j][k] = true;
-                else {
-                    for (int l = 1; l &lt; k; l++) {
-                        if (dp[i][j][l] &amp;&amp; dp[i + l][j + l][k - l] 
-                            || dp[i][j + k - l][l] &amp;&amp; dp[i + l][j][k - l]) {
-                            dp[i][j][k] = true;
-                            break;
-                        }
-                    }
-                }
-            }
-    return dp[0][0][n];
+    return validate(root.left, min, root.val) 
+        &amp;&amp; validate(root.right, root.val, max);
 }
 </code></pre>
 </div>
@@ -623,7 +308,7 @@ private boolean helper(String s1, int a1, int b1, String s2, int a2, int b2) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Reverse-Linked-List-II/">[LeetCode 92] Reverse Linked List II</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/26/Unique-Binary-Search-Trees-II/">[LeetCode 95] Unique Binary Search Trees II</a></h1>
     
     
       <p class="meta">
@@ -639,7 +324,7 @@ private boolean helper(String s1, int a1, int b1, String s2, int a2, int b2) {
   
 
 
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -648,142 +333,23 @@ private boolean helper(String s1, int a1, int b1, String s2, int a2, int b2) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/reverse-linked-list-ii/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/unique-binary-search-trees-ii/">link</a></p>
 
 <div class="question-content">
-            <p></p><p>
-Reverse a linked list from position <i>m</i> to <i>n</i>. Do it in-place and in one-pass.
-</p>
+            <p></p><p>Given <i>n</i>, generate all structurally unique <b>BST&#8217;s</b> (binary search trees) that store values 1&#8230;<i>n</i>.</p>
 
-<p>
-For example:<br>
-Given <code>1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL</code>, <i>m</i> = 2 and <i>n</i> = 4,
-</p>
-<p>
-return <code>1-&gt;4-&gt;3-&gt;2-&gt;5-&gt;NULL</code>.
-</p>
-<p>
-<b>Note:</b><br>
-Given <i>m</i>, <i>n</i> satisfy the following condition:<br>
-1 ≤ <i>m</i> ≤ <i>n</i> ≤ length of list.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">18 minutes</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a very standard interview question of LinkedList</strong>.</p>
-
-<h3>Solution</h3>
-
-<p><strong>Keep 2 pointers, one of which points to preReversePosition, another one points to finalTailOfTheReversedPart</strong>. Each time, I will get next element and insert it between the 2 pointers mentioned above. See below image for details:</p>
-
-<p><img class="middle" src="/assets/images/reverse-linked-list-ii.png"></p>
-
-<p>The coding isn&rsquo;t easy, there can be a lot of details being omitted. Just think of it in this way: in the above picture, 123 is broken away from 45678. Each time, get next element from 45678, and insert it right after 2. Do this 2 times, so that 4,5 are moved. In the end, make 3 point to 6, and solution done.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my code</strong></p>
-
-<pre><code>public ListNode reverseBetween(ListNode head, int m, int n) {
-    ListNode preHead = new ListNode(0);
-    preHead.next = head;
-    ListNode before = preHead;
-    for (int i = 1; i &lt; m; i ++)
-        before = before.next;
-    ListNode rTail = before.next;
-    ListNode cur = before.next.next;
-    for (int i = 0; i &lt; n - m; i ++) {
-        ListNode temp = cur.next;
-        cur.next = before.next;
-        before.next = cur;
-        cur = temp;
-    }
-    rTail.next = cur;
-    return preHead.next;
-}
-</code></pre>
-
-<p><strong>Second, </strong></p>
-
-<p>A lot of people have similar solutions, so I won&rsquo;t post any of their code. Reading it won&rsquo;t help, write it yourself is actually important.</p>
-
-<p>A lot of people have complained about this problem not easy to write.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Partition-List/">[LeetCode 86] Partition List</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/partition-list/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a linked list and a value <i>x</i>, partition it such that all nodes less than <i>x</i> come before nodes greater than or equal to <i>x</i>.
-</p>
-<p>
-You should preserve the original relative order of the nodes in each of the two partitions.
-</p>
 <p>
 For example,<br>
-Given <code>1-&gt;4-&gt;3-&gt;2-&gt;5-&gt;2</code> and <i>x</i> = 3,<br>
-return <code>1-&gt;2-&gt;2-&gt;4-&gt;3-&gt;5</code>.
-</p><p></p>
+Given <i>n</i> = 3, your program should return all 5 unique BST&#8217;s shown below.
+
+</p><pre>   1         3     3      2      1
+    \       /     /      / \      \
+     3     2     1      1   3      2
+    /     /       \                 \
+   2     1         2                 3
+</pre>
+<p></p>
+<p></p>
           </div>
 
 
@@ -792,127 +358,15 @@ return <code>1-&gt;2-&gt;2-&gt;4-&gt;3-&gt;5</code>.
 <table border="2">
     <tr>
         <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
+        <td bgcolor="white">1</td>
     </tr>
     <tr>
         <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
         <td bgcolor="red">4</td>
     </tr>
     <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">15 minutes</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This question is not very difficult</strong>, but can be confusing if the code don&rsquo;t have good logic.</p>
-
-<h3>Solution</h3>
-
-<p>There is no fancy algorithm solution. I got it wrong in 10 submissions at first. After a few days, I did this problem again and passed with 1 attempt.</p>
-
-<p>So just keep practicing.</p>
-
-<h3>Code</h3>
-
-<p><strong>my code</strong></p>
-
-<pre><code>public ListNode partition(ListNode head, int x) {
-    if (head == null) return head;
-    ListNode PH = new ListNode(1);
-    PH.next = head;
-    ListNode left = PH, preRight = PH, right = head;
-    while (right != null) {
-        if (right.val &lt; x) {
-            if (preRight != left) {
-                preRight.next = right.next;
-                right.next = left.next;
-                left.next = right;
-                left = right;
-                right = preRight.next;
-            } else {
-                left = left.next;
-                preRight = left;
-                right = right.next;
-            }
-        } else {
-            preRight = right;
-            right = preRight.next;
-        }
-    }
-    return PH.next;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Merge-Sorted-Array/">[LeetCode 88] Merge Sorted Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/merge-sorted-array/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given two sorted integer arrays A and B, merge B into A as one sorted array.</p>
-
-<p>
-<b>Note:</b><br>
-You may assume that A has enough space (size that is greater or equal to <i>m</i> + <i>n</i>) to hold additional elements from B. The number of elements initialized in A and B are <i>m</i> and <i>n</i> respectively.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
+        <td bgcolor="yellow">3</td>
     </tr>
     <tr>
         <td>Time to use</td>
@@ -925,25 +379,32 @@ You may assume that A has enough space (size that is greater or equal to <i>m</i
 
 <h3>Analysis</h3>
 
-<p><strong>This is an easy question.</strong></p>
+<p><strong>This is a question with standard solution</strong>.</p>
+
+<p>It looks like difficult, but actually the code is very short.</p>
 
 <h3>Solution</h3>
 
-<p>Just insert from the end to the head.</p>
+<p>This is my previous solution. Everyone in blogs are having same solution. I mean, every single one of  them, <a href="http://gongxuns.blogspot.sg/2013/01/leetcodeunique-binary-search-trees-ii.html">one example</a>.</p>
 
 <h3>Code</h3>
 
-<pre><code>public void merge(int A[], int m, int B[], int n) {
-    int p1 = m - 1, p2 = n - 1;
-    for (int i = m + n - 1; i &gt;= 0; i --){
-        if (p2 == -1) return;
-        if (p1 == -1) {
-            for (int j = 0; j &lt;= p2; j++) A[j] = B[j];
-            return;
-        }
-        if (A[p1] &gt; B[p2]) A[i] = A[p1--];
-        else A[i] = B[p2--];
-    }
+<pre><code>public ArrayList&lt;TreeNode&gt; generateTrees(int n) {
+    return construct(0, n);
+}
+
+ArrayList&lt;TreeNode&gt; construct(int base, int n) {
+    ArrayList&lt;TreeNode&gt; ans = new ArrayList&lt;TreeNode&gt;();
+    if (n == 0) ans.add(null);
+    for (int cur = 1; cur &lt;= n; cur++) 
+        for (TreeNode l : construct(base, cur - 1)) 
+            for (TreeNode r : construct(base + cur, n - cur)) {
+                TreeNode root = new TreeNode(base + cur);
+                root.left = l;
+                root.right = r;
+                ans.add(root);
+            }
+    return ans;
 }
 </code></pre>
 </div>
@@ -958,7 +419,7 @@ You may assume that A has enough space (size that is greater or equal to <i>m</i
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Largest-Rectangle-in-Histogram/">[LeetCode 84] Largest Rectangle in Histogram</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/26/Unique-Binary-Search-Trees/">[LeetCode 96] Unique Binary Search Trees</a></h1>
     
     
       <p class="meta">
@@ -974,7 +435,7 @@ You may assume that A has enough space (size that is greater or equal to <i>m</i
   
 
 
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -983,27 +444,499 @@ You may assume that A has enough space (size that is greater or equal to <i>m</i
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/largest-rectangle-in-histogram/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/unique-binary-search-trees/">link</a></p>
 
 <div class="question-content">
-            <p></p><p>
-Given <i>n</i> non-negative integers representing the histogram&#8217;s bar height where the width of each bar is 1, find the area of largest rectangle in the histogram.
-</p>
-
-<p>
-<img src="http://www.leetcode.com/wp-content/uploads/2012/04/histogram.png"><br>
-</p><p style="font-size: 11px">Above is a histogram where width of each bar is 1, given height = <code>[2,1,5,6,2,3]</code>.</p>
-<p></p>
-
-<p>
-<img src="http://www.leetcode.com/wp-content/uploads/2012/04/histogram_area.png"><br>
-</p><p style="font-size: 11px">The largest rectangle is shown in the shaded area, which has area = <code>10</code> unit.</p>
-<p></p>
+            <p></p><p>Given <i>n</i>, how many structurally unique <b>BST&#8217;s</b> (binary search trees) that store values 1&#8230;<i>n</i>?</p>
 
 <p>
 For example,<br>
-Given height = <code>[2,1,5,6,2,3]</code>,<br>
-return <code>10</code>.
+Given <i>n</i> = 3, there are a total of 5 unique BST&#8217;s.
+
+</p><pre>   1         3     3      2      1
+    \       /     /      / \      \
+     3     2     1      1   3      2
+    /     /       \                 \
+   2     1         2                 3
+</pre>
+<p></p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This seems like an easy recursion question</strong>, however it will result in many repeated recursion calls.</p>
+
+<p>To avoid repeated recursion, use <strong>Dynamic Programming</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>First code below is my solution. It is <strong>a standard recursion solution</strong>, but it&rsquo;s not good. The run time is 30ms more than next code.</p>
+
+<p>Second code is <strong>DP solution</strong>, where the previous answers are saved and used forfuture calculation. This is the best solution for this question, and I learnt it from <a href="https://github.com/shengmin/coding-problem/blob/master/leetcode/unique-binary-search-trees/Solution.java">this blog</a>.</p>
+
+<h3>Code</h3>
+
+<p><strong>First code</strong></p>
+
+<pre><code>public int numTrees(int n) {
+    if (n &lt;= 1) return 1;
+
+    int total = 0;
+    if (n % 2 == 0){
+        for (int i = 0; i &lt;= n / 2 - 1; i ++ ){
+            // i is all the possible number of nodes on the left
+            total += 2 * numTrees(i) * numTrees(n-i-1);
+        }
+    } else {
+        for (int i = 0; i &lt;= (n-1) / 2 - 1; i ++ ){
+            // i is all the possible number of nodes on the left
+            total += 2 * numTrees(i) * numTrees(n-i-1);
+        }
+        total += Math.pow(numTrees((n-1)/2), 2);
+    }
+    return total;
+}
+</code></pre>
+
+<p><strong>Second code</strong></p>
+
+<pre><code>public int numTrees(int n) {
+    int[] table = new int[n + 1];
+    table[0] = 1;
+    table[1] = 1;
+    for (int i = 2; i &lt;= n; i++) {
+        int sum = 0;
+        for (int j = 1; j &lt;= i; j++) {
+            int left = j - 1;
+            int right = i - j;
+            sum += table[left] * table[right];
+        }
+        table[i] = sum;
+    }
+    return table[n];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/26/Symmetric-Tree/">[LeetCode 101] Symmetric Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/symmetric-tree/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a binary tree, check whether it is a mirror of itself (ie, symmetric around its center).</p>
+
+<p>
+For example, this binary tree is symmetric:
+</p><pre>    1
+   / \
+  2   2
+ / \ / \
+3  4 4  3
+</pre>
+<p></p>
+<p>
+But the following is not:<br>
+</p><pre>    1
+   / \
+  2   2
+   \   \
+   3    3
+</pre>
+<p></p>
+
+<p>
+<b>Note:</b><br>
+Bonus points if you could solve it both recursively and iteratively.
+</p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">2 ways to solve</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is an easy one</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>I solved it using recursion.</p>
+
+<p>The non-recursion solution is using 2 stacks (or queues). I did not write it, but the code is posted as well, copied from <a href="https://oj.leetcode.com/discuss/456/recusive-solution-symmetric-optimal-solution-inordertraversal">this post</a>.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, recursion</strong></p>
+
+<pre><code>public boolean isSymmetric(TreeNode root) {
+    if (root == null) return true;
+    return check(root.left, root.right);
+}
+
+private boolean check(TreeNode left, TreeNode right) {
+    if (left == null &amp;&amp; right == null) return true;
+    if (left == null || right == null) return false;
+    if (left.val != right.val) return false;
+    return check(left.left, right.right) &amp; check(left.right, right.left);
+}
+</code></pre>
+
+<p><strong>Second, non-recursion</strong></p>
+
+<pre><code>public boolean isSymmetric(TreeNode root) {
+    if (root == null) return true;
+    Stack&lt;TreeNode&gt; s1 = new Stack&lt;TreeNode&gt;();
+    Stack&lt;TreeNode&gt; s2 = new Stack&lt;TreeNode&gt;();
+    s1.push(root.left);
+    s2.push(root.right);
+    while (!s1.empty() &amp;&amp; !s2.empty()) {
+        TreeNode n1 = s1.pop();
+        TreeNode n2 = s2.pop();
+        if (n1 == null &amp;&amp; n2 == null) continue;
+        if (n1 == null || n2 == null) return false;
+        if (n1.val != n2.val) return false;
+        s1.push(n1.left);
+        s2.push(n2.right);
+        s1.push(n1.right);
+        s2.push(n2.left);
+    }
+    return true;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/26/Convert-Sorted-List-to-Binary-Search-Tree/">[LeetCode 109] Convert Sorted List to Binary Search Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/convert-sorted-list-to-binary-search-tree/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a singly linked list where elements are sorted in ascending order, convert it to a height balanced BST.</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a very interesting question, with a very tricky solution</strong>. Because <strong>LinkedList does not have radom access</strong>, it is impossible for us to solve it in like we did in last question.</p>
+
+<p><strong>The traditional top-down approach</strong> is heavily relied on index operation, and we can&rsquo;t do that. That is why we solve this question with <strong>bottom-up approach</strong>. Which is to say, we insert TreeNodes following LinkedList&rsquo;s order.</p>
+
+<p>I know it&rsquo;s hard to understand. I found a <a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">explanation</a>, but it&rsquo;s not clear also. The fastest way is to just read the code or write it by hand.</p>
+
+<h3>Solution</h3>
+
+<p><strong>The key of this solution is a public pointer which traverse thru the list</strong>. Each time the pointer procceed, a new TreeNode is added into the final answer. <strong>How to keep track of parent TreeNodes</strong>? That&rsquo;s the tricky part. we tree structure is generated before the insertion, altough the values have not been filled in yet.</p>
+
+<p>It&rsquo;s like doing a DFS in-order traverse thru the tree, and fill in values one by one. In order to know how the tree would look like, prior knowledge of the size of the LinkedList is necessary.</p>
+
+<p>That&rsquo;s the solution. I&rsquo;ve never seen a solution like this before, so it&rsquo;s very important to learn it and memorize it by heart.</p>
+
+<h3>Code</h3>
+
+<p><strong>standard solution</strong></p>
+
+<pre><code>ListNode cur = null;
+
+public TreeNode sortedListToBST(ListNode head) {
+    cur = head;
+    int k = 0;
+    ListNode temp = head;
+    while (temp != null) {
+        temp = temp.next;
+        k ++;
+    }
+    return helper(0, k - 1);
+}
+
+private TreeNode helper(int left, int right) {
+    if (left &gt; right) return null;
+    int mid = left + (right - left) / 2;
+    TreeNode head = new TreeNode(-1);
+    head.left  = helper(left, mid - 1);
+    head.val = cur.val;
+    cur = cur.next;
+    head.right = helper(mid + 1, right);
+    return head;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/26/Convert-Sorted-Array-to-Binary-Search-Tree/">[LeetCode 108] Convert Sorted Array to Binary Search Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/convert-sorted-array-to-binary-search-tree/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given an array where elements are sorted in ascending order, convert it to a height balanced BST.</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>My first understanding of this question is wrong</strong>.</p>
+
+<p>A BST does not necessarily have to fill in left side of the leaf as muc has possible. I was confusing &ldquo;balanced binary tree&rdquo; with &ldquo;left-balanced binary tree&rdquo;.</p>
+
+<blockquote><p><strong>A balanced binary tree</strong> is commonly defined as a binary tree in which the depth of the left and right subtrees of every node differ by 1 or less</p>
+
+<p><strong>A left-balanced binary tree</strong> is a balanced binary tree where the left sub-tree of each node is filled before the right sub-tree</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Then this question become straight-forward.</p>
+
+<h3>Code</h3>
+
+<pre><code>public TreeNode sortedArrayToBST(int[] num) {
+    if (num.length == 0) return null;
+    return helper(num, 0, num.length - 1);
+}
+
+public TreeNode helper(int[] num, int start, int end) {
+    if (start &gt; end) return null;
+    int mid = (start + end) / 2;
+    TreeNode node = new TreeNode(num[mid]);
+    node.left = helper(num, start, mid - 1);
+    node.right = helper(num, mid + 1, end);
+    return node;
+} 
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/26/Balanced-Binary-Tree/">[LeetCode 110] Balanced Binary Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/balanced-binary-tree/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a binary tree, determine if it is height-balanced.
+</p>
+
+<p>
+For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of <i>every</i> node never differ by more than 1.
 </p><p></p>
           </div>
 
@@ -1017,204 +950,15 @@ return <code>10</code>.
     </tr>
     <tr>
         <td>Difficulty</td>
-        <td bgcolor="red">5</td>
+        <td bgcolor="white">1</td>
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">Can&#8217;t solve</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an extremely difficult question</strong>.</p>
-
-<p>The idea of the solution (using stack) seems understandable, but can be very tricky when coding.</p>
-
-<p><strong>The basic idea is, always keep increasing elements in the stack</strong>. When I see a decrease in number, pop stack. And I calculate max area only when poping elements. In the end, a &lsquo;0&rsquo; is inserted to the end, so that all stack item will be popped (and at the same time, max area been calculated).</p>
-
-<p>Sorry if I did not explain well enough. <a href="http://www.geeksforgeeks.org/largest-rectangle-under-histogram/">Here</a> is a better one:</p>
-
-<blockquote cite="http://www.geeksforgeeks.org/largest-rectangle-under-histogram/">
-<p>
-We traverse all bars from left to right, maintain a stack of bars.  Every bar is pushed to stack once.  A bar is popped from stack when a bar of smaller height is seen.  When a bar is popped, we calculate the area with the popped bar as smallest bar. How do we get left and right indexes of the popped bar – the current index tells us the ‘right index’ and index of previous item in stack is the ‘left index’.  Following is the complete algorithm.
-</p>
-<p><strong>1) </strong>Create an empty stack.</p>
-<p><strong>2) </strong>Start from first bar, and do following for every bar ‘hist[i]‘ where ‘i’ varies from 0 to n-1.<br>
-……<strong>a)</strong> If stack is empty or hist[i] is higher than the bar at top of stack, then push ‘i’ to stack.<br>
-……<strong>b)</strong> If this bar is smaller than the top of stack, then keep removing the top of stack while top of the stack is greater. Let the removed bar be hist[tp]. Calculate area  of rectangle with hist[tp] as smallest bar. For hist[tp], the ‘left index’ is previous (previous to tp) item in stack and ‘right index’ is ‘i’ (current index).</p>
-<p><strong>3)</strong> If the stack is not empty, then one by one remove all bars from stack and do step 2.b for every removed bar.</p>
-</blockquote>
-
-
-<p>Time complexity of the stack solution is <strong>O(n)</strong>. (Another algo analysis article <a href="http://tech-queries.blogspot.sg/2011/03/maximum-area-rectangle-in-histogram.html">here</a>)</p>
-
-<h3>Solution</h3>
-
-<p><strong>I wrote the code using idea from <a href="http://jane4532.blogspot.sg/2013/07/longest-rectangle-in-histogramleetcode.html">blog</a></strong>. It works, but there are 2 things that I got it wrong many time before I finally get the correct solution.</p>
-
-<p><strong>First, if elements are equal</strong>. I shall also push it. I can not simply skip it, I don&rsquo;t know why!</p>
-
-<blockquote><p>if (stack.isEmpty() || cur >= height[stack.peek()])</p></blockquote>
-
-<p><strong>Second, about how to calculate the width of the rectangle</strong>. I used this before:</p>
-
-<blockquote><p>int width = stack.isEmpty() ? p : p &ndash; h;</p></blockquote>
-
-<p>It&rsquo;s wrong, I must get the value of next element from stack, and then calculate width. Why? there might be element been popped before, which locate between these 2 elements in stack.</p>
-
-<blockquote><p>int width = stack.isEmpty() ? p : p &ndash; stack.peek() &ndash; 1;</p></blockquote>
-
-<p><strong>Updated on July 4th, 2014</strong>: the above 2 points are very valid, especially the second. Keep in mind:</p>
-
-<ol>
-<li><p>The values in stack means the last position that a height can be found. For example, height is (2, 10, 5) then the stack would have (2, removed, 5). When calculating the area for height 5, we should note the removed space is in consideration as well.</p></li>
-<li><p>So, when equal height is found, pop it. Because you won&rsquo;t need it any more. The stack only stores last position this height is found.</p></li>
-<li><p>When stack is empty, the width of rectange should be calculated from 0.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>My code written on July 4th, 2014</strong></p>
-
-<pre><code>public int largestRectangleArea(int[] height) {
-    if (height == null || height.length == 0) {
-        return 0;
-    }
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    stack.add(0);
-    int len = height.length;
-    int area = 0;
-    for (int i = 1; i &lt;= len; i++) {
-        int h = i == len ? 0 : height[i];
-        // pop a element and calculate its max area
-        // pop until the top element is smaller than h, then push h
-        while (!stack.isEmpty() &amp;&amp; h &lt;= height[stack.peek()]) {
-            int pos = stack.pop();
-            int width = stack.isEmpty() ? i : i - stack.peek() - 1;
-            area = Math.max(area, height[pos] * width);
-        }
-        stack.push(i);
-    }
-    return area;
-}
-</code></pre>
-
-<p><strong>My code written on July 18th, 2014</strong></p>
-
-<pre><code>public int largestRectangleArea(int[] height) {
-    if (height == null || height.length == 0) {
-        return 0;
-    }
-    int maxArea = Integer.MIN_VALUE;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    int p = 0;
-    while (p &lt; height.length) {
-        if (stack.isEmpty() || height[stack.peek()] &lt;= height[p]) {
-            stack.push(p);
-            p++;
-        } else {
-            int h = stack.pop();
-            int w = stack.isEmpty() ? p : p - stack.peek() - 1;
-            int area = height[h] * w;
-            maxArea = Math.max(maxArea, area);
-        }
-    }
-    while (!stack.isEmpty()) {
-        int h = stack.pop();
-        int w = stack.isEmpty() ? p : p - stack.peek() -1;
-        int area = height[h] * w;
-        maxArea = Math.max(maxArea, area);
-    }
-    return maxArea;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Gray-Code/">[LeetCode 89] Gray Code</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/gray-code/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>The gray code is a binary numeral system where two successive values differ in only one bit.</p>
-
-<p>Given a non-negative integer <i>n</i> representing the total number of bits in the code, print the sequence of gray code. A gray code sequence must begin with 0.</p>
-
-<p>For example, given <i>n</i> = 2, return <code>[0,1,3,2]</code>. Its gray code sequence is:</p>
-<pre>00 - 0
-01 - 1
-11 - 3
-10 - 2
-</pre>
-
-<p><b>Note:</b><br>
-For a given <i>n</i>, a gray code sequence is not uniquely defined.
-</p>
-<p>For example, <code>[0,2,3,1]</code> is also a valid gray code sequence according to the above definition.</p>
-
-<p>For now, the judge is able to judge based on one instance of gray code sequence. Sorry about that.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
         <td bgcolor="red">4</td>
     </tr>
     <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
         <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
@@ -1223,53 +967,52 @@ For a given <i>n</i>, a gray code sequence is not uniquely defined.
 
 <h3>Analysis</h3>
 
-<p><strong>This is a qure mathematics question.</strong></p>
+<p><strong>This is a difficult question for me</strong>.</p>
 
-<p><a href="http://en.wikipedia.org/wiki/Gray_code">Gray Code</a> is a very classic binary system, and we shall keep in mind clearly of its mathematical solution.</p>
+<p>My first code contains many dulicate calls. I have posted it below as an illustration of bad example.</p>
 
 <h3>Solution</h3>
 
-<p><strong>My solution is using recursion</strong>. First get the answer of input value = (n-1), then from that list, generate answer for input = n. <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-gray-code.html">A post</a> talked about this.</p>
-
-<p><strong>The math approach to solve this problem is much more simpler</strong>. The (i)th element of Gray Code is calculated by the following method (I learnt from <a href="http://blog.csdn.net/worldwindjp/article/details/21536103">this blog</a>):</p>
-
-<blockquote><p>binaryToGray = (i >> 1) ^ i;</p></blockquote>
-
-<p>For example,</p>
-
-<blockquote><p>00 &ndash;> 00</p>
-
-<p>01 &ndash;> 01</p>
-
-<p>10 &ndash;> 11</p>
-
-<p>11 &ndash;> 10</p></blockquote>
+<p>The solution should make use of the return value from the recursion, and avoid duplication calls. The standard solution is posted below.</p>
 
 <h3>Code</h3>
 
-<p><strong>First, my solution</strong></p>
+<p><strong>First, my initial solution</strong>. It takes 30ms more than next code.</p>
 
-<pre><code>public ArrayList&lt;Integer&gt; grayCode(int n) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    if (n == 0) {
-        ans.add(0);
-        return ans;
+<pre><code>public boolean isBalanced(TreeNode root) {
+    // my old code re-submit, for speed test
+    if (root == null) return true;
+    if (Math.abs(depth(root.left) - depth(root.right)) &gt; 1) {
+        return false;
     }
-    ArrayList&lt;Integer&gt; half = grayCode(n-1);
-    ans.addAll(half);
-    for (int i = half.size() - 1; i &gt;= 0; i -- ) 
-        ans.add(half.get(i) + (int)Math.pow(2, n-1));
-    return ans;
+    if (! isBalanced(root.left)) return false;
+    if (! isBalanced(root.right)) return false;
+    return true;
+}
+
+private int depth(TreeNode node) {
+    if (node == null) return 0;
+    if (node.left == null) return 1 + depth(node.right);
+    if (node.right == null) return 1 + depth(node.left);
+    return 1 + Math.max(depth(node.left), depth(node.right));
 }
 </code></pre>
 
-<p><strong>Second, math solution</strong></p>
+<p><strong>Second, the standard solution</strong></p>
 
-<pre><code>public ArrayList&lt;Integer&gt; grayCode(int n) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    for (int i = 0; i &lt; 1 &lt;&lt; n; i ++) 
-        ans.add((i &gt;&gt; 1) ^ i);
-    return ans;
+<pre><code>public boolean isBalanced(TreeNode root) {
+    return helper(root) != -1;
+}
+
+private int helper(TreeNode node) {
+    if (node == null) return 0;
+    int a = helper(node.left);
+    if (a == -1) return -1;
+    int b = helper(node.right);
+    if (b == -1) return -1;
+    if (Math.abs(a - b) &lt;= 1) 
+        return Math.max(a, b) + 1;
+    else return -1;
 }
 </code></pre>
 </div>
@@ -1284,7 +1027,7 @@ For a given <i>n</i>, a gray code sequence is not uniquely defined.
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Decode-Ways/">[LeetCode 91] Decode Ways</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/25/Same-Tree/">[LeetCode 100] Same Tree</a></h1>
     
     
       <p class="meta">
@@ -1300,7 +1043,7 @@ For a given <i>n</i>, a gray code sequence is not uniquely defined.
   
 
 
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -1309,31 +1052,14 @@ For a given <i>n</i>, a gray code sequence is not uniquely defined.
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/decode-ways/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/same-tree/">link</a></p>
 
 <div class="question-content">
             <p></p><p>
-A message containing letters from <code>A-Z</code> is being encoded to numbers using the following mapping:
+Given two binary trees, write a function to check if they are equal or not.
 </p>
 
-<pre>'A' -&gt; 1
-'B' -&gt; 2
-...
-'Z' -&gt; 26
-</pre>
-
-<p>
-Given an encoded message containing digits, determine the total number of ways to decode it.
-</p>
-
-<p>
-For example,<br>
-Given encoded message <code>"12"</code>,
-it could be decoded as <code>"AB"</code> (1 2) or <code>"L"</code> (12).
-</p>
-
-<p>
-The number of ways decoding <code>"12"</code> is 2.
+<p>Two binary trees are considered equal if they are structurally identical and the nodes have the same value.
 </p><p></p>
           </div>
 
@@ -1343,19 +1069,19 @@ The number of ways decoding <code>"12"</code> is 2.
 <table border="2">
     <tr>
         <td>Frequency</td>
-        <td bgcolor="red">4</td>
+        <td bgcolor="white">1</td>
     </tr>
     <tr>
         <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
+        <td bgcolor="white">1</td>
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
+        <td bgcolor="white">1</td>
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
@@ -1364,66 +1090,19 @@ The number of ways decoding <code>"12"</code> is 2.
 
 <h3>Analysis</h3>
 
-<p><strong>This question is easy to think, but hard to write.</strong></p>
-
-<p>Why? Because there are a lot of cases that the decode ways = 0. For example, input = &ldquo;02&rdquo; or &ldquo;50&rdquo;. We must handle those cases well. Also, boundary cases can cause some trouble.</p>
-
-<h3>Solution</h3>
-
-<p><strong>DP solution, the transformation function is:</strong></p>
-
-<blockquote><p>Count[i] = Count[i-1]  if only S[i-1] is valid</p>
-
-<p>Count[i] = Count[i-1] + Count[i-2] if S[i-1] and S[i-2] both valid</p></blockquote>
+<p><strong>This is an easy one</strong></p>
 
 <h3>Code</h3>
 
-<p><strong>First, my code.</strong></p>
-
-<pre><code>public int numDecodings(String s) {
-    int len = s.length();
-    if (len == 0) return 0;
-    // now len &gt;= 1
-    int[] dp = new int[len];
-    if (s.charAt(0) == '0') dp[0] = 0;
-    else dp[0] = 1;
-    if (len == 1) return dp[0];
-    // now len &gt;= 2
-    for (int i = 1; i &lt; len; i ++) {
-        if (s.charAt(i) != '0') dp[i] += dp[i-1];
-        int doubleDigit = Integer.parseInt(s.substring(i-1, i+1));
-        if (s.charAt(i-1) != '0' &amp;&amp; 1 &lt;= doubleDigit &amp;&amp; doubleDigit &lt;= 26)
-            if (i != 1) dp[i] += dp[i-2];
-            else dp[i] += 1;
-    }
-    return dp[len - 1];
-}
-</code></pre>
-
-<p><strong>Second, code from <a href="http://blog.csdn.net/u011095253/article/details/9248109">this blog</a>.</strong></p>
-
-<p>The only difference is an additional &lsquo;1&rsquo; at position 0 of the dp array. This helps simply the code a lot!</p>
-
-<pre><code>public int numDecodings(String s) {  
-    int n = s.length();  
-    if (n==0) return 0;  
-    int[] dp = new int[n+1];  
-    dp[0] = 1;  
-    if (isValid(s.substring(0,1))) dp[1] = 1;  
-    else dp[1] = 0;  
-    for(int i=2; i&lt;=n;i++){  
-        if (isValid(s.substring(i-1,i)))  
-            dp[i] = dp[i-1];  
-        if (isValid(s.substring(i-2,i)))  
-            dp[i] += dp[i-2];  
-    }  
-    return dp[n];  
-}  
-
-public boolean isValid(String s){  
-    if (s.charAt(0)=='0') return false;  
-    int code = Integer.parseInt(s);  
-    return code&gt;=1 &amp;&amp; code&lt;=26;  
+<pre><code>public boolean isSameTree(TreeNode p, TreeNode q) {
+    if (p == null &amp;&amp; q == null)
+        return true;
+    if (p == null || q == null)
+        return false;
+    if (p.val == q.val)
+        return isSameTree(p.left, q.left) 
+            &amp;&amp; isSameTree(p.right, q.right);
+    return false;
 }
 </code></pre>
 </div>
@@ -1438,7 +1117,7 @@ public boolean isValid(String s){
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/22/Subsets-II/">[LeetCode 90] Subsets II</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/25/Recover-Binary-Search-Tree/">[LeetCode 99] Recover Binary Search Tree</a></h1>
     
     
       <p class="meta">
@@ -1454,7 +1133,7 @@ public boolean isValid(String s){
   
 
 
-<time datetime="2014-05-22T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -1463,33 +1142,21 @@ public boolean isValid(String s){
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/subsets-ii/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/recover-binary-search-tree/">link</a></p>
 
 <div class="question-content">
             <p></p><p>
-Given a collection of integers that might contain duplicates, <i>S</i>, return all possible subsets.
-</p>
-<p><b>Note:</b><br>
-</p><ul>
-<li>Elements in a subset must be in non-descending order.</li>
-<li>The solution set must not contain duplicate subsets.</li>
-</ul>
-<p></p>
-<p>
-For example,<br>
-If <b><i>S</i></b> = <code>[1,2,2]</code>, a solution is:
+Two elements of a binary search tree (BST) are swapped by mistake.</p>
+
+<p>Recover the tree without changing its structure.
 </p>
 
-<pre>[
-  [2],
-  [1],
-  [1,2,2],
-  [2,2],
-  [1,2],
-  []
-]
-</pre><p></p>
-          </div>
+<b>Note:</b><br>
+A solution using O(<i>n</i>) space is pretty straight forward. Could you devise a constant space solution?
+<p></p>
+
+<p></p>
+</div>
 
 
 <h3>Stats</h3>
@@ -1505,11 +1172,11 @@ If <b><i>S</i></b> = <code>[1,2,2]</code>, a solution is:
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
+        <td bgcolor="red">4</td>
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
@@ -1518,72 +1185,138 @@ If <b><i>S</i></b> = <code>[1,2,2]</code>, a solution is:
 
 <h3>Analysis</h3>
 
-<p><strong>This is a question based on &ldquo;Subsets&rdquo; question</strong>.</p>
+<p><strong>This is one of the most difficult questions that I have solved</strong>.</p>
 
-<p>Solution is similar, only need to add features to avoid duplication.</p>
+<p>The question can be solved using 2 pointers to point to the 2 misplaced nodes, and swap them. I solved the problem with this approach, and I found a good explanation <a href="http://chaoren.is-programmer.com/posts/42931.html">here</a>.</p>
+
+<blockquote><p>Only two variables (first, second) are enough to record nodes to be exchanged.</p>
+
+<p>If there&rsquo;s only one descending order pair (e.g. 20, 10, 30, 40, 50), use first &amp; second to record it.</p>
+
+<p>If there are two descending order pairs (e.g. 10, 40, 30, 20, 50 or 50, 20, 30, 40, 10), use the smaller number in second pair to update variable &lsquo;second&rsquo;.</p>
+
+<p>In the end, swap first and second.</p></blockquote>
+
+<p>This is a popular solution on the Internet, which <strong>uses O(1) space, plus average case O(lgn) stack space</strong> (because recursion always incur stack usage). So this solution is actually not fulfilling the requirements.</p>
+
+<blockquote><p>中序遍历二叉树的空间复杂度是O(logN) on average case</p></blockquote>
+
+<p><strong>So finally I found a solution with constent space, and it&rsquo;s using Treaded Binary Tree again</strong>! Look below for details.</p>
 
 <h3>Solution</h3>
 
-<p>Based on the solution of previous question, I only add 1 variable called <strong>nonDupSize</strong>, which is the size that I need to merge new element with. For example, <strong>input = {1, 2, 3, 3}</strong></p>
+<p><a href="http://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion-and-without-stack/">This</a> is a systematic analysis of <strong>Morris Traversal</strong> based on <strong>Threaded Binary Tree</strong>.</p>
 
-<blockquote><p>Initialize the subset:  {}</p>
+<p><strong>A solution of using Morris Traversal is explained <a href="http://www.cnblogs.com/TenosDoIt/p/3445682.html">here</a></strong>. Don&rsquo;t worry about the tree structure being changed, because it&rsquo;s reverted back after the traversal.</p>
 
-<p>Added element &ldquo;1&rdquo;: {}, <strong>{&ldquo;1&rdquo;}</strong> (1 more elements)</p>
+<blockquote><p>算法2：为了满足O(1)空间复杂度，我们就要使用非递归且不使用栈的中序遍历算法，在leetcode另一个题目Binary Tree Inorder Traversal中，我们提到了Morris Traversal中序遍历算法，它既没有递归，也没有使用栈，而是用了线索二叉树的思想，用闲置的右节点指向中序序列中该节点的后缀，遍历后再恢复树的原始指针。其主要算法步骤如下：</p>
 
-<p>Added element &ldquo;2&rdquo;: {}, {&ldquo;1&rdquo;}, <strong>{&ldquo;2&rdquo;}, {&ldquo;1&rdquo;, &ldquo;2&rdquo;}</strong> (2 more elements)</p>
+<p>重复以下1、2直到当前节点为空。</p></blockquote>
 
-<p>Added element &ldquo;3&rdquo;: {}, {&ldquo;1&rdquo;}, {&ldquo;2&rdquo;}, {&ldquo;1&rdquo;, &ldquo;2&rdquo;}, <strong>{&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;3&rdquo;}, {&ldquo;2&rdquo;,&ldquo;3&rdquo;}, {&ldquo;1&rdquo;, &ldquo;2&rdquo;,&ldquo;3&rdquo;}</strong> (4 more elements)</p>
+<p><strong><a href="http://fisherlei.blogspot.sg/2012/12/leetcode-recover-binary-search-tree.html">Another person</a></strong> have a very good (maybe better) English version of analysis and code:</p>
 
-<p>Added element &ldquo;3&rdquo;: {}, {&ldquo;1&rdquo;}, {&ldquo;2&rdquo;}, {&ldquo;1&rdquo;, &ldquo;2&rdquo;}, {&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;3&rdquo;}, {&ldquo;2&rdquo;,&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;2&rdquo;,&ldquo;3&rdquo;}, <strong>{&ldquo;3&rdquo;,&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;3&rdquo;,&ldquo;3&rdquo;}, {&ldquo;2&rdquo;,&ldquo;3&rdquo;,&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;2&rdquo;,&ldquo;3&rdquo;,&ldquo;3&rdquo;}</strong> (4 more elements)</p></blockquote>
-
-<p>So instead of getting every list and merge with new element, I only get the lists of pre-calculated size (from bottom), and merge. Someone is having <a href="http://blog.csdn.net/perfect8886/article/details/22922785">similar solution</a> using a start-pointer.</p>
+<pre><code>1. Initialize current as root 
+2. While current is not NULL
+   If current does not have left child
+      a) Print current’s data
+      b) Go to the right, i.e., current = current-&amp;gt;right
+   Else
+      a) Make current as right child of the rightmost node in current's left subtree
+      b) Go to this left child, i.e., current = current-&amp;gt;left
+</code></pre>
 
 <h3>Code</h3>
 
-<p><strong>my code</strong></p>
+<p><strong>First, my code (2 pointer solution)</strong></p>
 
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; subsetsWithDup(int[] num) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    ans.add(new ArrayList&lt;Integer&gt;());
-    Arrays.sort(num);
-    // In this solution I introduce a new variable: nonDupSize
-    int curSize = 1, nonDupSize = 1;
-    for (int i = 0; i &lt; num.length; i ++) {
-        curSize = ans.size();
-        if (i &gt; 0 &amp;&amp; num[i] != num[i - 1]) nonDupSize = curSize;
-        for (int j = curSize - nonDupSize; j &lt; curSize; j ++) {
-            ArrayList&lt;Integer&gt; cur = new ArrayList&lt;Integer&gt;(ans.get(j));
-            cur.add(num[i]);
-            ans.add(cur);
+<pre><code>TreeNode first = null, second = null;
+TreeNode pre = new TreeNode(Integer.MIN_VALUE);
+
+public void recoverTree(TreeNode root) {
+    helper(root);
+    // now first and second are both found
+    int temp = first.val;
+    first.val = second.val;
+    second.val = temp;
+}
+
+private void helper(TreeNode root) {
+    if (root == null) return;
+    helper(root.left);
+    if (pre.val &gt; root.val) {
+        if (first == null) {
+            first = pre;
+            second = root;
         }
+        else second = root;
     }
-    return ans;
+    pre = root;
+    helper(root.right);
 }
 </code></pre>
 
-<p><strong>Updated on June 12th</strong> &ndash; solution using the &lsquo;Permutation Model&rsquo;.</p>
+<p><strong>Second, real O(1) space solution</strong> using Threaded Binary Tree (i.e. Morris Traversal) in C++. I could not memorize this code.</p>
 
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; subsetsWithDup(int[] num) {
-    List&lt;List&lt;Integer&gt;&gt; result = new ArrayList&lt;List&lt;Integer&gt;&gt;();
-    if(num == null || num.length == 0) {
-        return result;
-    }
-    Arrays.sort(num);
-    helper(result, new LinkedList&lt;Integer&gt;(), num, 0);
-    return result;
-}
+<pre><code>void recoverTree(TreeNode *root) {
+       TreeNode *f1=NULL, *f2=NULL;
+       TreeNode  *current,*pre, *parent=NULL;
 
-private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num, int position) {
-    ans.add(new LinkedList&lt;Integer&gt;(path));
-    for (int i = position; i &lt; num.length; i ++) {
-        if (i &gt; position &amp;&amp; num[i - 1] == num[i]) {
-            // if duplicate, only append num[position]
-            continue;
-        }
-        path.add(num[i]);
-        helper(ans, path, num, i + 1);
-        path.remove(path.size() - 1);
-    }
+       if(root == NULL)
+             return;
+       bool found = false;
+       current = root;
+       while(current != NULL)
+       {                
+             if(current-&gt;left == NULL)
+             {
+                    if(parent &amp;&amp; parent-&gt;val &gt; current-&gt;val)
+                    {
+                           if(!found)
+                           {
+                                 f1 = parent;
+                                 found = true;
+                           }
+                           f2 = current;
+                    }
+                    parent = current;
+                    current = current-&gt;right;     
+             }   
+             else
+             {
+                    /* Find the inorder predecessor of current */
+                    pre = current-&gt;left;
+                    while(pre-&gt;right != NULL &amp;&amp; pre-&gt;right != current)
+                           pre = pre-&gt;right;
+
+                    /* Make current as right child of its inorder predecessor */
+                    if(pre-&gt;right == NULL)
+                    {
+                           pre-&gt;right = current;
+                           current = current-&gt;left;
+                    }
+
+                    /* Revert the changes made in if part to restore the original
+                    tree i.e., fix the right child of predecssor */  
+                    else
+                    {
+                           pre-&gt;right = NULL;
+                           if(parent-&gt;val &gt; current-&gt;val)
+                           {
+                                 if(!found)
+                                 {
+                                        f1 = parent;       
+                                        found = true;
+                                 }
+                                 f2 = current;
+                           }
+                           parent = current;
+                           current = current-&gt;right;     
+                    } /* End of if condition pre-&gt;right == NULL */
+             } /* End of if condition current-&gt;left == NULL*/
+       } /* End of while */
+
+       if(f1 &amp;&amp; f2)
+             swap(f1-&gt;val, f2-&gt;val);
 }
 </code></pre>
 </div>
@@ -1608,7 +1341,7 @@ private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; pat
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (19)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (36)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
@@ -1622,6 +1355,7 @@ private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; pat
 <li class='category'><a href='/blog/categories/question/'>question (84)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
   </ul>
@@ -1631,23 +1365,23 @@ private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; pat
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/08/test-webpage-without-tool/">[CC150v4] 11.4 Test Webpage Without Tools (`)</a>
+        <a href="/blog/2014/09/10/top-million-from-billion/">[CC150v4] 20.6 Top Million From Billion</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/08/random-error-debugging-2/">[CC150v4] 11.2 Random Error Debugging 2</a>
+        <a href="/blog/2014/09/10/generate-m-from-array-of-n/">[CC150v4] 20.3 Generate M Int From Array of Size N</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a>
+        <a href="/blog/2014/09/10/full-text-search/">[CC150v4] 20.8 Full Text Search</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/08/find-coliner-in-2d-plane/">[CC150v4] 10.6 Find Collinear in 2D Plane (`)</a>
+        <a href="/blog/2014/09/10/find-subsquare-with-same-border/">[CC150v4] 20.11 Find Subsquare With Same Border</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a>
+        <a href="/blog/2014/09/10/count-2s-in-digits/">[CC150v4] 20.4 Count 2s in Digits</a>
       </li>
     
   </ul>

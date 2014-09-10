@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Google | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-08T01:53:11+08:00</updated>
+  <updated>2014-09-10T21:41:48+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,98 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Winner of Tic-tac-toe]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/09/Winner-tic-tac-toe/"/>
+    <updated>2014-09-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/09/Winner-tic-tac-toe</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm)
+
+> How would you determine if someone has won a game of tic-tac-toe on a board of any size? 
+
+(This is also on CC150v4 19.2)
+
+### Solution
+
+First, confirm that when the number of pieces in a line equals to the dimension of the board, one person wins. Eg. for 10 * 10 board, 10 pieces need to be in 1 line. 
+
+__[We can determine](http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm) if someone has won during a game in real time__, as in checking after every move. 
+
+> Create an array of size 2n+2 at the beginning of the game and fill it with zeros. Each spot in the array will be a sum of X's or O's horizontally (the first n places in the array), vertically (the second n places in the array) and diagonally (the last 2 places). Then with every move, you add 1 to the 2 places (or 3 if on a diagnol) of the array if X, and subtract 1 if its an O. After adding you check and see if the value of the array is equal to n or -n, if it is, n mean X has won and -n means O has won.
+
+This is uses O(2n+2) space, but it's the best solution I can find online. I wrote code posted below. 
+
+### Code
+
+__written by me__
+
+	enum Piece {
+		Empty, Red, Blue
+	};
+    
+	public static Piece hasWon3(Piece[][] board) {
+
+		int N = board.length;
+
+		// O(2n+2) space to store count info
+		int[] rowCnt = new int[N];
+		int[] colCnt = new int[N];
+		int[] digCnt = new int[2];
+
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+
+				int pieceValue = 0;
+				if (board[i][j] == Piece.Blue) {
+					pieceValue = 1;
+				} else if (board[i][j] == Piece.Red) {
+					pieceValue = -1;
+				}
+
+				// if empty, pieceValue is 0
+				// if blue, add 1 in count
+				// if red, subtract 1 in count
+				rowCnt[i] += pieceValue;
+				if (checkFinish(rowCnt[i], N) != null) {
+					return checkFinish(rowCnt[i], N);
+				}
+
+				// after adding the count, check if the game finishes
+				colCnt[j] += pieceValue;
+				if (checkFinish(colCnt[j], N) != null) {
+					return checkFinish(colCnt[j], N);
+				}
+
+				if (i == j) {
+					digCnt[0] += pieceValue;
+					if (checkFinish(digCnt[0], N) != null) {
+						return checkFinish(digCnt[0], N);
+					}
+				} else if (i + j == N) {
+					digCnt[1] += pieceValue;
+					if (checkFinish(digCnt[1], N) != null) {
+						return checkFinish(digCnt[1], N);
+					}
+				}
+			}
+		}
+		// game not finished, continue
+		return Piece.Empty;
+	}
+
+	private static Piece checkFinish(int count, int N) {
+		if (count == N)
+			return Piece.Blue;
+		else if (count == -1 * N)
+			return Piece.Red;
+		else
+			return null;
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Form a Palindrome With Insertion]]></title>
@@ -178,67 +270,6 @@ But still, this is not an easy question when asked at an interview. It won't har
 1. There should be a function to convert the hash value to corresponding array index. 
 1. Remember there's __a concept of Load factor__. It means to what percentage the hashmap is filled. 
 1. h & (length – 1) means h % length, which maps a hashcode to an array index. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Weird Sort Array]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/03/weird-sort-array/"/>
-    <updated>2014-09-03T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/03/weird-sort-array</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.mitbbs.com/article_t0/JobHunting/32772813.html)
-
-> 数组排序， 排成 a1<a2>a3<a4>a5。。。这种形式。
-
-### Solution
-
-__The are 2 solutions__. The easy one is this: 
-
-> sort first, then 把临近的奇数换到偶数(index)上, O(nlog n). 
-
-__There's a great O(n) solution however__, not easy to think: 
-
-> 两两比较相邻数字，把大的数字放到下标为奇数的位置。 O(n). 
-
-### Code
-
-__O(nlgn) solution__
-
-	public void solutionOnlgn(int[] A) {
-		// this is a O(nlgn) solution
-		Arrays.sort(A);
-		for (int i = 2; i < A.length; i += 2) {
-			swap(A, i - 1, i);
-		}
-	}
-
-	private void swap(int[] A, int a, int b) {
-		A[a] ^= A[b];
-		A[b] ^= A[a];
-		A[a] ^= A[b];
-	}
-
-__O(n) solution__
-
-	public void solutionOn(int[] A) {
-		// this is a O(n) solution
-		for (int i = 1; i < A.length; i++) {
-			// compare (i)th with (i-1)th, and put the large value
-			// at odd-indexed positions
-			if ((A[i - 1] < A[i] && i % 2 == 0)
-					|| (A[i - 1] > A[i] && i % 2 == 1)) {
-				swap(A, i - 1, i);
-			}
-		}
-	}
-
-	private void swap(int[] A, int a, int b) {
-		A[a] ^= A[b];
-		A[b] ^= A[a];
-		A[a] ^= A[b];
-	}
 ]]></content>
   </entry>
   

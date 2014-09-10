@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-08T01:53:11+08:00</updated>
+  <updated>2014-09-10T21:41:48+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,7 +14,481 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[CC150v4] 11.4 Test Webpage Without Tools (`)]]></title>
+    <title type="html"><![CDATA[[CC150v4] 20.6 Top Million From Billion]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/10/top-million-from-billion/"/>
+    <updated>2014-09-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/10/top-million-from-billion</id>
+    <content type="html"><![CDATA[### Question
+
+> Describe an algorithm to find the largest 1 million numbers in 1 billion numbers. 
+
+> Assume that the computer memory can hold all one billion numbers. 
+
+### Solution
+
+There&#8217;re enough discussion on __Top K problems__ so far in this blog. The suggest solutions is: 
+
+1. Sort
+
+1. Min Heap, O(n logm) time. 
+
+1. Quick select algorithm. O(n) time. 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 20.3 Generate M Int From Array of Size N]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/10/generate-m-from-array-of-n/"/>
+    <updated>2014-09-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/10/generate-m-from-array-of-n</id>
+    <content type="html"><![CDATA[### Question
+
+> Write a method to randomly generate a set of m integers from an array of size n. Each element must have equal probability of being chosen. 
+
+### Solution
+
+This is very similar to another post I wrote: __[Question] Shuffle An Array (Fisher–Yates)__.
+
+The basic idea is to choose element one by one using RNG. After choosing an int, swap it to top and __then mark this element as &#8216;dead&#8217;__. Next time, the RNG will not touch on the &#8216;dead&#8217; elements. 
+
+__Very similar to Fisher–Yates Shuffle__, and the code below is written by me. 
+
+### Code
+
+	public static int[] pickMRandomly(int[] original, int m) {
+		int[] ans = new int[m];
+		for (int i = 0; i < m; i++) {
+			int rand = Question.listRand.get(i);
+			// note: rand is RN in the range [i, max]
+			ans[i] = original[rand];
+			original[rand] = original[i];
+			// now (i)th position in original is dead
+			// no one cares what value is at original[i]
+		}
+		return ans;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 20.8 Full Text Search]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/10/full-text-search/"/>
+    <updated>2014-09-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/10/full-text-search</id>
+    <content type="html"><![CDATA[### Question
+
+> Given a string s and an array of smaller strings T, design a method to search s for each small string in T. 
+
+### Solution
+
+__This is a very classic questio of string__, especially favored by Google. 
+
+The solution is __suffix tree__. For example, using &#8220;bibs&#8221; to build a suffix tree like this: 
+
+<img class="middle" src="http://okckd.github.io/assets/images/suffix-tree-example-bibs.png">
+
+The building of suffix tree and searching is not a very lengthy code. It&#8217;s posted below and it&#8217;s not written by me. 
+
+### Code
+
+Main method:
+
+	public static void main(String[] args) {
+		String testString = &#8220;mississippi&#8221;;
+		String[] stringList = { &#8220;is&#8221;, &#8220;sip&#8221;, &#8220;hi&#8221;, &#8220;sis&#8221; };
+		SuffixTree tree = new SuffixTree(testString);
+		for (String s : stringList) {
+			ArrayList<Integer> list = tree.getIndexes(s);
+			if (list != null) {
+				System.out.println(s + &#8220;: &#8221; + list.toString());
+			} else {
+				System.out.println(s + &#8220;: does not exist.&#8221;);
+			}
+		}
+	}
+
+SuffixTree.java
+
+	public class SuffixTree {
+		SuffixTreeNode root = new SuffixTreeNode();
+		
+		public SuffixTree(String s) {
+			// create a suffix tree with input string s
+			for (int i = 0; i < s.length(); i++) {
+				String suffix = s.substring(i);
+				root.insertString(suffix, i);
+			}
+		}
+		
+		public ArrayList<Integer> getIndexes(String s) {
+			return root.getIndexes(s);
+		}
+	}
+
+SuffixTreeNode.java
+
+	public class SuffixTreeNode {
+
+		char value;
+		HashMap<Character, SuffixTreeNode> children;
+		ArrayList<Integer> indexes = new ArrayList<Integer>();
+
+		public SuffixTreeNode() {
+			children = new HashMap<Character, SuffixTreeNode>();
+		}
+
+		public void insertString(String s, int index) {
+			indexes.add(index);
+			if (s != null && s.length() > 0) {
+				value = s.charAt(0);
+				SuffixTreeNode child = null;
+				if (children.containsKey(value)) {
+					child = children.get(value);
+				} else {
+					child = new SuffixTreeNode();
+					children.put(value, child);
+				}
+				String remainder = s.substring(1);
+				child.insertString(remainder, index);
+			}
+		}
+
+		public ArrayList<Integer> getIndexes(String s) {
+			if (s == null || s.length() == 0) {
+				return indexes;
+			} else {
+				char first = s.charAt(0);
+				if (children.containsKey(first)) {
+					String remainder = s.substring(1);
+					return children.get(first).getIndexes(remainder);
+				}
+			}
+			return null;
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 20.11 Find Subsquare With Same Border]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/10/find-subsquare-with-same-border/"/>
+    <updated>2014-09-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/10/find-subsquare-with-same-border</id>
+    <content type="html"><![CDATA[### Question
+
+> Imagine you have a square matrix, where each cell is filled with either black or white. 
+
+> Design an algorithm to find the maximum subsquare such that all four borders are filled with black pixels. 
+
+### Solution
+
+There is no better way to solve this except Brute Force. First find a point (as the top-left corner), and then test square size from large to small. 
+
+The code below is from the book. 
+
+### Code
+
+	public static Subsquare findMaxSquareInMatrix(int[][] matrix) {
+		assert (matrix.length > 0);
+		for (int row = 0; row < matrix.length; row++) {
+			assert (matrix[row].length == matrix.length);
+		}
+
+		int N = matrix.length;
+		int currentMaxSize = 0;
+		Subsquare sq = null;
+		int col = 0;
+
+		// Iterate through each column from left to right
+		while (N - col > currentMaxSize) { // See step 4 above
+			for (int row = 0; row < matrix.length; row++) {
+				// starting from the biggest
+				int size = N - Math.max(row, col);
+				while (size > currentMaxSize) {
+					if (checkSquareBorders(matrix, row, col, size)) {
+						currentMaxSize = size;
+						sq = new Subsquare(row, col, size);
+						break; // go to next (full) column
+					}
+					size&#8211;;
+				}
+			}
+			col++;
+		}
+		return sq;
+	}
+
+	private static boolean checkSquareBorders(int[][] matrix, int row, int col,
+			int size) {
+		// Check top and bottom border.
+		for (int j = 0; j < size; j++) {
+			if (matrix[row][col + j] == 1) {
+				return false;
+			}
+			if (matrix[row + size - 1][col + j] == 1) {
+				return false;
+			}
+		}
+
+		// Check left and right border.
+		for (int i = 1; i < size - 1; i++) {
+			if (matrix[row + i][col] == 1) {
+				return false;
+			}
+			if (matrix[row + i][col + size - 1] == 1) {
+				return false;
+			}
+		}
+		return true;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 20.4 Count 2s in Digits]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/10/count-2s-in-digits/"/>
+    <updated>2014-09-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/10/count-2s-in-digits</id>
+    <content type="html"><![CDATA[### Question
+
+> Write a method to count the number of 2s between 0 and n.
+
+### Solution
+
+__This is a difficult question__, especially hard to come up with the correct formula. Eg. 
+
+> f(279) = {(79 + 1) + 2 * f(99)} + f(79)
+>
+> f(513) = {100 + 5 * f(99)} + f(13)
+
+Take 513 as example, the first digit is 5. We know that all the 200+ is within the range, so __there&#8217;re 100 twos in the first digit__. Then, for the rest of the digits, we get f(99) for number between 0 and 99, and another f(99) for number between 100 and 199&#8230; and __this happens 5 times until 499__. That&#8217;s why we have 5 multiple by f(99). 
+
+In the end, we do the calculation __recursively for reminder number 13__. 
+
+### Code
+
+	public static int myAnswer(int n) {
+		if (n == 0)
+			return 0;
+		int power = 1;
+		while (power * 10 <= n) {
+			power *= 10;
+		}
+
+		int first = n / power;
+		int reminder = n % power;
+		int firstDigit2count = 0;
+		if (first > 2) {
+			firstDigit2count = power;
+		} else if (first == 2) {
+			firstDigit2count = reminder + 1;
+		}
+		int totalCountBeforeReminder = firstDigit2count
+				+ (first * myAnswer(power - 1));
+		return totalCountBeforeReminder + myAnswer(reminder);
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 19.4 Get Max Number With >, < Operator]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/09/get-max-without-comparison-operator/"/>
+    <updated>2014-09-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/09/get-max-without-comparison-operator</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Write a method which finds the maximum of two numbers. You should not use if-else or any other comparison operator.</p>
+
+<p>EXAMPLE</p>
+
+<p>Input: 5, 10</p>
+
+<p>Output: 10</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>We can&rsquo;t use >, &lt; or if-else statement, but we can use mathematical operator like subtract and bit operators.</p>
+
+<p>Calculate (a-b) and do (a + K(a-b)) can help us (where K is either 0 or -1).</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int getMax(int a, int b) {
+    int c = a - b;
+    int signBit = c &gt;&gt; 31 &amp; 1;
+    // if (a-b) is negative, sign = 1
+    // otherwise, sign = 0
+    return a - signBit * c;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 19.6 Convert Integer to English]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/09/convert-int-to-english/"/>
+    <updated>2014-09-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/09/convert-int-to-english</id>
+    <content type="html"><![CDATA[### Question
+
+> Given an integer between 0 and 999,999, print an English phrase that describes the integer (eg, “One Thousand, Two Hundred Thirty Four”).
+
+### Solution
+
+The solution in book isn&#8217;t good, so I wrote the code myself. 
+
+Read it below. 
+
+### Code
+
+	private static String[] arr1 = { &#8220;Zero &#8220;, &#8220;One &#8220;, &#8220;Two &#8220;, &#8220;Three &#8220;,
+			&#8220;Four &#8220;, &#8220;Five &#8220;, &#8220;Six &#8220;, &#8220;Seven &#8220;, &#8220;Eight &#8220;, &#8220;Nine &#8221; };
+
+	private static String[] arr11 = { &#8220;Ten &#8220;, &#8220;Eleven &#8220;, &#8220;Twelve &#8220;,
+			&#8220;Thirteen &#8220;, &#8220;Fourteen &#8220;, &#8220;Fifteen &#8220;, &#8220;Sixteen &#8220;, &#8220;Seventeen &#8220;,
+			&#8220;Eighteen &#8220;, &#8220;Nineteen &#8221; };
+
+	private static String[] arr10 = { &#8220;&#8221;, &#8220;Ten &#8220;, &#8220;Twenty &#8220;, &#8220;Thirty &#8220;,
+			&#8220;Forty &#8220;, &#8220;Fifty &#8220;, &#8220;Sixty &#8220;, &#8220;Seventy &#8220;, &#8220;Eighty &#8220;, &#8220;Ninety &#8221; };
+
+	public static String numtostring(int num) {
+		int part1 = num / 1000;
+		int part2 = num % 1000;
+		if (part1 == 0) {
+			return numBelowTrousand(part2);
+		} else {
+			return numBelowTrousand(part1) + &#8220;Thousand, &#8221;
+					+ numBelowTrousand(part2);
+		}
+	}
+
+	public static String numBelowTrousand(int num) {
+		StringBuilder sb = new StringBuilder();
+		// assume num is below 1000
+
+		// first, convert hundred digit
+		int hundred = num / 100;
+		if (hundred != 0) {
+			sb.append(arr1[hundred] + &#8220;Hundred &#8220;);
+		}
+
+		// second, convert the rest of digits
+		num %= 100;
+		if (num != 0) {
+			int ten = num / 10;
+			int one = num % 10;
+			if (ten == 1) {
+				sb.append(arr11[num - 10]);
+			} else {
+				if (ten != 0) {
+					// ten is in the range of [2,9]
+					sb.append(arr10[ten]);
+				}
+				if (one != 0) {
+					sb.append(arr1[one]);
+				}
+			}
+		}
+		return sb.toString();
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Winner of Tic-tac-toe]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/09/Winner-tic-tac-toe/"/>
+    <updated>2014-09-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/09/Winner-tic-tac-toe</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">link</a></p>
+
+<blockquote><p>How would you determine if someone has won a game of tic-tac-toe on a board of any size?</p></blockquote>
+
+<p>(This is also on CC150v4 19.2)</p>
+
+<h3>Solution</h3>
+
+<p>First, confirm that when the number of pieces in a line equals to the dimension of the board, one person wins. Eg. for 10 * 10 board, 10 pieces need to be in 1 line.</p>
+
+<p><strong><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">We can determine</a> if someone has won during a game in real time</strong>, as in checking after every move.</p>
+
+<blockquote><p>Create an array of size 2n+2 at the beginning of the game and fill it with zeros. Each spot in the array will be a sum of X&rsquo;s or O&rsquo;s horizontally (the first n places in the array), vertically (the second n places in the array) and diagonally (the last 2 places). Then with every move, you add 1 to the 2 places (or 3 if on a diagnol) of the array if X, and subtract 1 if its an O. After adding you check and see if the value of the array is equal to n or -n, if it is, n mean X has won and -n means O has won.</p></blockquote>
+
+<p>This is uses O(2n+2) space, but it&rsquo;s the best solution I can find online. I wrote code posted below.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>enum Piece {
+    Empty, Red, Blue
+};
+
+public static Piece hasWon3(Piece[][] board) {
+
+    int N = board.length;
+
+    // O(2n+2) space to store count info
+    int[] rowCnt = new int[N];
+    int[] colCnt = new int[N];
+    int[] digCnt = new int[2];
+
+    for (int i = 0; i &lt; N; i++) {
+        for (int j = 0; j &lt; N; j++) {
+
+            int pieceValue = 0;
+            if (board[i][j] == Piece.Blue) {
+                pieceValue = 1;
+            } else if (board[i][j] == Piece.Red) {
+                pieceValue = -1;
+            }
+
+            // if empty, pieceValue is 0
+            // if blue, add 1 in count
+            // if red, subtract 1 in count
+            rowCnt[i] += pieceValue;
+            if (checkFinish(rowCnt[i], N) != null) {
+                return checkFinish(rowCnt[i], N);
+            }
+
+            // after adding the count, check if the game finishes
+            colCnt[j] += pieceValue;
+            if (checkFinish(colCnt[j], N) != null) {
+                return checkFinish(colCnt[j], N);
+            }
+
+            if (i == j) {
+                digCnt[0] += pieceValue;
+                if (checkFinish(digCnt[0], N) != null) {
+                    return checkFinish(digCnt[0], N);
+                }
+            } else if (i + j == N) {
+                digCnt[1] += pieceValue;
+                if (checkFinish(digCnt[1], N) != null) {
+                    return checkFinish(digCnt[1], N);
+                }
+            }
+        }
+    }
+    // game not finished, continue
+    return Piece.Empty;
+}
+
+private static Piece checkFinish(int count, int N) {
+    if (count == N)
+        return Piece.Blue;
+    else if (count == -1 * N)
+        return Piece.Red;
+    else
+        return null;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 11.4 Test Webpage Without Tools]]></title>
     <link href="http://okckd.github.io/blog/2014/09/08/test-webpage-without-tool/"/>
     <updated>2014-09-08T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/09/08/test-webpage-without-tool</id>
@@ -23,6 +497,118 @@
 <blockquote><p>How would you load test a webpage without using any test tools?</p></blockquote>
 
 <h3>Solution</h3>
+
+<h4>Load testing</h4>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Load_testing">Load testing</a></strong> is testing under normal and peak load condition. It&rsquo;s also called software performance testing, reliability testing, and volume testing.</p>
+
+<h4>Steps</h4>
+
+<p><strong>First identify the performance-critical scenarios</strong>, which might include:</p>
+
+<ol>
+<li>response time</li>
+<li>throughput</li>
+<li>resource utilization</li>
+<li>max load that system can bear</li>
+</ol>
+
+
+<p><strong>Then, design tests to simulate the load</strong>: we can create virtual users by a multi-threaded program with 1000 thread, each acting as a user loading the page. We measure response time of each user.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 15.2 SQL Types of Join]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/sql-types-of-join/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/sql-types-of-join</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>What are the different types of joins? Please explain how they differ and why certain types are better in certain situations.</p></blockquote>
+
+<h3>Answer</h3>
+
+<ol>
+<li><p>INNER JOIN: Returns all rows when there is at least one match in BOTH tables</p></li>
+<li><p>OUTER JOIN</p>
+
+<ol>
+<li><p>LEFT JOIN: Return all rows from the left table, and the matched rows from the right table</p></li>
+<li><p>RIGHT JOIN: Return all rows from the right table, and the matched rows from the left table</p></li>
+<li><p>FULL JOIN: Return all rows when there is a match in ONE of the tables. If no matching record was found then the corresponding result fields will have a NULL value.</p></li>
+</ol>
+</li>
+</ol>
+
+
+<p><a href="http://www.w3schools.com/sql/sql_join.asp">source</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 15.5 SQL Students Grade Database (`)]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/sql-design-students-grade-database/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/sql-design-students-grade-database</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Imagine a simple database storing information for students&#8217; grades. Design what this database might look like, and provide a SQL query to return a list of the honor roll students (top 10%), sorted by their grade point average.</p></blockquote>
+
+<h3>Answer</h3>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 15.4 SQL Design Company Database (`)]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/sql-design-company-database/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/sql-design-company-database</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Draw an entity-relationship diagram for a database with companies, people, and professionals (people who work for companies).</p></blockquote>
+
+<h3>Answer</h3>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 15.3 SQL Denormalization (`)]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/sql-denormalization/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/sql-denormalization</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>What is denormalization? Explain the pros and cons.</p></blockquote>
+
+<h3>Answer</h3>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 15.1 SQL Count and Group by Statement]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/sql-count-group-by/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/sql-count-group-by</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Write a method to find the number of employees in each department.</p></blockquote>
+
+<h3>Answer</h3>
+
+<pre><code>select 
+    Dept_Name, 
+    Departments.Dept_ID, 
+    count(*) as ‘num_employees’
+from 
+    Departments
+left join 
+    Employees
+on 
+    Employees.Dept_ID = Departments.Dept_ID
+group by 
+    Departments.Dept_ID, Dept_Name
+</code></pre>
 ]]></content>
   </entry>
   
@@ -73,582 +659,50 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v4] 10.4 Implement Mathematical Operators]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/08/implement-math-operators/"/>
+    <title type="html"><![CDATA[[CC150v4] 14.5 Java Reflection]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/java-reflection/"/>
     <updated>2014-09-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/08/implement-math-operators</id>
+    <id>http://okckd.github.io/blog/2014/09/08/java-reflection</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<blockquote><p>Write a method to implement *, &ndash; , / operations You should use only the + operator.</p></blockquote>
+<blockquote><p>Explain what object reflection is in Java and why it is useful.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>First it&rsquo;s important to write a &lsquo;negate&rsquo; operator</strong>. This is used in all other operations.</p>
+<p><strong><a href="http://tutorials.jenkov.com/java-reflection/index.html">Java Reflection</a> makes it possible to inspect classes, interfaces, fields and methods at runtime</strong>, without knowing the names of the classes, methods etc. at compile time. It is also possible to instantiate new objects, invoke methods and get/set field values using reflection.</p>
 
-<pre><code>public static int FnNegate(int a) {
-    int neg = 0;
-    int d = a &lt; 0 ? 1 : -1;
-    while (a != 0) {
-        neg += d;
-        a += d;
-    }
-    return neg;
-}
+<p>For example, say you have an object of <a href="http://stackoverflow.com/a/37632">an unknown type in Java</a>, and <strong>you would like to call a &lsquo;doSomething&rsquo; method on it if one exists</strong>. Java&rsquo;s static typing system isn&rsquo;t really designed to support this unless the object conforms to a known interface, <strong>but using reflection</strong>, your code can look at the object and find out if it has a method called &lsquo;doSomething&rsquo; and then call it if you want to. Like this:</p>
+
+<pre><code>Method method = foo.getClass().getMethod("doSomething", null);
+method.invoke(foo, null);
 </code></pre>
 
-<p>Although we can only use +, the author also used > and &lt; comparison operators.</p>
+<h4>Usage in Junit</h4>
 
-<p>This is a borning question, I did not write code myself.</p>
+<p>One very common use case in Java is the usage with annotations. JUnit 4, for example, will use reflection to <strong>look through your classes for methods tagged with the @Test annotation</strong>, and will then call them when running the unit test.</p>
 
 <h3>Code</h3>
 
-<p><strong>not written by me</strong></p>
+<p>The following example code is covered in <a href="http://tutorials.jenkov.com/java-reflection/index.html">this post</a>:</p>
 
-<pre><code>/* Flip a positive sign to negative, or a negative sign to pos */
-public static int FnNegate(int a) {
-    int neg = 0;
-    int d = a &lt; 0 ? 1 : -1;
-    while (a != 0) {
-        neg += d;
-        a += d;
-    }
-    return neg;
-}
-
-/* Subtract two numbers by negating b and adding them */
-public static int FnMinus(int a, int b) {
-    return a + FnNegate(b);
-}
-
-/* Check if a and b are different signs */
-public static boolean DifferentSigns(int a, int b) {
-    return ((a &lt; 0 &amp;&amp; b &gt; 0) || (a &gt; 0 &amp;&amp; b &lt; 0)) ? true : false;
-}
-
-/* Return absolute value */
-public static int abs(int a) {
-    if (a &lt; 0)
-        return FnNegate(a);
-    else
-        return a;
-}
-
-/* Multiply a by b by adding a to itself b times */
-public static int FnTimes(int a, int b) {
-    if (a &lt; b)
-        return FnTimes(b, a); // algo is faster if b &lt; a
-    int sum = 0;
-    for (int iter = abs(b); iter &gt; 0; --iter)
-        sum += a;
-    if (b &lt; 0)
-        sum = FnNegate(sum);
-    return sum;
-}
-
-// returns 1, if a/b &gt;= 0.5, and 0 otherwise
-public static int DefineAndRoundFraction(int a, int b) {
-    if (FnTimes(abs(a), 2) &gt;= abs(b))
-        return 1;
-    else
-        return 0;
-}
-
-/*
- * Divide a by b by literally counting how many times does b go into a. That
- * is, count how many times you can subtract b from a until you hit 0.
- */
-public static int FnDivide(int a, int b)
-        throws java.lang.ArithmeticException {
-    if (b == 0) {
-        throw new java.lang.ArithmeticException("ERROR: Divide by zero.");
-    }
-    int quotient = 0;
-    int divisor = FnNegate(abs(b));
-    int divend; /* dividend */
-    for (divend = abs(a); divend &gt;= abs(divisor); divend += divisor) {
-        ++quotient;
-    }
-    if (DifferentSigns(a, b))
-        quotient = FnNegate(quotient);
-    return quotient;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 10.6 Find Collinear in 2D Plane (`)]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/08/find-coliner-in-2d-plane/"/>
-    <updated>2014-09-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/08/find-coliner-in-2d-plane</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Given a two dimensional graph with points on it, find a line which passes the most number of points.</p></blockquote>
-
-<h3>Solution</h3>
-
-<h3>Code</h3>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] Chap9 Example - Sort Persons]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/sort-persons/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/sort-persons</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>You have a very large array of ‘Person’ objects. Sort the people in increasing order of age.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>First we look at the nature of this question:</p>
-
-<ol>
-<li>large input array</li>
-<li>sort based on age (<strong>which is between 1 and 100</strong>, this is important)</li>
-</ol>
-
-
-<p><strong>This exactly matches the charasteristics of Bucket Sort</strong>. Time complexity in average case is O(n + k) where k is the number of buckets.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 9.5 Search Array Containing Empty String]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/search-array-containing-empty-string/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/search-array-containing-empty-string</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Given a sorted array of strings which is interspersed with empty strings, write a method to find the location of a given string.</p>
-
-<p>Example: find “ball” in [“at”, “”, “”, “”, “ball”, “”, “”, “car”, “”, “”, “dad”, “”, “”] will return 4</p>
-
-<p>Example: find “ballcar” in [“at”, “”, “”, “”, “”, “ball”, “car”, “”, “”, “dad”, “”, “”] will return -1</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The solution is binary search, but when reads empty, <strong>advance to the next non-empty string</strong>.</p>
-
-<p>But wait, <strong>there can be a very big problem that causes looping forever</strong>. Eg.</p>
-
-<blockquote><p>&ldquo;a&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;c&rdquo; (5 items), look for &ldquo;b&rdquo;</p>
-
-<p>Now &lsquo;left&rsquo; points to 1st string(&ldquo;a&rdquo;) and &lsquo;right&rsquo; points to 4th(&ldquo;&rdquo;). If we read read &lsquo;mid&rsquo; value and advance to the next non-empty string, it&rsquo;ll be &ldquo;c&rdquo;.</p>
-
-<p>since &ldquo;c&rdquo; is large than &ldquo;b&rdquo;, &lsquo;right&rsquo; is set to the 4th index. It&rsquo;s a endless loop!</p></blockquote>
-
-<p>There&rsquo;re various ways to solve this. The book suggests</p>
-
-<p>My approach is to use 2 instances of &lsquo;mid&rsquo;:</p>
-
-<ol>
-<li>calculatedMid</li>
-<li>comparisonMid</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>public static int search(String[] input, String target) {
-    if (target == null || target.length() == 0) {
-        return -1;
-    }
-    int len = input.length;
-    int left = 0, right = len - 1;
-    while (left &lt; right) {
-        int calculatedMid = left + (right - left) / 2;
-        int comparisonMid = calculatedMid;
-        while (comparisonMid &lt; len &amp;&amp; input[comparisonMid].length() == 0) {
-            comparisonMid++;
-        }
-        if (input[comparisonMid].equals(target)) {
-            return comparisonMid;
-        } else if (input[comparisonMid].compareTo(target) &lt; 0) {
-            left = comparisonMid + 1;
-        } else {
-            right = calculatedMid - 1;
-        }
-    }
-    if (left &lt; len &amp;&amp; input[left].equals(target)) {
-        return left;
-    } else {
-        return -1;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 8.4 Generate Permutation Recursively]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/generate-permutation-recursively/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/generate-permutation-recursively</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Write a method to compute all permutations of a string.</p>
-
-<p>Do it recursively.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Get first char.</p></li>
-<li><p>Permute the reminder of the string.</p></li>
-<li><p>Insert that char into all possible positions.</p></li>
-</ol>
-
-
-<p>The code is more concise that doing it iteratively, <strong>and no visited array needed</strong>!</p>
-
-<h3>Code</h3>
-
-<pre><code>public static ArrayList&lt;String&gt; getPerms(String s) {
-    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-    if (s.length() == 1) {
-        ans.add(s);
-        return ans;
-    }
-    char single = s.charAt(0);
-    ArrayList&lt;String&gt; partialPerms = getPerms(s.substring(1));
-    for (String part : partialPerms) {
-        for (int i = 0; i &lt;= part.length(); i++) {
-            ans.add(part.substring(0, i) + single + part.substring(i));
-        }
-    }
-    return ans;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 5.7 Find Missing Number]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/find-missing-number/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/find-missing-number</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>An array A[1&hellip;n] contains all the integers from 0 to n except for one number which is missing. In this problem, we cannot access an entire integer in A with a single operation.</p>
-
-<p>The elements of A are represented in binary, and the only operation we can use to access them is “fetch the jth bit of A[i]”, which takes constant time. Write code to find the missing integer. Can you do it in O(n) time?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a difficult bit operation question</strong>.</p>
-
-<p>The main thing to understand is, for a particular bit:</p>
-
-<blockquote><p>if the bit value of the removed number is 0, then count(0) &lt;= count(1)</p>
-
-<p>if the bit value of the removed number is 1, then count(0) > count(1)</p></blockquote>
-
-<p>By using this principle, we can easily find the missing value for each bit.</p>
-
-<p><strong>However, we must know when to stop checking</strong>. For example:</p>
-
-<blockquote><p>input: 000, 001, 011</p></blockquote>
-
-<p>We know that the last bit is 0, second last is 1. We shall stop here and return the result &ldquo;010&rdquo;. If we did not stop, the result value would be &ldquo;110&rdquo;, which is wrong. How this is handled is by <strong>passing only half of the input list each time</strong>, and we also add one condition at the beginning:</p>
-
-<pre><code>if (list.size() == 0)
-    return 0;
-</code></pre>
-
-<p>By doing this, we always limit the input list to a smaller range, until we finish finding all bits.</p>
-
-<h3>Code</h3>
-
-<p><strong>hard to write</strong></p>
-
-<pre><code>public static int findMissing(List&lt;BitInteger&gt; list) {
-    return helper(list, BitInteger.INTEGER_SIZE - 1);
-}
-
-private static int helper(List&lt;BitInteger&gt; list, int col) {
-    if (list.size() == 0)
-        return 0;
-    List&lt;BitInteger&gt; zeroList = new ArrayList&lt;BitInteger&gt;();
-    List&lt;BitInteger&gt; oneList = new ArrayList&lt;BitInteger&gt;();
-    for (BitInteger bit : list) {
-        if (bit.fetch(col) == 0) {
-            zeroList.add(bit);
-        } else {
-            oneList.add(bit);
-        }
-    }
-    if (zeroList.size() &lt;= oneList.size()) {
-        // this means the missing value contains a 0
-        return helper(zeroList, col - 1) &lt;&lt; 1;
-    } else {
-        // the missing value contains 1
-        return helper(oneList, col - 1) &lt;&lt; 1 | 1;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 6.2 Cover the Chess Board]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/cover-the-chess-board/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/cover-the-chess-board</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>There is an 8x8 chess board in which two diagonally opposite squares have been cut off. You are given 31 dominos, and a single domino can cover exactly two squares.</p>
-
-<p>Can you use the 31 dominos to cover the entire board? Prove your answer (by providing an example, or showing why it’s impossible).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The chess board initially has 32 black and 32 white squares. By removing opposite corners, we&rsquo;re left with 30 of one color and 32 of the other color.</p>
-
-<p>31 dominos must cover 31 of one color and 31 of the other color.</p>
-
-<p>So, impossible.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 5.2 Convert Integer to Binary Form]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/convert-integer-to-binary/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/convert-integer-to-binary</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Given a (decimal &ndash; e.g. 3.72) number that is passed in as a string, print the binary representation.</p>
-
-<p>If the number can not be represented accurately in binary, print “ERROR”</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Convert the integer part is easy.</p>
-
-<p><strong>The difficulty is how to convert a floating point (the decimal part) to binary form</strong>. The idea suggested in the book is to keep x2, and subtract 1 when necessary. Eg.</p>
-
-<blockquote><p>0.625 x 2 = 1.25, append 1</p>
-
-<p>0.25 x 2 = 0.5, append 0</p>
-
-<p>0.5 x 2 = 1, append 1</p>
-
-<p>the binary form of 0.625 would be 0.101.</p></blockquote>
-
-<p>We must declarify the max number of digits in the decimal part. In the book, <strong>the answer assumes a maximum digits of 32 bits</strong> (i.e. when binary length grows more than 32 bits, return &ldquo;Error&rdquo;).</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static String printBinary(String n) {
-    String[] num = n.split("\\.");
-    int integer = Integer.parseInt(num[0]);
-    double decimal = Double.parseDouble("0." + num[1]);
-
-    // now convert decimal part, if can't convert, return ERROR
-    StringBuilder sb = new StringBuilder();
-    while (decimal != 0) {
-        if (sb.length() &gt; 32) {
-            return "ERROR";
-        }
-        double newDoub = 2 * decimal;
-        sb.append(newDoub &gt;= 1 ? "1" : "0");
-        decimal = newDoub % 1;
-    }
-
-    // now convert integer part
-    String intStr = "";
-    while (integer != 0) {
-        intStr = ((integer &amp; 1) == 1 ? "1" : "0") + intStr;
-        integer = integer &gt;&gt; 1;
-    }
-
-    // return the 2 parts connected with a dot
-    return intStr + "." + sb.toString();
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 3.6 Sort Stack]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/06/sort-stack/"/>
-    <updated>2014-09-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/06/sort-stack</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Write a program to sort a stack in ascending order. You should not make any assumptions about how the stack is implemented.</p>
-
-<p>The following are the only functions that should be used to write this program: push | pop | peek | isEmpty.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a very good question that tests stack operations.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static Stack&lt;Integer&gt; sort(Stack&lt;Integer&gt; s) {
-    Stack&lt;Integer&gt; result = new Stack&lt;Integer&gt;();
-    while (!s.isEmpty()) {
-        Integer nextNum = s.pop();
-        while (!result.isEmpty() &amp;&amp; result.peek() &lt; nextNum) {
-            s.push(result.pop());
-        }
-        result.push(nextNum);
-    }
-    return result;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 4.8 Print Path Sum to Value]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/06/print-path-sum-to-value/"/>
-    <updated>2014-09-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/06/print-path-sum-to-value</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>You are given a binary tree in which each node contains a value. Design an algorithm to print all paths which sum up to that value. Note that it can be any path in the tree &ndash; it does not have to start at the root.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Keep a list of items as buffer</strong>, and check the following condition:</p>
-
-<blockquote><p>“does this node complete a path with the sum?”</p></blockquote>
-
-<p>There&rsquo;re n nodes in total, and the max size of buffer is lg(n), so the time complexity is O(nlgn).</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static void find(TreeNode head, int target) {
-    findSum(head, target, new ArrayList&lt;Integer&gt;());
-}
-
-private static void findSum(TreeNode node, int target, List&lt;Integer&gt; buffer) {
-    if (node == null)
-        return;
-
-    buffer.add(node.data);
-    int sum = 0;
-    for (int i = buffer.size() - 1; i &gt;= 0; i--) {
-        sum += buffer.get(i);
-        if (sum == target) {
-            // from (i)th element until the last element is a valid path
-            printPath(buffer, i);
-        }
-    }
-
-    List&lt;Integer&gt; clone1 = new ArrayList&lt;Integer&gt;(buffer);
-    findSum(node.left, target, clone1);
-
-    List&lt;Integer&gt; clone2 = new ArrayList&lt;Integer&gt;(buffer);
-    findSum(node.right, target, clone2);
-}
-
-private static void printPath(List&lt;Integer&gt; buffer, int start) {
-    System.out.print("Path: ");
-    for (int i = start; i &lt; buffer.size(); i++) {
-        System.out.print(buffer.get(i) + " ");
-    }
-    System.out.println();
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 3.4 Towers of Hanoi]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/06/hanoi-tower/"/>
-    <updated>2014-09-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/06/hanoi-tower</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>In the classic problem of the Towers of Hanoi, you have 3 rods and N disks of di!erent sizes which can slide onto any tower. The puzzle starts with disks sorted in ascending order of size from top to bottom (e.g., each disk sits on top of an even larger one). You have the following constraints:</p></blockquote>
-
-<ol>
-<li>Only one disk can be moved at a time.</li>
-<li>A disk is slid o! the top of one rod onto the next rod.</li>
-<li>A disk can only be placed on top of a larger disk.</li>
-</ol>
-
-
-<blockquote><p>Write a program to move the disks from the &ldquo;rst rod to the last using Stacks.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a <strong>classic recursive question</strong>. The solution code is supposed to be very concise.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong>, slightly different from the answer in the book, but good.</p>
-
-<p>Main class:</p>
-
-<pre><code>public class HanoiMyAnswer {
-
-    private static Rod r0, r1, r2;
-    private static final int NUM_DISKS = 5;
+<pre><code>public class JavaReflection {
 
     public static void main(String[] args) {
-        // Hanoi Tower always have 3 rods
-        r0 = new Rod(0);
-        r1 = new Rod(1);
-        r2 = new Rod(2);
+        Method[] methods;
 
-        // Put some disks on the 1st rod, leaving 2nd and 3rd rod empty
-        r0.setDisks(NUM_DISKS);
+        methods = ListNode.class.getMethods();
 
-        // start main algorithm
-        System.out.println("My answer: ");
-        moveDisks(NUM_DISKS, r0, r2, r1);
-    }
-
-    private static void moveDisks(int number, Rod from, Rod to, Rod buffer) {
-        if (number == 1) {
-            int topValue = from.disks.pop();
-            to.disks.push(topValue);
-            displayMessage(topValue, from.name, to.name);
-        } else {
-            moveDisks(number - 1, from, buffer, to);
-            int bottomValue = from.disks.pop();
-            to.disks.push(bottomValue);
-            displayMessage(bottomValue, from.name, to.name);
-            moveDisks(number - 1, buffer, to, from);
+        for (Method method : methods) {
+            System.out.println(formatMethodName(method.getName() + "()")
+                    + method.getDeclaringClass());
         }
     }
 
-    private static void displayMessage(int disk, int from, int to) {
-        System.out.println("Disk[" + disk + "]: Rod" + from + "--&gt;" + to);
-    }
-}
-</code></pre>
-
-<p>Rod.java</p>
-
-<pre><code>class Rod {
-
-    int name;
-    Stack&lt;Integer&gt; disks = new Stack&lt;Integer&gt;();
-
-    public Rod(int rodIndex) {
-        this.name = rodIndex;
-    }
-
-    public void setDisks(int n) {
-        // this method will insert n disks on this Rod
-        // the bottom disk is indexed as (n-1) and top one is 0
-        disks.clear();
-        for (int i = n - 1; i &gt;= 0; i--) {
-            disks.push(i);
+    private static String formatMethodName(String methodName) {
+        for (int i = methodName.length(); i &lt; 30; i++) {
+            methodName += ".";
         }
+        return methodName;
     }
 }
 </code></pre>
@@ -656,49 +710,76 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v4] 4.5 Find Next Node in BST]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/06/find-next-node-bst/"/>
-    <updated>2014-09-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/06/find-next-node-bst</id>
+    <title type="html"><![CDATA[[CC150v4] 14.1 Java Private Constructor]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/java-private-constructor/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/java-private-constructor</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<blockquote><p>Write an algorithm to find the ‘next’ node (i.e., in-order successor) of a given node in a binary search tree where each node has a link to its parent.</p></blockquote>
+<blockquote><p>In terms of inheritance, what is the effect of keeping a constructor private?</p></blockquote>
 
 <h3>Solution</h3>
 
-<ol>
-<li><p><strong>If current node have a right child</strong>, return the leftmost leaf of right child.</p></li>
-<li><p><strong>If current node have no right child</strong>:</p>
+<p><a href="http://www.javapractices.com/topic/TopicAction.do?Id=40">If the programmer</a> does not provide a constructor for a class, <strong>the system will always provide a default, public no-argument constructor</strong>.</p>
+
+<p>To disable this default constructor, simply add a private no-argument constructor to the class.</p>
+
+<p>Two categories of usage:</p>
 
 <ol>
-<li><p>If current is parent&rsquo;s left child, then return parent node.</p></li>
-<li><p>If current is parent&rsquo;s right child, look all the way up until find a right-turning parent.</p></li>
-<li><p>If all parent is not right-turning. Return null.</p></li>
+<li>Object construction is entirely forbidden
+
+<ol>
+<li>class offers only static members (sometimes called <strong><a href="http://stackoverflow.com/a/17342889">utility class</a></strong>)</li>
+</ol>
+</li>
+<li>Object construction is private only
+
+<ol>
+<li>a class needs to prevent the caller from creating objects, like Singleton</li>
 </ol>
 </li>
 </ol>
 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 14.6 Java HashMap Counter]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/java-hashmap-counter/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/java-hashmap-counter</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Suppose you are using a map in your program, how would you count the number of times the program calls the put() and get() functions?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Write a wrapper class upon the HashMap Class</strong>, and override the ger() and put() methods.</p>
+
+<p>However, what if we have multiple instance of hashmap? <strong>Solution is to use a static variable to count</strong>. Some answers are found <a href="http://stackoverflow.com/a/20027116">here</a>.</p>
+
+<p>Good question this is!</p>
 
 <h3>Code</h3>
 
-<p><strong>written by me</strong></p>
+<pre><code>public static class MyHashMap&lt;K, V&gt; extends HashMap&lt;K, V&gt; {
 
-<pre><code>public static TreeNode inorderSucc(TreeNode e) {
-    if (e == null)
-        return null;
-    if (e.right != null) {
-        TreeNode p = e.right;
-        while (p.left != null) {
-            p = p.left;
-        }
-        return p;
-    } else {
-        TreeNode p = e.parent;
-        while (p != null &amp;&amp; p.right == e) {
-            e = p;
-            p = e.parent;
-        }
-        return p;
+    private static final long serialVersionUID = 1L;
+    private static int count = 0;
+
+    public V put(K key, V value) {
+        count++;
+        return super.put(key, value);
+    }
+
+    public V get(Object key) {
+        count++;
+        return super.get(key);
+    }
+
+    public static int getCount() {
+        return count;
     }
 }
 </code></pre>
@@ -706,279 +787,87 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v4] 4.7 Check Subtree]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/06/check-subtree/"/>
-    <updated>2014-09-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/06/check-subtree</id>
+    <title type="html"><![CDATA[[CC150v4] 14.2 Java Finally Statement]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/java-finally-statement/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/java-finally-statement</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<blockquote><p>You have two very large binary trees: T1, with millions of nodes, and T2, with hundreds of nodes. Create an algorithm to decide if T2 is a subtree of T1.</p></blockquote>
+<blockquote><p>In Java, does the finally block gets executed if we insert a return statement inside the try block of a try-catch-finally?</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>The best solution is to print inorder and preorder traversal</strong> of both trees. Find whether the 2 traversal string of T2 <strong>is substring of the traversal of T1</strong>.</p>
+<p>Yes, it will.</p>
 
-<p>This is a very good idea of checking subtree of a Binary Tree. However, this solution is very <strong>memory intensive</strong>.</p>
+<p>Even when we attempt to exit within the try block (normal exit, return, continue, break or any exception), <strong>the finally block will still be executed</strong>.</p>
 
-<p><strong>The alternative solution</strong> simply checks the tree similarity for each and every node.</p>
-
-<p>Time complexity:</p>
-
-<p>If k is the number of occurrences of T2’s root in T1, the worst case runtime can be characterized as O(n + k * m). So it&rsquo;s slower.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static boolean containsTree(TreeNode t1, TreeNode t2) {
-    if (t1 == null) {
-        return false;
-    } else if (matchTree(t1, t2)) {
-        return true;
-    } else {
-        return containsTree(t1.left, t2) || containsTree(t1.right, t2);
-    }
-}
-
-private static boolean matchTree(TreeNode t1, TreeNode t2) {
-    if (t2 == null) {
-        return true;
-    } else if (t1 == null) {
-        return false;
-    } else if (t1.data != t2.data) {
-        return false;
-    } else {
-        return matchTree(t1.left, t2.left) &amp;&amp; matchTree(t1.right, t2.right);
-    }
-}
-</code></pre>
+<p>The only time finally <a href="http://stackoverflow.com/a/65049">won&rsquo;t be called</a> is if you call System.exit() or if the JVM crashes first.</p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Google] Form a Palindrome With Insertion]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/06/Form-palindrome-with-insertion/"/>
-    <updated>2014-09-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/06/Form-palindrome-with-insertion</id>
+    <title type="html"><![CDATA[[CC150v4] 14.3 Java Final, Finally and Finalize]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/08/java-final-finally-finalize/"/>
+    <updated>2014-09-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/08/java-final-finally-finalize</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<p><a href="http://www.glassdoor.com/Interview/Given-a-string-convert-it-into-a-palindrome-with-the-lease-number-of-insertions-possible-QTN_729122.htm">link</a></p>
+<blockquote><p>What is the difference between Final, Finally, and finalize?</p></blockquote>
 
-<blockquote><p>Given a string, convert it into a palindrome with the lease number of insertions possible.</p></blockquote>
+<h3>final</h3>
 
-<h3>Solution</h3>
-
-<p>This is a DP question. There&rsquo;re 2 approaches.</p>
-
-<p><strong>First, is direct DP</strong>. This is the nicest solution, not intuitive at first, but actually good.</p>
-
-<blockquote><p>P[i, j] = P[i+1, j-1], if S[i] = S[j]</p>
-
-<p>P[i, j] = 1 + min(P[i,j-1], P[i+1,j]), otherwise</p></blockquote>
-
-<p>contributed by <a href="http://stackoverflow.com/a/10732879">this guy</a>.</p>
-
-<p><strong>Second approach is to calculate the longest palindrome subsequence</strong>, and the answer would be string length minus this value.</p>
-
-<p>I wrote code for both apporaches.</p>
-
-<p>According to <a href="http://www.geeksforgeeks.org/dynamic-programming-set-28-minimum-insertions-to-form-a-palindrome/">G4G</a>, we can actually calculate the <strong>Longest Common Subsequence of the string and its reverse</strong>, and this value shall be same as the longest palindrome subsequence that we got in second approach. It&rsquo;s nice to know this idea.</p>
-
-<h3>Code</h3>
-
-<p><strong>direct</strong></p>
-
-<pre><code>public int solve1(String str) {
-    // direct dp
-    if (str == null)
-        return 0;
-    int len = str.length();
-    int[][] dp = new int[len][len];
-    for (int i = len - 1; i &gt;= 0; i--) {
-        for (int j = i; j &lt; len; j++) {
-            if (i == j) {
-                dp[i][j] = 0;
-            } else if (i + 1 == j) {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 0 : 1;
-            } else {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? dp[i + 1][j - 1]
-                        : 1 + Math.min(dp[i + 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-    return dp[0][len - 1];
-}
-</code></pre>
-
-<p><strong>longest palindrome subsequence</strong></p>
-
-<pre><code>public int solve2(String str) {
-    // longest palindrome subsequence
-    if (str == null)
-        return 0;
-    int len = str.length();
-    int[][] dp = new int[len][len];
-    for (int i = len - 1; i &gt;= 0; i--) {
-        for (int j = i; j &lt; len; j++) {
-            if (i == j) {
-                dp[i][j] = 1;
-            } else if (i + 1 == j) {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 2 : 1;
-            } else {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 2 + dp[i + 1][j - 1]
-                        : Math.max(dp[i + 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-    return len - dp[0][len - 1];
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Unsolved Mystery of UTF8 Encoding]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/04/unsolved-mystery-of-utf8/"/>
-    <updated>2014-09-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/04/unsolved-mystery-of-utf8</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://algorithmguru.com/blog/?p=148">link</a></p>
-
-<blockquote><p>UTF-8 is a variable-length encoding of letters or runes. If the most significant bit of the first byte is 0, the letter is 1 byte long. Otherwise, its length is the number of leading 1’s in the first byte. If a letter is more than one byte long, all subsequent runes start with 10. Here’s a chart:</p>
-
-<p>UTF-8 encoding scheme is described below:</p></blockquote>
-
-<pre><code>0XXXXXXX = this is the entire rune
-10XXXXXX = this is a continuation of the rune from the previous byte
-110XXXXX = this is the start of a 2-byte rune.
-1110XXXX = this is the start of a 3-byte rune.
-11110XXX = this is the start of a 4-byte rune.
-111110XX = this is the start of a 5-byte rune.
-1111110X = this is the start of a 6-byte rune.
-11111110 = this is the start of a 7-byte rune.
-11111111 = this is the start of a 8-byte rune.
-</code></pre>
-
-<blockquote><p>For example, a 3-byte rune would be 1110XXXX 10XXXXXX 10XXXXXX.</p>
-
-<p>Write a function that decides whether a given byte array (or string) is valid UTF-8 encoded text.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is an easy question, just put here for reference.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Print Numbers Containing 5]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/04/print-numbers-containing-5/"/>
-    <updated>2014-09-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/04/print-numbers-containing-5</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32651839.html">link</a></p>
-
-<blockquote><p>写一个function，对于参数n，输出从0到n之间所有含5的数字。eg. func(30) 应该输出5，15，25</p>
-
-<p>this is Groupon interview question</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Suggested by level 10 of <a href="http://www.mitbbs.com/article_t/JobHunting/32651839.html">this forum</a>. It&rsquo;s (surprisingly) a DFS question.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public void mySolution(int num) {
-    if (num &gt;= 5) {
-        String str = String.valueOf(num);
-        helper(num, "", 0, str.length(), false);
-    }
-}
-
-private void helper(int max, String prefix, int pos, int len, boolean have5) {
-    if (pos == len) {
-        int cur = Integer.parseInt(prefix);
-        if (cur &lt;= max) {
-            System.out.print(cur + ", ");
-        }
-        return;
-    }
-    for (int i = 0; i &lt; 10; i++) {
-        if (pos == len - 1 &amp;&amp; !have5 &amp;&amp; i != 5) {
-            continue;
-        }
-        helper(max, prefix + i, pos + 1, len, have5 || i == 5);
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Find Second Shortest Path]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/04/Find-second-shortest-path/"/>
-    <updated>2014-09-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/04/Find-second-shortest-path</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=16922663">link</a></p>
-
-<blockquote><p>You are given a graph and an algorithm that can find the shortest path b/w any two nodes.</p>
-
-<p>Now you have to find the second shortest path between same two nodes.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>From the top answer:</p>
-
-<blockquote><p><strong>Find the shortest path</strong> between any two nodes. Let them be A and B.</p>
-
-<p>Now to get second shortest path between the same nodes, <strong>remove any one edge that is involved in the shortest path</strong> between the same nodes and calculate the shortest path.</p>
-
-<p>Do the above process for each of the node involved in shortest path and keep track of the minimum second shortest path found.</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Code a HashMap]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/04/Code-a-hashmap/"/>
-    <updated>2014-09-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/04/Code-a-hashmap</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
-
-<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We already write 2 post before:</p>
+<p><strong>is a keyword</strong>.</p>
 
 <ol>
-<li><p><strong>[Question] Implement a HashMap</strong></p></li>
-<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
+<li><strong>Variable</strong> decleared as final should be initialized only once and cannot be changed.</li>
+<li><strong>Classes</strong> declared as final cannot be extended.</li>
+<li><strong>Methods</strong> declared as final cannot be overridden.</li>
 </ol>
 
 
-<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
+<p>Code:</p>
 
-<ol>
-<li>The basic structure is an array. It can be:
+<pre><code>private final String name = "foo";
 
-<ol>
-<li>An array of linked nodes (with a next pointer).</li>
-<li>An array of linked list.</li>
-</ol>
-</li>
-<li>There should be a hash function.</li>
-<li>There should be a function to convert the hash value to corresponding array index.</li>
-<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
-<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
-</ol>
+public final String toString() {  return "NULL"; }
 
+// final can also make a class not "inheritable"
+public final class finalClass {...}
+public class classNotAllowed extends finalClass {...} 
+// Not allowed
+</code></pre>
+
+<h3>finally</h3>
+
+<p><strong>is a block</strong>.</p>
+
+<p>The finally block <strong>always executes</strong> when the try block exits (even if an unexpected exception occurs).</p>
+
+<pre><code>lock.lock();
+try {
+    //do stuff
+} catch (SomeException se) {
+    //handle se
+} finally {
+    lock.unlock(); //always executed, even if Exception or Error or se
+}
+</code></pre>
+
+<h3>finalize</h3>
+
+<p><strong>is a method</strong>.</p>
+
+<p><strong>It&rsquo;s called by Garbage Collector</strong> before reclaiming GC eligible objects.</p>
+
+<pre><code>public void finalize() {
+    //free resources (e.g. unallocate memory)
+    super.finalize();
+}
+</code></pre>
+
+<p><a href="http://www.java2novice.com/java_interview_questions/final-finally-finalize/">source1</a></p>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/11/difference-between-final-finally-and-finalize-java.html">source2</a></p>
 ]]></content>
   </entry>
   
