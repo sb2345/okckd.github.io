@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-10T10:37:27+08:00</updated>
+  <updated>2014-09-10T15:36:02+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,86 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 20.3 Generate M Int From Array of Size N]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/10/generate-m-from-array-of-n/"/>
+    <updated>2014-09-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/10/generate-m-from-array-of-n</id>
+    <content type="html"><![CDATA[### Question
+
+> Write a method to randomly generate a set of m integers from an array of size n. Each element must have equal probability of being chosen. 
+
+### Solution
+
+This is very similar to another post I wrote: __[Question] Shuffle An Array (Fisher–Yates)__.
+
+The basic idea is to choose element one by one using RNG. After choosing an int, swap it to top and __then mark this element as &#8216;dead&#8217;__. Next time, the RNG will not touch on the &#8216;dead&#8217; elements. 
+
+__Very similar to Fisher–Yates Shuffle__, and the code below is written by me. 
+
+### Code
+
+	public static int[] pickMRandomly(int[] original, int m) {
+		int[] ans = new int[m];
+		for (int i = 0; i < m; i++) {
+			int rand = Question.listRand.get(i);
+			// note: rand is RN in the range [i, max]
+			ans[i] = original[rand];
+			original[rand] = original[i];
+			// now (i)th position in original is dead
+			// no one cares what value is at original[i]
+		}
+		return ans;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 20.4 Count 2s in Digits]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/10/count-2s-in-digits/"/>
+    <updated>2014-09-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/10/count-2s-in-digits</id>
+    <content type="html"><![CDATA[### Question
+
+> Write a method to count the number of 2s between 0 and n.
+
+### Solution
+
+__This is a difficult question__, especially hard to come up with the correct formula. Eg. 
+
+> f(279) = {(79 + 1) + 2 * f(99)} + f(79)
+>
+> f(513) = {100 + 5 * f(99)} + f(13)
+
+Take 513 as example, the first digit is 5. We know that all the 200+ is within the range, so __there&#8217;re 100 twos in the first digit__. Then, for the rest of the digits, we get f(99) for number between 0 and 99, and another f(99) for number between 100 and 199&#8230; and __this happens 5 times until 499__. That&#8217;s why we have 5 multiple by f(99). 
+
+In the end, we do the calculation __recursively for reminder number 13__. 
+
+### Code
+
+	public static int myAnswer(int n) {
+		if (n == 0)
+			return 0;
+		int power = 1;
+		while (power * 10 <= n) {
+			power *= 10;
+		}
+
+		int first = n / power;
+		int reminder = n % power;
+		int firstDigit2count = 0;
+		if (first > 2) {
+			firstDigit2count = power;
+		} else if (first == 2) {
+			firstDigit2count = reminder + 1;
+		}
+		int totalCountBeforeReminder = firstDigit2count
+				+ (first * myAnswer(power - 1));
+		return totalCountBeforeReminder + myAnswer(reminder);
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CC150v4] 19.4 Get Max Number With >, < Operator]]></title>
@@ -821,118 +901,6 @@ public boolean equals(Object o) {}
 
 
 <p><strong>This exactly matches the charasteristics of Bucket Sort</strong>. Time complexity in average case is O(n + k) where k is the number of buckets.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 9.5 Search Array Containing Empty String]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/search-array-containing-empty-string/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/search-array-containing-empty-string</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Given a sorted array of strings which is interspersed with empty strings, write a method to find the location of a given string.</p>
-
-<p>Example: find “ball” in [“at”, “”, “”, “”, “ball”, “”, “”, “car”, “”, “”, “dad”, “”, “”] will return 4</p>
-
-<p>Example: find “ballcar” in [“at”, “”, “”, “”, “”, “ball”, “car”, “”, “”, “dad”, “”, “”] will return -1</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The solution is binary search, but when reads empty, <strong>advance to the next non-empty string</strong>.</p>
-
-<p>But wait, <strong>there can be a very big problem that causes looping forever</strong>. Eg.</p>
-
-<blockquote><p>&ldquo;a&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;c&rdquo; (5 items), look for &ldquo;b&rdquo;</p>
-
-<p>Now &lsquo;left&rsquo; points to 1st string(&ldquo;a&rdquo;) and &lsquo;right&rsquo; points to 4th(&ldquo;&rdquo;). If we read read &lsquo;mid&rsquo; value and advance to the next non-empty string, it&rsquo;ll be &ldquo;c&rdquo;.</p>
-
-<p>since &ldquo;c&rdquo; is large than &ldquo;b&rdquo;, &lsquo;right&rsquo; is set to the 4th index. It&rsquo;s a endless loop!</p></blockquote>
-
-<p>There&rsquo;re various ways to solve this. The book suggests <strong>locate &lsquo;right&rsquo; pointer at non-empty string</strong> by moving left, and then <strong>locate &lsquo;mid&rsquo; pointer at non-empty</strong> by moving right. This avoids endless loop.</p>
-
-<p>My approach is to use 2 instances of &lsquo;mid&rsquo;:</p>
-
-<ol>
-<li>calculatedMid</li>
-<li>comparisonMid</li>
-</ol>
-
-
-<p>Both ways are fine.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int search(String[] input, String target) {
-    if (target == null || target.length() == 0) {
-        return -1;
-    }
-    int len = input.length;
-    int left = 0, right = len - 1;
-    while (left &lt; right) {
-        int calculatedMid = left + (right - left) / 2;
-        int comparisonMid = calculatedMid;
-        while (comparisonMid &lt; len &amp;&amp; input[comparisonMid].length() == 0) {
-            comparisonMid++;
-        }
-        if (input[comparisonMid].equals(target)) {
-            return comparisonMid;
-        } else if (input[comparisonMid].compareTo(target) &lt; 0) {
-            left = comparisonMid + 1;
-        } else {
-            right = calculatedMid - 1;
-        }
-    }
-    if (left &lt; len &amp;&amp; input[left].equals(target)) {
-        return left;
-    } else {
-        return -1;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v4] 8.4 Generate Permutation Recursively]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/07/generate-permutation-recursively/"/>
-    <updated>2014-09-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/07/generate-permutation-recursively</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Write a method to compute all permutations of a string.</p>
-
-<p>Do it recursively.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Get first char.</p></li>
-<li><p>Permute the reminder of the string.</p></li>
-<li><p>Insert that char into all possible positions.</p></li>
-</ol>
-
-
-<p>The code is more concise that doing it iteratively, <strong>and no visited array needed</strong>!</p>
-
-<h3>Code</h3>
-
-<pre><code>public static ArrayList&lt;String&gt; getPerms(String s) {
-    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-    if (s.length() == 1) {
-        ans.add(s);
-        return ans;
-    }
-    char single = s.charAt(0);
-    ArrayList&lt;String&gt; partialPerms = getPerms(s.substring(1));
-    for (String part : partialPerms) {
-        for (int i = 0; i &lt;= part.length(); i++) {
-            ans.add(part.substring(0, i) + single + part.substring(i));
-        }
-    }
-    return ans;
-}
-</code></pre>
 ]]></content>
   </entry>
   
