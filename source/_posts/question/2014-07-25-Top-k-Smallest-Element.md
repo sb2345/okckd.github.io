@@ -2,7 +2,9 @@
 layout: post
 title: "[Question] Top k Element (quick select)"
 comments: true
-category: Question
+categories:
+- Question
+- Top K
 tags: [ src ]
 ---
 

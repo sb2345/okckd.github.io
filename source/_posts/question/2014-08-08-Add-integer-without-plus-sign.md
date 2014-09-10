@@ -44,3 +44,13 @@ __recursive__
 		int carry = (x & y) << 1;
 		return add2(x ^ y, carry);
 	}
+
+__updated on Sep 10th, 2014__: this question appears on cc150v4 20.1. I wrote the following code: 
+
+	public static int add_no_arithm(int a, int b) {
+		if (b == 0)
+			return a;
+		int addition = a ^ b;
+		int carry = (a & b) << 1;
+		return add_no_arithm(addition, carry);
+	}

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Shuffle a given array"
+title: "[Question] Shuffle An Array (Fisher–Yates) "
 comments: true
 category: Question
 tags: [  ]
@@ -43,9 +43,15 @@ This is called __[Fisher–Yates shuffle](http://en.wikipedia.org/wiki/Fisher%E2
 
 > We can easily generalize above proof for any other position. 
 
+__Updated on Sep 10th, 2014__: analysis of the approach. This question is on CC150v4 Q20.2. 
+
+Note that when we generate a new number between 0 and i, we swap it (with the last 'alive' number (ith number). __After this, ith number is 'dead'__. 
+
+By doing it this way, we get a perfect shuffle! Idea is from cc150. 
+
 ### Code
 
-__not written by me__
+__not written by me__, [link](http://www.geeksforgeeks.org/shuffle-a-given-array/)
 
 	def sattoloCycle(items):
 	    i = len(items)
@@ -54,3 +60,18 @@ __not written by me__
 	        j = randrange(i)  # 0 <= j <= i-1
 	        items[j], items[i] = items[i], items[j]
 	    return
+
+__code from cc150__
+
+	public static void shuffleArray(int[] cards) {
+		int temp;
+		int index;
+		for (int i = 0; i < cards.length; i++) {
+			index = (int) (Math.random() * (cards.length - i)) + i;
+			// number at position 'i' is swapped with position 'index' (which is
+			// random)
+			temp = cards[i];
+			cards[i] = cards[index];
+			cards[index] = temp;
+		}
+	}

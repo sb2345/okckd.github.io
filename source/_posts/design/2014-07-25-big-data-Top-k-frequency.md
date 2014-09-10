@@ -2,7 +2,9 @@
 layout: post
 title: "[Design] Big Data - Top k Frequency"
 comments: true
-category: Design
+categories:
+- Design
+- Top K
 tags: [  ]
 ---
 
