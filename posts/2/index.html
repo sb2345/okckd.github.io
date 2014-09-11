@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Write a method to find the number of employees in each department. Answer select Dept_Name, Departments.Dept_ID, count(*) as ‘num_employees &hellip;">
+  <meta name="description" content="Question Write a method to count the number of 2s between 0 and n. Solution This is a difficult question, especially hard to come up with the correct &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,472 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/10/count-2s-in-digits/">[CC150v4] 20.4 Count 2s in Digits</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a method to count the number of 2s between 0 and n.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult question</strong>, especially hard to come up with the correct formula. Eg.</p>
+
+<blockquote><p>f(279) = {(79 + 1) + 2 * f(99)} + f(79)</p>
+
+<p>f(513) = {100 + 5 * f(99)} + f(13)</p></blockquote>
+
+<p>Take 513 as example, the first digit is 5. We know that all the 200+ is within the range, so <strong>there&rsquo;re 100 twos in the first digit</strong>. Then, for the rest of the digits, we get f(99) for number between 0 and 99, and another f(99) for number between 100 and 199&hellip; and <strong>this happens 5 times until 499</strong>. That&rsquo;s why we have 5 multiple by f(99).</p>
+
+<p>In the end, we do the calculation <strong>recursively for reminder number 13</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int myAnswer(int n) {
+    if (n == 0)
+        return 0;
+    int power = 1;
+    while (power * 10 &lt;= n) {
+        power *= 10;
+    }
+
+    int first = n / power;
+    int reminder = n % power;
+    int firstDigit2count = 0;
+    if (first &gt; 2) {
+        firstDigit2count = power;
+    } else if (first == 2) {
+        firstDigit2count = reminder + 1;
+    }
+    int totalCountBeforeReminder = firstDigit2count
+            + (first * myAnswer(power - 1));
+    return totalCountBeforeReminder + myAnswer(reminder);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/09/get-max-without-comparator/">[CC150v4] 19.4 Get Max Number Without Comparator</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a method which finds the maximum of two numbers. You should not use if-else or any other comparison operator.</p>
+
+<p>EXAMPLE</p>
+
+<p>Input: 5, 10</p>
+
+<p>Output: 10</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>We can&rsquo;t use >, &lt; or if-else statement, but we can use mathematical operator like subtract and bit operators.</p>
+
+<p>Calculate (a-b) and do (a + K(a-b)) can help us (where K is either 0 or -1).</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int getMax(int a, int b) {
+    int c = a - b;
+    int signBit = c &gt;&gt; 31 &amp; 1;
+    // if (a-b) is negative, sign = 1
+    // otherwise, sign = 0
+    return a - signBit * c;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/09/convert-int-to-english/">[CC150v4] 19.6 Convert Integer to English</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given an integer between 0 and 999,999, print an English phrase that describes the integer (eg, “One Thousand, Two Hundred Thirty Four”).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The solution in book isn&rsquo;t good, so I wrote the code myself.</p>
+
+<p>Read it below.</p>
+
+<h3>Code</h3>
+
+<pre><code>private static String[] arr1 = { "Zero ", "One ", "Two ", "Three ",
+        "Four ", "Five ", "Six ", "Seven ", "Eight ", "Nine " };
+
+private static String[] arr11 = { "Ten ", "Eleven ", "Twelve ",
+        "Thirteen ", "Fourteen ", "Fifteen ", "Sixteen ", "Seventeen ",
+        "Eighteen ", "Nineteen " };
+
+private static String[] arr10 = { "", "Ten ", "Twenty ", "Thirty ",
+        "Forty ", "Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety " };
+
+public static String numtostring(int num) {
+    int part1 = num / 1000;
+    int part2 = num % 1000;
+    if (part1 == 0) {
+        return numBelowTrousand(part2);
+    } else {
+        return numBelowTrousand(part1) + "Thousand, "
+                + numBelowTrousand(part2);
+    }
+}
+
+public static String numBelowTrousand(int num) {
+    StringBuilder sb = new StringBuilder();
+    // assume num is below 1000
+
+    // first, convert hundred digit
+    int hundred = num / 100;
+    if (hundred != 0) {
+        sb.append(arr1[hundred] + "Hundred ");
+    }
+
+    // second, convert the rest of digits
+    num %= 100;
+    if (num != 0) {
+        int ten = num / 10;
+        int one = num % 10;
+        if (ten == 1) {
+            sb.append(arr11[num - 10]);
+        } else {
+            if (ten != 0) {
+                // ten is in the range of [2,9]
+                sb.append(arr10[ten]);
+            }
+            if (one != 0) {
+                sb.append(arr1[one]);
+            }
+        }
+    }
+    return sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/09/Winner-tic-tac-toe/">[Google] Winner of Tic-tac-toe</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">link</a></p>
+
+<blockquote><p>How would you determine if someone has won a game of tic-tac-toe on a board of any size?</p></blockquote>
+
+<p>(This is also on CC150v4 19.2)</p>
+
+<h3>Solution</h3>
+
+<p>First, confirm that when the number of pieces in a line equals to the dimension of the board, one person wins. Eg. for 10 * 10 board, 10 pieces need to be in 1 line.</p>
+
+<p><strong><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">We can determine</a> if someone has won during a game in real time</strong>, as in checking after every move.</p>
+
+<blockquote><p>Create an array of size 2n+2 at the beginning of the game and fill it with zeros. Each spot in the array will be a sum of X&rsquo;s or O&rsquo;s horizontally (the first n places in the array), vertically (the second n places in the array) and diagonally (the last 2 places). Then with every move, you add 1 to the 2 places (or 3 if on a diagnol) of the array if X, and subtract 1 if its an O. After adding you check and see if the value of the array is equal to n or -n, if it is, n mean X has won and -n means O has won.</p></blockquote>
+
+<p>This is uses O(2n+2) space, but it&rsquo;s the best solution I can find online. I wrote code posted below.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>enum Piece {
+    Empty, Red, Blue
+};
+
+public static Piece hasWon3(Piece[][] board) {
+
+    int N = board.length;
+
+    // O(2n+2) space to store count info
+    int[] rowCnt = new int[N];
+    int[] colCnt = new int[N];
+    int[] digCnt = new int[2];
+
+    for (int i = 0; i &lt; N; i++) {
+        for (int j = 0; j &lt; N; j++) {
+
+            int pieceValue = 0;
+            if (board[i][j] == Piece.Blue) {
+                pieceValue = 1;
+            } else if (board[i][j] == Piece.Red) {
+                pieceValue = -1;
+            }
+
+            // if empty, pieceValue is 0
+            // if blue, add 1 in count
+            // if red, subtract 1 in count
+            rowCnt[i] += pieceValue;
+            if (checkFinish(rowCnt[i], N) != null) {
+                return checkFinish(rowCnt[i], N);
+            }
+
+            // after adding the count, check if the game finishes
+            colCnt[j] += pieceValue;
+            if (checkFinish(colCnt[j], N) != null) {
+                return checkFinish(colCnt[j], N);
+            }
+
+            if (i == j) {
+                digCnt[0] += pieceValue;
+                if (checkFinish(digCnt[0], N) != null) {
+                    return checkFinish(digCnt[0], N);
+                }
+            } else if (i + j == N) {
+                digCnt[1] += pieceValue;
+                if (checkFinish(digCnt[1], N) != null) {
+                    return checkFinish(digCnt[1], N);
+                }
+            }
+        }
+    }
+    // game not finished, continue
+    return Piece.Empty;
+}
+
+private static Piece checkFinish(int count, int N) {
+    if (count == N)
+        return Piece.Blue;
+    else if (count == -1 * N)
+        return Piece.Red;
+    else
+        return null;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/08/test-webpage-without-tool/">[CC150v4] 11.4 Test Webpage Without Tools</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>How would you load test a webpage without using any test tools?</p></blockquote>
+
+<h3>Solution</h3>
+
+<h4>Load testing</h4>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Load_testing">Load testing</a></strong> is testing under normal and peak load condition. It&rsquo;s also called software performance testing, reliability testing, and volume testing.</p>
+
+<h4>Steps</h4>
+
+<p><strong>First identify the performance-critical scenarios</strong>, which might include:</p>
+
+<ol>
+<li>response time</li>
+<li>throughput</li>
+<li>resource utilization</li>
+<li>max load that system can bear</li>
+</ol>
+
+
+<p><strong>Then, design tests to simulate the load</strong>: we can create virtual users by a multi-threaded program with 1000 thread, each acting as a user loading the page. We measure response time of each user.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/08/sql-types-of-join/">[CC150v4] 15.2 SQL Types of Join</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>What are the different types of joins? Please explain how they differ and why certain types are better in certain situations.</p></blockquote>
+
+<h3>Answer</h3>
+
+<ol>
+<li><p>INNER JOIN: Returns all rows when there is at least one match in BOTH tables</p></li>
+<li><p>OUTER JOIN</p>
+
+<ol>
+<li><p>LEFT JOIN: Return all rows from the left table, and the matched rows from the right table</p></li>
+<li><p>RIGHT JOIN: Return all rows from the right table, and the matched rows from the left table</p></li>
+<li><p>FULL JOIN: Return all rows when there is a match in ONE of the tables. If no matching record was found then the corresponding result fields will have a NULL value.</p></li>
+</ol>
+</li>
+</ol>
+
+
+<p><a href="http://www.w3schools.com/sql/sql_join.asp">source</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -345,525 +811,6 @@ method.invoke(foo, null);
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/08/java-hashmap-counter/">[CC150v4] 14.6 Java HashMap Counter</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Suppose you are using a map in your program, how would you count the number of times the program calls the put() and get() functions?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Write a wrapper class upon the HashMap Class</strong>, and override the ger() and put() methods.</p>
-
-<p>However, what if we have multiple instance of hashmap? <strong>Solution is to use a static variable to count</strong>. Some answers are found <a href="http://stackoverflow.com/a/20027116">here</a>.</p>
-
-<p>Good question this is!</p>
-
-<h3>Code</h3>
-
-<pre><code>public static class MyHashMap&lt;K, V&gt; extends HashMap&lt;K, V&gt; {
-
-    private static final long serialVersionUID = 1L;
-    private static int count = 0;
-
-    public V put(K key, V value) {
-        count++;
-        return super.put(key, value);
-    }
-
-    public V get(Object key) {
-        count++;
-        return super.get(key);
-    }
-
-    public static int getCount() {
-        return count;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/08/java-finally-statement/">[CC150v4] 14.2 Java Finally Statement</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>In Java, does the finally block gets executed if we insert a return statement inside the try block of a try-catch-finally?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Yes, it will.</p>
-
-<p>Even when we attempt to exit within the try block (normal exit, return, continue, break or any exception), <strong>the finally block will still be executed</strong>.</p>
-
-<p>The only time finally <a href="http://stackoverflow.com/a/65049">won&rsquo;t be called</a> is if you call System.exit() or if the JVM crashes first.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/08/java-final-finally-finalize/">[CC150v4] 14.3 Java Final, Finally and Finalize</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>What is the difference between Final, Finally, and finalize?</p></blockquote>
-
-<h3>final</h3>
-
-<p><strong>is a keyword</strong>.</p>
-
-<ol>
-<li><strong>Variable</strong> decleared as final should be initialized only once and cannot be changed.</li>
-<li><strong>Classes</strong> declared as final cannot be extended.</li>
-<li><strong>Methods</strong> declared as final cannot be overridden.</li>
-</ol>
-
-
-<p>Code:</p>
-
-<pre><code>private final String name = "foo";
-
-public final String toString() {  return "NULL"; }
-
-// final can also make a class not "inheritable"
-public final class finalClass {...}
-public class classNotAllowed extends finalClass {...} 
-// Not allowed
-</code></pre>
-
-<h3>finally</h3>
-
-<p><strong>is a block</strong>.</p>
-
-<p>The finally block <strong>always executes</strong> when the try block exits (even if an unexpected exception occurs).</p>
-
-<pre><code>lock.lock();
-try {
-    //do stuff
-} catch (SomeException se) {
-    //handle se
-} finally {
-    lock.unlock(); //always executed, even if Exception or Error or se
-}
-</code></pre>
-
-<h3>finalize</h3>
-
-<p><strong>is a method</strong>.</p>
-
-<p><strong>It&rsquo;s called by Garbage Collector</strong> before reclaiming GC eligible objects.</p>
-
-<pre><code>public void finalize() {
-    //free resources (e.g. unallocate memory)
-    super.finalize();
-}
-</code></pre>
-
-<p><a href="http://www.java2novice.com/java_interview_questions/final-finally-finalize/">source1</a></p>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/11/difference-between-final-finally-and-finalize-java.html">source2</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a method to implement *, &ndash; , / operations You should use only the + operator.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>First it&rsquo;s important to write a &lsquo;negate&rsquo; operator</strong>. This is used in all other operations.</p>
-
-<pre><code>public static int FnNegate(int a) {
-    int neg = 0;
-    int d = a &lt; 0 ? 1 : -1;
-    while (a != 0) {
-        neg += d;
-        a += d;
-    }
-    return neg;
-}
-</code></pre>
-
-<p>Although we can only use +, the author also used > and &lt; comparison operators.</p>
-
-<p>This is a borning question, I did not write code myself.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong></p>
-
-<pre><code>/* Flip a positive sign to negative, or a negative sign to pos */
-public static int FnNegate(int a) {
-    int neg = 0;
-    int d = a &lt; 0 ? 1 : -1;
-    while (a != 0) {
-        neg += d;
-        a += d;
-    }
-    return neg;
-}
-
-/* Subtract two numbers by negating b and adding them */
-public static int FnMinus(int a, int b) {
-    return a + FnNegate(b);
-}
-
-/* Check if a and b are different signs */
-public static boolean DifferentSigns(int a, int b) {
-    return ((a &lt; 0 &amp;&amp; b &gt; 0) || (a &gt; 0 &amp;&amp; b &lt; 0)) ? true : false;
-}
-
-/* Return absolute value */
-public static int abs(int a) {
-    if (a &lt; 0)
-        return FnNegate(a);
-    else
-        return a;
-}
-
-/* Multiply a by b by adding a to itself b times */
-public static int FnTimes(int a, int b) {
-    if (a &lt; b)
-        return FnTimes(b, a); // algo is faster if b &lt; a
-    int sum = 0;
-    for (int iter = abs(b); iter &gt; 0; --iter)
-        sum += a;
-    if (b &lt; 0)
-        sum = FnNegate(sum);
-    return sum;
-}
-
-// returns 1, if a/b &gt;= 0.5, and 0 otherwise
-public static int DefineAndRoundFraction(int a, int b) {
-    if (FnTimes(abs(a), 2) &gt;= abs(b))
-        return 1;
-    else
-        return 0;
-}
-
-/*
- * Divide a by b by literally counting how many times does b go into a. That
- * is, count how many times you can subtract b from a until you hit 0.
- */
-public static int FnDivide(int a, int b)
-        throws java.lang.ArithmeticException {
-    if (b == 0) {
-        throw new java.lang.ArithmeticException("ERROR: Divide by zero.");
-    }
-    int quotient = 0;
-    int divisor = FnNegate(abs(b));
-    int divend; /* dividend */
-    for (divend = abs(a); divend &gt;= abs(divisor); divend += divisor) {
-        ++quotient;
-    }
-    if (DifferentSigns(a, b))
-        quotient = FnNegate(quotient);
-    return quotient;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/08/find-coliner-in-2d-plane/">[CC150v4] 10.6 Find Collinear in 2D Plane</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given a two dimensional graph with points on it, find a line which passes the most number of points.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>For this question, we used to use HashMap(Double, Integer) to do. However, the answer suggested in the book define its own Line Class, and uses HashMap(Line, Intger).</p>
-
-<p>This is a much better solution, however, I failed to write it, don&rsquo;t know why.</p>
-
-<p><strong>The key is to override the 2 methods</strong>:</p>
-
-<pre><code>@override
-public int hashCode() {}
-
-@override
-public boolean equals(Object o) {}
-</code></pre>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong></p>
-
-<p>Line.java</p>
-
-<pre><code>public class Line {
-
-    private static double epsilon = .0001;
-
-    public double slope;
-    public double intercept;
-    private boolean infinite_slope = false;
-
-    public Line(GraphPoint p, GraphPoint q) {
-        if (Math.abs(p.x - q.x) &gt; epsilon) { // if x痴 are different
-            slope = (p.y - q.y) / (p.x - q.x); // compute slope
-            intercept = p.y - slope * p.x; // y intercept from y=mx+b
-        } else {
-            infinite_slope = true;
-            intercept = p.x; // x-intercept, since slope is infinite
-        }
-    }
-
-    public boolean isEqual(double a, double b) {
-        return (Math.abs(a - b) &lt; epsilon);
-    }
-
-    public void Print() {
-        System.out.println("slope = " + slope + "\nintercept = " + intercept);
-    }
-
-    @Override
-    public int hashCode() {
-        int sl = (int) (slope * 1000);
-        int in = (int) (intercept * 1000);
-        return sl | in;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        Line l = (Line) o;
-        if (isEqual(l.slope, slope) &amp;&amp; isEqual(l.intercept, intercept)
-                &amp;&amp; (infinite_slope == l.infinite_slope)) {
-            return true;
-        }
-        return false;
-    }
-}
-</code></pre>
-
-<p>Main method:</p>
-
-<pre><code>public static Line findBestLine(GraphPoint[] points) {
-
-    Line bestLine = null;
-    HashMap&lt;Line, Integer&gt; line_count = new HashMap&lt;Line, Integer&gt;();
-
-    for (int i = 0; i &lt; points.length; i++) {
-        for (int j = i + 1; j &lt; points.length; j++) {
-            Line line = new Line(points[i], points[j]);
-            if (!line_count.containsKey(line)) {
-                line_count.put(line, 0);
-            }
-            line_count.put(line, line_count.get(line) + 1);
-            if (bestLine == null
-                    || line_count.get(line) &gt; line_count.get(bestLine)) {
-                bestLine = line;
-                System.out.println("bestLine upodated! count = "
-                        + line_count.get(line));
-            }
-        }
-    }
-    return bestLine;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/07/sort-persons/">[CC150v4] Chap9 Example - Sort Persons</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You have a very large array of ‘Person’ objects. Sort the people in increasing order of age.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>First we look at the nature of this question:</p>
-
-<ol>
-<li>large input array</li>
-<li>sort based on age (<strong>which is between 1 and 100</strong>, this is important)</li>
-</ol>
-
-
-<p><strong>This exactly matches the charasteristics of Bucket Sort</strong>. Time complexity in average case is O(n + k) where k is the number of buckets.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -879,12 +826,12 @@ public boolean equals(Object o) {}
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (33)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (37)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (31)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (33)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -893,7 +840,7 @@ public boolean equals(Object o) {}
 <li class='category'><a href='/blog/categories/question/'>question (84)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (4)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
   </ul>
@@ -903,23 +850,23 @@ public boolean equals(Object o) {}
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/10/generate-m-from-array-of-n/">[CC150v4] 20.3 Generate M Int From Array of Size N</a>
+        <a href="/blog/2014/09/30/sql-design-students-grade-database/">[CC150v4] 15.5 SQL Students Grade Database (`)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/10/count-2s-in-digits/">[CC150v4] 20.4 Count 2s in Digits</a>
+        <a href="/blog/2014/09/30/sql-design-company-database/">[CC150v4] 15.4 SQL Design Company Database (`)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/09/get-max-without-comparison-operator/">[CC150v4] 19.4 Get Max Number With >, < Operator</a>
+        <a href="/blog/2014/09/30/sql-denormalization/">[CC150v4] 15.3 SQL Denormalization (`)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/09/convert-int-to-english/">[CC150v4] 19.6 Convert Integer to English</a>
+        <a href="/blog/2014/09/11/longest-arithmetic-progression/">[Google] Longest Arithmetic Progression</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/09/Winner-tic-tac-toe/">[Google] Winner of Tic-tac-toe</a>
+        <a href="/blog/2014/09/11/find-triplet-arithmetic-progression/">[Google] Find Triplet Arithmetic Progression</a>
       </li>
     
   </ul>
