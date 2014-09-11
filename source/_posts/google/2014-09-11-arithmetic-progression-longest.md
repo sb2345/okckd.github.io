@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Google] Longest Arithmetic Progression "
+title: "[Google] Arithmetic Progression Longest "
 comments: true
 category: Google
 tags: [ src ]

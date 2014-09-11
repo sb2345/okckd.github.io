@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Google] Find Triplet Arithmetic Progression "
+title: "[Google] Arithmetic Progression Triplet "
 comments: true
 category: Google
 tags: [ src ]
