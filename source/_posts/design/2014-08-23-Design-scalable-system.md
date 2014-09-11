@@ -4,6 +4,7 @@ title: "[Design] Designing Scalable Systems (`)"
 comments: true
 category: Design
 tags: [  ]
+published: false
 ---
 
 1. horizontal scaling

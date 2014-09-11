@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Max Sum In A 2D Array"
+title: "[Question] Max Sum In A 2D Array (sub-matrix) "
 comments: true
 category: Question
 tags: [ src ]
