@@ -26,15 +26,15 @@ tags: [  ]
 
 This looks like a very difficult question, especially during a phone interview. 
 
-__The 10th floor post the best solution__:
+__The 10th floor gives the best solution__: 
 
 > __BFS from every box__. in each box, a non-blocking cell (include box position, but exclude hazard position) will have a weight value, stand for the distance to the box. 
 
 > after bfs from all the boxes, each cell will have k weight, k is the number of boxes. sum all the weight in each cell, and find the cell with smallest sum of weight. 
 
-> One problem of this solution may lead to a cell of a box. revision is sort the cell by sum of weight and find the first that is not a box. 
+> One problem of this solution may lead to a cell of a box. We can then sort the cell by sum of weight and find the first position that is not a box. 
 
-> complexity k*n^2
+> complexity O(k*n^2)
 
 ### Code
 
