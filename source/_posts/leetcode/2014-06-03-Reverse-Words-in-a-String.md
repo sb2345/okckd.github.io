@@ -108,36 +108,32 @@ __My code__. pointer solution.
 		return ans.trim();
     }
 
-__Updated on June 9th, the in-place solution__
-
-Note that String.split() behaves strangely when there is space char. So it's necessary to check (str==""). Eg: 
-
-> " a  b c " -> after String.split(" ") -> [, a, , b, c]
+__Updated on Sep 12th__: updated with 3-step-reverse method.
 
     public String reverseWords(String s) {
-		if (s == null || s.length() == 0) {
-			return s;
-		}
-		String[] words = s.split(" ");
-		String firstReversed = "";
-		for (int i = 0; i < words.length; i ++) {
-		    if (words[i].equals("")) continue;
-			firstReversed += inPlaceReverse(words[i]) + " ";
-		}
-		return inPlaceReverse(firstReversed);
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+        StringBuilder ans = new StringBuilder();
+        int len = s.length();
+        int p = len - 1;
+        while (p >= 0) {
+            while (p >= 0 && s.charAt(p) == ' ') {
+                p--;
+            }
+            if (p == -1) {
+                break;
+            }
+            StringBuilder word = new StringBuilder();
+            while (p >= 0 && s.charAt(p) != ' ') {
+                word.append(s.charAt(p));
+                p--;
+            }
+            if (ans.length() == 0) {
+                ans.append(word.reverse().toString());
+            } else {
+                ans.append(" " + word.reverse().toString());
+            }
+        }
+        return ans.toString();
     }
-	
-	private String inPlaceReverse(String str) {
-		if (str == null || str.length() == 0) return str;
-		char[] chars = str.trim().toCharArray();
-		int left = 0;
-		int right = chars.length - 1;
-		while (left < right) {
-			char temp = chars[left];
-			chars[left] = chars[right];
-			chars[right] = temp;
-			left ++;
-			right --;
-		}
-		return String.valueOf(chars);
-	}

@@ -81,7 +81,7 @@ Note that if we were to write our own 'Line' class, __we must override the 2 met
 
 ### Code
 
-__written by me, version 3 using HashMap__
+__written by me, Version3 using HashMap__
 
 	public int maxPoints(Point[] points) {
 		if (points.length <= 1)

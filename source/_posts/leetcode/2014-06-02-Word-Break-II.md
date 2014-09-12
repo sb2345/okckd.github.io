@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[LeetCode 140] Word Break II"
+title: "[LeetCode 140] Word Break II "
 comments: true
 category: Leetcode
 tags: [  ]
@@ -56,47 +56,31 @@ __Updated on July 4th, 2014__. The DFS code actually standard, but keep in mind 
 
 ### Code
 
-__DFS with pruning and DP breakable check__
+__DFS with pruning and DP breakable check__, with the again-updated code on Sep 12th, 2014. 
 
     public List<String> wordBreak(String s, Set<String> dict) {
-        List<String> ans = new LinkedList<String>();
-        if (s == null || s.length() == 0) {
-            return null;
-        }
-        if (!canBreak(s, dict)) {
+        List<String> ans = new ArrayList<String>();
+        if (s == null || s.length() == 0 || dict == null) {
+            return ans;
+        } else if (!canBreak(s, dict)) {
             return ans;
         }
-        int maxLength = getMaxLength(dict);
-        helper(ans, "", s, dict, 0, maxLength);
+        helper(ans, "", s, 0, dict);
         return ans;
     }
     
-    private void helper(List<String> ans, String path, String s, Set<String> dict, int pos, int maxLength) {
-        if (pos == s.length()) {
-            ans.add(path);
+    private void helper(List<String> ans, String str, String s, int pos, Set<String> dict) {
+        int len = s.length();
+        if (pos == len) {
+            ans.add(str.substring(1));
             return;
         }
-        for (int i = pos + 1; i <= s.length() && i <= pos + maxLength; i++) {
-            String temp = s.substring(pos, i);
-            if (!dict.contains(temp)) {
-                continue;
+        for (int i = pos; i < len; i++) {
+            String sub = s.substring(pos, i + 1);
+            if (dict.contains(sub)) {
+                helper(ans, str + " " + sub, s, i + 1, dict);
             }
-            String newPath = null;
-            if (path.length() == 0) {
-                newPath = temp;
-            } else {
-                newPath = path + " " + temp;
-            }
-            helper(ans, newPath, s, dict, i, maxLength);
         }
-    }
-	
-    private int getMaxLength(Set<String> dict) {
-        int maxLength = 0;
-        for (String word : dict) {
-            maxLength = Math.max(maxLength, word.length());
-        }
-        return maxLength;
     }
     
     public boolean canBreak(String s, Set<String> dict) {
