@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[Google] Longest Arithmetic Progression - Woodstock Blog</title>
+  <title>[Google] Arithmetic Progression Triplet - Woodstock Blog</title>
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given an array of integers A, give an algorithm to find the longest Arithmetic progression in it, i.e find a sequence i1 &lt; i2 &lt &hellip;">
+  <meta name="description" content="Question link Given a sorted set, find if there exist three elements in Arithmetic Progression or not. Solution This is a rather simple Arithmetic &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://okckd.github.io/blog/2014/09/11/longest-arithmetic-progression">
+  <link rel="canonical" href="http://okckd.github.io/blog/2014/09/11/arithmetic-progression-triplet">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Woodstock Blog" type="application/atom+xml">
@@ -80,7 +80,7 @@
   
   <header>
     
-      <h1 class="entry-title">[Google] Longest Arithmetic Progression</h1>
+      <h1 class="entry-title">[Google] Arithmetic Progression Triplet</h1>
     
     
       <p class="meta">
@@ -105,77 +105,39 @@
 
 <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.careercup.com/question?id=8211177">link</a></p>
+<p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">link</a></p>
 
-<blockquote><p>Given an array of integers A, give an algorithm to find the longest Arithmetic progression in it, i.e find a sequence i1 &lt; i2 &lt; … &lt; ik, such that</p>
-
-<p>A[i1], A[i2], …, A[ik] forms an arithmetic progression, and k is the largest possible.</p>
-
-<p>The sequence S1, S2, …, Sk is called an arithmetic progression if S(j+1) – S(j) is a constant.</p></blockquote>
+<blockquote><p>Given a sorted set, find if there exist three elements in Arithmetic Progression or not.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>This is a rather difficult Arithmetic Progression question</strong>.</p>
+<p><strong>This is a rather simple Arithmetic Progression question</strong>.</p>
 
-<p>The solution is 2-D DP.</p>
+<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">To find the three elements</a>, we first fix an element as middle element and search for other two (one smaller and one greater).</p></blockquote>
 
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">The idea is</a> to create a 2D table dp[n][n]. An entry dp[i][j] in this table stores LLAP with input[i] and input[j] as first two elements of AP(j > i).</p>
-
-<p>The last column of the table is always 2. Rest of the table is filled <strong>from bottom right to top left</strong>.</p>
-
-<p>To fill rest of the table, j (second element in AP) is first fixed. i and k are searched for a fixed j. If i and k are found such that i, j, k form an AP, then <strong>the value of dp[i][j] is set as dp[j][k] + 1</strong>.</p>
-
-<p><strong>Note that the value of dp[j][k] must have been filled</strong> before as the loop traverses from right to left columns.</p></blockquote>
-
-<p>The 2 difficult points of this question:</p>
-
-<ol>
-<li>how to come up with the transation formula. (i.e. <strong>dp[i][j] = dp[j][k] + 1</strong>, when (i, j, k) forms a AP).</li>
-<li>how to fill up all dp[i][j] in each loop of j. (Once inside the if-else, once outside the main while-loop)</li>
-</ol>
-
+<p>O(n<sup>2</sup>) time.</p>
 
 <h3>Code</h3>
 
 <p><strong>written by me</strong></p>
 
-<pre><code>public int longest(int[] A) {
+<pre><code>public boolean longest(int[] A) {
     int len = A.length;
-    int[][] dp = new int[len][len];
-    for (int i = 0; i &lt; len; i++) {
-        // the pair ending at last position is always a progression
-        dp[i][len - 1] = 2;
-    }
-    int longest = 1;
-    for (int j = len - 2; j &gt;= 0; j--) {
-        // for each j, find i and k that makes 1 progression
-        int i = j - 1;
-        int k = j + 1;
-        while (i &gt;= 0 &amp;&amp; k &lt; len) {
-            int total = A[i] + A[k];
-            if (total &gt; 2 * A[j]) {
-                // this is important!
-                dp[i][j] = 2;
-                i--;
-            } else if (total &lt; 2 * A[j]) {
-                k++;
+    for (int i = 1; i &lt; len - 1; i++) {
+        int left = i - 1;
+        int right = i + 1;
+        while (left &gt;= 0 &amp;&amp; right &lt; len) {
+            int total = A[left] + A[right];
+            if (total &gt; 2 * A[i]) {
+                left--;
+            } else if (total &lt; 2 * A[i]) {
+                right++;
             } else {
-                // found a valid progression triplet A(i, j, k)
-                dp[i][j] = dp[j][k] + 1;
-                longest = Math.max(longest, dp[i][j]);
-                i--;
-                k++;
+                return true;
             }
         }
-        // this is important!
-        while (i &gt;= 0) {
-            dp[i][j] = 2;
-            i--;
-            // If the loop was stopped due to k becoming more than
-            // n-1, set the remaining dp[i][j] as 2
-        }
     }
-    return longest;
+    return false;
 }
 </code></pre>
 </div>
@@ -214,7 +176,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/09/11/longest-arithmetic-progression/" data-via="" data-counturl="http://okckd.github.io/blog/2014/09/11/longest-arithmetic-progression/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/09/11/arithmetic-progression-triplet/" data-via="" data-counturl="http://okckd.github.io/blog/2014/09/11/arithmetic-progression-triplet/" >Tweet</a>
   
   
   
@@ -223,10 +185,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/09/11/find-triplet-arithmetic-progression/" title="Previous Post: [Google] Find Triplet Arithmetic Progression ">&laquo; [Google] Find Triplet Arithmetic Progression </a>
+        <a class="basic-alignment left" href="/blog/2014/09/11/arithmetic-progression-longest/" title="Previous Post: [Google] Arithmetic Progression Longest ">&laquo; [Google] Arithmetic Progression Longest </a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/09/30/sql-denormalization/" title="Next Post: [CC150v4] 15.3 SQL Denormalization (`)">[CC150v4] 15.3 SQL Denormalization (`) &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/09/11/barrier-goods-van-and-distance/" title="Next Post: [Google] Barrier, Goods Van and Distance ">[Google] Barrier, Goods Van and Distance  &raquo;</a>
       
     </p>
   </footer>
@@ -239,18 +201,18 @@
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (37)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (8)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (50)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (33)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (34)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (84)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
@@ -263,23 +225,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/30/sql-design-students-grade-database/">[CC150v4] 15.5 SQL Students Grade Database (`)</a>
+        <a href="/blog/2014/09/11/celebrity-problem/">[Question] Celebrity Problem</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/30/sql-design-company-database/">[CC150v4] 15.4 SQL Design Company Database (`)</a>
+        <a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/30/sql-denormalization/">[CC150v4] 15.3 SQL Denormalization (`)</a>
+        <a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/11/longest-arithmetic-progression/">[Google] Longest Arithmetic Progression</a>
+        <a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/11/find-triplet-arithmetic-progression/">[Google] Find Triplet Arithmetic Progression</a>
+        <a href="/blog/2014/09/10/top-million-from-billion/">[CC150v4] 20.6 Top Million From Billion</a>
       </li>
     
   </ul>
