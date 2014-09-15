@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Implement strStr(). Returns a pointer to the first occurrence of needle in haystack, or null if needle is not part of haystack. Stats &hellip;">
+  <meta name="description" content="Question link Merge k sorted linked lists and return it as one sorted list. Analyze and describe its complexity. Stats Frequency 4 Difficulty 3 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,418 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/11/Merge-k-Sorted-Lists/">[LeetCode 23] Merge K Sorted Lists</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/merge-k-sorted-lists/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and describe its complexity.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">Difficult</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>There are two ways to solve this problem.</p>
+
+<ul>
+<li>k &ndash; number of lists</li>
+<li>n &ndash; String length of each list</li>
+</ul>
+
+
+<p><strong>First approach is merge sort</strong>. Using divide and conquer approach, divide the entire input into halves, and then merge 2 list each time. Instead of merging 1 by 1 which the time complexity is O(nk x (k-1)), the 2 lists to be merged is always similar length, thus time complexity is reduced to O(nk x logk).</p>
+
+<p><strong>You may wonder how I calculate time complexity</strong>. See, each round of sort, nk nodes are read and sorted. This happened O(logk) times, where k is the number of lists. Thus totoal time take is O(nk x logk).</p>
+
+<p><strong>Second approach is heap sort</strong>. The idea of this is to always keep a sorted list of the head of each list. But before the code, what actually is heap/priority queue?</p>
+
+<blockquote><p><strong><a href="http://en.wikipedia.org/wiki/Heap_%28data_structure%29">Heap</a> is a specialized tree-based data structure</strong>. Heap is crucial in Dijkstra&rsquo;s algorithm and heapsort.</p>
+
+<p>We take max heap for example. The keys of parent nodes are always greater than or equal to the children node.</p>
+
+<p><strong>The heap is an implementation of priority queue</strong>. In fact, priority queues are often referred to as &ldquo;heaps&rdquo;, regardless of how they may be implemented.</p>
+
+<p>Note that despite the similarity of the name &ldquo;heap&rdquo; to &ldquo;stack&rdquo; and &ldquo;queue&rdquo;, the latter two are <strong>abstract data types</strong>, while a heap is a <strong>specific data structure</strong>, and &ldquo;priority queue&rdquo; is the proper term for the abstract data type.</p></blockquote>
+
+
+
+<table class="tg">
+  <tr>
+    <th class="tg-s6z2">Heap</th>
+    <th class="tg-s6z2">Time</th>
+  </tr>
+  <tr>
+    <td class="tg-031e">Find max</td>
+    <td class="tg-s6z2">O(1)</td>
+  </tr>
+  <tr>
+    <td class="tg-031e">Delete</td>
+    <td class="tg-s6z2">O(lgn)</td>
+  </tr>
+  <tr>
+    <td class="tg-031e">Insert</td>
+    <td class="tg-s6z2">O(lgn)</td>
+  </tr>
+  <tr>
+    <td class="tg-031e">Merge</td>
+    <td class="tg-s6z2">O(n)</td>
+  </tr>
+</table>
+
+
+<br />
+
+
+<p>Both method are well explained in <a href="http://blog.csdn.net/linhuanmars/article/details/19899259">this csdn blog</a>. Time complexity analysis is given by <a href="http://n00tc0d3r.blogspot.sg/2013/04/merge-k-sorted-lists.html">nootcoder blog</a>.</p>
+
+<h3>Solution</h3>
+
+<p>First, divide and conquer code is lengthy but medium difficulty.</p>
+
+<p>Second solution, however, is not as easy. <strong>Especially when we have to write Comparator on our own</strong>.  A priority queue (heap) is implemented and head of each list is inserted into the heap. Then poll elements out from the heap until heap is empty.</p>
+
+<h3>My code</h3>
+
+<p><strong>Merge sort code, written by me</strong></p>
+
+<pre><code>public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
+    if (lists == null || lists.size() == 0) {
+        return null;
+    }
+    return mergeHelper(lists, 0, lists.size() - 1);
+}
+
+private ListNode mergeHelper(List&lt;ListNode&gt; lists, int start, int end) {
+    if (start == end) {
+        return lists.get(start);
+    } 
+    int mid = start + (end - start) / 2;
+    ListNode firstHalf = mergeHelper(lists, start, mid);
+    ListNode secondHalf = mergeHelper(lists, mid + 1, end);
+    return mergeTwo(firstHalf, secondHalf);
+}
+
+private ListNode mergeTwo(ListNode head1, ListNode head2) {
+    ListNode dummy = new ListNode(0);
+    ListNode p = dummy;
+    while (head1 != null &amp;&amp; head2 != null) {
+        if (head1.val &lt; head2.val) {
+            p.next = head1;
+            head1 = head1.next;
+            p = p.next;
+        } else {
+            p.next = head2;
+            head2 = head2.next;
+            p = p.next;
+        }
+    }
+    if (head1 == null) {
+        p.next = head2;
+    } else {
+        p.next = head1;
+    }
+    return dummy.next;
+}
+</code></pre>
+
+<p><strong>Heap sort code, written by me</strong>. <a href="http://answer.ninechapter.com/solutions/merge-k-sorted-lists/">source</a></p>
+
+<pre><code>public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
+    if (lists == null || lists.size() == 0) {
+        return null;
+    }
+    int size = lists.size();
+    NodeComparator comparator = new NodeComparator();
+    Queue&lt;ListNode&gt; queue = new PriorityQueue&lt;ListNode&gt;(size, comparator);
+    for (ListNode node: lists) {
+        if (node == null) {
+            continue;
+        }
+        queue.offer(node);
+    }
+    ListNode dummy = new ListNode(0);
+    ListNode p = dummy;
+    while (!queue.isEmpty()) {
+        p.next = queue.poll();
+        p = p.next;
+        if (p.next != null) {
+            queue.offer(p.next);
+        }
+    }
+    p.next = null;
+    return dummy.next;
+}
+
+class NodeComparator implements Comparator&lt;ListNode&gt; {
+    public int compare(ListNode o1, ListNode o2) {
+        return o1.val - o2.val;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/10/Substring-with-Concatenation-All-Words/">[LeetCode 30] Substring With Concatenation of All Words</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/substring-with-concatenation-of-all-words/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+You are given a string, <b>S</b>, and a list of words, <b>L</b>, that are all of the same length. Find all starting indices of substring(s) in S that is a concatenation of each word in L exactly once and without any intervening characters.
+</p>
+
+<p>
+For example, given:<br>
+<b>S</b>: <code>"barfoothefoobarman"</code><br>
+<b>L</b>: <code>["foo", "bar"]</code>
+</p>
+
+<p>
+You should return the indices: <code>[0,9]</code>.<br>
+(order does not matter).
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">more than hour</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>There are 2 ways to solve this question. <strong>The naive approach takes around 1200ms to pass</strong>, and <strong>the KPM-like approach takes around half of that time</strong>. Both methods are explained well in <a href="http://n00tc0d3r.blogspot.sg/2013/06/substring-with-concatenation-of-all.html">this blog</a>.</p>
+
+<h4>The HashMap</h4>
+
+<p>Before the solution, I will like to do a recap on <strong>HashMap</strong>.</p>
+
+<blockquote cite="http://www.sparknotes.com/cs/searching/hashtables/section1.html">
+<div>
+<a href="http://www.sparknotes.com/cs/searching/hashtables/section1.html">link</a>
+</div>
+<p>
+A hash table is made up of two parts: an array (the actual table where the data to be searched is stored) and a mapping function, known as a hash function. 
+</p>
+<p>
+The hash function is a mapping from the input space to the integer space that defines the indices of the array. In other words, the hash function provides a way for assigning numbers to the input data such that the data can then be stored at the array index corresponding to the assigned number.
+</p>
+</blockquote>
+
+
+<p>For example, if I want to store &lt;&ldquo;Durant&rdquo;>, I pass &ldquo;Durant&rdquo; into the hash function, and get (let&rsquo;s say) number 3. So in the Hash Table, it will store table(3 &ndash;> &ldquo;Durant&rdquo;).</p>
+
+<p>In this way, the <strong>searching of HashMap can almost achieve  O(1) time in best case</strong> (like array access).</p>
+
+<p>However,</p>
+
+<blockquote cite="http://stackoverflow.com/a/9214421">
+<div>
+<a href="http://stackoverflow.com/a/9214421">link</a>
+</div>
+<p>
+For average case, It really is (as the wikipedia page says) O(1+n/k) where K is the hash table size. If K is large enough, then the result is effectively O(1). But suppose K is 10 and N is 100. In that case each bucket will have on average 10 entries, so the search time is definitely not O(1); it is a linear search through up to 10 entries.
+</p>
+</blockquote>
+
+
+<p>In practise, we will just assume search in HashMap always O(1).</p>
+
+<p>Below is a great conclusion.</p>
+
+<blockquote cite="http://stackoverflow.com/a/9214594">
+<div>
+<a href="http://stackoverflow.com/a/9214594">link</a>
+</div>
+<p><a href="http://en.wikipedia.org/wiki/Hash_table">Hash tables</a> are <code>O(1)</code> <strong>average and <a href="http://en.wikipedia.org/wiki/Amortized_analysis">amortized</a></strong> case complexity, however is suffers from <code>O(n)</code> <strong>worst case</strong> time complexity. [And I think this is where your confusion is]</p>
+
+<p>Hash tables suffer from <code>O(n)</code> worst time complexity due to two reasons:</p>
+
+<ol>
+<li>If too many elements were hashed into the same key: looking inside this key may take <code>O(n)</code> time.</li>
+<li>Once a hash table has passed its <a href="http://en.wikipedia.org/wiki/Load_balancing_%28computing%29">load balance</a> - it has to rehash [create a new bigger table, and re-insert each element to the table]. </li>
+</ol>
+
+<p>However, it is said to be <code>O(1)</code> average and amortized case because:</p>
+
+<ol>
+<li>It is very rare that many items will be hashed to the same key [if you chose a good hash function and you don&#8217;t have too big load balance.</li>
+<li>The rehash operation, which is <code>O(n)</code>, can at most happen after <code>n/2</code> ops, which are all assumed <code>O(1)</code>: Thus when you sum the average time per op, you get : <code>(n*O(1) + O(n)) / n) = O(1)</code></li>
+</ol>
+</blockquote>
+
+
+<h3>Solution</h3>
+
+<p><strong>The naive approach uses a HashMap</strong>. Reason 1 is because there can be duplications in L, and reason 2 is the searching is faster.</p>
+
+<p><strong>Time complexity of this solution is O((n &ndash; k * m) x m)</strong>, and <strong>space is the size of list L, O(m)</strong>. If m is not very big, the time can be regarded as O(n).</p>
+
+<p><strong>some variables used in this question</strong>.</p>
+
+<ul>
+<li>n &ndash; length of the input string</li>
+<li>L &ndash; a list of words (dictionary)</li>
+<li>m &ndash; the size of L</li>
+<li>k &ndash; the length of each word in L (all words have same length)</li>
+<li>(k * m) &ndash; this is the length of a possible concatenation</li>
+<li>(n &ndash; k * m) &ndash; this is the number of possible concatenation exist</li>
+</ul>
+
+
+<h3>My code</h3>
+
+<p><strong>Updated on July 7th</strong>, code.</p>
+
+<pre><code>public List&lt;Integer&gt; findSubstring(String S, String[] L) {
+    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+    if (S == null || L == null || S.length() == 0 || L.length == 0) {
+        return ans;
+    }
+    HashMap&lt;String, Integer&gt; set = new HashMap&lt;String, Integer&gt;();
+    for (String str: L) {
+        if (set.containsKey(str)) {
+            set.put(str, set.get(str) + 1);
+        } else {
+            set.put(str, 1);
+        }
+    }
+    int num = L.length;
+    int len = L[0].length();
+    for (int i = 0; i &lt;= S.length() - num * len; i++) {
+        // start from i, check (num) words of length (len)
+        HashMap&lt;String, Integer&gt; setCopy = new HashMap&lt;String, Integer&gt;(set);
+        for (int j = 0; j &lt; num; j++) {
+            String cur = S.substring(i + j * len, i + (j + 1) * len);
+            if (setCopy.containsKey(cur)) {
+                if (setCopy.get(cur) == 1) {
+                    setCopy.remove(cur);
+                } else {
+                    setCopy.put(cur, setCopy.get(cur) - 1);
+                }
+            } else {
+                break;
+            }
+        }
+        if (setCopy.isEmpty()) {
+            ans.add(i);
+        }
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -989,282 +1401,6 @@ Your function should return length = <code>2</code>, and A is now <code>[1,2]</c
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/09/Generate-Parentheses/">[LeetCode 22] Generate Parentheses</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/valid-parentheses/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given <i>n</i> pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
-</p>
-
-<p>
-For example, given <i>n</i> = 3, a solution set is:
-</p>
-<p>
-<code>"((()))", "(()())", "(())()", "()(())", "()()()"</code>
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>Most popular solutions online are using recursive calls</strong>. For example, <a href="http://www.geeksforgeeks.org/print-all-combinations-of-balanced-parentheses/">this blog</a>. I also used this method.</p>
-
-<h3>Solution</h3>
-
-<p>I kept 2 integers: <strong>open</strong> (number of unclosed left parenthesis) and <strong>remain</strong> (number of parenthesis that can be addded to the current string). I optimized my previous code and made it cleaner.</p>
-
-<h3>My code</h3>
-
-<pre><code>public ArrayList&lt;String&gt; generateParenthesis(int n) {
-        return helper(new ArrayList&lt;String&gt;(), 0, n, "");
-}
-
-private ArrayList&lt;String&gt; helper(ArrayList&lt;String&gt; ans, 
-                int open, int remain, String cur) {
-        if (open == 0 &amp;&amp; remain == 0) ans.add(cur);
-        if (remain &gt; 0) helper(ans, open + 1, remain - 1, cur + "(");
-        if (open &gt; 0) helper(ans, open - 1, remain, cur + ")");
-        return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/03/4Sum/">[LeetCode 18] 4Sum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/4sum/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given an array <i>S</i> of <i>n</i> integers, are there elements <i>a</i>, <i>b</i>, <i>c</i>, and <i>d</i> in <i>S</i> such that <i>a</i> + <i>b</i> + <i>c</i> + <i>d</i> = target? Find all unique quadruplets in the array which gives the sum of target.</p>
-
-<p><b>Note:</b><br>
-</p><ul>
-<li>Elements in a quadruplet (<i>a</i>,<i>b</i>,<i>c</i>,<i>d</i>) must be in non-descending order. (ie, <i>a</i> ≤ <i>b</i> ≤ <i>c</i> ≤ <i>d</i>)</li>
-<li>The solution set must not contain duplicate quadruplets.</li>
-</ul>
-<p></p>
-
-<pre>    For example, given array S = {1 0 -1 0 -2 2}, and target = 0.
-
-    A solution set is:
-    (-1,  0, 0, 1)
-    (-2, -1, 1, 2)
-    (-2,  0, 0, 2)
-</pre><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">Rather long time</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This solution is using exactly same algorithm as 3Sum</strong>. Basic idea is for every value pair (a, b), find all (c, d) that makes the sum equals to the target.</p>
-
-<p>Note that the final found answer set (a, b, c, d) is already in sorted order, no need  to re-sort.</p>
-
-<h3>Solution</h3>
-
-<p><strong>The code might be a little tricky dealing with duplications</strong>. I simple omit all repeated numbers, and luckily my code passed. There is <a href="http://www.programcreek.com/2013/02/leetcode-4sum-java/">another code</a> removing duplications by using <strong>HashSet.contains()</strong>. I will post his code below, but personally I think my solution is better.</p>
-
-<p>The solution I gave is O(n<sup>3</sup>), which is <strong>a very popular solution from LeetCode blogs</strong>. This is good enough, but in case you&rsquo;re interested, there&rsquo;s a O(n<sup>2</sup>) solution using a HashMap to store all 2-number sums. The coding is difficult, thus would not be discussed here. Check code from <a href="http://www.cnblogs.com/TenosDoIt/p/3649607.html">this blog</a>.</p>
-
-<p><strong>For this question, a O(n<sup>3</sup>) solution is good enough</strong>.</p>
-
-<h3>My code</h3>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; fourSum(int[] numbers, int target) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    if (numbers == null || numbers.length == 0) {
-        return ans;
-    }
-    Arrays.sort(numbers);
-    int len = numbers.length;
-    for (int i = 0; i &lt; len - 3; i++) {
-        if (i &gt; 0 &amp;&amp; numbers[i - 1] == numbers[i]) {
-            continue;
-        }
-        for (int j = i + 1; j &lt; len - 2; j++) {
-            if (j &gt; i + 1 &amp;&amp; numbers[j - 1] == numbers[j]) {
-                continue;
-            }
-            int left = j + 1;
-            int right = len - 1;
-            while (left &lt; right) {
-                int diff = numbers[left] + numbers[right] + numbers[i] + numbers[j] - target;
-                if (diff == 0) {
-                    ArrayList&lt;Integer&gt; triplet = new ArrayList&lt;Integer&gt;();
-                    triplet.add(numbers[i]);
-                    triplet.add(numbers[j]);
-                    triplet.add(numbers[left]);
-                    triplet.add(numbers[right]);
-                    ans.add(triplet);
-                }
-                if (diff &lt;= 0) {
-                    left++;
-                    while (left &lt; len &amp;&amp; numbers[left - 1] == numbers[left]) {
-                        left++;
-                    }
-                }
-                if (diff &gt;= 0) {
-                    right--;
-                    while (right &gt;= 0 &amp;&amp; numbers[right + 1] == numbers[right]) {
-                        right--;
-                    }
-                }
-            }
-        }
-    }
-    return ans;
-}
-</code></pre>
-
-<p>We can also use HashMap to remove duplication (interesting idea). Check this <a href="http://www.programcreek.com/2013/02/leetcode-4sum-java/">solution</a>.</p>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; fourSum(int[] num, int target) {
-    Arrays.sort(num);
-    HashSet&lt;ArrayList&lt;Integer&gt;&gt; hashSet = new HashSet&lt;ArrayList&lt;Integer&gt;&gt;();
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    for (int i = 0; i &lt; num.length; i++) {
-        for (int j = i + 1; j &lt; num.length; j++) {
-            int k = j + 1;
-            int l = num.length - 1;
-            while (k &lt; l) {
-                int sum = num[i] + num[j] + num[k] + num[l];
-                if (sum &gt; target) l--;
-                else if (sum &lt; target) k++;
-                else if (sum == target) {
-                    ArrayList&lt;Integer&gt; temp = 
-                        new ArrayList&lt;Integer&gt;();
-                    temp.add(num[i]);
-                    temp.add(num[j]);
-                    temp.add(num[k++]);
-                    temp.add(num[l--]);
-                    if (!hashSet.contains(temp)) {
-                        hashSet.add(temp);
-                        result.add(temp);
-                    }
-                }
-            }
-        }
-    }
-    return result;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/42">&larr; Older</a>
@@ -1281,7 +1417,7 @@ private ArrayList&lt;String&gt; helper(ArrayList&lt;String&gt; ans,
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (12)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (14)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -1304,6 +1440,14 @@ private ArrayList&lt;String&gt; helper(ArrayList&lt;String&gt; ans,
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/15/stack-of-animals/">[CC150v5] 3.7 Stack of Animals</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a>
       </li>
     
@@ -1313,14 +1457,6 @@ private ArrayList&lt;String&gt; helper(ArrayList&lt;String&gt; ans,
     
       <li class="post">
         <a href="/blog/2014/09/15/">[CC150v5] 2.</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/14/kth-last-element-recursive/">[CC150v5] 2.2 Kth Last Element (Recursive)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a>
       </li>
     
   </ul>
