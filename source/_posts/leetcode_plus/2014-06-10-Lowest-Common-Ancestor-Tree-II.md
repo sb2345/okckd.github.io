@@ -1,11 +1,10 @@
 ---
 layout: post
-title: "[LeetCode Plus] Lowest Common Ancestor of a Binary Tree Part II"
+title: "[LeetCode Plus] Lowest Common Ancestor of Binary Tree (II)"
 comments: true
 category: leetcode_plus
-tags: [ unit test needed ]
+tags: [  ]
 ---
-
 
 ### Question 
 
@@ -34,14 +33,12 @@ tags: [ unit test needed ]
 
 ### Analysis 
 
-__This is not an difficult question, right__? Finding the common parent would only require 2 bottom-up walk, and find the first position to meet. 
-
-__However, we do not wish to use extra space for this solution__. The solution is actually very very creative. 
+__If have parent pointer, we do not wish to use extra space for the solution__. 
 
 1. Find the height of both nodes (from the head)
 2. By calculating the height difference, move the lower nodes up (follow the parent path) to the same level as the other node. 
 3. Two nodes move up together until they meet. 
-4. This solution requires no extra space. 
+4. This solution requires no extra space.
 
 Here is __a very similar question: [Intersection of 2 LinkedList](http://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/)__. 
 
