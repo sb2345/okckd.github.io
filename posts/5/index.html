@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link 写一个function，对于参数n，输出从0到n之间所有含5的数字。eg. func(30) 应该输出5，15，25 this is Groupon interview question Solution Suggested by level 10 of this &hellip;">
+  <meta name="description" content="Question link Given a string, convert it into a palindrome with the lease number of insertions possible. Solution This is a DP question. There&rsquo; &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,175 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/06/Form-palindrome-with-insertion/">[Google] Form a Palindrome With Insertion</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/Given-a-string-convert-it-into-a-palindrome-with-the-lease-number-of-insertions-possible-QTN_729122.htm">link</a></p>
+
+<blockquote><p>Given a string, convert it into a palindrome with the lease number of insertions possible.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a DP question. There&rsquo;re 2 approaches.</p>
+
+<p><strong>First, is direct DP</strong>. This is the nicest solution, not intuitive at first, but actually good.</p>
+
+<blockquote><p>P[i, j] = P[i+1, j-1], if S[i] = S[j]</p>
+
+<p>P[i, j] = 1 + min(P[i,j-1], P[i+1,j]), otherwise</p></blockquote>
+
+<p>contributed by <a href="http://stackoverflow.com/a/10732879">this guy</a>.</p>
+
+<p><strong>Second approach is to calculate the longest palindrome subsequence</strong>, and the answer would be string length minus this value.</p>
+
+<p>I wrote code for both apporaches.</p>
+
+<p>According to <a href="http://www.geeksforgeeks.org/dynamic-programming-set-28-minimum-insertions-to-form-a-palindrome/">G4G</a>, we can actually calculate the <strong>Longest Common Subsequence of the string and its reverse</strong>, and this value shall be same as the longest palindrome subsequence that we got in second approach. It&rsquo;s nice to know this idea.</p>
+
+<h3>Code</h3>
+
+<p><strong>direct</strong></p>
+
+<pre><code>public int solve1(String str) {
+    // direct dp
+    if (str == null)
+        return 0;
+    int len = str.length();
+    int[][] dp = new int[len][len];
+    for (int i = len - 1; i &gt;= 0; i--) {
+        for (int j = i; j &lt; len; j++) {
+            if (i == j) {
+                dp[i][j] = 0;
+            } else if (i + 1 == j) {
+                dp[i][j] = str.charAt(i) == str.charAt(j) ? 0 : 1;
+            } else {
+                dp[i][j] = str.charAt(i) == str.charAt(j) ? dp[i + 1][j - 1]
+                        : 1 + Math.min(dp[i + 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    return dp[0][len - 1];
+}
+</code></pre>
+
+<p><strong>longest palindrome subsequence</strong></p>
+
+<pre><code>public int solve2(String str) {
+    // longest palindrome subsequence
+    if (str == null)
+        return 0;
+    int len = str.length();
+    int[][] dp = new int[len][len];
+    for (int i = len - 1; i &gt;= 0; i--) {
+        for (int j = i; j &lt; len; j++) {
+            if (i == j) {
+                dp[i][j] = 1;
+            } else if (i + 1 == j) {
+                dp[i][j] = str.charAt(i) == str.charAt(j) ? 2 : 1;
+            } else {
+                dp[i][j] = str.charAt(i) == str.charAt(j) ? 2 + dp[i + 1][j - 1]
+                        : Math.max(dp[i + 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    return len - dp[0][len - 1];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/04/unsolved-mystery-of-utf8/">[Google] Unsolved Mystery of UTF8 Encoding</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://algorithmguru.com/blog/?p=148">link</a></p>
+
+<blockquote><p>UTF-8 is a variable-length encoding of letters or runes. If the most significant bit of the first byte is 0, the letter is 1 byte long. Otherwise, its length is the number of leading 1’s in the first byte. If a letter is more than one byte long, all subsequent runes start with 10. Here’s a chart:</p>
+
+<p>UTF-8 encoding scheme is described below:</p></blockquote>
+
+<pre><code>0XXXXXXX = this is the entire rune
+10XXXXXX = this is a continuation of the rune from the previous byte
+110XXXXX = this is the start of a 2-byte rune.
+1110XXXX = this is the start of a 3-byte rune.
+11110XXX = this is the start of a 4-byte rune.
+111110XX = this is the start of a 5-byte rune.
+1111110X = this is the start of a 6-byte rune.
+11111110 = this is the start of a 7-byte rune.
+11111111 = this is the start of a 8-byte rune.
+</code></pre>
+
+<blockquote><p>For example, a 3-byte rune would be 1110XXXX 10XXXXXX 10XXXXXX.</p>
+
+<p>Write a function that decides whether a given byte array (or string) is valid UTF-8 encoded text.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is an easy question, just put here for reference.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -722,172 +891,6 @@ public static void findUnsortedSequence(int[] array) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/02/Listener-Observer-pattern/">[Design] Listener / Observer Pattern</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Observer pattern</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Observer_pattern">The observer pattern</a></strong> is a software design pattern in which an object(subject) maintains a list of dependents(observers), and notifies them automatically of any state changes (usually by calling one of their methods).</p>
-
-<p>The Observer pattern is mainly used to implement distributed event handling systems. It&rsquo;s also a key part in MVC architectural.</p>
-
-<h3>Example</h3>
-
-<p>A mailing list example.</p>
-
-<p>Each student in the mailing list would be a listener/observer, and teacher would be announcer/subject.</p>
-
-<p>So in the code, there&rsquo;s a Listener Interface that all students implement. There&rsquo;s a update() method in the interface, where each student define their own implementation.</p>
-
-<p>Teacher would keep a list of Listeners. When there&rsquo;s any news, teacher would call update() on each object.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/02/Find-anagrams-in-dictionary/">[Google] Find Anagrams in Dictionary</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=3088">link</a></p>
-
-<blockquote><p>Imagine you had a dictionary. How would you print all anagrams of a word? What if you had to do this repeatedly? Could you optimize it?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>A very <a href="http://stackoverflow.com/a/12477976">nice solution</a>:</p>
-
-<ol>
-<li><p>Open dictionary</p></li>
-<li><p>Create empty hashmap H</p></li>
-<li><p>For each word in dictionary:</p>
-
-<ol>
-<li><p>Create a key that is the word&rsquo;s letters sorted alphabetically (and forced to one case)</p></li>
-<li><p>Add the word to the list of words accessed by the hash key in H</p></li>
-</ol>
-</li>
-</ol>
-
-
-<p>There&rsquo;s another <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">very interesting idea</a>, if the length of the word is not too long.</p>
-
-<blockquote><p>Another approach could be we can assign each letters from a..z a prime numbers (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, .. so on)</p>
-
-<p>and then for any word, we can calculate its key as the multiples of all the prime number corresponding to characters in the word.</p>
-
-<p>The char &ndash;> int assignment may look like:</p></blockquote>
-
-<pre><code>a=2, b=3, c=5, d=7, e=11, f=13, g=17, h=19, i=23, j=29, 
-k=31, l=37, m=41, n=43, o=47, p=53, q=59, r=61, s=67, t=71, 
-u=73, v=79, w=83, x=89, y=97, z=101
-</code></pre>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong>, <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">link</a></p>
-
-<pre><code>private static HashMap&lt;String, ArrayList&lt;String&gt;&gt; anagramMap = new HashMap&lt;String, ArrayList&lt;String&gt;&gt;();
-
-public static void findAnagrams(String[] dictionary) {
-    int len = dictionary.length;
-
-    for (int i = 0; i &lt; len; i++) {
-        String sortedWord = sortWordLexicographically(dictionary[i]);
-        ArrayList&lt;String&gt; wordList = anagramMap.get(sortedWord);
-        if (wordList == null) {
-            wordList = new ArrayList&lt;String&gt;();
-        }
-        wordList.add(dictionary[i]);
-        anagramMap.put(sortedWord, wordList);
-    }
-}
-
-public ArrayList&lt;String&gt; getAnagrams(String word) {
-    if (word == null) {
-        return null;
-    }
-
-    String sortedWord = sortWordLexicographically(word);
-    return anagramMap.get(sortedWord);
-}
-
-public void printAnagrams(String word) {
-    if (word == null) {
-        System.out.println("Input word is null!");
-    } else {
-        ArrayList&lt;String&gt; wordList = getAnagrams(word);
-        if (wordList == null) {
-            System.out.println("No anagrams exists for : " + word);
-        } else {
-            Iterator&lt;String&gt; iter = wordList.iterator();
-            while (iter.hasNext()) {
-                System.out.print(iter.next());
-            }
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/6">&larr; Older</a>
@@ -904,7 +907,7 @@ public void printAnagrams(String word) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (10)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (12)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -927,23 +930,23 @@ public void printAnagrams(String word) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/15/implement-stack/">[CC150v5] Chap 3 Example - Implement Stack</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/15/">[CC150v5] 2.</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/14/kth-last-element-recursive/">[CC150v5] 2.2 Kth Last Element (Recursive)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/14/">[CC150v5] 2.</a>
-      </li>
-    
-      <li class="post">
         <a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/11/celebrity-problem/">[Question] Celebrity Problem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a>
       </li>
     
   </ul>

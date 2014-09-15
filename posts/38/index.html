@@ -9,8 +9,9 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a matrix of m x n elements (m rows, n columns), return all elements of the matrix in spiral order. For example,
-Given the &hellip;">
+  <meta name="description" content="Question link Given a collection of intervals, merge all overlapping intervals. For example,
+Given [1,3],[2,6],[8,10],[15,18],
+return [1,6],[8,10],[ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +79,345 @@ Given the &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/17/Merge-Intervals/">[LeetCode 56] Merge Intervals</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/merge-intervals/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a collection of intervals, merge all overlapping intervals.</p>
+
+<p>
+For example,<br>
+Given <code>[1,3],[2,6],[8,10],[15,18]</code>,<br>
+return <code>[1,6],[8,10],[15,18]</code>.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">Around 40 min</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>The idea of the solution is not difficult</strong>.</p>
+
+<p>First, sort the entire collection list by start time. Secondly, merge it.</p>
+
+<p><strong>The real difficult part is how to sort the collection</strong>. I did it in quite differently from most people did. So there are 3 solutions posted below (or I would say 2.5 because last 2 piece of code is almost identical).</p>
+
+<h3>Solution</h3>
+
+<p><strong>My solution is basically insertion sort it</strong>. Here I did not used traditional insetion sort, but instead <strong>binary insertion sort</strong>. I thought it&rsquo;s going to have smaller time complexity, until I read <a href="http://www.brpreiss.com/books/opus5/html/page487.html">this article</a></p>
+
+<blockquote><p>The straight insertion algorithm presented in the preceding section does a linear search to find the position in which to do the insertion. However, since the element is inserted into a sequence that is already sorted, we can use a binary search instead of a linear search. Whereas a linear search requires O(n) comparisons in the worst case, a binary search only requires O(logn) comparisons. Therefore, if the cost of a comparison is significant, the binary search may be preferred.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/merge_interval_binary_insertion_sort_algo.png"></p>
+
+<p><strong>And from</strong> <a href="http://en.wikipedia.org/wiki/Insertion_sort#Variants">wikipedia</a></p>
+
+<blockquote><p>If the cost of comparisons exceeds the cost of swaps, as is the case for example with string keys stored by reference or with human interaction (such as choosing one of a pair displayed side-by-side), then using binary insertion sort may yield better performance. Binary insertion sort employs a binary search to determine the correct location to insert new elements, and therefore performs ⌈log2(n)⌉ comparisons in the worst case, which is O(n log n). The algorithm as a whole still has a running time of O(n<sup>2</sup>) on average because of the series of swaps required for each insertion.</p></blockquote>
+
+<p>Any way, I choose a O(n<sup>2</sup>) sorting algorithm and implemented it, then the merge part is done easily (it&rsquo;s easier than I thought).</p>
+
+<p><strong>The most popular solution on Internet is similar, only they&rsquo;re using Collection.sort function</strong>.</p>
+
+<p>java.util.Collections</p>
+
+<p>public static <T> void sort(List<T> list, Comparator&lt;? super T> c)</p>
+
+<p>Parameters: c
+The comparator to determine the order of the list. A null value indicates that the elements&#8217; natural ordering should be used.</p>
+
+<p>A new class that implements the Comparator interface is created, and inside there is compare(Interval, Interval) method. This is most people&rsquo;s solution, and <a href="http://www.cnblogs.com/lautsie/p/3254191.html">here</a> is one example.</p>
+
+<p><strong>The third solution is same as the second, but only different</strong> in implementing the comparator object. The following code from <a href="http://rleetcode.blogspot.sg/2014/01/merge-intervals-java.html">this blog</a> is the only thing that differs:</p>
+
+<p>Comparator<Interval> intervalComperator = new Comparator<Interval>(){</p>
+
+<pre><code>    public int compare(Interval i1, Interval i2){
+            Integer i1St=i1.start;
+            Integer i2St=i2.start;
+            return i1St.compareTo(i2St);
+    }
+</code></pre>
+
+<p>};</p>
+
+<h3>My code</h3>
+
+<p><strong>My code</strong>, sort the list by hand, then merge</p>
+
+<pre><code>public ArrayList&lt;Interval&gt; merge(ArrayList&lt;Interval&gt; intervals) {
+    ArrayList&lt;Interval&gt; ans = new ArrayList&lt;Interval&gt;();
+    int len = intervals.size();
+    if (len == 0) return ans;
+    ans.add(intervals.get(0));
+    if (len == 1) return ans;
+    // now intervals length is &gt;= then 2
+    if (intervals.get(0).start &lt; intervals.get(1).start)
+        ans.add(intervals.get(1));
+    else ans.add(0, intervals.get(1));
+    for (int i = 2; i &lt; len; i++) {
+        int cur = intervals.get(i).start;
+        // now find number cur from ans&lt;list&gt;
+        int left = 0, right = ans.size() - 1;
+        while (right - left &gt; 1) {
+            int mid = (left + right) / 2;
+            if (ans.get(mid).start &lt; cur) left = mid;
+            else right = mid;
+        }
+        // insert cur between left and right, unless:
+        if (left == 0 &amp;&amp; cur &lt; ans.get(0).start)
+            ans.add(0, intervals.get(i));
+        else if (right == ans.size() - 1
+                &amp;&amp; cur &gt; ans.get(ans.size() - 1).start)
+            ans.add(intervals.get(i));
+        else
+            ans.add(right, intervals.get(i));
+    }
+    // now merge ans
+    int k = 0;
+    while (k &lt; ans.size() - 1) {
+        while (k &lt; ans.size() - 1 &amp;&amp; ans.get(k).end &gt;= ans.get(k + 1).start) {
+            ans.get(k).end = Math.max(ans.get(k).end, ans.get(k + 1).end);
+            ans.remove(k + 1);
+        }
+        k++;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Standard solution</strong>. Creating a new Comparator class</p>
+
+<pre><code>public class Solution {
+    public ArrayList&lt;Interval&gt; merge(ArrayList&lt;Interval&gt; intervals) {
+        int len = intervals.size();
+        if (len == 0 || len == 1) return intervals;
+
+        ArrayList&lt;Interval&gt; ans = new ArrayList&lt;Interval&gt;();
+        Collections.sort(intervals, new IntervalComparator());
+
+        Interval tmp = intervals.get(0);
+        for (int i = 1; i &lt; len; i++) {
+            Interval itv = intervals.get(i);
+            if (tmp.end &gt;= itv.start) { // mergeable
+                int left = Math.min(tmp.start, itv.start);
+                int right = Math.max(tmp.end, itv.end);
+                tmp = new Interval(left, right);
+            }
+            else {
+                ans.add(tmp);
+                tmp = intervals.get(i);
+            }
+        }
+        ans.add(tmp);
+        return ans;
+    }
+}
+
+class IntervalComparator implements Comparator&lt;Interval&gt; {
+    public int compare(Interval a, Interval b) {
+        return a.start - b.start;
+    }
+}
+</code></pre>
+
+<p><strong>Third solution</strong>, different way of writing Comparator.</p>
+
+<pre><code>public ArrayList&lt;Interval&gt; merge(ArrayList&lt;Interval&gt; intervals) {
+    if (intervals == null || intervals.size() &lt; 2)
+        return intervals;
+    ArrayList&lt;Interval&gt; result = new ArrayList&lt;Interval&gt;();
+
+    Comparator&lt;Interval&gt; intervalComperator = new Comparator&lt;Interval&gt;() {
+        public int compare(Interval i1, Interval i2) {
+            Integer i1St = i1.start;
+            Integer i2St = i2.start;
+            return i1St.compareTo(i2St);
+
+        }
+    };
+    Collections.sort(intervals, intervalComperator);
+
+    Interval current = intervals.get(0);
+    int i = 1;
+    while (i &lt; intervals.size()) {
+        Interval currentToCompare = intervals.get(i);
+        if (current.end &lt; currentToCompare.start) {
+            result.add(current);
+            current = currentToCompare;
+        } else
+            current.end = Math.max(current.end, currentToCompare.end);
+        i++;
+    }
+    result.add(current);
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/16/Spiral-Matrix-II/">[LeetCode 59] Spiral Matrix II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/spiral-matrix-ii/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given an integer <i>n</i>, generate a square matrix filled with elements from 1 to <i>n</i><sup>2</sup> in spiral order.</p>
+
+<p>
+For example,<br>
+Given <i>n</i> = <code>3</code>,
+</p>
+You should return the following matrix:
+<pre>[
+ [ 1, 2, 3 ],
+ [ 8, 9, 4 ],
+ [ 7, 6, 5 ]
+]
+</pre><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This question is basic mathematics</strong>. There is another similar question <strong>Spiral Matrix</strong>.</p>
+
+<p>The difficult part is writing the code.</p>
+
+<h3>Solution</h3>
+
+<p>Code is easy to read.</p>
+
+<h3>My code</h3>
+
+<p><strong>My code, this is pure math</strong>.</p>
+
+<pre><code>public int[][] generateMatrix(int n) {
+    int[][] ans = new int[n][n];
+    int num = 1;
+    for (int i = 0; i &lt; n / 2; i ++) {
+        for (int k = i; k &lt;= n-2-i; k ++) ans[i][k] = num ++;
+        for (int l = i; l &lt;= n-2-i; l ++) ans[l][n-i-1] = num ++;
+        for (int p = n-i-1; p &gt;=i+1 ; p --) ans[n-i-1][p] = num ++;
+        for (int q = n-i-1; q &gt;=i+1 ; q --) ans[q][i] = num ++;
+    }
+    if (n % 2 == 1) ans[n/2][n/2] = num;
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1223,392 +1563,6 @@ private double helper(double x, int n) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/14/Trapping-Rain-Water/">[LeetCode 42] Trapping Rain Water</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/trapping-rain-water/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given <i>n</i> non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it is able to trap after raining. 
-</p>
-
-<p>
-For example, <br>
-Given <code>[0,1,0,2,1,0,1,3,2,1,2,1]</code>, return <code>6</code>.
-</p>
-
-<p>
-<img src="http://www.leetcode.com/wp-content/uploads/2012/08/rainwatertrap.png"><br>
-</p><p style="font-size: 11px">The above elevation map is represented by array [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped. <b>Thanks Marcos</b> for contributing this image!</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an interesting question</strong>.</p>
-
-<p>I come up with a great solution, which is different from most online solutions.</p>
-
-<p><strong>My solution of using 2 iterations</strong>. First, find the point of max height (m). Second, iterate from 0 to right side, until reach m, while filling in the trapped water. Third, iterate from last to left side, until reach m.</p>
-
-<p><strong>The most popular solution online is DP</strong>. The explanation from <a href="http://rleetcode.blogspot.sg/2014/03/trapping-rain-water-java-python.html">this blog</a> is slightly confusing, so I will explain it here. <strong>Basic idea is to do 2 iteration</strong>. First time get the heighest bound to the left of every point. Second time get the heighest bound to the right.</p>
-
-<blockquote><p>Example: input = [0,1,0,2,1,0,1,3,2,1,2,1].</p>
-
-<p>Assume the 2 DP arrays are called highestLeftSoFar and highestRightSoFar.</p>
-
-<p>highestLeftSoFar  = 0,1,1,2,2,2,2,3,3,3,3,3</p>
-
-<p>highestRightSoFar = 3,3,3,3,3,3,3,3,2,2,2,1</p>
-
-<p>For each point, get the lowest bound (of the 2 bounds), and calculate water.</p></blockquote>
-
-<p><strong>There is another solution making use of stack</strong> from <a href="http://n00tc0d3r.blogspot.sg/2013/06/trapping-rain-water.html">this blog</a>. This idea is IMHO not very good, but it can be a good thinking/coding excercise. (I put the code in next section, but I did not write it)</p>
-
-<blockquote><p>We kind of add up level by level, as shown in picture below.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/trapping_rain.png"></p>
-
-<ol>
-<li>Use Stack to store the index of a bar;</li>
-<li>If the current one is smaller then the top of the stack, push it to stack;</li>
-<li>Otherwise, pop up the top until stack is empty or top is greater than the current one, add up the volume, push the current one to stack.</li>
-</ol>
-
-
-<blockquote><p>The tricky part is what is the volume to be added each time when we pop up a value from the stack.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Coding part is easy.</p>
-
-<h3>My code</h3>
-
-<p>My solution.</p>
-
-<pre><code>public int trap(int[] A) {
-    int len = A.length;
-    if (len &lt;= 2) return 0;
-    int m = 0, left = 0, right = 0, sum = 0;
-    for (int i = 0; i &lt; len; i ++) if (A[m] &lt; A[i]) m = i;
-    // now m points to the max height of the entire array
-    for (int i = 0; i &lt; m; i ++) {
-        sum += Math.max(0, left - A[i]);
-        left = Math.max(left, A[i]);
-    }
-    for (int i = len - 1; i &gt; m; i --) {
-        sum += Math.max(0, right - A[i]);
-        right = Math.max(right, A[i]);
-    }
-    return sum;
-}
-</code></pre>
-
-<p>DP solution.</p>
-
-<pre><code>public int trap(int[] A) {
-    if (A == null ||A.length == 0) return 0;
-    int[] highestLeftSoFar = new int[A.length];
-    int[] highestRightSoFar = new int[A.length];
-    for (int i = 0; i &lt; highestLeftSoFar.length; i ++)
-        highestLeftSoFar[i] = i == 0 ? 
-            A[i] : Math.max(A[i], highestLeftSoFar[i-1]);
-    for (int i = A.length - 1; i &gt;= 0; i --)
-        highestRightSoFar[i] = i == A.length-1 ? 
-            A[i] : Math.max(A[i], highestRightSoFar[i+1]);
-    int totalVolume=0;
-    for (int i = 0; i &lt; A.length; i ++)
-        totalVolume += Math.max(0, 
-            Math.min(highestLeftSoFar[i], highestRightSoFar[i]) - A[i]);
-    return totalVolume;
-}
-</code></pre>
-
-<p>Stack Solution.</p>
-
-<pre><code>public int trap(int[] A) {
-    int cur = 0;
-    while (cur &lt; A.length &amp;&amp; A[cur] == 0) cur ++;
-    int vol = 0;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    while (cur &lt; A.length) {
-        while (!stack.isEmpty() &amp;&amp; A[cur] &gt;= A[stack.peek()]) {
-            int b = stack.pop();
-            if (stack.isEmpty()) break;
-            vol += ((cur - stack.peek() - 1) * (Math.min(A[cur], A[stack.peek()]) - A[b]));
-        }
-        stack.push(cur ++);
-        cur ++;
-    }
-    return vol;
-}
-</code></pre>
-
-<p><strong>updated on Aug 27th, 2014</strong>, there is a very very good 2 pointer solution which reads the input only <strong>once</strong>!</p>
-
-<p><a href="http://qandwhat.runkite.com/i-failed-a-twitter-interview/">This post</a> wrote about it, and <a href="https://gist.github.com/mkozakov/59af0fd5bddbed1a0399">source code</a> available.</p>
-
-<pre><code>public int trap(int[] A) {
-    if (A == null || A.length == 0) {
-        return 0;
-    }
-
-    int len = A.length;
-    int left = 0;
-    int right = len - 1;
-    int leftHeight = 0;
-    int rightHeight = 0;
-    int water = 0;
-
-    while (left &lt; right) {
-        leftHeight = Math.max(leftHeight, A[left]);
-        rightHeight = Math.max(rightHeight, A[right]);
-        // Two ways to write the following if-condition 
-        // This would also work: if (A[left] &lt; A[right]) {
-        if (leftHeight &lt; rightHeight) {
-            // increase left pointer
-            water += leftHeight - A[left];
-            left++;
-        } else {
-            water += rightHeight - A[right];
-            right--;
-        }
-    }
-    return water;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/14/Sudoku-Solver/">[LeetCode 37] Sudoku Solver</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/sudoku-solver/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Write a program to solve a Sudoku puzzle by filling the empty cells.</p>
-
-<p>Empty cells are indicated by the character <code>'.'</code>.</p>
-
-<p>You may assume that there will be only one unique solution.
-
-</p><p>
-<img src="http://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Sudoku-by-L2G-20050714.svg/250px-Sudoku-by-L2G-20050714.svg.png"><br>
-</p><p style="font-size: 11px">A sudoku puzzle&#8230;</p>
-<p></p>
-
-<p>
-<img src="http://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Sudoku-by-L2G-20050714_solution.svg/250px-Sudoku-by-L2G-20050714_solution.svg.png"><br>
-</p><p style="font-size: 11px">&#8230;and its solution numbers marked in red.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">Difficult</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a very classic DFS search problem</strong>, and it is not easy!</p>
-
-<h3>Solution</h3>
-
-<p><strong>The solution simply brute force DFS</strong>.</p>
-
-<h3>My code</h3>
-
-<p>The following solution is from <a href="http://xixiaogualu.blogspot.sg/2013/09/leetcode-sudoku-solver.html">this blog</a></p>
-
-<pre><code>public void solveSudoku(char[][] board) {
-    helper(board, 0, 0);
-}
-
-private boolean helper(char[][] board, int i, int j) {
-    if (j &gt;= 9) return helper(board, i + 1, 0);
-    if (i == 9) return true;
-    if (board[i][j] == '.') {
-        for (int k = 1; k &lt;= 9; k++) {
-            board[i][j] = (char) (k + '0');
-            if (isValid(board, i, j)) 
-                if (helper(board, i, j + 1))
-                    return true;
-            board[i][j] = '.';
-        }
-    } else return helper(board, i, j + 1);
-    return false;
-}
-
-private boolean isValid(char[][] board, int i, int j) {
-    boolean[] map = new boolean[9];
-    for (int k = 0; k &lt; 9; k++) 
-        if (k != j &amp;&amp; board[i][k] == board[i][j])
-            return false;
-    for (int k = 0; k &lt; 9; k++) 
-        if (k != i &amp;&amp; board[k][j] == board[i][j])
-            return false;
-    for (int row = i / 3 * 3; row &lt; i / 3 * 3 + 3; row++) 
-        for (int col = j / 3 * 3; col &lt; j / 3 * 3 + 3; col++) 
-            if ((row != i || col != j) &amp;&amp; board[row][col] == board[i][j])
-                return false;
-    return true;
-}
-</code></pre>
-
-<p><strong>Updated on July 7th</strong>, code:</p>
-
-<pre><code>public void solveSudoku(char[][] board) {
-    helper(board, 0, 0);
-}
-
-private boolean helper(char[][] b, int m, int n) {
-    if (n == 9) {
-        m += 1;
-        n = 0;
-    }
-    if (m == 9) {
-        return true;
-    }
-    if (b[m][n] != '.') {
-        return helper(b, m, n + 1);
-    }
-    for (int i = 1; i &lt;= 9; i++) {
-        b[m][n] = (char) ('0' + i);
-        if (!validate(b, m, n)) {
-            continue;
-        }
-        if (helper(b, m, n + 1)) {
-            return true;
-        }
-    }
-    b[m][n] = '.';
-    return false;
-}
-
-private boolean validate(char[][] board, int i, int j) {
-    for (int k = 0; k &lt; 9; k++) 
-        if (k != j &amp;&amp; board[i][k] == board[i][j])
-            return false;
-    for (int k = 0; k &lt; 9; k++) 
-        if (k != i &amp;&amp; board[k][j] == board[i][j])
-            return false;
-    for (int row = i / 3 * 3; row &lt; i / 3 * 3 + 3; row++) 
-        for (int col = j / 3 * 3; col &lt; j / 3 * 3 + 3; col++) 
-            if ((row != i || col != j) &amp;&amp; board[row][col] == board[i][j])
-                return false;
-    return true;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/39">&larr; Older</a>
@@ -1625,7 +1579,7 @@ private boolean validate(char[][] board, int i, int j) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (10)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (12)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -1648,23 +1602,23 @@ private boolean validate(char[][] board, int i, int j) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/15/implement-stack/">[CC150v5] Chap 3 Example - Implement Stack</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/15/">[CC150v5] 2.</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/14/kth-last-element-recursive/">[CC150v5] 2.2 Kth Last Element (Recursive)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/14/">[CC150v5] 2.</a>
-      </li>
-    
-      <li class="post">
         <a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/11/celebrity-problem/">[Question] Celebrity Problem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a>
       </li>
     
   </ul>
