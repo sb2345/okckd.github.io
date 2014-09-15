@@ -26,7 +26,7 @@ Time complexity:
 
 If k is the number of occurrences of T2’s root in T1, the worst case runtime can be characterized as O(n + k * m). 
 
-__However, there can be a lot of pruning for this solution__, so it's necessarily slower than Solution 1. There can be a lot of discussions on this (refer to CC150v5 Q4.8 for more). 
+__However, there can be a lot of pruning for this solution__, so it's NOT necessarily slower than Solution 1. There can be a lot of discussions on this (__refer to CC150v5 Q4.8 for more__). 
 
 ### Code
 

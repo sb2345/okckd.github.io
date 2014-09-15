@@ -21,20 +21,20 @@ Producer-consumer problem illustrates the need for __synchronization__ in system
 __The code might look like this__: 
 
 	BufferSize = 3;
-	  count = 0;
+    count = 0;
 
 	Producer()
 	{
-	    int widget;
-	    WHILE (true) {                   // loop forever
-	      make_new(widget);              // create a new widget to put in the buffer
-	      IF(count==BufferSize)
-	           Sleep();                  // if the buffer is full, sleep
-	      put_item(widget);              // put the item in the buffer
-	      count = count + 1;             // increment count of items
-	      IF (count==1)
-	         Wakeup(Consumer);           // if the buffer was previously empty, wake
-	   }                                 //  the consumer
+        int widget;
+	    WHILE (true) {                     // loop forever
+	       make_new(widget);               // create a new widget to put in the buffer
+	       IF(count==BufferSize)
+	           Sleep();                    // if the buffer is full, sleep
+	       put_item(widget);               // put the item in the buffer
+	       count = count + 1;              // increment count of items
+	       IF (count==1)
+	           Wakeup(Consumer);           // if the buffer was previously empty, wake
+        }                                  //  the consumer
 	}
 
 	Consumer()
