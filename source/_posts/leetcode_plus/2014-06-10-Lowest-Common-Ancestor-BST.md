@@ -1,11 +1,10 @@
 ---
 layout: post
-title: "[LeetCode Plus] Lowest Common Ancestor of a Binary Search Tree"
+title: "[LeetCode Plus] Lowest Common Ancestor of BST "
 comments: true
 category: leetcode_plus
-tags: [ unit test needed ]
+tags: [  ]
 ---
-
 
 ### Question 
 
@@ -46,8 +45,6 @@ __This question is the easiest of this series of questions__. I will quote the s
 ### Code
 
 The code is not written by me. 
-
-I shall write some test cases for all questions in leetcode_plus. 
 
     Node *LCA(Node *root, Node *p, Node *q) {
       if (!root || !p || !q) return NULL;

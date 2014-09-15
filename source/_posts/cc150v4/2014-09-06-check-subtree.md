@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v4] 4.7 Check Subtree"
+title: "[CC150v4] 4.7 Check Subtree "
 comments: true
 category: CC150v4
 tags: [  ]
@@ -10,17 +10,23 @@ tags: [  ]
 
 > You have two very large binary trees: T1, with millions of nodes, and T2, with hundreds of nodes. Create an algorithm to decide if T2 is a subtree of T1. 
 
-### Solution
+### Solution 1
 
-__The best solution is to print inorder and preorder traversal__ of both trees. Find whether the 2 traversal string of T2 __is substring of the traversal of T1__. 
+__The best solution is to print inorder and preorder traversal__ of both trees. Find whether the 2 traversal string of T2 __is substring of the traversal of T1__. This is a very good idea of checking subtree of a Binary Tree. 
 
-This is a very good idea of checking subtree of a Binary Tree. However, this solution is very __memory intensive__. 
+__Updated on Sep 15th, 2014__: we must use sentinals for this purpose. Otherwise, if a node have a child, we cannot tell whether it's the left or right child. 
+
+However, this solution is very __memory intensive__. 
+
+### Solution 2
 
 __The alternative solution__ simply checks the tree similarity for each and every node. 
 
 Time complexity:
 
-If k is the number of occurrences of T2’s root in T1, the worst case runtime can be characterized as O(n + k * m). So it's slower. 
+If k is the number of occurrences of T2’s root in T1, the worst case runtime can be characterized as O(n + k * m). 
+
+__However, there can be a lot of pruning for this solution__, so it's necessarily slower than Solution 1. There can be a lot of discussions on this (refer to CC150v5 Q4.8 for more). 
 
 ### Code
 

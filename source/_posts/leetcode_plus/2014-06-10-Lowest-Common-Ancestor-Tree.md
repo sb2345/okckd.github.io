@@ -1,11 +1,10 @@
 ---
 layout: post
-title: "[LeetCode Plus] Lowest Common Ancestor of a Binary Tree Part I"
+title: "[LeetCode Plus] Lowest Common Ancestor of Binary Tree (I)"
 comments: true
 category: leetcode_plus
-tags: [ unit test needed ]
+tags: [  ]
 ---
-
 
 ### Question 
 
@@ -29,13 +28,15 @@ tags: [ unit test needed ]
         <br>Top-down or bottom-up? Consider both approaches and see which one is more efficient.</p>
 </div>
 
+__This question appears on CC150v5 Q4.7__. 
+
 ### Analysis 
 
 This tree is not BST, so it's more difficult then previous. Top-down approach would take O(n^2) time due to duplicate traverse. 
 
 __However, there is a very good bottom-up approach with O(n) time__. This solution, though tricky, is the most standard and common interview question that can be asked about Binary Tree. 
 
-> We traverse from the bottom, and once we reach a node which matches one of the two nodes, we pass it up to its parent. The parent would then test its left and right subtree if each contain one of the two nodes. If yes, then the parent must be the LCA and we pass its parent up to the root. If not, we pass the lower node which contains either one of the two nodes (if the left or right subtree contains either p or q), or NULL (if both the left and right subtree does not contain either p or q) up.
+> We traverse from the bottom, and once we reach a node which matches one of the two nodes, we pass it up to its parent. The parent would then test its left and right subtree if each contain one of the two nodes. If yes, then the parent must be the LCA and we pass its parent up to the root. If not, we pass the lower node which contains either one of the two nodes (if the left or right subtree contains either p or q), or NULL (if both the left and right subtree does not contain either p or q) up. 
 
 The coding is much easier than coming up with this idea. 
 
@@ -46,52 +47,21 @@ The coding is much easier than coming up with this idea.
 
 ### Code
 
-Assuming root node is given. C++ code from leetcode.com.
+__updated on Sep 15th, 2014__: code from CC150v5 Q4.7
 
-    Node *LCA(Node *root, Node *p, Node *q) {
-      if (!root) return NULL;
-      if (root == p || root == q) return root;
-      Node *L = LCA(root->left, p, q);
-      Node *R = LCA(root->right, p, q);
-      if (L && R) return root;  // if p and q are on both sides
-      return L ? L : R;  // either one of p,q is on one side OR p,q is not in L&R subtrees
-    }
-
-Assuming parent node is not given. This Java code is from [ninechap](http://answer.ninechapter.com/solutions/lowest-common-ancestor/) (The first method getRoot() is used to get root node). 
-
-    private TreeNode getRoot(node) {
-        while (node.parent != null) {
-            node = node.parent;
-        }
-        return node;
-    }
-    
-    private TreeNode getAncestor(TreeNode root, TreeNode node1, TreeNode node2) {
-        if (root == null || root == node1 || root == node2) {
-            return root;
-        }
-        
-        // Divide
-        TreeNode left = getAncestor(root.left, node1, node2);
-        TreeNode right = getAncestor(root.right, node1, node2);
-        
-        // Conquer
-        if (left != null && right != null) {
-            return root;
-        } 
-        if (left != null) {
-            return left;
-        }
-        if (right != null) {
-            return right;
-        }
-        return null;
-    }
-    
-    public TreeNode latestCommonAncestor(TreeNode node1, TreeNode node2) {
-        if (node1 == null || node2 == null) {
-            return null;
-        }
-        TreeNode root = getRoot(node1);
-        return getAncestor(root, node1, node2);
-    }
+	public static TreeNode commonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+		if (root == null) {
+			return null;
+		} else if (root == p) {
+			return p;
+		} else if (root == q) {
+			return q;
+		}
+		if (commonAncestor(root.left, p, q) == null) {
+			return commonAncestor(root.right, p, q);
+		} else if (commonAncestor(root.right, p, q) == null) {
+			return commonAncestor(root.left, p, q);
+		} else {
+			return root;
+		}
+	}
