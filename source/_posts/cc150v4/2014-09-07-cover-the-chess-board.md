@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v4] 6.2 Cover the Chess Board "
+title: "[Brain teaser] 6.2 Cover the Chess Board "
 comments: true
 category: CC150v4
 tags: [  ]
