@@ -9,8 +9,8 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Follow up for problem &#8221;Populating Next Right Pointers in Each Node&#8221;.
-What if the given tree could be any binary tree? Would &hellip;">
+  <meta name="description" content="Question link Given a binary tree, flatten it to a linked list in-place. For example,
+Given 1 / \ 2 5 / \ \ 3 4 6 The flattened tree should look like &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,837 @@ What if the given tree could be any binary tree? Would &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/28/Flatten-Binary-Tree-to-Linked-List/">[LeetCode 114] Flatten Binary Tree to Linked List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/flatten-binary-tree-to-linked-list/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a binary tree, flatten it to a linked list in-place.
+</p>
+
+<p>
+For example,<br>
+Given
+</p><pre>         1
+        / \
+       2   5
+      / \   \
+     3   4   6
+</pre>
+<p></p>
+
+The flattened tree should look like:<br>
+<pre>   1
+    \
+     2
+      \
+       3
+        \
+         4
+          \
+           5
+            \
+             6
+</pre>
+
+<div class="spoilers" ><b>Hints:</b>
+<p>If you notice carefully in the flattened tree, each node&#8217;s right child points to the next node of a pre-order traversal.</p>
+</div><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a very difficult question</strong>, and there are many solutions.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Analysis of all solutions (except first one) is found in <a href="http://n00tc0d3r.blogspot.sg/2013/03/flatten-binary-tree-to-linked-list-in.html">this great article</a></strong>.</p>
+
+<p><strong>Solution 1 is my code</strong>, I am make use of a &lsquo;pre&rsquo; pointer in this recursive method. This idea is actually quite good, but is never seen in any other people&rsquo;s blogs.</p>
+
+<p><strong>Solution 2 is the most standard recursive solution</strong>. It passes in a node, flatten it and return the last node after it&rsquo;s flattened. So we can flatten root node&rsquo;s left and right node respectively, and then connect it.</p>
+
+<blockquote cite="http://n00tc0d3r.blogspot.sg/2013/03/flatten-binary-tree-to-linked-list-in.html">
+To flatten a binary tree, according to the given example, is to recursively insert the left subtree to the right subtree and append the original right subtree to the end of the left subtree, i.e.<br>
+<pre>     root                        root
+     /  \            -&gt;            \
+  left  right                      left
+                                     \
+                                    right
+</pre>
+Since we need to append the original right-tree to the end of the left subtree, we let the recursion function return the last node after flatten.
+</blockquote>
+
+
+<p>I missed &ldquo;root.left = null&rdquo; while coding, and it resulted in long long time debugging. I think this is a very silly mistake.</p>
+
+<p><strong>Solution 3 is making use of a stack</strong>. I have to say, although I can figure how it works, I am still blur about the thinking process of this entire idea. Which is to say, I can&rsquo;t keep it in mind even after learning it.</p>
+
+<p>I shall try write this code in the future.</p>
+
+<blockquote>
+We can also solve the problem without recursion.<br>
+<br>
+To do that, we can use a stack to store all right subtrees when we prune them temporarily, and append each of them back after we go through the corresponding left subtree.<br>
+<br>
+Basically, given a non-empty tree,<br>
+<ul>
+<li>if it has left subtree, store the right subtree (if not null) to stack, move the left subtree to right;</li>
+<li>if not, append back a subtree from stack to the current node&#8217;s right;</li>
+<li>continue to the right node until finish.</li>
+</ul>
+</blockquote>
+
+
+<p><strong>Solution 4 is what I believe the best solution</strong>. It simple uses while loop to put all nodes in the correct position, without recursion or stack.</p>
+
+<blockquote><p>Each time when we prune a right subtree, we use while-loop to find the right-most leaf of the current left subtree, and append the subtree there.</p></blockquote>
+
+<p><strong>Analysis of all solutions (except first one) is found in <a href="http://n00tc0d3r.blogspot.sg/2013/03/flatten-binary-tree-to-linked-list-in.html">this great article</a></strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, my solution</strong>, a kind of recursive solution</p>
+
+<pre><code>public void flatten(TreeNode root) {
+    helper(new TreeNode(1234), root);
+}
+
+private TreeNode helper(TreeNode pre, TreeNode node) { 
+    // pre cannot be null, this function return the last node of the flatten list
+    if (node == null) return pre;
+    pre.left = null;
+    pre.right = node;
+    TreeNode a = node.left;
+    TreeNode b = node.right;
+    TreeNode temp = helper(node, a);
+    return helper(temp, b);
+}
+</code></pre>
+
+<p><strong>Second, standard recursive solution</strong></p>
+
+<pre><code>public void flatten(TreeNode root) {
+    helper(root);
+}
+
+private TreeNode helper(TreeNode root) {
+    if (root == null) return null;
+    TreeNode oldRight = root.right;
+    if (root.left != null) {
+        root.right = root.left;
+        // I missed this line of code: 
+        root.left = null;
+        root = helper(root.right);
+    }
+    if (oldRight != null) {
+        root.right = oldRight;
+        root = helper(root.right);
+    }
+    // return value is the last element of the flatten tree
+    return root;
+}
+</code></pre>
+
+<p><strong>Third, stack non-recursive solution</strong></p>
+
+<pre><code>public void flatten(TreeNode root) {
+    TreeNode cur = root;
+    Stack&lt;TreeNode&gt; rtrees = new Stack&lt;TreeNode&gt;();
+    while (cur != null) {
+        while (cur.left != null) {
+            if (cur.right != null)
+                rtrees.push(cur.right);
+            cur.right = cur.left;
+            cur.left = null;
+            cur = cur.right;
+        }
+        if (cur != null &amp;&amp; cur.right == null &amp;&amp; !rtrees.isEmpty()) {
+            cur.right = rtrees.pop();
+        }
+        cur = cur.right;
+    }
+}
+</code></pre>
+
+<p><strong>Fourth, non-stack non-recursive solution</strong></p>
+
+<pre><code>public void flatten(TreeNode root) {
+    TreeNode cur = root;
+    while (cur != null) {
+        if (cur.left != null) {
+            if (cur.right != null) { // if we need to prune a right subtree
+                TreeNode next = cur.left;
+                while (next.right != null)
+                    next = next.right;
+                next.right = cur.right;
+            }
+            cur.right = cur.left;
+            cur.left = null;
+        }
+        cur = cur.right;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/">[LeetCode 124] Binary Tree Maximum Path Sum</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-maximum-path-sum/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a binary tree, find the maximum path sum.
+</p>
+
+<p>
+The path may start and end at any node in the tree.
+</p>
+
+<p>
+For example:<br>
+Given the below binary tree,
+</p><pre>       1
+      / \
+     2   3
+</pre>
+<p></p>
+<p>
+Return <code>6</code>.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a difficult DFS question</strong>.</p>
+
+<p>The basic idea is:</p>
+
+<blockquote><p>When we are in a root node, how we decided to include current node in the maximum path sum? We need to calculate the depth in both subtree. In the meantime, we need to set a variable &ldquo;max&rdquo; to store the max path sum we found during the recursion.</p>
+
+<p>Pay attention that when a subtree sum to negative value, we discard this subtree.</p>
+
+<p>Otherwise, max path sum including current node is <strong>leftSum + cur.val + rightSum</strong></p>
+
+<p>Max depth of current node is <strong>(maximum value of leftSum and rightSum) + cur.val</strong></p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are 2 points that may incur problems during coding, they are:</p>
+
+<ol>
+<li><p>The recursive solution is calculating the &lsquo;max height&rsquo; while checking &lsquo;its own max path sum&rsquo;. It&rsquo;s a bit hard to explain. Basic idea is doing 2 things at same time, while traversing (are one result is returned, another is stored in a public variable, at least for code 1 below).</p></li>
+<li><p>Note that &lsquo;max height&rsquo; of a child branch can be nagative. In this case, WE MUST SET IT TO 0.</p></li>
+</ol>
+
+
+<p>The first point is a concept seen in previous questions, but I forgot which. The second point is important, because I missed this and got failed a few times without any clue.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, recursive solution</strong></p>
+
+<pre><code>int max = Integer.MIN_VALUE;
+
+public int maxPathSum(TreeNode root) {
+    maxHeight(root);
+    return max;
+}
+
+private int maxHeight(TreeNode node) {
+    if (node == null) return 0;
+    int l = Math.max(0, maxHeight(node.left));
+    int r = Math.max(0, maxHeight(node.right));
+    max = Math.max(max, l + r + node.val);
+    return node.val + Math.max(l, r);
+}
+</code></pre>
+
+<p><strong>Second, previous code refactored</strong>.</p>
+
+<p>I removed the global variable, and instead pass an array as reference in the recursion. In this way the &lsquo;shared&rsquo; array achieve same functionality as a global variable.</p>
+
+<pre><code>public int maxPathSum(TreeNode root) {
+    int[] shared = {Integer.MIN_VALUE};
+    maxHeight(root, shared);
+    return shared[0];
+}
+
+private int maxHeight(TreeNode node, int[] shared) {
+    if (node == null) return 0;
+    int l = Math.max(0, maxHeight(node.left, shared));
+    int r = Math.max(0, maxHeight(node.right, shared));
+    shared[0] = Math.max(shared[0], l + r + node.val);
+    return node.val + Math.max(l, r);
+}
+</code></pre>
+
+<p><strong>Updated on June 10th, it&rsquo;s a terrible practise to use global variable</strong>. The <a href="http://answer.ninechapter.com/solutions/binary-tree-maximum-path-sum/">new solution</a> suggested by Mr. Huang uses a new ResultType Class to solve the problem.</p>
+
+<pre><code>private class ResultType {
+    int singlePath, maxPath;
+    ResultType(int singlePath, int maxPath) {
+        this.singlePath = singlePath;
+        this.maxPath = maxPath;
+    }
+}
+
+public int maxPathSum(TreeNode root) {
+    ResultType result = helper(root);
+    return result.maxPath;
+}
+
+private ResultType helper(TreeNode node) {
+    // null case
+    if (node == null) {
+        return new ResultType(0, Integer.MIN_VALUE);
+    }
+    // divide
+    ResultType ll = helper(node.left);
+    ResultType rr = helper(node.right);
+    // conquer
+    int curSinglePath = Math.max(0, node.val + 
+            Math.max(ll.singlePath, rr.singlePath));
+    int childMaxPath = Math.max(ll.maxPath, rr.maxPath);
+    int curMaxPath = Math.max(childMaxPath, node.val + 
+            ll.singlePath + rr.singlePath);
+    // done
+    return new ResultType(curSinglePath, curMaxPath);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-III/">[LeetCode 123] Best Time to Buy and Sell Stock III</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
+
+<p>Design an algorithm to find the maximum profit. You may complete at most <i>two</i> transactions.</p>
+
+<p><b>Note:</b><br>
+You may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is much harder to solve then previous 2 question combined</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Almost all solutions online are same</strong>, I think <a href="http://rleetcode.blogspot.sg/2014/02/best-time-to-buy-and-sell-stock-iii-java.html">this blog</a> explains it best.</p>
+
+<blockquote><p>we can just dived the whole prices array at every point, try to calculate max profit from left and from right respectively&hellip;</p>
+
+<p>However, there are many repeat calculations. So we can apply DP to record max profits for each left side and right side. then add them together at each point.</p></blockquote>
+
+<p>A detailed illustration with examples can be found <a href="http://yucoding.blogspot.sg/2012/12/leetcode-question-10-best-time-to-buy.html">here</a>.</p>
+
+<p>However, the coding part is slightly difficult at least for me. <strong>I made a terrible mistake with the variable &lsquo;leftMin&rsquo; and &lsquo;rightMax&rsquo;</strong>. I declared it as <strong>&lsquo;rightMin&rsquo;</strong> instead, and then the program logic is wrong. We should avoid this kind of mistakes.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int maxProfit(int[] prices) {
+    int len = prices.length;
+    if (len == 0) return 0;
+    int leftMin = Integer.MAX_VALUE, rightMax = Integer.MIN_VALUE;
+    int leftPro[] = new int[len], rightPro[] = new int[len];
+    for (int j = 0; j &lt;= len - 1; j ++) {
+        leftMin = Math.min(leftMin, prices[j]);
+        if (j == 0) leftPro[0] = 0;
+        else leftPro[j] = Math.max(leftPro[j-1], prices[j] - leftMin);
+    }
+    for (int k = len - 1; k &gt;= 0; k --) {
+        rightMax = Math.max(rightMax, prices[k]);
+        if (k == len - 1) rightPro[len-1] = 0;
+        else rightPro[k] = Math.max(rightPro[k+1], rightMax - prices[k]);
+    }
+    int totalPro = 0;
+    for (int i = 0; i &lt; len; i ++) {
+        totalPro = Math.max(totalPro, leftPro[i] + rightPro[i]);
+    }
+    return totalPro;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-II/">[LeetCode 122] Best Time to Buy and Sell Stock II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
+
+<p>Design an algorithm to find the maximum profit. You may complete as many transactions as you like (ie, buy one and sell one share of the stock multiple times). However, you may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p><strong>This solution is best explained <a href="http://jane4532.blogspot.sg/2013/07/best-time-to-buy-and-sell-stock.html">here</a></strong>.</p>
+
+<blockquote><p>就从左到右轮一遍，遇到递增的都给加起来呗。</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public int maxProfit(int[] prices) {
+    int len = prices.length;
+    if (len &lt;= 1) return 0;
+    int profit = 0;
+    for (int i = 1; i &lt; len; i ++) 
+        profit += Math.max(0, prices[i] - prices[i-1]);
+    return profit;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock/">[LeetCode 121] Best Time to Buy and Sell Stock</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
+
+<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a question from a MIT course</strong>, <a href="http://courses.csail.mit.edu/iap/interview/materials.php">Hacking a Google Interview</a>.</p>
+
+<p>I did not solve it, but it&rsquo;s actually very simple to do.</p>
+
+<h3>Solution</h3>
+
+<p>The solution is explained <a href="http://leetcode.com/2010/11/best-time-to-buy-and-sell-stock.html">here</a>:</p>
+
+<blockquote><p>To solve this problem efficiently, you would need to track the minimum value’s index. As you traverse, update the minimum value’s index when a new minimum is met. Then, compare the difference of the current element with the minimum value. Save the buy and sell time when the difference exceeds our maximum difference (also update the maximum difference).</p>
+
+<p>Time is O(N)</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public int maxProfit(int[] prices) {
+    int len = prices.length;
+    if (len &lt;= 1) return 0;
+    int min = prices[0];
+    int max = Integer.MIN_VALUE;
+    for (int i = 1; i &lt; len; i ++) {
+        max = Math.max(max, prices[i] - min);
+        min = Math.min(min, prices[i]);
+    }
+    return Math.max(max, 0);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/27/Triangle/">[LeetCode 120] Triangle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/triangle/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.</p>
+
+<p>
+For example, given the following triangle<br>
+</p><pre>[
+     [<font color="red">2</font>],
+    [<font color="red">3</font>,4],
+   [6,<font color="red">5</font>,7],
+  [4,<font color="red">1</font>,8,3]
+]
+</pre>
+<p></p>
+<p>
+The minimum path sum from top to bottom is <code>11</code> (i.e., <font color="red">2</font> + <font color="red">3</font> + <font color="red">5</font> + <font color="red">1</font> = 11).
+</p>
+
+<p>
+<b>Note:</b><br>
+Bonus point if you are able to do this using only <i>O</i>(<i>n</i>) extra space, where <i>n</i> is the total number of rows in the triangle.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a math question</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>It&rsquo;s an easy question. Instead of normal DP transition function, this one is <strong>so-called bottom-up approach</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int minimumTotal(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; triangle) {
+    int len = triangle.size();
+    if (len == 0) return 0;
+    int[] m = new int[len];
+    m[0] = triangle.get(0).get(0);
+    for (int i = 1; i &lt; len; i ++) {
+        ArrayList&lt;Integer&gt; cur = triangle.get(i);
+        for (int j = i; j &gt;= 0; j --) {
+            if (j == i) m[j] = m[j-1] + cur.get(j);
+            else if (j == 0) m[j] = m[0] + cur.get(0);
+            else m[j] = Math.min(m[j-1], m[j]) + cur.get(j);
+        }
+    }
+    int min = Integer.MAX_VALUE;
+    for (Integer k: m)
+        min = Math.min(min, k);
+    return min;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -659,788 +1490,6 @@ return true, as there exist a root-to-leaf path <code>5-&gt;4-&gt;11-&gt;2</code
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Pascal-Triangle-II/">[LeetCode 119] Pascal&#8217;s Triangle II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/pascals-triangle-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given an index <i>k</i>, return the <i>k</i><sup>th</sup> row of the Pascal&#8217;s triangle.</p>
-
-<p>
-For example, given <i>k</i> = 3,<br>
-Return <code>[1,3,3,1]</code>.
-</p>
-
-<p>
-<b>Note:</b><br>
-Could you optimize your algorithm to use only <i>O</i>(<i>k</i>) extra space?
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime"></td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a math question</strong>.</p>
-
-<p>First code below is my code.</p>
-
-<p>Second code is a very concise solution from <a href="http://xiaotong-blog.herokuapp.com/posts/16">this blog</a>.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my code</strong></p>
-
-<pre><code>public ArrayList&lt;Integer&gt; getRow(int rowIndex) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    if (rowIndex == 0) {
-        ans.add(1);
-        return ans;
-    }
-    int[] nodes = new int[rowIndex + 1];
-    nodes[0] = 1;
-    for (int k = 1; k &lt;= rowIndex; k++) {
-        for (int i = k / 2; i &gt;= 1; i--) {
-            if (k % 2 == 0 &amp;&amp; i == k / 2)
-                nodes[i] = 2 * nodes[i - 1];
-            else
-                nodes[i] = nodes[i - 1] + nodes[i];
-        }
-        for (int j = k / 2 + 1; j &lt;= k; j++) {
-            nodes[j] = nodes[k - j];
-        }
-    }
-    for (Integer a: nodes) ans.add(a);
-    return ans;
-}
-</code></pre>
-
-<p><strong>Second, a better version</strong></p>
-
-<pre><code>public ArrayList&lt;Integer&gt; getRow(int rowIndex) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    for (int j = 0; j &lt;= rowIndex; j ++){
-        for (int i = 1; i &lt; ans.size(); i ++)
-            ans.set(i-1, ans.get(i-1)+ans.get(i));
-        ans.add(0,1);
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Pascal-Triangle/">[LeetCode 118] Pascal&#8217;s Triangle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/pascals-triangle/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given <i>numRows</i>, generate the first <i>numRows</i> of Pascal&#8217;s triangle.</p>
-
-<p>
-For example, given <i>numRows</i> = 5,<br>
-Return
-</p><pre>[
-     [1],
-    [1,1],
-   [1,2,1],
-  [1,3,3,1],
- [1,4,6,4,1]
-]
-</pre>
-<p></p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime"></td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a math question</strong>.</p>
-
-<p>Below is my code.</p>
-
-<h3>Code</h3>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; generate(int numRows) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    if (numRows == 0)
-        return ans;
-    for (int i = 0; i &lt; numRows; i++){
-        ArrayList&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();
-        for (int j = 0; j &lt;= i; j++){
-            if (j == 0 || j == i){
-                list.add(1);
-            } else {
-                list.add(ans.get(i-1).get(j-1) + ans.get(i-1).get(j));
-            }
-        }
-        ans.add(list);
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Distinct-Subsequences/">[LeetCode 115] Distinct Subsequences</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/distinct-subsequences/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a string <b>S</b> and a string <b>T</b>, count the number of distinct subsequences of <b>T</b> in <b>S</b>.
-</p>
-
-<p>
-A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (ie, <code>"ACE"</code> is a subsequence of <code>"ABCDE"</code> while <code>"AEC"</code> is not).
-</p>
-
-<p>
-Here is an example:<br>
-<b>S</b> = <code>"rabbbit"</code>, <b>T</b> = <code>"rabbit"</code>
-</p>
-<p>
-Return <code>3</code>.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an extremely difficult DP question</strong>, probably the most difficult DP on leetcode.</p>
-
-<p>Normally, string matching question is best solved with DP, so is this question. The problem is how to construct the <strong><a href="http://en.wikipedia.org/wiki/Bellman_equation">Bellman equation</a></strong> (also known as dynamic programming equation).</p>
-
-<p><strong>Updated on June 24th</strong>, I listed down one example using S = &ldquo;abab&rdquo; and T = &ldquo;ab&rdquo;.</p>
-
-
-
-<table class="tg">
-  <tr>
-    <th class="tg-s6z2"></th>
-    <th class="tg-031e">{}</th>
-    <th class="tg-031e">a</th>
-    <th class="tg-031e">b</th>
-  </tr>
-  <tr>
-    <td class="tg-031e">{}</td>
-    <td class="tg-031e">1</td>
-    <td class="tg-031e">0</td>
-    <td class="tg-031e">0</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">a</td>
-    <td class="tg-031e">1</td>
-    <td class="tg-031e">1</td>
-    <td class="tg-031e">0</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">b</td>
-    <td class="tg-031e">1</td>
-    <td class="tg-031e">1</td>
-    <td class="tg-031e">1</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">a</td>
-    <td class="tg-031e">1</td>
-    <td class="tg-031e">2</td>
-    <td class="tg-031e">1</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">b</td>
-    <td class="tg-031e">1</td>
-    <td class="tg-031e">2</td>
-    <td class="tg-031e">3</td>
-  </tr>
-</table>
-
-
-<h3>Solution</h3>
-
-<p>It took me a really long time to understand, until I read <a href="http://www.programcreek.com/2013/01/leetcode-distinct-subsequences-total-java/">this blog</a>.</p>
-
-<blockquote><p>Let W(i, j) stand for the number of subsequences of S(0, i) in T(0, j). If S.charAt(i) == T.charAt(j), W(i, j) = W(i-1, j-1) + W(i-1,j); Otherwise, W(i, j) = W(i-1,j).</p></blockquote>
-
-<p>Two code are posted below, realizing this solution with 2D and 1D array respectively (first code is better).</p>
-
-<h3>Code</h3>
-
-<p><strong>First, DP code</strong></p>
-
-<pre><code>public int numDistinct(String S, String T) {
-    int m = S.length(), n = T.length();
-    int[][] dp = new int[m + 1][n + 1];
-    for (int i = 0; i &lt;= m; i ++) {
-        for (int j = 0; j &lt;= n; j ++) {
-            if (j == 0) dp[i][j] = 1;
-            else if (i == 0) dp[i][j] = 0;
-            else if (S.charAt(i-1) == T.charAt(j-1)) 
-                dp[i][j] = dp[i-1][j-1] + dp[i-1][j];
-            else
-                dp[i][j] = dp[i-1][j];
-        }
-    }
-    return dp[m][n];
-}
-</code></pre>
-
-<p><strong>Second, same solution but reduced 2-D array to 1-D</strong>.</p>
-
-<p>Code readability is reduced, however.</p>
-
-<pre><code>public int numDistinct(String S, String T) {
-    int m = S.length(), n = T.length();
-    int[] dp = new int[n + 1];
-    for (int i = 0; i &lt;= m; i ++) {
-        for (int j = n; j &gt;= 0; j --) {
-            if (j == 0) 
-                dp[j] = 1;
-            else if (i == 0) 
-                dp[j] = 0;
-            else if (S.charAt(i-1) == T.charAt(j-1)) 
-                dp[j] = dp[j-1] + dp[j];
-        }
-    }
-    return dp[n];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Preorder-and-Inorder/">[LeetCode 105] Construct Binary Tree From Preorder and Inorder</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given preorder and inorder traversal of a tree, construct the binary tree.</p>
-
-<p><b>Note:</b><br>
-You may assume that duplicates do not exist in the tree.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an interesting question</strong>.</p>
-
-<p>The key is, <strong>the tree header is always the first element in the pre-order traversal</strong>. Knowing this is enough to help us divide the lists and solve the question recursively.</p>
-
-<p><strong>About time complexity</strong>. According to the <a href="http://leetcode.com/2011/04/construct-binary-tree-from-inorder-and-preorder-postorder-traversal.html">analysis</a>, it is O(nlgn) if the tree is balance, and O(n<sup>2</sup>) if the tree is totally skewed. This article suggests using HashTable for searching, which achieves O(n) efficiency.</p>
-
-<blockquote><p>We left out some details on how we search the root value’s index in the inorder sequence. How about a simple linear search? If we assume that the constructed binary tree is always balanced, then we can guarantee the run time complexity to be O(N log N), where N is the number of nodes. However, this is not necessarily the case and the constructed binary tree can be skewed to the left/right, which has the worst complexity of O(N2). I quote the entire article below.</p>
-
-<p>A more efficient way is to eliminate the search by using an efficient look-up mechanism such as hash table. By hashing an element’s value to its corresponding index in the inorder sequence, we can do look-ups in constant time. Now, we need only O(N) time to construct the tree, which theoretically is the most efficient way.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>I post my code below. However, a better code is written in <a href="http://edwardliwashu.blogspot.sg/2013/01/construct-binary-tree-from-preorder-and.html">this post</a>.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my code</strong>, it&rsquo;s 100ms slower than next code.</p>
-
-<pre><code>public TreeNode buildTree(int[] preorder, int[] inorder) {
-    int len = preorder.length;
-    if (len == 0) return null;
-    TreeNode root = new TreeNode(preorder[0]);
-    int leftLen = 0;
-    while (inorder[leftLen] != preorder[0]) leftLen++;
-    int[] leftPreOrder = new int[leftLen];
-    int[] rightPreOrder = new int[len - 1 - leftLen];
-    int[] leftInOrder = new int[leftLen];
-    int[] rightInOrder = new int[len - 1 - leftLen];
-    for (int i = 1; i &lt;= leftLen; i ++) {
-        leftPreOrder[i-1] = preorder[i];
-        leftInOrder[i-1] = inorder[i-1];
-    }
-    for (int i = leftLen + 1; i &lt; len; i ++) {
-        rightPreOrder[i-leftLen-1] = preorder[i];
-        rightInOrder[i-leftLen-1] = inorder[i];
-    }
-    root.left = buildTree(leftPreOrder, leftInOrder);
-    root.right = buildTree(rightPreOrder, rightInOrder);
-    return root;
-}
-</code></pre>
-
-<p><strong>Second, other ppl&rsquo;s code</strong></p>
-
-<pre><code>public TreeNode buildTree(int[] preorder, int[] inorder) {
-    int preLength = preorder.length;
-    int inLength = inorder.length;
-    return buildTree(preorder, 0, preLength - 1, inorder, 0, inLength - 1);
-}
-
-public TreeNode buildTree(int[] pre, int preStart, int preEnd, int[] in,
-        int inStart, int inEnd) {
-    if (inStart &gt; inEnd) return null;
-    int rootVal = pre[preStart];
-    int rootIndex = 0;
-    for (int i = inStart; i &lt;= inEnd; i++) {
-        if (in[i] == rootVal) {
-            rootIndex = i;
-            break;
-        }
-    }
-    int len = rootIndex - inStart;
-    TreeNode root = new TreeNode(rootVal);
-    root.left = buildTree(pre, preStart + 1, preStart + len, in, inStart,
-            rootIndex - 1);
-    root.right = buildTree(pre, preStart + len + 1, preEnd, in,
-            rootIndex + 1, inEnd);
-    return root;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Inorder-and-Postorder/">[LeetCode 106] Construct Binary Tree From Inorder and Postorder</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given inorder and postorder traversal of a tree, construct the binary tree.</p>
-
-<p><b>Note:</b><br>
-You may assume that duplicates do not exist in the tree.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is exactly the same question as</strong> &ldquo;Construct Binary Tree from Preorder and Inorder&rdquo;.</p>
-
-<h3>Solution</h3>
-
-<p>I post the code from <a href="http://www.programcreek.com/2013/01/construct-binary-tree-from-inorder-and-postorder-traversal/">this article</a>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public TreeNode buildTree(int[] inorder, int[] postorder) {
-    int inStart = 0, inEnd = inorder.length-1;
-    int postStart =0, postEnd = postorder.length-1;
-    return buildTree(inorder, inStart, inEnd, postorder, postStart, postEnd);
-}
-
-public TreeNode buildTree(int[] inorder, int inStart, int inEnd, 
-                          int[] postorder, int postStart, int postEnd){
-    if(inStart &gt; inEnd || postStart &gt; postEnd)
-        return null;
-    int rootValue = postorder[postEnd];
-    TreeNode root = new TreeNode(rootValue);
-    int k=0;
-    for(int i=0; i&lt; inorder.length; i++){
-        if(inorder[i]==rootValue){
-            k = i;
-            break;
-        }
-    }
-    root.left = buildTree(inorder, inStart, k-1, 
-        postorder, postStart, postStart+k-(inStart+1));
-    root.right = buildTree(inorder, k+1, inEnd, 
-        postorder, postStart+k-inStart, postEnd-1);
-    return root;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/26/Validate-Binary-Search-Tree/">[LeetCode 98] Validate Binary Search Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/validate-binary-search-tree/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a binary tree, determine if it is a valid binary search tree (BST).
-</p>
-
-<p>
-Assume a BST is defined as follows:
-</p><ul>
-<li>The left subtree of a node contains only nodes with keys <b>less than</b> the node&#8217;s key.</li>
-<li>The right subtree of a node contains only nodes with keys <b>greater than</b> the node&#8217;s key.</li>
-<li>Both the left and right subtrees must also be binary search trees.</li>
-</ul>
-<p></p>
-<p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a textbook-like example of recursion</strong>.</p>
-
-<p>I solved it using DFS, but there is actually a much more concise solution.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my code</strong>, it&rsquo;s basically a in-order traversal.</p>
-
-<pre><code>int num = Integer.MIN_VALUE;
-
-public boolean isValidBST(TreeNode root) {
-    if (root == null) return true;
-    if(! isValidBST(root.left)) return false;
-    if (num &gt;= root.val) return false;
-    num = root.val;
-    if(! isValidBST(root.right)) return false;
-    return true;
-}
-</code></pre>
-
-<p><strong>Second, great solution I found from <a href="http://www.programcreek.com/2012/12/leetcode-validate-binary-search-tree-java/">this post</a></strong></p>
-
-<pre><code>public static boolean isValidBST(TreeNode root) {
-    return validate(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
-}
-
-public static boolean validate(TreeNode root, int min, int max) {
-    if (root == null) return true;
-    if (root.val &lt;= min || root.val &gt;= max)
-        return false;
-    return validate(root.left, min, root.val) 
-        &amp;&amp; validate(root.right, root.val, max);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/33">&larr; Older</a>
@@ -1457,11 +1506,11 @@ public static boolean validate(TreeNode root, int min, int max) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (14)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (19)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (34)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -1480,23 +1529,23 @@ public static boolean validate(TreeNode root, int min, int max) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/15/stack-of-animals/">[CC150v5] 3.7 Stack of Animals</a>
+        <a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a>
+        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a>
+        <a href="/blog/2014/09/16/find-magic-index/">[CC150v5] 9.3 Find Magic Index (`)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/15/implement-stack/">[CC150v5] Chap 3 Example - Implement Stack</a>
+        <a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/15/">[CC150v5] 2.</a>
+        <a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a>
       </li>
     
   </ul>

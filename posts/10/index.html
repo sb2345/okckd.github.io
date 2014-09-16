@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question 给出下面这个图 设计数据结构和算法求出图中所有的正方形数量 (count the number of squares). Solution Pre-processing: 从每一个点开始存储上下左右四个方向最多延伸到的位置
-Main algorithm: 枚举右下角位置 &hellip;">
+  <meta name="description" content="Question Explain how you would design a chat server. In particular, provide details about the various back end components, classes, and methods. What &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +77,686 @@ Main algorithm: 枚举右下角位置 &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/24/design-online-chat-server-1/">[CC150v5] 8.7 Design Online Chat Server (1)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Explain how you would design a chat server. In particular, provide details about the various back end components, classes, and methods.</p>
+
+<p>What would be the hardest problems to solve?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>First, decide the objects and methods. Here we&rsquo;ll focus on the core user management and conversation aspects.</p>
+
+<h4>Class</h4>
+
+<ol>
+<li>UserMgmt (business logic)</li>
+<li>User (includes basic info, UserStatus, a map of conversation, a map of requests)</li>
+<li>UserStatus (on/offline, status message)</li>
+<li>Conversation Abstract Class (a list of user and a list of messages)
+
+<ol>
+<li>PrivateChat (private conversation)</li>
+<li>GroupChat</li>
+</ol>
+</li>
+<li>Message (a string and a date/time)</li>
+<li>Request (add request and delete request, involves 2 Users)</li>
+</ol>
+
+
+<h4>Functions</h4>
+
+<ol>
+<li>Sign in and log off (update availability)</li>
+<li>update status message</li>
+<li>add/delete request</li>
+<li>send/accept/reject a request</li>
+<li>create a conversation (group or private)</li>
+<li>add a new message (group or private)</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>The most important classes is User and UserMgmt. The others are simply data containers.</p>
+
+<p>UserManager.java</p>
+
+<pre><code>public class UserManager {
+    private static UserManager instance;
+    private HashMap&lt;Integer, User&gt; usersById = new HashMap&lt;Integer, User&gt;();
+    private HashMap&lt;String, User&gt; usersByAccountName = new HashMap&lt;String, User&gt;();
+    private HashMap&lt;Integer, User&gt; onlineUsers = new HashMap&lt;Integer, User&gt;();
+
+    public static UserManager getInstance() {
+        if (instance == null) {
+            instance = new UserManager();
+        }
+        return instance;
+    }
+
+    public void addUser(User fromUser, String toAccountName) {
+        User toUser = usersByAccountName.get(toAccountName);
+        AddRequest req = new AddRequest(fromUser, toUser, new Date());
+        toUser.receivedAddRequest(req);
+        fromUser.sentAddRequest(req);
+    }
+
+    public void approveAddRequest(AddRequest req) {
+        req.status = RequestStatus.Accepted;
+        User from = req.getFromUser();
+        User to = req.getToUser();
+        from.addContact(to);
+        to.addContact(from);
+    }
+
+    public void rejectAddRequest(AddRequest req) {
+        req.status = RequestStatus.Rejected;
+        User from = req.getFromUser();
+        User to = req.getToUser();
+        from.removeAddRequest(req);
+        to.removeAddRequest(req);       
+    }
+
+    public void userSignedOn(String accountName) {
+        User user = usersByAccountName.get(accountName);
+        if (user != null) {
+            user.setStatus(new UserStatus(UserStatusType.Available, ""));           
+            onlineUsers.put(user.getId(), user);
+        }
+    }
+
+    public void userSignedOff(String accountName) {
+        User user = usersByAccountName.get(accountName);
+        if (user != null) {
+            user.setStatus(new UserStatus(UserStatusType.Offline, ""));
+            onlineUsers.remove(user.getId());
+        }
+    }   
+}
+</code></pre>
+
+<p>User.java</p>
+
+<p>Property:</p>
+
+<ol>
+<li>id and name</li>
+<li>a map of conversations</li>
+<li>a map of sent request</li>
+<li>a map of received request</li>
+<li>a map of friends list</li>
+</ol>
+
+
+<p>Methods:</p>
+
+<ol>
+<li>sendMessageToUser(User)</li>
+<li>addContact(User)</li>
+<li>receivedAddRequest(Request)</li>
+<li>sentAddRequest(Request)</li>
+<li>removeAddRequest(Request)</li>
+<li>addConversation(Conversation)</li>
+</ol>
+
+
+<p>Note that all user actions are controlled by the UserManager Class. For example, when adding a friend:</p>
+
+<ol>
+<li>User A clicks &ldquo;add user&rdquo; on the client.</li>
+<li>User A calls requestAddUser (User B).</li>
+<li>This method calls UserManager.addUser(User a, userBid).</li>
+<li>UserManager calls both User A.sentAddRequest() and User B.receivedAddRequest().</li>
+</ol>
+
+
+<p>Code:</p>
+
+<pre><code>public class User {
+    private int id;
+    private UserStatus status = null;
+    private HashMap&lt;Integer, PrivateChat&gt; privateChats = new HashMap&lt;Integer, PrivateChat&gt;();
+    private ArrayList&lt;GroupChat&gt; groupChats = new ArrayList&lt;GroupChat&gt;();
+    private HashMap&lt;Integer, AddRequest&gt; receivedAddRequests = new HashMap&lt;Integer, AddRequest&gt;();
+    private HashMap&lt;Integer, AddRequest&gt; sentAddRequests = new HashMap&lt;Integer, AddRequest&gt;();
+
+    private HashMap&lt;Integer, User&gt; contacts = new HashMap&lt;Integer, User&gt;();
+    private String accountName;
+    private String fullName;
+
+    public User(int id, String accountName, String fullName) {
+        this.accountName = accountName;
+        this.fullName = fullName;
+        this.id = id;
+    }
+
+    public boolean sendMessageToUser(User toUser, String content) {
+        PrivateChat chat = privateChats.get(toUser.getId());
+        if (chat == null) {
+            chat = new PrivateChat(this, toUser);
+            privateChats.put(toUser.getId(), chat);
+        }
+        Message message = new Message(content, new Date());
+        return chat.addMessage(message);
+    }
+
+    public boolean sendMessageToGroupChat(int groupId, String content) {
+        GroupChat chat = groupChats.get(groupId);
+        if (chat != null) {
+            Message message = new Message(content, new Date());
+            return chat.addMessage(message);
+        }
+        return false;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public boolean addContact(User user) {
+        if (contacts.containsKey(user.getId())) {
+            return false;
+        } else {
+            contacts.put(user.getId(), user);
+            return true;
+        }
+    }
+
+    public void receivedAddRequest(AddRequest req) {
+        int senderId = req.getFromUser().getId();
+        if (!receivedAddRequests.containsKey(senderId)) {
+            receivedAddRequests.put(senderId, req);
+        }       
+    }
+
+    public void sentAddRequest(AddRequest req) {
+        int receiverId = req.getFromUser().getId();
+        if (!sentAddRequests.containsKey(receiverId)) {
+            sentAddRequests.put(receiverId, req);
+        }       
+    }
+
+    public void removeAddRequest(AddRequest req) {
+        if (req.getToUser() == this) {
+            receivedAddRequests.remove(req);
+        } else if (req.getFromUser() == this) {
+            sentAddRequests.remove(req);
+        }
+    }
+
+    public void requestAddUser(String accountName) {
+        UserManager.getInstance().addUser(this, accountName);
+    }
+
+    public void addConversation(PrivateChat conversation) {
+        User otherUser = conversation.getOtherParticipant(this);
+        privateChats.put(otherUser.getId(), conversation);
+    }
+
+    public void addConversation(GroupChat conversation) {
+        groupChats.add(conversation);
+    }   
+
+    public int getId() {
+        return id;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/23/stack-and-heap/">[Design] Stack and Heap</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Overview</h3>
+
+<p>Value types are created on the stack, and reference types are created on the heap.</p>
+
+<p><strong>Both are stored in computer RAM</strong>.</p>
+
+<p><strong>Each thread gets a stack</strong>, while there&rsquo;s typically only one heap for the application.</p>
+
+<h4>Stack</h4>
+
+<p><a href="http://stackoverflow.com/a/80113">When a function</a> is called, a block is reserved <strong>on the top of the stack</strong> for local variables and some bookkeeping data in a LIFO order. Freeing a block from the stack is nothing more than adjusting one pointer.</p>
+
+<h4>Heap</h4>
+
+<p>Unlike the stack, there&rsquo;s no enforced pattern to the allocation and deallocation of blocks from the heap; you can allocate a block at any time and free it at any time. This makes it much more complex to keep track of which parts of the heap are allocated or free at any given time; there are many custom heap allocators available to tune heap performance for different usage patterns.</p>
+
+<h3>Q &amp; A</h3>
+
+<h4>What is their scope?</h4>
+
+<p>The stack is attached to a thread, so <strong>when the thread exits</strong> the stack is reclaimed.</p>
+
+<p>The heap is typically allocated at application startup by the runtime, and is reclaimed <strong>when the application (technically process) exits</strong>.</p>
+
+<h4>What determines the size of each of them?</h4>
+
+<p>The size of the stack is set when a thread is created.</p>
+
+<p>The size of the heap is set on application startup, but can grow as space is needed (the allocator requests more memory from the operating system).</p>
+
+<h4>What makes one faster?</h4>
+
+<p><strong>The stack is faster</strong> because the access pattern makes it trivial to allocate and deallocate memory from it, while the heap has much more complex bookkeeping involved in an allocation or free.</p>
+
+<p>Each byte in the stack tends to be reused very frequently which means it tends to be mapped to the processor&rsquo;s cache, making it very fast.</p>
+
+<p>Another performance hit for the heap is that the heap, being mostly a global resource, typically has to be multi-threading safe, i.e. each allocation and deallocation needs to be (typically) synchronized.</p>
+
+<p><img class="middle" src="/assets/images/stack-and-heap.png"></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/23/Web-hosting-shared-and-vps/">[Design] Shared Hosting vs. VPS Hosting</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Shared hosting</h3>
+
+<p><a href="https://kb.greengeeks.com/3072/shared-hosting-vs-vps-hosting/">Shared hosting</a> is like living in an apartment where you share a common space with your neighbors. You cannot customize anything but you share maintenance cost and responsibility with your neighbors.</p>
+
+<ol>
+<li>Economical</li>
+<li>Technical maintenance of the server is not required</li>
+<li>Limited number of resources</li>
+<li>Your website performance may be affected by other websites hosted on the shared server</li>
+<li>Possible long term problems with scalability and backup</li>
+<li>Possible security issues for sharing a common server</li>
+</ol>
+
+
+<h3>Virtual Private Server</h3>
+
+<p>Virtual Private Server (VPS) Hosting is like living in a simplex or half-plex where you can customize everything to your own tastes. However, you still need to maintain your own area. Companies that deal with resource-heavy applications and secured data most often use VPS.</p>
+
+<ol>
+<li>Larger space and bandwidth</li>
+<li>Can configure anything</li>
+<li>Run your own batch files to create multiple services inside the server using shell access</li>
+<li>Easy scalability and backup</li>
+<li>You need a dedicated system administrator</li>
+<li>Costly</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/23/BST-over-hashmap/">[Design] Binary Search Trees Over Hash Tables</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/4128546/advantages-of-binary-search-trees-over-hash-tables">What are the advantages</a> of binary search trees over hash tables?</p>
+
+<h3>Answer</h3>
+
+<ol>
+<li><p><strong>More memory-efficient</strong>. (They do not reserve more memory than they need to)</p>
+
+<p> For instance, if a hash function has a range R(h) = 0&hellip;100, then you need to allocate an array of 100 (pointers-to) elements, even if you are just hashing 20 elements.</p></li>
+<li><p><a href="http://stackoverflow.com/a/4128585">Inorder traverse</a>.</p></li>
+<li><p>Collision might hamper HashMap&rsquo;s performance.</p></li>
+<li><p><a href="http://stackoverflow.com/a/4129272">Resizing issue</a></p>
+
+<p> When the hash table pressure grows too much, you often tend to enlargen and reallocate the hash table. The BST has simpler behavior here and does not tend to suddenly allocate a lot of data and do a rehashing operation.</p></li>
+<li><p>Binary search tree do range searches efficiently.</p></li>
+</ol>
+
+
+<h3>One more thing</h3>
+
+<p><strong>Trees tend to be the <a href="http://stackoverflow.com/a/19896875">ultimate average data structure</a></strong>. They can act as lists, can easily be split for parallel operation, have fast removal, insertion and lookup on the order of O(lgn). They do nothing particularly well, but they don&rsquo;t have any excessively bad behavior either.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/22/design-deck-card/">[CC150v5] 8.1 Design a Generic Deck of Cards</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-22T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Design a Generic Deck of Cards</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>A simple design:</p>
+
+<pre><code>enum Suit {
+    HEART, DIAMOND, SPADES, CLUBS;
+}
+
+class Deck {
+    List&lt;Card&gt; deck;
+}
+
+class Card {
+    Suit suit;
+    int num;
+}
+</code></pre>
+
+<p>A more complex design:</p>
+
+<pre><code>enum Suit {
+    HEART, DIAMOND, SPADES, CLUBS;
+}
+
+class Deck&lt;T extends Card&gt; {
+    List&lt;Card&gt; deck;
+
+    public void shuffle() {
+    };
+}
+
+abstract class Card {
+    boolean available;
+    Suit suit;
+    int num;
+
+    public boolean isAvailable() {
+        return available;
+    };
+}
+
+class Hand&lt;T extends Card&gt; {
+    List&lt;Card&gt; cards;
+
+    public int score() {
+        int score = 0;
+        for (Card c : cards) {
+            score += c.num;
+        }
+        return score;
+    }
+
+    public void addCard(T card) {
+        cards.add(card);
+    }
+}
+
+// Now use the above generic Data Structure to make a
+// Blackjack Game
+class Blackjack extends Hand&lt;BlackJackCard&gt; {
+}
+
+class BlackJackCard extends Card {
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/20/Talk-about-singleton/">[Design] About Singleton</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-20T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Implement Singlton</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
+
+<h4>using Enum</h4>
+
+<p>This is only available since Java 6.</p>
+
+<pre><code>public enum Singleton_Enum {
+    INSTANCE;
+}
+</code></pre>
+
+<h4>using double checked locking</h4>
+
+<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
+
+<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
+    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
+
+    private Singleton_DoubleCheckedLocking() {
+    }
+
+    public static Singleton_DoubleCheckedLocking getInstance() {
+        if (INSTANCE == null) {
+            synchronized (Singleton_DoubleCheckedLocking.class) {
+                // double checking Singleton instance
+                if (INSTANCE == null) {
+                    INSTANCE = new Singleton_DoubleCheckedLocking();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h4>using static factory method</h4>
+
+<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
+
+<pre><code>public class Singleton_StaticFactory {
+    // initailzed during class loading
+    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
+
+    // to prevent creating another instance of Singleton
+    private Singleton_StaticFactory() {
+    }
+
+    public static Singleton_StaticFactory getSingleton() {
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h3>About thread-saft</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
+
+<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
+
+<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
+
+<ol>
+<li>using static field</li>
+<li>using Enum</li>
+</ol>
+
+
+<h3>Q &amp; A</h3>
+
+<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
+
+<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -411,463 +1090,6 @@ Main algorithm: 枚举右下角位置 &hellip;">
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/19/Count-level-in-perfect-BT/">[Question] Count Level in Perfect Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/10721583/how-can-i-calculate-the-level-of-a-node-in-a-perfect-binary-tree-from-its-depth">link</a></p>
-
-<blockquote><p>A perfect binary tree, i.e. each node in the tree is either a leaf node, or has two children, and all leaf nodes are on the same level. Each node has an index in depth-first order.</p></blockquote>
-
-<pre><code>      0
-    /   \
-  1      4
- / \    / \
-2   3  5   6
-</code></pre>
-
-<blockquote><p>Given the index (k) of a particular node, calculate its level.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a <a href="http://stackoverflow.com/a/10721897">magical solution</a></strong>.  It divides the tree in the middle with number k decrease by 1 each time.</p>
-
-<p>Beautiful, and hard to understand.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong>.</p>
-
-<pre><code>public int countLevel(TreeNode root, int k, int n) {
-    int level = 0;
-    while (k != 0) {
-        k--;
-        n = (n - 1) / 2;
-        k = k % n;
-        level++;
-    }
-    return level + 1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/19/A-random-thought/">[Thoughts] Some Random Thought</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>自从7月16号投了Fb，到今天一共33天。</p>
-
-<p>我大概交了五六次简历。</p>
-
-<p>一个面试都没有，妈的！</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/18/Leetcode-second-third/">[Leetcode] Leetcode Second Round (3)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-18T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ol>
-<li>Gas Station</li>
-<li>Trapping Rain Water</li>
-<li>Remove Duplicates from Sorted Array II</li>
-<li>Word Search</li>
-<li>First Missing Positive</li>
-<li>Permutations II</li>
-<li>Palindrome Partitioning II</li>
-<li>Word Ladder</li>
-<li>Minimum Window Substring</li>
-<li>Largest Rectangle in Histogram</li>
-<li>LRU Cache</li>
-</ol>
-
-
-<p>additional</p>
-
-<ol>
-<li>Clone Graph</li>
-<li>Regular Expression Matching &ndash; difficult</li>
-<li>Wildcard Matching &ndash; very difficult, still</li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/17/Numbers-Concatenation-Max/">[Question] Numbers Concatenation to Get Max Value</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-17T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#45">link</a></p>
-
-<blockquote><p>数组nums中有n个非负整数（整数用字符串表示），将它们以一定的顺序拼接，得到最大的整数。</p>
-
-<p>样例：</p>
-
-<p>nums: [&ldquo;54&rdquo;, &ldquo;546&rdquo;, &ldquo;548&rdquo;, &ldquo;60&rdquo;]</p>
-
-<p>可以拼接得到的最大整数为&#8221;6054854654&#8221;，因此函数应该返回&#8221;6054854654&#8221;。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>I will first list out 2 special cases</strong>:</p>
-
-<blockquote><p>{40, 20, 201} => 4020201</p>
-
-<p>{40, 20, 203} => 4020320</p></blockquote>
-
-<p>Knowing about this 2 cases helps us to come up with a sorting-based algorithm. We only need to achieve this:</p>
-
-<blockquote><p>201 &lt; 20</p>
-
-<p>20 &lt; 203</p></blockquote>
-
-<p>By reading <a href="http://www.itint5.com/discuss/183/%E8%B0%81%E8%83%BD%E5%B8%AE%E6%88%91%E7%9C%8B%E4%B8%80%E4%B8%8B%E6%88%91%E7%9A%84%E4%BB%A3%E7%A0%81%EF%BC%8Cn-200%E6%97%B6%E6%8F%90%E7%A4%BAsegmentation">this post</a>, I found the best comparator solution, defined as below:</p>
-
-<pre><code>String firstNum = s1 + s2;
-String secondNum = s2 + s1;
-return firstNum.compareTo(secondNum);
-</code></pre>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong>.</p>
-
-<pre><code>public String biggestNum(String[] nums) {
-    Arrays.sort(nums, new SpecialComparator());
-    StringBuilder sb = new StringBuilder();
-    for (int i = nums.length - 1; i &gt;= 0; i--) {
-        sb.append(nums[i]);
-    }
-    return sb.toString();
-}
-
-class SpecialComparator implements Comparator&lt;String&gt; {
-    public int compare(String s1, String s2) {
-        // eg.
-        // 40 &gt; 20
-        // 20 &gt; 201
-        // 203 &gt; 20
-        String firstNum = s1 + s2;
-        String secondNum = s2 + s1;
-        return firstNum.compareTo(secondNum);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/17/Number-of-tree-given-preorder-postorder/">[Question] Number of Valid Trees Given Preorder and Postorder</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-17T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#28">link</a></p>
-
-<blockquote><p>对于包含n个结点的二叉树（树中结点编号从1到n），已知前序和后序遍历序列，我们知道不一定能唯一的恢复这棵树。请计算出满足条件的二叉树的总数。</p>
-
-<p>Example</p></blockquote>
-
-<pre><code>前序遍历序列preorder：1 2
-后序遍历序列postorder：2 1
-
-一共有2棵满足条件的二叉树：
-    1       1
-   /         \
-  2           2
-</code></pre>
-
-<h3>Solution</h3>
-
-<blockquote><p>先看两种遍历的性质:</p>
-
-<p>pre-order: root, left *************, right #########</p>
-
-<p>post-order: **************left, ########right, root</p>
-
-<p>所以 pre-order 的第一个元素一定等于 post-order 的最后一个元素. 然后在post-order中由前往后找, 找出等于pre-oder中第二个元素的位置, 也就是 left 的位置.</p>
-
-<ol>
-<li>如果post-order中的这个位置不是倒数第二个, 说明左右子树都非空, 那么对左右子树递归<strong>调用后用乘法原理</strong>.</li>
-<li>如果是倒数第二个, 说明有一个子树为空, return的值就是 <strong>2*递归调用非空子树</strong>.</li>
-</ol>
-</blockquote>
-
-<p><a href="http://www.itint5.com/discuss/94/%E8%AF%B7%E5%A4%A7%E5%AE%B6%E6%8F%90%E4%B8%80%E4%BA%9B%E6%94%B9%E8%BF%9B%E6%84%8F%E8%A7%81">ref</a></p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong>. This code is REALLY 叼炸天。</p>
-
-<pre><code>int helper(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; posorder, 
-         int i1, int j1, int i2, int j2){
-    if(i1 == j1) return 1;
-    if(preorder[i1+1] == posorder[j2-1]){
-        return 2*helper(preorder, posorder, i1+1, j1, i2, j2-1);
-    }
-    int k = i2;
-    while(posorder[k] != preorder[i1+1]){ k++; }
-    return helper(preorder, posorder, i1+1,i1+1+k-i2 ,i2 , k)
-         * helper(preorder, posorder, i1+2+k-i2, j1, k+1, j2-1);
-}
-
-int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; posorder) {
-    int n = preorder.size();
-    return helper(preorder, posorder, 0, n-1, 0, n-1);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/17/Expression-evaluation/">[Twitter] Arithmetic Expression Evaluation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-17T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#26">link</a></p>
-
-<blockquote><p>给定一个表达式字符串，其中只包含非负整数，加法，减法以及乘法符号，例如7+3<em>4</em>5+2+4-3-1。请写程序计算该表达式的值。</p>
-
-<p>提示：可以尝试使用递归算法，程序将非常简洁易写，很适用于面试场合。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Trying to solve this problem iteratively is like suicide</strong>. The code would be lengthy and buggy, and very hard to make it right.</p>
-
-<p><strong>The most important point about this question, is how to handle minus(&ndash;) sign</strong>. We know that when we see * and /, we evaluate immediately, and when sees + and &ndash;, we postpone it. However this case:</p>
-
-<blockquote><p>1 &ndash; 2 &ndash; 3</p></blockquote>
-
-<p>If we postpone the first minus sign, we would end up getting:</p>
-
-<blockquote><p>1 &ndash; (-1)</p></blockquote>
-
-<p>So it&rsquo;s wrong (outputing 2 in this case).</p>
-
-<p><strong>The solution to this issue is, consider (a &ndash; b) as (a + (-b))</strong>. That&rsquo;s why later in the code, you&rsquo;ll see a variable <strong>preNum</strong> being modified.</p>
-
-<p><a href="http://www.itint5.com/discuss/50/case%E9%87%8C%E9%9D%A2%E6%9C%89%E4%B8%80%E4%B8%AA%E5%B8%A6%E8%B4%9F%E6%95%B4%E6%95%B0%E7%9A%84%EF%BC%8C%E5%B9%B6%E6%B1%82%E9%80%92%E5%BD%92%E5%AE%9E%E7%8E%B0">ref</a></p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>int p;
-
-public int evaluate(String expr) {
-    p = 0;
-    int firstNum = getNumber(expr);
-    return helper(firstNum, expr);
-}
-
-private int helper(int preNum, String expr) {
-    // now p points to a operator (or end of string)
-    if (p == expr.length()) {
-        return preNum;
-    }
-    char operator = expr.charAt(p);
-    p++;
-    int nextNum = getNumber(expr);
-    switch (operator) {
-    case '+':
-        return preNum + helper(nextNum, expr);
-    case '-':
-        return preNum + helper(-1 * nextNum, expr);
-    case '*':
-        return helper(preNum * nextNum, expr);
-    default:
-        return helper(preNum / nextNum, expr);
-    }
-}
-
-private int getNumber(String expr) {
-    // now p points to a number
-    int num = 0;
-    while (p &lt; expr.length() &amp;&amp; expr.charAt(p) &gt;= '0'
-            &amp;&amp; expr.charAt(p) &lt;= '9') {
-        num = num * 10 + expr.charAt(p) - '0';
-        p++;
-    }
-    return num;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/11">&larr; Older</a>
@@ -884,11 +1106,11 @@ private int getNumber(String expr) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (14)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (19)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (34)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -907,23 +1129,23 @@ private int getNumber(String expr) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/15/stack-of-animals/">[CC150v5] 3.7 Stack of Animals</a>
+        <a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a>
+        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a>
+        <a href="/blog/2014/09/16/find-magic-index/">[CC150v5] 9.3 Find Magic Index (`)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/15/implement-stack/">[CC150v5] Chap 3 Example - Implement Stack</a>
+        <a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/15/">[CC150v5] 2.</a>
+        <a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a>
       </li>
     
   </ul>
