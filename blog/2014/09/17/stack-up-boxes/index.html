@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[CC150v5] 9.3 Find Magic Index (`) - Woodstock Blog</title>
+  <title>[CC150v5] 9.10 Stack Up the Boxes - Woodstock Blog</title>
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i. Given a sorted array of distinct integers, write a &hellip;">
+  <meta name="description" content="Question You have a stack of n boxes, with widths w., heights h, and depths d. The boxes can only be stacked on top of one another if each box is &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://okckd.github.io/blog/2014/09/16/find-magic-index">
+  <link rel="canonical" href="http://okckd.github.io/blog/2014/09/17/stack-up-boxes">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Woodstock Blog" type="application/atom+xml">
@@ -80,7 +80,7 @@
   
   <header>
     
-      <h1 class="entry-title">[CC150v5] 9.3 Find Magic Index (`)</h1>
+      <h1 class="entry-title">[CC150v5] 9.10 Stack Up the Boxes</h1>
     
     
       <p class="meta">
@@ -96,7 +96,7 @@
   
 
 
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-17T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -105,15 +105,60 @@
 
 <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i.</p>
+<blockquote><p>You have a stack of n boxes, with widths w., heights h, and depths d. The boxes can only be stacked on top of one another if each box is strictly larger than the box above it in width, height, and depth.</p>
 
-<p>Given a sorted array of distinct integers, write a method to find a magic index, if one exists, in array A.</p>
-
-<p>FOLLOW UP: What if the values are not distinct?</p></blockquote>
+<p>Implement a method to build the tallest stack possible, where the height of a stack is the sum of the heights of each box.</p></blockquote>
 
 <h3>Solution</h3>
 
+<p>This is appearantly a DP question. I did it in the normal way, and the solution turns out to be very good:</p>
+
+<pre><code>DP solution is        2638ms
+Recursive solution is 1322ms
+My solution is         370ms
+</code></pre>
+
+<p>I could not understand the 2 solutions given in the book. Sorry.</p>
+
+<p>The coding is a bit lengthy, and we keeps 2 DP arrays. <strong>Not an easy question of course</strong>, but the solution is actually standard.</p>
+
 <h3>Code</h3>
+
+<pre><code>public static ArrayList&lt;Box&gt; createStack(Box[] boxes) {
+    ArrayList&lt;Box&gt; ans = new ArrayList&lt;Box&gt;();
+    int len = boxes.length;
+    int[] heights = new int[len];
+    int[] preMap = new int[len];
+    int maxIndex = 0;
+
+    // start DP
+    for (int i = 0; i &lt; len; i++) {
+        heights[i] = boxes[i].height;
+        preMap[i] = -1;
+        for (int j = 0; j &lt; i; j++) {
+            if (boxes[j].canBeAbove(boxes[i])) {
+                int newHeight = heights[j] + boxes[i].height;
+                if (newHeight &gt; heights[i]) {
+                    heights[i] = newHeight;
+                    preMap[i] = j;
+                }
+            }
+        }
+        // now updated maxIndex
+        if (heights[i] &gt; heights[maxIndex]) {
+            maxIndex = i;
+        }
+    }
+
+    // print from maxIndex all the way backwards
+    while (maxIndex != -1) {
+        ans.add(boxes[maxIndex]);
+        // the print order is reversed, so...
+        maxIndex = preMap[maxIndex];
+    }
+    return ans;
+}
+</code></pre>
 </div>
 
 
@@ -136,7 +181,7 @@
   
 
 
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-17T00:00:00+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -150,7 +195,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/09/16/find-magic-index/" data-via="" data-counturl="http://okckd.github.io/blog/2014/09/16/find-magic-index/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/09/17/stack-up-boxes/" data-via="" data-counturl="http://okckd.github.io/blog/2014/09/17/stack-up-boxes/" >Tweet</a>
   
   
   
@@ -159,10 +204,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/09/16/calculate-bits-convertions/" title="Previous Post: [CC150v5] 5.5 Calculate Bits Conversion Required ">&laquo; [CC150v5] 5.5 Calculate Bits Conversion Required </a>
+        <a class="basic-alignment left" href="/blog/2014/09/17/parenthesize-expression/" title="Previous Post: [CC150v5] 9.11 Parenthesize the Expression ">&laquo; [CC150v5] 9.11 Parenthesize the Expression </a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/09/16/google-guess-password/" title="Next Post: [Google] Guess Password ">[Google] Guess Password  &raquo;</a>
       
     </p>
   </footer>
@@ -176,7 +219,7 @@
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (19)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (22)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -199,23 +242,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a>
+        <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
+        <a href="/blog/2014/09/17/parenthesize-expression/">[CC150v5] 9.11 Parenthesize the Expression</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/find-magic-index/">[CC150v5] 9.3 Find Magic Index (`)</a>
+        <a href="/blog/2014/09/17/paint-fill-map/">[CC150v5] 9.7 Paint Fill in Map</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a>
+        <a href="/blog/2014/09/17/find-magic-index/">[CC150v5] 9.3 Find Magic Index</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a>
+        <a href="/blog/2014/09/17/">[CC150v5] 9.</a>
       </li>
     
   </ul>

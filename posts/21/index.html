@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given two queues with their standard operations (enqueue, dequeue, isempty, size), implement a stack with its standard operations (pop &hellip;">
+  <meta name="description" content="Terminologies Atomicity, Atomic Operation Atomicity is unbreakability, or uninterrupted operation. Atomic operation helps in understanding reentrancy &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,302 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/Multithreading-basics/">[Design] Multithreading Basics</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Terminologies</h2>
+
+<h3>Atomicity, Atomic Operation</h3>
+
+<p><strong><a href="http://www.geeksforgeeks.org/g-fact-57/">Atomicity</a> is unbreakability</strong>, or uninterrupted operation.</p>
+
+<p>Atomic operation helps in understanding reentrancy, critical section, thread safety, synchronization primitives, etc.</p>
+
+<h3>Critical Section</h3>
+
+<p><strong><a href="http://www.geeksforgeeks.org/g-fact-70/">Critical section</a></strong> is group of instructions/statements or region of code that <strong>need to be executed atomically</strong>.</p>
+
+<p>If one thread tries to change a shared data while another thread tries to read, the result is unpredictable. It is critical to understand the importance of race condition while writing kernel mode programming.</p>
+
+<p>A simple solution to critical section:</p>
+
+<pre><code>acquireLock();
+Process Critical Section
+releaseLock();
+</code></pre>
+
+<h3>Synchronization primitives</h3>
+
+<p><a href="http://stackoverflow.com/a/8017629">Synchronization primitives</a> are simple software mechanisms for the purposes of supporting thread or process synchronization.</p>
+
+<p><strong>Mutex, event, conditional variables and semaphores</strong> are all synchronization primitives.</p>
+
+<p><strong>Critical section</strong> is not a synchronization primitive. It&rsquo;s a part of an execution path that must be protected from concurrent execution in order to maintain some invariants.</p>
+
+<p>You need to use some synchronization primitives to protect critical section.</p>
+
+<h3>Producer–consumer</h3>
+
+<p>Two processes, <a href="http://en.wikipedia.org/wiki/Producer-consumer_problem">producer and consumer</a>. Producer thread will collect the data and writes it to the buffer. Consumer thread will process the collected data from the buffer.</p>
+
+<p>Producer won&rsquo;t try to add when buffer&rsquo;s full and consumer won&rsquo;t remove when buffer&rsquo;s empty.</p>
+
+<p><strong>Solution 1: Mutex</strong></p>
+
+<p>A mutex provides mutual exclusion, either producer or consumer can have the key (mutex) and proceed with their work. As long as the buffer is filled by producer, the consumer needs to wait, and vice versa.</p>
+
+<p><strong>Solution 2: Semaphore</strong></p>
+
+<p><a href="http://en.wikipedia.org/wiki/Producer-consumer_problem#Using_semaphores">A semaphore</a> is a generalized mutex. In lieu of single buffer, we can split the 4 KB buffer into four 1 KB buffers (identical resources). A semaphore can be associated with these four buffers. The consumer and producer can work on different buffers at the same time.</p>
+
+<h3>Interrupt service routine</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Interrupt_handler">Interrupt service routine</a> (ISR), is a callback subroutine in an operating system or device driver whose execution is triggered by the reception of an interrupt.</p>
+
+<p><a href="http://stackoverflow.com/a/3392889">One good example</a> is reading from a hard drive. The drive is slow and you don&rsquo;t want your OS to wait for the data to come back; you want the OS to go and do other things. <strong>So you set up the system so that when the disk has the data (ready), it raises an interrupt</strong>. In the <strong>ISR for the disk</strong>, CPU will take the data and return it to the requester.</p>
+
+<p><strong>ISRs often need to happen quickly</strong> as the hardware can have a limited buffer, which will be overwritten by new data if it&rsquo;s now pulled off quickly enough.</p>
+
+<p>It&rsquo;s also important to have your ISR complete quickly as while the CPU is servicing one ISR other interrupts will be masked.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/First-non-repeating-character/">[Question] Find the First Non-repeating Character</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/given-a-string-find-its-first-non-repeating-character/">link</a></p>
+
+<blockquote><p>Question One: Given a string, find the first non-repeating character in it</p></blockquote>
+
+<p><a href="http://www.geeksforgeeks.org/find-first-non-repeating-character-stream-characters/">link</a></p>
+
+<blockquote><p>Question Two: Given a stream of characters, find the first non-repeating character from stream. You need to tell the first non-repeating character in O(1) time at any moment.</p></blockquote>
+
+<h3>From a string</h3>
+
+<ol>
+<li><p>Scan the string from left to right and construct the count array.</p></li>
+<li><p>Again, scan the string from left to right and check for count of each
+character, if you find an element who&rsquo;s count is 1, return it.</p></li>
+</ol>
+
+
+<p><strong>O(n) time</strong>.</p>
+
+<p>The array is size of 128 if it&rsquo;s ASCII encoding. It can also be replaced with a HashMap if the length of the string is small.</p>
+
+<h3>From a stream of chars</h3>
+
+<p><strong>Use a DLL (doubly linked list), 1 count array and 1 DLL-node array</strong>. Alternatively, the 2 arrays can be replaced with 2 HashMaps.</p>
+
+<p>In totally, one DLL and 2 array are used. <strong>The DLL</strong> is used to get the sequence of non-repeating chars. <strong>The 1st array</strong> is for char count, and <strong>the 2nd array</strong> is for fast loop-up in the DLL.</p>
+
+<p>The detailed precedure:</p>
+
+<ol>
+<li><p>Create an empty DLL and 2 arrays: repeated[] and dllMap[].</p></li>
+<li><p>To get the first non-repeating character, return the head of DLL.</p></li>
+<li><p>Following are steps to process a new character &lsquo;x&rsquo; in stream.</p>
+
+<ol>
+<li><p>If repeated[x] is false and dllMap[x] is NULL, append x to DLL and store it in dllMap[x].</p></li>
+<li><p>If repeated[x] is false and dllMap[x] is not NULL, get DLL node of x using dllMap[x] and remove the node. Set repeated[x] as true and optionally clear dllMap[x].</p></li>
+<li><p>If repeated[x] is true, ignore it.</p></li>
+</ol>
+</li>
+</ol>
+
+
+<p>I didn&rsquo;t write code for this question.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/Convert-BST-To-Circular-DLL/">[LeetCode Plus] Convert Binary Search Tree to Circular Doubly-Linked List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">link</a></p>
+
+<blockquote><p>Convert a BST to a sorted circular doubly-linked list in-place.</p>
+
+<p>Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.</p></blockquote>
+
+<h3>Inorder solution</h3>
+
+<p>This question can be solved with <strong>inorder traversal with the help of a &lsquo;pre&rsquo; pointer</strong>.</p>
+
+<p>This solution is recommended by L33tcode, but not very intuitive, and difficult to write. The C++ code is attached below. <a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">source</a>.</p>
+
+<pre><code>void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
+  if (!p) return;
+  treeToDoublyList(p-&gt;left, prev, head);
+  // current node's left points to previous node
+  p-&gt;left = prev;
+  if (prev)
+    prev-&gt;right = p;  // previous node's right points to current node
+  else
+    head = p; // current node (smallest element) is head of
+              // the list if previous node is not available
+  // as soon as the recursion ends, the head's left pointer 
+  // points to the last node, and the last node's right pointer
+  // points to the head pointer.
+  Node *right = p-&gt;right;
+  head-&gt;left = p;
+  p-&gt;right = head;
+  // updates previous node
+  prev = p;
+  treeToDoublyList(right, prev, head);
+}
+
+// Given an ordered binary tree, returns a sorted circular
+// doubly-linked list. The conversion is done in-place.
+Node* treeToDoublyList(Node *root) {
+  Node *prev = NULL;
+  Node *head = NULL;
+  treeToDoublyList(root, prev, head);
+  return head;
+}
+</code></pre>
+
+<h3>Divide and conquer solution</h3>
+
+<p>The good and intuitive solution is to do D&amp;C and <strong>solve left and right recursively</strong>. Do note how the circular linked lists are merged, and be careful when replacing the pointers.</p>
+
+<p>The Java code is posted below. <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">source</a></p>
+
+<pre><code>public static TreeNode treeToList(TreeNode root) {
+    if (root == null)
+        return (null);
+
+    // Recursively do the subtrees (leap of faith!)
+    TreeNode aList = treeToList(root.left);
+    TreeNode bList = treeToList(root.right);
+
+    // Make root a circular DLL
+    root.left = root;
+    root.right = root;
+
+    // At this point we have three lists, merge them
+    aList = append(aList, root);
+    aList = append(aList, bList);
+
+    return (aList);
+}
+
+/*
+ * given two circular doubly linked lists, append them and return the new
+ * list.
+ */
+public static TreeNode append(TreeNode a, TreeNode b) {
+    if (a == null)
+        return (b);
+    if (b == null)
+        return (a);
+
+    TreeNode aLast = a.left;
+    TreeNode bLast = b.left;
+
+    aLast.right = b;
+    b.left = aLast;
+    bLast.right = a;
+    a.left = bLast;
+
+    return (a);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -715,247 +1011,6 @@ private static String removeDigit(String number, int digitIndex) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/OOP-principles/">[Design] OOP - 4 Major Principles</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>4 Principles</h3>
-
-<p><a href="http://codebetter.com/raymondlewallen/2005/07/19/4-major-principles-of-object-oriented-programming/">link</a></p>
-
-<ol>
-<li><p>Encapsulation</p></li>
-<li><p>Abstraction</p></li>
-<li><p>Inheritance</p></li>
-<li><p>Polymorphism</p></li>
-</ol>
-
-
-<h3>Encapsulation</h3>
-
-<p><strong>The hiding of data implementation</strong> by restricting access to accessors and mutators.</p>
-
-<h3>Abstraction</h3>
-
-<p><strong>Representation of data in which the implementation details are hidden</strong>.</p>
-
-<p>For examplem, the development of classes, objects, types in terms of their interfaces and functionality, instead of their implementation details.</p>
-
-<p>Abstraction is used to manage complexity (decompose complex systems into smaller components).</p>
-
-<h3>Inheritance</h3>
-
-<p><strong>The ability to derive new classes from existing classes</strong>.</p>
-
-<h3>Polymorphism</h3>
-
-<p>Polymorphism describes a pattern in object oriented programming in which classes have different functionality while sharing a common interface.</p>
-
-<p>Eg. shape object.</p>
-
-<h3>Read more</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/SOLID_">http://en.wikipedia.org/wiki/SOLID_</a>(object-oriented_design)</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Longest-Substring-2-Unique-Characters/">[Question] Longest Substring Which Contains 2 Unique Characters</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.programcreek.com/2013/02/longest-substring-which-contains-2-unique-characters/">link</a></p>
-
-<blockquote><p>Given a string, find the longest substring that contains only two unique characters. For example, given &ldquo;abcbbbbcccbdddadacb&rdquo;, the longest substring that contains 2 unique character is &ldquo;bcbbbbcccb&rdquo;.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a naive solution</strong>, which we use 2 pointers and 1 hashset. The code is very readable (written by me).</p>
-
-<p>What if the question change from &lsquo;2 unique chars&rsquo; to &lsquo;N unique chars&rsquo;? I think we can <strong>use HashMap instead of HashSet</strong> (for searching of start pointer). The rest of the is very similar.</p>
-
-<h3>Code</h3>
-
-<p><strong>writen by me</strong></p>
-
-<pre><code>private String solution(String input) {
-    HashSet&lt;Character&gt; set = new HashSet&lt;Character&gt;();
-    char[] letters = input.toCharArray();
-    set.add(letters[0]);
-
-    int start = 0;
-    String longest = input.substring(0, 1);
-
-    for (int i = 1; i &lt; input.length(); i++) {
-        if (set.add(letters[i])) {
-            if (set.size() &gt; 2) {
-                // first, update the longest substring that exists before i
-                if (i - start &gt; longest.length()) {
-                    longest = input.substring(start, i);
-                }
-                // clear and rebuild the HashSet
-                set.clear();
-                set.add(letters[i]);
-                set.add(letters[i - 1]);
-                // remove 1 char entirely from current substring
-                int p = i - 1;
-                while (p &gt; 0 &amp;&amp; letters[p] == letters[p - 1]) {
-                    p--;
-                }
-                start = p;
-            }
-        }
-    }
-    if (input.length() - start &gt; longest.length()) {
-        longest = input.substring(start);
-    }
-    return longest;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Clone-octopress-blog-from-a-different-computer/">[Octopress] Clone Octopress Blog From a Different Computer</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Before we start</h3>
-
-<p>Well first of all, we must have Ruby, DevKit, gem, bundler and dependencies installed. Simply follow <a href="http://www.techelex.org/setup-octopress-on-windows7/">this tutorial</a>.</p>
-
-<p>Remember to set the <strong>Ruby directory</strong> (C:\Ruby193\bin) in the <strong>System Variable Settings</strong>.</p>
-
-<h3>Now, start</h3>
-
-<p>I&rsquo;ve had a little confusions about how to develop my Octopress blog on 2 different computers. Some solutions posted online does not work, and it turns out that some commands have changed its functions in new version of Octopress. So, I write this post to clarify these confusions.</p>
-
-<p>To set up a new local repository from an online github octopress blog repo, follow the instructions:</p>
-
-<ol>
-<li><p><strong>clone the source branch to the local octopress folder</strong></p>
-
-<blockquote><p>git clone -b source git@github.com:willran168/willran168.github.io.git octopress</p></blockquote></li>
-<li><p><strong>run the rake installation to configure everything</strong></p></li>
-</ol>
-
-
-<blockquote><p>cd octopress</p>
-
-<p>gem install bundler</p>
-
-<p>rbenv rehash    (I think this is optional)</p>
-
-<p>bundle install</p>
-
-<p>rake setup_github_pages</p></blockquote>
-
-<ol>
-<li><strong>enter repository URL</strong></li>
-</ol>
-
-
-<blockquote><p>git@github.com:willran168/willran168.github.io.git</p></blockquote>
-
-<ol>
-<li><strong>clone the master branch to the _deploy subfolder</strong></li>
-</ol>
-
-
-<blockquote><p>git clone git@github.com:willran168/willran168.github.io.git _deploy</p></blockquote>
-
-<p>Clone master branch is the last step. Because running <code>rake setup_github_pages</code> will remove previous _deploy folder and init a new repo inside of it. So master have to be cloned after this step.</p>
-
-<p>It&rsquo;s done. Now we can do &lsquo;rake gen_deploy&rsquo;, or &lsquo;git commit or push origin source&rsquo;.</p>
-
-<p><a href="http://blog.zerosharp.com/clone-your-octopress-to-blog-from-two-places/">reference</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/22">&larr; Older</a>
@@ -972,7 +1027,7 @@ private static String removeDigit(String number, int digitIndex) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (19)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (22)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -995,23 +1050,23 @@ private static String removeDigit(String number, int digitIndex) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a>
+        <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
+        <a href="/blog/2014/09/17/parenthesize-expression/">[CC150v5] 9.11 Parenthesize the Expression</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/find-magic-index/">[CC150v5] 9.3 Find Magic Index (`)</a>
+        <a href="/blog/2014/09/17/paint-fill-map/">[CC150v5] 9.7 Paint Fill in Map</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a>
+        <a href="/blog/2014/09/17/find-magic-index/">[CC150v5] 9.3 Find Magic Index</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a>
+        <a href="/blog/2014/09/17/">[CC150v5] 9.</a>
       </li>
     
   </ul>

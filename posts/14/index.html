@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Overview Producer-consumer problem illustrates the need for synchronization in systems where many processes share a resource. In the problem, two &hellip;">
+  <meta name="description" content="Question link What is the distributed algorithm to determine the median of arrays of 1 billion integers located on different computers? Solution &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,259 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/09/Median-in-distributed-computers/">[Design] Median of Array in Distributed Computers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.quora.com/Distributed-Algorithms/What-is-the-distributed-algorithm-to-determine-the-median-of-arrays-of-integers-located-on-different-computers">link</a></p>
+
+<blockquote><p>What is the <strong>distributed algorithm</strong> to determine the median of arrays of 1 billion integers located on different computers?</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Suppose you have <strong>a master node</strong> (or are able to use a consensus protocol to elect a master from among your servers).</p></li>
+<li><p>The master queries all servers for the size of their sets of data, so that it knows to look for the k = n/2 largest element.</p></li>
+<li><p>The master then selects a random server and queries <strong>a random element</strong>.</p></li>
+<li><p>The master broadcasts this element to each server.</p></li>
+<li><p>Each server partitions its elements into those larger than or equal to the broadcasted element and those smaller than the broadcasted element.</p></li>
+<li><p>Each server returns to the master the <strong>size of the larger-than partition</strong>, call this m.</p>
+
+<ol>
+<li><p>If the sum of these sizes is greater than k, the master indicates to each server to disregard the &lsquo;less-than&rsquo; set.</p></li>
+<li><p>If it is less than k, the master indicates to disregard the larger-than sets and updates k = k &ndash; m.</p></li>
+<li><p>If it is exactly k, the algorithm terminates and the value returned is the pivot selected at the beginning of the iteration.</p></li>
+</ol>
+</li>
+<li><p>Recurse beginning with selecting a new random pivot from the remaining elements.</p></li>
+</ol>
+
+
+<p><a href="http://qr.ae/k2DcS">ref</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/09/Functional-programming/">[Design] Functional Programming</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Overview</h3>
+
+<p><strong><a href="http://stackoverflow.com/a/23290">A functional language</a> allows you to write a mathematical function</strong>, i.e. a function that takes n arguments and returns a value. If the program is executed, this function is evaluated.</p>
+
+<p>A purely functional program <strong>always yields the same value for an input</strong>, and the order of evaluation is not well-defined; which means that uncertain values like user input or random values are hard to model in purely functional languages.</p>
+
+<h3>One Sentence</h3>
+
+<p><strong>Functional programming is like describing your <a href="http://stackoverflow.com/a/23475">problem to a mathematician</a>. Imperative programming is like giving instructions to an idiot</strong>.</p>
+
+<h3>Pros and Cons</h3>
+
+<p>Functional Programming allows coding <a href="http://stackoverflow.com/a/24294">with fewer potentials for bugs</a> because each component is completely isolated. Also, using recursion and first-class functions allows for <strong>simple proofs of correctness</strong> which typically mirror the structure of the code.</p>
+
+<p>Functional programming languages are typically <a href="http://en.wikipedia.org/wiki/Functional_programming#Efficiency_issues">less efficient</a> in their use of CPU and memory than imperative languages such as C and Pascal.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/08/Thread-pool-pattern/">[Design] Thread Pool Pattern</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Overview</h3>
+
+<p><a href="http://programmers.stackexchange.com/a/173580">Thread pool</a> is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue.</p>
+
+<p><img class="middle" src="/assets/images/thread-pool.png"></p>
+
+<p><a href="http://en.wikipedia.org/wiki/Thread_pool_pattern">A sample thread pool</a> (green boxes) with waiting tasks (blue) and completed tasks (yellow)</p>
+
+<h3>Why Thread Pool?</h3>
+
+<p><a href="http://www.ibm.com/developerworks/library/j-jtp0730/">Many server applications</a>, such as <strong>Web servers (eg. Tomcat)</strong>, database servers, file servers, or mail servers must process a large number of tasks received from a network protocol. Often, the task is short-lived and the number of requests is large.</p>
+
+<p><strong>Thread Pools are useful when you need to limit the number of threads</strong> running in your application at the same time.</p>
+
+<h3>More details</h3>
+
+<p>A thread pool is a group of pre-instantiated, idle threads which stand ready to be given work. These are preferred over instantiating new threads for each task when there is <strong>a large number of short tasks</strong> to be done <strong>rather than a small number of long ones</strong>.</p>
+
+<p>Instead of starting a new thread for every task to execute concurrently, the <strong>task can be passed to a thread pool</strong>. As soon as the pool has any idle threads the task is assigned to one of them and executed.</p>
+
+<p>Thread pools are often used in multi threaded servers. Each connection <strong>arriving at the server via the network is wrapped as a task</strong> and passed on to a thread pool. The threads in the thread pool will process the requests on the connections concurrently.</p>
+
+<h3>Code</h3>
+
+<p><strong>a <a href="http://tutorials.jenkov.com/java-concurrency/thread-pools.html">simple thread pool implementation</a></strong></p>
+
+<p>Pool Class:</p>
+
+<pre><code>public class ThreadPool {
+
+  private BlockingQueue taskQueue = null;
+  private List&lt;PoolThread&gt; threads = new ArrayList&lt;PoolThread&gt;();
+  private boolean isStopped = false;
+
+  public ThreadPool(int noOfThreads, int maxNoOfTasks){
+    taskQueue = new BlockingQueue(maxNoOfTasks);
+
+    for(int i=0; i&lt;noOfThreads; i++){
+      threads.add(new PoolThread(taskQueue));
+    }
+    for(PoolThread thread : threads){
+      thread.start();
+    }
+  }
+
+  public void synchronized execute(Runnable task){
+    if(this.isStopped) throw
+      new IllegalStateException("ThreadPool is stopped");
+
+    this.taskQueue.enqueue(task);
+  }
+
+  public synchronized void stop(){
+    this.isStopped = true;
+    for(PoolThread thread : threads){
+      thread.stop();
+    }
+  }
+}
+</code></pre>
+
+<p>Thread Class:</p>
+
+<pre><code>public class PoolThread extends Thread {
+
+  private BlockingQueue taskQueue = null;
+  private boolean       isStopped = false;
+
+  public PoolThread(BlockingQueue queue){
+    taskQueue = queue;
+  }
+
+  public void run(){
+    while(!isStopped()){
+      try{
+        Runnable runnable = (Runnable) taskQueue.dequeue();
+        runnable.run();
+      } catch(Exception e){
+        //log or otherwise report exception,
+        //but keep pool thread alive.
+      }
+    }
+  }
+
+  public synchronized void stop(){
+    isStopped = true;
+    this.interrupt(); //break pool thread out of dequeue() call.
+  }
+
+  public synchronized void isStopped(){
+    return isStopped;
+  }
+}
+</code></pre>
+
+<p>An explanation:</p>
+
+<blockquote><p>The thread pool implementation consists of two parts. A ThreadPool class which is the public interface to the thread pool, and a PoolThread class which implements the threads that execute the tasks.</p>
+
+<p>To execute a task the method ThreadPool.execute(Runnable r) is called with a Runnable implementation as parameter. The Runnable is enqueued in the blocking queue internally, waiting to be dequeued.</p>
+
+<p>The Runnable will be dequeued by an idle PoolThread and executed. You can see this in the PoolThread.run() method. After execution the PoolThread loops and tries to dequeue a task again, until stopped.</p>
+
+<p>To stop the ThreadPool the method ThreadPool.stop() is called. The stop called is noted internally in the isStopped member. Then each thread in the pool is stopped by calling PoolThread.stop(). Notice how the execute() method will throw an IllegalStateException if execute() is called after stop() has been called.</p>
+
+<p>The threads will stop after finishing any task they are currently executing. Notice the this.interrupt() call in PoolThread.stop(). This makes sure that a thread blocked in a wait() call inside the taskQueue.dequeue() call breaks out of the wait() call, and leaves the dequeue() method call with an InterruptedException thrown. This exception is caught in the PoolThread.run() method, reported, and then the isStopped variable is checked. Since isStopped is now true, the PoolThread.run() will exit and the thread dies.</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -648,206 +901,6 @@ public String decToHex(int dec) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/07/Million-phone-numbers/">[Google] Million Phone Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question 1</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/How-would-you-store-1-million-phone-numbers-QTN_456.htm">link</a></p>
-
-<blockquote><p>How would you store 1 million phone numbers?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>BitMap.</p>
-
-<blockquote><p>The key here is that 1 million phone numbers will be within some range, likely 10 million or so. 10 million bits = 10<sup>7</sup> bits ~ 0.12 GB. Just have a bit array where the first bit being set implies that the first phone number is set (e.g., 10 000 000) and the last bit indicates the last phone number (10 999 999). If you find a number in the list, just set the appropriate bit. You now have a bit vector of size 1million bits, sorted, and to check for a particular number, you just check whether the corresponding bit is set.</p></blockquote>
-
-<h3>Question 2</h3>
-
-<p><a href="http://www.careercup.com/question?id=7997766">link</a></p>
-
-<blockquote><p>How would you sort 1 million phone numbers?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>BitMap or radix sort, both are O(n) complexity.</p>
-
-<p>Read more <a href="http://www.vex.net/~trebla/compsci/sorting-phone-numbers.html">here</a>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/07/Distributed-network-bottleneck/">[Design] Distributed Network Bottleneck</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Question</h2>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32702821.html">link</a></p>
-
-<blockquote><p>一个distributed的环境，有很多机器，现在你发现性能有问题，可能是网络带宽造成的，你怎么解决？ (你不能更换网络设备的前提下)</p></blockquote>
-
-<h3>Answer</h3>
-
-<ol>
-<li>Identify problem</li>
-</ol>
-
-
-<p>首先得判定是否真的是网络造成的，就算是网络问题，哪些机器之间的网络问题？ 这个得先大概了解high level component dependency relationship，</p>
-
-<p>看看是不是cpu memory disk都没有问题。 可以profile几个机器看看是不是 a lot of time spent waiting for network calls.</p>
-
-<ol>
-<li>Locate the faulty component</li>
-</ol>
-
-
-<p>判定是网络问题之后看是哪些components之间，或是某个component里面有很多网络通讯。</p>
-
-<ol>
-<li>Improvement</li>
-</ol>
-
-
-<p>不能更换设备的话，能不能改network topology来让critical path machine之间的带宽有改善。</p>
-
-<p>要是不能改topology就只能改程序了。还是先identify top offender,然后就只能慢慢改了</p>
-
-<ol>
-<li>What&rsquo;s more</li>
-</ol>
-
-
-<p>要还有时间的话就可以聊聊问啥不能换设备，是资金问题还是用的已经是top of the line了？</p>
-
-<p>或者是在public cloud上？</p>
-
-<p>Answer suggested by user <strong>remus</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/06/Postorder-successor-Binary-Tree/">[Google] Postorder Successor in Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5173972006076416">link</a></p>
-
-<blockquote><p>Write an algorithm to find the ‘next’ post-order successor of a given node in a binary tree and binary search tree.</p>
-
-<ol>
-<li>where each node has a link to its parent.</li>
-<li>without parent pointer</li>
-</ol>
-
-
-<p>Implement 2 versions of the algorithm: 1.) binary tree 2.) BST</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>In postorder, any node below current node shall be &lsquo;predecessor&rsquo; of current node. Thus we only care about current node&rsquo;s parent.</p>
-
-<p>Suggested by a user:</p>
-
-<pre><code>1) parent pointer is given. 
-- go to the parent of the current node. 
-- if current node is the right child of its parent =&gt; print parent. 
-- else return leftmost node of the right sub-tree of parent. 
-
-2) parent pointer is not given. 
-- traverse the tree and find the parent of the current node 
-- do the same as method (1). 
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/15">&larr; Older</a>
@@ -864,7 +917,7 @@ public String decToHex(int dec) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (19)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (22)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -887,23 +940,23 @@ public String decToHex(int dec) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a>
+        <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
+        <a href="/blog/2014/09/17/parenthesize-expression/">[CC150v5] 9.11 Parenthesize the Expression</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/find-magic-index/">[CC150v5] 9.3 Find Magic Index (`)</a>
+        <a href="/blog/2014/09/17/paint-fill-map/">[CC150v5] 9.7 Paint Fill in Map</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a>
+        <a href="/blog/2014/09/17/find-magic-index/">[CC150v5] 9.3 Find Magic Index</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a>
+        <a href="/blog/2014/09/17/">[CC150v5] 9.</a>
       </li>
     
   </ul>
