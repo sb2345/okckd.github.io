@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Cc150v5 | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/cc150v5/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-15T14:26:55+08:00</updated>
+  <updated>2014-09-18T13:08:03+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,242 +14,9 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[CC150v5] 3.7 Stack of Animals]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/15/stack-of-animals/"/>
-    <updated>2014-09-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/15/stack-of-animals</id>
-    <content type="html"><![CDATA[### Question
-
-> An animal shelter holds only dogs and cats. People must adopt either the "oldest" animals, or they can select whether they would prefer a dog or a cat (and will receive the oldest animal of that type). They cannot select which specific animal they would like. 
-
-> Create the data structures to maintain this system and implement operations such as enqueue, dequeueAny, dequeueDog and dequeueCat. You may use the built-in LinkedList data structure. 
-
-### Solution
-
-There are 2 solutions.
-
-__First one is using a single queue__. This makes 'dequeueAny' easy, but 'dequeueCat' and 'dequeueDog' difficult. 
-
-__Second approach would be using 2 queues for dogs and cats__. We need something like timestamp to be stored (more space usage). 
-
-When we return, we peek both queues are choose the older one. __This is recommended solution in the book__. 
-
-### Code
-
-__not written__
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 3.2 Stack Min Value]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/15/stack-get-min-value/"/>
-    <updated>2014-09-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/15/stack-get-min-value</id>
-    <content type="html"><![CDATA[### Question
-
-> How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element? 
-
-> Push, pop and min should all operate in 0(1) time. 
-
-### Solution
-
-This is __a very tricky question__. 
-
-The key is how to use the minimum space to achieve O(1) query min operation. The trick is to count how many times the same min-value occur. Eg. 
-
-> input: 5,3,3,1,1,2,2,2,2,2,2,2.
->
-> stack: 5,3,3,1,1.
-
-So we can pop '1' twice, pop '3' twice, and pop '5' once. Read the code! 
-
-### Code
-
-	public class StackMyAnswer extends Stack<Integer> {
-
-		Stack<Integer> min = new Stack<Integer>();
-
-		public void push(int value) {
-			if (min.isEmpty() || value <= min.peek()) {
-				min.push(value);
-			}
-			super.push(value);
-		}
-
-		public Integer pop() {
-			int val = super.pop();
-			if (!min.isEmpty() && val == min.peek()) {
-				min.pop();
-			}
-			return val;
-		}
-
-		public int min() {
-			if (min.isEmpty()) {
-				return Integer.MAX_VALUE;
-			}
-			return min.peek();
-		}
-	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 2.7 Linked List Palindrome]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/15/linked-list-palindrome/"/>
-    <updated>2014-09-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/15/linked-list-palindrome</id>
-    <content type="html"><![CDATA[### Question
-
-> Implement a function to check if a linked list is a palindrome. 
-
-### Solution
-
-There are multiple solutions for this question. 
-
-__First, maybe the simplest solution of all__, is to compare the list with the reversed list (compare first half would be enough). This is a very nice idea. 
-
-__Second solution is iterative approach__. My code below is to first get the total length, then __use a Stack__. Alternatively, we can also use __fast/slow pointer__ to find the mid point. This solution is easiest to write. 
-
-__Third solution is recursive__. We basically uses a public pointer to: 
-
-1. get starting value
-1. check middle parts
-1. get ending value
-1. if starting == ending and middle part is valid, then true.
-
-This code is not easy to write, and hard to think. 
-
-It's best to know both iterative and recursive solution. 
-
-### Code
-
-Iterative
-
-	public static boolean isPalindrome1(LinkedListNode head) {
-		int len = getListLength(head);
-		int half = len / 2;
-		Stack<Integer> stack = new Stack<Integer>();
-		for (int i = 0; i < half; i++) {
-			stack.push(head.data);
-			head = head.next;
-		}
-		if (len % 2 == 1) {
-			head = head.next;
-		}
-		for (int i = 0; i < half; i++) {
-			if (head.data != stack.pop()) {
-				return false;
-			}
-			head = head.next;
-		}
-		return true;
-	}
-
-Recursive
-
-	private static LinkedListNode p;
-
-	public static boolean isPalindrome2(LinkedListNode head) {
-		p = head;
-		int len = getListLength(head);
-		return helper2(0, len - 1);
-	}
-
-	public static boolean helper2(int from, int to) {
-		if (from > to) {
-			return true;
-		} else if (from == to) {
-			p = p.next;
-			return true;
-		} else {
-			// first get fromVal, then check middlep part, last, get toVal
-			int fromVal = p.data;
-			p = p.next;
-			if (!helper2(from + 1, to - 1)) {
-				return false;
-			}
-			int toVal = p.data;
-			p = p.next;
-			if (fromVal != toVal) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-Shared method:
-
-	private static int getListLength(LinkedListNode node) {
-		int count = 0;
-		while (node != null) {
-			count++;
-			node = node.next;
-		}
-		return count;
-	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] Chap 3 Example - Implement Stack]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/15/implement-stack/"/>
-    <updated>2014-09-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/15/implement-stack</id>
-    <content type="html"><![CDATA[### Question
-
-> Implement a stack. 
-
-### Solution
-
-__Stack uses LinkedNode to implement__. 
-
-### Code
-
-    public class MyStack {
-
-        Node top;
-
-        public int pop() {
-            if (top == null) {
-                return -1;
-            }
-            int returnVal = top.val;
-            top = top.next;
-            return returnVal;
-        }
-
-        public int peek() {
-            if (top == null) {
-                return -1;
-            }
-            return top.val;
-
-        }
-
-        public void push(int val) {
-            Node newNode = new Node(val);
-            newNode.next = top;
-            top = newNode;
-        }
-
-        class Node {
-
-            int val;
-            Node next;
-
-            Node(int value) {
-                val = value;
-            }
-        }
-    }
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 2.]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/15/"/>
-    <updated>2014-09-15T00:00:00+08:00</updated>
+    <title type="html"><![CDATA[[CC150v5] 9.]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/18/"/>
+    <updated>2014-09-18T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/09/</id>
     <content type="html"><![CDATA[### Question
 
@@ -262,6 +29,352 @@ __Stack uses LinkedNode to implement__.
 ### Code
 
 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 9.10 Stack Up the Boxes]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/17/stack-up-boxes/"/>
+    <updated>2014-09-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/17/stack-up-boxes</id>
+    <content type="html"><![CDATA[### Question
+
+> You have a stack of n boxes, with widths w., heights h, and depths d. The boxes can only be stacked on top of one another if each box is strictly larger than the box above it in width, height, and depth. 
+
+> Implement a method to build the tallest stack possible, where the height of a stack is the sum of the heights of each box. 
+
+### Solution
+
+This is appearantly a DP question. I did it in the normal way, and the solution turns out to be very good: 
+
+	DP solution is        2638ms
+	Recursive solution is 1322ms
+	My solution is         370ms
+
+I could not understand the 2 solutions given in the book. Sorry.
+
+The coding is a bit lengthy, and we keeps 2 DP arrays. __Not an easy question of course__, but the solution is actually standard. 
+
+### Code
+
+	public static ArrayList<Box> createStack(Box[] boxes) {
+		ArrayList<Box> ans = new ArrayList<Box>();
+		int len = boxes.length;
+		int[] heights = new int[len];
+		int[] preMap = new int[len];
+		int maxIndex = 0;
+
+		// start DP
+		for (int i = 0; i < len; i++) {
+			heights[i] = boxes[i].height;
+			preMap[i] = -1;
+			for (int j = 0; j < i; j++) {
+				if (boxes[j].canBeAbove(boxes[i])) {
+					int newHeight = heights[j] + boxes[i].height;
+					if (newHeight > heights[i]) {
+						heights[i] = newHeight;
+						preMap[i] = j;
+					}
+				}
+			}
+			// now updated maxIndex
+			if (heights[i] > heights[maxIndex]) {
+				maxIndex = i;
+			}
+		}
+
+		// print from maxIndex all the way backwards
+		while (maxIndex != -1) {
+			ans.add(boxes[maxIndex]);
+			// the print order is reversed, so...
+			maxIndex = preMap[maxIndex];
+		}
+		return ans;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 9.11 Parenthesize the Expression]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/17/parenthesize-expression/"/>
+    <updated>2014-09-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/17/parenthesize-expression</id>
+    <content type="html"><![CDATA[### Question
+
+> Given a boolean expression consisting of the symbols 0, 1, '&', '|', and '^', and a desired boolean result value 'result'. 
+
+> Now implement a function to count the number of ways of __parenthesizing the expression__ such that it evaluates to 'result'.
+
+### Solution
+
+__This is a difficult question__.
+
+> Each parenthesized expression must have an outermost pair of
+parentheses. 
+
+> That is, we can iterate through the expression, treating each operator as the first operator to be parenthesized. 
+
+Nice idea suggested in the book! So __for each operator, we consider is as first operator (to evaluate)__, and then we shall if the total possible count. 
+
+(Note that while coding, we DO NOT WRITE {if-else if-else...} but instead use {if... if... if...} in order to get the total count. )
+
+DP is more time-efficient. 
+
+__Like CC150v5 Q9.10, the code given in the book is very hard to read__. I have my own code posted below. 
+
+### Code
+
+	public static int countMyAnswer(String exp, boolean result) {
+		if (exp.length() == 1) {
+			return convertIntToBool(exp.charAt(0)) == result ? 1 : 0;
+		}
+		// eg. 1^0|0|1
+		// result: true
+		int totalCount = 0;
+		for (int i = 1; i < exp.length(); i += 2) {
+
+			char op = exp.charAt(i);
+			String firstHalf = exp.substring(0, i);
+			String secondHalf = exp.substring(i + 1);
+
+			int firstHalfTrue = countMyAnswer(firstHalf, true);
+			int firstHalfFalse = countMyAnswer(firstHalf, false);
+			int secondHalfTrue = countMyAnswer(secondHalf, true);
+			int secondHalfFalse = countMyAnswer(secondHalf, false);
+
+			if (evaluate('0', op, '0') == result) {
+				totalCount += firstHalfFalse * secondHalfFalse;
+			}
+			if (evaluate('0', op, '1') == result) {
+				totalCount += firstHalfFalse * secondHalfTrue;
+			}
+			if (evaluate('1', op, '0') == result) {
+				totalCount += firstHalfTrue * secondHalfFalse;
+			}
+			if (evaluate('1', op, '1') == result) {
+				totalCount += firstHalfTrue * secondHalfTrue;
+			}
+		}
+		return totalCount;
+	}
+
+	private static boolean convertIntToBool(char num) {
+		if (num == '1') {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private static boolean evaluate(char num1, char op, char num2) {
+		boolean b1 = convertIntToBool(num1);
+		boolean b2 = convertIntToBool(num2);
+		if (op == '&') {
+			return b1 & b2;
+		} else if (op == '|') {
+			return b1 | b2;
+		} else if (op == '^') {
+			return b1 ^ b2;
+		}
+		System.out.println("Did not found operator " + op);
+		return false;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 9.7 Paint Fill in Map]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/17/paint-fill-map/"/>
+    <updated>2014-09-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/17/paint-fill-map</id>
+    <content type="html"><![CDATA[### Question
+
+> Implement the "paint fill" function that one might see on many image editing programs. 
+
+> That is, given a screen (represented by a two-dimensional array of colors), a point, and a new color, __fill in the surrounding area__ until the color changes from the original color. 
+
+### Solution
+
+This is a BFS/DFS question, very similar to __[LeetCode 130] Surrounded Regions__. 
+
+__However, this question is not same as surrounding region__, because no temporary storage of state is needed, __and we DO NOT NEED TO keep track of the visited positions__! 
+
+Why is this? 
+
+1. This question, we simple change the color __from A to B__. 
+1. Surrounding Region is __change A to B, and B to A__. 
+
+That's why, the nature of 2 questions are different. 
+
+Code 1 is my first solution, and Code 2 is doing a BFS and set color directly to expected value. This type of questions is highly frequent and sometimes may cause confusions. 
+
+### Code
+
+__my code 1__, with 'temp' state
+
+	public static void PaintFill1(Color[][] screen, int posX, int posY,
+			Color ncolor) {
+		// the queue keeps the list of positions that I'm going to visit
+		Queue<Position> q = new LinkedList<Position>();
+		int len = screen.length;
+		Color original = screen[posX][posY];
+		// visited origin node first
+		q.offer(new Position(posX, posY));
+		while (!q.isEmpty()) {
+			// visit positions in q one by one (mark color as 'Temp')
+			Position p = q.poll();
+			if (p.x < 0 || p.x >= len || p.y < 0 || p.y >= len) {
+				// invalid pos coordinate
+				continue;
+			} else if (screen[p.x][p.y] == Color.Temp
+					|| screen[p.x][p.y] != original) {
+				continue;
+			}
+			screen[p.x][p.y] = Color.Temp;
+			q.offer(new Position(p.x - 1, p.y));
+			q.offer(new Position(p.x + 1, p.y));
+			q.offer(new Position(p.x, p.y - 1));
+			q.offer(new Position(p.x, p.y + 1));
+		}
+		// finish visiting all positions that's original color
+		for (int i = 0; i < len; i++) {
+			for (int j = 0; j < len; j++) {
+				if (screen[i][j] == Color.Temp) {
+					screen[i][j] = ncolor;
+				}
+			}
+		}
+	}
+
+__my code 2__, without 'temp' state
+
+	public static void PaintFill2(Color[][] screen, int posX, int posY,
+			Color ncolor) {
+		// the queue keeps the list of positions that I'm going to visit
+		Queue<Position> q = new LinkedList<Position>();
+		int len = screen.length;
+		Color original = screen[posX][posY];
+		// visited origin node first
+		q.offer(new Position(posX, posY));
+		while (!q.isEmpty()) {
+			// visit positions in q one by one (mark color as 'Temp')
+			Position p = q.poll();
+			if (p.x < 0 || p.x >= len || p.y < 0 || p.y >= len) {
+				// invalid pos coordinate
+				continue;
+			} else if (screen[p.x][p.y] != original) {
+				continue;
+			}
+			screen[p.x][p.y] = ncolor;
+			q.offer(new Position(p.x - 1, p.y));
+			q.offer(new Position(p.x + 1, p.y));
+			q.offer(new Position(p.x, p.y - 1));
+			q.offer(new Position(p.x, p.y + 1));
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 9.3 Find Magic Index]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/17/find-magic-index/"/>
+    <updated>2014-09-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/17/find-magic-index</id>
+    <content type="html"><![CDATA[### Question 1 
+
+> A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i. 
+
+> Given a sorted array of distinct integers, write a method to find a magic index, if one exists, in array A. 
+
+### Question 2 
+
+> FOLLOW UP: What if the values are not distinct? 
+
+### Solution
+
+__This is a difficult binary search question__! 
+
+__Question 1 is slightly easier__: we simplyl use binary search, and we are able to discard half of the array each time. 
+
+1. if (array[mid] > mid), then we discard the right half.
+1. if (array[mid] < mid), then we discard the left half.
+
+__Question 2 is difficult__. We cannot discard half of the input any more. Instead, we discard a range between (mid) and (array[mid]). Then check left and right part seperately. 
+
+So, I wrote the following code:
+
+	int mid = left + (right - left) / 2;
+	if (array[mid] == mid) {
+		return mid;
+	} else {
+		int smaller = Math.min(array[mid], mid);
+		int larger = Math.max(array[mid], mid);
+		int leftResult = helper(array, left, smaller);
+		if (leftResult != -1) {
+			return leftResult;
+		} else {
+			return helper(array, larger, right);
+		}
+	}
+
+This becomes an endless loop. We did not discard point 'mid' in the code above. The correct code is posted below. 
+
+### Code
+
+__code for non-duplicate input__
+
+	public static int myAnswerNonDup(int[] array) {
+		int len = array.length;
+		return helper(array, 0, len - 1);
+	}
+
+	public static int helper(int[] array, int left, int right) {
+		if (right < left) {
+			return -1;
+		}
+		int mid = left + (right - left) / 2;
+		if (array[mid] == mid) {
+			return mid;
+		} else if (array[mid] < mid) {
+			// discard all element to the left of array[mid]
+			return helper(array, mid + 1, right);
+		} else {
+			return helper(array, left, mid - 1);
+		}
+	}
+
+__code for have-duplicate input__
+
+	public static int myAnswerWithDup(int[] array) {
+		int len = array.length;
+		return helper(array, 0, len - 1);
+	}
+
+	public static int helper(int[] array, int left, int right) {
+		if (right < left) {
+			return -1;
+		}
+		int mid = left + (right - left) / 2;
+		if (array[mid] == mid) {
+			return mid;
+		} else {
+			int smaller = 0;
+			int larger = 0;
+			if (array[mid] < mid) {
+				smaller = array[mid];
+				larger = mid + 1;
+			} else if (array[mid] > mid) {
+				smaller = mid - 1;
+				larger = array[mid];
+			}
+			int leftResult = helper(array, left, smaller);
+			if (leftResult != -1) {
+				return leftResult;
+			} else {
+				return helper(array, larger, right);
+			}
+		}
+	}
 ]]></content>
   </entry>
   
