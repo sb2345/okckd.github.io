@@ -1,8 +1,10 @@
 ---
 layout: post
-title: "[CC150v4] 11.2 Random error debugging 2"
+title: "[CC150v4] 11.2 Random error debugging 2 "
 comments: true
-category: CC150v4
+categories:
+- CC150v4
+- Testing
 tags: [  ]
 ---
 
@@ -12,7 +14,7 @@ tags: [  ]
 
 ### Solution
 
-This question is from CC150v4, but my previous post __[Testing] Random error debugging 1__ already covered this question. 
+The solution is from __both CC150v4 and CC150v5__. My previous post __[Testing] Random error debugging 1__ already covered this question. 
 
 Again, the answer is very similar: 
 
@@ -20,6 +22,9 @@ Again, the answer is very similar:
 	1. RNG
 	1. depends on user input
 	1. depends on system date/time
+1. Uninitialized variable
+    1. can take on arbitrary value
+    1. can execute in different path
 1. Memory Leak
 	1. out of RAM
 	1. heap overflow
@@ -29,3 +34,5 @@ Again, the answer is very similar:
 	1. depends on some system attributed that's being modified by another application (this is especially for hardware-facing applications)
 
 In general, __Web server is more prone to Memory Leak__, and program that runs __close to system level__ is more prone to system dependency errors. 
+
+Additionally, we may be able to use tools to check for specific situations. For example, to investigate issue #2, we can __utilize runtime tools which check for uninitialized variables__. 
