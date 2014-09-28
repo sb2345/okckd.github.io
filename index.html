@@ -9,7 +9,8 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question You&#8217;reworking on the Google Chrome team when you receivea bug report: Chrome crashes on launch. What would you do? Step 1: Understand &hellip;">
+  <meta name="description" content="Question Solution Code
+">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +78,487 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/29/">[CC150v5] 14.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote></blockquote>
+
+<h3>Solution</h3>
+
+<h3>Code</h3>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values less than or equal to x).</p>
+
+<p>Implement the data structures and algorithms to support these operations. That is,implement the method <strong>track(int x)</strong>, which is called when each number is generated, and the method <strong>getRankOfNumber(int x)</strong>, which returns the number of values less than or equal to x (not including x itself).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This question requires a special type of Data Structure</strong>. It basically is a modified BST like this:</p>
+
+<blockquote><p>The tree node stores both number value and the <strong>count of node on left subtree</strong></p></blockquote>
+
+<p><img class="middle" src="/assets/images/get-rank-number-stream.png"></p>
+
+<p>Suppose we want to find the rank of 24 in the tree above. We would compare 24 with the root, 20, and find that 24 must reside on the right. The root has 4 nodes in its left subtree, and when we include the root itself, this gives us five total nodes smaller than 24. We set counter to 5.</p>
+
+<p>Then, we compare 24 with node 25 and find that 24 must be on the left. The value of counter does not update, since we&rsquo;re not &ldquo;passing over&rdquo; any smaller nodes. The value of counter is still 5.</p>
+
+<p>Next, we compare 24 with node 23,and find that 24 must be on the right. Counter gets incremented by just 1 (to 6), since 23 has no left nodes.</p>
+
+<p>Finally, we find 24 and we return counter: 6.</p>
+
+<h3>Code</h3>
+
+<p>I did not write code myself. It&rsquo;s too complex!</p>
+
+<p><strong>RankNode.java</strong></p>
+
+<pre><code>public class RankNode {
+    public int left_size = 0;
+    public RankNode left;
+    public RankNode right;
+    public int data = 0;
+    public RankNode(int d) {
+        data = d;
+    }
+
+    public void insert(int d) {
+        if (d &lt;= data) {
+            if (left != null) {
+                left.insert(d);
+            } else {
+                left = new RankNode(d);
+            }
+            left_size++;
+        } else {
+            if (right != null) {
+                right.insert(d);
+            } else {
+                right = new RankNode(d);
+            }
+        }
+    }
+
+    public int getRank(int d) {
+        if (d == data) {
+            return left_size;
+        } else if (d &lt; data) {
+            if (left == null) {
+                return -1;
+            } else {
+                return left.getRank(d);
+            }
+        } else {
+            int right_rank = right == null ? -1 : right.getRank(d);
+            if (right_rank == -1) {
+                return -1;
+            } else {
+                return left_size + 1 + right_rank;
+            }
+        }
+    }
+}
+</code></pre>
+
+<p><strong>Main Class</strong>:</p>
+
+<pre><code>public class Question {
+    private static RankNode root = null;
+
+    public static void track(int number) {
+        if (root == null) {
+            root = new RankNode(number);
+        } else {
+            root.insert(number);
+        }
+    }
+
+    public static int getRankOfNumber(int number) {
+        return root.getRank(number);
+    }
+
+    public static void main(String[] args) {
+        int size = 100;
+        int[] list = AssortedMethods.randomArray(size, -100, 100);
+        for (int i = 0; i &lt; list.length; i++) {
+            track(list[i]);
+        }
+
+        int[] tracker = new int[size];
+        for (int i = 0; i &lt; list.length; i++) {
+            int v = list[i];
+            int rank1 = root.getRank(list[i]);
+            tracker[rank1] = v;
+        }
+
+        for (int i = 0; i &lt; tracker.length - 1; i++) {
+            if (tracker[i] != 0 &amp;&amp; tracker[i + 1] != 0) {
+                if (tracker[i] &gt; tracker[i + 1]) {
+                    System.out.println("ERROR at " + i);
+                }
+            }
+        }
+
+        System.out.println("Array: " + AssortedMethods.arrayToString(list));
+        System.out.println("Ranks: " + AssortedMethods.arrayToString(tracker));
+    }
+
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
+
+<blockquote><ol>
+<li><p>找到heading的最长递增序列.</p></li>
+<li><p>找到tailing的最长的递增序列.</p></li>
+</ol>
+</blockquote>
+
+<p>After that:</p>
+
+<blockquote><ol>
+<li><p>用中间部分的min去shrink左边.</p></li>
+<li><p>用中间部分的max去shrink右边.</p></li>
+</ol>
+</blockquote>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static void findUnsortedSequence(int[] array, int[] ans) {
+    int len = array.length;
+    ans[0] = 0;
+    ans[1] = 0;
+
+    // find increasing sequence on left and on right
+    int leftPeak = 0;
+    while (leftPeak &lt; len - 1) {
+        if (array[leftPeak] &lt; array[leftPeak + 1]) {
+            leftPeak++;
+        } else {
+            break;
+        }
+    }
+    if (leftPeak == len - 1) {
+        return;
+    }
+    int rightBottom = len - 1;
+    while (rightBottom &gt; 0) {
+        if (array[rightBottom] &gt; array[rightBottom - 1]) {
+            rightBottom--;
+        } else {
+            break;
+        }
+    }
+
+    // leftPeak and rightBottom are found, now read mid part
+    int midMin = Integer.MAX_VALUE;
+    int midMax = Integer.MIN_VALUE;
+    for (int i = leftPeak; i &lt;= rightBottom; i++) {
+        midMin = Math.min(midMin, array[i]);
+        midMax = Math.max(midMax, array[i]);
+    }
+
+    // find left boudary and right boundary
+    int leftBound = leftPeak;
+    while (leftBound &gt;= 0) {
+        if (array[leftBound] &lt; midMin) {
+            break;
+        }
+        leftBound--;
+    }
+    int rightBound = rightBottom;
+    while (rightBound &lt; len) {
+        if (array[rightBound] &gt; midMax) {
+            break;
+        }
+        rightBound++;
+    }
+
+    // finish it up
+    ans[0] = leftBound + 1;
+    ans[1] = rightBound - 1;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement a <strong>CircularArray</strong> class that supports an array-like data structure which can be efficiently rotated.</p>
+
+<p>The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>First part of the question is solved by using an array and a pointer</strong>. The solution simplifies the question by fixing the array size (not a dynamic-resizing array).</p>
+
+<p><strong>The difficult part is how to write iterator</strong>.</p>
+
+<p>Note that we should support <strong>Java Generics</strong>:</p>
+
+<pre><code>class MyCircularArray&lt;T&gt;
+</code></pre>
+
+<p>Implement <strong>Iterable Interface</strong>:</p>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+}
+</code></pre>
+
+<p>Override <strong>iterator() method</strong>:</p>
+
+<pre><code>@Override
+public Iterator&lt;T&gt; iterator() {
+    return new MyIterator&lt;T&gt;(this);
+}
+</code></pre>
+
+<p>Write our own <strong>Iterator Class</strong>:</p>
+
+<pre><code>class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+}
+</code></pre>
+
+<p>Finish it up</p>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+        return new MyIterator&lt;T&gt;(this);
+    }
+
+    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+        @Override
+        public boolean hasNext() {
+        }
+
+        @Override
+        public T next() {
+        }
+
+        @Override
+        public void remove() {
+        }
+    }
+}
+</code></pre>
+
+<p>It might be confusing when implementing <strong>Iterable</strong> and <strong>Iterator</strong> Class.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+
+    T[] items;
+
+    int head;
+    int cur;
+
+    public MyCircularArray(int size) {
+        // this is really important (casting the type)
+        items = (T[]) new Object[size];
+
+        head = 0;
+        cur = 0;
+    }
+
+    public void put(T item) {
+        items[cur++] = item;
+        cur = cur % items.length;
+    }
+
+    public T get(int i) {
+        int newIndex = (i + head) % items.length;
+        return items[newIndex];
+    }
+
+    public void rotate(int shiftRight) {
+        head += shiftRight;
+        head = head % items.length;
+    }
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+        return new MyIterator&lt;T&gt;(this);
+    }
+
+    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+
+        T[] items;
+        int head;
+        int count;
+
+        public MyIterator(MyCircularArray&lt;T&gt; array) {
+            this.items = array.items;
+            this.head = array.head;
+            this.count = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.count != items.length;
+        }
+
+        @Override
+        public T next() {
+            if (hasNext()) {
+                return items[(head + count++) % items.length];
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+        }
+    }
+
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -183,7 +665,7 @@
 
 <h3>Solution</h3>
 
-<p><strong>External Sort</strong></p>
+<p>Use <strong>External Sort</strong>.</p>
 
 <ol>
 <li><p>First divide the file into chunks which are x megabytes each, where x is the amount of memory we have available.</p></li>
@@ -191,94 +673,6 @@
 <li><p>Once all the chunks are sorted, we then merge the chunks, one by one.</p></li>
 </ol>
 
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/24/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers (`)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values less than or equal to x).</p>
-
-<p>Implement the data structures and algorithms to support these operations. That is,implement the method <strong>track(int x)</strong>, which is called when each number is generated, and the method <strong>getRankOfNumber(int x)</strong>, which returns the number of values less than or equal to x (not including x itself).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Too sleepy to do this.</p>
-
-<h3>Code</h3>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/24/">[CC150v5] 14.</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote></blockquote>
-
-<h3>Solution</h3>
-
-<h3>Code</h3>
 </div>
   
   
@@ -682,115 +1076,6 @@ public static int helper(int[] array, int left, int right) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a program to swap odd and even bits in an integer with as few instructions as possible (e.g., bit 0 and bit 1 are swapped, bit 2 and bit 3 are swapped, and so on).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Mask odd and even bits seperately.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int swapOddEvenBits(int x) {
-    return (((x &amp; 0xaaaaaaaa) &gt;&gt; 1) | ((x &amp; 0x55555555) &lt;&lt; 1));
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">link</a></p>
-
-<blockquote><p>给你一个password 假定6位</p>
-
-<p>有个function, 每call一次就给你一个triplet 是password 里的随即三位(order不变)。比如google, 可能返回: ggl, goe, oog, ool&hellip;</p>
-
-<p>问如何最有效破译这个密码?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is just a rough idea suggested by Level 6 from the post.</p>
-
-<blockquote><p>六位密码随机给三位，应该有C(6, 3) = 20个bucket。</p>
-
-<p>如果密码是abcdef，那么以a开头的bucket应该是10个。以b开头的buckt应该是6个，以c开头的是3个，以d开头的是1个。</p>
-
-<p>如果abcd中间有相同，那么就会出现以a开头的是11个（abca)，13个(abad)，14个(abaa)，16个(aacd)，17个(aaca),19个(aaad)或者20个(aaaa).</p></blockquote>
-
-<p>So we generate many triplets, and calculate based on their frequencies.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -805,7 +1090,7 @@ public static int helper(int[] array, int left, int right) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (25)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (26)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -828,23 +1113,23 @@ public static int helper(int[] array, int left, int right) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/29/">[CC150v5] 14.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] Chap12 Example - Troubleshoot Google Chrome</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/sort-20GB-file/">[CC150v5] 11.4 Sort 20GB File</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers (`)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/">[CC150v5] 14.</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>
       </li>
     
   </ul>

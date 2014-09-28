@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question A circus is designing a tower routine consisting of people standing atop one another’s shoulders. For practical and aesthetic reasons, each &hellip;">
+  <meta name="description" content="Question link 有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。 注意：query是动态的输入进行查询的，预先并不知道所有的query。 Solution Basic idea of the solution is to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,107 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/14/Large-string-find-substring/">[Facebook] Large String Find Substring</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#15">link</a></p>
+
+<blockquote><p>有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。</p>
+
+<p>注意：query是动态的输入进行查询的，预先并不知道所有的query。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Basic idea of the solution is to use Prefix Tree (Trie)</strong> and similar alternatives.</p>
+
+<p><strong>Solution 1</strong> is <a href="http://www.itint5.com/discuss/27/%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E9%A2%84%E5%A4%84%E7%90%86">an nice idea using HashMap</a>.</p>
+
+<blockquote><p>我是把所有长度&lt; =10的子串，哈希一下存放到10个哈希表中。</p>
+
+<p>至于哈希函数的选取，随便选一个应该都不会超时。</p></blockquote>
+
+<p><strong>Solution 2</strong> is using so-called &lsquo;<strong>prefix array</strong>&rsquo;. The most important point of this idea is to only make a substring instance <strong>for every 10 characters</strong>.</p>
+
+<blockquote><p>只用=10的子串。然后二分查找</p>
+
+<p>用=10的字串排序即可，如包含更短的串会使得预处理变成O(10nlg(10n))。 查找的复杂度可能没什么变化，使用&lt;=10会是O(lg(10n))，而只使用=10子串初始化的话，因为可能还要进行短query跟长子串间的前缀比较，复杂度会是O(10lgn)，稍微有点提高。</p></blockquote>
+
+<p>Which is to say, using substring length == 10, we comsume <strong>less time for pre-processing</strong>, and a little <strong>more time when querying</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>read it from <a href="http://www.itint5.com/discuss/203/%E8%B6%85%E7%AE%80%E5%8D%95%E7%9A%84prefix-array-java-code">here</a></strong>, note written by me</p>
+
+<pre><code>private List&lt;String&gt; prefixList;
+
+// pre-process the large string
+public void initWithString(String str) {
+    Set&lt;String&gt; strs = new HashSet&lt;String&gt;();
+
+    for(int i = 0; i &lt; str.length(); ++i) {
+        strs.add(str.substring(i, Math.min(str.length(), i + 10)));
+    }
+    prefixList = new ArrayList&lt;String&gt;(strs);
+    Collections.sort(prefixList);
+}
+
+// find the query substring
+public boolean existSubString(String query) {
+    int low = 0;
+    int high = prefixList.size() - 1;
+    while(low &lt;= high) {
+        int mid = (low + high) / 2;
+        int comp = prefixList.get(mid).compareTo(query);
+        if(comp == 0)  {
+            return true;
+        }
+        if(prefixList.get(mid).startsWith(query)) {
+            return true;
+        }
+        if(comp &gt; 0) //mid &gt; query
+        {
+            high = mid - 1;
+        }else{
+            low = mid + 1;
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -727,54 +828,6 @@ k: number of hash functions
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-existence-of-number/">[Design] Big Data - Find Existence of a Number</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
-
-<blockquote><p>给40亿个不重复的unsigned int的整数，没排过序的，然后再给一个数，如何快速判断这个数是否在那40亿个数当中？</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Categorized under <strong>BitMap</strong>.</p>
-
-<p>There&rsquo;re 4.3 billion unsigned integers in Java. This is a perfect question to use BitMap.</p>
-
-<p>申请512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/14">&larr; Older</a>
@@ -791,7 +844,7 @@ k: number of hash functions
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (25)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (26)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -814,23 +867,23 @@ k: number of hash functions
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/29/">[CC150v5] 14.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] Chap12 Example - Troubleshoot Google Chrome</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/sort-20GB-file/">[CC150v5] 11.4 Sort 20GB File</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers (`)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/">[CC150v5] 14.</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>
       </li>
     
   </ul>

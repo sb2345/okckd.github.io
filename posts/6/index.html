@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question You are given a binary tree in which each node contains a value. Design an algorithm to print all paths which sum up to that value. Note &hellip;">
+  <meta name="description" content="Question Given a (decimal &ndash; e.g. 3.72) number that is passed in as a string, print the binary representation. If the number can not be &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,155 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/convert-integer-to-binary/">[CC150v4] 5.2 Convert Integer to Binary Form</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given a (decimal &ndash; e.g. 3.72) number that is passed in as a string, print the binary representation.</p>
+
+<p>If the number can not be represented accurately in binary, print “ERROR”</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Convert the integer part is easy.</p>
+
+<p><strong>The difficulty is how to convert a floating point (the decimal part) to binary form</strong>. The idea suggested in the book is to keep x2, and subtract 1 when necessary. Eg.</p>
+
+<blockquote><p>0.625 x 2 = 1.25, append 1</p>
+
+<p>0.25 x 2 = 0.5, append 0</p>
+
+<p>0.5 x 2 = 1, append 1</p>
+
+<p>the binary form of 0.625 would be 0.101.</p></blockquote>
+
+<p>We must declarify the max number of digits in the decimal part. In the book, <strong>the answer assumes a maximum digits of 32 bits</strong> (i.e. when binary length grows more than 32 bits, return &ldquo;Error&rdquo;).</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static String printBinary(String n) {
+    String[] num = n.split("\\.");
+    int integer = Integer.parseInt(num[0]);
+    double decimal = Double.parseDouble("0." + num[1]);
+
+    // now convert decimal part, if can't convert, return ERROR
+    StringBuilder sb = new StringBuilder();
+    while (decimal != 0) {
+        if (sb.length() &gt; 32) {
+            return "ERROR";
+        }
+        double newDoub = 2 * decimal;
+        sb.append(newDoub &gt;= 1 ? "1" : "0");
+        decimal = newDoub % 1;
+    }
+
+    // now convert integer part
+    String intStr = "";
+    while (integer != 0) {
+        intStr = ((integer &amp; 1) == 1 ? "1" : "0") + intStr;
+        integer = integer &gt;&gt; 1;
+    }
+
+    // return the 2 parts connected with a dot
+    return intStr + "." + sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/06/sort-stack/">[CC150v4] 3.6 Sort Stack</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a program to sort a stack in ascending order. You should not make any assumptions about how the stack is implemented.</p>
+
+<p>The following are the only functions that should be used to write this program: push | pop | peek | isEmpty.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a very good question that tests stack operations.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static Stack&lt;Integer&gt; sort(Stack&lt;Integer&gt; s) {
+    Stack&lt;Integer&gt; result = new Stack&lt;Integer&gt;();
+    while (!s.isEmpty()) {
+        Integer nextNum = s.pop();
+        while (!result.isEmpty() &amp;&amp; result.peek() &lt; nextNum) {
+            s.push(result.pop());
+        }
+        result.push(nextNum);
+    }
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -735,163 +884,6 @@ private void helper(int max, String prefix, int pos, int len, boolean have5) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/04/Code-a-hashmap/">[Google] Code a HashMap</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-04T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
-
-<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We already write 2 post before:</p>
-
-<ol>
-<li><p><strong>[Question] Implement a HashMap</strong></p></li>
-<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
-</ol>
-
-
-<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
-
-<ol>
-<li>The basic structure is an array. It can be:
-
-<ol>
-<li>An array of linked nodes (with a next pointer).</li>
-<li>An array of linked list.</li>
-</ol>
-</li>
-<li>There should be a hash function.</li>
-<li>There should be a function to convert the hash value to corresponding array index.</li>
-<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
-<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/03/weird-sort-array/">[Google] Weird Sort Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32772813.html">link</a></p>
-
-<blockquote><p>数组排序， 排成 a1<a2>a3<a4>a5。。。这种形式。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>The are 2 solutions</strong>. The easy one is this:</p>
-
-<blockquote><p>sort first, then 把临近的奇数换到偶数(index)上, O(nlog n).</p></blockquote>
-
-<p><strong>There&rsquo;s a great O(n) solution however</strong>, not easy to think:</p>
-
-<blockquote><p>两两比较相邻数字，把大的数字放到下标为奇数的位置。 O(n).</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>O(nlgn) solution</strong></p>
-
-<pre><code>public void solutionOnlgn(int[] A) {
-    // this is a O(nlgn) solution
-    Arrays.sort(A);
-    for (int i = 2; i &lt; A.length; i += 2) {
-        swap(A, i - 1, i);
-    }
-}
-
-private void swap(int[] A, int a, int b) {
-    A[a] ^= A[b];
-    A[b] ^= A[a];
-    A[a] ^= A[b];
-}
-</code></pre>
-
-<p><strong>O(n) solution</strong></p>
-
-<pre><code>public void solutionOn(int[] A) {
-    // this is a O(n) solution
-    for (int i = 1; i &lt; A.length; i++) {
-        // compare (i)th with (i-1)th, and put the large value
-        // at odd-indexed positions
-        if ((A[i - 1] &lt; A[i] &amp;&amp; i % 2 == 0)
-                || (A[i - 1] &gt; A[i] &amp;&amp; i % 2 == 1)) {
-            swap(A, i - 1, i);
-        }
-    }
-}
-
-private void swap(int[] A, int a, int b) {
-    A[a] ^= A[b];
-    A[b] ^= A[a];
-    A[a] ^= A[b];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/7">&larr; Older</a>
@@ -908,7 +900,7 @@ private void swap(int[] A, int a, int b) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (25)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (26)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -931,23 +923,23 @@ private void swap(int[] A, int a, int b) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/29/">[CC150v5] 14.</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] Chap12 Example - Troubleshoot Google Chrome</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/sort-20GB-file/">[CC150v5] 11.4 Sort 20GB File</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers (`)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/">[CC150v5] 14.</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>
       </li>
     
   </ul>
