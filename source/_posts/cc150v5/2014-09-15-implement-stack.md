@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v5] Chap 3 Example - Implement Stack "
+title: "[CC150v5] 3.0 Example - Implement Stack "
 comments: true
 category: CC150v5
 tags: [ src ]

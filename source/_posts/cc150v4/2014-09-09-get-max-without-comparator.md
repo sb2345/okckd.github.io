@@ -16,6 +16,8 @@ tags: [ src ]
 >
 > Output: 10
 
+This is also on __CC150v5 Q17.4__. 
+
 ### Solution
 
 We can't use >, < or if-else statement, but we can use mathematical operator like subtract and bit operators. 
@@ -42,7 +44,7 @@ __first solution from v4__, written by me:
 		return a - signBit * c;
 	}
 
-__modified solution__
+__modified solution__, no overflow issues. 
 
 	public static int getMax(int a, int b) {
 		int sign;
