@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[LeetCode Plus] Convert Binary Search Tree to Circular Doubly-Linked List"
+title: "[LeetCode Plus] Convert BST to Circular Doubly-Linked List"
 comments: true
 category: leetcode_plus
 tags: [ src ]
