@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would &hellip;">
+  <meta name="description" content="Question 1 A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i. Given a sorted array of distinct integers, write a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,445 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/17/find-magic-index/">[CC150v5] 9.3 Find Magic Index</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question 1</h3>
+
+<blockquote><p>A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i.</p>
+
+<p>Given a sorted array of distinct integers, write a method to find a magic index, if one exists, in array A.</p></blockquote>
+
+<h3>Question 2</h3>
+
+<blockquote><p>FOLLOW UP: What if the values are not distinct?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult binary search question</strong>!</p>
+
+<p><strong>Question 1 is slightly easier</strong>: we simplyl use binary search, and we are able to discard half of the array each time.</p>
+
+<ol>
+<li>if (array[mid] > mid), then we discard the right half.</li>
+<li>if (array[mid] &lt; mid), then we discard the left half.</li>
+</ol>
+
+
+<p><strong>Question 2 is difficult</strong>. We cannot discard half of the input any more. Instead, we discard a range between (mid) and (array[mid]). Then check left and right part seperately.</p>
+
+<p>So, I wrote the following code:</p>
+
+<pre><code>int mid = left + (right - left) / 2;
+if (array[mid] == mid) {
+    return mid;
+} else {
+    int smaller = Math.min(array[mid], mid);
+    int larger = Math.max(array[mid], mid);
+    int leftResult = helper(array, left, smaller);
+    if (leftResult != -1) {
+        return leftResult;
+    } else {
+        return helper(array, larger, right);
+    }
+}
+</code></pre>
+
+<p>This becomes an endless loop. We did not discard point &lsquo;mid&rsquo; in the code above. The correct code is posted below.</p>
+
+<h3>Code</h3>
+
+<p><strong>code for non-duplicate input</strong></p>
+
+<pre><code>public static int myAnswerNonDup(int[] array) {
+    int len = array.length;
+    return helper(array, 0, len - 1);
+}
+
+public static int helper(int[] array, int left, int right) {
+    if (right &lt; left) {
+        return -1;
+    }
+    int mid = left + (right - left) / 2;
+    if (array[mid] == mid) {
+        return mid;
+    } else if (array[mid] &lt; mid) {
+        // discard all element to the left of array[mid]
+        return helper(array, mid + 1, right);
+    } else {
+        return helper(array, left, mid - 1);
+    }
+}
+</code></pre>
+
+<p><strong>code for have-duplicate input</strong></p>
+
+<pre><code>public static int myAnswerWithDup(int[] array) {
+    int len = array.length;
+    return helper(array, 0, len - 1);
+}
+
+public static int helper(int[] array, int left, int right) {
+    if (right &lt; left) {
+        return -1;
+    }
+    int mid = left + (right - left) / 2;
+    if (array[mid] == mid) {
+        return mid;
+    } else {
+        int smaller = 0;
+        int larger = 0;
+        if (array[mid] &lt; mid) {
+            smaller = array[mid];
+            larger = mid + 1;
+        } else if (array[mid] &gt; mid) {
+            smaller = mid - 1;
+            larger = array[mid];
+        }
+        int leftResult = helper(array, left, smaller);
+        if (leftResult != -1) {
+            return leftResult;
+        } else {
+            return helper(array, larger, right);
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a program to swap odd and even bits in an integer with as few instructions as possible (e.g., bit 0 and bit 1 are swapped, bit 2 and bit 3 are swapped, and so on).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Mask odd and even bits seperately.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int swapOddEvenBits(int x) {
+    return (((x &amp; 0xaaaaaaaa) &gt;&gt; 1) | ((x &amp; 0x55555555) &lt;&lt; 1));
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">link</a></p>
+
+<blockquote><p>给你一个password 假定6位</p>
+
+<p>有个function, 每call一次就给你一个triplet 是password 里的随即三位(order不变)。比如google, 可能返回: ggl, goe, oog, ool&hellip;</p>
+
+<p>问如何最有效破译这个密码?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is just a rough idea suggested by Level 6 from the post.</p>
+
+<blockquote><p>六位密码随机给三位，应该有C(6, 3) = 20个bucket。</p>
+
+<p>如果密码是abcdef，那么以a开头的bucket应该是10个。以b开头的buckt应该是6个，以c开头的是3个，以d开头的是1个。</p>
+
+<p>如果abcd中间有相同，那么就会出现以a开头的是11个（abca)，13个(abad)，14个(abaa)，16个(aacd)，17个(aaca),19个(aaad)或者20个(aaaa).</p></blockquote>
+
+<p>So we generate many triplets, and calculate based on their frequencies.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a function to determine the number of bits (change) required to convert integer A to integer B.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The only thing to know is <strong>how to count the number of &lsquo;1&rsquo;s in a integer</strong>. It&rsquo;s like this:</p>
+
+<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
+
+<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>code 1</strong></p>
+
+<pre><code>public static int calcBitsSwapMe1(int a, int b) {
+    int num = a ^ b;
+    int count = 0;
+    while (num != 0) {
+        count += num &amp; 1;
+        num = num &gt;&gt;&gt; 1;
+    }
+    return count;
+}
+</code></pre>
+
+<p><strong>code 2</strong></p>
+
+<pre><code>public static int calcBitsSwapMe2(int a, int b) {
+    int num = a ^ b;
+    int count = 0;
+    while (num != 0) {
+        num = num &amp; (num - 1);
+        count++;
+    }
+    return count;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You have 20 bottles of pills. 19 bottles have 1.0 gram pills, but one has pills of weight 1.1 grams.</p>
+
+<p>Given a scale, how to find the heavy bottle <strong>only scaling ONCE</strong>?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Take 1 pill from Bottle 1, 2 pills from Bottle 2, and so on. We&rsquo;ll expect (1 + 2 + &hellip; + 20) = 210 gram of pills.</p>
+
+<p>The answer would be {(weight &ndash; 210 grams) / 0.1}.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/binary-merge-two-numbers/">[CC150v5] 5.1 Binary Merge 2 Numbers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You are given two 32-bit numbers, N andM, and two bit positions, i and j. Write a method to insert M into Nsuch that M starts at bit j and ends at bit i. You can assume that the bits j through i have enough space to fit all ofM. That is, ifM= 10011, you can assume that there are at least 5 bits between j and i. You would not, for example, have j-3 and i=2, because M could not fully fit between bit 3 and bit 2.</p>
+
+<p>EXAMPLE:</p>
+
+<p>Input: N = 16000000000, M = 10011, i = 2, j = 6</p>
+
+<p>Output: N = 10001001100</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a basic bit manipulation question</strong>. The key is to use binary maks. Two things to note:</p>
+
+<ol>
+<li><p>The &lsquo;~&rsquo; means negate. So (~0) is a sequence of 1 (the value equals to -1).</p></li>
+<li><p>When shifting bits, <strong>DO NOT USE &lsquo;>>&rsquo; because it&rsquo;s signed shift</strong>. Instead, <strong>use &lsquo;>>>&rsquo; (unsigned right shift operator)</strong>.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static int myAnswer(int n, int m, int i, int j) {
+    int rr = (~0 &gt;&gt;&gt; (31 - j));
+    int ll = (~0 &lt;&lt; i);
+    // printBinary(rr);
+    // printBinary(ll);
+
+    int middleMask = ll &amp; rr;
+    int twoEndMask = ll ^ rr;
+
+    n = n &amp; twoEndMask;
+    m = (m &lt;&lt; i) &amp; middleMask;
+
+    return n | m;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -534,424 +973,6 @@ public static boolean helper2(int from, int to) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/14/kth-last-element-recursive/">[CC150v5] 2.2 Kth Last Element (Recursive)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-14T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement an algorithm to find the kth to last element of a singly linked list.</p>
-
-<p>Do it recursively.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Iterative solution is easy, <strong>recursive is not</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>private static int myAns = -1;
-
-public static int nthToLastMe(LinkedListNode head, int n) {
-    if (head == null) {
-        return 0;
-    } else if (nthToLastMe(head.next, n) &lt; n - 1) {
-        return nthToLastMe(head.next, n) + 1;
-    } else if (nthToLastMe(head.next, n) == n - 1) {
-        myAns = head.data;
-        return Integer.MAX_VALUE;
-    }
-    return Integer.MAX_VALUE;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>What protocol is used for communicating with a DNS?</p></blockquote>
-
-<h3>Answer</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Domain_Name_System">Domain Name System</a> (DNS) is a hierarchical distributed naming system for computers, services, or any resource connected to the Internet or a private network. It associates various information with domain names assigned to each of the participating entities. Most prominently, it translates easily memorized domain names to the numerical IP addresses needed for the purpose of locating computer services and devices worldwide. The Domain Name System is an essential component of the functionality of the Internet.</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Domain_Name_System#Protocol_transport">DNS primarily uses</a> <strong>User Datagram Protocol (UDP)</strong> on port number 53 to serve requests.</p>
-
-<p>DNS queries consist of a single UDP request from the client followed by a single UDP reply from the server.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/11/celebrity-problem/">[Question] Celebrity Problem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=13167666">link</a></p>
-
-<blockquote><p>You have a room with n people. A celebrity walks in. Everyone knows the celebrity, the celebrity knows no one.</p>
-
-<p>Non-celebrities may/may not know anyone in the room.</p>
-
-<p>Give an algorithm to find the celebrity. Discuss the complexity.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><a href="http://www.geeksforgeeks.org/the-celebrity-problem/">Classic brute-force solution</a> would take O(n<sup>2</sup>) time to build a map. That&rsquo;s not good, and we have a very simple solution that works in O(n) time:</p>
-
-<blockquote><p>Make all of them stand in a row. Let&rsquo;s say the people are a,b,c,d,e,f,g,h,i,j,&hellip;&hellip;.n</p>
-
-<p>Compare a and b. <strong>If a knows b</strong>, a is not celebrity. <strong>If a doesn&rsquo;t know b</strong>, b is not celebrity.</p>
-
-<p>At the end, the probable celebrity who survives is the certain celebrity. (better do a check)</p></blockquote>
-
-<p>Total number of comparison is <a href="http://www.geeksforgeeks.org/the-celebrity-problem/">3(N-1) times</a>.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32631467_0_1.html">link</a></p>
-
-<blockquote><p>2d array ＊代表障碍物 ＃代表货物 空白就是正常的路</p>
-
-<p>问如何找到一个点为出发点 能实现总共取货路径最短？ 每次只能拿一个货物，遇到障碍需要绕开，拿到以后要放回出发点，然后再取另一个.</p></blockquote>
-
-<pre><code>＊＊＊＊＊＊＊＊＊＊
-＊  #           ＊
-＊  ＊＊＊  ＊   ＊
-＊              ＊
-＊     ＊＊   ＊ ＊
-＊  #    # # ＊＊＊
-＊＊＊＊＊＊＊＊＊＊
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>This looks like a very difficult question, especially during a phone interview.</p>
-
-<p><strong>The 10th floor gives the best solution</strong>:</p>
-
-<blockquote><p><strong>BFS from every box</strong>. in each box, a non-blocking cell (include box position, but exclude hazard position) will have a weight value, stand for the distance to the box.</p>
-
-<p>after bfs from all the boxes, each cell will have k weight, k is the number of boxes. sum all the weight in each cell, and find the cell with smallest sum of weight.</p>
-
-<p>One problem of this solution may lead to a cell of a box. We can then sort the cell by sum of weight and find the first position that is not a box.</p>
-
-<p>complexity O(k*n<sup>2</sup>)</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">link</a></p>
-
-<blockquote><p>Given a sorted set, find if there exist three elements in Arithmetic Progression or not.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a rather simple Arithmetic Progression question</strong>.</p>
-
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">To find the three elements</a>, we first fix an element as middle element and search for other two (one smaller and one greater).</p></blockquote>
-
-<p>O(n<sup>2</sup>) time.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public boolean longest(int[] A) {
-    int len = A.length;
-    for (int i = 1; i &lt; len - 1; i++) {
-        int left = i - 1;
-        int right = i + 1;
-        while (left &gt;= 0 &amp;&amp; right &lt; len) {
-            int total = A[left] + A[right];
-            if (total &gt; 2 * A[i]) {
-                left--;
-            } else if (total &lt; 2 * A[i]) {
-                right++;
-            } else {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=8211177">link</a></p>
-
-<blockquote><p>Given an array of integers A, give an algorithm to find the longest Arithmetic progression in it, i.e find a sequence i1 &lt; i2 &lt; … &lt; ik, such that</p>
-
-<p>A[i1], A[i2], …, A[ik] forms an arithmetic progression, and k is the largest possible.</p>
-
-<p>The sequence S1, S2, …, Sk is called an arithmetic progression if S(j+1) – S(j) is a constant.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a rather difficult Arithmetic Progression question</strong>.</p>
-
-<p>The solution is 2-D DP.</p>
-
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">The idea is</a> to create a 2D table dp[n][n]. An entry dp[i][j] in this table stores LLAP with input[i] and input[j] as first two elements of AP(j > i).</p>
-
-<p>The last column of the table is always 2. Rest of the table is filled <strong>from bottom right to top left</strong>.</p>
-
-<p>To fill rest of the table, j (second element in AP) is first fixed. i and k are searched for a fixed j. If i and k are found such that i, j, k form an AP, then <strong>the value of dp[i][j] is set as dp[j][k] + 1</strong>.</p>
-
-<p><strong>Note that the value of dp[j][k] must have been filled</strong> before as the loop traverses from right to left columns.</p></blockquote>
-
-<p>The 2 difficult points of this question:</p>
-
-<ol>
-<li>how to come up with the transation formula. (i.e. <strong>dp[i][j] = dp[j][k] + 1</strong>, when (i, j, k) forms a AP).</li>
-<li>how to fill up all dp[i][j] in each loop of j. (Once inside the if-else, once outside the main while-loop)</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public int longest(int[] A) {
-    int len = A.length;
-    int[][] dp = new int[len][len];
-    for (int i = 0; i &lt; len; i++) {
-        // the pair ending at last position is always a progression
-        dp[i][len - 1] = 2;
-    }
-    int longest = 1;
-    for (int j = len - 2; j &gt;= 0; j--) {
-        // for each j, find i and k that makes 1 progression
-        int i = j - 1;
-        int k = j + 1;
-        while (i &gt;= 0 &amp;&amp; k &lt; len) {
-            int total = A[i] + A[k];
-            if (total &gt; 2 * A[j]) {
-                // this is important!
-                dp[i][j] = 2;
-                i--;
-            } else if (total &lt; 2 * A[j]) {
-                k++;
-            } else {
-                // found a valid progression triplet A(i, j, k)
-                dp[i][j] = dp[j][k] + 1;
-                longest = Math.max(longest, dp[i][j]);
-                i--;
-                k++;
-            }
-        }
-        // this is important!
-        while (i &gt;= 0) {
-            dp[i][j] = 2;
-            i--;
-            // If the loop was stopped due to k becoming more than
-            // n-1, set the remaining dp[i][j] as 2
-        }
-    }
-    return longest;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -968,7 +989,7 @@ public static int nthToLastMe(LinkedListNode head, int n) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (22)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (27)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -979,7 +1000,7 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
-<li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
@@ -991,23 +1012,23 @@ public static int nthToLastMe(LinkedListNode head, int n) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/18/">[CC150v5] 9.</a>
+        <a href="/blog/2014/09/29/">[CC150v5] 14.</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>
+        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/17/parenthesize-expression/">[CC150v5] 9.11 Parenthesize the Expression</a>
+        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/17/paint-fill-map/">[CC150v5] 9.7 Paint Fill in Map</a>
+        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/17/find-magic-index/">[CC150v5] 9.3 Find Magic Index</a>
+        <a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] Chap12 Example - Troubleshoot Google Chrome</a>
       </li>
     
   </ul>

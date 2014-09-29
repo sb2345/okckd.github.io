@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Cc150v5 | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/cc150v5/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-19T10:32:39+08:00</updated>
+  <updated>2014-09-29T19:02:11+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,9 +14,9 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[CC150v5] 9.]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/18/"/>
-    <updated>2014-09-18T00:00:00+08:00</updated>
+    <title type="html"><![CDATA[[CC150v5] 14.]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/29/"/>
+    <updated>2014-09-29T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/09/</id>
     <content type="html"><![CDATA[### Question
 
@@ -33,348 +33,383 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v5] 9.10 Stack Up the Boxes]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/17/stack-up-boxes/"/>
-    <updated>2014-09-17T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/17/stack-up-boxes</id>
+    <title type="html"><![CDATA[[CC150v5] 11.8 Get Rank in Stream of Integers]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/28/get-rank-stream-integers/"/>
+    <updated>2014-09-28T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/28/get-rank-stream-integers</id>
     <content type="html"><![CDATA[### Question
 
-> You have a stack of n boxes, with widths w., heights h, and depths d. The boxes can only be stacked on top of one another if each box is strictly larger than the box above it in width, height, and depth. 
+> Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values less than or equal to x). 
 
-> Implement a method to build the tallest stack possible, where the height of a stack is the sum of the heights of each box. 
+> Implement the data structures and algorithms to support these operations. That is,implement the method __track(int x)__, which is called when each number is generated, and the method __getRankOfNumber(int x)__, which returns the number of values less than or equal to x (not including x itself). 
 
 ### Solution
 
-This is appearantly a DP question. I did it in the normal way, and the solution turns out to be very good: 
+__This question requires a special type of Data Structure__. It basically is a modified BST like this: 
 
-	DP solution is        2638ms
-	Recursive solution is 1322ms
-	My solution is         370ms
+> The tree node stores both number value and the __count of node on left subtree__
 
-I could not understand the 2 solutions given in the book. Sorry.
+<img class="middle" src="/assets/images/get-rank-number-stream.png">
 
-The coding is a bit lengthy, and we keeps 2 DP arrays. __Not an easy question of course__, but the solution is actually standard. 
+Suppose we want to find the rank of 24 in the tree above. We would compare 24 with the root, 20, and find that 24 must reside on the right. The root has 4 nodes in its left subtree, and when we include the root itself, this gives us five total nodes smaller than 24. We set counter to 5.
+
+Then, we compare 24 with node 25 and find that 24 must be on the left. The value of counter does not update, since we're not "passing over" any smaller nodes. The value of counter is still 5. 
+
+Next, we compare 24 with node 23,and find that 24 must be on the right. Counter gets incremented by just 1 (to 6), since 23 has no left nodes.
+
+Finally, we find 24 and we return counter: 6.
 
 ### Code
 
-	public static ArrayList<Box> createStack(Box[] boxes) {
-		ArrayList<Box> ans = new ArrayList<Box>();
-		int len = boxes.length;
-		int[] heights = new int[len];
-		int[] preMap = new int[len];
-		int maxIndex = 0;
+I did not write code myself. It's too complex! 
 
-		// start DP
-		for (int i = 0; i < len; i++) {
-			heights[i] = boxes[i].height;
-			preMap[i] = -1;
-			for (int j = 0; j < i; j++) {
-				if (boxes[j].canBeAbove(boxes[i])) {
-					int newHeight = heights[j] + boxes[i].height;
-					if (newHeight > heights[i]) {
-						heights[i] = newHeight;
-						preMap[i] = j;
-					}
-				}
-			}
-			// now updated maxIndex
-			if (heights[i] > heights[maxIndex]) {
-				maxIndex = i;
-			}
-		}
+__RankNode.java__
 
-		// print from maxIndex all the way backwards
-		while (maxIndex != -1) {
-			ans.add(boxes[maxIndex]);
-			// the print order is reversed, so...
-			maxIndex = preMap[maxIndex];
-		}
-		return ans;
-	}
+    public class RankNode {
+        public int left_size = 0;
+        public RankNode left;
+        public RankNode right;
+        public int data = 0;
+        public RankNode(int d) {
+            data = d;
+        }
+
+        public void insert(int d) {
+            if (d <= data) {
+                if (left != null) {
+                    left.insert(d);
+                } else {
+                    left = new RankNode(d);
+                }
+                left_size++;
+            } else {
+                if (right != null) {
+                    right.insert(d);
+                } else {
+                    right = new RankNode(d);
+                }
+            }
+        }
+
+        public int getRank(int d) {
+            if (d == data) {
+                return left_size;
+            } else if (d < data) {
+                if (left == null) {
+                    return -1;
+                } else {
+                    return left.getRank(d);
+                }
+            } else {
+                int right_rank = right == null ? -1 : right.getRank(d);
+                if (right_rank == -1) {
+                    return -1;
+                } else {
+                    return left_size + 1 + right_rank;
+                }
+            }
+        }
+    }
+
+__Main Class__: 
+
+    public class Question {
+        private static RankNode root = null;
+
+        public static void track(int number) {
+            if (root == null) {
+                root = new RankNode(number);
+            } else {
+                root.insert(number);
+            }
+        }
+
+        public static int getRankOfNumber(int number) {
+            return root.getRank(number);
+        }
+
+        public static void main(String[] args) {
+            int size = 100;
+            int[] list = AssortedMethods.randomArray(size, -100, 100);
+            for (int i = 0; i < list.length; i++) {
+                track(list[i]);
+            }
+
+            int[] tracker = new int[size];
+            for (int i = 0; i < list.length; i++) {
+                int v = list[i];
+                int rank1 = root.getRank(list[i]);
+                tracker[rank1] = v;
+            }
+
+            for (int i = 0; i < tracker.length - 1; i++) {
+                if (tracker[i] != 0 && tracker[i + 1] != 0) {
+                    if (tracker[i] > tracker[i + 1]) {
+                        System.out.println("ERROR at " + i);
+                    }
+                }
+            }
+
+            System.out.println("Array: " + AssortedMethods.arrayToString(list));
+            System.out.println("Ranks: " + AssortedMethods.arrayToString(tracker));
+        }
+
+    }
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v5] 9.11 Parenthesize the Expression]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/17/parenthesize-expression/"/>
-    <updated>2014-09-17T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/17/parenthesize-expression</id>
+    <title type="html"><![CDATA[[CC150v5] 17.6 Order an Array by Sorting Middle]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle/"/>
+    <updated>2014-09-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle</id>
     <content type="html"><![CDATA[### Question
 
-> Given a boolean expression consisting of the symbols 0, 1, '&', '|', and '^', and a desired boolean result value 'result'. 
-
-> Now implement a function to count the number of ways of __parenthesizing the expression__ such that it evaluates to 'result'.
+> Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).
 
 ### Solution
 
-__This is a difficult question__.
+Referring to [this guy](http://www.mitbbs.com/article_t/JobHunting/32772399.html): 
 
-> Each parenthesized expression must have an outermost pair of
-parentheses. 
+> 1. 找到heading的最长递增序列.
+>
+> 1. 找到tailing的最长的递增序列.
 
-> That is, we can iterate through the expression, treating each operator as the first operator to be parenthesized. 
+After that: 
 
-Nice idea suggested in the book! So __for each operator, we consider is as first operator (to evaluate)__, and then we shall if the total possible count. 
-
-(Note that while coding, we DO NOT WRITE {if-else if-else...} but instead use {if... if... if...} in order to get the total count. )
-
-DP is more time-efficient. 
-
-__Like CC150v5 Q9.10, the code given in the book is very hard to read__. I have my own code posted below. 
+> 1. 用中间部分的min去shrink左边.
+>
+> 1. 用中间部分的max去shrink右边.
 
 ### Code
 
-	public static int countMyAnswer(String exp, boolean result) {
-		if (exp.length() == 1) {
-			return convertIntToBool(exp.charAt(0)) == result ? 1 : 0;
-		}
-		// eg. 1^0|0|1
-		// result: true
-		int totalCount = 0;
-		for (int i = 1; i < exp.length(); i += 2) {
+__written by me__
 
-			char op = exp.charAt(i);
-			String firstHalf = exp.substring(0, i);
-			String secondHalf = exp.substring(i + 1);
-
-			int firstHalfTrue = countMyAnswer(firstHalf, true);
-			int firstHalfFalse = countMyAnswer(firstHalf, false);
-			int secondHalfTrue = countMyAnswer(secondHalf, true);
-			int secondHalfFalse = countMyAnswer(secondHalf, false);
-
-			if (evaluate('0', op, '0') == result) {
-				totalCount += firstHalfFalse * secondHalfFalse;
-			}
-			if (evaluate('0', op, '1') == result) {
-				totalCount += firstHalfFalse * secondHalfTrue;
-			}
-			if (evaluate('1', op, '0') == result) {
-				totalCount += firstHalfTrue * secondHalfFalse;
-			}
-			if (evaluate('1', op, '1') == result) {
-				totalCount += firstHalfTrue * secondHalfTrue;
-			}
-		}
-		return totalCount;
-	}
-
-	private static boolean convertIntToBool(char num) {
-		if (num == '1') {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private static boolean evaluate(char num1, char op, char num2) {
-		boolean b1 = convertIntToBool(num1);
-		boolean b2 = convertIntToBool(num2);
-		if (op == '&') {
-			return b1 & b2;
-		} else if (op == '|') {
-			return b1 | b2;
-		} else if (op == '^') {
-			return b1 ^ b2;
-		}
-		System.out.println("Did not found operator " + op);
-		return false;
-	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 9.7 Paint Fill in Map]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/17/paint-fill-map/"/>
-    <updated>2014-09-17T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/17/paint-fill-map</id>
-    <content type="html"><![CDATA[### Question
-
-> Implement the "paint fill" function that one might see on many image editing programs. 
-
-> That is, given a screen (represented by a two-dimensional array of colors), a point, and a new color, __fill in the surrounding area__ until the color changes from the original color. 
-
-### Solution
-
-This is a BFS/DFS question, very similar to __[LeetCode 130] Surrounded Regions__. 
-
-__However, this question is not same as surrounding region__, because no temporary storage of state is needed, __and we DO NOT NEED TO keep track of the visited positions__! 
-
-Why is this? 
-
-1. This question, we simple change the color __from A to B__. 
-1. Surrounding Region is __change A to B, and B to A__. 
-
-That's why, the nature of 2 questions are different. 
-
-Code 1 is my first solution, and Code 2 is doing a BFS and set color directly to expected value. This type of questions is highly frequent and sometimes may cause confusions. 
-
-### Code
-
-__my code 1__, with 'temp' state
-
-	public static void PaintFill1(Color[][] screen, int posX, int posY,
-			Color ncolor) {
-		// the queue keeps the list of positions that I'm going to visit
-		Queue<Position> q = new LinkedList<Position>();
-		int len = screen.length;
-		Color original = screen[posX][posY];
-		// visited origin node first
-		q.offer(new Position(posX, posY));
-		while (!q.isEmpty()) {
-			// visit positions in q one by one (mark color as 'Temp')
-			Position p = q.poll();
-			if (p.x < 0 || p.x >= len || p.y < 0 || p.y >= len) {
-				// invalid pos coordinate
-				continue;
-			} else if (screen[p.x][p.y] == Color.Temp
-					|| screen[p.x][p.y] != original) {
-				continue;
-			}
-			screen[p.x][p.y] = Color.Temp;
-			q.offer(new Position(p.x - 1, p.y));
-			q.offer(new Position(p.x + 1, p.y));
-			q.offer(new Position(p.x, p.y - 1));
-			q.offer(new Position(p.x, p.y + 1));
-		}
-		// finish visiting all positions that's original color
-		for (int i = 0; i < len; i++) {
-			for (int j = 0; j < len; j++) {
-				if (screen[i][j] == Color.Temp) {
-					screen[i][j] = ncolor;
-				}
-			}
-		}
-	}
-
-__my code 2__, without 'temp' state
-
-	public static void PaintFill2(Color[][] screen, int posX, int posY,
-			Color ncolor) {
-		// the queue keeps the list of positions that I'm going to visit
-		Queue<Position> q = new LinkedList<Position>();
-		int len = screen.length;
-		Color original = screen[posX][posY];
-		// visited origin node first
-		q.offer(new Position(posX, posY));
-		while (!q.isEmpty()) {
-			// visit positions in q one by one (mark color as 'Temp')
-			Position p = q.poll();
-			if (p.x < 0 || p.x >= len || p.y < 0 || p.y >= len) {
-				// invalid pos coordinate
-				continue;
-			} else if (screen[p.x][p.y] != original) {
-				continue;
-			}
-			screen[p.x][p.y] = ncolor;
-			q.offer(new Position(p.x - 1, p.y));
-			q.offer(new Position(p.x + 1, p.y));
-			q.offer(new Position(p.x, p.y - 1));
-			q.offer(new Position(p.x, p.y + 1));
-		}
-	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 9.3 Find Magic Index]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/17/find-magic-index/"/>
-    <updated>2014-09-17T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/17/find-magic-index</id>
-    <content type="html"><![CDATA[### Question 1 
-
-> A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i. 
-
-> Given a sorted array of distinct integers, write a method to find a magic index, if one exists, in array A. 
-
-### Question 2 
-
-> FOLLOW UP: What if the values are not distinct? 
-
-### Solution
-
-__This is a difficult binary search question__! 
-
-__Question 1 is slightly easier__: we simplyl use binary search, and we are able to discard half of the array each time. 
-
-1. if (array[mid] > mid), then we discard the right half.
-1. if (array[mid] < mid), then we discard the left half.
-
-__Question 2 is difficult__. We cannot discard half of the input any more. Instead, we discard a range between (mid) and (array[mid]). Then check left and right part seperately. 
-
-So, I wrote the following code:
-
-	int mid = left + (right - left) / 2;
-	if (array[mid] == mid) {
-		return mid;
-	} else {
-		int smaller = Math.min(array[mid], mid);
-		int larger = Math.max(array[mid], mid);
-		int leftResult = helper(array, left, smaller);
-		if (leftResult != -1) {
-			return leftResult;
-		} else {
-			return helper(array, larger, right);
-		}
-	}
-
-This becomes an endless loop. We did not discard point 'mid' in the code above. The correct code is posted below. 
-
-### Code
-
-__code for non-duplicate input__
-
-	public static int myAnswerNonDup(int[] array) {
+	public static void findUnsortedSequence(int[] array, int[] ans) {
 		int len = array.length;
-		return helper(array, 0, len - 1);
-	}
+		ans[0] = 0;
+		ans[1] = 0;
 
-	public static int helper(int[] array, int left, int right) {
-		if (right < left) {
-			return -1;
-		}
-		int mid = left + (right - left) / 2;
-		if (array[mid] == mid) {
-			return mid;
-		} else if (array[mid] < mid) {
-			// discard all element to the left of array[mid]
-			return helper(array, mid + 1, right);
-		} else {
-			return helper(array, left, mid - 1);
-		}
-	}
-
-__code for have-duplicate input__
-
-	public static int myAnswerWithDup(int[] array) {
-		int len = array.length;
-		return helper(array, 0, len - 1);
-	}
-
-	public static int helper(int[] array, int left, int right) {
-		if (right < left) {
-			return -1;
-		}
-		int mid = left + (right - left) / 2;
-		if (array[mid] == mid) {
-			return mid;
-		} else {
-			int smaller = 0;
-			int larger = 0;
-			if (array[mid] < mid) {
-				smaller = array[mid];
-				larger = mid + 1;
-			} else if (array[mid] > mid) {
-				smaller = mid - 1;
-				larger = array[mid];
-			}
-			int leftResult = helper(array, left, smaller);
-			if (leftResult != -1) {
-				return leftResult;
+		// find increasing sequence on left and on right
+		int leftPeak = 0;
+		while (leftPeak < len - 1) {
+			if (array[leftPeak] < array[leftPeak + 1]) {
+				leftPeak++;
 			} else {
-				return helper(array, larger, right);
+				break;
 			}
 		}
+		if (leftPeak == len - 1) {
+			return;
+		}
+		int rightBottom = len - 1;
+		while (rightBottom > 0) {
+			if (array[rightBottom] > array[rightBottom - 1]) {
+				rightBottom--;
+			} else {
+				break;
+			}
+		}
+
+		// leftPeak and rightBottom are found, now read mid part
+		int midMin = Integer.MAX_VALUE;
+		int midMax = Integer.MIN_VALUE;
+		for (int i = leftPeak; i <= rightBottom; i++) {
+			midMin = Math.min(midMin, array[i]);
+			midMax = Math.max(midMax, array[i]);
+		}
+
+		// find left boudary and right boundary
+		int leftBound = leftPeak;
+		while (leftBound >= 0) {
+			if (array[leftBound] < midMin) {
+				break;
+			}
+			leftBound--;
+		}
+		int rightBound = rightBottom;
+		while (rightBound < len) {
+			if (array[rightBound] > midMax) {
+				break;
+			}
+			rightBound++;
+		}
+
+		// finish it up
+		ans[0] = leftBound + 1;
+		ans[1] = rightBound - 1;
 	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 14.6 Implement CircularArray in Java]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/26/implement-circular-array-java/"/>
+    <updated>2014-09-26T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/26/implement-circular-array-java</id>
+    <content type="html"><![CDATA[### Question
+
+> Implement a __CircularArray__ class that supports an array-like data structure which can be efficiently rotated. 
+
+> The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation. 
+
+### Solution
+
+__First part of the question is solved by using an array and a pointer__. The solution simplifies the question by fixing the array size (not a dynamic-resizing array). 
+
+__The difficult part is how to write iterator__.
+
+Note that we should support __Java Generics__:
+
+    class MyCircularArray<T>
+
+Implement __Iterable Interface__:
+
+    public class MyCircularArray<T> implements Iterable<T> {
+    }
+
+Override __iterator() method__:
+
+	@Override
+	public Iterator<T> iterator() {
+		return new MyIterator<T>(this);
+	}
+
+Write our own __Iterator Class__:
+
+	class MyIterator<T> implements Iterator<T> {
+    }
+
+Finish it up
+
+    public class MyCircularArray<T> implements Iterable<T> {
+
+        @Override
+        public Iterator<T> iterator() {
+            return new MyIterator<T>(this);
+        }
+
+        class MyIterator<T> implements Iterator<T> {
+            @Override
+            public boolean hasNext() {
+            }
+
+            @Override
+            public T next() {
+            }
+
+            @Override
+            public void remove() {
+            }
+        }
+    }
+
+It might be confusing when implementing __Iterable__ and __Iterator__ Class.
+
+### Code
+
+    public class MyCircularArray<T> implements Iterable<T> {
+
+        T[] items;
+
+        int head;
+        int cur;
+
+        public MyCircularArray(int size) {
+            // this is really important (casting the type)
+            items = (T[]) new Object[size];
+
+            head = 0;
+            cur = 0;
+        }
+
+        public void put(T item) {
+            items[cur++] = item;
+            cur = cur % items.length;
+        }
+
+        public T get(int i) {
+            int newIndex = (i + head) % items.length;
+            return items[newIndex];
+        }
+
+        public void rotate(int shiftRight) {
+            head += shiftRight;
+            head = head % items.length;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new MyIterator<T>(this);
+        }
+
+        class MyIterator<T> implements Iterator<T> {
+
+            T[] items;
+            int head;
+            int count;
+
+            public MyIterator(MyCircularArray<T> array) {
+                this.items = array.items;
+                this.head = array.head;
+                this.count = 0;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return this.count != items.length;
+            }
+
+            @Override
+            public T next() {
+                if (hasNext()) {
+                    return items[(head + count++) % items.length];
+                }
+                return null;
+            }
+
+            @Override
+            public void remove() {
+            }
+        }
+
+    }
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] Chap12 Example - Troubleshoot Google Chrome]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/24/troubleshoot-google-chrome/"/>
+    <updated>2014-09-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/24/troubleshoot-google-chrome</id>
+    <content type="html"><![CDATA[### Question
+
+> You'reworking on the Google Chrome team when you receivea bug report: Chrome crashes on launch. What would you do? 
+
+### Step 1: Understand the Scenario
+
+1. How long has user seen this issue?
+1. version of browser and OS?
+1. Does this happen consistently? How often, and when?
+
+### Step 2: Break Down the Problem
+
+Flow of situation:
+
+1. start menu
+1. click chrome
+1. browser starts
+1. browser load settings
+1. browser issues HTTP response
+1. browser get HTTP response
+1. browser parses webpage
+1. browser displays content
+
+__At some points in this process, something fails__. A good tester would iterate thru the elements of this scenario and diagnose the problem. 
+
+### Step 3: Create Specific, Manageable Tests
+
+Come up with realistic instructions. 
 ]]></content>
   </entry>
   

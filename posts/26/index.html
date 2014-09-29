@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link 定义一个数字有以下的特征, 它可以被分成几个部分,而前面的部分相加起来的和是后面的部分.举例来说 1235813, 1+2=3; 2+3=5;3+5=8; 5+8=13; 112112224, 112+112=224; 1981100, 19+81=100; &hellip;">
+  <meta name="description" content="Dynamic Programming The fundamental of DP is &lsquo;merorized search&rsquo;. It&rsquo;s easy to implement but bad for memory. And it&rsquo;s &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,1040 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/24/NineChap-Dynamic-Programming/">[NineChap 5.1] Dynamic Programming</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Dynamic Programming</h2>
+
+<p>The fundamental of DP is &lsquo;merorized search&rsquo;. It&rsquo;s easy to implement but bad for memory. And it&rsquo;s generally useless in the industry.</p>
+
+<h3>When to use DP?</h3>
+
+<ol>
+<li>Input cannot sort</li>
+<li>Find minimum/maximum result</li>
+<li>Check the feasibility</li>
+<li>Count all possible solutions</li>
+</ol>
+
+
+<p>If question asks you to find all possible solutions, it&rsquo;s gonna be DFS, not DP.</p>
+
+<h3>5 Types of DP</h3>
+
+<ol>
+<li>Matrix DP (10%)</li>
+<li>Sequence/Two Sequences DP (80%)</li>
+<li>Interval DP (5%)</li>
+<li>Tree DP (5%)</li>
+<li>States Compressing DP (0%)</li>
+</ol>
+
+
+<p>Type 3 to 5 are less important.</p>
+
+<h3>Question List</h3>
+
+<p><strong>Type 1: Matrix DP</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/27/Triangle/">Triangle</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/20/Unique-Paths/">Unique Paths </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/20/Unique-Paths-II/">Unique Paths II  </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/20/Minimum-Path-Sum/">Minimum Path Sum </a></strong></p></li>
+</ol>
+
+
+<p><strong>Type 2.1: Sequence Dp</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/21/Climbing-Stairs/">Climbing Stairs </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/16/Jump-Game/">Jump Game </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/14/Jump-Game-II/">Jump Game II</a></strong> &ndash; tricky, index handling</p></li>
+<li><p><strong><a href="/blog/2014/05/30/Palindrome-Partitioning-II/">Palindrome Partitioning II </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/02/Word-Break/">Word Break </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/02/Word-Break-II/">Word Break II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/23/Decode-Ways/">Decode Ways </a></strong> &ndash; tricky, initial state</p></li>
+<li><p><strong><a href="/blog/2014/06/24/Longest-Increasing-Subsequence/">Longest Increasing Subsequence</a></strong></p></li>
+</ol>
+
+
+<p><strong>Type 2.2: Two Sequences Dp</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/27/Distinct-Subsequences/">Distinct Subsequences </a></strong> &ndash; difficult, state transition formula</p></li>
+<li><p><strong><a href="/blog/2014/05/21/Edit-Distance/">Edit Distance </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/24/Interleaving-String/">Interleaving String </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/24/Longest-Common-Subsequence/">Longest Common Subsequence</a></strong></p></li>
+</ol>
+
+
+<p><strong>Type 3: Interval Dp</strong></p>
+
+<p><a href="http://wikioi.com/problem/1048/">Merge Stone</a></p>
+
+<p><strong>Type 4: Tree Dp</strong></p>
+
+<ol>
+<li><strong><a href="/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/">Binary Tree Maximum Path Sum</a></strong></li>
+</ol>
+
+
+<p><strong>Type 5: States Compressing DP</strong></p>
+
+<p>Ignore.</p>
+
+<p>Additional questions</p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/20/Maximum-Subarray/">Maximum Subarray </a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/30/Coin-Changing-Problem/">Coin Change Problem</a></strong></p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<h4>Type 1: Matrix DP</h4>
+
+<p><strong>Triangle</strong></p>
+
+<pre><code>public int minimumTotal(List&lt;List&lt;Integer&gt;&gt; triangle) {
+    if (triangle == null || triangle.size() == 0) {
+        return 0;
+    }
+    int len = triangle.size();
+    int[][] dp = new int[len][len];
+    for (int i = len - 1; i &gt;= 0; i--) {
+        // bottom-up approach (row by row)
+        for (int j = 0; j &lt;= i; j++) {
+            if (i == len - 1) {
+                dp[i][j] = triangle.get(i).get(j);
+            } else {
+                dp[i][j] = triangle.get(i).get(j)
+                        + Math.min(dp[i+1][j], dp[i+1][j+1]);
+            }
+        }
+    }
+    return dp[0][0];
+}
+</code></pre>
+
+<p><strong>Unique Paths</strong></p>
+
+<pre><code>public int uniquePaths(int m, int n) {
+    if (m == 0 &amp;&amp; n == 0) {
+        return 0;
+    }
+    int[][] dp = new int[m][n];
+    for (int i = 0; i &lt; m; i++) {
+        for (int j = 0; j &lt; n; j++) {
+            if (i == 0 || j == 0) {
+                dp[i][j] = 1;
+            } else {
+                dp[i][j] = dp[i-1][j] + dp[i][j-1];
+            }
+        }
+    }
+    return dp[m-1][n-1];
+}
+</code></pre>
+
+<p><strong>Unique Paths II</strong></p>
+
+<pre><code>public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+    if (obstacleGrid == null) {
+        return 0;
+    }
+    int m = obstacleGrid.length;
+    int n = obstacleGrid[0].length;
+    int[][] dp = new int[m][n];
+    for (int i = 0; i &lt; m; i++) {
+        for (int j = 0; j &lt; n; j++) {
+            if (obstacleGrid[i][j] != 0) {
+                dp[i][j] = 0;
+            } else if (i == 0 &amp;&amp; j == 0) {
+                dp[i][j] = 1;
+            } else if (i == 0) {
+                dp[i][j] = dp[i][j-1];
+            } else if (j == 0) {
+                dp[i][j] = dp[i-1][j];
+            } else {
+                dp[i][j] = dp[i-1][j] + dp[i][j-1];
+            }
+        }
+    }
+    return dp[m-1][n-1];
+}
+</code></pre>
+
+<p><strong>Minimum Path Sum</strong></p>
+
+<pre><code>public int minPathSum(int[][] grid) {
+    if (grid == null) {
+        return 0;
+    }
+    int m = grid.length;
+    int n = grid[0].length;
+    int[][] dp = new int[m][n];
+    for (int i = 0; i &lt; m; i++) {
+        for (int j = 0; j &lt; n; j++) {
+            if (i == 0 &amp;&amp; j == 0) {
+                dp[i][j] = grid[i][j];
+            } else if (i == 0) {
+                dp[i][j] = dp[i][j-1] + grid[i][j];
+            } else if (j == 0) {
+                dp[i][j] = dp[i-1][j] + grid[i][j];
+            } else {
+                dp[i][j] = grid[i][j] + Math.min(dp[i-1][j], dp[i][j-1]);
+            }
+        }
+    }
+    return dp[m-1][n-1];
+}
+</code></pre>
+
+<h4>Type 2.1: Sequence Dp</h4>
+
+<p><strong>Climbing Stairs</strong></p>
+
+<pre><code>public int climbStairs(int n) {
+    if (n &lt;= 2) {
+        return n;
+    }
+    int[] dp = new int[n];
+    dp[0] = 1;
+    dp[1] = 2;
+    for (int i = 2; i &lt; n; i++) {
+        dp[i] = dp[i - 2] + dp[i - 1];
+    }
+    return dp[n - 1];
+}
+</code></pre>
+
+<p><strong>Jump Game</strong></p>
+
+<pre><code>public boolean canJump(int[] A) {
+    if (A == null || A.length == 0) 
+        return false;
+    int reach = 0;
+    int len = A.length;
+    for (int i = 0; i &lt; len; i++) {
+        if (i &gt; reach) 
+            break;
+        reach = Math.max(reach, i + A[i]);
+        if (reach &gt;= len - 1)   
+            return true;
+    }
+    return false;
+}
+</code></pre>
+
+<p><strong>Jump Game II</strong></p>
+
+<pre><code>public int jump(int[] A) {
+    if (A == null || A.length &lt;= 1) 
+        return 0;
+    int[] dp = new int[A.length];
+    int cur = 1;
+    for (int i = 0; i &lt; A.length - 1; i++) {
+        while (cur &lt;= i + A[i] &amp;&amp; cur &lt; dp.length) {
+            dp[cur] = dp[i] + 1;
+            cur++;
+        }
+        if (cur == dp.length) {
+            break;
+        }
+    }
+    return dp[A.length - 1];
+}
+</code></pre>
+
+<p><strong>Palindrome Partitioning II</strong></p>
+
+<pre><code>public int minCut(String s) {
+    if (s == null || s.length() &lt;= 1) {
+        return 0;
+    }
+    boolean[][] map = palindromeMap(s);
+    int len = s.length();
+    int[] dp = new int[len + 1];
+    dp[0] = -1;
+    for (int i = 1; i &lt;= len; i++) {
+        dp[i] = Integer.MAX_VALUE;
+        for (int j = 1; j &lt;= i; j++) {
+            if (map[i-1][j-1]) {
+                dp[i] = Math.min(dp[i], dp[j-1] + 1);
+            }
+        }
+    }
+    return dp[len];
+}
+
+private boolean[][] palindromeMap(String s) {
+    int len = s.length();
+    boolean[][] map = new boolean[len][len];
+    char[] ss = s.toCharArray();
+    for (int i = 0; i &lt; len; i++) {
+        for (int j = i; j &gt;= 0; j--) {
+            if (i == j) {
+                map[i][j] = true;
+            } else if (i - j == 1) {
+                map[i][j] = ss[i] == ss[j];
+            } else {
+                map[i][j] = (ss[i] == ss[j]) &amp; map[i - 1][j + 1];
+            }
+        }
+    }
+    return map;
+}
+</code></pre>
+
+<p><strong>Word Break</strong></p>
+
+<pre><code>public boolean wordBreak(String s, Set&lt;String&gt; dict) {
+    if (s == null || s.length() == 0) {
+        return true;
+    }
+    int len = s.length();
+    boolean[] dp = new boolean[len + 1];
+    dp[0] = true;
+    for (int i = 1; i &lt;= len; i++) {
+        for (int j = 0; j &lt; i; j++) {
+            if (!dp[j]) {
+                continue;
+            }
+            if (dict.contains(s.substring(j, i))) {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp[len];
+}
+</code></pre>
+
+<p><strong>Word Break II</strong></p>
+
+<p>My code is definitely correct, although it got TLE.</p>
+
+<p>See original post for more.</p>
+
+<p><strong>Decode Ways</strong></p>
+
+<pre><code>public int numDecodings(String s) {
+    if (s == null || s.length() == 0) {
+        return 0;
+    }
+    int len = s.length();
+    int[] dp = new int[len + 1];
+    dp[0] = 1;
+    dp[1] = 1; // pay attention to the initial state
+    if (!isValidNumber(s.substring(0, 1))) {
+        return 0;
+    }
+    for (int i = 2; i &lt;= len; i++) {
+        if (isValidNumber(s.substring(i - 1, i))) {
+            dp[i] += dp[i - 1];
+        }
+        if (isValidNumber(s.substring(i - 2, i))) {
+            dp[i] += dp[i - 2];
+        }
+    }
+    return dp[len];
+}
+
+private boolean isValidNumber(String input) {
+    if (input.length() == 0 || input.length() &gt; 2 || input.charAt(0) == '0') {
+        return false;
+    }
+    int num = Integer.parseInt(input);
+    return (1 &lt;= num &amp;&amp; num &lt;= 26);
+}
+</code></pre>
+
+<p><strong>Longest Increasing Subsequence</strong></p>
+
+<p>There&rsquo;s a new post in &lsquo;Lintcode&rsquo; category.</p>
+
+<h4>Type 2.2: Two Sequences Dp</h4>
+
+<p><strong>Distinct Subsequences</strong></p>
+
+<pre><code>public int numDistinct(String S, String T) {
+    int m = S.length(), n = T.length();
+    int[][] dp = new int[m + 1][n + 1];
+    for (int i = 0; i &lt;= m; i++) {
+        for (int j = 0; j &lt;= n; j++) {
+            if (j == 0) {
+                dp[i][j] = 1;
+            } else if (i == 0) {
+                dp[i][j] = 0;
+            } else {
+                dp[i][j] = dp[i - 1][j];
+                if (S.charAt(i - 1) == T.charAt(j - 1)) {
+                    dp[i][j] += dp[i - 1][j - 1];
+                }
+            }
+        }
+    }
+    return dp[m][n];
+}
+</code></pre>
+
+<p><strong>Edit Distance</strong></p>
+
+<pre><code>public int minDistance(String A, String B) {
+    if (A == null || B == null)
+        return 0;
+    int m = A.length(), n = B.length();
+    int[][] dp = new int[m + 1][n + 1];
+    for (int i = 0; i &lt;= m; i++) {
+        for (int j = 0; j &lt;= n; j++) {
+            if (i == 0) {
+                dp[i][j] = j;
+            } else if (j == 0) {
+                dp[i][j] = i;
+            } else {
+                if (A.charAt(i - 1) == B.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], dp[i - 1][j]);
+                    dp[i][j] = Math.min(dp[i][j], dp[i][j - 1]);
+                    dp[i][j]++;
+                }
+            }
+        }
+    }
+    return dp[m][n];
+}
+</code></pre>
+
+<p><strong>Interleaving String</strong></p>
+
+<pre><code>public boolean isInterleave(String s1, String s2, String s3) {
+    if (s1 == null || s2 == null) {
+        return false;
+    }
+    int m = s1.length(), n = s2.length();
+    if (m + n != s3.length()) {
+        return false;
+    }
+    boolean[][] dp = new boolean[m + 1][n + 1];
+    for (int i = 0; i &lt;= m; i++) {
+        for (int j = 0; j &lt;= n; j++) {
+            if (i == 0) {
+                dp[i][j] = s2.substring(0, j).equals(s3.substring(0, j));
+                continue;
+            } else if (j == 0) {
+                dp[i][j] = s1.substring(0, i).equals(s3.substring(0, i));
+                continue;
+            }
+            if (i &gt; 0 &amp;&amp; dp[i - 1][j]
+                    &amp;&amp; s1.charAt(i - 1) == s3.charAt(i + j - 1)) {
+                dp[i][j] = true;
+            }
+            if (j &gt; 0 &amp;&amp; dp[i][j - 1]
+                    &amp;&amp; s2.charAt(j - 1) == s3.charAt(i + j - 1)) {
+                dp[i][j] = true;
+            }
+        }
+    }
+    return dp[m][n];
+}
+</code></pre>
+
+<p><strong>Longest Common Subsequence</strong></p>
+
+<p>There&rsquo;s a new post in &lsquo;Lintcode&rsquo; category.</p>
+
+<h3>Type 3: Interval Dp</h3>
+
+<p><strong>Merge Stone</strong></p>
+
+<blockquote><p>有n堆石子排成一列，每堆石子有一个重量w[i], 每次合并可以合并相邻的两堆石子，一次合并的代价为两堆石子的重量和w[i]+w[i+1]。问安排怎样的合并顺序，能够使得总合并代价达到最小。</p></blockquote>
+
+<p><a href="http://wikioi.com/problem/1048/">link</a></p>
+
+<p>Solution explained:</p>
+
+<blockquote><p>sum[i[用于记录从第1堆到第i堆（包含i）石子的总重量。</p>
+
+<p>dp[i][j]表示从第i堆（包含i）到第j堆（包含j）石子的合并的最小代价。</p>
+
+<p>状态转移方程为：dp[i][j] = minimize{dp[i][k] + dp[k+1][j] + sum[j] &ndash; sum[i-1]}, k从i到j（不包含j）。</p>
+
+<p>len=2表示第一次合并的情况，此时合并的石子为2堆。此时，i从1到n-len+1，j=i+len-1。</p></blockquote>
+
+<p>Quoted from <a href="http://blog.csdn.net/kingzone_2008/article/details/12361327">this blog</a> and the solution is well explained on <a href="http://wikioi.com/solution/list/1048/">wikiio</a>.</p>
+
+<h3>Type 4: Tree Dp</h3>
+
+<p><strong>Binary Tree Maximum Path Sum</strong></p>
+
+<p>This is a difficult question, but I solved it. I feel happy.</p>
+
+<pre><code>private class ResultType {
+    int maxPath;
+    int depth;
+
+    ResultType(int a, int b) {
+        this.maxPath = a;
+        this.depth = b;
+    }
+}
+
+public int maxPathSum(TreeNode root) {
+    if (root == null) {
+        return 0;
+    }
+    return helper(root).maxPath;
+}
+
+private ResultType helper(TreeNode node) {
+    if (node == null) {
+        return new ResultType(Integer.MIN_VALUE, 0);
+    }
+    ResultType ll = helper(node.left);
+    ResultType rr = helper(node.right);
+    int maxPath = node.val + ll.depth + rr.depth;
+    maxPath = Math.max(maxPath, ll.maxPath);
+    maxPath = Math.max(maxPath, rr.maxPath);
+    int depth = 0;
+    depth = Math.max(depth, node.val + Math.max(ll.depth, rr.depth));
+    return new ResultType(maxPath, depth);
+}
+</code></pre>
+
+<h3>Additional questions</h3>
+
+<p><strong>Maximum Subarray</strong></p>
+
+<pre><code>public int maxSubArray(int[] A) {
+    if (A == null || A.length == 0) {
+        return 0;
+    }
+    int len = A.length;
+    int[] dp = new int[len];
+    dp[0] = A[0];
+    for (int i = 1; i &lt; len; i++) {
+        dp[i] = A[i];
+        if (dp[i - 1] &gt; 0)
+            dp[i] += dp[i - 1];
+    }
+    int max = Integer.MIN_VALUE;
+    for (Integer i : dp)
+        max = Math.max(max, i);
+    return max;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/24/Longest-Increasing-Subsequence/">[LintCode] Longest Increasing Subsequence</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://lintcode.com/en/problem/longest-increasing-subsequence/">link</a></p>
+
+<div style="min-height:100px">
+    <p>Given a sequence of integers, find the longest increasing subsequence (LIS).</p>
+    <p>You code should return the length of the LIS.</p>
+    <div class="m-t-lg m-b-lg">
+    <b>Example</b>
+    <div>
+        <p>For [5, 4, 1, 2, 3], the LIS &nbsp;is [1, 2, 3], return 3</p>
+        <p>For [4, 2, 4, 5, 3, 7], the LIS is [4, 4, 5, 7], return 4</p>
+    </div>
+    </div>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p>This is one of the <strong>2 most popular questions of DP</strong>. This is a sequences Dp. The equation isn&rsquo;t difficult. Time complexity of DP solution is O(n<sup>2</sup>).</p>
+
+<p><strong>There&rsquo;s also a binary search solution</strong> which the time complexity is O(nlgn). It&rsquo;s very complex, and very hard to explain, but I&rsquo;ll try:</p>
+
+<p>Maintain an array called &lsquo;array&rsquo;. A[i] denotes the tail of sequence for LIS = i. Initially A[0] = first element of the input, then keep inserting elements into this array. It&rsquo;s explained in <a href="http://www.geeksforgeeks.org/longest-monotonically-increasing-subsequence-size-n-log-n/">this post</a>.</p>
+
+<p>I will give an example for the input: 0, 8, 4, 12, 2</p>
+
+<blockquote><p>Our strategy determined by the following conditions:</p>
+
+<ol>
+<li><p>If A[i] is smallest among all end candidates of active lists, we will start new active list of length 1.</p></li>
+<li><p>If A[i] is largest among all end candidates of active lists, we will clone the largest active list, and extend it by A[i].</p></li>
+<li><p>If A[i] is in between, we will find a list with largest end element that is smaller than A[i]. Clone and extend this list by A[i]. We will discard all other lists of same length as that of this modified list.</p></li>
+</ol>
+
+
+<p>A[0] = 0. Case 1. There are no active lists, create one.</p>
+
+<p>array = 0</p>
+
+<p>A[1] = 8. Case 2. Clone and extend.</p>
+
+<p>array = 0, 8</p>
+
+<p>A[2] = 4. Case 3. Clone, extend and discard.</p>
+
+<p>array = 0, 4</p>
+
+<p>A[3] = 12. Case 2. Clone and extend.</p>
+
+<p>array = 0, 4, 12</p>
+
+<p>A[4] = 2. Case 3. Clone, extend and discard.</p>
+
+<p>array = 0, 2, 12</p>
+
+<p>So the LIS is (0, 2, 12) of length 3.</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>DP solution, by me</strong></p>
+
+<pre><code>public int longestIncreasingSubsequence(int[] nums) {
+    // write your code here
+    if (nums == null || nums.length == 0) {
+        return 0;
+    }
+    int len = nums.length;
+    int[] dp = new int[len];
+    dp[0] = 1;
+    for (int i = 1; i &lt; len; i++) {
+        dp[i] = 1;
+        for (int j = 0; j &lt; i; j++) {
+            if (nums[j] &lt;= nums[i]) {
+                dp[i] = Math.max(dp[i], dp[j] + 1);
+            }
+        }
+    }
+    int lis = 1;
+    for (Integer seq : dp) {
+        lis = Math.max(lis, seq);
+    }
+    return lis;
+}
+</code></pre>
+
+<p><strong>Binary search solution</strong>, C++ code from <a href="http://www.geeksforgeeks.org/longest-monotonically-increasing-subsequence-size-n-log-n/">this post</a>. I don&rsquo;t think I am able code this solution.</p>
+
+<pre><code>#include &lt;iostream&gt;
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+
+using namespace std;
+
+#define ARRAY_SIZE(A) sizeof(A)/sizeof(A[0])
+// Binary search (note boundaries in the caller)
+// A[] is ceilIndex in the caller
+int CeilIndex(int A[], int l, int r, int key) {
+    int m;
+
+    while( r - l &gt; 1 ) {
+        m = l + (r - l)/2;
+        (A[m] &gt;= key ? r : l) = m; // ternary expression returns an l-value
+    }
+
+    return r;
+}
+
+int LongestIncreasingSubsequenceLength(int A[], int size) {
+    // Add boundary case, when array size is one
+
+    int *tailTable   = new int[size];
+    int len; // always points empty slot
+
+    memset(tailTable, 0, sizeof(tailTable[0])*size);
+
+    tailTable[0] = A[0];
+    len = 1;
+    for( int i = 1; i &lt; size; i++ ) {
+        if( A[i] &lt; tailTable[0] )
+            // new smallest value
+            tailTable[0] = A[i];
+        else if( A[i] &gt; tailTable[len-1] )
+            // A[i] wants to extend largest subsequence
+            tailTable[len++] = A[i];
+        else
+            // A[i] wants to be current end candidate of an existing subsequence
+            // It will replace ceil value in tailTable
+            tailTable[CeilIndex(tailTable, -1, len-1, A[i])] = A[i];
+    }
+
+    delete[] tailTable;
+
+    return len;
+}
+
+int main() {
+    int A[] = { 2, 5, 3, 7, 11, 8, 10, 13, 6 };
+    int n = ARRAY_SIZE(A);
+
+    printf("Length of Longest Increasing Subsequence is %d\n",
+            LongestIncreasingSubsequenceLength(A, n));
+
+    return 0;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/24/Longest-Common-Subsequence/">[LintCode] Longest Common Subsequence</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://lintcode.com/en/problem/longest-common-subsequence/">link</a></p>
+
+<div style="min-height:100px">
+    <p>Given two strings, find the longest comment subsequence (LCS).</p>
+    <p>Your code should return the length of LCS.</p>
+    <div class="m-t-lg m-b-lg">
+    <b>Example</b>
+    <div>
+        <p>For &#8220;ABCD&#8221; and &#8220;EDCA&#8221;, the LCS is &#8220;A&#8221; (or D or C), return 1</p>
+        <p>For &#8220;ABCD&#8221; and &#8220;EACB&#8221;, the LCS is &#8220;AC&#8221;, return 2</p>
+    </div>
+    </div>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p>This is one of the <strong>2 most popular questions of DP</strong>.</p>
+
+<p>This is a two-sequences Dp. The equation is not difficult to build. (consider only the last element of the DP array when building the state transition equation)</p>
+
+<h3>Code</h3>
+
+<pre><code>public int longestCommonSubsequence(String A, String B) {
+    // write your code here
+    if (A == null || B == null) {
+        return 0;
+    }
+    int m = A.length(), n = B.length();
+    int[][] dp = new int[m + 1][n + 1];
+    for (int i = 1; i &lt;= m; i++) {
+        for (int j = 1; j &lt;= n; j++) {
+            if (A.charAt(i - 1) == B.charAt(j - 1)) {
+                dp[i][j] = 1 + dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    return dp[m][n];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/23/Cache-algorithms/">[Design] Cache and Page Replacement Algorithms</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Cache Algorithms</h3>
+
+<p>This post is originally written for <strong>Cache Algo</strong> only, before I found out this 2 topics are very similar, so I changed the title to &ldquo;Cache and Page Replacement Algorithms&rdquo;.</p>
+
+<h4>Equation</h4>
+
+<p>of memory reference time is:</p>
+
+<p>T = m * T(m) + T(h) + E</p>
+
+<blockquote><p>m: miss ratio = 1 &ndash; hit ratio</p>
+
+<p>T(m): time for main memory access</p>
+
+<p>T(h): latency (when there&rsquo;s a hit)</p>
+
+<p>E: secondary effects liek queuing effects etc.</p></blockquote>
+
+<h4>hit ratio</h4>
+
+<p>how often a searched-for item is actually found in the cache</p>
+
+<h4>latency</h4>
+
+<p>how long after requesting a desired item the cache can return that item (when there is a hit).</p>
+
+<h3>Replacement policy</h3>
+
+<h4>Bélády&rsquo;s Algorithm (Optimal Algorithm)</h4>
+
+<p>The optimal algorithm, not implementable in practise.</p>
+
+<h4>LFU</h4>
+
+<p>Least Frequently Used, slow and not very adaptive.</p>
+
+<h4>LRU</h4>
+
+<p>Fast and adaptive, but hard to implement.</p>
+
+<p>It can be implemented with either a counter or a stack/doubleLinkedList.</p>
+
+<p>Web browser use this.</p>
+
+<h4>LRU2 and 2Qs</h4>
+
+<p><strong>LRU2</strong> &ndash; Only add entries to the cache the second time they are accessed.</p>
+
+<p><strong>Two Queues</strong> &ndash; Add entries to an normal LRU cache. If accessed again, move it to second, larger, LRU cache.</p>
+
+<h4>MRU (most recent used)</h4>
+
+<p>Some claim that MRU cache algorithms have more hits than LRU due to their tendency to retain older data.</p>
+
+<h4>FIFO</h4>
+
+<p>Low-overhead, fast but not adaptive.</p>
+
+<h4>Second-chance</h4>
+
+<p>Modified version of FIFO. Relatively better than FIFO at little cost.</p>
+
+<p>Initially, a reference bit is set. Instead of removing old entries, it clears reference bit first, and insert that entry at the back of the queue. An entry is only cleared if the reference bit is not set. This is like a circular queue.</p>
+
+<p>If all the pages have been referenced, second chance degenerates into pure FIFO. Why? Let&rsquo;s say all entries reference are set, the pointer will go around the entire list and clear all references, and in the end come back to the starting point. Then, it&rsquo;s like a FIFO. For more, see the <a href="http://javalandscape.blogspot.sg/2009/01/cachingcaching-algorithms-and-caching.html">link</a>.</p>
+
+<h4>Clock</h4>
+
+<p>Modified version of second-hand. Better than second hand. Instead of pushing to the back, it keep a &ldquo;hand&rdquo; pointer in the circular list. <a href="http://javalandscape.blogspot.sg/2009/01/cachingcaching-algorithms-and-caching.html">link</a></p>
+
+<p>When cache miss occurs and no empty place exists, then I consult the R (referenced) bit at the hand&rsquo;s location to know what I should do. If R is 0, then I will place the new entry at the &ldquo;hand&rdquo; position, otherwise I will clear the R bit. Then, I will increment the hand (iterator) and repeat the process until an entry is replaced.</p>
+
+<h4>Simple time-based</h4>
+
+<p>Fast, but not adaptive. Entries remain in cache for a specific amount of time.</p>
+
+<h4>Extended time-based expiration</h4>
+
+<p>Only clear cache at certain points in time (say every 5 minutes).</p>
+
+<h3>Conclusion</h3>
+
+<p>Each replacement strategy is a <strong>compromise between hit rate and latency</strong>.</p>
+
+<h4>One more thing</h4>
+
+<p>What is Distributed cache?</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Distributed_cache">Distributed cache</a> is an extension of the traditional concept of cache used in a single locale.</p>
+
+<p>A distributed cache may <strong>span multiple servers</strong> so that it can grow in size and in transactional capacity. It is mainly used to store <strong>application data residing in database and web session data</strong>.</p>
+
+<p>The idea of distributed caching has become feasible now because main memory has become very cheap and network cards have become very fast (speed of 1 Gbit is now standard, and 10 Gbit is gaining traction).</p>
+
+<p>Also, a distributed cache works well on <strong>lower cost machines usually employed for web servers</strong> as opposed to <strong>database servers</strong> which require expensive hardware.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/18/Two-egg-100-floor-question/">[Brain Teaser] 2 Eggs 100 Floors Puzzle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.programmerinterview.com/index.php/puzzles/2-eggs-100-floors-puzzle/">link</a></p>
+
+<blockquote><p>You are given 2 eggs.</p>
+
+<p>You have access to a 100-storey building.</p>
+
+<p>Eggs can be very hard or very fragile means it may break if dropped from the first floor or may not even break if dropped from 100 th floor.Both eggs are identical.</p>
+
+<p>You need to figure out the highest floor of a 100-storey building an egg can be dropped without breaking.</p>
+
+<p>Now the question is how many drops you need to make. You are allowed to break 2 eggs in the process</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Most obvious solutoin is drop in 10th, 20th, 30th &hellip; floor. But this solution would result in <strong>19 drops in worst case</strong>. We should try to reduce the worst case scenario by making all possible scenarios take the same number of drops!</p>
+
+<p>The best solution is:</p>
+
+<blockquote><p>What if we tried to reduce the number of drops that would be required with the linear search (with the 2nd egg) after we get to one of the higher floors? This way we <strong>counteract the fact that getting to the higher floor took so many drops</strong>, and if we use less drops for the linear search we are <strong>balancing out the worst case</strong>.</p></blockquote>
+
+<p>According to the <a href="http://www.programmerinterview.com/index.php/puzzles/2-eggs-100-floors-puzzle/">solution</a>, we form a series:</p>
+
+<blockquote><p>x + (x-1) + (x-2) + (x-3) + &hellip; + 1 = 100</p>
+
+<p>x(x+1)/2 = 100</p>
+
+<p>x = 14</p></blockquote>
+
+<h3>Final Result</h3>
+
+<p>We would drop in this way:</p>
+
+<table width="50">
+<thead><tr><th>&nbsp;Drop&nbsp;</th><th>&nbsp;Floor&nbsp;</th></tr></thead>
+<tbody><tr align="center"><td>#1</td><td>14</td></tr>
+<tr align="center"><td>#2</td><td>27</td></tr>
+<tr align="center"><td>#3</td><td>39</td></tr>
+<tr align="center"><td>#4</td><td>50</td></tr>
+<tr align="center"><td>#5</td><td>60</td></tr>
+<tr align="center"><td>#6</td><td>69</td></tr>
+<tr align="center"><td>#7</td><td>77</td></tr>
+<tr align="center"><td>#8</td><td>84</td></tr>
+<tr align="center"><td>#9</td><td>90</td></tr>
+<tr align="center"><td>#10</td><td>95</td></tr>
+<tr align="center"><td>#11</td><td>99</td></tr>
+<tr align="center"><td>#12</td><td>100</td></tr>
+</tbody>
+</table>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -698,978 +1732,6 @@ public ListNode helper(ListNode head, int k, int count) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/16/NineChap-Linked-List/">[NineChap 4.1] Linked List</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>First Word</h2>
-
-<p>LinkedList aims to test one of the most important concepts in C++, pointers.</p>
-
-<p><strong>Unlike array, linked list does not have &lsquo;in-place&rsquo; operations</strong>. This is very important to understand.</p>
-
-<h3>Type 1: Dummy Node</h3>
-
-<p>When the head is not determined, use DummyHead.</p>
-
-<p>Note that when using DummyHead to solve problems, the pointer <strong>starts from DummyHead</strong>. By doing this, we assuming that DummyHead must be valid, and we <strong>only check pointer.next (instead of checking pointer itself)</strong>. See &lsquo;Remove Duplicates from Sorted List II&rsquo; for details.</p>
-
-<h3>Type 2: Five Basic Operations in Linked List</h3>
-
-<ol>
-<li>Insert in Sorted List</li>
-<li>Remove in Sorted List</li>
-<li>Reverse a list</li>
-<li>Merge 2 Sorted List</li>
-<li>Find middle</li>
-</ol>
-
-
-<h4>1.Insert in Sorted List</h4>
-
-<pre><code>public ListNode insert(ListNode head, ListNode node) {
-    // first, initialize
-    ListNode dummy = new ListNode(Integer.MIN_VALUE);
-    dummy.next = head;
-
-    // second, assume p is less than node, and check p.next
-    ListNode p = dummy;
-    while (p.next != null &amp;&amp; p.next.val &lt; node.val) {
-        p = p.next;
-    }
-
-    // insert node after 'p'
-    node.next = p.next;
-    p.next = node;
-    return dummy.next;
-}
-</code></pre>
-
-<h4>2.Remove in Sorted List</h4>
-
-<p>(written by me)</p>
-
-<pre><code>public ListNode remove(ListNode head, int value) {
-    ListNode dummy = new ListNode(0);
-    dummy.next = head;
-    ListNode p = dummy;
-    while (p.next != null &amp;&amp; p.next.val != value) {
-        p = p.next;
-    }
-    if (p.next != null &amp;&amp; p.next.val == value) {
-        while (p.next != null &amp;&amp; p.next.val == value)
-            p.next = p.next.next;
-    }
-    return dummy.next;
-}
-</code></pre>
-
-<h4>3.Reverse a list</h4>
-
-<p>First variant: Reverse from a particular node to the end.</p>
-
-<p>四句话 statement.</p>
-
-<pre><code>public ListNode reverse(ListNode start) {
-    ListNode result = null;
-    ListNode cur = start;
-    while (cur != null) {
-        ListNode temp = cur.next;
-        cur.next = result;
-        result = cur;
-        cur = temp;
-    }
-    return result;
-}
-</code></pre>
-
-<p>Second variant: Reverse from a node until another node</p>
-
-<pre><code>// Given 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL, start = 2 and len = 3,
-// return 1-&gt;4-&gt;3-&gt;2-&gt;5-&gt;NULL. 
-public ListNode reverseRange(ListNode start, int len) {
-    ListNode result = null;
-    ListNode cur = start;
-    while (len &gt; 0) {
-        ListNode temp = cur.next;
-        cur.next = result;
-        result = cur;
-        cur = temp;
-        len--;
-    }
-    start.next = cur;
-    return result;
-}
-</code></pre>
-
-<p>The comparison:</p>
-
-<p><img class="middle" src="/assets/images/reverse-linked-list-code-compare.png"></p>
-
-<p>More: there is a way to reverse list recursively. This can be another good interview question. <strong><a href="/blog/2014/06/17/Reverse-linkedlist-recursively/">Reverse linkedlist recursively</a></strong></p>
-
-<h4>4.Merge 2 Sorted List</h4>
-
-<pre><code>public ListNode merge(ListNode head1, ListNode head2) {
-    ListNode dummy = new ListNode(0);
-    ListNode p = dummy;
-    while (head1 != null &amp;&amp; head2 != null) {
-        if (head1.val &lt; head2.val) {
-            p.next = head1;
-            head1 = head1.next;
-            p = p.next;
-        } else {
-            p.next = head2;
-            head2 = head2.next;
-            p = p.next;
-        }
-    }
-    if (head1 == null) {
-        p.next = head2;
-    } else {
-        p.next = head1;
-    }
-    return dummy.next;
-}
-</code></pre>
-
-<h4>5.Find middle</h4>
-
-<p>There are 2 ways to do this: calculate the total length, or fast/slow pointer. But fast/slow pointer is better <strong>because in engineering world, a lot of problems only allows information to flow once (数据流概念)</strong>. Sometimes it&rsquo;s not a good idea to read list for a second (or 1.5) time.</p>
-
-<pre><code>public ListNode findMiddle(ListNode head) {
-    if (head == null) {
-        return null;
-    }
-    ListNode slow = head, fast = head.next;
-    while (fast != null &amp;&amp; fast.next != null) {
-        fast = fast.next.next;
-        slow = slow.next;
-    }
-    return slow;
-}
-</code></pre>
-
-<p><strong>Dummy head questions</strong></p>
-
-<ol>
-<li><p><strong><a href="/blog/2014/05/22/Remove-Duplicates-from-Sorted-List/">Remove Duplicates from Sorted List</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/22/Remove-Duplicates-from-Sorted-List-II/">Remove Duplicates from Sorted List II</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/23/Partition-List/">Partition List</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/09/Merge-Two-Sorted-Lists/">Merge Two Sorted Lists</a></strong></p></li>
-</ol>
-
-
-<p><strong>5 basic operations questions</strong></p>
-
-<ol>
-<li><p><strong><a href="/blog/2014/05/23/Reverse-Linked-List-II/">Reverse Linked List II</a></strong> &ndash; difficult</p></li>
-<li><p><strong><a href="/blog/2014/06/02/Sort-List/">Sort List</a></strong></p>
-
-<p> 2 operations used</p></li>
-<li><p><strong><a href="/blog/2014/06/03/Reorder-List/">Reorder List</a></strong></p>
-
-<p> 3 operations used</p></li>
-<li><p><strong><a href="/blog/2014/06/02/Linked-List-Cycle/">Linked List Cycle</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/06/02/Linked-List-Cycle-II/">Linked List Cycle II</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/11/Merge-k-Sorted-Lists/">Merge k Sorted Lists</a></strong></p>
-
-<p> For this question, it&rsquo;s important to write a comparator by yourself, to show your understanding of a PriorityQueue.</p>
-
-<p> n<em>k</em>lgk time, why? 1:14:30 recording
- about heap 1:15:00 recording</p></li>
-<li><p><strong><a href="/blog/2014/06/02/Copy-List-with-Random-Pointer/">Copy List with Random Pointer</a></strong></p></li>
-</ol>
-
-
-<h2>Code</h2>
-
-<p><strong>Remove Duplicates from Sorted List</strong></p>
-
-<p>Easy, no dummy head needed.</p>
-
-<p><strong>Remove Duplicates from Sorted List II</strong></p>
-
-<pre><code>public ListNode deleteDuplicates(ListNode head) {
-    ListNode dummy = new ListNode(0);
-    dummy.next = head;
-    ListNode p = dummy;
-    while (p.next != null &amp;&amp; p.next.next != null) {
-        if (p.next.val == p.next.next.val) {
-            int dupVal = p.next.val;
-            while (p.next != null &amp;&amp; p.next.val == dupVal) {
-                p.next = p.next.next;
-            }
-        } else {
-            p = p.next;
-        }
-    }
-    return dummy.next;
-}
-</code></pre>
-
-<p><strong>Partition List</strong> &ndash; spend a lot of time on a list cycle in the result</p>
-
-<pre><code>public ListNode partition(ListNode head, int x) {
-    if (head == null) {
-        return null;
-    }
-    ListNode head1 = new ListNode(0);
-    ListNode head2 = new ListNode(0);
-
-    ListNode p1 = head1;
-    ListNode p2 = head2;
-    ListNode cur = head;
-
-    while (cur != null) {
-        if (cur.val &lt; x) {
-            p1.next = cur;
-            p1 = cur;
-        } else {
-            p2.next = cur;
-            p2 = cur;
-        }
-        cur = cur.next;
-    }
-
-    p1.next = head2.next;
-    // VERY IMPORTANT THIS LINE !!!
-    p2.next = null;
-    // VERY IMPORTANT THIS LINE !!!
-    return head1.next;
-}
-</code></pre>
-
-<p><strong>Merge Two Sorted Lists</strong></p>
-
-<pre><code>public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-    ListNode dummy = new ListNode(0);
-    ListNode p = dummy;
-    while (l1 != null &amp;&amp; l2 != null) {
-        if (l1.val &lt; l2.val) {
-            p.next = l1;
-            l1 = l1.next;
-            p = p.next;
-        } else {
-            p.next = l2;
-            l2 = l2.next;
-            p = p.next;
-        } 
-    }
-    if (l1 == null) {
-        p.next = l2;
-    } else {
-        p.next = l1;
-    }
-    return dummy.next;
-}
-</code></pre>
-
-<h4>5 basic operations</h4>
-
-<p><strong>Reverse Linked List II</strong></p>
-
-<pre><code>public ListNode reverseBetween(ListNode head, int m, int n) {
-    ListNode dummy = new ListNode(0);
-    dummy.next = head;
-    ListNode start = dummy;
-    int count = 1;
-    while (head != null &amp;&amp; count &lt; m) {
-        start = start.next;
-        count++;
-    }
-    start.next = reverseRange(start.next, n - m + 1);
-    return dummy.next;
-}
-
-private ListNode reverseRange(ListNode start, int len) {
-    ListNode result = null;
-    ListNode cur = start;
-    while (len &gt; 0) {
-        ListNode temp = cur.next;
-        cur.next = result;
-        result = cur;
-        cur = temp;
-        len--;
-    }
-    start.next = cur;
-    return result;
-}
-</code></pre>
-
-<p><strong>Sort List</strong></p>
-
-<p>Time complexity analysis: T(n) = 2 T(n/2) + O(n). <strong>By applying Master theorem, time = O(nlgn)</strong>.</p>
-
-<pre><code>public ListNode sortList(ListNode head) {
-        if (head == null || head.next == null) {
-            return head;
-        }
-        ListNode mid = findMid(head);
-        ListNode secondHalf = mid.next;
-        mid.next = null;
-        head = sortList(head);
-        secondHalf = sortList(secondHalf);
-        return merge(head, secondHalf);
-}
-
-private ListNode findMid(ListNode head) {
-    ListNode slow = head;
-    ListNode fast = head.next;
-    while (fast != null &amp;&amp; fast.next != null) {
-        slow = slow.next;
-        fast = fast.next.next;
-    }
-    return slow;
-}
-
-private ListNode merge(ListNode h1, ListNode h2) {
-    ListNode dummy = new ListNode(0);
-    ListNode p = dummy;
-    while (h1 != null &amp;&amp; h2 != null) {
-        if (h1.val &lt; h2.val) {
-            p.next = h1;
-            h1 = h1.next;
-        } else {
-            p.next = h2;
-            h2 = h2.next;
-        }
-        p = p.next;
-    }
-    if (h1 == null) {
-        p.next = h2;
-    } else if (h2 == null) {
-        p.next = h1;
-    }
-    return dummy.next;
-}
-</code></pre>
-
-<p><strong>Reorder List</strong></p>
-
-<pre><code>public void reorderList(ListNode head) {
-    if (head == null || head.next == null) {
-        return;
-    }
-    ListNode mid = findMid(head);
-    ListNode secondHalf = mid.next;
-    mid.next = null;
-    secondHalf = reverse(secondHalf);
-    head = mergeInterlace(head, secondHalf);
-}
-
-private ListNode findMid(ListNode head) {
-    if (head == null) {
-        return null;
-    }
-    ListNode slow = head;
-    ListNode fast = head.next;
-    while (fast != null &amp;&amp; fast.next != null) {
-        slow = slow.next;
-        fast = fast.next.next;
-    }
-    return slow;
-}
-
-private ListNode reverse(ListNode head) {
-    ListNode result = null;
-    ListNode cur = head;
-    while (cur != null) {
-        ListNode temp = cur.next;
-        cur.next = result;
-        result = cur;
-        cur = temp;
-    }
-    return result;
-}
-
-private ListNode mergeInterlace(ListNode h1, ListNode h2) {
-    ListNode result = h1;
-    h1 = h1.next;
-    ListNode p = result;
-    while (h1 != null &amp;&amp; h2 != null) {
-        p.next = h2;
-        h2 = h2.next;
-        p.next.next = h1;
-        h1 = h1.next;
-        p = p.next.next;
-    }
-    if (h1 == null) {
-        p.next = h2;
-    } else {
-        p.next = h1;
-    }
-    return result;
-}
-</code></pre>
-
-<p><strong>Linked List Cycle</strong></p>
-
-<pre><code>public boolean hasCycle(ListNode head) {
-    if (head == null || head.next == null) 
-        return false;
-    ListNode slow = head;
-    ListNode fast = head.next;
-    while (fast != null &amp;&amp; fast.next != null) {
-        fast = fast.next.next;
-        slow = slow.next;
-        if (fast == slow) {
-            return true;
-        }
-    }
-    return false;
-}
-</code></pre>
-
-<p><strong>Linked List Cycle II</strong></p>
-
-<pre><code>public ListNode detectCycle(ListNode head) {
-    if (head == null || head.next == null) 
-        return null;
-    ListNode slow = head;
-    ListNode fast = head;
-    while (fast != null &amp;&amp; fast.next != null) {
-        fast = fast.next.next;
-        slow = slow.next;
-        if (fast == slow) {
-            slow = head;
-            while (slow != fast) {
-                slow = slow.next;
-                fast = fast.next;
-            }
-            return slow;
-        }
-    }
-    return null;
-}
-</code></pre>
-
-<p><strong>Merge k Sorted Lists</strong></p>
-
-<p>I write the code in the original post.</p>
-
-<p><strong>Copy List with Random Pointer</strong></p>
-
-<pre><code>public RandomListNode copyRandomList(RandomListNode head)  {
-    if (head == null)  {
-        return null;
-    }
-    // 1, make a new copy of each node
-    RandomListNode p = head;
-    while (p != null) {
-        RandomListNode copy = new RandomListNode(p.label);
-        copy.next = p.next;
-        p.next = copy;
-        p = copy.next;
-    }
-    // 2. link the random pointer of copied nodes
-    p = head;
-    while (p != null) {
-        if (p.random != null) {
-            p.next.random = p.random.next;
-        }
-        p = p.next.next;
-    }
-    // 3. break the copied nodes from original nodes
-    RandomListNode result = head.next;
-    p = head;
-    RandomListNode p2 = head.next;
-    while (p != null) {
-        p.next = p2.next;
-        if (p2.next != null) {
-            p2.next = p2.next.next;
-        }
-        p = p.next;
-        p2 = p2.next;
-    }
-    return result;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/16/Binary-tree-serialize-deserialize/">[LeetCode Plus] Binary Tree Serialize and Deserialize</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://leetcode.com/2010/09/serializationdeserialization-of-binary.html">link1</a>, <a href="http://leetcode.com/2010/09/saving-binary-search-tree-to-file.html">link2</a>.</p>
-
-<blockquote><p>Variant 1: Given a Binary Search Tree, serialize and deserialize it.</p>
-
-<p>Variant 2: Given a Binary Tree, serialize and deserialize it.</p></blockquote>
-
-<h3>Variant 1 &ndash; Binary search tree</h3>
-
-<p><strong>We must only use pre-order</strong>.</p>
-
-<p>Think about why, or read <a href="http://leetcode.com/2010/09/serializationdeserialization-of-binary.html">link1</a>. So, serialization is simple &ndash; preorder traversal.</p>
-
-<p>The desecialization would make use of the first element, and range validation method. This is very similar to another question &lsquo;validate BST&rsquo;. Rmb the key is:</p>
-
-<blockquote><p>Each time we add a number, we also pass the valid range within which the number can lie between.</p></blockquote>
-
-<h4>Code</h4>
-
-<p>The code is concise, but may not be easy to write:</p>
-
-<pre><code>void readBSTHelper(int min, int max, int &amp;insertVal,
-                   BinaryTree *&amp;p, ifstream &amp;fin) {
-  if (insertVal &gt; min &amp;&amp; insertVal &lt; max) {
-    int val = insertVal;
-    p = new BinaryTree(val);
-    if (fin &gt;&gt; insertVal) {
-      readBSTHelper(min, val, insertVal, p-&gt;left, fin);
-      readBSTHelper(val, max, insertVal, p-&gt;right, fin);
-    }
-  }
-}
-
-void readBST(BinaryTree *&amp;root, ifstream &amp;fin) {
-  int val;
-  fin &gt;&gt; val;
-  readBSTHelper(INT_MIN, INT_MAX, val, root, fin);
-}
-</code></pre>
-
-<h3>Variant 2 &ndash; Binary tree</h3>
-
-<p>For binary tree, we could not use above solution any more. We must use some NULL pointers to fill in empty slots. For this variant, <strong>pre-order and level-order both would work</strong>.</p>
-
-<p>Then which of these 2 is a better choice?</p>
-
-<pre>
-   1
-  / \
- 2   3
-</pre>
-
-
-<blockquote><p>Given the tree above:</p>
-
-<p>The pre-order serialization is: {1, 2, #, #, 3, #, #}</p>
-
-<p>The level-order serialization is: {1, 2, 3}</p>
-
-<p>We can see that level-order is a better idea, because last level null pointers need not be handled.</p></blockquote>
-
-<h4>Code (preorder)</h4>
-
-<p>The serializaion is a simple traversal.</p>
-
-<pre><code>void writeBinaryTree(BinaryTree *p, ostream &amp;out) {
-  if (!p) {
-    out &lt;&lt; "# ";
-  } else {
-    out &lt;&lt; p-&gt;data &lt;&lt; " ";
-    writeBinaryTree(p-&gt;left, out);
-    writeBinaryTree(p-&gt;right, out);
-  }
-}
-</code></pre>
-
-<p>The deserialization is a little bit like &ldquo;convert linked list to balanced tree&rdquo; (where we use first element of the list as root of the tree).</p>
-
-<pre><code>void readBinaryTree(BinaryTree *&amp;p, ifstream &amp;fin) {
-  int token;
-  bool isNumber;
-  if (!readNextToken(token, fin, isNumber)) 
-    return;
-  if (isNumber) {
-    p = new BinaryTree(token);
-    readBinaryTree(p-&gt;left, fin);
-    readBinaryTree(p-&gt;right, fin);
-  }
-}
-</code></pre>
-
-<p>I did not find any code for level-order, but it&rsquo;s similar to &lsquo;level-order traversal&rsquo;.</p>
-
-<h3>One more thing</h3>
-
-<p>A Binary Search Tree (BST) is useful for storing phone book records in a memory limited device, such as a cell phone. The records are always maintained in sorted order, inserting and deleting a record takes O(lg n) time (slower than linked list, but much better than array).</p>
-
-<h3>One more one-more-thing</h3>
-
-<p><strong>This post we use # as a sentinel</strong>. There is also <strong><a href="http://stackoverflow.com/a/15044868">another idea</a> of doing both Inorder and Preorder traversal</strong> to searialize the tree data, and use the solution to &ldquo;Construct Binary Tree from Preorder and Inorder&rdquo; to deserialize it.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/15/NineChap-Binary-Tree-additional/">[NineChap 3.4] Binary Tree Additional</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>These are some additional questions that are not covered in previous NineChap posts. Some questions are non-standard and difficult to solve, and some are not found in OJ websites. But these are real questions that has been asked during interviews.</p>
-
-<h2>Question list</h2>
-
-<ol>
-<li><p><strong><a href="/blog/2014/06/15/BST-find-upper-lower-bound/">Binary Search Tree find upper/lower bound</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/06/14/Iterator-of-Tree/">Implement iterator of Binary Search Tree</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/06/16/Binary-tree-serialize-deserialize/">Binary Tree Serialize and Deserialize</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node/">Populating Next Right Pointers in Each Node</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node-II/">Populating Next Right Pointers in Each Node II</a></strong> &ndash; difficult</p></li>
-<li><p><strong><a href="/blog/2014/05/26/Symmetric-Tree/">Symmetric Tree</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/25/Same-Tree/">Same Tree</a></strong></p></li>
-</ol>
-
-
-<h2>Code</h2>
-
-<p><strong>Binary Search Tree find upper/lower bound</strong></p>
-
-<p>Find the new post.</p>
-
-<p><strong>Implement iterator of Binary Search Tree</strong></p>
-
-<p>Find the new post.</p>
-
-<p><strong>Binary Tree Serialize and Deserialize</strong></p>
-
-<p>Find the new post.</p>
-
-<p><strong>Populating Next Right Pointers in Each Node</strong></p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    TreeLinkNode dummy = new TreeLinkNode(0);
-    dummy.left = root;
-    helper(dummy, root);
-}
-
-private void helper(TreeLinkNode parent, TreeLinkNode child) {
-    if (child == null) {
-        return;
-    }
-    if (child == parent.left) {
-        child.next = parent.right;
-    } else if (child == parent.right) {
-        if (parent.next != null) {
-            child.next = parent.next.left;
-        }
-    }
-    helper(child, child.left);
-    helper(child, child.right);
-}
-</code></pre>
-
-<p><strong>Populating Next Right Pointers in Each Node II</strong></p>
-
-<p>This is a very tricky variant of DFS where the left sub-tree is making use of right sub-tree. I did not solve it even at second time.</p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    if (root == null) return;
-    if (root.left == null &amp;&amp; root.right == null) return;
-    TreeLinkNode levelNext = root.next;
-    TreeLinkNode lowerNext = null;
-    while (levelNext != null &amp;&amp; lowerNext == null) {
-        if (levelNext.left != null) {
-            lowerNext = levelNext.left;
-            break;
-        } else if (levelNext.right != null) {
-            lowerNext = levelNext.right;
-            break;
-        } else {
-            // if there is no child node of levelNext
-            levelNext = levelNext.next;
-        }
-    }
-    if (root.left == null) {
-        root.right.next = lowerNext;
-    } else if (root.right == null) {
-        root.left.next = lowerNext;
-    } else {
-        root.left.next = root.right;
-        root.right.next = lowerNext;
-    }
-    connect(root.right);
-    connect(root.left);
-}
-</code></pre>
-
-<p><strong>Symmetric Tree</strong></p>
-
-<pre><code>public boolean isSymmetric(TreeNode root) {
-    if (root == null) {
-        return true;
-    }
-    return mirror(root.left, root.right);
-}
-
-private boolean mirror(TreeNode left, TreeNode right) {
-    if (left == null &amp;&amp; right == null) {
-        return true;
-    }
-    if (left == null || right == null) {
-        return false;
-    }
-    return (left.val == right.val) 
-        &amp; mirror(left.left, right.right)
-        &amp; mirror(left.right, right.left);
-}
-</code></pre>
-
-<p><strong>Same Tree</strong></p>
-
-<pre><code>public boolean isSameTree(TreeNode left, TreeNode right) {
-    if (left == null &amp;&amp; right == null) {
-        return true;
-    }
-    if (left == null || right == null) {
-        return false;
-    }
-    return (left.val == right.val) 
-        &amp; isSameTree(left.left, right.left)
-        &amp; isSameTree(left.right, right.right);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/15/Java-Global-Variable/">[Question] Java Global Variable</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Global variable?</h3>
-
-<p>There is no such thing as a &lsquo;global variable&rsquo; in Java.</p>
-
-<blockquote><p>In computer programming, a global variable is a variable that is accessible in every scope (the global environment). Some languages, like Java, don&rsquo;t have global variables. <a href="https://sg.answers.yahoo.com/question/index?qid=20110811104130AA5JrbR">reference</a></p></blockquote>
-
-<p>But static variable can be seen as one, although every static variable must belong to some class (like Math.MIN_VALUE).</p>
-
-<p>Global variables are generally only used for declaring constants. In this case, declare it as &lsquo;final static&rsquo;. <a href="http://stackoverflow.com/questions/4646577/global-variables-in-java">reference</a></p>
-
-<h3>Four types of variable in Java</h3>
-
-<h4>Local variables</h4>
-
-<p>Created when the method, constructor or block is entered and will be destroyed once it exits the method, constructor or block.</p>
-
-<h4>Instance variables</h4>
-
-<p>Outside a method or constructor.</p>
-
-<p>When a space is allocated for an object in the heap, a slot for each instance variable value is created. It is destroyed when the object is destroyed.</p>
-
-<h4>Class/static variables</h4>
-
-<p>Static variable is class variable.</p>
-
-<p>Declared with &lsquo;static&rsquo; keyword in a class.</p>
-
-<h4>Constants</h4>
-
-<p>Most common usage of static variable &ndash; constant.</p>
-
-<p>Declared with &lsquo;static final&rsquo; keyword in a class.</p>
-
-<h3>One more thing</h3>
-
-<p>About <a href="http://programmers.stackexchange.com/a/65289">stack and heap in Java</a>:</p>
-
-<blockquote><p>In Java, primitives are created on the stack.</p>
-
-<p>Objects are created on the heap, and only references (which in turn are primitives) are passed around on the stack.</p>
-
-<p>If you create an object, it is put on the heap, with all the variables that belong to it, so that it can persist after the function call returns.</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/15/BST-find-upper-lower-bound/">[Question] Binary Search Tree Find Upper/lower Bound</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given a BST, find the node that is larger/smaller than particular number</p></blockquote>
-
-<p>Or the question can be:</p>
-
-<blockquote><p>Given a binary search tree and a value k, please find a node in the binary search tree whose value is closest to k. <a href="http://codercareer.blogspot.sg/2013/03/no-45-closest-node-in-binary-search-tree_2.html">link</a></p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>This post is based on the second question above</strong>.</p>
-
-<ol>
-<li>Traverse the tree top-down.</li>
-<li>While traversing, record values that are closer to target than previously-found value.</li>
-<li>If found, the target, break and return. <a href="http://stackoverflow.com/a/6209372">source</a></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p>From <a href="http://codercareer.blogspot.sg/2013/03/no-45-closest-node-in-binary-search-tree_2.html">this post</a>.</p>
-
-<pre><code>BinaryTreeNode* getClosestNode(BinaryTreeNode* pRoot, int value)
-{
-    BinaryTreeNode* pClosest = NULL;
-    int minDistance = 0x7FFFFFFF;
-    BinaryTreeNode* pNode = pRoot;
-    while(pNode != NULL){
-        int distance = abs(pNode-&gt;m_nValue - value);
-        if(distance &lt; minDistance){
-            minDistance = distance;
-            pClosest = pNode;
-        }
-
-        if(distance == 0)
-            break;
-
-        if(pNode-&gt;m_nValue &gt; value)
-            pNode = pNode-&gt;m_pLeft;
-        else if(pNode-&gt;m_nValue &lt; value)
-            pNode = pNode-&gt;m_pRight;
-    }
-
-    return pClosest;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/27">&larr; Older</a>
@@ -1686,7 +1748,7 @@ private boolean mirror(TreeNode left, TreeNode right) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (22)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (27)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -1697,7 +1759,7 @@ private boolean mirror(TreeNode left, TreeNode right) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
-<li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
@@ -1709,23 +1771,23 @@ private boolean mirror(TreeNode left, TreeNode right) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/18/">[CC150v5] 9.</a>
+        <a href="/blog/2014/09/29/">[CC150v5] 14.</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>
+        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/17/parenthesize-expression/">[CC150v5] 9.11 Parenthesize the Expression</a>
+        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/17/paint-fill-map/">[CC150v5] 9.7 Paint Fill in Map</a>
+        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/17/find-magic-index/">[CC150v5] 9.3 Find Magic Index</a>
+        <a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] Chap12 Example - Troubleshoot Google Chrome</a>
       </li>
     
   </ul>
