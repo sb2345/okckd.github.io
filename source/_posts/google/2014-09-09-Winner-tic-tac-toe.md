@@ -12,7 +12,7 @@ tags: [ src ]
 
 > How would you determine if someone has won a game of tic-tac-toe on a board of any size? 
 
-(This is also on CC150v4 19.2)
+(This is also on CC150v4 19.2 and CC150v4 17.2)
 
 ### Solution
 
