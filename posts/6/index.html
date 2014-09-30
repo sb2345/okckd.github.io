@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question There is an 8x8 chess board in which two diagonally opposite squares have been cut off. You are given 31 dominos, and a single domino can &hellip;">
+  <meta name="description" content="Question An array A[1&hellip;n] contains all the integers from 0 to n except for one number which is missing. In this problem, we cannot access an &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,100 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>An array A[1&hellip;n] contains all the integers from 0 to n except for one number which is missing. In this problem, we cannot access an entire integer in A with a single operation.</p>
+
+<p>The elements of A are represented in binary, and the only operation we can use to access them is “fetch the jth bit of A[i]”, which takes constant time. Write code to find the missing integer. Can you do it in O(n) time?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult bit operation question</strong>.</p>
+
+<p>The main thing to understand is, for a particular bit:</p>
+
+<blockquote><p>if the bit value of the removed number is 0, then count(0) &lt;= count(1)</p>
+
+<p>if the bit value of the removed number is 1, then count(0) > count(1)</p></blockquote>
+
+<p>By using this principle, we can easily find the missing value for each bit.</p>
+
+<p><strong>However, we must know when to stop checking</strong>. For example:</p>
+
+<blockquote><p>input: 000, 001, 011</p></blockquote>
+
+<p>We know that the last bit is 0, second last is 1. We shall stop here and return the result &ldquo;010&rdquo;. If we did not stop, the result value would be &ldquo;110&rdquo;, which is wrong. How this is handled is by <strong>passing only half of the input list each time</strong>, and we also add one condition at the beginning:</p>
+
+<pre><code>if (list.size() == 0)
+    return 0;
+</code></pre>
+
+<p>By doing this, we always limit the input list to a smaller range, until we finish finding all bits.</p>
+
+<h3>Code</h3>
+
+<p><strong>hard to write</strong></p>
+
+<pre><code>public static int findMissing(List&lt;BitInteger&gt; list) {
+    return helper(list, BitInteger.INTEGER_SIZE - 1);
+}
+
+private static int helper(List&lt;BitInteger&gt; list, int col) {
+    if (list.size() == 0)
+        return 0;
+    List&lt;BitInteger&gt; zeroList = new ArrayList&lt;BitInteger&gt;();
+    List&lt;BitInteger&gt; oneList = new ArrayList&lt;BitInteger&gt;();
+    for (BitInteger bit : list) {
+        if (bit.fetch(col) == 0) {
+            zeroList.add(bit);
+        } else {
+            oneList.add(bit);
+        }
+    }
+    if (zeroList.size() &lt;= oneList.size()) {
+        // this means the missing value contains a 0
+        return helper(zeroList, col - 1) &lt;&lt; 1;
+    } else {
+        // the missing value contains 1
+        return helper(oneList, col - 1) &lt;&lt; 1 | 1;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -806,80 +900,6 @@ private static boolean matchTree(TreeNode t1, TreeNode t2) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/04/print-numbers-containing-5/">[Question] Print Numbers Containing 5</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-04T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32651839.html">link</a></p>
-
-<blockquote><p>写一个function，对于参数n，输出从0到n之间所有含5的数字。eg. func(30) 应该输出5，15，25</p>
-
-<p>this is Groupon interview question</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Suggested by level 10 of <a href="http://www.mitbbs.com/article_t/JobHunting/32651839.html">this forum</a>. It&rsquo;s (surprisingly) a DFS question.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public void mySolution(int num) {
-    if (num &gt;= 5) {
-        String str = String.valueOf(num);
-        helper(num, "", 0, str.length(), false);
-    }
-}
-
-private void helper(int max, String prefix, int pos, int len, boolean have5) {
-    if (pos == len) {
-        int cur = Integer.parseInt(prefix);
-        if (cur &lt;= max) {
-            System.out.print(cur + ", ");
-        }
-        return;
-    }
-    for (int i = 0; i &lt; 10; i++) {
-        if (pos == len - 1 &amp;&amp; !have5 &amp;&amp; i != 5) {
-            continue;
-        }
-        helper(max, prefix + i, pos + 1, len, have5 || i == 5);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/7">&larr; Older</a>
@@ -896,7 +916,7 @@ private void helper(int max, String prefix, int pos, int len, boolean have5) {
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (27)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -919,6 +939,14 @@ private void helper(int max, String prefix, int pos, int len, boolean have5) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/29/optimal-unconcatenate-document/">[CC150v5] 17.14 Optimal Way to Unconcatenate a Doc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/29/convert-bst-to-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/29/">[CC150v5] 14.</a>
       </li>
     
@@ -928,14 +956,6 @@ private void helper(int max, String prefix, int pos, int len, boolean have5) {
     
       <li class="post">
         <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] Chap12 Example - Troubleshoot Google Chrome</a>
       </li>
     
   </ul>
