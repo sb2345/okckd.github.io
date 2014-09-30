@@ -111,7 +111,79 @@
 
 <h3>Solution</h3>
 
+<p><strong>This is a difficult question</strong>.</p>
+
+<blockquote><p>Each parenthesized expression must have an outermost pair of
+parentheses.</p>
+
+<p>That is, we can iterate through the expression, treating each operator as the first operator to be parenthesized.</p></blockquote>
+
+<p>Nice idea suggested in the book! So <strong>for each operator, we consider is as first operator (to evaluate)</strong>, and then we shall if the total possible count.</p>
+
+<p>(Note that while coding, we DO NOT WRITE {if-else if-else&hellip;} but instead use {if&hellip; if&hellip; if&hellip;} in order to get the total count. )</p>
+
+<p>DP is more time-efficient.</p>
+
+<p><strong>Like CC150v5 Q9.10, the code given in the book is very hard to read</strong>. I have my own code posted below.</p>
+
 <h3>Code</h3>
+
+<pre><code>public static int countMyAnswer(String exp, boolean result) {
+    if (exp.length() == 1) {
+        return convertIntToBool(exp.charAt(0)) == result ? 1 : 0;
+    }
+    // eg. 1^0|0|1
+    // result: true
+    int totalCount = 0;
+    for (int i = 1; i &lt; exp.length(); i += 2) {
+
+        char op = exp.charAt(i);
+        String firstHalf = exp.substring(0, i);
+        String secondHalf = exp.substring(i + 1);
+
+        int firstHalfTrue = countMyAnswer(firstHalf, true);
+        int firstHalfFalse = countMyAnswer(firstHalf, false);
+        int secondHalfTrue = countMyAnswer(secondHalf, true);
+        int secondHalfFalse = countMyAnswer(secondHalf, false);
+
+        if (evaluate('0', op, '0') == result) {
+            totalCount += firstHalfFalse * secondHalfFalse;
+        }
+        if (evaluate('0', op, '1') == result) {
+            totalCount += firstHalfFalse * secondHalfTrue;
+        }
+        if (evaluate('1', op, '0') == result) {
+            totalCount += firstHalfTrue * secondHalfFalse;
+        }
+        if (evaluate('1', op, '1') == result) {
+            totalCount += firstHalfTrue * secondHalfTrue;
+        }
+    }
+    return totalCount;
+}
+
+private static boolean convertIntToBool(char num) {
+    if (num == '1') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+private static boolean evaluate(char num1, char op, char num2) {
+    boolean b1 = convertIntToBool(num1);
+    boolean b2 = convertIntToBool(num2);
+    if (op == '&amp;') {
+        return b1 &amp; b2;
+    } else if (op == '|') {
+        return b1 | b2;
+    } else if (op == '^') {
+        return b1 ^ b2;
+    }
+    System.out.println("Did not found operator " + op);
+    return false;
+}
+</code></pre>
 </div>
 
 
@@ -174,7 +246,7 @@
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (26)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
@@ -197,6 +269,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/09/30/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate a Doc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/29/">[CC150v5] 14.</a>
       </li>
     
@@ -206,14 +286,6 @@
     
       <li class="post">
         <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] Chap12 Example - Troubleshoot Google Chrome</a>
       </li>
     
   </ul>

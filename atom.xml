@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-29T05:14:19+08:00</updated>
+  <updated>2014-09-30T21:58:38+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,87 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 17.14 Optimal Way to Unconcatenate a Doc]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/30/optimal-unconcatenate-doc/"/>
+    <updated>2014-09-30T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/30/optimal-unconcatenate-doc</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Given a lengthy document without spaces, punctuation, and capitalization:</p>
+
+<p>eg: iresetthecomputeritstilldidntboot</p>
+
+<p>Now add back in the punctation and capitalization.</p>
+
+<p>Most of the words will be in a dictionary, but some strings, like proper names, will not. Given a dictionary (a list of words), design an algorithm to find the optimal way of &ldquo;unconcatenating&rdquo; a sequence of words (by minimizing unrecognized sequences of characters).</p>
+
+<p>For example, the string &ldquo;jesslookedjustliketimherbrother&rdquo; would be optimally parsed as &ldquo;JESS looked just like TIM her brother&rdquo;. This parsing has seven unrecognized characters, which we have capitalized for clarity.</p></blockquote>
+
+<h3>Solution</h3>
+
+<h3>Code</h3>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 17.13 Convert BST to Doubly-Linked List]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/30/convert-bst-doubly-linked-list/"/>
+    <updated>2014-09-30T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/30/convert-bst-doubly-linked-list</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Consider a simple node-like data structure called BiNode, which has pointers to two other nodes.</p></blockquote>
+
+<pre><code>public class BiNode {
+    public BiNode nodel, node2;
+    public int data;
+}
+</code></pre>
+
+<p>The data structure BiNode could be used to represent both a binary tree (where nodel is the left node and node2 is the right node) or a doubly linked list (where nodel is the previous node and node2 is the next node). Implement a method to convert a binary search tree (implemented with BiNode) into a doubly linked list. The values should be kept in order and the operation should be performed in place (that is, on the original data structure).</p>
+
+<h3>Solution</h3>
+
+<h3>Code</h3>
+
+<pre><code>public static BiNode convert(BiNode root) {
+    if (root == null) {
+        return null;
+    }
+    return helper(root);
+}
+
+private static BiNode helper(BiNode node) {
+    // node is not null
+    BiNode newHead = node;
+    // do left part
+    if (node.node1 != null) {
+        newHead = helper(node.node1);
+        BiNode leftTail = getListTail(newHead);
+        leftTail.node2 = node;
+        node.node1 = leftTail;
+    }
+    // do right part
+    if (node.node2 != null) {
+        BiNode rightHead = helper(node.node2);
+        node.node2 = rightHead;
+        rightHead.node1 = node;
+    }
+    return newHead;
+}
+
+private static BiNode getListTail(BiNode head) {
+    // head is not null
+    while (head.node2 != null) {
+        head = head.node2;
+    }
+    return head;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[CC150v5] 14.]]></title>
@@ -529,7 +610,79 @@ My solution is         370ms
 
 <h3>Solution</h3>
 
+<p><strong>This is a difficult question</strong>.</p>
+
+<blockquote><p>Each parenthesized expression must have an outermost pair of
+parentheses.</p>
+
+<p>That is, we can iterate through the expression, treating each operator as the first operator to be parenthesized.</p></blockquote>
+
+<p>Nice idea suggested in the book! So <strong>for each operator, we consider is as first operator (to evaluate)</strong>, and then we shall if the total possible count.</p>
+
+<p>(Note that while coding, we DO NOT WRITE {if-else if-else&hellip;} but instead use {if&hellip; if&hellip; if&hellip;} in order to get the total count. )</p>
+
+<p>DP is more time-efficient.</p>
+
+<p><strong>Like CC150v5 Q9.10, the code given in the book is very hard to read</strong>. I have my own code posted below.</p>
+
 <h3>Code</h3>
+
+<pre><code>public static int countMyAnswer(String exp, boolean result) {
+    if (exp.length() == 1) {
+        return convertIntToBool(exp.charAt(0)) == result ? 1 : 0;
+    }
+    // eg. 1^0|0|1
+    // result: true
+    int totalCount = 0;
+    for (int i = 1; i &lt; exp.length(); i += 2) {
+
+        char op = exp.charAt(i);
+        String firstHalf = exp.substring(0, i);
+        String secondHalf = exp.substring(i + 1);
+
+        int firstHalfTrue = countMyAnswer(firstHalf, true);
+        int firstHalfFalse = countMyAnswer(firstHalf, false);
+        int secondHalfTrue = countMyAnswer(secondHalf, true);
+        int secondHalfFalse = countMyAnswer(secondHalf, false);
+
+        if (evaluate('0', op, '0') == result) {
+            totalCount += firstHalfFalse * secondHalfFalse;
+        }
+        if (evaluate('0', op, '1') == result) {
+            totalCount += firstHalfFalse * secondHalfTrue;
+        }
+        if (evaluate('1', op, '0') == result) {
+            totalCount += firstHalfTrue * secondHalfFalse;
+        }
+        if (evaluate('1', op, '1') == result) {
+            totalCount += firstHalfTrue * secondHalfTrue;
+        }
+    }
+    return totalCount;
+}
+
+private static boolean convertIntToBool(char num) {
+    if (num == '1') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+private static boolean evaluate(char num1, char op, char num2) {
+    boolean b1 = convertIntToBool(num1);
+    boolean b2 = convertIntToBool(num2);
+    if (op == '&amp;') {
+        return b1 &amp; b2;
+    } else if (op == '|') {
+        return b1 | b2;
+    } else if (op == '^') {
+        return b1 ^ b2;
+    }
+    System.out.println("Did not found operator " + op);
+    return false;
+}
+</code></pre>
 ]]></content>
   </entry>
   
@@ -1195,96 +1348,6 @@ public static boolean helper2(int from, int to) {
         node = node.next;
     }
     return count;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] Chap 3 Example - Implement Stack]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/15/implement-stack/"/>
-    <updated>2014-09-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/15/implement-stack</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Implement a stack.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Stack uses LinkedNode to implement</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class MyStack {
-
-    Node top;
-
-    public int pop() {
-        if (top == null) {
-            return -1;
-        }
-        int returnVal = top.val;
-        top = top.next;
-        return returnVal;
-    }
-
-    public int peek() {
-        if (top == null) {
-            return -1;
-        }
-        return top.val;
-
-    }
-
-    public void push(int val) {
-        Node newNode = new Node(val);
-        newNode.next = top;
-        top = newNode;
-    }
-
-    class Node {
-
-        int val;
-        Node next;
-
-        Node(int value) {
-            val = value;
-        }
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 2.2 Kth Last Element (Recursive)]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/14/kth-last-element-recursive/"/>
-    <updated>2014-09-14T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/14/kth-last-element-recursive</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Implement an algorithm to find the kth to last element of a singly linked list.</p>
-
-<p>Do it recursively.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Iterative solution is easy, <strong>recursive is not</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>private static int myAns = -1;
-
-public static int nthToLastMe(LinkedListNode head, int n) {
-    if (head == null) {
-        return 0;
-    } else if (nthToLastMe(head.next, n) &lt; n - 1) {
-        return nthToLastMe(head.next, n) + 1;
-    } else if (nthToLastMe(head.next, n) == n - 1) {
-        myAns = head.data;
-        return Integer.MAX_VALUE;
-    }
-    return Integer.MAX_VALUE;
 }
 </code></pre>
 ]]></content>
