@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[LeetCode Plus] Convert BST to Circular Doubly-Linked List"
+title: "[LeetCode Plus] Convert BST to Doubly-Linked List"
 comments: true
 category: leetcode_plus
 tags: [ src ]
@@ -14,7 +14,7 @@ tags: [ src ]
 
 > Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.
 
-### Inorder solution
+### One: Inorder
 
 This question can be solved with __inorder traversal with the help of a 'pre' pointer__. 
 
@@ -50,7 +50,7 @@ This solution is recommended by L33tcode, but not very intuitive, and difficult 
       return head;
     }
 
-### Divide and conquer solution
+### Two: Divide and conquer
 
 The good and intuitive solution is to do D&C and __solve left and right recursively__. Do note how the circular linked lists are merged, and be careful when replacing the pointers. 
 
