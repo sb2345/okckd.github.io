@@ -34,7 +34,7 @@ __The key of the solution is how we return both HEAD and TAIL__. The book sugges
 
 I wrote the code for 2nd suggestion. 
 
-__The circular list is a great idea__. It's already covered in previous post. Do keep in mind why we need the list to be circular! 
+__The circular list is a great idea__. It's already covered in previous post. Do keep in mind __why we need the list to be circular__! 
 
 ### Code
 
