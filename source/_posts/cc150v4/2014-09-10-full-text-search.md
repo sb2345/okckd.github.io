@@ -2,7 +2,9 @@
 layout: post
 title: "[CC150v4] 20.8 Full Text Search "
 comments: true
-category: CC150v4
+categories:
+- CC150v4
+- String search
 tags: [  ]
 ---
 

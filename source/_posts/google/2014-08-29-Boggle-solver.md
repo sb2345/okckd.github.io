@@ -2,7 +2,9 @@
 layout: post
 title: "[Google] Boggle Solver (search words from matrix)"
 comments: true
-category: Google
+categories:
+- Google
+- String search
 tags: [  ]
 ---
 

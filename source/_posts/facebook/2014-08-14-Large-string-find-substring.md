@@ -2,7 +2,9 @@
 layout: post
 title: "[Facebook] Large String Find Substring "
 comments: true
-category: Facebook
+categories:
+- Facebook
+- String search
 tags: [  ]
 ---
 

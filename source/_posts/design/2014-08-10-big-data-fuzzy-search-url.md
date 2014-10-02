@@ -2,7 +2,9 @@
 layout: post
 title: "[Design] Big Data - Fuzzy Search url"
 comments: true
-category: Design
+categories:
+- Design
+- String search
 tags: [  ]
 ---
 

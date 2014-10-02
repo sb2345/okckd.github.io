@@ -2,7 +2,9 @@
 layout: post
 title: "[LeetCode 79] Word Search"
 comments: true
-category: Leetcode
+categories:
+- Leetcode
+- String search
 tags: [  ]
 ---
 
