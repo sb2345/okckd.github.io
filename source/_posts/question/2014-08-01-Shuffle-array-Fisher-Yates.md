@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Shuffle An Array (Fisher–Yates) "
 comments: true
 category: Question
-tags: [  ]
+tags: [ src ]
 ---
 
 ### Question 
@@ -49,9 +49,17 @@ Note that when we generate a new number between 0 and i, we swap it (with the la
 
 By doing it this way, we get a perfect shuffle! Idea is from cc150. 
 
+__Updated again on Oct 2nd, 2014__: I re-wrote the code for CC150v5 Q18.2. It's very important to note that: 
+
+    if (a == b) {
+        return;
+    }
+
+When a == b, do not swap, otherwise __the XOR swap method will product an zero__! 
+
 ### Code
 
-__not written by me__, [link](http://www.geeksforgeeks.org/shuffle-a-given-array/)
+__code form G4G__, [link](http://www.geeksforgeeks.org/shuffle-a-given-array/)
 
 	def sattoloCycle(items):
 	    i = len(items)
@@ -61,17 +69,27 @@ __not written by me__, [link](http://www.geeksforgeeks.org/shuffle-a-given-array
 	        items[j], items[i] = items[i], items[j]
 	    return
 
-__code from cc150__
+__written by me__
 
-	public static void shuffleArray(int[] cards) {
-		int temp;
-		int index;
+	public static void shuffleArrayInteratively(int[] cards) {
 		for (int i = 0; i < cards.length; i++) {
-			index = (int) (Math.random() * (cards.length - i)) + i;
-			// number at position 'i' is swapped with position 'index' (which is
-			// random)
-			temp = cards[i];
-			cards[i] = cards[index];
-			cards[index] = temp;
+			// all nums to the left of (i) is 'dead', don't consider them
+			int choose = rand(i, cards.length - 1);
+			swap(cards, i, choose);
+			// now (i) is also 'dead'
 		}
+	}
+
+	private static int rand(int from, int to) {
+		int count = to - from + 1;
+		return from + (int) (Math.random() * count);
+	}
+
+	private static void swap(int[] nums, int a, int b) {
+		if (a == b) {
+			return;
+		}
+		nums[a] ^= nums[b];
+		nums[b] ^= nums[a];
+		nums[a] ^= nums[b];
 	}
