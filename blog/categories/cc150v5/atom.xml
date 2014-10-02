@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Cc150v5 | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/cc150v5/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-09-30T13:25:25+08:00</updated>
+  <updated>2014-10-02T12:02:28+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,10 +14,68 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[CC150v5] 17.14 Optimal Way to Unconcatenate a Doc]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/29/optimal-unconcatenate-document/"/>
-    <updated>2014-09-29T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/29/optimal-unconcatenate-document</id>
+    <title type="html"><![CDATA[[CC150v5] 18.7 Longest Word Made From Other Words]]></title>
+    <link href="http://okckd.github.io/blog/2014/10/02/longest-word-made-from-other/"/>
+    <updated>2014-10-02T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/10/02/longest-word-made-from-other</id>
+    <content type="html"><![CDATA[### Question
+
+> Given a list of words, write a program to find the longest word made of other words in the list.
+
+> EXAMPLE
+>
+> Input: cat, banana, dog, nana, walk, walker, dogwalker
+>
+> Output: dogwalker
+
+### Solution
+
+__Search it recursively from longest to shortest__. Use HashSet to help us search for words quickly. 
+
+This question might look difficult at first, it's actually a very classical recursive search. 
+
+### Code
+
+	public static void printLongestWord(String[] arr) {
+		Arrays.sort(arr, new LengthComparator());
+		HashSet<String> set = new HashSet<String>();
+		for (String str : arr) {
+			set.add(str);
+		}
+		for (String word : arr) {
+			if (canDivide(word, 0, set)) {
+				System.out.println(word);
+				return;
+			}
+		}
+		System.out.println("can not find such word");
+	}
+
+	private static boolean canDivide(String word, int from, HashSet<String> set) {
+		if (from == word.length()) {
+			return true;
+		}
+		for (int i = from; i < word.length(); i++) {
+			String str = word.substring(from, i + 1);
+			if (from == 0 && i == word.length() - 1) {
+				continue;
+			} else if (!set.contains(str)) {
+				continue;
+			}
+			if (canDivide(word, i + 1, set)) {
+				return true;
+			}
+		}
+		return false;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 17.14 Optimal Way to Unconcatenate Doc]]></title>
+    <link href="http://okckd.github.io/blog/2014/10/01/optimal-unconcatenate-doc/"/>
+    <updated>2014-10-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/10/01/optimal-unconcatenate-doc</id>
     <content type="html"><![CDATA[### Question
 
 > Given a lengthy document without spaces, punctuation, and capitalization:
@@ -32,56 +90,108 @@
 
 ### Solution
 
+The solution given in the book is very hard to understand. It uses HashMap to memorize the previous result. 
 
+After long time of struggle, I finally solved it with traditional DP approach. The key idea is to consider: "__whether I insert a space after this char, or not__". 
+
+The code is concise and easy to read. 
 
 ### Code
 
-
+	public static int parse(String doc, Trie dict) {
+		int len = doc.length();
+		int[] dp = new int[len + 1];
+		// dp[i] denotes the number of special chars in first i chars of docs
+		for (int i = 1; i <= len; i++) {
+			dp[i] =  Integer.MAX_VALUE;
+			for (int j = 0; j < i; j++) {
+				String str = doc.substring(j, i);
+				if (dict.contains(str, true)) {
+					// consider (i to j) a valid word
+					dp[i] = Math.min(dp[i], dp[j]);
+				} else {
+					// consider (i to j) special chars
+					dp[i] = Math.min(dp[i], dp[j] + i - j);
+				}
+			}
+		}
+		return dp[len];
+	}
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[[CC150v5] 17.13 Convert BST to Doubly-Linked List]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/29/convert-bst-to-doubly-linked-list/"/>
-    <updated>2014-09-29T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/29/convert-bst-to-doubly-linked-list</id>
+    <link href="http://okckd.github.io/blog/2014/09/30/convert-bst-doubly-linked-list/"/>
+    <updated>2014-09-30T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/30/convert-bst-doubly-linked-list</id>
     <content type="html"><![CDATA[### Question
 
 > Consider a simple node-like data structure called BiNode, which has pointers to two other nodes.
 
     public class BiNode {
-        public BiNode nodel, node2;
+        public BiNode node1, node2;
         public int data;
     }
 
-The data structure BiNode could be used to represent both a binary tree (where nodel is the left node and node2 is the right node) or a doubly linked list (where nodel is the previous node and node2 is the next node). Implement a method to convert a binary search tree (implemented with BiNode) into a doubly linked list. The values should be kept in order and the operation should be performed in place (that is, on the original data structure). 
+> The data structure BiNode could be used to represent both a binary tree (where node1 is the left node and node2 is the right node) or a doubly linked list (where node1 is the previous node and node2 is the next node). Implement a method to convert a binary search tree (implemented with BiNode) into a doubly linked list. The values should be kept in order and the operation should be performed in place (that is, on the original data structure). 
 
 ### Solution
 
+At another post __[LeetCode Plus] Convert BST to Doubly-Linked List__, we already discussed 2 approaches: 
 
+1. in-order traversal approach
+1. divide and conquer approach
 
-### Code
+First approach isn't intuitive. We will further discuss D&C approach here. 
 
+__The key of the solution is how we return both HEAD and TAIL__. The book suggests 3 ways: 
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 14.]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/29/"/>
-    <updated>2014-09-29T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/</id>
-    <content type="html"><![CDATA[### Question
+1. Build a __data structure__ to store both head and tail
+1. __Just return head__, and retrieve tail by traversing thru - bad time complexity O(n^2)
+1. __Use circular linked-list__! Time O(n). 
 
-> 
+I wrote the code for 2nd suggestion. 
 
-### Solution
-
-
+__The circular list is a great idea__. It's already covered in previous post. Do keep in mind __why we need the list to be circular__! 
 
 ### Code
 
+__Just return head approach__
 
+	public static BiNode convert(BiNode root) {
+		if (root == null) {
+			return null;
+		}
+		return helper(root);
+	}
+
+	private static BiNode helper(BiNode node) {
+		// node is not null
+		BiNode newHead = node;
+		// do left part
+		if (node.node1 != null) {
+			newHead = helper(node.node1);
+			BiNode leftTail = getListTail(newHead);
+			leftTail.node2 = node;
+			node.node1 = leftTail;
+		}
+		// do right part
+		if (node.node2 != null) {
+			BiNode rightHead = helper(node.node2);
+			node.node2 = rightHead;
+			rightHead.node1 = node;
+		}
+		return newHead;
+	}
+
+	private static BiNode getListTail(BiNode head) {
+		// head is not null
+		while (head.node2 != null) {
+			head = head.node2;
+		}
+		return head;
+	}
 ]]></content>
   </entry>
   
