@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v5] 17.14 Optimal Way to Unconcatenate Doc (`) "
+title: "[CC150v5] 17.14 Optimal Way to Unconcatenate Doc "
 comments: true
 category: CC150v5
 tags: [ src ]
