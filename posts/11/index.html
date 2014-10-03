@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Overview Value types are created on the stack, and reference types are created on the heap. Both are stored in computer RAM. Each thread gets a stack &hellip;">
+  <meta name="description" content="Question Explain how you would design a chat server. In particular, provide details about the various back end components, classes, and methods. What &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,280 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/24/design-online-chat-server-1/">[CC150v5] 8.7 Design Online Chat Server (1)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Explain how you would design a chat server. In particular, provide details about the various back end components, classes, and methods.</p>
+
+<p>What would be the hardest problems to solve?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>First, decide the objects and methods. Here we&rsquo;ll focus on the core user management and conversation aspects.</p>
+
+<h4>Class</h4>
+
+<ol>
+<li>UserMgmt (business logic)</li>
+<li>User (includes basic info, UserStatus, a map of conversation, a map of requests)</li>
+<li>UserStatus (on/offline, status message)</li>
+<li>Conversation Abstract Class (a list of user and a list of messages)
+
+<ol>
+<li>PrivateChat (private conversation)</li>
+<li>GroupChat</li>
+</ol>
+</li>
+<li>Message (a string and a date/time)</li>
+<li>Request (add request and delete request, involves 2 Users)</li>
+</ol>
+
+
+<h4>Functions</h4>
+
+<ol>
+<li>Sign in and log off (update availability)</li>
+<li>update status message</li>
+<li>add/delete request</li>
+<li>send/accept/reject a request</li>
+<li>create a conversation (group or private)</li>
+<li>add a new message (group or private)</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>The most important classes is User and UserMgmt. The others are simply data containers.</p>
+
+<p>UserManager.java</p>
+
+<pre><code>public class UserManager {
+    private static UserManager instance;
+    private HashMap&lt;Integer, User&gt; usersById = new HashMap&lt;Integer, User&gt;();
+    private HashMap&lt;String, User&gt; usersByAccountName = new HashMap&lt;String, User&gt;();
+    private HashMap&lt;Integer, User&gt; onlineUsers = new HashMap&lt;Integer, User&gt;();
+
+    public static UserManager getInstance() {
+        if (instance == null) {
+            instance = new UserManager();
+        }
+        return instance;
+    }
+
+    public void addUser(User fromUser, String toAccountName) {
+        User toUser = usersByAccountName.get(toAccountName);
+        AddRequest req = new AddRequest(fromUser, toUser, new Date());
+        toUser.receivedAddRequest(req);
+        fromUser.sentAddRequest(req);
+    }
+
+    public void approveAddRequest(AddRequest req) {
+        req.status = RequestStatus.Accepted;
+        User from = req.getFromUser();
+        User to = req.getToUser();
+        from.addContact(to);
+        to.addContact(from);
+    }
+
+    public void rejectAddRequest(AddRequest req) {
+        req.status = RequestStatus.Rejected;
+        User from = req.getFromUser();
+        User to = req.getToUser();
+        from.removeAddRequest(req);
+        to.removeAddRequest(req);       
+    }
+
+    public void userSignedOn(String accountName) {
+        User user = usersByAccountName.get(accountName);
+        if (user != null) {
+            user.setStatus(new UserStatus(UserStatusType.Available, ""));           
+            onlineUsers.put(user.getId(), user);
+        }
+    }
+
+    public void userSignedOff(String accountName) {
+        User user = usersByAccountName.get(accountName);
+        if (user != null) {
+            user.setStatus(new UserStatus(UserStatusType.Offline, ""));
+            onlineUsers.remove(user.getId());
+        }
+    }   
+}
+</code></pre>
+
+<p>User.java</p>
+
+<p>Property:</p>
+
+<ol>
+<li>id and name</li>
+<li>a map of conversations</li>
+<li>a map of sent request</li>
+<li>a map of received request</li>
+<li>a map of friends list</li>
+</ol>
+
+
+<p>Methods:</p>
+
+<ol>
+<li>sendMessageToUser(User)</li>
+<li>addContact(User)</li>
+<li>receivedAddRequest(Request)</li>
+<li>sentAddRequest(Request)</li>
+<li>removeAddRequest(Request)</li>
+<li>addConversation(Conversation)</li>
+</ol>
+
+
+<p>Note that all user actions are controlled by the UserManager Class. For example, when adding a friend:</p>
+
+<ol>
+<li>User A clicks &ldquo;add user&rdquo; on the client.</li>
+<li>User A calls requestAddUser (User B).</li>
+<li>This method calls UserManager.addUser(User a, userBid).</li>
+<li>UserManager calls both User A.sentAddRequest() and User B.receivedAddRequest().</li>
+</ol>
+
+
+<p>Code:</p>
+
+<pre><code>public class User {
+    private int id;
+    private UserStatus status = null;
+    private HashMap&lt;Integer, PrivateChat&gt; privateChats = new HashMap&lt;Integer, PrivateChat&gt;();
+    private ArrayList&lt;GroupChat&gt; groupChats = new ArrayList&lt;GroupChat&gt;();
+    private HashMap&lt;Integer, AddRequest&gt; receivedAddRequests = new HashMap&lt;Integer, AddRequest&gt;();
+    private HashMap&lt;Integer, AddRequest&gt; sentAddRequests = new HashMap&lt;Integer, AddRequest&gt;();
+
+    private HashMap&lt;Integer, User&gt; contacts = new HashMap&lt;Integer, User&gt;();
+    private String accountName;
+    private String fullName;
+
+    public User(int id, String accountName, String fullName) {
+        this.accountName = accountName;
+        this.fullName = fullName;
+        this.id = id;
+    }
+
+    public boolean sendMessageToUser(User toUser, String content) {
+        PrivateChat chat = privateChats.get(toUser.getId());
+        if (chat == null) {
+            chat = new PrivateChat(this, toUser);
+            privateChats.put(toUser.getId(), chat);
+        }
+        Message message = new Message(content, new Date());
+        return chat.addMessage(message);
+    }
+
+    public boolean sendMessageToGroupChat(int groupId, String content) {
+        GroupChat chat = groupChats.get(groupId);
+        if (chat != null) {
+            Message message = new Message(content, new Date());
+            return chat.addMessage(message);
+        }
+        return false;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public boolean addContact(User user) {
+        if (contacts.containsKey(user.getId())) {
+            return false;
+        } else {
+            contacts.put(user.getId(), user);
+            return true;
+        }
+    }
+
+    public void receivedAddRequest(AddRequest req) {
+        int senderId = req.getFromUser().getId();
+        if (!receivedAddRequests.containsKey(senderId)) {
+            receivedAddRequests.put(senderId, req);
+        }       
+    }
+
+    public void sentAddRequest(AddRequest req) {
+        int receiverId = req.getFromUser().getId();
+        if (!sentAddRequests.containsKey(receiverId)) {
+            sentAddRequests.put(receiverId, req);
+        }       
+    }
+
+    public void removeAddRequest(AddRequest req) {
+        if (req.getToUser() == this) {
+            receivedAddRequests.remove(req);
+        } else if (req.getFromUser() == this) {
+            sentAddRequests.remove(req);
+        }
+    }
+
+    public void requestAddUser(String accountName) {
+        UserManager.getInstance().addUser(this, accountName);
+    }
+
+    public void addConversation(PrivateChat conversation) {
+        User otherUser = conversation.getOtherParticipant(this);
+        privateChats.put(otherUser.getId(), conversation);
+    }
+
+    public void addConversation(GroupChat conversation) {
+        groupChats.add(conversation);
+    }   
+
+    public int getId() {
+        return id;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -816,77 +1090,6 @@ class BlackJackCard extends Card {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/19/Count-level-in-perfect-BT/">[Question] Count Level in Perfect Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/10721583/how-can-i-calculate-the-level-of-a-node-in-a-perfect-binary-tree-from-its-depth">link</a></p>
-
-<blockquote><p>A perfect binary tree, i.e. each node in the tree is either a leaf node, or has two children, and all leaf nodes are on the same level. Each node has an index in depth-first order.</p></blockquote>
-
-<pre><code>      0
-    /   \
-  1      4
- / \    / \
-2   3  5   6
-</code></pre>
-
-<blockquote><p>Given the index (k) of a particular node, calculate its level.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a <a href="http://stackoverflow.com/a/10721897">magical solution</a></strong>.  It divides the tree in the middle with number k decrease by 1 each time.</p>
-
-<p>Beautiful, and hard to understand.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong>.</p>
-
-<pre><code>public int countLevel(TreeNode root, int k, int n) {
-    int level = 0;
-    while (k != 0) {
-        k--;
-        n = (n - 1) / 2;
-        k = k % n;
-        level++;
-    }
-    return level + 1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/12">&larr; Older</a>
@@ -908,7 +1111,7 @@ class BlackJackCard extends Card {
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (155)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (156)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
@@ -927,6 +1130,10 @@ class BlackJackCard extends Card {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/10/03/Leetcode-third-1/">[Leetcode] Leetcode Third Round (1)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
       </li>
     
@@ -940,10 +1147,6 @@ class BlackJackCard extends Card {
     
       <li class="post">
         <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
       </li>
     
   </ul>
