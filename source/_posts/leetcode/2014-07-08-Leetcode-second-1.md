@@ -6,6 +6,15 @@ category: Leetcode
 tags: [  ]
 ---
 
+    Days:        12
+    Submission:  427
+    Pass:        144
+    
+    Submit/day:  35.6
+    Pass/day:    12
+    
+    Pass/submit: 0.34
+
 ### Question List
 
 1. Integer to Roman
