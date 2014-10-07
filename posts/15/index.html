@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Overview Producer-consumer problem illustrates the need for synchronization in systems where many processes share a resource. In the problem, two &hellip;">
+  <meta name="description" content="Overview Thread pool is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue. A sample thread pool &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,147 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/08/Thread-pool-pattern/">[Design] Thread Pool Pattern</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Overview</h3>
+
+<p><a href="http://programmers.stackexchange.com/a/173580">Thread pool</a> is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue.</p>
+
+<p><img class="middle" src="/assets/images/thread-pool.png"></p>
+
+<p><a href="http://en.wikipedia.org/wiki/Thread_pool_pattern">A sample thread pool</a> (green boxes) with waiting tasks (blue) and completed tasks (yellow)</p>
+
+<h3>Why Thread Pool?</h3>
+
+<p><a href="http://www.ibm.com/developerworks/library/j-jtp0730/">Many server applications</a>, such as <strong>Web servers (eg. Tomcat)</strong>, database servers, file servers, or mail servers must process a large number of tasks received from a network protocol. Often, the task is short-lived and the number of requests is large.</p>
+
+<p><strong>Thread Pools are useful when you need to limit the number of threads</strong> running in your application at the same time.</p>
+
+<h3>More details</h3>
+
+<p>A thread pool is a group of pre-instantiated, idle threads which stand ready to be given work. These are preferred over instantiating new threads for each task when there is <strong>a large number of short tasks</strong> to be done <strong>rather than a small number of long ones</strong>.</p>
+
+<p>Instead of starting a new thread for every task to execute concurrently, the <strong>task can be passed to a thread pool</strong>. As soon as the pool has any idle threads the task is assigned to one of them and executed.</p>
+
+<p>Thread pools are often used in multi threaded servers. Each connection <strong>arriving at the server via the network is wrapped as a task</strong> and passed on to a thread pool. The threads in the thread pool will process the requests on the connections concurrently.</p>
+
+<h3>Code</h3>
+
+<p><strong>a <a href="http://tutorials.jenkov.com/java-concurrency/thread-pools.html">simple thread pool implementation</a></strong></p>
+
+<p>Pool Class:</p>
+
+<pre><code>public class ThreadPool {
+
+  private BlockingQueue taskQueue = null;
+  private List&lt;PoolThread&gt; threads = new ArrayList&lt;PoolThread&gt;();
+  private boolean isStopped = false;
+
+  public ThreadPool(int noOfThreads, int maxNoOfTasks){
+    taskQueue = new BlockingQueue(maxNoOfTasks);
+
+    for(int i=0; i&lt;noOfThreads; i++){
+      threads.add(new PoolThread(taskQueue));
+    }
+    for(PoolThread thread : threads){
+      thread.start();
+    }
+  }
+
+  public void synchronized execute(Runnable task){
+    if(this.isStopped) throw
+      new IllegalStateException("ThreadPool is stopped");
+
+    this.taskQueue.enqueue(task);
+  }
+
+  public synchronized void stop(){
+    this.isStopped = true;
+    for(PoolThread thread : threads){
+      thread.stop();
+    }
+  }
+}
+</code></pre>
+
+<p>Thread Class:</p>
+
+<pre><code>public class PoolThread extends Thread {
+
+  private BlockingQueue taskQueue = null;
+  private boolean       isStopped = false;
+
+  public PoolThread(BlockingQueue queue){
+    taskQueue = queue;
+  }
+
+  public void run(){
+    while(!isStopped()){
+      try{
+        Runnable runnable = (Runnable) taskQueue.dequeue();
+        runnable.run();
+      } catch(Exception e){
+        //log or otherwise report exception,
+        //but keep pool thread alive.
+      }
+    }
+  }
+
+  public synchronized void stop(){
+    isStopped = true;
+    this.interrupt(); //break pool thread out of dequeue() call.
+  }
+
+  public synchronized void isStopped(){
+    return isStopped;
+  }
+}
+</code></pre>
+
+<p>An explanation:</p>
+
+<blockquote><p>The thread pool implementation consists of two parts. A ThreadPool class which is the public interface to the thread pool, and a PoolThread class which implements the threads that execute the tasks.</p>
+
+<p>To execute a task the method ThreadPool.execute(Runnable r) is called with a Runnable implementation as parameter. The Runnable is enqueued in the blocking queue internally, waiting to be dequeued.</p>
+
+<p>The Runnable will be dequeued by an idle PoolThread and executed. You can see this in the PoolThread.run() method. After execution the PoolThread loops and tries to dequeue a task again, until stopped.</p>
+
+<p>To stop the ThreadPool the method ThreadPool.stop() is called. The stop called is noted internally in the isStopped member. Then each thread in the pool is stopped by calling PoolThread.stop(). Notice how the execute() method will throw an IllegalStateException if execute() is called after stop() has been called.</p>
+
+<p>The threads will stop after finishing any task they are currently executing. Notice the this.interrupt() call in PoolThread.stop(). This makes sure that a thread blocked in a wait() call inside the taskQueue.dequeue() call breaks out of the wait() call, and leaves the dequeue() method call with an InterruptedException thrown. This exception is caught in the PoolThread.run() method, reported, and then the isStopped variable is checked. Since isStopped is now true, the PoolThread.run() will exit and the thread dies.</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -784,70 +925,6 @@ public String decToHex(int dec) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/06/Postorder-successor-Binary-Tree/">[Google] Postorder Successor in Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5173972006076416">link</a></p>
-
-<blockquote><p>Write an algorithm to find the ‘next’ post-order successor of a given node in a binary tree and binary search tree.</p>
-
-<ol>
-<li>where each node has a link to its parent.</li>
-<li>without parent pointer</li>
-</ol>
-
-
-<p>Implement 2 versions of the algorithm: 1.) binary tree 2.) BST</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>In postorder, any node below current node shall be &lsquo;predecessor&rsquo; of current node. Thus we only care about current node&rsquo;s parent.</p>
-
-<p>Suggested by a user:</p>
-
-<pre><code>1) parent pointer is given. 
-- go to the parent of the current node. 
-- if current node is the right child of its parent =&gt; print parent. 
-- else return leftmost node of the right sub-tree of parent. 
-
-2) parent pointer is not given. 
-- traverse the tree and find the parent of the current node 
-- do the same as method (1). 
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/16">&larr; Older</a>
@@ -875,6 +952,7 @@ public String decToHex(int dec) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
+<li class='category'><a href='/blog/categories/read/'>read (1)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
@@ -886,6 +964,10 @@ public String decToHex(int dec) {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/read/">[Read] Read</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/10/03/Leetcode-third-1/">[Leetcode] Leetcode Third Round (1)</a>
@@ -901,10 +983,6 @@ public String decToHex(int dec) {
     
       <li class="post">
         <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
       </li>
     
   </ul>
