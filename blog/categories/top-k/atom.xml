@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Top K | Woodstock Blog]]></title>
+  <link href="http://okckd.github.io/blog/categories/top-k/atom.xml" rel="self"/>
+  <link href="http://okckd.github.io/"/>
+  <updated>2014-10-11T00:07:55+08:00</updated>
+  <id>http://okckd.github.io/</id>
+  <author>
+    <name><![CDATA[Charlie Brown]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v4] 20.6 Top Million From Billion]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/10/top-million-from-billion/"/>
+    <updated>2014-09-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/10/top-million-from-billion</id>
+    <content type="html"><![CDATA[### Question
+
+> Describe an algorithm to find the largest 1 million numbers in 1 billion numbers. 
+
+> Assume that the computer memory can hold all one billion numbers. 
+
+### Solution
+
+There're enough discussion on __Top K problems__ so far in this blog. The suggest solutions is: 
+
+1. Sort
+
+1. Min Heap, O(n logm) time. 
+
+1. Quick select algorithm. O(n) time. 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Top K Questions (Summarize)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://dongxicheng.org/big-data/select-ten-from-billions/)
+
+> 在海量数据中找出出现频率最高的前K个数，或者从海量数据中找出最大的前K个数，这类问题通常称为“top K”问题，
+
+> 1. top K value
+> 1. top K frequency
+
+### Analysis
+
+__Standard solution__ is 【分治+trie树/hash+小顶堆】, which I covered in another post [Big Data - Top k Frequency](/blog/2014/07/25/big-data-Top-k-frequency/). Briefly it is 3 steps: 
+
+1. 先将数据集按照hash方法分解成多个小数据集，
+1. 使用trie树或者hash统计每个小数据集中的query词频，
+1. 用小顶堆求出每个数据集中出频率最高的前K个数
+
+But, there're other senarios where different solutions may apply. Consider: 
+
+1. Single core vs. multiple core
+
+1. Single PC vs. multiple PC
+
+1. Large RAM vs. limited RAM
+
+1. Distributed system
+
+### 1. 单机+单核+足够大内存
+
+设每个查询词平均占8Byte，则10亿个查询词所需的内存大约是10^9*8=8G内存。如果你有这么大的内存，直接在内存中对查询词进行排序，顺序遍历找出10个出现频率最大的10个即可。这种方法简单快速，更加实用。当然，也可以先用HashMap求出每个词出现的频率，然后求出出现频率最大的10个词。
+
+### 2. 单机+单核+受限内存
+
+这种情况下，需要将原数据文件切割成一个一个小文件，如，采用hash(x)%M，将原文件中的数据切割成M小文件，如果小文件仍大于内存大小，继续采用hash的方法对数据文件进行切割，直到每个小文件小于内存大小，这样，每个文件可放到内存中处理。采用3.1节的方法依次处理每个小文件。
+
+### 3. 单机+多核+足够大内存
+
+这时可以直接在内存中实用hash方法将数据划分成n个partition，每个partition交给一个线程处理，线程的处理逻辑是同[1]节类似，最后一个线程将结果归并。
+
+该方法存在一个瓶颈会明显影响效率，即数据倾斜，每个线程的处理速度可能不同，快的线程需要等待慢的线程，最终的处理速度取决于慢的线程。解决方法是，__将数据划分成 (c x n)个partition（c>1），每个线程处理完当前partition后主动取下一个partition继续处理__，直到所有数据处理完毕，最后由一个线程进行归并。
+
+### 4. 多机+受限内存
+
+这种情况下，为了合理利用多台机器的资源，可将数据分发到多台机器上，每台机器采用[3]节中的策略解决本地的数据。可采用__hash + socket__方法进行数据分发。
+
+### 5. Distributed
+
+Top k问题很适合采用__MapReduce框架__解决，用户只需编写一个map函数和两个reduce 函数，然后提交到Hadoop（采用mapchain和reducechain）上即可解决该问题。
+
+A map function. 对于map函数，采用hash算法，将hash值相同的数据交给同一个reduce task. 
+
+2 reduce functions. 对于__第一个reduce函数__，采用HashMap统计出每个词出现的频率，对于__第二个reduce函数__，统计所有reduce task输出数据中的top k即可。
+
+### 6. Other
+
+公司一般不会自己写个程序进行计算，而是提交到自己核心的数据处理平台上计算，该平台的计算效率可能不如直接写程序高，但它具有__良好的扩展性和容错性__，而这才是企业最看重的。
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Top K Frequency 2]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2/"/>
+    <updated>2014-08-10T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://blog.csdn.net/v_july_v/article/details/7382693)
+
+> 一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。
+
+### Analysis
+
+__The basic solution for 'Top K' questions__ is 【分治+trie树/hash+小顶堆】. 
+
+In the previous post [Big Data - Top k Frequency](/blog/2014/07/25/big-data-Top-k-frequency/), we used HashMap for calculating query frequency. Now we __use Trie to do it__. 
+
+> 这题是考虑时间效率。用trie树统计每个词出现的次数，时间复杂度是O(n x le)（le表示单词的平准长度）。然后是找出出现最频繁的前10个词，可以用堆来实现，前面的题中已经讲到了，时间复杂度是O(n x lg10)。所以总的时间复杂度，是O(n x le)与O(n x lg10)中较大的哪一个。
+
+#### How to use Trie to calculate word frequency? 
+
+在Trie的node节点中[添加count域后](http://blog.csdn.net/ohmygirl/article/details/7953814)，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）. 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Big Data - Top K Frequency]]></title>
+    <link href="http://okckd.github.io/blog/2014/07/25/big-data-Top-k-frequency/"/>
+    <updated>2014-07-25T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/07/25/big-data-Top-k-frequency</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://blog.csdn.net/v_JULY_v/article/details/6256463)
+
+> 搜索引擎会通过日志文件把用户每次检索使用的所有检索串都记录下来，每个查询串的长度为1-255字节。
+
+> 假设目前有一千万个记录（这些查询串的重复度比较高，虽然总数是1千万，但如果除去重复后，不超过3百万个。一个查询串的重复度越高，说明查询它的用户越多，也就是越热门。），请你统计最热门的10个查询串，要求使用的内存不能超过1G。
+
+### Analysis
+
+第一步：Query统计
+
+第二步：根据统计结果，找Top 10
+
+Be careful: 内存不能超过1G，10 million 条记录，每条记录是255Byte，很显然要占据2.375G内存. 
+
+### Query统计
+
+__HashMap__. 
+
+虽然有一千万个Query，但是由于重复度比较高，因此事实上只有300万的Query，每个Query 255Byte，因此我们可以考虑把他们都放进内存中去。
+
+Hash Table绝对是我们优先的选择，因为Hash Table的查询速度非常的快，几乎是O(1)的时间复杂度。我们在O(N)的时间复杂度内完成了对该海量数据的处理。
+
+### 找Top 10
+
+__Heap__. 
+
+借助堆结构，我们可以在log量级的时间内查找和调整/移动。因此到这里，我们的算法可以改进为这样，维护一个K(该题目中是10)大小的小根堆，然后遍历300万的Query，分别和根元素进行对比。
+
+查找目标元素的时间复杂度为 O(logK)。
+
+### Conclusion
+
+至此，算法就完全结束了，经过上述第一步、先用Hash表统计每个Query出现的次数，O（N）；然后第二步、采用堆数据结构找出Top 10，O(NlogK)。所以，我们最终的时间复杂度是：O（N） + O(N'logK)。
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Top K Element (Quick Select)]]></title>
+    <link href="http://okckd.github.io/blog/2014/07/25/Top-k-Smallest-Element/"/>
+    <updated>2014-07-25T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/07/25/Top-k-Smallest-Element</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.geeksforgeeks.org/k-largestor-smallest-elements-in-an-array/)
+
+> Find Top k smallest element in an array. 
+
+### Analysis
+
+There're 2 solutions. 
+
+First solution, __use a max-heap__. O(nlgk) time complexity.
+
+Second solution is called __[quick select](http://www.geekviewpoint.com/java/search/quickselect)__, a type of [selection algorithm](http://en.wikipedia.org/wiki/Selection_algorithm) that's based on quicksort. It's averaging O(n) time, but O(n^2) if pivot selection is poor. The code is posted below. There's also a similar [iterative solution](http://blog.teamleadnet.com/2012/07/quick-select-algorithm-find-kth-element.html). 
+
+To [further optimize this](http://www.isnowfy.com/top-k-number/), we can change the pivot selection method by dividing into k group and find median of each. This is called [Median of medians algorithm](http://en.wikipedia.org/wiki/Median_of_medians). The worst case is O(n) time. And this is the best solution for "Top k" questions. 
+
+### Code 
+
+__quick select__
+
+	public static void quickSelect1(int[] list, int k) {
+		selectHelper1(list, 0, list.length - 1, k);
+	}
+
+	public static void selectHelper1(int[] list, int left, int right, int k) {
+		int pivotIndex = partition(list, left, right);
+		if (pivotIndex == k) {
+			return;
+		} else if (k < pivotIndex) {
+			selectHelper1(list, left, pivotIndex - 1, k);
+		} else {
+			selectHelper1(list, pivotIndex + 1, right, k);
+		}
+	}
+
+	private static int partition(int[] list, int left, int right) {
+		int pivot = left + (right - left) / 2;
+		swap(list, right, pivot);
+		for (int i = left; i < right; i++) {
+			if (list[i] < list[right]) {
+				swap(list, i, left);
+				left++;
+			}
+		}
+		swap(list, left, right);
+		return left;
+	}
+
+__quick select, iteratively__
+
+	public static int quickSelect2(int[] arr, int k) {
+		if (arr == null || arr.length <= k)
+			throw new Error();
+		int from = 0, to = arr.length - 1;
+		// if from == to we reached the kth element
+		while (from < to) {
+			int r = from, w = to;
+			int mid = arr[(r + w) / 2];
+			// stop if the reader and writer meets
+			while (r < w) {
+				if (arr[r] >= mid) { // put the large values at the end
+					swap(arr, w, r);
+					w--;
+				} else { // the value is smaller than the pivot, skip
+					r++;
+				}
+			}
+			// if we stepped up (r++) we need to step one down
+			if (arr[r] > mid)
+				r--;
+			// the r pointer is on the end of the first k elements
+			if (k <= r) {
+				to = r;
+			} else {
+				from = r + 1;
+			}
+		}
+		return arr[k];
+	}
+]]></content>
+  </entry>
+  
+</feed>

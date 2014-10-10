@@ -1,0 +1,1056 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Woodstock Blog</title>
+  <meta name="author" content="Charlie Brown">
+
+  
+  <meta name="description" content="Question An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://okckd.github.io/posts/3">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Woodstock Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-52495723-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Woodstock Blog</a></h1>
+  
+    <h2>What's the good of living if you don't try a few things?</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:okckd.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-of-animals/">[CC150v5] 3.7 Stack of Animals</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would prefer a dog or a cat (and will receive the oldest animal of that type). They cannot select which specific animal they would like.</p>
+
+<p>Create the data structures to maintain this system and implement operations such as enqueue, dequeueAny, dequeueDog and dequeueCat. You may use the built-in LinkedList data structure.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are 2 solutions.</p>
+
+<p><strong>First one is using a single queue</strong>. This makes &lsquo;dequeueAny&rsquo; easy, but &lsquo;dequeueCat&rsquo; and &lsquo;dequeueDog&rsquo; difficult.</p>
+
+<p><strong>Second approach would be using 2 queues for dogs and cats</strong>. We need something like timestamp to be stored (more space usage).</p>
+
+<p>When we return, we peek both queues are choose the older one. <strong>This is recommended solution in the book</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>from the book</strong></p>
+
+<p>Animal.java</p>
+
+<pre><code>public abstract class Animal {
+    int order;
+    String name;
+
+    public Animal(String n) {
+        name = n;
+    }
+
+    public abstract String name();
+
+    public boolean isOlderThan(Animal a) {
+        return this.order &lt; a.order;
+    }
+}
+
+class Cat extends Animal {
+    public Cat(String n) {
+        super(n);
+    }
+
+    public String name() {
+        return "Cat: " + name;
+    }
+}
+
+class Dog extends Animal {
+    public Dog(String n) {
+        super(n);
+    }
+
+    public String name() {
+        return "Dog: " + name;
+    }
+}
+</code></pre>
+
+<p>AnimalQueue.java</p>
+
+<pre><code>public class AnimalQueue {
+    LinkedList&lt;Dog&gt; dogs = new LinkedList&lt;Dog&gt;();
+    LinkedList&lt;Cat&gt; cats = new LinkedList&lt;Cat&gt;();
+    private int order = 0;
+
+    public void enqueue(Animal a) {
+        a.order = order;
+        order++;
+        if (a instanceof Dog) {
+            dogs.addLast((Dog) a);
+        } else if (a instanceof Cat) {
+            cats.addLast((Cat) a);
+        }
+    }
+
+    public Animal dequeueAny() {
+        if (dogs.size() == 0) {
+            return dequeueCats();
+        } else if (cats.size() == 0) {
+            return dequeueDogs();
+        }
+        Dog dog = dogs.peek();
+        Cat cat = cats.peek();
+        if (dog.isOlderThan(cat)) {
+            return dogs.poll();
+        } else {
+            return cats.poll();
+        }
+    }
+
+    public Animal peek() {
+        if (dogs.size() == 0) {
+            return cats.peek();
+        } else if (cats.size() == 0) {
+            return dogs.peek();
+        }
+        Dog dog = dogs.peek();
+        Cat cat = cats.peek();
+        if (dog.isOlderThan(cat)) {
+            return dog;
+        } else {
+            return cat;
+        }
+    }
+
+    public int size() {
+        return dogs.size() + cats.size();
+    }
+
+    public Dog dequeueDogs() {
+        return dogs.poll();
+    }
+
+    public Dog peekDogs() {
+        return dogs.peek();
+    }
+
+    public Cat dequeueCats() {
+        return cats.poll();
+    }
+
+    public Cat peekCats() {
+        return cats.peek();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element?</p>
+
+<p>Push, pop and min should all operate in 0(1) time.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is <strong>a very tricky question</strong>.</p>
+
+<p>The key is how to use the minimum space to achieve O(1) query min operation. The trick is to count how many times the same min-value occur. Eg.</p>
+
+<blockquote><p>input: 5,3,3,1,1,2,2,2,2,2,2,2.</p>
+
+<p>stack: 5,3,3,1,1.</p></blockquote>
+
+<p>So we can pop &lsquo;1&rsquo; twice, pop &lsquo;3&rsquo; twice, and pop &lsquo;5&rsquo; once. Read the code!</p>
+
+<h3>Code</h3>
+
+<pre><code>public class StackMyAnswer extends Stack&lt;Integer&gt; {
+
+    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
+
+    public void push(int value) {
+        if (min.isEmpty() || value &lt;= min.peek()) {
+            min.push(value);
+        }
+        super.push(value);
+    }
+
+    public Integer pop() {
+        int val = super.pop();
+        if (!min.isEmpty() &amp;&amp; val == min.peek()) {
+            min.pop();
+        }
+        return val;
+    }
+
+    public int min() {
+        if (min.isEmpty()) {
+            return Integer.MAX_VALUE;
+        }
+        return min.peek();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement a function to check if a linked list is a palindrome.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are multiple solutions for this question.</p>
+
+<p><strong>First, maybe the simplest solution of all</strong>, is to compare the list with the reversed list (compare first half would be enough). This is a very nice idea.</p>
+
+<p><strong>Second solution is iterative approach</strong>. My code below is to first get the total length, then <strong>use a Stack</strong>. Alternatively, we can also use <strong>fast/slow pointer</strong> to find the mid point. This solution is easiest to write.</p>
+
+<p><strong>Third solution is recursive</strong>. We basically uses a public pointer to:</p>
+
+<ol>
+<li>get starting value</li>
+<li>check middle parts</li>
+<li>get ending value</li>
+<li>if starting == ending and middle part is valid, then true.</li>
+</ol>
+
+
+<p>This code is not easy to write, and hard to think.</p>
+
+<p>It&rsquo;s best to know both iterative and recursive solution.</p>
+
+<h3>Code</h3>
+
+<p>Iterative</p>
+
+<pre><code>public static boolean isPalindrome1(LinkedListNode head) {
+    int len = getListLength(head);
+    int half = len / 2;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    for (int i = 0; i &lt; half; i++) {
+        stack.push(head.data);
+        head = head.next;
+    }
+    if (len % 2 == 1) {
+        head = head.next;
+    }
+    for (int i = 0; i &lt; half; i++) {
+        if (head.data != stack.pop()) {
+            return false;
+        }
+        head = head.next;
+    }
+    return true;
+}
+</code></pre>
+
+<p>Recursive</p>
+
+<pre><code>private static LinkedListNode p;
+
+public static boolean isPalindrome2(LinkedListNode head) {
+    p = head;
+    int len = getListLength(head);
+    return helper2(0, len - 1);
+}
+
+public static boolean helper2(int from, int to) {
+    if (from &gt; to) {
+        return true;
+    } else if (from == to) {
+        p = p.next;
+        return true;
+    } else {
+        // first get fromVal, then check middlep part, last, get toVal
+        int fromVal = p.data;
+        p = p.next;
+        if (!helper2(from + 1, to - 1)) {
+            return false;
+        }
+        int toVal = p.data;
+        p = p.next;
+        if (fromVal != toVal) {
+            return false;
+        }
+    }
+    return true;
+}
+</code></pre>
+
+<p>Shared method:</p>
+
+<pre><code>private static int getListLength(LinkedListNode node) {
+    int count = 0;
+    while (node != null) {
+        count++;
+        node = node.next;
+    }
+    return count;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/implement-stack/">[CC150v5] 3.0 Example - Implement Stack</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement a stack.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Stack uses LinkedNode to implement</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class MyStack {
+
+    Node top;
+
+    public int pop() {
+        if (top == null) {
+            return -1;
+        }
+        int returnVal = top.val;
+        top = top.next;
+        return returnVal;
+    }
+
+    public int peek() {
+        if (top == null) {
+            return -1;
+        }
+        return top.val;
+
+    }
+
+    public void push(int val) {
+        Node newNode = new Node(val);
+        newNode.next = top;
+        top = newNode;
+    }
+
+    class Node {
+
+        int val;
+        Node next;
+
+        Node(int value) {
+            val = value;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/14/kth-last-element-recursive/">[CC150v5] 2.2 Kth Last Element (Recursive)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement an algorithm to find the kth to last element of a singly linked list.</p>
+
+<p>Do it recursively.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Iterative solution is easy, <strong>recursive is not</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>private static int myAns = -1;
+
+public static int nthToLastMe(LinkedListNode head, int n) {
+    if (head == null) {
+        return 0;
+    } else if (nthToLastMe(head.next, n) &lt; n - 1) {
+        return nthToLastMe(head.next, n) + 1;
+    } else if (nthToLastMe(head.next, n) == n - 1) {
+        myAns = head.data;
+        return Integer.MAX_VALUE;
+    }
+    return Integer.MAX_VALUE;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-12T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>What protocol is used for communicating with a DNS?</p></blockquote>
+
+<h3>Answer</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Domain_Name_System">Domain Name System</a> (DNS) is a hierarchical distributed naming system for computers, services, or any resource connected to the Internet or a private network. It associates various information with domain names assigned to each of the participating entities. Most prominently, it translates easily memorized domain names to the numerical IP addresses needed for the purpose of locating computer services and devices worldwide. The Domain Name System is an essential component of the functionality of the Internet.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Domain_Name_System#Protocol_transport">DNS primarily uses</a> <strong>User Datagram Protocol (UDP)</strong> on port number 53 to serve requests.</p>
+
+<p>DNS queries consist of a single UDP request from the client followed by a single UDP reply from the server.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/11/celebrity-problem/">[Question] Celebrity Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=13167666">link</a></p>
+
+<blockquote><p>You have a room with n people. A celebrity walks in. Everyone knows the celebrity, the celebrity knows no one.</p>
+
+<p>Non-celebrities may/may not know anyone in the room.</p>
+
+<p>Give an algorithm to find the celebrity. Discuss the complexity.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><a href="http://www.geeksforgeeks.org/the-celebrity-problem/">Classic brute-force solution</a> would take O(n<sup>2</sup>) time to build a map. That&rsquo;s not good, and we have a very simple solution that works in O(n) time:</p>
+
+<blockquote><p>Make all of them stand in a row. Let&rsquo;s say the people are a,b,c,d,e,f,g,h,i,j,&hellip;&hellip;.n</p>
+
+<p>Compare a and b. <strong>If a knows b</strong>, a is not celebrity. <strong>If a doesn&rsquo;t know b</strong>, b is not celebrity.</p>
+
+<p>At the end, the probable celebrity who survives is the certain celebrity. (better do a check)</p></blockquote>
+
+<p>Total number of comparison is <a href="http://www.geeksforgeeks.org/the-celebrity-problem/">3(N-1) times</a>.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32631467_0_1.html">link</a></p>
+
+<blockquote><p>2d array ＊代表障碍物 ＃代表货物 空白就是正常的路</p>
+
+<p>问如何找到一个点为出发点 能实现总共取货路径最短？ 每次只能拿一个货物，遇到障碍需要绕开，拿到以后要放回出发点，然后再取另一个.</p></blockquote>
+
+<pre><code>＊＊＊＊＊＊＊＊＊＊
+＊  #           ＊
+＊  ＊＊＊  ＊   ＊
+＊              ＊
+＊     ＊＊   ＊ ＊
+＊  #    # # ＊＊＊
+＊＊＊＊＊＊＊＊＊＊
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>This looks like a very difficult question, especially during a phone interview.</p>
+
+<p><strong>The 10th floor gives the best solution</strong>:</p>
+
+<blockquote><p><strong>BFS from every box</strong>. in each box, a non-blocking cell (include box position, but exclude hazard position) will have a weight value, stand for the distance to the box.</p>
+
+<p>after bfs from all the boxes, each cell will have k weight, k is the number of boxes. sum all the weight in each cell, and find the cell with smallest sum of weight.</p>
+
+<p>One problem of this solution may lead to a cell of a box. We can then sort the cell by sum of weight and find the first position that is not a box.</p>
+
+<p>complexity O(k*n<sup>2</sup>)</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>not written</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">link</a></p>
+
+<blockquote><p>Given a sorted set, find if there exist three elements in Arithmetic Progression or not.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a rather simple Arithmetic Progression question</strong>.</p>
+
+<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">To find the three elements</a>, we first fix an element as middle element and search for other two (one smaller and one greater).</p></blockquote>
+
+<p>O(n<sup>2</sup>) time.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public boolean longest(int[] A) {
+    int len = A.length;
+    for (int i = 1; i &lt; len - 1; i++) {
+        int left = i - 1;
+        int right = i + 1;
+        while (left &gt;= 0 &amp;&amp; right &lt; len) {
+            int total = A[left] + A[right];
+            if (total &gt; 2 * A[i]) {
+                left--;
+            } else if (total &lt; 2 * A[i]) {
+                right++;
+            } else {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=8211177">link</a></p>
+
+<blockquote><p>Given an array of integers A, give an algorithm to find the longest Arithmetic progression in it, i.e find a sequence i1 &lt; i2 &lt; … &lt; ik, such that</p>
+
+<p>A[i1], A[i2], …, A[ik] forms an arithmetic progression, and k is the largest possible.</p>
+
+<p>The sequence S1, S2, …, Sk is called an arithmetic progression if S(j+1) – S(j) is a constant.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a rather difficult Arithmetic Progression question</strong>.</p>
+
+<p>The solution is 2-D DP.</p>
+
+<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">The idea is</a> to create a 2D table dp[n][n]. An entry dp[i][j] in this table stores LLAP with input[i] and input[j] as first two elements of AP(j > i).</p>
+
+<p>The last column of the table is always 2. Rest of the table is filled <strong>from bottom right to top left</strong>.</p>
+
+<p>To fill rest of the table, j (second element in AP) is first fixed. i and k are searched for a fixed j. If i and k are found such that i, j, k form an AP, then <strong>the value of dp[i][j] is set as dp[j][k] + 1</strong>.</p>
+
+<p><strong>Note that the value of dp[j][k] must have been filled</strong> before as the loop traverses from right to left columns.</p></blockquote>
+
+<p>The 2 difficult points of this question:</p>
+
+<ol>
+<li>how to come up with the transation formula. (i.e. <strong>dp[i][j] = dp[j][k] + 1</strong>, when (i, j, k) forms a AP).</li>
+<li>how to fill up all dp[i][j] in each loop of j. (Once inside the if-else, once outside the main while-loop)</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int longest(int[] A) {
+    int len = A.length;
+    int[][] dp = new int[len][len];
+    for (int i = 0; i &lt; len; i++) {
+        // the pair ending at last position is always a progression
+        dp[i][len - 1] = 2;
+    }
+    int longest = 1;
+    for (int j = len - 2; j &gt;= 0; j--) {
+        // for each j, find i and k that makes 1 progression
+        int i = j - 1;
+        int k = j + 1;
+        while (i &gt;= 0 &amp;&amp; k &lt; len) {
+            int total = A[i] + A[k];
+            if (total &gt; 2 * A[j]) {
+                // this is important!
+                dp[i][j] = 2;
+                i--;
+            } else if (total &lt; 2 * A[j]) {
+                k++;
+            } else {
+                // found a valid progression triplet A(i, j, k)
+                dp[i][j] = dp[j][k] + 1;
+                longest = Math.max(longest, dp[i][j]);
+                i--;
+                k++;
+            }
+        }
+        // this is important!
+        while (i &gt;= 0) {
+            dp[i][j] = 2;
+            i--;
+            // If the loop was stopped due to k becoming more than
+            // n-1, set the remaining dp[i][j] as 2
+        }
+    }
+    return longest;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/posts/4">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/posts/2">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section class="well">
+  <h1>Categories</h1>
+  <ul id="categories" class="nav nav-list">
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
+<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (156)</a></li>
+<li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
+<li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
+<li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
+<li class='category'><a href='/blog/categories/read/'>read (1)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
+<li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
+<li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/08/oct-zhihu/">[Read] 十月以前 知乎摘抄</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/08/interleave-positive-negative/">[Question] Interleave Positive and Negative Numbers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/03/Leetcode-third-1/">[Leetcode] Leetcode Third Round (1)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Charlie Brown -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
