@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Count Set Bit in Binary Number. 3 = 00000011 => 2 128 = 10000000 => 1 Solution Bits counting algorithm (Brian Kernighan). Basic idea is &hellip;">
+  <meta name="description" content="Question link Given n dice each with m faces, numbered from 1 to m, find the number of ways to get sum X. X is the summation of values on each face &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,97 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/20/Dice-roll-DP-question/">[Question] Ways of Dice Throw</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-20T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/dice-throw-problem/">link</a></p>
+
+<blockquote><p>Given n dice each with m faces, numbered from 1 to m, find the number of ways to get sum X. X is the summation of values on each face when all the dice are thrown.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>DP</strong></p>
+
+<blockquote><p>Sum(m, n, X) = Sum(m, n &ndash; 1, X &ndash; 1) +</p>
+
+<pre><code>           Sum(m, n - 1, X - 2) +
+
+           .................... + 
+
+           Sum(m, n - 1, X - m)
+</code></pre></blockquote>
+
+<p>So we can have dp(n)(X) and for each, iterate m time. Total time is O(m * n * X).</p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong>.</p>
+
+<pre><code>int findWays(int m, int n, int x)
+{
+    // Create a table to store results of subproblems.  One extra 
+    // row and column are used for simpilicity (Number of dice
+    // is directly used as row index and sum is directly used
+    // as column index).  The entries in 0th row and 0th column
+    // are never used.
+    int table[n + 1][x + 1];
+    memset(table, 0, sizeof(table)); // Initialize all entries as 0
+
+    // Table entries for only one dice
+    for (int j = 1; j &lt;= m &amp;&amp; j &lt;= x; j++)
+        table[1][j] = 1;
+
+    // Fill rest of the entries in table using recursive relation
+    // i: number of dice, j: sum
+    for (int i = 2; i &lt;= n; i++)
+        for (int j = 1; j &lt;= x; j++)
+            for (int k = 1; k &lt;= m &amp;&amp; k &lt; j; k++)
+                table[i][j] += table[i-1][j-k];
+
+    /* Uncomment these lines to see content of table
+    for (int i = 0; i &lt;= n; i++)
+    {
+      for (int j = 0; j &lt;= x; j++)
+        cout &lt;&lt; table[i][j] &lt;&lt; " ";
+      cout &lt;&lt; endl;
+    } */
+    return table[n][x];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -773,116 +864,6 @@ private int getNumber(String expr) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/16/Excel-decimal-conversion/">[Question] Excel Decimal Conversion</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#23">link</a></p>
-
-<blockquote><p>Excel中的行列数用A~Z 26个字母表示，A, B, C, D, …, Z, AA, AB, …, AZ, BA, BB, … 分别表示10进制数1, 2, 3, 4, …, 26, 27, 28, …, 52, 53, 54…。</p>
-
-<p>请实现2个函数decToExcel和excelToDec，将10进制数转换为Excel数，以及将Excel数转换为10进制数。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Note the indexing starts from 1, not from 0. This caused some trouble for me.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public String decToExcel(int decNum) {
-    decNum--;
-    int digits = 1;
-    int exponen = 26;
-    while (decNum &gt;= exponen) {
-        decNum -= exponen;
-        exponen *= 26;
-        digits++;
-    }
-    // now we know the total number of digits
-    int num = decNum;
-    int total = exponen / 26;
-    String ans = "";
-    for (int i = 0; i &lt; digits; i++) {
-        ans += (char) (num / total + 'A');
-        num %= total;
-        total /= 26;
-    }
-    return ans;
-}
-
-public int excelToDec(String excelNum) {
-    int digits = excelNum.length();
-    int total = 1;
-    int sum = 1;
-    for (int i = 1; i &lt; digits; i++) {
-        total *= 26;
-        sum += total;
-    }
-    for (int i = 0; i &lt; digits; i++) {
-        sum += (excelNum.charAt(i) - 'A') * total;
-        total /= 26;
-    }
-    return sum;
-}
-</code></pre>
-
-<p><strong>updated code</strong>: we can actually do it recursively. The code is much more concise (the code is found in the eclipse project).</p>
-
-<pre><code>//将十进制数转换为excel数
-public String decToExcel(int decNum) {
-    if (decNum == 0) {
-        return "";
-    }
-    decNum--;
-    char last = (char) ('A' + decNum % 26);
-    return decToExcel(decNum / 26) + last;
-}
-
-//将excel数转换为十进制数
-public int excelToDec(String excelNum) {
-    if (excelNum.equals("")) {
-        return 0;
-    }
-    int len = excelNum.length();
-    int last = 1 + excelNum.charAt(len - 1) - 'A';
-    return excelToDec(excelNum.substring(0, len - 1)) * 26 + last;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/13">&larr; Older</a>
@@ -910,7 +891,7 @@ public int excelToDec(String excelNum) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
-<li class='category'><a href='/blog/categories/read/'>read (1)</a></li>
+<li class='category'><a href='/blog/categories/read/'>read (2)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
@@ -922,6 +903,10 @@ public int excelToDec(String excelNum) {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/08/previous-zhihu/">[Read] 十月以前 读书笔记</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/10/08/oct-zhihu/">[Read] 十月以前 知乎摘抄</a>
@@ -937,10 +922,6 @@ public int excelToDec(String excelNum) {
     
       <li class="post">
         <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
       </li>
     
   </ul>

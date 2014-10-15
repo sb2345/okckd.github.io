@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given some random letters, for example &ldquo;a,e,o,g,z,k,l,j,w,n&rdquo; and a dictionary. Try to find a word in the dictionary that &hellip;">
+  <meta name="description" content="Question link In a 2D matrix of dimensions M*N, find number of &ldquo;equilibrium&rdquo; points. A point (i, j) is said to be an &ldquo;equilibrium& &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,88 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/27/equilibrium-points-in-2d-array/">[Question] Equilibrium Points in 2D Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://get-that-job-at-google.blogspot.sg/2013/01/twitter-programming-test.html">link</a></p>
+
+<blockquote><p>In a 2D matrix of dimensions M*N, find number of &ldquo;equilibrium&rdquo; points.  A point (i, j) is said to be an &ldquo;equilibrium&rdquo; point only if all following conditions hold:</p>
+
+<p>a) sum of rows 1&hellip;(i-1) =  sum of rows (i+1)&hellip;M</p>
+
+<p>b) sum of columns 1&hellip;(j-1)  = sum of columns (j+1)&hellip;N</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is <strong>a generalize question of </strong>Equilibrium index__. For now, I got no better idea then checking Equilibrium index for every single node in the matrix.</p>
+
+<p>So this question literally becomes <a href="http://www.geeksforgeeks.org/equilibrium-index-of-an-array/">this</a>:</p>
+
+<blockquote><p>Equilibrium index of an array is an index such that the sum of elements at lower indexes is equal to the sum of elements at higher indexes. For example, in an arrya A:</p>
+
+<p>A[0] = -7, A[1] = 1, A[2] = 5, A[3] = 2, A[4] = -4, A[5] = 3, A[6]=0</p>
+
+<p>3 is an equilibrium index, because:
+A[0] + A[1] + A[2] = A[4] + A[5] + A[6]</p>
+
+<p>6 is also an equilibrium index, because sum of zero elements is zero, i.e., A[0] + A[1] + A[2] + A[3] + A[4] + A[5]=0</p></blockquote>
+
+<p><strong>The idea</strong> is to get total sum of array first. Then Iterate through the array and keep updating the left sum.</p>
+
+<h3>Code</h3>
+
+<p><strong>code for <a href="http://rosettacode.org/wiki/Equilibrium_index#Java">findning EI in 1-D array</a></strong></p>
+
+<pre><code>public List&lt;Integer&gt; findEI(int[] array) {
+    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+    int sum = 0;
+    for (int i = 0; i &lt; array.length; i++) {
+        sum += array[i];
+    }
+    int runningSum = 0;
+    for (int i = 0; i &lt; array.length; i++) {
+        if (2 * runningSum + array[i] == sum) {
+            ans.add(i);
+        }
+        runningSum += array[i];
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1098,179 +1180,6 @@ public class Level {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/25/Implement-HashMap/">[CC150v5] 8.10 Implement a Hashmap</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Design and implement a hash table which uses chaining (linked lists) to handle collisions.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>I wrote this topic before (using Java source code as a reference). This time, I would like to take another (easier) approach.</p>
-
-<p>The main part of this is to use an array of list structure like this:</p>
-
-<pre><code>LinkedList&lt;Cell&lt;K, V&gt;&gt;[] items;
-</code></pre>
-
-<p>And the Cell Class looks like this:</p>
-
-<pre><code>public class Cell&lt;K, V&gt; {
-    private K key;
-    private V value;
-
-    public Cell(K k, V v) {
-        key = k;
-        value = v;
-    }
-
-    public boolean equivalent(Cell&lt;K, V&gt; c) {
-        return equivalent(c.getKey());
-    }
-
-    public boolean equivalent(K k) {
-        return key.equals(k);
-    }
-
-    public K getKey() {
-        return key;
-    }
-
-    public V getValue() {
-        return value;
-    }
-}
-</code></pre>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public class HashMapCC150&lt;K, V&gt; {
-
-    int size;
-    LinkedList&lt;Cell&lt;K, V&gt;&gt;[] items;
-
-    public HashMapCC150(int num) {
-        this.size = num;
-        items = (LinkedList&lt;Cell&lt;K, V&gt;&gt;[]) new LinkedList[10];
-    }
-
-    public V get(K k) {
-        int hashValue = this.calculateHashCode(k);
-        if (items[hashValue] == null) {
-            items[hashValue] = new LinkedList&lt;Cell&lt;K, V&gt;&gt;();
-            return null;
-        }
-        for (Cell&lt;K, V&gt; cell : items[hashValue]) {
-            if (k.equals(cell.getKey())) {
-                return cell.getValue();
-            }
-        }
-        return null;
-    }
-
-    public V put(K k, V v) {
-        int hashValue = this.calculateHashCode(k);
-        if (items[hashValue] == null) {
-            items[hashValue] = new LinkedList&lt;Cell&lt;K, V&gt;&gt;();
-        }
-        for (Cell&lt;K, V&gt; cell : items[hashValue]) {
-            if (k.equals(cell.getKey())) {
-                items[hashValue].remove(cell);
-                break;
-            }
-        }
-        Cell&lt;K, V&gt; newItem = new Cell&lt;K, V&gt;(k, v);
-        items[hashValue].add(newItem);
-        return null;
-    }
-
-    public V remove(K k) {
-        // not written
-        return null;
-    }
-
-    private int calculateHashCode(K k) {
-        return k.toString().length() % size;
-    }
-
-    public static void main(String[] args) {
-        HashMapCC150&lt;String, String&gt; map = new HashMapCC150&lt;String, String&gt;(10);
-        map.put("kevin", "durant");
-        map.put("steven", "curry");
-        map.put("al", "jefferson");
-        System.out.println(map.get("kevin"));
-        System.out.println(map.get("steven"));
-        System.out.println(map.get("al"));
-        map.put("kevin", "martin");
-        map.put("steven", "nash");
-        map.put("kevin", "braynt");
-        System.out.println(map.get("kevin"));
-        System.out.println(map.get("steven"));
-        System.out.println(map.get("al"));
-    }
-}
-
-class Cell&lt;K, V&gt; {
-    private K key;
-    private V value;
-
-    public Cell(K k, V v) {
-        key = k;
-        value = v;
-    }
-
-    public boolean equivalent(Cell&lt;K, V&gt; c) {
-        return equivalent(c.getKey());
-    }
-
-    public boolean equivalent(K k) {
-        return key.equals(k);
-    }
-
-    public K getKey() {
-        return key;
-    }
-
-    public V getValue() {
-        return value;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/11">&larr; Older</a>
@@ -1298,7 +1207,7 @@ class Cell&lt;K, V&gt; {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
-<li class='category'><a href='/blog/categories/read/'>read (1)</a></li>
+<li class='category'><a href='/blog/categories/read/'>read (2)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
@@ -1310,6 +1219,10 @@ class Cell&lt;K, V&gt; {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/08/previous-zhihu/">[Read] 十月以前 读书笔记</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/10/08/oct-zhihu/">[Read] 十月以前 知乎摘抄</a>
@@ -1325,10 +1238,6 @@ class Cell&lt;K, V&gt; {
     
       <li class="post">
         <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
       </li>
     
   </ul>
