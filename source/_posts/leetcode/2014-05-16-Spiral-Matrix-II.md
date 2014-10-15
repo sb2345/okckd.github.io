@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[LeetCode 59] Spiral Matrix II"
+title: "[LeetCode 59] Spiral Matrix II "
 comments: true
 category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/spiral-matrix-ii/)
 
 <div class="question-content">
@@ -61,7 +61,6 @@ Code is easy to read.
 
 __My code, this is pure math__.
 
-
     public int[][] generateMatrix(int n) {
         int[][] ans = new int[n][n];
         int num = 1;
@@ -73,4 +72,34 @@ __My code, this is pure math__.
         }
         if (n % 2 == 1) ans[n/2][n/2] = num;
         return ans;
+    }
+
+__Updated on Oct 9th, 2014__, a better piece of code:
+
+    public int[][] generateMatrix(int n) {
+        int small = 0;
+		int large = n - 1;
+		int num = 1;
+		
+		int[][] ans = new int[n][n];
+		while (small < large) {
+			for (int i = small; i < large; i++) {
+				ans[small][i] = num++;
+			}
+			for (int i = small; i < large; i++) {
+				ans[i][large] = num++;
+			}
+			for (int i = large; i > small; i--) {
+				ans[large][i] = num++;
+			}
+			for (int i = large; i > small; i--) {
+				ans[i][small] = num++;
+			}
+			small++;
+			large--;
+		}
+		if (small == large) {
+			ans[small][small] = num;
+		}
+		return ans;
     }
