@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link In a 2D matrix of dimensions M*N, find number of &ldquo;equilibrium&rdquo; points. A point (i, j) is said to be an &ldquo;equilibrium& &hellip;">
+  <meta name="description" content="Question link Given API: int Read4096(char* buf); It reads data from a file and records the position so that the next time when it is called it read &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,99 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/27/google-api-read-4096/">[Google] Google API Read4096 (read4K)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14424684">link</a></p>
+
+<blockquote><p>Given API: int Read4096(char* buf);</p>
+
+<p>It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read.</p>
+
+<p>Use above API to Implement API &ldquo;int Read(char* buf, int n)&rdquo; which reads any number of chars from the file.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Since the nature of C++ and Java is different, I changed the api to:</p>
+
+<pre><code>GoogleApi.read4096(){}
+GoogleRead4096.read(int n){}
+</code></pre>
+
+<p>As <a href="http://www.careercup.com/question?id=14424684">suggested</a>, the solution is to keep <strong>one local buffer</strong>, and 1 pointer within the buffer.</p>
+
+<h3>Code</h3>
+
+<pre><code>String buffer = null;
+int p = 0;
+
+public String read(int n) {
+    if (n &lt; 0) {
+        return null;
+    } else if (n == 0) {
+        return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    while (n &gt; 0) {
+        // there is (LENGTH - p) chars left in the local buffer
+        if (buffer == null || p == buffer.length()) {
+            // no char left in buffer, update buffer
+            buffer = GoogleApi.read4096();
+            p = 0;
+            if (buffer.length() == 0) {
+                // finish reading the file (no more input chars)
+                break;
+            }
+        } else {
+            int numChars = buffer.length() - p;
+            if (numChars &gt;= n) {
+                sb.append(buffer.substring(p, p + n));
+                p = p + n;
+                n = 0;
+            } else {
+                sb.append(buffer.substring(p));
+                p = buffer.length();
+                n -= numChars;
+            }
+        }
+    }
+    return sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1009,177 +1102,6 @@ public class Level {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/25/design-in-memory-file-system/">[CC150v5] 8.9 Design a In-memory File System</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Explain the data structures and algorithms that you would use to design an in-memory file system. Illustrate with an example in code where possible.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>A file system consists of Files and Directories</strong>. Each Directory contains a set of Files and Directories.</p>
-
-<p>Since Files and Directories share so many characteristics, we&rsquo;ve implemented them such that they <strong>inherit from the same class</strong> &mdash; Entry.</p>
-
-<h3>Code</h3>
-
-<p>Entry.java</p>
-
-<pre><code>public abstract class Entry {
-    protected Directory parent;
-    protected long created;
-    protected long lastUpdated;
-    protected long lastAccessed;
-    protected String name;
-
-    public Entry(String n, Directory p) {
-        name = n;
-        parent = p;
-        created = System.currentTimeMillis();
-    }
-
-    public boolean delete() {
-        if (parent == null) {
-            return false;
-        }
-        return parent.deleteEntry(this);
-    }
-
-    public abstract int size();
-
-    public String getFullPath() {
-        if (parent == null) {
-            return name;
-        } else {
-            return parent.getFullPath() + "/" + name;
-        }
-    }
-
-    public long getCreationTime() {
-        return created;
-    }
-
-    public long getLastUpdatedTime() {
-        return lastUpdated;
-    }
-
-    public long getLastAccessedTime() {
-        return lastAccessed;
-    }
-
-    public void changeName(String n) {
-        name = n;
-    }
-
-    public String getName() {
-        return name;
-    }
-}
-</code></pre>
-
-<p>Directory.java</p>
-
-<pre><code>public class Directory extends Entry {
-    protected ArrayList&lt;Entry&gt; contents;
-
-    public Directory(String n, Directory p) {
-        super(n, p);
-        contents = new ArrayList&lt;Entry&gt;();
-    }
-
-    protected ArrayList&lt;Entry&gt; getContents() {
-        return contents;
-    }
-
-    public int size() {
-        int size = 0;
-        for (Entry e : contents) {
-            size += e.size();
-        }
-        return size;
-    }
-
-    public int numberOfFiles() {
-        int count = 0;
-        for (Entry e : contents) {
-            if (e instanceof Directory) {
-                count++; // Directory counts as a file
-                Directory d = (Directory) e;
-                count += d.numberOfFiles();
-            } else if (e instanceof File) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public boolean deleteEntry(Entry entry) {
-        return contents.remove(entry);
-    }
-
-    public void addEntry(Entry entry) {
-        contents.add(entry);
-    }
-}
-</code></pre>
-
-<p>File.java</p>
-
-<pre><code>public class File extends Entry {
-    private String content;
-    private int size;
-
-    public File(String n, Directory p, int sz) {
-        super(n, p);
-        size = sz;
-    }
-
-    public int size() {
-        return size;
-    }
-
-    public String getContents() {
-        return content;
-    }
-
-    public void setContents(String c) {
-        content = c;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/11">&larr; Older</a>
@@ -1198,19 +1120,19 @@ public class Level {
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (156)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
-<li class='category'><a href='/blog/categories/read/'>read (2)</a></li>
+<li class='category'><a href='/blog/categories/read/'>read (1)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/thoughts/'>thoughts (7)</a></li>
+<li class='category'><a href='/blog/categories/thoughts/'>thoughts (8)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
@@ -1221,7 +1143,7 @@ public class Level {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/10/08/previous-zhihu/">[Read] 十月以前 读书笔记</a>
+        <a href="/blog/2014/10/17/who-will-remember-you/">[Thoughts] Who Will Remember You?</a>
       </li>
     
       <li class="post">
