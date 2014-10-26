@@ -1,10 +1,9 @@
 ---
 layout: post
-title: "[Design] Cryptographic Hash Function"
+title: "[Design] Cryptographic Hash Function "
 comments: true
 category: Design
 tags: [  ]
-published: false
 ---
 
 ### Overview
@@ -42,4 +41,3 @@ In practice, the signature is not used directly on the file, but rather on the [
 {% img middle /assets/images/Digital-Signature-diagram.png %}
 
 [Video](https://www.khanacademy.org/economics-finance-domain/core-finance/money-and-banking/bitcoin/v/bitcoin-digital-signatures) on digital signature. 
-
