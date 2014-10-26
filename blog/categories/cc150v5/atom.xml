@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Cc150v5 | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/cc150v5/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-10-26T17:03:15+08:00</updated>
+  <updated>2014-10-26T17:27:36+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -322,86 +322,137 @@ __Main Class__:
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[CC150v5] 17.6 Order an Array by Sorting Middle]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle/"/>
-    <updated>2014-09-27T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle</id>
+    <title type="html"><![CDATA[[CC150v5] 14.6 Implement CircularArray in Java]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/26/implement-circular-array-java/"/>
+    <updated>2014-09-26T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/26/implement-circular-array-java</id>
     <content type="html"><![CDATA[### Question
 
-> Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).
+> Implement a __CircularArray__ class that supports an array-like data structure which can be efficiently rotated. 
+
+> The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation. 
 
 ### Solution
 
-Referring to [this guy](http://www.mitbbs.com/article_t/JobHunting/32772399.html): 
+__First part of the question is solved by using an array and a pointer__. The solution simplifies the question by fixing the array size (not a dynamic-resizing array). 
 
-> 1. 找到heading的最长递增序列.
->
-> 1. 找到tailing的最长的递增序列.
+__The difficult part is how to write iterator__.
 
-After that: 
+Note that we should support __Java Generics__:
 
-> 1. 用中间部分的min去shrink左边.
->
-> 1. 用中间部分的max去shrink右边.
+    class MyCircularArray<T>
+
+Implement __Iterable Interface__:
+
+    public class MyCircularArray<T> implements Iterable<T> {
+    }
+
+Override __iterator() method__:
+
+	@Override
+	public Iterator<T> iterator() {
+		return new MyIterator<T>(this);
+	}
+
+Write our own __Iterator Class__:
+
+	class MyIterator<T> implements Iterator<T> {
+    }
+
+Finish it up
+
+    public class MyCircularArray<T> implements Iterable<T> {
+
+        @Override
+        public Iterator<T> iterator() {
+            return new MyIterator<T>(this);
+        }
+
+        class MyIterator<T> implements Iterator<T> {
+            @Override
+            public boolean hasNext() {
+            }
+
+            @Override
+            public T next() {
+            }
+
+            @Override
+            public void remove() {
+            }
+        }
+    }
+
+It might be confusing when implementing __Iterable__ and __Iterator__ Class.
 
 ### Code
 
-__written by me__
+    public class MyCircularArray<T> implements Iterable<T> {
 
-	public static void findUnsortedSequence(int[] array, int[] ans) {
-		int len = array.length;
-		ans[0] = 0;
-		ans[1] = 0;
+        T[] items;
 
-		// find increasing sequence on left and on right
-		int leftPeak = 0;
-		while (leftPeak < len - 1) {
-			if (array[leftPeak] < array[leftPeak + 1]) {
-				leftPeak++;
-			} else {
-				break;
-			}
-		}
-		if (leftPeak == len - 1) {
-			return;
-		}
-		int rightBottom = len - 1;
-		while (rightBottom > 0) {
-			if (array[rightBottom] > array[rightBottom - 1]) {
-				rightBottom--;
-			} else {
-				break;
-			}
-		}
+        int head;
+        int cur;
 
-		// leftPeak and rightBottom are found, now read mid part
-		int midMin = Integer.MAX_VALUE;
-		int midMax = Integer.MIN_VALUE;
-		for (int i = leftPeak; i <= rightBottom; i++) {
-			midMin = Math.min(midMin, array[i]);
-			midMax = Math.max(midMax, array[i]);
-		}
+        public MyCircularArray(int size) {
+            // this is really important (casting the type)
+            items = (T[]) new Object[size];
 
-		// find left boudary and right boundary
-		int leftBound = leftPeak;
-		while (leftBound >= 0) {
-			if (array[leftBound] < midMin) {
-				break;
-			}
-			leftBound--;
-		}
-		int rightBound = rightBottom;
-		while (rightBound < len) {
-			if (array[rightBound] > midMax) {
-				break;
-			}
-			rightBound++;
-		}
+            head = 0;
+            cur = 0;
+        }
 
-		// finish it up
-		ans[0] = leftBound + 1;
-		ans[1] = rightBound - 1;
-	}
+        public void put(T item) {
+            items[cur++] = item;
+            cur = cur % items.length;
+        }
+
+        public T get(int i) {
+            int newIndex = (i + head) % items.length;
+            return items[newIndex];
+        }
+
+        public void rotate(int shiftRight) {
+            head += shiftRight;
+            head = head % items.length;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new MyIterator<T>(this);
+        }
+
+        class MyIterator<T> implements Iterator<T> {
+
+            T[] items;
+            int head;
+            int count;
+
+            public MyIterator(MyCircularArray<T> array) {
+                this.items = array.items;
+                this.head = array.head;
+                this.count = 0;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return this.count != items.length;
+            }
+
+            @Override
+            public T next() {
+                if (hasNext()) {
+                    return items[(head + count++) % items.length];
+                }
+                return null;
+            }
+
+            @Override
+            public void remove() {
+            }
+        }
+
+    }
 ]]></content>
   </entry>
   

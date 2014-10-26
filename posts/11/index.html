@@ -9,9 +9,8 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Design a Generic Deck of Cards Solution A simple design: enum Suit { HEART, DIAMOND, SPADES, CLUBS;
-} class Deck { List&lt;Card&gt; deck;
-} &hellip;">
+  <meta name="description" content="Question 给出下面这个图 设计数据结构和算法求出图中所有的正方形数量 (count the number of squares). Solution Pre-processing: 从每一个点开始存储上下左右四个方向最多延伸到的位置
+Main algorithm: 枚举右下角位置 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +71,7 @@
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
 </ul>
 
 </nav>
@@ -79,219 +79,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/22/design-deck-card/">[CC150v5] 8.1 Design a Generic Deck of Cards</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Design a Generic Deck of Cards</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>A simple design:</p>
-
-<pre><code>enum Suit {
-    HEART, DIAMOND, SPADES, CLUBS;
-}
-
-class Deck {
-    List&lt;Card&gt; deck;
-}
-
-class Card {
-    Suit suit;
-    int num;
-}
-</code></pre>
-
-<p>A more complex design:</p>
-
-<pre><code>enum Suit {
-    HEART, DIAMOND, SPADES, CLUBS;
-}
-
-class Deck&lt;T extends Card&gt; {
-    List&lt;Card&gt; deck;
-
-    public void shuffle() {
-    };
-}
-
-abstract class Card {
-    boolean available;
-    Suit suit;
-    int num;
-
-    public boolean isAvailable() {
-        return available;
-    };
-}
-
-class Hand&lt;T extends Card&gt; {
-    List&lt;Card&gt; cards;
-
-    public int score() {
-        int score = 0;
-        for (Card c : cards) {
-            score += c.num;
-        }
-        return score;
-    }
-
-    public void addCard(T card) {
-        cards.add(card);
-    }
-}
-
-// Now use the above generic Data Structure to make a
-// Blackjack Game
-class Blackjack extends Hand&lt;BlackJackCard&gt; {
-}
-
-class BlackJackCard extends Card {
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/20/Talk-about-singleton/">[Design] About Singleton</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-20T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Implement Singlton</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
-
-<h4>using Enum</h4>
-
-<p>This is only available since Java 6.</p>
-
-<pre><code>public enum Singleton_Enum {
-    INSTANCE;
-}
-</code></pre>
-
-<h4>using double checked locking</h4>
-
-<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
-
-<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
-    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
-
-    private Singleton_DoubleCheckedLocking() {
-    }
-
-    public static Singleton_DoubleCheckedLocking getInstance() {
-        if (INSTANCE == null) {
-            synchronized (Singleton_DoubleCheckedLocking.class) {
-                // double checking Singleton instance
-                if (INSTANCE == null) {
-                    INSTANCE = new Singleton_DoubleCheckedLocking();
-                }
-            }
-        }
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h4>using static factory method</h4>
-
-<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
-
-<pre><code>public class Singleton_StaticFactory {
-    // initailzed during class loading
-    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
-
-    // to prevent creating another instance of Singleton
-    private Singleton_StaticFactory() {
-    }
-
-    public static Singleton_StaticFactory getSingleton() {
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h3>About thread-saft</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
-
-<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
-
-<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
-
-<ol>
-<li>using static field</li>
-<li>using Enum</li>
-</ol>
-
-
-<h3>Q &amp; A</h3>
-
-<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
-
-<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
-</div>
-  
-  
-
-
-    </article>
   
   
     <article>
@@ -938,6 +725,183 @@ int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; poso
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/16/Excel-decimal-conversion/">[Question] Excel Decimal Conversion</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#23">link</a></p>
+
+<blockquote><p>Excel中的行列数用A~Z 26个字母表示，A, B, C, D, …, Z, AA, AB, …, AZ, BA, BB, … 分别表示10进制数1, 2, 3, 4, …, 26, 27, 28, …, 52, 53, 54…。</p>
+
+<p>请实现2个函数decToExcel和excelToDec，将10进制数转换为Excel数，以及将Excel数转换为10进制数。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Note the indexing starts from 1, not from 0. This caused some trouble for me.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public String decToExcel(int decNum) {
+    decNum--;
+    int digits = 1;
+    int exponen = 26;
+    while (decNum &gt;= exponen) {
+        decNum -= exponen;
+        exponen *= 26;
+        digits++;
+    }
+    // now we know the total number of digits
+    int num = decNum;
+    int total = exponen / 26;
+    String ans = "";
+    for (int i = 0; i &lt; digits; i++) {
+        ans += (char) (num / total + 'A');
+        num %= total;
+        total /= 26;
+    }
+    return ans;
+}
+
+public int excelToDec(String excelNum) {
+    int digits = excelNum.length();
+    int total = 1;
+    int sum = 1;
+    for (int i = 1; i &lt; digits; i++) {
+        total *= 26;
+        sum += total;
+    }
+    for (int i = 0; i &lt; digits; i++) {
+        sum += (excelNum.charAt(i) - 'A') * total;
+        total /= 26;
+    }
+    return sum;
+}
+</code></pre>
+
+<p><strong>updated code</strong>: we can actually do it recursively. The code is much more concise (the code is found in the eclipse project).</p>
+
+<pre><code>//将十进制数转换为excel数
+public String decToExcel(int decNum) {
+    if (decNum == 0) {
+        return "";
+    }
+    decNum--;
+    char last = (char) ('A' + decNum % 26);
+    return decToExcel(decNum / 26) + last;
+}
+
+//将excel数转换为十进制数
+public int excelToDec(String excelNum) {
+    if (excelNum.equals("")) {
+        return 0;
+    }
+    int len = excelNum.length();
+    int last = 1 + excelNum.charAt(len - 1) - 'A';
+    return excelToDec(excelNum.substring(0, len - 1)) * 26 + last;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Product-all-ones/">[Google] Product All 1s</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#18">link</a></p>
+
+<blockquote><p>给定一个非负整数a（不超过10<sup>6</sup>），是否存在整数b，使得a和b的乘积全为1。如果存在，返回最小的乘积的位数。如果不存在，返回-1。</p>
+
+<p>样例：a=3，存在b=37，使得3*37=111，则函数应返回3（111的位数）。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There&rsquo;s 1 equation of mod operation, which is helpful:</p>
+
+<blockquote><p>(a * b) mod x = ((mx+a&#8217;) * (nx+b&#8217;)) mod x = (a&#8217; mod x) * (b&#8217; mod x) = (a mod x) * (b mod x)</p>
+
+<p>i.e.  (a * b) mod x = (a mod x) * (b mod x)</p></blockquote>
+
+<p>Altough <a href="http://www.itint5.com/discuss/136/%E8%BF%99%E9%A2%98%E6%88%91%E8%B6%85%E6%97%B6%E4%BA%86%EF%BC%8C%E8%AF%B7%E9%97%AE%E5%A6%82%E4%BD%95%E7%BC%A9%E7%9F%AD%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4">I don&rsquo;t understand why</a> does it contribute to the incredibly short solution code posted below. I can&rsquo;t solve this question, freakly speaking.</p>
+
+<h3>Code</h3>
+
+<pre><code>int findMinAllOne(int a) {
+    if (a &lt; 0 || (a % 10) % 2 == 0 || a % 10 == 5)
+        return -1;
+
+    int ans = 1;
+    for (int p = 1; p != 0; p %= a) {
+        p = 10 * p + 1;
+        ++ans;
+    }
+    return a == 1 ? ans - 1 : ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/posts/12">&larr; Older</a>
@@ -954,7 +918,7 @@ int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; poso
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (27)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
@@ -963,7 +927,7 @@ int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; poso
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (4)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
@@ -973,10 +937,6 @@ int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; poso
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2014/10/08/interleave-positive-negative/">[Question] Interleave Positive and Negative Numbers</a>
-      </li>
     
       <li class="post">
         <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
@@ -992,6 +952,10 @@ int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; poso
     
       <li class="post">
         <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
       </li>
     
   </ul>
