@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question You are given two 32-bit numbers, N andM, and two bit positions, i and j. Write a method to insert M into Nsuch that M starts at bit j and &hellip;">
+  <meta name="description" content="Question How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element? Push, pop and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,241 +77,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/binary-merge-two-numbers/">[CC150v5] 5.1 Binary Merge 2 Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You are given two 32-bit numbers, N andM, and two bit positions, i and j. Write a method to insert M into Nsuch that M starts at bit j and ends at bit i. You can assume that the bits j through i have enough space to fit all ofM. That is, ifM= 10011, you can assume that there are at least 5 bits between j and i. You would not, for example, have j-3 and i=2, because M could not fully fit between bit 3 and bit 2.</p>
-
-<p>EXAMPLE:</p>
-
-<p>Input: N = 16000000000, M = 10011, i = 2, j = 6</p>
-
-<p>Output: N = 10001001100</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a basic bit manipulation question</strong>. The key is to use binary maks. Two things to note:</p>
-
-<ol>
-<li><p>The &lsquo;~&rsquo; means negate. So (~0) is a sequence of 1 (the value equals to -1).</p></li>
-<li><p>When shifting bits, <strong>DO NOT USE &lsquo;>>&rsquo; because it&rsquo;s signed shift</strong>. Instead, <strong>use &lsquo;>>>&rsquo; (unsigned right shift operator)</strong>.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static int myAnswer(int n, int m, int i, int j) {
-    int rr = (~0 &gt;&gt;&gt; (31 - j));
-    int ll = (~0 &lt;&lt; i);
-    // printBinary(rr);
-    // printBinary(ll);
-
-    int middleMask = ll &amp; rr;
-    int twoEndMask = ll ^ rr;
-
-    n = n &amp; twoEndMask;
-    m = (m &lt;&lt; i) &amp; middleMask;
-
-    return n | m;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-of-animals/">[CC150v5] 3.7 Stack of Animals</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would prefer a dog or a cat (and will receive the oldest animal of that type). They cannot select which specific animal they would like.</p>
-
-<p>Create the data structures to maintain this system and implement operations such as enqueue, dequeueAny, dequeueDog and dequeueCat. You may use the built-in LinkedList data structure.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are 2 solutions.</p>
-
-<p><strong>First one is using a single queue</strong>. This makes &lsquo;dequeueAny&rsquo; easy, but &lsquo;dequeueCat&rsquo; and &lsquo;dequeueDog&rsquo; difficult.</p>
-
-<p><strong>Second approach would be using 2 queues for dogs and cats</strong>. We need something like timestamp to be stored (more space usage).</p>
-
-<p>When we return, we peek both queues are choose the older one. <strong>This is recommended solution in the book</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>from the book</strong></p>
-
-<p>Animal.java</p>
-
-<pre><code>public abstract class Animal {
-    int order;
-    String name;
-
-    public Animal(String n) {
-        name = n;
-    }
-
-    public abstract String name();
-
-    public boolean isOlderThan(Animal a) {
-        return this.order &lt; a.order;
-    }
-}
-
-class Cat extends Animal {
-    public Cat(String n) {
-        super(n);
-    }
-
-    public String name() {
-        return "Cat: " + name;
-    }
-}
-
-class Dog extends Animal {
-    public Dog(String n) {
-        super(n);
-    }
-
-    public String name() {
-        return "Dog: " + name;
-    }
-}
-</code></pre>
-
-<p>AnimalQueue.java</p>
-
-<pre><code>public class AnimalQueue {
-    LinkedList&lt;Dog&gt; dogs = new LinkedList&lt;Dog&gt;();
-    LinkedList&lt;Cat&gt; cats = new LinkedList&lt;Cat&gt;();
-    private int order = 0;
-
-    public void enqueue(Animal a) {
-        a.order = order;
-        order++;
-        if (a instanceof Dog) {
-            dogs.addLast((Dog) a);
-        } else if (a instanceof Cat) {
-            cats.addLast((Cat) a);
-        }
-    }
-
-    public Animal dequeueAny() {
-        if (dogs.size() == 0) {
-            return dequeueCats();
-        } else if (cats.size() == 0) {
-            return dequeueDogs();
-        }
-        Dog dog = dogs.peek();
-        Cat cat = cats.peek();
-        if (dog.isOlderThan(cat)) {
-            return dogs.poll();
-        } else {
-            return cats.poll();
-        }
-    }
-
-    public Animal peek() {
-        if (dogs.size() == 0) {
-            return cats.peek();
-        } else if (cats.size() == 0) {
-            return dogs.peek();
-        }
-        Dog dog = dogs.peek();
-        Cat cat = cats.peek();
-        if (dog.isOlderThan(cat)) {
-            return dog;
-        } else {
-            return cat;
-        }
-    }
-
-    public int size() {
-        return dogs.size() + cats.size();
-    }
-
-    public Dog dequeueDogs() {
-        return dogs.poll();
-    }
-
-    public Dog peekDogs() {
-        return dogs.peek();
-    }
-
-    public Cat dequeueCats() {
-        return cats.poll();
-    }
-
-    public Cat peekCats() {
-        return cats.peek();
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
   
   
     <article>
@@ -916,6 +681,167 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=8211177">link</a></p>
+
+<blockquote><p>Given an array of integers A, give an algorithm to find the longest Arithmetic progression in it, i.e find a sequence i1 &lt; i2 &lt; … &lt; ik, such that</p>
+
+<p>A[i1], A[i2], …, A[ik] forms an arithmetic progression, and k is the largest possible.</p>
+
+<p>The sequence S1, S2, …, Sk is called an arithmetic progression if S(j+1) – S(j) is a constant.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a rather difficult Arithmetic Progression question</strong>.</p>
+
+<p>The solution is 2-D DP.</p>
+
+<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">The idea is</a> to create a 2D table dp[n][n]. An entry dp[i][j] in this table stores LLAP with input[i] and input[j] as first two elements of AP(j > i).</p>
+
+<p>The last column of the table is always 2. Rest of the table is filled <strong>from bottom right to top left</strong>.</p>
+
+<p>To fill rest of the table, j (second element in AP) is first fixed. i and k are searched for a fixed j. If i and k are found such that i, j, k form an AP, then <strong>the value of dp[i][j] is set as dp[j][k] + 1</strong>.</p>
+
+<p><strong>Note that the value of dp[j][k] must have been filled</strong> before as the loop traverses from right to left columns.</p></blockquote>
+
+<p>The 2 difficult points of this question:</p>
+
+<ol>
+<li>how to come up with the transation formula. (i.e. <strong>dp[i][j] = dp[j][k] + 1</strong>, when (i, j, k) forms a AP).</li>
+<li>how to fill up all dp[i][j] in each loop of j. (Once inside the if-else, once outside the main while-loop)</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int longest(int[] A) {
+    int len = A.length;
+    int[][] dp = new int[len][len];
+    for (int i = 0; i &lt; len; i++) {
+        // the pair ending at last position is always a progression
+        dp[i][len - 1] = 2;
+    }
+    int longest = 1;
+    for (int j = len - 2; j &gt;= 0; j--) {
+        // for each j, find i and k that makes 1 progression
+        int i = j - 1;
+        int k = j + 1;
+        while (i &gt;= 0 &amp;&amp; k &lt; len) {
+            int total = A[i] + A[k];
+            if (total &gt; 2 * A[j]) {
+                // this is important!
+                dp[i][j] = 2;
+                i--;
+            } else if (total &lt; 2 * A[j]) {
+                k++;
+            } else {
+                // found a valid progression triplet A(i, j, k)
+                dp[i][j] = dp[j][k] + 1;
+                longest = Math.max(longest, dp[i][j]);
+                i--;
+                k++;
+            }
+        }
+        // this is important!
+        while (i &gt;= 0) {
+            dp[i][j] = 2;
+            i--;
+            // If the loop was stopped due to k becoming more than
+            // n-1, set the remaining dp[i][j] as 2
+        }
+    }
+    return longest;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/10/top-million-from-billion/">[CC150v4] 20.6 Top Million From Billion</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Describe an algorithm to find the largest 1 million numbers in 1 billion numbers.</p>
+
+<p>Assume that the computer memory can hold all one billion numbers.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There&rsquo;re enough discussion on <strong>Top K problems</strong> so far in this blog. The suggest solutions is:</p>
+
+<ol>
+<li><p>Sort</p></li>
+<li><p>Min Heap, O(n logm) time.</p></li>
+<li><p>Quick select algorithm. O(n) time.</p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -943,10 +869,8 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
-<li class='category'><a href='/blog/categories/read/'>read (1)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/thoughts/'>thoughts (8)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
@@ -955,14 +879,6 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2014/10/17/who-will-remember-you/">[Thoughts] Who Will Remember You?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/08/oct-zhihu/">[Read] 十月以前 知乎摘抄</a>
-      </li>
     
       <li class="post">
         <a href="/blog/2014/10/08/interleave-positive-negative/">[Question] Interleave Positive and Negative Numbers</a>
@@ -974,6 +890,14 @@ public static int nthToLastMe(LinkedListNode head, int n) {
     
       <li class="post">
         <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
       </li>
     
   </ul>
