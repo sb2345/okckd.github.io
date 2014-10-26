@@ -65,21 +65,37 @@ Find all unique queries - use bigmap to store 3 types of states
 ### Design a short url system
 
 1. Cache 
-    to store hot urls
+
+> to store hot urls
+
 1. Load Balance 
-    Too many click in short time
+
+> Too many click in short time
+
 1. Storage balance
-    Hash value of an url and then store in individual machine
-    Expansibility?
+
+> Hash value of an url and then store in 
+individual machine
+>
+> Expansibility?
+
 1. Consistent Hash
-    Node, can increase # of machines to store information
-    Migration process
+
+> Node, can increase # of machines to store information
+
+> Migration process
+
 1. Router
-    check which machine response my query
-    light-weight calculations
-    what is router is down?
+
+> check which machine response my query
+>
+> light-weight calculations
+>
+> what is router is down?
+
 1. Locale
-    url frequently access by China, then put the url storage in Beijing
+
+> url frequently access by China, then put the url storage in Beijing
 
 ### Need-to-know Design patterns
 

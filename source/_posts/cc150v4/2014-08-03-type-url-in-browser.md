@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v4] 17.1 How Web Works"
+title: "[CC150v4] 17.1 Type a URL in Browser and Hit Enter "
 comments: true
 category: CC150v4
 tags: [  ]
@@ -62,4 +62,4 @@ Your router essentially guides your request through the network, helping the pac
 
 ### Even more
 
-An even more detailed article can be found [here](http://www.garshol.priv.no/download/text/http-tut.html). 
+An even more detailed article can be found [here](http://www.garshol.priv.no/download/text/http-tut.html), or [here](http://igoro.com/archive/what-really-happens-when-you-navigate-to-a-url/).
