@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element? Push, pop and &hellip;">
+  <meta name="description" content="Overview Cryptographic hash function is a hash function which is considered practically impossible to invert. The input is arbitrary length, and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,7 @@
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
 </ul>
 
 </nav>
@@ -83,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/30/Cryptographic-Hash-Function/">[Design] Cryptographic Hash Function</a></h1>
     
     
       <p class="meta">
@@ -99,691 +100,54 @@
   
 
 
-<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-30T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><h3>Overview</h3>
 
-<blockquote><p>How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element?</p>
+<p><a href="http://en.wikipedia.org/wiki/Cryptographic_hash_function">Cryptographic hash function</a> is a hash function which is considered practically impossible to invert.</p>
 
-<p>Push, pop and min should all operate in 0(1) time.</p></blockquote>
+<p>The input is arbitrary length, and output is fixed length.</p>
 
-<h3>Solution</h3>
+<p>The input is called &lsquo;message&rsquo; and output (the hash value) is called &lsquo;<strong>digest</strong>&rsquo;.</p>
 
-<p>This is <strong>a very tricky question</strong>.</p>
-
-<p>The key is how to use the minimum space to achieve O(1) query min operation. The trick is to count how many times the same min-value occur. Eg.</p>
-
-<blockquote><p>input: 5,3,3,1,1,2,2,2,2,2,2,2.</p>
-
-<p>stack: 5,3,3,1,1.</p></blockquote>
-
-<p>So we can pop &lsquo;1&rsquo; twice, pop &lsquo;3&rsquo; twice, and pop &lsquo;5&rsquo; once. Read the code!</p>
-
-<h3>Code</h3>
-
-<pre><code>public class StackMyAnswer extends Stack&lt;Integer&gt; {
-
-    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
-
-    public void push(int value) {
-        if (min.isEmpty() || value &lt;= min.peek()) {
-            min.push(value);
-        }
-        super.push(value);
-    }
-
-    public Integer pop() {
-        int val = super.pop();
-        if (!min.isEmpty() &amp;&amp; val == min.peek()) {
-            min.pop();
-        }
-        return val;
-    }
-
-    public int min() {
-        if (min.isEmpty()) {
-            return Integer.MAX_VALUE;
-        }
-        return min.peek();
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement a function to check if a linked list is a palindrome.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are multiple solutions for this question.</p>
-
-<p><strong>First, maybe the simplest solution of all</strong>, is to compare the list with the reversed list (compare first half would be enough). This is a very nice idea.</p>
-
-<p><strong>Second solution is iterative approach</strong>. My code below is to first get the total length, then <strong>use a Stack</strong>. Alternatively, we can also use <strong>fast/slow pointer</strong> to find the mid point. This solution is easiest to write.</p>
-
-<p><strong>Third solution is recursive</strong>. We basically uses a public pointer to:</p>
+<p>Common examples are:</p>
 
 <ol>
-<li>get starting value</li>
-<li>check middle parts</li>
-<li>get ending value</li>
-<li>if starting == ending and middle part is valid, then true.</li>
+<li>MD5</li>
+<li>SHA-1 (said to be <a href="http://security.stackexchange.com/questions/19705/is-sha1-better-than-md5-only-because-it-generates-a-hash-of-160-bits">better than MD5</a>)</li>
 </ol>
 
 
-<p>This code is not easy to write, and hard to think.</p>
-
-<p>It&rsquo;s best to know both iterative and recursive solution.</p>
-
-<h3>Code</h3>
-
-<p>Iterative</p>
-
-<pre><code>public static boolean isPalindrome1(LinkedListNode head) {
-    int len = getListLength(head);
-    int half = len / 2;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    for (int i = 0; i &lt; half; i++) {
-        stack.push(head.data);
-        head = head.next;
-    }
-    if (len % 2 == 1) {
-        head = head.next;
-    }
-    for (int i = 0; i &lt; half; i++) {
-        if (head.data != stack.pop()) {
-            return false;
-        }
-        head = head.next;
-    }
-    return true;
-}
-</code></pre>
-
-<p>Recursive</p>
-
-<pre><code>private static LinkedListNode p;
-
-public static boolean isPalindrome2(LinkedListNode head) {
-    p = head;
-    int len = getListLength(head);
-    return helper2(0, len - 1);
-}
-
-public static boolean helper2(int from, int to) {
-    if (from &gt; to) {
-        return true;
-    } else if (from == to) {
-        p = p.next;
-        return true;
-    } else {
-        // first get fromVal, then check middlep part, last, get toVal
-        int fromVal = p.data;
-        p = p.next;
-        if (!helper2(from + 1, to - 1)) {
-            return false;
-        }
-        int toVal = p.data;
-        p = p.next;
-        if (fromVal != toVal) {
-            return false;
-        }
-    }
-    return true;
-}
-</code></pre>
-
-<p>Shared method:</p>
-
-<pre><code>private static int getListLength(LinkedListNode node) {
-    int count = 0;
-    while (node != null) {
-        count++;
-        node = node.next;
-    }
-    return count;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/15/implement-stack/">[CC150v5] 3.0 Example - Implement Stack</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement a stack.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Stack uses LinkedNode to implement</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class MyStack {
-
-    Node top;
-
-    public int pop() {
-        if (top == null) {
-            return -1;
-        }
-        int returnVal = top.val;
-        top = top.next;
-        return returnVal;
-    }
-
-    public int peek() {
-        if (top == null) {
-            return -1;
-        }
-        return top.val;
-
-    }
-
-    public void push(int val) {
-        Node newNode = new Node(val);
-        newNode.next = top;
-        top = newNode;
-    }
-
-    class Node {
-
-        int val;
-        Node next;
-
-        Node(int value) {
-            val = value;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/14/kth-last-element-recursive/">[CC150v5] 2.2 Kth Last Element (Recursive)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-14T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement an algorithm to find the kth to last element of a singly linked list.</p>
-
-<p>Do it recursively.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Iterative solution is easy, <strong>recursive is not</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>private static int myAns = -1;
-
-public static int nthToLastMe(LinkedListNode head, int n) {
-    if (head == null) {
-        return 0;
-    } else if (nthToLastMe(head.next, n) &lt; n - 1) {
-        return nthToLastMe(head.next, n) + 1;
-    } else if (nthToLastMe(head.next, n) == n - 1) {
-        myAns = head.data;
-        return Integer.MAX_VALUE;
-    }
-    return Integer.MAX_VALUE;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>What protocol is used for communicating with a DNS?</p></blockquote>
-
-<h3>Answer</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Domain_Name_System">Domain Name System</a> (DNS) is a hierarchical distributed naming system for computers, services, or any resource connected to the Internet or a private network. It associates various information with domain names assigned to each of the participating entities. Most prominently, it translates easily memorized domain names to the numerical IP addresses needed for the purpose of locating computer services and devices worldwide. The Domain Name System is an essential component of the functionality of the Internet.</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Domain_Name_System#Protocol_transport">DNS primarily uses</a> <strong>User Datagram Protocol (UDP)</strong> on port number 53 to serve requests.</p>
-
-<p>DNS queries consist of a single UDP request from the client followed by a single UDP reply from the server.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/11/celebrity-problem/">[Question] Celebrity Problem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=13167666">link</a></p>
-
-<blockquote><p>You have a room with n people. A celebrity walks in. Everyone knows the celebrity, the celebrity knows no one.</p>
-
-<p>Non-celebrities may/may not know anyone in the room.</p>
-
-<p>Give an algorithm to find the celebrity. Discuss the complexity.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><a href="http://www.geeksforgeeks.org/the-celebrity-problem/">Classic brute-force solution</a> would take O(n<sup>2</sup>) time to build a map. That&rsquo;s not good, and we have a very simple solution that works in O(n) time:</p>
-
-<blockquote><p>Make all of them stand in a row. Let&rsquo;s say the people are a,b,c,d,e,f,g,h,i,j,&hellip;&hellip;.n</p>
-
-<p>Compare a and b. <strong>If a knows b</strong>, a is not celebrity. <strong>If a doesn&rsquo;t know b</strong>, b is not celebrity.</p>
-
-<p>At the end, the probable celebrity who survives is the certain celebrity. (better do a check)</p></blockquote>
-
-<p>Total number of comparison is <a href="http://www.geeksforgeeks.org/the-celebrity-problem/">3(N-1) times</a>.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32631467_0_1.html">link</a></p>
-
-<blockquote><p>2d array ＊代表障碍物 ＃代表货物 空白就是正常的路</p>
-
-<p>问如何找到一个点为出发点 能实现总共取货路径最短？ 每次只能拿一个货物，遇到障碍需要绕开，拿到以后要放回出发点，然后再取另一个.</p></blockquote>
-
-<pre><code>＊＊＊＊＊＊＊＊＊＊
-＊  #           ＊
-＊  ＊＊＊  ＊   ＊
-＊              ＊
-＊     ＊＊   ＊ ＊
-＊  #    # # ＊＊＊
-＊＊＊＊＊＊＊＊＊＊
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>This looks like a very difficult question, especially during a phone interview.</p>
-
-<p><strong>The 10th floor gives the best solution</strong>:</p>
-
-<blockquote><p><strong>BFS from every box</strong>. in each box, a non-blocking cell (include box position, but exclude hazard position) will have a weight value, stand for the distance to the box.</p>
-
-<p>after bfs from all the boxes, each cell will have k weight, k is the number of boxes. sum all the weight in each cell, and find the cell with smallest sum of weight.</p>
-
-<p>One problem of this solution may lead to a cell of a box. We can then sort the cell by sum of weight and find the first position that is not a box.</p>
-
-<p>complexity O(k*n<sup>2</sup>)</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">link</a></p>
-
-<blockquote><p>Given a sorted set, find if there exist three elements in Arithmetic Progression or not.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a rather simple Arithmetic Progression question</strong>.</p>
-
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">To find the three elements</a>, we first fix an element as middle element and search for other two (one smaller and one greater).</p></blockquote>
-
-<p>O(n<sup>2</sup>) time.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public boolean longest(int[] A) {
-    int len = A.length;
-    for (int i = 1; i &lt; len - 1; i++) {
-        int left = i - 1;
-        int right = i + 1;
-        while (left &gt;= 0 &amp;&amp; right &lt; len) {
-            int total = A[left] + A[right];
-            if (total &gt; 2 * A[i]) {
-                left--;
-            } else if (total &lt; 2 * A[i]) {
-                right++;
-            } else {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=8211177">link</a></p>
-
-<blockquote><p>Given an array of integers A, give an algorithm to find the longest Arithmetic progression in it, i.e find a sequence i1 &lt; i2 &lt; … &lt; ik, such that</p>
-
-<p>A[i1], A[i2], …, A[ik] forms an arithmetic progression, and k is the largest possible.</p>
-
-<p>The sequence S1, S2, …, Sk is called an arithmetic progression if S(j+1) – S(j) is a constant.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a rather difficult Arithmetic Progression question</strong>.</p>
-
-<p>The solution is 2-D DP.</p>
-
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">The idea is</a> to create a 2D table dp[n][n]. An entry dp[i][j] in this table stores LLAP with input[i] and input[j] as first two elements of AP(j > i).</p>
-
-<p>The last column of the table is always 2. Rest of the table is filled <strong>from bottom right to top left</strong>.</p>
-
-<p>To fill rest of the table, j (second element in AP) is first fixed. i and k are searched for a fixed j. If i and k are found such that i, j, k form an AP, then <strong>the value of dp[i][j] is set as dp[j][k] + 1</strong>.</p>
-
-<p><strong>Note that the value of dp[j][k] must have been filled</strong> before as the loop traverses from right to left columns.</p></blockquote>
-
-<p>The 2 difficult points of this question:</p>
+<h4>Properties</h4>
 
 <ol>
-<li>how to come up with the transation formula. (i.e. <strong>dp[i][j] = dp[j][k] + 1</strong>, when (i, j, k) forms a AP).</li>
-<li>how to fill up all dp[i][j] in each loop of j. (Once inside the if-else, once outside the main while-loop)</li>
+<li>Computationally efficient</li>
+<li>Collision resistant</li>
+<li>Hide information</li>
+<li>Look random</li>
 </ol>
 
 
-<h3>Code</h3>
+<h4>Examples</h4>
 
-<p><strong>written by me</strong></p>
+<blockquote><p>I generated checksum values on an important file I backed up to ensure that everything went OK. <a href="http://pcsupport.about.com/od/termsm/g/md5.htm">source</a></p>
 
-<pre><code>public int longest(int[] A) {
-    int len = A.length;
-    int[][] dp = new int[len][len];
-    for (int i = 0; i &lt; len; i++) {
-        // the pair ending at last position is always a progression
-        dp[i][len - 1] = 2;
-    }
-    int longest = 1;
-    for (int j = len - 2; j &gt;= 0; j--) {
-        // for each j, find i and k that makes 1 progression
-        int i = j - 1;
-        int k = j + 1;
-        while (i &gt;= 0 &amp;&amp; k &lt; len) {
-            int total = A[i] + A[k];
-            if (total &gt; 2 * A[j]) {
-                // this is important!
-                dp[i][j] = 2;
-                i--;
-            } else if (total &lt; 2 * A[j]) {
-                k++;
-            } else {
-                // found a valid progression triplet A(i, j, k)
-                dp[i][j] = dp[j][k] + 1;
-                longest = Math.max(longest, dp[i][j]);
-                i--;
-                k++;
-            }
-        }
-        // this is important!
-        while (i &gt;= 0) {
-            dp[i][j] = 2;
-            i--;
-            // If the loop was stopped due to k becoming more than
-            // n-1, set the remaining dp[i][j] as 2
-        }
-    }
-    return longest;
-}
-</code></pre>
+<p>To verify that the latest version of Firefox I was downloading is correct, I ran a cryptographic hash function, SHA-1 to be exact, on the download and compared that checksum with the one published on Mozilla&rsquo;s site. <a href="http://pcsupport.about.com/od/termsc/g/cryptographic-hash-function.htm">source</a></p></blockquote>
+
+<h3>Digital signature</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Digital_signature">Digital signature</a> is a mathematical scheme for demonstrating the authenticity of a digital message. It uses public/private keys.</p>
+
+<p>In practice, the signature is not used directly on the file, but rather on the <a href="http://en.wikipedia.org/wiki/Digital_signature#How_they_work">digest of the file</a>.</p>
+
+<p><img class="middle" src="/assets/images/Digital-Signature-diagram.png"></p>
+
+<p><a href="https://www.khanacademy.org/economics-finance-domain/core-finance/money-and-banking/bitcoin/v/bitcoin-digital-signatures">Video</a> on digital signature.</p>
 </div>
   
   
@@ -796,7 +160,7 @@ public static int nthToLastMe(LinkedListNode head, int n) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/09/10/top-million-from-billion/">[CC150v4] 20.6 Top Million From Billion</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/30/A-start-search/">[Classic] A-Star Search</a></h1>
     
     
       <p class="meta">
@@ -812,7 +176,73 @@ public static int nthToLastMe(LinkedListNode head, int n) {
   
 
 
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Definition</h3>
+
+<p>A* is a computer algorithm that is widely used in pathfinding and graph traversal.</p>
+
+<p>It uses a knowledge-plus-heuristic cost function like this:</p>
+
+<blockquote><p>f (n) = g(n) + h(n)</p>
+
+<p>f (n): estimated total cost of path through n to goal</p>
+
+<p>g(x) = past path-cost function</p>
+
+<p>h(x) = future path-cost function, which is an admissible &ldquo;heuristic estimate&rdquo; of the distance from x to the goal</p></blockquote>
+
+<p>What sets A* <strong>apart from a greedy best-first search</strong> is that it also takes the distance already traveled into account.</p>
+
+<h3>Implementation</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/A*_search_algorithm#Process">Maintains a priority queue</a> (lower f(x) means higher priority). At each step, node with the lowest f(x) value is removed from the queue, and neighbors are added to the queue.</p>
+
+<p>This continues until a goal node has a lower f value than any node in the queue. Goal found!</p>
+
+<h3>Relationship with Dijkstra</h3>
+
+<p><strong><a href="http://stackoverflow.com/a/1332478">Dijkstra is a special case</a> for A*</strong> (when the <a href="http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Algorithm">heuristics is 0</a>).</p>
+
+<p>Illustration (I wish you can view the gif below):</p>
+
+<p><img class="middle" src="/assets/images/path-find-Astar.gif"></p>
+
+<p><img class="middle" src="/assets/images/path-find-Dijkstras.gif"></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/29/Boggle-solver/">[Google] Boggle Solver (Search Words From Matrix)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-29T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -821,18 +251,943 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>Describe an algorithm to find the largest 1 million numbers in 1 billion numbers.</p>
+<p><a href="http://stackoverflow.com/questions/746082/how-to-find-list-of-possible-words-from-a-letter-matrix-boggle-solver">link</a></p>
 
-<p>Assume that the computer memory can hold all one billion numbers.</p></blockquote>
+<blockquote><p>Boggle Game:</p></blockquote>
+
+<pre><code>F X I E
+A M L O
+E W B X
+A S T U
+</code></pre>
+
+<blockquote><p>The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference.</p></blockquote>
+
+<h3>Variation</h3>
+
+<p><strong>Another version of questions states in <a href="http://www.glassdoor.com/Interview/I-was-asked-to-write-an-algorithm-to-solve-a-crossword-like-puzzle-I-forget-the-name-but-started-with-a-B-As-opposed-QTN_435641.htm">here</a></strong></p>
+
+<blockquote><p>&hellip; Boggle Game. As opposed to simply vertical, horizontal, and diagonal placement of words, they were allowed to snake around the grid in any way.</p></blockquote>
+
+<p>For this version of question, no &lsquo;visited&rsquo; memory needs to be stored. In other words, it&rsquo;s a simpler version of above question.</p>
 
 <h3>Solution</h3>
 
-<p>There&rsquo;re enough discussion on <strong>Top K problems</strong> so far in this blog. The suggest solutions is:</p>
+<p><strong><a href="http://stackoverflow.com/a/4314056">The best solution</a> is to use Trie</strong>, then do DFS search. However it might not be as intuitive as it seems.</p>
+
+<p>The idea is from <a href="http://stackoverflow.com/a/746102">this answer</a> (However this guy admits that his solution does not handle &lsquo;visited&rsquo; nodes properly, means the same char might be visited again to produce a word).</p>
+
+<p>We need to first define a class called Item:</p>
+
+<pre><code>class Item {
+    public final int x, y;
+    public final String prefix;
+
+    public Item(int row, int column, String prefix) {
+        this.x = row;
+        this.y = column;
+        this.prefix = prefix;
+    }
+}
+</code></pre>
+
+<p>So when we start doing DFS, we pass in an Item object which stores 2 information:</p>
 
 <ol>
-<li><p>Sort</p></li>
-<li><p>Min Heap, O(n logm) time.</p></li>
-<li><p>Quick select algorithm. O(n) time.</p></li>
+<li>The next position that we&rsquo;re going to visit.</li>
+<li>The prefix string that we have validated so far (before visiting this position).</li>
+</ol>
+
+
+<p>For example:</p>
+
+<pre><code>F X I E
+A M L O
+E W B X
+A S T U
+</code></pre>
+
+<p>We&rsquo;ll have Items objects like (0, 0, &ldquo;&rdquo;), (0, 1, &ldquo;F&rdquo;), (0, 2, &ldquo;FA&rdquo;) &hellip; We guarantee that the prefix must be a valid prefix by searching them in the Trie.</p>
+
+<p>How to tell whether a string is a prefix of word, or it&rsquo;s an actual word? We have a property in TrieNode called TrieNode.isWord() to help us.</p>
+
+<p>That&rsquo;s about it. I spend quite some time writing the code below, by refering to the Java solution by <a href="http://stackoverflow.com/a/11698898">zouzhile</a>.</p>
+
+<h3>Code</h3>
+
+<p>BoggleSolver.java</p>
+
+<pre><code>public class BoggleSolver {
+
+    private static BufferedReader in = null;
+    private static final String INPUT_FILE = "dictionary.txt";
+
+    public static void beginFileReader() {
+        try {
+            in = new BufferedReader(new FileReader(new File(BoggleSolver.class
+                    .getResource(INPUT_FILE).toURI())));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Trie buildTrie() {
+        Trie trie = new Trie();
+        beginFileReader();
+        String line = null;
+        try {
+            while ((line = in.readLine()) != null) {
+                String[] words = line.split(" ");
+                for (String word : words) {
+                    word = word.trim().toLowerCase();
+                    trie.addWord(word);
+                }
+            }
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        return trie;
+    }
+
+    public Set&lt;String&gt; findWords(char[][] map, Trie dict) {
+        Set&lt;String&gt; ans = new TreeSet&lt;String&gt;();
+        int m = map.length;
+        int n = map[0].length;
+        for (int i = 0; i &lt; m; i++) {
+            for (int j = 0; j &lt; n; j++) {
+                boolean[][] visited = new boolean[m][n];
+                findWordsDfs(ans, dict, map, visited, new Item(i, j, ""));
+                // item have 3 parameters:
+                // location x,y and the prefix string before reaching (i.j)
+            }
+        }
+        return ans;
+    }
+
+    public void findWordsDfs(Set&lt;String&gt; ans, Trie dict, char[][] map,
+            boolean[][] visited, Item item) {
+        // item: the location that we're going to test
+        // item.prefix is the word prefix before reaching (x, y)
+
+        int m = map.length;
+        int n = map[0].length;
+        int x = item.x;
+        int y = item.y;
+
+        // check whether cur.(x,y) is a valid position
+        if (x &lt; 0 || x &gt;= m || y &lt; 0 || y &gt;= n) {
+            return;
+        } else if (visited[x][y]) {
+            return;
+        }
+        String newWord = item.prefix + map[x][y];
+        // check whether cur.prefix is a valid prefix
+        TrieNode findWord = dict.match(newWord);
+        if (findWord == null) {
+            // up to this position (x, y), the word dont' exists
+            return;
+        }
+        // now cur is in a valid position, with a valid prefix
+        if (findWord.isWord()) {
+            ans.add(newWord);
+        }
+        // visit this position, and continue in 4 different directions
+        visited[x][y] = true;
+        findWordsDfs(ans, dict, map, visited, new Item(x, y - 1, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x, y + 1, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x - 1, y, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x + 1, y, newWord));
+        visited[x][y] = false;
+    }
+
+    public static void main(String[] args) {
+        String[] rows = "eela,elps,weut,korn".split(",");
+        char[][] input = new char[4][4];
+        for (int i = 0; i &lt; 4; i++) {
+            input[i] = rows[i].toCharArray();
+        }
+
+        // prepare test data
+        BoggleSolver solver = new BoggleSolver();
+        Trie dictionary = solver.buildTrie();
+        // start finding words
+        Set&lt;String&gt; set = solver.findWords(input, dictionary);
+        // present the result
+        System.out.println(set.size() + " words are found, they are: ");
+        for (String str : set) {
+            System.out.println(str);
+        }
+    }
+
+    class Item {
+        public final int x, y;
+        public final String prefix;
+
+        public Item(int row, int column, String prefix) {
+            this.x = row;
+            this.y = column;
+            this.prefix = prefix;
+        }
+    }
+}
+</code></pre>
+
+<p>Trie.java</p>
+
+<pre><code>public class Trie {
+    private TrieNode root;
+
+    public Trie() {
+        this.root = new TrieNode();
+    }
+
+    public void addWord(String word) {
+        TrieNode node = this.root;
+        for (char c : word.toCharArray()) {
+            node = node.addChild(c);
+            if (node == null)
+                return;
+        }
+        node.setWord(true);
+    }
+
+    public TrieNode match(String s) {
+        TrieNode node = this.root;
+        for (char c : s.toCharArray()) {
+            node = node.get(c);
+            if (node == null)
+                return null;
+        }
+        return node;
+    }
+}
+</code></pre>
+
+<p>TrieNode.java</p>
+
+<pre><code>public class TrieNode {
+    private TrieNode[] children;
+    private boolean isWord = false;
+
+    public TrieNode() {
+        this.children = new TrieNode[26];
+    }
+
+    public TrieNode addChild(char child) {
+        if (child &lt; 'a' || child &gt; 'z')
+            return null;
+
+        int offset = child - 'a';
+        if (this.children[offset] == null) {
+            this.children[offset] = new TrieNode();
+        }
+        return this.children[offset];
+    }
+
+    public boolean isWord() {
+        return isWord;
+    }
+
+    public void setWord(boolean isWord) {
+        this.isWord = isWord;
+    }
+
+    public TrieNode get(char c) {
+        int offset = c - 'a';
+        return this.children[offset];
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/28/google-pre-interview-coaching/">[Google] Google Pre-interview Coaching</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a program that breaks up a string of words with no spaces into a string with the appropriate spaces.</p></blockquote>
+
+<p>Follow the following process:</p>
+
+<ol>
+<li>Clarify the problem</li>
+<li>Refine the solution</li>
+<li>Code it</li>
+<li>Last words</li>
+</ol>
+
+
+<h3>Clarify the problem</h3>
+
+<ol>
+<li>Consider a general case, like &ldquo;fastman&rdquo;</li>
+<li>Disambiguate expected result</li>
+<li>State the key assumptions</li>
+<li>clarify function signature</li>
+</ol>
+
+
+<p>2 words? null input? where is the words from? We might use a dictionary.</p>
+
+<h3>Refine the solution</h3>
+
+<ol>
+<li>what if the dictionary cannot fit in RAM</li>
+<li>how would you print the most likely of multiple choices</li>
+<li>what if the words are not spelled correctly?</li>
+<li>Testing</li>
+</ol>
+
+
+<h3>Code it</h3>
+
+<p>Write code now, skip.</p>
+
+<h3>Last words</h3>
+
+<p>Talk naive solution, then come up with a reasonably better one.</p>
+
+<p>Time/Space tradeoff. (like pre-processing or something)</p>
+
+<p>For very big/small input.</p>
+
+<p>White-board practise is important!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/28/Http-cookie/">[Design] HTTP Cookie</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>First Word</h3>
+
+<p>A cookie is <strong>a small text file</strong> that is stored by a browser on the user’s machine. Cookies are plain text; they contain no executable code.</p>
+
+<p>Every time the user loads the website, the <strong>browser sends the cookie back to the server</strong> to notify the website of the user&rsquo;s previous activity.</p>
+
+<ol>
+<li><p>Stateful information</p>
+
+<p> Such as shopping cart</p></li>
+<li><p>browsing activity</p>
+
+<p> Such as log in, which button is clicked, and which page is visited</p></li>
+</ol>
+
+
+<h3>Security</h3>
+
+<p>A secure cookie will only be sent to the server when a request is made using SSL and the HTTPS protocol. However, the entire mechanism is inherently insecure.</p>
+
+<p>The cookie just contains data and <strong>isn’t harmful</strong> in and of itself. However, tracking cookies and especially third-party tracking cookies are commonly used as ways to compile long-term records of individuals&#8217; browsing history, which is a potential privacy concern.</p>
+
+<h3>Types of HTTP Cookie</h3>
+
+<p>Common cookie types:</p>
+
+<h4>Session cookie</h4>
+
+<p>It&rsquo;s <strong>while browsing</strong>. (Normally) deleted by browser when the user closes the browser.</p>
+
+<h4>Persistent cookie</h4>
+
+<p>Max-age 1 year. The value set in that cookie would be sent back to the server every time the user visited the server. Also called <strong>tracking cookies</strong></p>
+
+<h4>Secure cookie</h4>
+
+<p>The secure attribute is enabled, and is only used via HTTPS.</p>
+
+<h4>Third-party cookie</h4>
+
+<p><strong>First-party cookies</strong> are cookies that belong to the same domain that is shown in the browser&rsquo;s address bar. <strong>Third-party cookies</strong> are cookies that belong to domains different from the one shown in the address bar.</p>
+
+<p>It opens up the potential for <strong>tracking the user&rsquo;s browsing history</strong>. An example of 3rd-party:</p>
+
+<blockquote><p>As an example, suppose a user visits www.example1.com. This web site contains an advert from ad.foxytracking.com, which, when downloaded, sets a cookie belonging to the advert&rsquo;s domain (ad.foxytracking.com). Then, the user visits another website, www.example2.com, which also contains an advert from ad.foxytracking.com, and which also sets a cookie belonging to that domain (ad.foxytracking.com). Eventually, both of these cookies will be sent to the advertiser when loading their ads or visiting their website. The advertiser can then use these cookies to build up a browsing history of the user across all the websites that have ads from this advertiser.</p></blockquote>
+
+<h4>One more thing</h4>
+
+<p>Nowadays ther&#8217;e a new kind of <strong>HttpOnly cookie</strong> (used only when transmitting HTTP (or HTTPS) requests, thus restricting access from other, non-HTTP APIs such as JavaScript).</p>
+
+<p><a href="http://www.nczonline.net/blog/2009/05/05/http-cookies-explained/">source1</a></p>
+
+<p><a href="http://en.wikipedia.org/wiki/HTTP_cookie">source2</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/27/google-api-read-4096/">[Google] Google API Read4096 (read4K)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14424684">link</a></p>
+
+<blockquote><p>Given API: int Read4096(char* buf);</p>
+
+<p>It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read.</p>
+
+<p>Use above API to Implement API &ldquo;int Read(char* buf, int n)&rdquo; which reads any number of chars from the file.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Since the nature of C++ and Java is different, I changed the api to:</p>
+
+<pre><code>GoogleApi.read4096(){}
+GoogleRead4096.read(int n){}
+</code></pre>
+
+<p>As <a href="http://www.careercup.com/question?id=14424684">suggested</a>, the solution is to keep <strong>one local buffer</strong>, and 1 pointer within the buffer.</p>
+
+<h3>Code</h3>
+
+<pre><code>String buffer = null;
+int p = 0;
+
+public String read(int n) {
+    if (n &lt; 0) {
+        return null;
+    } else if (n == 0) {
+        return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    while (n &gt; 0) {
+        // there is (LENGTH - p) chars left in the local buffer
+        if (buffer == null || p == buffer.length()) {
+            // no char left in buffer, update buffer
+            buffer = GoogleApi.read4096();
+            p = 0;
+            if (buffer.length() == 0) {
+                // finish reading the file (no more input chars)
+                break;
+            }
+        } else {
+            int numChars = buffer.length() - p;
+            if (numChars &gt;= n) {
+                sb.append(buffer.substring(p, p + n));
+                p = p + n;
+                n = 0;
+            } else {
+                sb.append(buffer.substring(p));
+                p = buffer.length();
+                n -= numChars;
+            }
+        }
+    }
+    return sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/27/Duplicate-rows-in-matrix/">[Question] Duplicate Rows in Matrix</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question 1</h3>
+
+<p><a href="http://www.careercup.com/question?id=6488077455327232">link</a></p>
+
+<blockquote><p>Given a 2D array (n x m) of integers, find all duplicate rows and print their index.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a <a href="http://get-that-job-at-google.blogspot.sg/2012/12/google-interview-experience.html">google question</a>.</p>
+
+<p><strong>Use HashMap</strong> (but make your own). Computer hash value of each row and insert into HashMap as value pair of HashMap(hashValue, rowNumber). When there&rsquo;s a collision, just check the rowNumber stored in HashMap with current row.</p>
+
+<p>This requires O(n*m) time and O(n) space. Note that <strong>we&rsquo;re not store the entire row into HashMap</strong> cuz it&rsquo;ll take up too much space.</p>
+
+<p>We (probably) can also use Trie.</p>
+
+<h3>Question 2</h3>
+
+<p><a href="http://www.careercup.com/question?id=9478119">link</a></p>
+
+<blockquote><p>Given a binary matrix of N X N of integers, you need to return only unique rows of binary arrays.</p></blockquote>
+
+<pre><code>input: 
+0 1 0 0 1 
+1 0 1 1 0 
+0 1 0 0 1 
+1 1 1 0 0 
+
+ans: 
+0 1 0 0 1 
+1 0 1 1 0 
+1 1 1 0 0
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Different from <strong>Question 1</strong>, this input is only 0 and 1.</p>
+
+<p><strong>The solution is to use Trie</strong>. Each node <a href="http://www.geeksforgeeks.org/print-unique-rows/">only have 2 children</a> (that&rsquo;s why Trie is perfect solution here).</p>
+
+<h3>Code</h3>
+
+<p><strong>Using binary trie node</strong>, refactored by me.</p>
+
+<pre><code>public int[][] getUniqueRows(int[][] matrix) {
+    int m = matrix.length;
+    int n = matrix[0].length;
+
+    TrieNode root = new TrieNode();
+    TrieNode p;
+    int uniqueCount = 0;
+    boolean[] isUnique = new boolean[m];
+    // isUnique is used to mark the lines that would appear in final result
+
+    // start to build the trie
+    for (int i = 0; i &lt; m; i++) {
+        // insert number matrix[i][] into the trie
+        p = root;
+        // root element would be an empty heading for all numbers
+        for (int j = 0; j &lt; n; j++) {
+            int digit = matrix[i][j];
+            if (p.kids == null) {
+                p.kids = new TrieNode[2];
+            }
+            if (p.kids[digit] == null) {
+                // this is a whole new branch, create a new node here
+                p.kids[digit] = new TrieNode();
+                if (j == n - 1) {
+                    uniqueCount++;
+                    isUnique[i] = true;
+                }
+            }
+            p = p.kids[digit];
+        }
+    }
+    System.out.println("uniqueCount is " + uniqueCount);
+    int[][] result = new int[uniqueCount][];
+    int k = 0;
+    for (int w = 0; w &lt; isUnique.length; w++) {
+        if (isUnique[w]) {
+            result[k++] = matrix[w];
+        }
+    }
+    return result;
+}
+
+class TrieNode {
+    TrieNode[] kids = null;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/26/Virtual-memory-page-fault-thrashing/">[Design] Virtual Memory, Page Fault and Thrashing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Terminologies</h3>
+
+<h4>Paging</h4>
+
+<p><a href="http://whatis.techtarget.com/definition/paging">Paging</a> is a method of writing data to, and reading it from, <strong>secondary storage</strong> for use in <strong>primary storage</strong>, also known as main memory. Paging plays a role in memory management for a operating system.</p>
+
+<h4>Page table</h4>
+
+<p><a href="http://en.wikipedia.org/wiki/Page_table">A page table</a> is the data structure used by a virtual memory system to store the mapping between <strong>virtual addresses</strong> and <strong>physical addresses</strong>.</p>
+
+<h4>Page fault</h4>
+
+<p>Page fault is an <strong>interrupt</strong> that occurs when a program requests data that is <strong>not currently in real memory</strong>. The interrupt triggers the operating system to fetch the data from a virtual memory and load it into RAM.</p>
+
+<p>An <strong>invalid page fault</strong> or <strong>page fault error</strong> occurs when the operating system cannot find the data in virtual memory. This usually happens when the virtual memory area, or the table that maps virtual addresses to real addresses, becomes corrupt.</p>
+
+<h4>Logical address</h4>
+
+<p><a href="http://en.wikipedia.org/wiki/Logical_address">Logical address</a> is the address at which an item (memory cell, storage element, network host) appears to reside from the perspective of an executing application program.</p>
+
+<h4>Physical address</h4>
+
+<p><a href="http://en.wikipedia.org/wiki/Physical_address">Physical address</a> (also real address, or binary address), is a memory address that is represented in the form of a binary number for accessing main memory.</p>
+
+<p><a href="http://www.geekinterview.com/question_details/3186">In general</a>, Logical address is the address generated <strong>by the CPU</strong>. Where as physical address is the <strong>actual address of the process in the memory</strong>. The CPU generates the logical address that is added with the <strong>offset value</strong> to get the actual address of the process inthe memory.</p>
+
+<h4>Thrashing</h4>
+
+<p><a href="http://www.computerhope.com/jargon/t/thrash.htm">Thrashing</a> or disk thrashing is a term used to describe when the hard drive is <strong>being overworked by moving information</strong> between the system memory and virtual memory excessively.</p>
+
+<h3>Demand Paging</h3>
+
+<p>Virtual memory is implemented (mostly) using demand paging. <strong><a href="http://www.webopedia.com/TERM/D/demand_paging.html">Demand Paging</a></strong> is a type of swapping in which pages of data are not copied from disk to RAM until they are needed. This is an example of a <a href="http://en.wikipedia.org/wiki/Demand_paging">lazy loading technique</a>.</p>
+
+<p>Pros:</p>
+
+<ol>
+<li>less RAM needed</li>
+<li>more users</li>
+<li>less I/O</li>
+</ol>
+
+
+<p>When a pages is needed, if <strong>invalid referernce</strong>, abort the process. else <strong>if valid</strong>, it&rsquo;s called page fault.</p>
+
+<p>Page fault time:</p>
+
+<ol>
+<li>servicing the page fault interrupt</li>
+<li>read in new page (major part)</li>
+<li>restart the process</li>
+</ol>
+
+
+<h3>Page Replacement</h3>
+
+<ol>
+<li>FIFO</li>
+<li>Optimal Algorithm</li>
+<li>LRU</li>
+<li>LRU Approximation
+
+<ol>
+<li>Additional-Reference-Bits algorithm</li>
+<li>Second-Chance (Clock) algorithm</li>
+</ol>
+</li>
+</ol>
+
+
+<p>Refer to another post <strong>&ldquo;Cache and Page Replacement Algorithms&rdquo;</strong>.</p>
+
+<h3>Solution to Thrashing</h3>
+
+<ol>
+<li>More RAM</li>
+<li>Less program running together</li>
+<li>Assign working priorities</li>
+<li>Improve <a href="http://en.wikipedia.org/wiki/Thrashing_(computer_science">spatial locality</a>#Solutions) by replacing loops, i.e.</li>
+</ol>
+
+
+<p>Replace</p>
+
+<pre><code>// recall that in C, arrays use Row-major order
+int m[256][256]; 
+for (k=0; k&lt;256; k++) { 
+    for (i=0; i&lt;256; i++) { 
+        m[i][k] = something(); 
+    }
+}
+</code></pre>
+
+<p>with</p>
+
+<pre><code>int m[256][256]; 
+for (i=0; i&lt;256; i++) { 
+    for (k=0; k&lt;256; k++) {
+        // consecutive values of k reside in adjacent memory locations 
+        m[i][k] = something(); 
+    }
+}
+</code></pre>
+
+<p>So that the use of data elements is within relatively <a href="http://en.wikipedia.org/wiki/Locality_of_reference">close storage locations</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/26/Test-hashcode-function/">[Testing] Test hashCode() Function</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>How to test hashCode() function? Example:</p></blockquote>
+
+<pre><code>public int hashCode(){
+    int result = 17 + hashDouble(re);
+    result = 31 * result + hashDouble(im);
+    return result;
+}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>We need to test that the hash function is <a href="http://stackoverflow.com/a/4449791">reflexive, symmetric, and transitive</a>.</p>
+
+<h3>Code</h3>
+
+<p>Not including &lsquo;not equal&rsquo; test.</p>
+
+<pre><code>@Test
+public void testEquals_Symmetric() {
+    Person x = new Person("Foo Bar");  // equals and hashCode check name field value
+    Person y = new Person("Foo Bar");
+    Assert.assertTrue(x.equals(y) &amp;&amp; y.equals(x));
+    Assert.assertTrue(x.hashCode() == y.hashCode());
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/26/Design-OOD-elevator/">[Design] OOD Design of Elevator</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://thought-works.blogspot.sg/2012/11/object-oriented-design-for-elevator-in.html">link</a></p>
+
+<blockquote><p>Object Oriented design for Elevator in a multi-storied apartment</p></blockquote>
+
+<h3>A Single Elevator</h3>
+
+<p>Use Case:</p>
+
+<ol>
+<li>User
+
+<ol>
+<li>press a button to summon the lift</li>
+<li>press a button to get to a specific floor</li>
+</ol>
+</li>
+<li>Button
+
+<ol>
+<li>floor button and level button</li>
+<li>illuminates when pressed</li>
+<li>place an &lsquo;elevator request&rsquo; when pressed</li>
+</ol>
+</li>
+<li>Elevator
+
+<ol>
+<li>moves up/down</li>
+<li>open/close the door</li>
+</ol>
+</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/elevator-class-diagram.png"></p>
+
+<p><strong>ElevatorRequests Class</strong></p>
+
+<p>Each button press results in an elevator request which has to be served. Each of these requests is tracked at a global place. ElevatorRequests, the class which stores elevator requests can use different strategies to schedule the elevator requests.</p>
+
+<p><strong>ElevatorController</strong></p>
+
+<p>The elevator is controlled by a controller class which we call ElevatorController. The elevator controller instructs the elevator what to do and also can shutdown/start up the elevator of the building. The elevator controller reads the next elevator request to be processed and serves it.</p>
+
+<p><strong>Button (Abstract) Class</strong></p>
+
+<p>Button is abstract class defining common behavior like illuminate, doNotIlluminate. FloorButton, ElevatorButton extend Button type and define placeRequest() which is invoked when the button is pressed.</p>
+
+<p>In conclusion, <strong>ElevatorController</strong> runs the show by reading the <strong>ElevatorRequests</strong> to process and instructing the <strong>Elevator</strong> what to do. User send request by pressing <strong>Buttons</strong>.</p>
+
+<h3>Extend the answer to multiple elevators</h3>
+
+<ol>
+<li><p>Each elevator have 1 controller.</p></li>
+<li><p>Floor based requests can be served by any elevator, thus these requests are added to a common area accessible by all controllers.</p></li>
+<li><p>Each elevator controller runs as a separate thread and checks if it can process a floor request. Mind synchronization issues.</p></li>
 </ol>
 
 </div>
@@ -857,22 +1212,18 @@ public static int nthToLastMe(LinkedListNode head, int n) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
+    <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (156)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (152)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
-<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
-<li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (3)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (4)</a></li>
 
   </ul>
 </section>
@@ -881,23 +1232,23 @@ public static int nthToLastMe(LinkedListNode head, int n) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/10/08/interleave-positive-negative/">[Question] Interleave Positive and Negative Numbers</a>
+        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/03/Leetcode-third-1/">[Leetcode] Leetcode Third Round (1)</a>
+        <a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
+        <a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
+        <a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
+        <a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a>
       </li>
     
   </ul>

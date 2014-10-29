@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Definition A* is a computer algorithm that is widely used in pathfinding and graph traversal. It uses a knowledge-plus-heuristic cost function like &hellip;">
+  <meta name="description" content="Question link Facebook&rsquo;s &ldquo;You and Joe have 230 friends in common&rdquo; feature. Sure you could use a decent caching strategy, but for &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,7 @@
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
 </ul>
 
 </nav>
@@ -83,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/30/A-start-search/">[Classic] A-Star Search</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/05/MapReduce-Common-Friends/">[Design] MapReduce Common Friends Example</a></h1>
     
     
       <p class="meta">
@@ -99,44 +100,111 @@
   
 
 
-<time datetime="2014-08-30T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Definition</h3>
+  <div class="entry-content"><h3>Question</h3>
 
-<p>A* is a computer algorithm that is widely used in pathfinding and graph traversal.</p>
+<p><a href="http://stackoverflow.com/a/12375878">link</a></p>
 
-<p>It uses a knowledge-plus-heuristic cost function like this:</p>
+<blockquote><p>Facebook&rsquo;s &ldquo;You and Joe have 230 friends in common&rdquo; feature. Sure you could use a decent caching strategy, but for now, use MapReduce.</p></blockquote>
 
-<blockquote><p>f (n) = g(n) + h(n)</p>
+<h3>Analysis</h3>
 
-<p>f (n): estimated total cost of path through n to goal</p>
+<p>This list doesn&rsquo;t change frequently so it&rsquo;d be wasteful to recalculate it every time. We&rsquo;re going to use mapreduce to calculate everyone&rsquo;s common friends once a day and store those results.</p>
 
-<p>g(x) = past path-cost function</p>
+<p>Note that friends are <strong>bi-directional</strong>. If I&rsquo;m your friend, you&rsquo;re mine. (follow-up: how to do it for follower system?)</p>
 
-<p>h(x) = future path-cost function, which is an admissible &ldquo;heuristic estimate&rdquo; of the distance from x to the goal</p></blockquote>
+<h4>Input</h4>
 
-<p>What sets A* <strong>apart from a greedy best-first search</strong> is that it also takes the distance already traveled into account.</p>
+<p>Assume the friends are stored as Person->[List of Friends], our friends list is then:</p>
 
-<h3>Implementation</h3>
+<pre><code>A -&gt; B C D
+B -&gt; A C D E
+C -&gt; A B D E
+D -&gt; A B C E
+E -&gt; B C D
+</code></pre>
 
-<p><a href="http://en.wikipedia.org/wiki/A*_search_algorithm#Process">Maintains a priority queue</a> (lower f(x) means higher priority). At each step, node with the lowest f(x) value is removed from the queue, and neighbors are added to the queue.</p>
+<h4>Map</h4>
 
-<p>This continues until a goal node has a lower f value than any node in the queue. Goal found!</p>
+<p>The mapper will output a key-value pair. The key will be a friend along with the person. The value will be the list of friends. The key will be sorted so that the friends are in order, causing all pairs of friends to go to the same reducer.</p>
 
-<h3>Relationship with Dijkstra</h3>
+<p>For map(A &ndash;> B C D) :</p>
 
-<p><strong><a href="http://stackoverflow.com/a/1332478">Dijkstra is a special case</a> for A*</strong> (when the <a href="http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Algorithm">heuristics is 0</a>).</p>
+<pre><code>(A B) -&gt; B C D
+(A C) -&gt; B C D
+(A D) -&gt; B C D
+</code></pre>
 
-<p>Illustration (I wish you can view the gif below):</p>
+<p>For map(B &ndash;> A C D E) : (Note that A comes before B in the key)</p>
 
-<p><img class="middle" src="/assets/images/path-find-Astar.gif"></p>
+<pre><code>(A B) -&gt; A C D E
+(B C) -&gt; A C D E
+(B D) -&gt; A C D E
+(B E) -&gt; A C D E
+</code></pre>
 
-<p><img class="middle" src="/assets/images/path-find-Dijkstras.gif"></p>
+<p>For map(C &ndash;> A B D E) :</p>
+
+<pre><code>(A C) -&gt; A B D E
+(B C) -&gt; A B D E
+(C D) -&gt; A B D E
+(C E) -&gt; A B D E
+</code></pre>
+
+<p>For map(D &ndash;> A B C E) :</p>
+
+<pre><code>(A D) -&gt; A B C E
+(B D) -&gt; A B C E
+(C D) -&gt; A B C E
+(D E) -&gt; A B C E
+</code></pre>
+
+<p>And finally for map(E &ndash;> B C D):</p>
+
+<pre><code>(B E) -&gt; B C D
+(C E) -&gt; B C D
+(D E) -&gt; B C D
+</code></pre>
+
+<p>Before we send these key-value pairs to the reducers, we group them by their keys and get:</p>
+
+<pre><code>(A B) -&gt; (A C D E) (B C D)
+(A C) -&gt; (A B D E) (B C D)
+(A D) -&gt; (A B C E) (B C D)
+(B C) -&gt; (A B D E) (A C D E)
+(B D) -&gt; (A B C E) (A C D E)
+(B E) -&gt; (A C D E) (B C D)
+(C D) -&gt; (A B C E) (A B D E)
+(C E) -&gt; (A B D E) (B C D)
+(D E) -&gt; (A B C E) (B C D)
+</code></pre>
+
+<p>Each line will be passed as an argument to a reducer.</p>
+
+<h4>Reduce</h4>
+
+<p>The reduce function will simply intersect the lists of values and output the same key with the result of the intersection. After reduction:</p>
+
+<pre><code>(A B) -&gt; (C D)
+(A C) -&gt; (B D)
+(A D) -&gt; (B C)
+(B C) -&gt; (A D E)
+(B D) -&gt; (A C E)
+(B E) -&gt; (C D)
+(C D) -&gt; (A B E)
+(C E) -&gt; (B D)
+(D E) -&gt; (B C)
+</code></pre>
+
+<h4>Result</h4>
+
+<p>Now when D visits B&rsquo;s profile, we can quickly look up (B D) and see that they have three friends in common, (A C E).</p>
 </div>
   
   
@@ -149,7 +217,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/29/Boggle-solver/">[Google] Boggle Solver (Search Words From Matrix)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/05/AWS-explained/">[Design] Amazon Web Services</a></h1>
     
     
       <p class="meta">
@@ -165,7 +233,89 @@
   
 
 
-<time datetime="2014-08-29T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Overview</h2>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Amazon_Web_Services">Amazon Web Services</a></strong> (AWS) is a collection of <strong>remote computing services</strong> that together make up a cloud computing platform. AWS provides a large computing capacity much faster and cheaper than building a physical server farm.</p>
+
+<p>The most well-known is Amazon EC2 and Amazon S3.</p>
+
+<p><a href="http://practicalcloudcomputing.com/post/311045887/cloudexplained">Amazon is an example of</a> an <strong>IAAS (Infrastructure as a Service) provider</strong>.</p>
+
+<h3>Terminologies</h3>
+
+<h4>AWS</h4>
+
+<p>Amazon Web Services, a division of Amazon focusing on hosting our applications and data</p>
+
+<h4>SimpleDB</h4>
+
+<p>AWS’s always-available replacement for RDBMSs. Specifically SimpleDB is their hosted, replicated key-value store that is always available and accessible as a web service</p>
+
+<h4>S3</h4>
+
+<p>(a.k.a Simple Storage Service) AWS’s always-available file storage solution accessible as a web service</p>
+
+<h4>SQS</h4>
+
+<p>(a.k.a Simple Queue Service) AWS’s always-available queueing service accessible as a web service</p>
+
+<h4>ELB</h4>
+
+<p>(a.k.a Elastic Load Balancer) AWS’s always-available load balancing service accessible as a web service</p>
+
+<h4>EC2</h4>
+
+<p>(a.k.a Elastic Compute Cloud) AWS’s on-demand server offering accessible as a web service</p>
+
+<h4>CloudFront</h4>
+
+<p>AWS’s CDN (a.k.a Content Delivery Network) offering accessible as a web service</p>
+
+<h3>Benefits</h3>
+
+<p>Basically, by moving these services out of your data center and into the cloud, you:</p>
+
+<ol>
+<li><p><strong>No longer need to run and maintain a data center</strong>. You no longer need the associated staff</p></li>
+<li><p>Get a <strong>more scalable and available infrastructure</strong> without trying to build it yourself</p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/04/Traveller-Path-Problem/">[Google] Traveller Path Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-04T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -174,258 +324,53 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://stackoverflow.com/questions/746082/how-to-find-list-of-possible-words-from-a-letter-matrix-boggle-solver">link</a></p>
+<p><a href="http://www.careercup.com/question?id=5749537700315136">link</a></p>
 
-<blockquote><p>Boggle Game:</p></blockquote>
+<blockquote><p>Traveler wants to travel from city “A” to city “D”. There is a path from city “A” to city “D”. Path consists of steps, i.e. travel from city “A” to city “B”. Path is encoded as sequence of steps.</p>
 
-<pre><code>F X I E
-A M L O
-E W B X
-A S T U
+<p>Sequence is in incorrect order. Your task is to restore order of steps in the path.</p>
+
+<p>Input (unordered sequence):</p></blockquote>
+
+<pre><code>C -&gt; D 
+A -&gt; B 
+B -&gt; C 
 </code></pre>
 
-<blockquote><p>The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference.</p></blockquote>
+<blockquote><p>Output (Correctly ordered list which represents path):</p></blockquote>
 
-<h3>Variation</h3>
+<pre><code>A, B, C, D 
+</code></pre>
 
-<p><strong>Another version of questions states in <a href="http://www.glassdoor.com/Interview/I-was-asked-to-write-an-algorithm-to-solve-a-crossword-like-puzzle-I-forget-the-name-but-started-with-a-B-As-opposed-QTN_435641.htm">here</a></strong></p>
+<blockquote><p>Implement following API:</p></blockquote>
 
-<blockquote><p>&hellip; Boggle Game. As opposed to simply vertical, horizontal, and diagonal placement of words, they were allowed to snake around the grid in any way.</p></blockquote>
+<pre><code>class Step {
+    String start;
+    String finish;
+};
 
-<p>For this version of question, no &lsquo;visited&rsquo; memory needs to be stored. In other words, it&rsquo;s a simpler version of above question.</p>
+class Node {
+    String value;
+    Node next;
+}
+
+List&lt;String&gt; findPath(List&lt;Step&gt; steps) {
+}
+</code></pre>
 
 <h3>Solution</h3>
 
-<p><strong><a href="http://stackoverflow.com/a/4314056">The best solution</a> is to use Trie</strong>, then do DFS search. However it might not be as intuitive as it seems.</p>
+<p>This question is not stated clear enough. I found one tentative algorithm:</p>
 
-<p>The idea is from <a href="http://stackoverflow.com/a/746102">this answer</a> (However this guy admits that his solution does not handle &lsquo;visited&rsquo; nodes properly, means the same char might be visited again to produce a word).</p>
+<blockquote><p>First, initialize a result &ndash; sortedPath, and build 2 maps (String to String) &ndash; startsToFinishes and finishesToStarts (O(N))</p>
 
-<p>We need to first define a class called Item:</p>
+<p>Then, find the one key on startsToFinishes, that is not a key in finishesToStarts &ndash; this is the city from which the path begins. (O(N))</p>
 
-<pre><code>class Item {
-    public final int x, y;
-    public final String prefix;
+<p>Then, iteratively, city by city, build the path.</p></blockquote>
 
-    public Item(int row, int column, String prefix) {
-        this.x = row;
-        this.y = column;
-        this.prefix = prefix;
-    }
-}
-</code></pre>
+<p><strong>Follow up on Sep 2nd, 2014</strong>:</p>
 
-<p>So when we start doing DFS, we pass in an Item object which stores 2 information:</p>
-
-<ol>
-<li>The next position that we&rsquo;re going to visit.</li>
-<li>The prefix string that we have validated so far (before visiting this position).</li>
-</ol>
-
-
-<p>For example:</p>
-
-<pre><code>F X I E
-A M L O
-E W B X
-A S T U
-</code></pre>
-
-<p>We&rsquo;ll have Items objects like (0, 0, &ldquo;&rdquo;), (0, 1, &ldquo;F&rdquo;), (0, 2, &ldquo;FA&rdquo;) &hellip; We guarantee that the prefix must be a valid prefix by searching them in the Trie.</p>
-
-<p>How to tell whether a string is a prefix of word, or it&rsquo;s an actual word? We have a property in TrieNode called TrieNode.isWord() to help us.</p>
-
-<p>That&rsquo;s about it. I spend quite some time writing the code below, by refering to the Java solution by <a href="http://stackoverflow.com/a/11698898">zouzhile</a>.</p>
-
-<h3>Code</h3>
-
-<p>BoggleSolver.java</p>
-
-<pre><code>public class BoggleSolver {
-
-    private static BufferedReader in = null;
-    private static final String INPUT_FILE = "dictionary.txt";
-
-    public static void beginFileReader() {
-        try {
-            in = new BufferedReader(new FileReader(new File(BoggleSolver.class
-                    .getResource(INPUT_FILE).toURI())));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Trie buildTrie() {
-        Trie trie = new Trie();
-        beginFileReader();
-        String line = null;
-        try {
-            while ((line = in.readLine()) != null) {
-                String[] words = line.split(" ");
-                for (String word : words) {
-                    word = word.trim().toLowerCase();
-                    trie.addWord(word);
-                }
-            }
-            if (in != null) {
-                in.close();
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        return trie;
-    }
-
-    public Set&lt;String&gt; findWords(char[][] map, Trie dict) {
-        Set&lt;String&gt; ans = new TreeSet&lt;String&gt;();
-        int m = map.length;
-        int n = map[0].length;
-        for (int i = 0; i &lt; m; i++) {
-            for (int j = 0; j &lt; n; j++) {
-                boolean[][] visited = new boolean[m][n];
-                findWordsDfs(ans, dict, map, visited, new Item(i, j, ""));
-                // item have 3 parameters:
-                // location x,y and the prefix string before reaching (i.j)
-            }
-        }
-        return ans;
-    }
-
-    public void findWordsDfs(Set&lt;String&gt; ans, Trie dict, char[][] map,
-            boolean[][] visited, Item item) {
-        // item: the location that we're going to test
-        // item.prefix is the word prefix before reaching (x, y)
-
-        int m = map.length;
-        int n = map[0].length;
-        int x = item.x;
-        int y = item.y;
-
-        // check whether cur.(x,y) is a valid position
-        if (x &lt; 0 || x &gt;= m || y &lt; 0 || y &gt;= n) {
-            return;
-        } else if (visited[x][y]) {
-            return;
-        }
-        String newWord = item.prefix + map[x][y];
-        // check whether cur.prefix is a valid prefix
-        TrieNode findWord = dict.match(newWord);
-        if (findWord == null) {
-            // up to this position (x, y), the word dont' exists
-            return;
-        }
-        // now cur is in a valid position, with a valid prefix
-        if (findWord.isWord()) {
-            ans.add(newWord);
-        }
-        // visit this position, and continue in 4 different directions
-        visited[x][y] = true;
-        findWordsDfs(ans, dict, map, visited, new Item(x, y - 1, newWord));
-        findWordsDfs(ans, dict, map, visited, new Item(x, y + 1, newWord));
-        findWordsDfs(ans, dict, map, visited, new Item(x - 1, y, newWord));
-        findWordsDfs(ans, dict, map, visited, new Item(x + 1, y, newWord));
-        visited[x][y] = false;
-    }
-
-    public static void main(String[] args) {
-        String[] rows = "eela,elps,weut,korn".split(",");
-        char[][] input = new char[4][4];
-        for (int i = 0; i &lt; 4; i++) {
-            input[i] = rows[i].toCharArray();
-        }
-
-        // prepare test data
-        BoggleSolver solver = new BoggleSolver();
-        Trie dictionary = solver.buildTrie();
-        // start finding words
-        Set&lt;String&gt; set = solver.findWords(input, dictionary);
-        // present the result
-        System.out.println(set.size() + " words are found, they are: ");
-        for (String str : set) {
-            System.out.println(str);
-        }
-    }
-
-    class Item {
-        public final int x, y;
-        public final String prefix;
-
-        public Item(int row, int column, String prefix) {
-            this.x = row;
-            this.y = column;
-            this.prefix = prefix;
-        }
-    }
-}
-</code></pre>
-
-<p>Trie.java</p>
-
-<pre><code>public class Trie {
-    private TrieNode root;
-
-    public Trie() {
-        this.root = new TrieNode();
-    }
-
-    public void addWord(String word) {
-        TrieNode node = this.root;
-        for (char c : word.toCharArray()) {
-            node = node.addChild(c);
-            if (node == null)
-                return;
-        }
-        node.setWord(true);
-    }
-
-    public TrieNode match(String s) {
-        TrieNode node = this.root;
-        for (char c : s.toCharArray()) {
-            node = node.get(c);
-            if (node == null)
-                return null;
-        }
-        return node;
-    }
-}
-</code></pre>
-
-<p>TrieNode.java</p>
-
-<pre><code>public class TrieNode {
-    private TrieNode[] children;
-    private boolean isWord = false;
-
-    public TrieNode() {
-        this.children = new TrieNode[26];
-    }
-
-    public TrieNode addChild(char child) {
-        if (child &lt; 'a' || child &gt; 'z')
-            return null;
-
-        int offset = child - 'a';
-        if (this.children[offset] == null) {
-            this.children[offset] = new TrieNode();
-        }
-        return this.children[offset];
-    }
-
-    public boolean isWord() {
-        return isWord;
-    }
-
-    public void setWord(boolean isWord) {
-        this.isWord = isWord;
-    }
-
-    public TrieNode get(char c) {
-        int offset = c - 'a';
-        return this.children[offset];
-    }
-}
-</code></pre>
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32772275.html">This post</a> talks about this question. The answer would be similar to what&rsquo;s writtne above.</p>
 </div>
   
   
@@ -438,7 +383,7 @@ A S T U
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/28/ugly-numbers/">[CC150v4] 10.7 Ugly Numbers (Hamming Numbers)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/04/Overview-Big-Data-Tech/">[Design] Overview of Big Data Technology</a></h1>
     
     
       <p class="meta">
@@ -454,7 +399,178 @@ A S T U
   
 
 
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://datajobs.com/what-is-hadoop-and-nosql">link</a></p>
+
+<h3>Traditional RDBMS</h3>
+
+<p>Data is organized in a highly-structured manner, following the relational model.</p>
+
+<p>The need for the data to be well-structured actually becomes a substantial burden at extremely large volumes.</p>
+
+<h3>NoSQL</h3>
+
+<p>A completely different framework of databases that allows for high-performance, agile processing of information at massive scale.</p>
+
+<p>NoSQL centers around the concept of distributed databases.</p>
+
+<p>It&rsquo;s horizontally scalable; as data continues to explode, just add more hardware to keep up.</p>
+
+<h3>Hadoop</h3>
+
+<p>Hadoop is not a type of database, but rather a software ecosystem that allows for massively parallel computing.</p>
+
+<p>Hadoop is <a href="http://www.javaworld.com/article/2077907/open-source-tools/mapreduce-programming-with-apache-hadoop.html?page=3">an open source implementation</a> of the MapReduce programming model. Hadoop relies not on Google File System (GFS), but on its own Hadoop Distributed File System (HDFS).</p>
+
+<h3>MapReduce</h3>
+
+<p>An example of the Hadoop ecosystem is MapReduce.</p>
+
+<p>It&rsquo;s a computational model that basically takes intensive data processes and spreads the computation across a potentially endless number of servers.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/04/MVC/">[Design] Model–view–controller (MVC)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Overview</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model–view–controller</a> (MVC) is a software architectural pattern for implementing <strong>user interfaces</strong>.</p>
+
+<p><strong>From MIT handouts 3</strong>: MVC uses separate programming entities to <strong>store the data(model), display the data(view), and modify the data(controller)</strong>.</p>
+
+<h3>Components</h3>
+
+<p><strong>The central component of MVC, the model</strong>, captures the application&rsquo;s behavior in terms of its problem domain, independent of the user interface. The model directly manages the application&rsquo;s data, logic and rules.</p>
+
+<p><strong>A view can be any output representation</strong> of information, such as a chart or a diagram; multiple views of the same information are possible, such as a bar chart for management and a tabular view for accountants.</p>
+
+<p><strong>The third part, the controller</strong>, accepts input and converts it to commands for the model or view.</p>
+
+<p>Early web MVC frameworks took a thin client approach that placed almost the entire MVC on server. As client technologies have matured, MVC components can be executed partly on the client(AJAX).</p>
+
+<h3>Other good explanation</h3>
+
+<p>MVC is a <a href="http://geekswithblogs.net/gregorymalcolm/archive/2009/07/14/user-interface-patterns.aspx">user interface design pattern</a>.</p>
+
+<ol>
+<li><p>Controller – Represents interactions, typically with the mouse or keyboard, or in the case of web applications, in the form of HTTP requests.</p></li>
+<li><p>View – Renders the graphical output of the application</p></li>
+<li><p>Model – Everything else. In particular this includes <strong>the data and business logic</strong>.</p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/04/Hadoop-cluster/">[Design] Hadoop Cluster</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://searchbusinessanalytics.techtarget.com/definition/Hadoop-cluster">link</a></p>
+
+<h3></h3>
+
+<p>A Hadoop cluster is <strong>a special type of computational cluster</strong> designed specifically for storing and analyzing huge amounts of unstructured data in a distributed computing environment.</p>
+
+<p>Such clusters <strong>run Hadoop&rsquo;s open source distributed processing software</strong> on low-cost commodity computers.</p>
+
+<p>Typically one machine in the cluster is designated as the <strong>NameNode</strong> and another machine the as <strong>JobTracker</strong>; these are the masters. The rest of the machines in the cluster act as both <strong>DataNode and TaskTracker</strong>; these are the slaves.</p>
+
+<p>Hadoop clusters are known for boosting the speed of data analysis applications. They also are highly scalable.</p>
+
+<p>As of early 2013, Facebook was recognized as having the largest Hadoop cluster in the world.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/04/Find-occurance-greater-than-index/">[Google] Find Occurance Greater Than Index</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-04T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -463,34 +579,45 @@ A S T U
 
   <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>Design an algorithm to find the kth number such that the only prime factors are 3, 5, and 7.</p></blockquote>
+<p><a href="http://www.careercup.com/question?id=5094709806497792">link</a></p>
+
+<blockquote><p>Given an unsorted array of integers, you need to return maximum possible n such that the array consists at least n values greater than or equals to n. Array can contain duplicate values.</p>
+
+<p>Sample input : [1, 2, 3, 4] &mdash; output : 2</p>
+
+<p>Sample input : [900, 2, 901, 3, 1000] &mdash; output: 3</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>This is very difficult question</strong>. All I can say is, just memorize this solution.</p>
+<p>The idea of &lsquo;couting sort&rsquo;, solves in O(n) time.</p>
 
-<p>It works like this:</p>
+<blockquote><p>Lets say the array has M numbers. So, <strong>we can count the number of existing values between 1 and M</strong>.</p>
 
-<ol>
-<li>Init 3 queues, with initial value of 3, 5 and 7 respectively.</li>
-<li>Fetch the smallest element x at the head of 3 queues.</li>
-<li>Add number x to the result list, then:
+<p>Then, process the values backwards (M to 1) to find the answer, adding the counts of the values processed so far.</p></blockquote>
 
-<ol>
-<li>if number x comes from queue3, add 3x, 5x and 7x into 3 queues</li>
-<li>if number x comes from queue5, add 5x and 7x into queue5 and queue7</li>
-<li>if number x comes from queue7, add 7x into queue7</li>
-</ol>
-</li>
-<li>Fetch next smallest element and do this recursively.</li>
-</ol>
-
-
-<p>A <a href="http://www.geeksforgeeks.org/ugly-numbers/">dp solution</a> is available. It&rsquo;s using the same method actually, but less intuitive.</p>
+<p>This is not an easy question.</p>
 
 <h3>Code</h3>
 
-<p>not written</p>
+<p><strong>not written by me</strong></p>
+
+<pre><code>int Solve(const vector&lt;int&gt;&amp; values) {
+    int n = values.size();
+    vector&lt;int&gt; count(n+1, 0);
+    for (auto val: values)
+        if (val &gt;= n)
+            count[n]++;
+        else if (val &gt; 0) // ignore negative values
+            count[val]++;
+    int am = 0;
+    for (int i = n; i &gt; 0; i--) {
+        am += count[i];  // amount of numbers &gt;= i
+        if (am &gt;= i)
+            return i;
+    }
+    return 0;
+}
+</code></pre>
 </div>
   
   
@@ -503,7 +630,7 @@ A S T U
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/28/google-pre-interview-coaching/">[Google] Google Pre-interview Coaching</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/04/Find-Nearest-Point-in-2D-Space/">[Google] Find Nearest Point in a 2D Space</a></h1>
     
     
       <p class="meta">
@@ -519,7 +646,7 @@ A S T U
   
 
 
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-04T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -528,53 +655,19 @@ A S T U
 
   <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>Write a program that breaks up a string of words with no spaces into a string with the appropriate spaces.</p></blockquote>
+<p><a href="http://www.careercup.com/question?id=5634947435986944">link</a></p>
 
-<p>Follow the following process:</p>
+<blockquote><p>You are given information about hotels in a country/city. X and Y coordinates of each hotel are known. You need to suggest the list of nearest hotels to a user who is querying from a particular point (X and Y coordinates of the user are given). Distance is calculated as the straight line distance between the user and the hotel coordinates.</p></blockquote>
 
-<ol>
-<li>Clarify the problem</li>
-<li>Refine the solution</li>
-<li>Code it</li>
-<li>Last words</li>
-</ol>
+<h3>Solution</h3>
 
+<p><strong>Build a 2-D Tree (by using Binary Tree)</strong>.</p>
 
-<h3>Clarify the problem</h3>
+<p>First find the root, then divide the rest of nodes by left-side and right-side. Then, divide by up-side and down-side.</p>
 
-<ol>
-<li>Consider a general case, like &ldquo;fastman&rdquo;</li>
-<li>Disambiguate expected result</li>
-<li>State the key assumptions</li>
-<li>clarify function signature</li>
-</ol>
+<p>There&rsquo;s a very good example video <a href="http://www.youtube.com/watch?v=T9h2KKJ_Pl8">here</a>, which talked about how to construct a 2-D tree.</p>
 
-
-<p>2 words? null input? where is the words from? We might use a dictionary.</p>
-
-<h3>Refine the solution</h3>
-
-<ol>
-<li>what if the dictionary cannot fit in RAM</li>
-<li>how would you print the most likely of multiple choices</li>
-<li>what if the words are not spelled correctly?</li>
-<li>Testing</li>
-</ol>
-
-
-<h3>Code it</h3>
-
-<p>Write code now, skip.</p>
-
-<h3>Last words</h3>
-
-<p>Talk naive solution, then come up with a reasonably better one.</p>
-
-<p>Time/Space tradeoff. (like pre-processing or something)</p>
-
-<p>For very big/small input.</p>
-
-<p>White-board practise is important!</p>
+<p>After this <strong>preprocessing</strong>, the search for nearest hotels in about O(lgn). However, if we were to return a list of nearest nodes, I&rsquo;ve got no idea.</p>
 </div>
   
   
@@ -587,7 +680,7 @@ A S T U
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/28/Http-cookie/">[Design] HTTP Cookie</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/03/Three-Keys-Data-Structure/">[Google] Three Keys Data Structure</a></h1>
     
     
       <p class="meta">
@@ -603,7 +696,112 @@ A S T U
   
 
 
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5763793837621248">link</a></p>
+
+<blockquote><p>Give efficient implementation of the following problem.</p>
+
+<p>An item consist of different keys say k1, k2, k3. User can insert any number of items in database, search for item using <strong>any (one) key</strong>, delete it using any key and iterate through all the items in sorted order <strong>using any key</strong>. Give the most efficient way such that it supports insertion, search based on a key, iteration and deletion.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There&rsquo;re 3 keys, so we need 3 maps to store search map for 3 types of keys. For example, the DS is like this:</p>
+
+<blockquote><p>(date, name, country) &ndash;> ItemObject</p></blockquote>
+
+<p>Then we would have:</p>
+
+<blockquote><p>date &ndash;> a list of ItemObject</p>
+
+<p>name &ndash;> a list of ItemObject</p>
+
+<p>country &ndash;> a list of ItemObject</p></blockquote>
+
+<p>Since we need to iterate in order, we choose TreeMap over HashMap.</p>
+
+<p>For scalability purpose, we use another HashMap&lt;KeyType, TreeMap> and put 3 items in.</p>
+
+<h3>Final Data Structure</h3>
+
+<p>3 DS needed. <a href="http://www.careercup.com/question?id=5763793837621248">source</a></p>
+
+<ol>
+<li>ArrayList<ItemObject> list;</li>
+<li>TreeMap&lt;KeyValue, List<ItemObject>> index;</li>
+<li>HashMap&lt;KeyType, TreeMap&lt;KeyValue, List<ItemObject>>> mapOfIndexes;</li>
+</ol>
+
+
+<h4>Method add(item): void</h4>
+
+<ol>
+<li>add item in ArrayList.</li>
+<li>For each key, get TreeMap from HashMap and add into TreeMap.</li>
+</ol>
+
+
+<h4>Method search(key): List<Item></h4>
+
+<ol>
+<li>Get TreeMap from HashMap for provided key.</li>
+<li>Search the TreeMap</li>
+<li>Return List Of Items</li>
+</ol>
+
+
+<h4>Method delete(key): List<Item></h4>
+
+<ol>
+<li>Using search method get List Of item</li>
+<li>Delete items from ArrayList and <strong>also delete its mapping from all (3) TreeMap</strong></li>
+</ol>
+
+
+<h4>Method orderedIterator(keytype): Iterator</h4>
+
+<ol>
+<li>Get TreeMap from HashMap for provided key</li>
+<li>Get EntrySet from TreeMap</li>
+<li>Return EntrySet.iterator();</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/03/Multilayered-architecture/">[Design] Multilayered Architecture</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-03T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -612,492 +810,51 @@ A S T U
 
   <div class="entry-content"><h3>First Word</h3>
 
-<p>A cookie is <strong>a small text file</strong> that is stored by a browser on the user’s machine. Cookies are plain text; they contain no executable code.</p>
+<p>A <a href="http://en.wikipedia.org/wiki/Multilayered_architecture">multilayered software architecture</a> is a software architecture that uses many layers for allocating the different responsibilities of a software product.</p>
 
-<p>Every time the user loads the website, the <strong>browser sends the cookie back to the server</strong> to notify the website of the user&rsquo;s previous activity.</p>
+<h3>Layers</h3>
 
 <ol>
-<li><p>Stateful information</p>
+<li><strong>Presentation layer</strong>
 
-<p> Such as shopping cart</p></li>
-<li><p>browsing activity</p>
+<ol type="a">
+<li>UI layer, view layer</li>
+<li>presentation tier in multitier architecture</li>
+</ol>
+</li>
+<li><strong>Application layer</strong>
 
-<p> Such as log in, which button is clicked, and which page is visited</p></li>
+<ol type="a">
+<li>also called service layer/GRASP Controller Layer</li>
+</ol>
+</li>
+<li><strong>Business layer</strong>
+
+<ol type="a">
+<li>also called business logic layer/domain layer</li>
+</ol>
+</li>
+<li>Infrastructure layer
+
+<ol>
+<li>data access layer/<strong>persistence layer</strong></li>
+<li>logging, networking, and other services which are required to support a particular business layer</li>
+</ol>
+</li>
 </ol>
 
 
-<h3>Security</h3>
+<h3>Conventions</h3>
 
-<p>A secure cookie will only be sent to the server when a request is made using SSL and the HTTPS protocol. However, the entire mechanism is inherently insecure.</p>
+<p><strong>Application layer</strong> (or service layer) is sometimes considered a sublayer of <strong>business layer</strong>.</p>
 
-<p>The cookie just contains data and <strong>isn’t harmful</strong> in and of itself. However, tracking cookies and especially third-party tracking cookies are commonly used as ways to compile long-term records of individuals&#8217; browsing history, which is a potential privacy concern.</p>
+<p>If there&rsquo;s no explicit distinction between first 3 tiers, then it&rsquo;s a <strong>traditional client-server(two-tier) model</strong>.</p>
 
-<h3>Types of HTTP Cookie</h3>
+<p>The <strong>application/business layers</strong> can, in fact, be further subdivided to emphasize distinct responsibility (eg. MVC).</p>
 
-<p>Common cookie types:</p>
+<p>Sometimes there&rsquo;s <strong>business infrastructure layer(BI)</strong>, located between the business layer and infrastructure layer.</p>
 
-<h4>Session cookie</h4>
-
-<p>It&rsquo;s <strong>while browsing</strong>. (Normally) deleted by browser when the user closes the browser.</p>
-
-<h4>Persistent cookie</h4>
-
-<p>Max-age 1 year. The value set in that cookie would be sent back to the server every time the user visited the server. Also called <strong>tracking cookies</strong></p>
-
-<h4>Secure cookie</h4>
-
-<p>The secure attribute is enabled, and is only used via HTTPS.</p>
-
-<h4>Third-party cookie</h4>
-
-<p><strong>First-party cookies</strong> are cookies that belong to the same domain that is shown in the browser&rsquo;s address bar. <strong>Third-party cookies</strong> are cookies that belong to domains different from the one shown in the address bar.</p>
-
-<p>It opens up the potential for <strong>tracking the user&rsquo;s browsing history</strong>. An example of 3rd-party:</p>
-
-<blockquote><p>As an example, suppose a user visits www.example1.com. This web site contains an advert from ad.foxytracking.com, which, when downloaded, sets a cookie belonging to the advert&rsquo;s domain (ad.foxytracking.com). Then, the user visits another website, www.example2.com, which also contains an advert from ad.foxytracking.com, and which also sets a cookie belonging to that domain (ad.foxytracking.com). Eventually, both of these cookies will be sent to the advertiser when loading their ads or visiting their website. The advertiser can then use these cookies to build up a browsing history of the user across all the websites that have ads from this advertiser.</p></blockquote>
-
-<h4>One more thing</h4>
-
-<p>Nowadays ther&#8217;e a new kind of <strong>HttpOnly cookie</strong> (used only when transmitting HTTP (or HTTPS) requests, thus restricting access from other, non-HTTP APIs such as JavaScript).</p>
-
-<p><a href="http://www.nczonline.net/blog/2009/05/05/http-cookies-explained/">source1</a></p>
-
-<p><a href="http://en.wikipedia.org/wiki/HTTP_cookie">source2</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/largest-cycle-in-permutation/">[Twitter] Largest Cycle in Permutation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://get-that-job-at-google.blogspot.sg/2013/01/twitter-programming-test.html">link</a></p>
-
-<blockquote><p>Given a permutation which contains numbers in the range [1, N], return the length of the largest cycle in the permutation.</p>
-
-<p>A <a href="http://mathworld.wolfram.com/PermutationCycle.html">permutation cycle</a> is a subset of a permutation whose elements trade places with one another.</p>
-
-<p>Sample Testcases:</p>
-
-<p>a) longestCycle([2 3 1]) returns 3, since only cycle is (1 2 3) whose length is 3</p>
-
-<p>b) longestCycle([5 4 3 2 1]) returns 2, since the permutation can be decomposed into (1 5), (2 4), (3)</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is just an idea.</p>
-
-<p>Now first of all, its important to understand <strong>what is a cycle in permutation</strong>.</p>
-
-<p>Keeping that in mind, I take (5,4,3,2,1) as an example. First, we fetch 5, and we swap number 5 with the 5th element of the array (which is 1). After this swap, value 1 is in the 1st position, so this cycle is done, the length is 2.</p>
-
-<p>We continue doing this until <strong>all numbers of value v is in the (v)th position</strong>, we should know the largest length of cycle during this process.</p>
-
-<p>I did not write code for this, and there&rsquo;s little resource online that&rsquo;s relevant.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/google-api-read-4096/">[Google] Google API Read4096 (read4K)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=14424684">link</a></p>
-
-<blockquote><p>Given API: int Read4096(char* buf);</p>
-
-<p>It reads data from a file and records the position so that the next time when it is called it read the next 4k chars (or the rest of the file, whichever is smaller) from the file. The return is the number of chars read.</p>
-
-<p>Use above API to Implement API &ldquo;int Read(char* buf, int n)&rdquo; which reads any number of chars from the file.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Since the nature of C++ and Java is different, I changed the api to:</p>
-
-<pre><code>GoogleApi.read4096(){}
-GoogleRead4096.read(int n){}
-</code></pre>
-
-<p>As <a href="http://www.careercup.com/question?id=14424684">suggested</a>, the solution is to keep <strong>one local buffer</strong>, and 1 pointer within the buffer.</p>
-
-<h3>Code</h3>
-
-<pre><code>String buffer = null;
-int p = 0;
-
-public String read(int n) {
-    if (n &lt; 0) {
-        return null;
-    } else if (n == 0) {
-        return "";
-    }
-    StringBuilder sb = new StringBuilder();
-    while (n &gt; 0) {
-        // there is (LENGTH - p) chars left in the local buffer
-        if (buffer == null || p == buffer.length()) {
-            // no char left in buffer, update buffer
-            buffer = GoogleApi.read4096();
-            p = 0;
-            if (buffer.length() == 0) {
-                // finish reading the file (no more input chars)
-                break;
-            }
-        } else {
-            int numChars = buffer.length() - p;
-            if (numChars &gt;= n) {
-                sb.append(buffer.substring(p, p + n));
-                p = p + n;
-                n = 0;
-            } else {
-                sb.append(buffer.substring(p));
-                p = buffer.length();
-                n -= numChars;
-            }
-        }
-    }
-    return sb.toString();
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/equilibrium-points-in-2d-array/">[Question] Equilibrium Points in 2D Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://get-that-job-at-google.blogspot.sg/2013/01/twitter-programming-test.html">link</a></p>
-
-<blockquote><p>In a 2D matrix of dimensions M*N, find number of &ldquo;equilibrium&rdquo; points.  A point (i, j) is said to be an &ldquo;equilibrium&rdquo; point only if all following conditions hold:</p>
-
-<p>a) sum of rows 1&hellip;(i-1) =  sum of rows (i+1)&hellip;M</p>
-
-<p>b) sum of columns 1&hellip;(j-1)  = sum of columns (j+1)&hellip;N</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is <strong>a generalize question of </strong>Equilibrium index__. For now, I got no better idea then checking Equilibrium index for every single node in the matrix.</p>
-
-<p>So this question literally becomes <a href="http://www.geeksforgeeks.org/equilibrium-index-of-an-array/">this</a>:</p>
-
-<blockquote><p>Equilibrium index of an array is an index such that the sum of elements at lower indexes is equal to the sum of elements at higher indexes. For example, in an arrya A:</p>
-
-<p>A[0] = -7, A[1] = 1, A[2] = 5, A[3] = 2, A[4] = -4, A[5] = 3, A[6]=0</p>
-
-<p>3 is an equilibrium index, because:
-A[0] + A[1] + A[2] = A[4] + A[5] + A[6]</p>
-
-<p>6 is also an equilibrium index, because sum of zero elements is zero, i.e., A[0] + A[1] + A[2] + A[3] + A[4] + A[5]=0</p></blockquote>
-
-<p><strong>The idea</strong> is to get total sum of array first. Then Iterate through the array and keep updating the left sum.</p>
-
-<h3>Code</h3>
-
-<p><strong>code for <a href="http://rosettacode.org/wiki/Equilibrium_index#Java">findning EI in 1-D array</a></strong></p>
-
-<pre><code>public List&lt;Integer&gt; findEI(int[] array) {
-    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    int sum = 0;
-    for (int i = 0; i &lt; array.length; i++) {
-        sum += array[i];
-    }
-    int runningSum = 0;
-    for (int i = 0; i &lt; array.length; i++) {
-        if (2 * runningSum + array[i] == sum) {
-            ans.add(i);
-        }
-        runningSum += array[i];
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/Word-that-has-most-letters-given/">[Question] Find Word That Has the Most Letters Given</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://programmers.stackexchange.com/questions/188687/try-to-find-a-word-in-the-dictionary-that-has-most-letters-given">link</a></p>
-
-<blockquote><p>Given some random letters, for example &ldquo;a,e,o,g,z,k,l,j,w,n&rdquo; and a dictionary.</p>
-
-<p>Try to find a word in the dictionary that has most letters given.</p>
-
-<p>Example: &ldquo;abbee&rdquo; &ndash;> 3 occurance.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Make an array that marks all given chars. Like this:</p>
-
-<p> index={a:1, b:0, c:0, d:0, e:1, f:0, g:1&hellip;}</p></li>
-<li><p>Iterate over each word of dictionary.</p>
-
-<p> The array gives an easy way to search a char&rsquo;s existance. I did not write code for this question.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>max=0;
-max_index=0;
-
-foreach(dictionary as position=&gt;word) {
-    sum=0;
-    foreach(word as letter)
-    {
-      sum += index[letter];
-    }
-    if(sum &gt; max)
-    {
-        max = sum;
-        max_index = position;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/27/Duplicate-rows-in-matrix/">[Question] Duplicate Rows in Matrix</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question 1</h3>
-
-<p><a href="http://www.careercup.com/question?id=6488077455327232">link</a></p>
-
-<blockquote><p>Given a 2D array (n x m) of integers, find all duplicate rows and print their index.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a <a href="http://get-that-job-at-google.blogspot.sg/2012/12/google-interview-experience.html">google question</a>.</p>
-
-<p><strong>Use HashMap</strong> (but make your own). Computer hash value of each row and insert into HashMap as value pair of HashMap(hashValue, rowNumber). When there&rsquo;s a collision, just check the rowNumber stored in HashMap with current row.</p>
-
-<p>This requires O(n*m) time and O(n) space. Note that <strong>we&rsquo;re not store the entire row into HashMap</strong> cuz it&rsquo;ll take up too much space.</p>
-
-<p>We (probably) can also use Trie.</p>
-
-<h3>Question 2</h3>
-
-<p><a href="http://www.careercup.com/question?id=9478119">link</a></p>
-
-<blockquote><p>Given a binary matrix of N X N of integers, you need to return only unique rows of binary arrays.</p></blockquote>
-
-<pre><code>input: 
-0 1 0 0 1 
-1 0 1 1 0 
-0 1 0 0 1 
-1 1 1 0 0 
-
-ans: 
-0 1 0 0 1 
-1 0 1 1 0 
-1 1 1 0 0
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Different from <strong>Question 1</strong>, this input is only 0 and 1.</p>
-
-<p><strong>The solution is to use Trie</strong>. Each node <a href="http://www.geeksforgeeks.org/print-unique-rows/">only have 2 children</a> (that&rsquo;s why Trie is perfect solution here).</p>
-
-<h3>Code</h3>
-
-<p><strong>Using binary trie node</strong>, refactored by me.</p>
-
-<pre><code>public int[][] getUniqueRows(int[][] matrix) {
-    int m = matrix.length;
-    int n = matrix[0].length;
-
-    TrieNode root = new TrieNode();
-    TrieNode p;
-    int uniqueCount = 0;
-    boolean[] isUnique = new boolean[m];
-    // isUnique is used to mark the lines that would appear in final result
-
-    // start to build the trie
-    for (int i = 0; i &lt; m; i++) {
-        // insert number matrix[i][] into the trie
-        p = root;
-        // root element would be an empty heading for all numbers
-        for (int j = 0; j &lt; n; j++) {
-            int digit = matrix[i][j];
-            if (p.kids == null) {
-                p.kids = new TrieNode[2];
-            }
-            if (p.kids[digit] == null) {
-                // this is a whole new branch, create a new node here
-                p.kids[digit] = new TrieNode();
-                if (j == n - 1) {
-                    uniqueCount++;
-                    isUnique[i] = true;
-                }
-            }
-            p = p.kids[digit];
-        }
-    }
-    System.out.println("uniqueCount is " + uniqueCount);
-    int[][] result = new int[uniqueCount][];
-    int k = 0;
-    for (int w = 0; w &lt; isUnique.length; w++) {
-        if (isUnique[w]) {
-            result[k++] = matrix[w];
-        }
-    }
-    return result;
-}
-
-class TrieNode {
-    TrieNode[] kids = null;
-}
-</code></pre>
+<p>Infrastructure layer can be partitioned into different levels (high-level or low-level). <strong>Developers focus on only the persistence capabilities</strong>, therefore only talk about persistence layer or data access layer.</p>
 </div>
   
   
@@ -1120,22 +877,18 @@ class TrieNode {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
+    <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (156)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (152)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
-<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
-<li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (3)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (4)</a></li>
 
   </ul>
 </section>
@@ -1144,23 +897,23 @@ class TrieNode {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/10/08/interleave-positive-negative/">[Question] Interleave Positive and Negative Numbers</a>
+        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/03/Leetcode-third-1/">[Leetcode] Leetcode Third Round (1)</a>
+        <a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
+        <a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
+        <a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
+        <a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a>
       </li>
     
   </ul>

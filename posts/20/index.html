@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right &hellip;">
+  <meta name="description" content="First Word For BST it&rsquo;s very important to do insert and delete (balancing not required). Insertion is easy, but deletion is very difficult. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,7 @@
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
 </ul>
 
 </nav>
@@ -83,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Sliding-Window-Maximum/">[LeetCode Plus] Sliding Window Maximum</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/11/BST-insert-and-delete/">[Design] BST Node Insertion / Deletion</a></h1>
     
     
       <p class="meta">
@@ -99,7 +100,191 @@
   
 
 
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>First Word</h2>
+
+<p>For BST it&rsquo;s very important to do insert and delete (balancing not required).</p>
+
+<p>Insertion is easy, but deletion is very difficult. However, it&rsquo;s a good idea to at least know the principles.</p>
+
+<h3>Insert a node</h3>
+
+<h4>Steps:</h4>
+
+<ol>
+<li><p>check whether new value = current node value. If not, proceed.</p></li>
+<li><p>if new value is less, than:</p>
+
+<ol>
+<li><p>if current node has no left child, set left to new value, and return</p></li>
+<li><p>otherwise, go to left child and start over</p></li>
+</ol>
+</li>
+<li><p>if new value is greater, than:</p>
+
+<ol>
+<li><p>if current node has no right child, set right to new value</p></li>
+<li><p>otherwise, go to right child and start over</p></li>
+</ol>
+</li>
+</ol>
+
+
+<h4>Note:</h4>
+
+<p>The BST may not be balanced after the insertion.</p>
+
+<h4>Code</h4>
+
+<p>Code snippet from <a href="http://www.algolist.net/Data_structures/Binary_search_tree/Insertion">this article</a></p>
+
+<pre><code>public boolean add(TreeNode node, int value) {
+    if (value == node.val)
+        return false;
+    if (value &lt; node.val) {
+        if (node.left == null) {
+            node.left = new TreeNode(value);
+            return true;
+        } else {
+            return add(node.left, value);
+        }
+    } else if (value &gt; node.val) {
+        if (node.right == null) {
+            node.right = new TreeNode(value);
+            return true;
+        } else {
+            return add(node.right, value);
+        }
+    }
+    return false;
+}
+</code></pre>
+
+<h3>Delete a node</h3>
+
+<h4>Steps:</h4>
+
+<ol>
+<li>Find the node</li>
+<li>Find the maximum node in the left subtree</li>
+<li>Replace the node with the maximum node in the left subtree.</li>
+</ol>
+
+
+<h4>Special Cases:</h4>
+
+<ol>
+<li>The node doest have a left child.</li>
+<li>The maximum node in the left subtree has a left child.</li>
+<li>The node is the root of the tree</li>
+</ol>
+
+
+<h4>Code</h4>
+
+<p>The source code given by <a href="http://answer.ninechapter.com/solutions/delete-a-node-in-binary-search-tree/">ninechap</a></p>
+
+<pre><code>private void myDeleteNode(TreeNode parent, TreeNode node) {
+    if (node.left == null) {
+        if (parent.right == node) {
+            parent.right = node.right;
+        } else {
+            parent.left = node.right;
+        }
+    } else {
+        TreeNode maxNodeParent = node;
+        TreeNode maxNode = node.left;
+
+        // find the maximum node in the left sub tree
+        while (maxNode.right != null) {
+            maxNodeParent = maxNode;
+            maxNode = maxNode.right;
+        }
+
+        if (maxNodeParent.left == maxNode) {
+            maxNodeParent.left = maxNode.left;
+        } else {
+            maxNodeParent.right = maxNode.left;
+        }
+
+        // move replacedNode to node
+        maxNode.left = node.left;
+        maxNode.right = node.right;
+        if (parent.left == node) {
+            parent.left = maxNode;
+        } else {
+            parent.right = maxNode;
+        }
+    }
+}
+
+private void findAndDelete(TreeNode parent, TreeNode node, int val) {
+    if (node == null) {
+        return;
+    }
+    if (node.val == val) {
+        myDeleteNode(parent, node);
+    } else if (node.val &lt; val) {
+        findAndDelete(node, node.right, val);
+    } else {
+        findAndDelete(node, node.left, val);
+    }
+}
+
+public TreeNode deleteNode(TreeNode root, int val) {
+    TreeNode dummyNode = new TreeNode(0);
+    dummyNode.left = root;
+    findAndDelete(dummyNode, root, val);
+    return dummyNode.left;
+}
+</code></pre>
+
+<h3>A little bit on balancing</h3>
+
+<p>There are 2 ways to balance a tree. <strong>Most common method is tree rotation</strong>:</p>
+
+<p><img class="middle" src="/assets/images/rotate-tree.png"></p>
+
+<p>An AVL Trees means a self-balancing search trees. If balance gets out of range −1&hellip;+1, the subtree is rotated to bring into balance.</p>
+
+<p><strong>Second way is to convert tree into a linkedlist</strong>, then build the tree again (we have discussed this algorithm before, pick the middle element).</p>
+
+<p>This method is slow if we insert and re-balance on each step, but we can do bulk insert/delete forgetting about the re-balancing for a while. This will make the data structure faster! <a href="http://java.dzone.com/articles/algorithm-week-balancing">more details</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/Searching-a-2D-Sorted-Matrix/">[LeetCode Plus] Searching a 2D Sorted Matrix</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -108,81 +293,74 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">link</a></p>
+<p><a href="http://leetcode.com/2010/10/searching-2d-sorted-matrix.html">link</a></p>
 
-<blockquote><p>A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right. You can only see the w numbers in the window. Each time the sliding window moves rightwards by one position. Following is an example:
-The array is [1 3 -1 -3 5 3 6 7], and w is 3.</p></blockquote>
+<blockquote>
+<p class="font-color">Write an efficient algorithm that searches for a value in an <i>n</i> x <i>m</i> table (two-dimensional array). This table is sorted along the rows and columns — that is,</p><p class="font-color">Table[i][j] ≤ Table[i][j + 1], <br>Table[i][j] ≤ Table[i + 1][j]</p>
+</blockquote>
 
-<pre><code>Window position                Max
----------------               -----
-[1  3  -1] -3  5  3  6  7       3
- 1 [3  -1  -3] 5  3  6  7       3
- 1  3 [-1  -3  5] 3  6  7       5
- 1  3  -1 [-3  5  3] 6  7       5
- 1  3  -1  -3 [5  3  6] 7       6
- 1  3  -1  -3  5 [3  6  7]      7
-</code></pre>
 
-<blockquote><p>Input: A long array A[], and a window width w</p>
+<h3>Related questions</h3>
 
-<p>Output: An array B[], B[i] is the maximum value of from A[i] to A[i+w-1]</p></blockquote>
+<p><strong><a href="/blog/2014/05/21/Search-a-2D-Matrix/">Search a 2D Matrix</a></strong>.</p>
+
+<p><strong><a href="/blog/2014/06/10/Searching-a-2D-Sorted-Matrix/">Searching a 2D Sorted Matrix</a></strong>.</p>
+
+<p><strong><a href="/blog/2014/06/14/Count-negative-in-2D-Sorted-Matrix/">Count negative in a 2D Sorted Matrix</a></strong>.</p>
 
 <h3>Analysis</h3>
 
-<p><strong>The  naive approach is using a Heap</strong>. This time complexity is O(n*logn). However, there is a better way using a (double-ended) queue.</p>
+<p>This is a extremely high-freq question. Almost every company will ask.</p>
 
-<p><strong>We do not need to <a href="http://n00tc0d3r.blogspot.sg/2013/04/sliding-window-maximum.html">keep all numbers</a></strong>. For example, suppose numbers in a window of size 4 are (1, 3, -1, 2). Obviously, no matter what next numbers are, 1 and -1 are never going to be a maximal as the window moving. The queue should look like (3, 2) in this case.</p>
+<p>This question is not to be confused with <strong><a href="/blog/2014/05/21/Search-a-2D-Matrix/">Search a 2D Matrix</a></strong>.</p>
 
-<h3>Solution</h3>
+<p><strong>Solution One: Step-wise Linear Search</strong>. Standard solution.</p>
 
-<ol>
-<li>When moves to a new number, iterate through back of the queue, removes all numbers that are not greater than the new one, and then insert the new one to the back.</li>
-<li>FindMax only need to take the first one of the queue.</li>
-<li>To remove a number outside the window, only compare whether the current index is greater than the front of queue. If so, remove it.</li>
-</ol>
+<p>Time = O(n). Worse case 2n steps.</p>
 
+<p>Note that <strong>this is the best solution</strong>!</p>
 
-<p><a href="http://leetcode.com/2011/01/sliding-window-maximum.html">A natural way</a> most people would think is to try to maintain the queue size the same as the window’s size. Try to break away from this thought and think out of the box.</p>
+<p><img class="middle" src="/assets/images/search_2D_matrix_1.png"></p>
+
+<blockquote><p>begin with the upper right corner, we traverse one step to the left or bottom. For example, the picture below shows the traversed path (the red line) when we search for 13.</p>
+
+<pre><code>Essentially, each step we are able to eliminate either a row or a column.
+</code></pre></blockquote>
+
+<p><strong>Solution Two: Quad Partition 四分法</strong>.</p>
+
+<p>Time = O(n<sup>1</sup>.58). Analysis can be found in the original question post.</p>
+
+<p><img class="middle" src="/assets/images/search_2D_matrix_2.png"></p>
+
+<p>Basic idea is like binary search &ndash; get mid and divide. We can then discard &frac14; of the matrix. For example: search for 6, we can discard the bottom right sub-matrix.</p>
+
+<p><strong>Solution Three: Diagonal-based binary partition</strong>. This is based on previous solution, but better.</p>
+
+<p>Time = O(nlgn).</p>
+
+<p><img class="middle" src="/assets/images/search_2D_matrix_3.png"></p>
+
+<p>This is a good solution, but it would fail in a non-square matrix, so&hellip;</p>
 
 <h3>Code</h3>
 
-<p>Code by N00tc0d3r.</p>
+<p><strong>step-wise linear search</strong></p>
 
-<pre><code>public int[] windowMax(int[] nums, int window) {
-    int w = (nums.length &lt; window) ? nums.length : window;
-    // A deque allows insertion/deletion on both ends.
-    // Maintain the first as the index of maximal of the window
-    // and elements after it are all smaller and came later than the first.
-    Deque&lt;Integer&gt; que = new ArrayDeque&lt;Integer&gt;();
-
-    // initialize window
-    int i = 0;
-    while (i &lt; w) {
-        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
-            que.removeLast();
-        }
-        que.addLast(i++);
-    }
-
-    // sliding window
-    int[] max = new int[nums.length - w + 1];
-    max[i - w] = que.getFirst();
-    while (i &lt; nums.length) {
-        // add new element
-        while (!que.isEmpty() &amp;&amp; nums[que.getLast()] &lt;= nums[i]) {
-            que.removeLast();
-        }
-        que.addLast(i);
-        // remove old element if still in que
-        if (!que.isEmpty() &amp;&amp; i - w &gt;= que.getFirst()) {
-            que.removeFirst();
-        }
-        // get maximal
-        ++i;
-        max[i - w] = que.getFirst();
-    }
-
-    return max;
+<pre><code>bool stepWise(int mat[][N_MAX], int N, int target, 
+              int &amp;row, int &amp;col) {
+  if (target &lt; mat[0][0] || target &gt; mat[N-1][N-1]) return false;
+  row = 0;
+  col = N-1;
+  while (row &lt;= N-1 &amp;&amp; col &gt;= 0) {
+    if (mat[row][col] &lt; target) 
+      row++;
+    else if (mat[row][col] &gt; target)
+      col--;
+    else
+      return true;
+  }
+  return false;
 }
 </code></pre>
 </div>
@@ -197,7 +375,7 @@ The array is [1 3 -1 -3 5 3 6 7], and w is 3.</p></blockquote>
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Reconstruct-Tree-From-PreOrder-Traversal/">[Question] Reconstruct Tree From Pre-Order Traversal</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/10/NineChap-Binary-Tree-DFS/">[NineChap 3.1] Binary Tree DFS and Divide Conquer</a></h1>
     
     
       <p class="meta">
@@ -213,7 +391,724 @@ The array is [1 3 -1 -3 5 3 6 7], and w is 3.</p></blockquote>
   
 
 
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>DFS</h2>
+
+<h4>Recursion or While-Loop?</h4>
+
+<p>We can use recursion, because unless it&rsquo;s pre-order traverse, binary tree questions can be difficult.</p>
+
+<p>Solving the problem is more important.</p>
+
+<h4>Divide &amp; Conquer Algorithm</h4>
+
+<ol>
+<li>Merge Sort</li>
+<li>Quick Sort</li>
+<li>Most of Binary tree questions</li>
+</ol>
+
+
+<h4>Solution modal</h4>
+
+<p>Generally, D&amp;C questions would do 2 things at same time:</p>
+
+<ol>
+<li>Divide &ndash; For binary tree, it mean solve left child, and solve right child</li>
+<li>Conquer &ndash; return result value</li>
+</ol>
+
+
+<p>A very common type would be validating the left/right children and return -1 if the validation failed. Otherwise, a result value is returned. In this way, by checking the positive/negative sign, we know whether this node is valid, and if valid, we know the returned value.</p>
+
+<p>This idea is extensivelly used among all binary tree questions. See &ldquo;Lowest Common Ancestor (LCA)&rdquo; for more details.</p>
+
+<h4>Template</h4>
+
+<p><strong>Divide &amp; Conquer</strong>, <a href="http://answer.ninechapter.com/solutions/dfs-template/">link</a></p>
+
+<pre><code>public class Solution {
+    public ResultType traversal(TreeNode root) {
+        // null or leaf
+        if (root == null) {
+            // do something and return;
+        }
+
+        // Divide
+        ResultType left = traversal(root.left);
+        ResultType right = traversal(root.right);
+
+        // Conquer
+        ResultType result = Merge from left and right.
+        return result;
+    }
+}
+</code></pre>
+
+<h2>Question list</h2>
+
+<p><strong>Traversal</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/06/02/Binary-Tree-Preorder-Traversal/">Binary Tree Preorder Traversal</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/24/Binary-Tree-Inorder-Traversal/">Binary Tree Inorder Traversal</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">Binary Tree Postorder Traversal</a></strong></p></li>
+</ol>
+
+
+<p><strong>Divide &amp; Conquer</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/25/Maximum-Depth-of-Binary-Tree/">Maximum Depth of Binary Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/25/Minimum-Depth-of-Binary-Tree/">Minimum Depth of Binary Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/26/Balanced-Binary-Tree/">Balanced Binary Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/">Binary Tree Maximum Path Sum</a></strong> &ndash; the most important question for this category</p></li>
+</ol>
+
+
+<h4>Additional</h4>
+
+<ol>
+<li><p><strong>Lowest Common Ancestor Problem</strong></p>
+
+<p> <a href="/blog/2014/06/10/Lowest-Common-Ancestor-BST/">problem one</a></p>
+
+<p> <a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree/">problem two</a></p>
+
+<p> <a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree-II/">problem three</a></p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<p><strong>Binary Tree Preorder Traversal</strong></p>
+
+<pre><code>public List&lt;Integer&gt; preorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
+    if (root == null) return ans;
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    stack.push(root);
+    while (!stack.isEmpty()) {
+        TreeNode cur = stack.pop();
+        ans.add(cur.val);
+        if (cur.right != null) {
+            stack.push(cur.right);
+        } 
+        if (cur.left != null) {
+            stack.push(cur.left);
+        }
+    }
+    return ans;
+}
+</code></pre>
+
+<p>There is a not-recommended but good-to-know solution of Divide &amp; Conquer (not written by me)</p>
+
+<pre><code>public class Solution {
+    public ArrayList&lt;Integer&gt; preorderTraversal(TreeNode root) {
+        ArrayList&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
+        // null or leaf
+        if (root == null) {
+            return result;
+        }
+
+        // Divide
+        ArrayList&lt;Integer&gt; left = preorderTraversal(root.left);
+        ArrayList&lt;Integer&gt; right = preorderTraversal(root.right);
+
+        // Conquer
+        result.add(root.val);
+        result.addAll(left);
+        result.addAll(right);
+        return result;
+    }
+}
+</code></pre>
+
+<p><strong>Binary Tree Inorder Traversal</strong></p>
+
+<p>Keep traversing left until a NULL is found. When it happens, pop one and traverse right once. <strong>Remember this solution</strong>!</p>
+
+<pre><code>public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) {
+    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+    if (root == null) {
+        return ans;
+    }
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    TreeNode p = root;
+    while (p != null || !stack.isEmpty()) {
+        if (p != null) {
+            stack.push(p);
+            p = p.left;
+        }
+        else {
+            p = stack.pop();
+            ans.add(p.val);
+            p = p.right;
+        }
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Binary Tree Postorder Traversal</strong></p>
+
+<p>I failed to write the code even after reading the solution. I need to memorize this solution by heart.</p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+    if (root == null) {
+        return ans;
+    }
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    stack.push(root);
+    TreeNode pre = null;
+    TreeNode cur = null;
+    while (!stack.isEmpty()) {
+        cur = stack.peek();
+        if (pre == null || pre.left == cur || pre.right == cur) {
+            if (cur.left != null) {
+                stack.push(cur.left);
+            } else if (cur.right != null) {
+                stack.push(cur.right);
+            }
+        } else if (cur.left == pre) {
+            if (cur.right != null) {
+                stack.push(cur.right);
+            }
+        } else if (cur.right == pre || cur == pre) {
+            // note that 'pre' and 'cur' are never going to be apart
+            // for more then 1 edge (they can overlap) 
+            ans.add(stack.pop().val);
+        }
+        pre = cur;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Maximum Depth of Binary Tree</strong></p>
+
+<pre><code>// 1 minute
+public int maxDepth(TreeNode root) {
+    if (root == null) return 0;
+    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}
+</code></pre>
+
+<p><strong>Minimum Depth of Binary Tree</strong></p>
+
+<pre><code>public int minDepth(TreeNode root) {
+    if (root == null) {
+        return 0;
+    }
+    return checkLeaf(root);
+}
+
+private int checkLeaf(TreeNode node) {
+    if (node.left == null &amp;&amp; node.right == null) {
+        return 1;
+    }
+    int ll = Integer.MAX_VALUE;
+    int rr = Integer.MAX_VALUE;
+    if (node.left != null) ll = checkLeaf(node.left);
+    if (node.right != null) rr = checkLeaf(node.right);
+    return 1 + Math.min(ll, rr);
+}
+</code></pre>
+
+<p>After checking <a href="http://answer.ninechapter.com/solutions/minimum-depth-of-binary-tree/">the answer</a>, the code above can be optimized:</p>
+
+<pre><code>public int minDepth(TreeNode root) {
+    if (root == null) {
+        return 0;
+    }
+    return getMin(root);
+}
+
+public int getMin(TreeNode root){
+    if (root == null) {
+        return Integer.MAX_VALUE; // important
+    }
+
+    if (root.left == null &amp;&amp; root.right == null) {
+        return 1;
+    }
+
+    return Math.min(getMin(root.left), getMin(root.right)) + 1;
+}
+</code></pre>
+
+<p><strong>Balanced Binary Tree</strong></p>
+
+<pre><code>// 4 minutes
+public boolean isBalanced(TreeNode root) {
+    return getDepth(root) != -1;
+}
+
+private int getDepth(TreeNode node) {
+    if (node == null) {
+        return 0;
+    }
+    int ll = getDepth(node.left);
+    int rr = getDepth(node.right);
+    if (ll == -1 || rr == -1 || Math.abs(ll - rr) &gt; 1) {
+        return -1;
+    }
+    return 1 + Math.max(ll, rr);
+}
+</code></pre>
+
+<p><strong>Binary Tree Maximum Path Sum</strong></p>
+
+<p>Although the following code works:</p>
+
+<pre><code>int max = Integer.MIN_VALUE;
+
+public int maxPathSum(TreeNode root) {
+    maxDepth(root);
+    return max;
+}
+
+private int maxDepth(TreeNode node) {
+    if (node == null) {
+        return 0;
+    }
+    int ll = maxDepth(node.left);
+    int rr = maxDepth(node.right);
+    int currentMaxPath = ll + rr + node.val;
+    max = Math.max(max, currentMaxPath);
+    return Math.max(0, node.val + Math.max(ll, rr));
+}
+</code></pre>
+
+<p>Mr. Huang said it&rsquo;s AN EXTREMELY BAD IDEA TO USE GLOBAL VARIABLE in Java. It&rsquo;s just terrible. Don&rsquo;t do it.</p>
+
+<p>According to Mr. Huang&rsquo;s <a href="http://answer.ninechapter.com/solutions/binary-tree-maximum-path-sum/">suggestion</a>, I added another class called &ldquo;ResultType&rdquo;. This can help me return 2 values at 1 single traversal.</p>
+
+<p>Code is below. One &lsquo;catch-ya&rsquo; is when NULL is found, the maxPath should return Integer.MIN_VALUE instead of 0.</p>
+
+<p>This code is much easier for both me and anyone else to understand, so <strong>stick to this solution, and never use global variable in Java</strong>!</p>
+
+<pre><code>private class ResultType {
+    int singlePath, maxPath;
+    ResultType(int singlePath, int maxPath) {
+        this.singlePath = singlePath;
+        this.maxPath = maxPath;
+    }
+}
+
+public int maxPathSum(TreeNode root) {
+    ResultType result = helper(root);
+    return result.maxPath;
+}
+
+private ResultType helper(TreeNode node) {
+    // null case
+    if (node == null) {
+        return new ResultType(0, Integer.MIN_VALUE);
+    }
+    // divide
+    ResultType ll = helper(node.left);
+    ResultType rr = helper(node.right);
+    // conquer
+    int curSinglePath = Math.max(0, node.val + 
+            Math.max(ll.singlePath, rr.singlePath));
+    int childMaxPath = Math.max(ll.maxPath, rr.maxPath);
+    int curMaxPath = Math.max(childMaxPath, node.val + 
+            ll.singlePath + rr.singlePath);
+    // done
+    return new ResultType(curSinglePath, curMaxPath);
+}
+</code></pre>
+
+<p><strong>Lowest Common Ancestor</strong> &ndash; I wrote three new posts on this topic:</p>
+
+<p>Problem 1: BST: top-down O(height) solution</p>
+
+<p>Problem 2: Binary Tree: bottom-up O(n) solution</p>
+
+<p>Problem 3: Binary Tree with a link to parent</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/NineChap-Binary-Tree-BFS/">[NineChap 3.2] Binary Tree BFS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Template (BFS)</h2>
+
+<p>BFS can be implemented using either 2 queues (replacing) or 1 queue. Of course 1 queue is better.</p>
+
+<p><a href="http://answer.ninechapter.com/solutions/bfs-template/">link</a></p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    ArrayList result = new ArrayList();
+
+    if (root == null)
+        return result;
+
+    Queue&lt;TreeNode&gt; queue = new LinkedList&lt;TreeNode&gt;();
+    queue.offer(root);
+
+    while (!queue.isEmpty()) {
+        ArrayList&lt;Integer&gt; level = new ArrayList&lt;Integer&gt;(); // important
+        int size = queue.size();
+        for (int i = 0; i &lt; size; i++) {
+            TreeNode head = queue.poll();
+            level.add(head.val);
+            if (head.left != null)
+                queue.offer(head.left);
+            if (head.right != null)
+                queue.offer(head.right);
+        }
+        result.add(level); // important
+    }
+
+    return result;
+}
+</code></pre>
+
+<h2>Question list</h2>
+
+<p><strong>BFS</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal/">Binary Tree Level Order Traversal</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal-II/">Binary Tree Level Order Traversal II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/25/Binary-Tree-Zigzag-Level-Order-Traversal/">Binary Tree Zigzag Level Order Traversal</a></strong></p></li>
+</ol>
+
+
+<p><strong>Additional</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Preorder-and-Inorder/">Construct Binary Tree from Preorder and Inorder</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Inorder-and-Postorder/">Construct Binary Tree from Inorder and Postorder</a></strong></p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<p>First 3 questions are basically same. Below code is for question 1. There is no &lsquo;catch-ya&rsquo;, it&rsquo;s very standard code.</p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new LinkedList&lt;List&lt;Integer&gt;&gt;();
+    if (root == null) {
+        return ans;
+    }
+    Queue&lt;TreeNode&gt; q = new LinkedList&lt;TreeNode&gt;();
+    q.offer(root);
+    while(!q.isEmpty()) {
+        int size = q.size();
+        List&lt;Integer&gt; level = new LinkedList&lt;Integer&gt;();
+        for (int i = 0; i &lt; size; i ++) {
+            TreeNode node = q.poll();
+            level.add(node.val);
+            if (node.left != null) {
+                q.offer(node.left);
+            }
+            if (node.right != null) {
+                q.offer(node.right);
+            }
+        }
+        ans.add(level);
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Construct Binary Tree from Preorder and Inorder</strong> &ndash; written by me</p>
+
+<pre><code>public TreeNode buildTree(int[] preorder, int[] inorder) {
+    if (preorder == null || inorder == null || preorder.length != inorder.length) {
+        return null;
+    }
+    return helper(preorder, 0, preorder.length-1, inorder, 0, inorder.length-1);
+}
+
+private TreeNode helper(int[] preorder, int a, int b, int[] inorder, int c, int d) {
+    if (a &gt; b) {
+        return null;
+    }
+    int headVal = preorder[a];
+    TreeNode head = new TreeNode(headVal);
+    int p = c;
+    while (p &lt;= d) {
+        if (inorder[p] == headVal) {
+            break;
+        }
+        p ++;
+    }
+    head.left = helper(preorder, a+1, a+p-c, inorder, c, p-1);
+    head.right = helper(preorder, b-d+p+1, b, inorder, p+1, d);
+    return head;
+}
+</code></pre>
+
+<p><strong>Construct Binary Tree from Inorder and Postorder</strong> &ndash; similar to previous code, copied from <a href="http://answer.ninechapter.com/solutions/construct-binary-tree-from-inorder-and-postorder-traversal/">ninechap</a></p>
+
+<pre><code>private int findPosition(int[] arr, int start, int end, int key) {
+    int i;
+    for (i = start; i &lt;= end; i++) {
+        if (arr[i] == key) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+private TreeNode myBuildTree(int[] inorder, int instart, int inend,
+        int[] postorder, int poststart, int postend) {
+    if (instart &gt; inend) {
+        return null;
+    }
+
+    TreeNode root = new TreeNode(postorder[postend]);
+    int position = findPosition(inorder, instart, inend, postorder[postend]);
+
+    root.left = myBuildTree(inorder, instart, position - 1,
+            postorder, poststart, poststart + position - instart - 1);
+    root.right = myBuildTree(inorder, position + 1, inend,
+            postorder, poststart + position - instart, postend - 1);
+    return root;
+}
+
+public TreeNode buildTree(int[] inorder, int[] postorder) {
+    if (inorder.length != postorder.length) {
+        return null;
+    }
+    return myBuildTree(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/NineChap-Binary-Search-Tree/">[NineChap 3.3] Binary Search Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Question list</h2>
+
+<p><strong>BST</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/26/Validate-Binary-Search-Tree/">Validate Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/11/BST-insert-and-delete/">Insert a Node in Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/11/BST-insert-and-delete/">Delete a Node in Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/13/Search-range-BST-trim-BST/">Search Range in a Binary Search Tree</a></strong></p></li>
+</ol>
+
+
+<p><strong>Additional</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/25/Recover-Binary-Search-Tree/">Recover Binary Search Tree</a></strong> &ndash; used global variable</p></li>
+<li><p><strong><a href="/blog/2014/05/26/Convert-Sorted-Array-to-Binary-Search-Tree/">Convert Sorted Array to Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/26/Convert-Sorted-List-to-Binary-Search-Tree/">Convert Sorted List to Binary Search Tree</a></strong> &ndash; used global variable</p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<p><strong>Validate Binary Search Tree</strong></p>
+
+<pre><code>public boolean isValidBST(TreeNode root) {
+    return validate(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
+}
+
+private boolean validate(TreeNode node, int min, int max) {
+    if (node == null) {
+        return true;
+    }
+    if (node.val &lt;= min || max &lt;= node.val) {
+        return false;
+    }
+    return validate(node.left, min, node.val) &amp; validate(node.right, node.val, max);
+}
+</code></pre>
+
+<p><strong>Insert a Node in Binary Search Tree</strong> and <strong>Delete a Node in Binary Search Tree</strong> are written in a new post.</p>
+
+<p><strong>Search Range in a Binary Search Tree</strong></p>
+
+<p>There is a new post for this.</p>
+
+<p><strong>Recover Binary Search Tree</strong></p>
+
+<pre><code>// 3 global variables used
+TreeNode first = null;
+TreeNode second = null; 
+TreeNode current = null;
+
+public void recoverTree(TreeNode root) {
+    traverse(root);
+    if (first != null) {
+        int temp = first.val;
+        first.val = second.val;
+        second.val = temp;
+    }
+}
+
+public void traverse(TreeNode root) {
+    if (root == null) {
+        return;
+    }
+    traverse(root.left);
+    // inorder traversal
+    if (current != null &amp;&amp; current.val &gt; root.val) {
+        if (first == null) {
+            first = current;
+        }
+        second = root;
+    }
+    current = root;
+    traverse(root.right);
+}
+</code></pre>
+
+<p><strong>Convert Sorted Array to Binary Search Tree</strong></p>
+
+<pre><code>public TreeNode sortedArrayToBST(int[] num) {
+    if (num == null || num.length == 0) {
+        return null;
+    }
+    return build(num, 0, num.length - 1);
+}
+
+private TreeNode build(int[] num, int start, int end) {
+    if (start &gt; end) {
+        return null;
+    }
+    int mid = start + (end - start) / 2;
+    TreeNode head = new TreeNode(num[mid]);
+    head.left = build(num, start, mid - 1);
+    head.right = build(num, mid + 1, end);
+    return head;
+}
+</code></pre>
+
+<p><strong>Convert Sorted List to Binary Search Tree</strong> &ndash; note that this solution uses 1 global variable</p>
+
+<pre><code>ListNode cur = null;
+
+public TreeNode sortedListToBST(ListNode head) {
+    // count total length of the list 
+    ListNode p = head;
+    int count = 0;
+    while (p != null) {
+        p = p.next;
+        count++;
+    }
+    // start to traverse the tree and fill in data
+    cur = head;
+    return build(0, count - 1);
+}
+
+private TreeNode build(int start, int end) {
+    if (start &gt; end) {
+        return null;
+    }
+    int mid = start + (end - start) / 2;
+    TreeNode head = new TreeNode(0);
+    head.left = build(start, mid - 1);
+    head.val = cur.val;
+    cur = cur.next;
+    head.right = build(mid + 1, end);
+    return head;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree-II/">[LeetCode Plus] Lowest Common Ancestor of Binary Tree (II)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -222,45 +1117,257 @@ The array is [1 3 -1 -3 5 3 6 7], and w is 3.</p></blockquote>
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://tech-queries.blogspot.sg/2011/06/reconstruct-tree-from-pre-order.html">link</a></p>
+<p><a href="http://leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-ii.html">link</a></p>
 
-<blockquote><p>A tree has a special property where leaves are represented with ‘2’ and non-leaf with ‘1’. Each node has either 0 or 2 children. If given preorder traversal of this tree, construct the tree.</p>
+<div class="entry bg-color bg-img font-color">
+    <blockquote>
+        <p class="font-color">Given a binary tree, find the lowest common ancestor of two given nodes in the tree. Each node contains a parent pointer which links to its parent.</p>
+    </blockquote>
+    <p class="font-color bg-color bg-img"><span id="more-797" class="font-color"></span>
+        <br> <strong><span style="color: red;" class="font-color">Note:</span></strong>
+        <br>This is Part II of Lowest Common Ancestor of a Binary Tree. If you need to find the lowest common ancestor without parent pointers, please read <a href="http://www.leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-i.html" class="font-color">Lowest Common Ancestor of a Binary Tree Part I</a>.
+        <br>
+    </p><pre>        _______<span style="color: #990000;" class="font-color">3</span>______
+       /              \
+    ___<span style="color: #990000;" class="font-color">5</span>__          ___<span style="color: #990000;" class="font-color">1</span>__
+   /      \        /      \
+   <span style="color: #990000;" class="font-color">6</span>      _<span style="color: #990000;" class="font-color">2       0       8</span>
+         /  \
+         <span style="color: #990000;" class="font-color">7   4</span></pre>
+    <p class="font-color">If you are not so sure about the definition of lowest common ancestor (LCA), please refer to my previous post: <a href="http://www.leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-search-tree.html" class="font-color">Lowest Common Ancestor of a Binary Search Tree (BST)</a> or the definition of LCA <a href="http://en.wikipedia.org/wiki/Lowest_common_ancestor" class="font-color">here</a>. Using the tree above as an example, the LCA of nodes <span style="color: #990000;" class="font-color">5</span> and <span style="color: #990000;" class="font-color">1</span> is <span style="color: #990000;" class="font-color">3</span>. Please note that LCA for nodes <span style="color: #990000;" class="font-color">5</span> and <span style="color: #990000;" class="font-color">4</span> is <span style="color: #990000;" class="font-color">5</span>.</p>
+    <p class="font-color">In my last post: <a href="http://www.leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-i.html" class="font-color">Lowest Common Ancestor of a Binary Tree Part I</a>, we have devised a recursive solution which finds the LCA in O(<em>n</em>) time. If each node has a pointer that link to its parent, could we devise a better solution?</p>
+    <p class="font-color"><strong>Hint:</strong>
+        <br>No recursion is needed. There is an easy solution which uses extra space. Could you eliminate the need of extra space?</p>
+</div>
 
-<p>Example: Given Pre Order string => 12122, output:</p></blockquote>
-
-<pre><code>       1
-      / \
-     2   1
-        / \
-       2   2
-</code></pre>
 
 <h3>Analysis</h3>
 
-<blockquote><p><a href="http://tech-queries.blogspot.sg/2011/06/reconstruct-tree-from-pre-order.html">In normal scenario</a>, it’s not possible to detect where left subtree ends and right subtree starts using only pre-order traversal. But here, we are given a special property. Since every node has either 2 children or no child, we can surely say that if a node exists then its sibling also exists.</p></blockquote>
+<p><strong>If have parent pointer, we do not wish to use extra space for the solution</strong>.</p>
 
-<p>Keep a public variable and build the tree recursively until the list finishes.</p>
+<ol>
+<li>Find the height of both nodes (from the head)</li>
+<li>By calculating the height difference, move the lower nodes up (follow the parent path) to the same level as the other node.</li>
+<li>Two nodes move up together until they meet.</li>
+<li>This solution requires no extra space.</li>
+</ol>
+
+
+<p>Here is <strong>a very similar question: <a href="http://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/">Intersection of 2 LinkedList</a></strong>.</p>
 
 <h3>Code</h3>
 
-<pre><code>ListNode list = null; // this is the input list public variable
-
-public TreeNode main(ListNode input) {
-    list = input;
-    return constructTree();
+<pre><code>// As root-&gt;parent is NULL, we don't need to pass root in.
+Node *LCA(Node *p, Node *q) {
+  int h1 = getHeight(p);
+  int h2 = getHeight(q);
+  // swap both nodes in case p is deeper than q.
+  if (h1 &gt; h2) {
+    swap(h1, h2);
+    swap(p, q);
+  }
+  // invariant: h1 &lt;= h2.
+  int dh = h2 - h1;
+  for (int h = 0; h &lt; dh; h++)
+    q = q-&gt;parent;
+  while (p &amp;&amp; q) {
+    if (p == q) return p;
+    p = p-&gt;parent;
+    q = q-&gt;parent;
+  }
+  return NULL;  // p and q are not in the same tree
 }
 
-private TreeNode constructTree() {
-    if (list == null) {
-        return null;
-    }
-    TreeNode root = new TreeNode(list.val);
-    list = list.next;
+int getHeight(Node *p) {
+  int height = 0;
+  while (p) {
+    height++;
+    p = p-&gt;parent;
+  }
+  return height;
+}
+</code></pre>
+</div>
+  
+  
 
-    if (root.val == 1) {
-        root.left = constructTree();
-        root.right = constructTree();
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree/">[LeetCode Plus] Lowest Common Ancestor of Binary Tree (I)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-i.html">link</a></p>
+
+<div class="entry bg-color bg-img font-color">
+    <blockquote>
+        <p class="font-color bg-color bg-img">Given a binary tree, find the lowest common ancestor of two given nodes in the tree.</p>
+    </blockquote>
+    <p class="font-color bg-color bg-img"><span id="more-790" class="font-color"></span>
+        <br>
+    </p><pre class="bg-color bg-img font-color">        _______<span style="color: #990000;" class="font-color">3</span>______
+       /              \
+    ___<span style="color: #990000;" class="font-color">5</span>__          ___<span style="color: #990000;" class="font-color">1</span>__
+   /      \        /      \
+   <span style="color: #990000;" class="font-color">6</span>      _<span style="color: #990000;" class="font-color">2       0       8</span>
+         /  \
+         <span style="color: #990000;" class="font-color">7   4</span></pre>
+    <p class="font-color">If you are not so sure about the definition of lowest common ancestor (LCA), please refer to my previous post: <a href="http://www.leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-search-tree.html" class="font-color bg-color bg-img">Lowest Common Ancestor of a Binary Search Tree (BST)</a> or the definition of LCA <a href="http://en.wikipedia.org/wiki/Lowest_common_ancestor" class="font-color">here</a>. Using the tree above as an example, the LCA of nodes <strong><span style="color: #990000;" class="font-color">5</span></strong> and <strong><span style="color: #990000;" class="font-color">1</span></strong> is <strong><span style="color: #990000;" class="font-color">3</span></strong>. Please note that LCA for nodes <strong><span style="color: #990000;" class="font-color">5</span> </strong>and <strong><span style="color: #990000;" class="font-color">4</span> </strong>is <strong><span style="color: #990000;" class="font-color">5</span></strong>.</p>
+    <p class="font-color bg-color bg-img"><strong>Hint:</strong>
+        <br>Top-down or bottom-up? Consider both approaches and see which one is more efficient.</p>
+</div>
+
+
+<p><strong>This question appears on CC150v5 Q4.7</strong>.</p>
+
+<h3>Analysis</h3>
+
+<p>This tree is not BST, so it&rsquo;s more difficult then previous. Top-down approach would take O(n<sup>2</sup>) time due to duplicate traverse.</p>
+
+<p><strong>However, there is a very good bottom-up approach with O(n) time</strong>. This solution, though tricky, is the most standard and common interview question that can be asked about Binary Tree.</p>
+
+<blockquote><p>We traverse from the bottom, and once we reach a node which matches one of the two nodes, we pass it up to its parent. The parent would then test its left and right subtree if each contain one of the two nodes. If yes, then the parent must be the LCA and we pass its parent up to the root. If not, we pass the lower node which contains either one of the two nodes (if the left or right subtree contains either p or q), or NULL (if both the left and right subtree does not contain either p or q) up.</p></blockquote>
+
+<p>The coding is much easier than coming up with this idea.</p>
+
+<blockquote cite="http://leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-i.html">
+<p class="font-color"><strong>Notes:<br> </strong>The LCA problem had been studied extensively by many computer scientists. There exists efficient algorithms for finding LCA in constant time after initial processing of the tree in linear time. For the adventurous reader, please read this article for more details: <a href="http://www.topcoder.com/tc?module=Static&amp;d1=tutorials&amp;d2=lowestCommonAncestor" class="font-color">Range Minimum Query and Lowest Common Ancestor in Topcoder</a>.
+</p>
+</blockquote>
+
+
+<h3>Code</h3>
+
+<p><strong>updated on Sep 15th, 2014</strong>: code from CC150v5 Q4.7</p>
+
+<pre><code>public static TreeNode commonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+    if (root == null) {
+        return null;
+    } else if (root == p) {
+        return p;
+    } else if (root == q) {
+        return q;
     }
+    if (commonAncestor(root.left, p, q) == null) {
+        return commonAncestor(root.right, p, q);
+    } else if (commonAncestor(root.right, p, q) == null) {
+        return commonAncestor(root.left, p, q);
+    } else {
+        return root;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/Lowest-Common-Ancestor-BST/">[LeetCode Plus] Lowest Common Ancestor of BST</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-search-tree.html">link</a></p>
+
+<div class="entry bg-color bg-img font-color">
+    <blockquote class="bg-color bg-img font-color">
+        <p class="font-color bg-color bg-img">Given a binary search tree (BST), find the lowest common ancestor of two given nodes in the BST.</p>
+    </blockquote>
+    <p class="font-color bg-color bg-img"><span id="more-782" class="font-color"></span>
+        <br>
+    </p><pre class="bg-color bg-img font-color">        _______<span style="color: #990000;" class="font-color">6</span>______
+       /              \
+    ___<span style="color: #990000;" class="font-color">2</span>__          ___<span style="color: #990000;" class="font-color">8</span>__
+   /      \        /      \
+   <span style="color: #990000;" class="font-color">0</span>      _<span style="color: #990000;" class="font-color">4       7       9</span>
+         /  \
+         <span style="color: #990000;" class="font-color">3   5</span></pre>
+    <p class="font-color bg-color bg-img">Using the above tree as an example, the lowest common ancestor (LCA) of nodes <span style="color: #990000;" class="font-color">2</span> and <span style="color: #990000;" class="font-color bg-color bg-img">8</span> is <span style="color: #990000;" class="font-color">6</span>. But how about LCA of nodes <span style="color: #990000;" class="font-color">2</span> and <span style="color: #990000;" class="font-color">4</span>? Should it be <span style="color: #990000;" class="font-color">6</span> or <span style="color: #990000;" class="font-color">2</span>?</p>
+    <p class="font-color bg-color bg-img">According to the <a href="http://en.wikipedia.org/wiki/Least_common_ancestor" class="font-color">definition of LCA on  Wikipedia</a>: &#8220;The lowest common ancestor is defined between two nodes <em>v</em> and <em>w</em> as the lowest node in T that has both <em>v</em> and <em>w</em> as descendants (where we allow a node to be a descendant of itself).&#8221; Since a node can be a descendant of itself, the LCA of <span style="color: #990000;" class="font-color">2</span> and <span style="color: #990000;" class="font-color">4</span> should be <span style="color: #990000;" class="font-color">2</span>, according to this definition.</p>
+    <p class="font-color bg-color bg-img"><strong>Hint:</strong>
+        <br>A top-down walk from the root of the tree is enough.</p>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p><strong>This question is the easiest of this series of questions</strong>. I will quote the solution analysis.</p>
+
+<blockquote><p>There’s only three cases you need to consider.</p></blockquote>
+
+<pre><code>1. Both nodes are to the left of the tree.
+2. Both nodes are to the right of the tree.
+3. One node is on the left while the other is on the right. This node must be LCA. 
+4. Current node equals to one of the two nodes, this node must be the LCA. 
+</code></pre>
+
+<blockquote><p>The run time complexity is O(h), where h is the height of the BST.</p></blockquote>
+
+<h3>Code</h3>
+
+<p>The code is not written by me.</p>
+
+<pre><code>Node *LCA(Node *root, Node *p, Node *q) {
+  if (!root || !p || !q) return NULL;
+  if (max(p-&gt;data, q-&gt;data) &lt; root-&gt;data)
+    return LCA(root-&gt;left, p, q);
+  else if (min(p-&gt;data, q-&gt;data) &gt; root-&gt;data)
+    return LCA(root-&gt;right, p, q);
+  else
     return root;
 }
 </code></pre>
@@ -276,7 +1383,7 @@ private TreeNode constructTree() {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Knapsack-problem-with-duplication/">[Question] Knapsack Problem With Duplications</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/10/First-Character-Appearing-Once/">[Question] First Character Appearing Only Once</a></h1>
     
     
       <p class="meta">
@@ -292,7 +1399,7 @@ private TreeNode constructTree() {
   
 
 
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -301,662 +1408,202 @@ private TreeNode constructTree() {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://tech-queries.blogspot.sg/2011/04/integer-knapsack-problem-duplicate.html">link</a></p>
+<p><a href="http://codercareer.blogspot.sg/2011/10/no-13-first-character-appearing-only.html">link</a></p>
 
-<blockquote><p>You have n types of items, where the ith item type has an integer size si and a real value vi. You need to ﬁll a knapsack of total capacity C with a selection of items of maximum value. You can add multiple items of the same type to the knapsack.</p>
+<blockquote><p>Problem: Implement a function to find the first character in a string which only appears once.</p>
 
-<p>This is similar to &ldquo;0-1 Knapsack Problem&rdquo;, but duplication is allowed for this question.</p></blockquote>
+<pre><code>For example: It returns ‘b’ when the input is “abaccdeff”.
+</code></pre></blockquote>
 
 <h3>Analysis</h3>
 
-<p>Of course this is DP, and it&rsquo;s 1-D DP. However, <strong>there is one very tricky special case</strong>.</p>
+<p>Great solution from <a href="http://stackoverflow.com/a/2285561">Ryan</a>:</p>
 
-<h3>Solution</h3>
+<blockquote><p>You can&rsquo;t know that the character is un-repeated until you&rsquo;ve processed the whole string, so my suggestion would be&hellip;</p></blockquote>
 
-<p>Using &rsquo;M(j)&lsquo; to denote the max value for total weight j, &#8216;w&rsquo; to denote weight, and &lsquo;v&rsquo; to denote value, the equation is:</p>
+<p>Keep 2 lists.</p>
 
-<blockquote><p>M(j) = max{M(j − 1), max(i=1&hellip;n) M(j − wi) + vi}</p></blockquote>
+<p>One stores chars that appear once, the other list stores repeated chars.</p>
 
-<p><strong>Note the 2 cases are</strong>:</p>
+<p>Code is shown below.</p>
+
+<pre><code>def first_non_repeated_character(string):
+  chars = []
+  repeated = []
+  for character in string:
+    if character in chars:
+      chars.remove(character)
+      repeated.append(character)
+    else:
+      if not character in repeated:
+        chars.append(character)
+  if len(chars):
+    return chars[0]
+  else:
+    return False
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/09/NineChap-Sorted-array/">[NineChap 2.2] Sorted Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Sorted Array</h2>
+
+<h4>Template</h4>
+
+<p>There is no template.</p>
+
+<h4>Question list</h4>
 
 <ol>
-<li>when (j)th spot is not filled, the max value is <strong>M(j-1)</strong></li>
-<li>when (j)th spot is filled, the max value is <strong>max(i=1&hellip;n) M(j − wi) + vi</strong></li>
+<li><p><strong><a href="/blog/2014/05/09/Remove-Duplicates-from-Sorted-Array/">Remove Duplicates from Sorted Array</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/22/Remove-Duplicates-from-Sorted-Array-II/">Remove Duplicates from Sorted Array II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/23/Merge-Sorted-Array/">Merge Sorted Array</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/04/26/Median-of-Two-Sorted-Arrays/">Median of Two Sorted Arrays</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/08/Recover-Rotated-Sorted-Array/">Recover Rotated Sorted Array</a></strong></p></li>
 </ol>
 
 
-<p>This question is trickier than &ldquo;0-1 Knapsack Problem&rdquo;, if not more difficult. <strong>Study the 2 question together</strong>.</p>
+<h4>Additional</h4>
 
-<h3>Code</h3>
+<ol>
+<li><p><strong><a href="/blog/2014/06/03/Reverse-Words-in-a-String/">Reverse Words in a String</a></strong></p></li>
+<li><p><strong>Rotate String</strong></p>
 
-<p><strong>not written by me</strong></p>
-
-<pre><code>int knapsack(int value[], int weight[], int n, int C, vector&lt;int&gt; backtrack) {
- int *M = new int[C+1];  
- int i, j, tmp, pos;  
- for(i=1; i&lt;= C; i++) {  
-     M[i] = M[i-1];  
-     pos = i-1;               
-     for(j=0; j&lt; n; j++)  
-     {  
-         if (i &gt;= weight[j])  
-             tmp = M[i-weight[j]] + value[j];  
-         if (tmp &gt; M[i]){  
-             M[i] = tmp;  
-             pos = i - weight[j];  
-         }  
-     }  
-     backtrack.push_back(pos);  
- }   
- int ans = M[C];  
- delete[] M;        
- return ans;  
-}  
-</code></pre>
-</div>
-  
-  
+<p> Given string &ldquo;abcdefg&rdquo; and offset = 3, the rotated string is &ldquo;efgabcd&rdquo;.</p></li>
+</ol>
 
 
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Fit-dominos-in-strip/">[Question] Fit 1*2 Dominos in 2*N Strip</a></h1>
-    
-    
-      <p class="meta">
-        
+<h2>Code</h2>
 
+<p><strong>Remove Duplicates from Sorted Array</strong></p>
 
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2011/07/fit-12-dominos-in-2n-strip.html">link</a></p>
-
-<blockquote><p>In how many ways can one tile a 2 X N strip of square cells with 1 X 2 dominos?</p></blockquote>
-
-<p><img class="middle" src="/assets/images/Dominos.png"></p>
-
-<h3>Solution</h3>
-
-<p><strong>X(n+1) = X(n) + X(n-1)</strong></p>
-
-<p>It&rsquo;s a Fibonacci Series with X(1) = 1 and X(2) = 2.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Elephant-And-Bananas/">[Question] Elephant and Bananas</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2011/04/elephant-and-banana.html">link</a></p>
-
-<blockquote><p>There&rsquo;s a elephant, which can carry max 1000 bananas. The elephant eats a banana every 1 Km (both forward and back).</p>
-
-<p>Now we want to transfer 3000 bananas to a place 1000 Km away. How many bananas can be left?</p>
-
-<p>Also solved to generalized problem (write code for solution).</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>If we subdivide distances for each kilometer</strong>. Notice if elephant wants to shift all the bananas 1 km, <strong>you will loose 5 bananas every km</strong>.</p>
-
-<p>So we transferred 2995 (998+998+999) to one km distance. This process continues until after 200 km, we have only 2000 bananas left with remaining distance of 800 km.</p>
-
-<p><strong>Start from here, we only loose 3 bananas every km</strong>. This goes on for another 334 km, we will have 998 bananas left, and the rest of the bananas can be transfered in a single journey.</p>
-
-<h3>Solution</h3>
-
-<p><strong>532 bananas</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong></p>
-
-<pre><code>double transferBananas(double N, double D, double C, double F) {  
-    // base case: remaining bananas &lt;= C,  
-    // so carry all the bananas in one trip  
-    // at this point if distance is more than N/F,  
-    // elephant can never reach destination, return 0  
-    if (N &lt;= C) {
-        double bananasAtDestination = N - D*F;  
-        return (bananasAtDestination &gt;= 0.0) ?  
-            bananasAtDestination :  0.0;    // out of bananas!  
-    }  
-
-    // # trips you would travel back and forth  
-    int numTrips = 2*(ceil(N/C) - 1) + 1;  
-
-    // how many bananas you consume per km  
-    double costPerKm = numTrips * F;  
-
-    // remaining number of bananas after consumption, we want it  
-    // as an integer multiple of C.  
-    double remainingBananas = C*(ceil(N/C) - 1.0);  
-
-    // this is the distance you are able to travel before you  
-    // reach ONE LESS round trip fetching bananas  
-    // derived from eq: N - costPerKm * traveled = remaining bananas  
-
-    double traveled = (N - remainingBananas) / costPerKm;  
-
-    // we are able to travel greater (or equal) than the remaining  
-    // distance, so fetch the bananas right to the destination  
-    if (traveled &gt;= D)
-        return N - D*costPerKm;  
-
-    // calculate recursively as we travel ONE less round trip now.  
-    return transferBananas(remainingBananas, D-traveled, C, F);  
+<pre><code>public int removeDuplicates(int[] A) {
+    if (A == null || A.length == 0) {
+        return 0;
+    }
+    int left = 1;
+    int right = 1;
+    while (right &lt; A.length) {
+        if (A[right - 1] != A[right]) {
+            A[left] = A[right];
+            left++;
+        }
+        right++;
+    }
+    return left;
 }
 </code></pre>
-</div>
-  
-  
 
+<p><strong>Remove Duplicates from Sorted Array II</strong> &ndash; slightly difficult in coding</p>
 
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/27/Coins-in-Line/">[LeetCode Plus] Coins in a Line</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://leetcode.com/2011/02/coins-in-line.html">link</a></p>
-
-<blockquote><p>There are n coins in a line. Two players take turns to take a coin from one of the ends of the line until there are no more coins left. The player with the larger amount of money wins. Assume that you go first, describe an algorithm to compute the maximum amount of money you can win.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>There&rsquo;s a guaranteed &lsquo;win strategy&rsquo;</strong>, if the input array is even size. Find the sum of coins at even and odd positions respectively. Then, make sure you always take coin from even (or odd, whichever sum is bigger) position.</p>
-
-<p>This strategy is clever and simple, but <strong>DOES NOT maximize your total sum</strong>.</p>
-
-<h3>Solution</h3>
-
-<p><strong>The optimized solution is to use <a href="http://tech-queries.blogspot.sg/2011/06/get-maximum-sum-from-coins-in-line.html">2-D DP</a></strong>. Now we have array A and C(i, j) which is the maximum sum possible when remaining coins are from i to j.</p>
-
-<p>You can take either i or j. Since the opponent is as smart as you, he would have chosen the choice that yields the minimum amount to you.</p>
-
-<p>So, the final equation is:</p>
-
-<blockquote><p>C(i, j) = max { Ai + min{C(i+2, j), C(i+1, j-1)}, Aj + min{C(i+1, j-1), C(i, j-2)} }</p></blockquote>
-
-<h3>Code</h3>
-
-<p>C++ code</p>
-
-<pre><code>#define MAX 100  
-int maxMoney(int A[], int N) {
-    int C[MAX][MAX] = {0};  
-    int x, y, z; //x = C[m+2][n], y = C[m+1][n-1], z = C[m][n-2]  
-    for (int i = 0; i &lt; N; i++) {
-        for (int m = 0, n = i; n &lt; N; m++, n++) {
-          //calculate x, y, z  
-          x = (m+2 &lt; N)                         ? C[m+2][n] : 0;  
-          y = (m+1 &lt; N &amp;&amp; n-1 &gt;= 0)    ? C[m+1][n-1] : 0;  
-          z = (n-1 &gt; 0)                            ? C[m][n-2] : 0;  
-          C[m][n] = max(A[m] + min(x,y),  
-                                 A[n] + min(y,z));  
-          //For Debugging        
-          cout &lt;&lt; x &lt;&lt; ", " &lt;&lt; y &lt;&lt; ", " &lt;&lt; z &lt;&lt; endl;  
-          cout &lt;&lt; m &lt;&lt; ", " &lt;&lt; n &lt;&lt; ", " &lt;&lt; C[m][n] &lt;&lt; endl;  
+<pre><code>public int removeDuplicates(int[] A) {
+    if (A == null || A.length == 0) {
+        return 0;
+    }
+    int left = 1;
+    int right = 1;
+    boolean twice = false;
+    while (right &lt; A.length) {
+        if (A[right - 1] != A[right]) {
+            A[left++] = A[right++];
+            twice = false;
+        } else if (!twice){
+            A[left++] = A[right++];
+            twice = true;
+        } else {
+            right++;
         }
     }
-    return C[0][N-1];
+    return left;
 }
 </code></pre>
-</div>
-  
-  
 
+<p><strong>Merge Sorted Array</strong></p>
 
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/26/True-tell-brain-teaser/">[Question] Truth Tell Brain Teaser</a></h1>
-    
-    
-      <p class="meta">
-        
+<p>Easy question, tail to head merge.</p>
 
+<p><strong>Median of Two Sorted Arrays</strong></p>
 
+<p>This question is Find kth largest from A&amp;B. Refer to original post.</p>
 
+<p><strong>Recover Rotated Sorted Array</strong></p>
 
+<p>I wrote a new post.</p>
 
+<p><strong>Reverse Words in a String</strong></p>
 
+<pre><code>public String reverseWords(String s) {
+    if (s == null || s.length() == 0) {
+        return s;
+    }
+    String[] words = s.split(" ");
+    String firstReversed = "";
+    for (int i = 0; i &lt; words.length; i ++) {
+        if (words[i].equals("")) continue;
+        firstReversed += inPlaceReverse(words[i]) + " ";
+    }
+    return inPlaceReverse(firstReversed);
+}
 
-
-  
-
-
-<time datetime="2014-07-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2011/07/truth-or-lie.html">link</a></p>
-
-<blockquote><p>There are 100 people in a room. A person always speaks either lie or truth.</p>
-
-<p>When asked:</p></blockquote>
-
-<pre><code>1st person says =&gt; all are liars
-2nd person says =&gt; at most 1 speaks truth
-3rd person says =&gt; at most 2 speak truth
-4th person says =&gt; at most 3 speak truth
-.
-.
-.
-100th person says =&gt; at most 99 speak truth
+private String inPlaceReverse(String str) {
+    if (str == null || str.length() == 0) return str;
+    char[] chars = str.trim().toCharArray();
+    int left = 0;
+    int right = chars.length - 1;
+    while (left &lt; right) {
+        char temp = chars[left];
+        chars[left] = chars[right];
+        chars[right] = temp;
+        left ++;
+        right --;
+    }
+    return String.valueOf(chars);
+}
 </code></pre>
 
-<blockquote><p>&ldquo;At most N&rdquo; means &ldquo;there&rsquo;re N or less than N&rdquo;.</p>
+<p><strong>Rotate String</strong></p>
 
-<p>How many people speak only truth?</p></blockquote>
+<p>Same strategy.</p>
 
-<h3>Solution</h3>
+<h2>Conclusion</h2>
 
 <ol>
-<li></li>
-<li><p>Assume 1st person speaks truth, then all including him should be liar. It means he doesn’t speak truth.</p></li>
-<li><p>Assume 2nd person speaks truth, then he is the only person who speaks truth. But if this statement is true then statements by all others are also true. I.e. if “at most 1 person speaks truth” is true then “at most N speak truth” is also true. So person 2 is also a liar.</p></li>
-<li><p>Assume 3rd person is speaking truth. But then the statements of person 4-100 are also true, which contradicts his own statement. It means that person 3 is also a liar.</p></li>
-<li><p>This process will continue since 50th person. So 1-50 people are liars.</p></li>
-<li><p>51st person says “at most 50 speak truth”. Lets say he is speaking truth. “at most 50” means any number from 0-50. It means that statements like “at most 51 speak truth” and “at most 70 speak truth” are also true. It means that people from 51 to 100 are speaking truth.</p></li>
+<li>If array is sorted, try binary search</li>
+<li>If array is not sorted, try sort it first</li>
+<li>When you see &lsquo;rotated array&rsquo;, think of &lsquo;list reverse&rsquo;.</li>
 </ol>
 
-
-<p><strong>Hence, 50 people speak truth</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/26/Test-Number-Divisibility/">[Testing] Test Number Divisibility</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mathsisfun.com/divisibility-rules.html">link</a></p>
-
-<blockquote><p>Pay attention on Number 3, 7, 9 and 11.</p></blockquote>
-
-<h3>The Divisibility Rules</h3>
-
-<table border="0" align="center" style='border:1px solid black'>
-                                <tbody><tr align="center">
-                                    <th width="100" class="bg-color bg-img font-color">Divisible by:</th>
-                                    <th width="300" class="bg-color bg-img font-color">If:</th>
-                                    <th width="300" class="bg-color bg-img font-color">Examples:</th>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">2</td>
-                                    <td class="bg-color bg-img font-color">The last digit is even (0,2,4,6,8)</td>
-                                    <td class="bg-color bg-img font-color">12<b>8</b> is<br>
-                                    12<b>9</b> is not                               </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">3</td>
-                                    <td class="bg-color bg-img font-color">The sum of the digits is divisible by 3</td>
-                                    <td class="bg-color bg-img font-color">
-                                        <p class="font-color">381 (3+8+1=12, and 12÷3 = 4) <b>Yes</b><br>
-                                    </p>
-                                        <p class="font-color">217 (2+1+7=10, and 10÷3 = 3&nbsp;<span class="frac font-color"><sup>1</sup>/<sub>3</sub></span>) <b>No</b></p>                                   </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">4</td>
-                                    <td class="bg-color bg-img font-color">The last 2 digits are divisible by 4</td>
-                                    <td class="bg-color bg-img font-color">
-                                        <p class="font-color">13<b>12</b> is<b></b> (12÷4=3)<br>
-                                    70<b>19</b> is not </p>                               </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">5</td>
-                                    <td class="bg-color bg-img font-color">The last digit is 0 or 5</td>
-                                    <td class="bg-color bg-img font-color">17<b>5</b> is<br>
-                                    80<b>9</b> is not                               </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">6</td>
-                                    <td class="bg-color bg-img font-color">The number is divisible by both 2 <i>and</i> 3</td>
-                                    <td class="bg-color bg-img font-color">
-                                        114 (it is even, and 1+1+4=6 and 6÷3 = 2) <b>Yes</b><br>
-                                        <br>
-                                        308 (it is even, but 3+0+8=11 and 11÷3 = 3&nbsp;<span class="frac font-color"><sup>2</sup>/<sub>3</sub></span>) <b>No</b>                                  </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">7</td>
-                                    <td class="bg-color bg-img font-color">If you double the last digit and subtract it from the rest of the number and 
-                                      the answer  is:
-                                      <ul class="bg-color bg-img font-color">
-                                        <li><b>0</b>, or </li>
-                                        <li><b>divisible by 7</b></li>
-                                  </ul>
-                                      (Note: you can apply this rule to that answer again if you want)</td>
-                                    <td class="bg-color bg-img font-color">
-                                        <p class="font-color">672 (Double 2 is 4, 67-4=63, and 63÷7=9) <b>Yes</b></p>
-                                        <p class="font-color">905 (Double 5 is 10, 90-10=80, and 80÷7=11&nbsp;<span class="frac font-color"><sup>3</sup>/<sub>7</sub></span>) <b>No<br>
-                                      </b></p>                                  </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">8</td>
-                                    <td class="bg-color bg-img font-color">The last three digits are divisible by 8</td>
-                                    <td class="bg-color bg-img font-color">
-                                        <p class="font-color">109<b>816</b> (816÷8=102) <b>Yes</b></p>
-                                        <p class="font-color">216<b>302</b> (302÷8=37&nbsp;<span class="frac font-color"><sup>3</sup>/<sub>4</sub></span>) <b>No</b></p>                                   </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">9</td>
-                                    <td class="bg-color bg-img font-color">The sum of the digits is divisible by 9<br>
-                                      <br>
-                                  (Note: you can apply this rule to that answer again if you want)</td>
-                                    <td class="bg-color bg-img font-color">
-                                        <p class="font-color">1629 (1+6+2+9=18, and again, 1+8=9) <b>Yes</b></p>
-                                        <p class="font-color">2013 (2+0+1+3=6) <b>No</b></p>                                  </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">10</td>
-                                    <td class="bg-color bg-img font-color">The number ends in 0</td>
-                                    <td class="bg-color bg-img font-color">
-                                        <p class="font-color">22<b>0</b> is<br>
-                                            22<b>1</b> is not                                     </p>                                </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center">11</td>
-                                    <td class="bg-color bg-img font-color"><p class="font-color">If you sum every second digit and then subtract all other digits and the answer  is:</p>
-                                      <ul class="bg-color bg-img font-color">
-                                        <li><b>0</b>, or </li>
-                                        <li><b>divisible by 11</b></li>
-                      </ul>                                 </td>
-                                    <td class="bg-color bg-img font-color">
-                                        <p class="font-color">1<b>3</b>6<b>4</b> ((3+4) - (1+6) = <b>0</b>) <b>Yes</b></p>
-                                        <p class="font-color">3<b>7</b>2<b>9</b> ((7+9) - (3+2) = <b>11</b>) <b>Yes</b></p>
-                                      <p class="font-color">2<b>5</b>1<b>7</b>6 ((5+7) - (2+1+6) = <b>3</b>) <b>No</b></p>                                </td>
-                                </tr>
-                                <tr>
-                                    <td class="large bg-color bg-img font-color" align="center" height="16">12</td>
-                                    <td height="16" class="bg-color bg-img font-color">The number is divisible by both 3 <i><b>and</b></i> 4</td>
-                                    <td height="16" class="bg-color bg-img font-color">
-                                        <p class="font-color">648 <br>
-                                        (<i>By 3?</i> 6+4+8=18 and 18÷3=6 Yes. <br>
-                                        <i>By 4?</i> 48÷4=12 Yes) <b>Yes</b></p>
-                                        <p class="font-color">524 <br>
-                                        (<i>By 3?</i> 5+2+4=11, 11÷3= 3&nbsp;<span class="frac font-color"><sup>2</sup>/<sub>3</sub></span> No. <br>
-                                        Don&#8217;t need to check by 4.) <b>No</b></p>
-</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/26/Random-number-generate-question/">[Question] Random Number Generate Question</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=12426697">link</a></p>
-
-<blockquote><p>Given a RNG r(5) which generates number between 1-5 uniformly, make r(7) which generates random number between 1-7.</p></blockquote>
-
-<h3>Solution</h3>
-
-<pre><code>int rand7() {
-    int r = 0;
-    do {
-        int a = rand(5) - 1;    //uniformly at random from 0 to 4
-        int b = rand(5) - 1;
-        r = 5 * b + a;            //uniformly at random from 0 to 24
-    }
-    while (r &gt;= 21);            // in this event, we have to roll again
-    return r % 7 + 1; 
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/26/Multithreading-Q-and-A/">[Design] Multithreading Q&A</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>General Q &amp; A</h2>
-
-<p><a href="http://www.geeksforgeeks.org/mutex-vs-semaphore/">source</a></p>
-
-<h4>Can a thread acquire more than one lock (Mutex)?</h4>
-
-<p>Yes, if they need more resource.</p>
-
-<h4>Can a mutex be locked more than once?</h4>
-
-<p>Unless it&rsquo;s a recursive mutex, no.</p>
-
-<p>A mutex is a lock.</p>
-
-<h4>What happens if a non-recursive mutex is locked more than once?</h4>
-
-<p>Deadlock.</p>
-
-<p>Trying to lock the mutex again, it will enter into the waiting queue. But no other thread can unlock that mutex.</p>
-
-<h4>Are binary semaphore and mutex same?</h4>
-
-<p>No. One is <strong>signalling</strong>, another is <strong>locking mechanism</strong>.</p>
-
-<p>A semaphore is <a href="http://stackoverflow.com/a/2350628">more general concept</a> than mutex. A mutex is (almost) a special case of a semaphore.</p>
-
-<h4>Why use mutex and critical section?</h4>
-
-<p>Critical section is group of instructions that need to be executed atomically.</p>
-
-<p>The objective of mutex is atomic access of critical section.</p>
-
-<h4>Can we acquire mutex/semaphore in an Interrupt Service Routine?</h4>
-
-<p>Yes, but very bad practise.</p>
-
-<p>The ISR are meant be short, the call to mutex/semaphore may block the current running thread. However, an ISR can signal a semaphore or unlock a mutex.</p>
-
-<h4>What is thread blocking on mutex/semaphore?</h4>
-
-<p>When the resource is not available, the requesting thread will be moved from the running list of processor to the waiting list of the synchronization primitive.</p>
-
-<p>When the resource is available, the higher priority thread on the waiting list will get resource (more precisely, it depends on the scheduling policies).</p>
-
-<h4>Is it necessary that a thread must block when resource is not available?</h4>
-
-<p>No.</p>
-
-<p>If the design is sure ‘what has to be done when resource is not available‘, the thread can take up that work (a different code branch). To support, application requirements the OS provides non-blocking API.</p>
-
-<h2>Google interview questions</h2>
-
-<p><a href="http://www.chiefdelphi.com/forums/showthread.php?p=983786">source</a></p>
-
-<h4>What is the difference between a mutex and a semaphore? Which one would you use to protect access to an increment operation?</h4>
-
-<p><a href="http://www.jacopretorius.net/2010/12/google-interview-questions-and-answers.html">A mutex</a> is used when only one thread or process is allowed to access a resource and a semaphore is used when only a certain set limit of threads or processes can access the shared resource.</p>
-
-<p>It looks like a mutex is a binary semaphore. <strong>But the expected answer is mutex</strong>.</p>
-
-<p><strong><a href="http://www.chiefdelphi.com/forums/showthread.php?p=983786">A big differences</a> is that mutexes have the concept of &ldquo;ownership&rdquo;</strong>. Only the thread that owns the mutex (i.e. was the thread that originally claimed the mutex) can give it up. If another thread tries to free the mutex, this will cause an error. With semaphores, basically any thread is allowed to manipulate them.</p>
-
-<h4>What is multithreaded programming? What is a deadlock?</h4>
-
-<p><a href="http://www.programsquare.com/2011/05/what-is-multithreaded-programming-what.html">Multithreading</a> as a widespread programming and execution model allows multiple threads to exist within the context of a single process.</p>
-
-<p>These threads share the process&#8217; resources but are able to execute independently.</p>
-
-<p><strong>Deadlock refers to a specific condition when two or more processes are each waiting for the other to release a resource</strong>, or more than two processes are waiting for resources in a circular chain</p>
-
-<p>In an operating system, a <a href="http://en.wikipedia.org/wiki/Deadlock">deadlock is a situation</a> which occurs when a process or thread enters a waiting state because a resource requested is being held by another waiting process, which in turn is waiting for another resource.</p>
 </div>
   
   
@@ -979,22 +1626,18 @@ int maxMoney(int A[], int N) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
+    <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (156)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (152)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (86)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
-<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
-<li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (3)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (4)</a></li>
 
   </ul>
 </section>
@@ -1003,23 +1646,23 @@ int maxMoney(int A[], int N) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/10/08/interleave-positive-negative/">[Question] Interleave Positive and Negative Numbers</a>
+        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/03/Leetcode-third-1/">[Leetcode] Leetcode Third Round (1)</a>
+        <a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
+        <a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
+        <a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
+        <a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a>
       </li>
     
   </ul>
