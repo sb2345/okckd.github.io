@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-12-01T12:03:01+08:00</updated>
+  <updated>2014-12-01T14:55:31+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,46 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Code a HashMap]]></title>
+    <link href="http://okckd.github.io/blog/2014/11/04/Code-a-hashmap/"/>
+    <updated>2014-11-04T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/11/04/Code-a-hashmap</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
+
+<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>We already write 2 post before:</p>
+
+<ol>
+<li><p><strong>[Question] Implement a HashMap</strong></p></li>
+<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
+</ol>
+
+
+<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
+
+<ol>
+<li>The basic structure is an array. It can be:
+
+<ol>
+<li>An array of linked nodes (with a next pointer).</li>
+<li>An array of linked list.</li>
+</ol>
+</li>
+<li>There should be a hash function.</li>
+<li>There should be a function to convert the hash value to corresponding array index.</li>
+<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
+<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Thoughts] Who Will Remember You?]]></title>
@@ -1332,140 +1372,6 @@ public static int helper(int[] array, int left, int right) {
     m = (m &lt;&lt; i) &amp; middleMask;
 
     return n | m;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 3.7 Stack of Animals]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/15/stack-of-animals/"/>
-    <updated>2014-09-15T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/15/stack-of-animals</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would prefer a dog or a cat (and will receive the oldest animal of that type). They cannot select which specific animal they would like.</p>
-
-<p>Create the data structures to maintain this system and implement operations such as enqueue, dequeueAny, dequeueDog and dequeueCat. You may use the built-in LinkedList data structure.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are 2 solutions.</p>
-
-<p><strong>First one is using a single queue</strong>. This makes &lsquo;dequeueAny&rsquo; easy, but &lsquo;dequeueCat&rsquo; and &lsquo;dequeueDog&rsquo; difficult.</p>
-
-<p><strong>Second approach would be using 2 queues for dogs and cats</strong>. We need something like timestamp to be stored (more space usage).</p>
-
-<p>When we return, we peek both queues are choose the older one. <strong>This is recommended solution in the book</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>from the book</strong></p>
-
-<p>Animal.java</p>
-
-<pre><code>public abstract class Animal {
-    int order;
-    String name;
-
-    public Animal(String n) {
-        name = n;
-    }
-
-    public abstract String name();
-
-    public boolean isOlderThan(Animal a) {
-        return this.order &lt; a.order;
-    }
-}
-
-class Cat extends Animal {
-    public Cat(String n) {
-        super(n);
-    }
-
-    public String name() {
-        return "Cat: " + name;
-    }
-}
-
-class Dog extends Animal {
-    public Dog(String n) {
-        super(n);
-    }
-
-    public String name() {
-        return "Dog: " + name;
-    }
-}
-</code></pre>
-
-<p>AnimalQueue.java</p>
-
-<pre><code>public class AnimalQueue {
-    LinkedList&lt;Dog&gt; dogs = new LinkedList&lt;Dog&gt;();
-    LinkedList&lt;Cat&gt; cats = new LinkedList&lt;Cat&gt;();
-    private int order = 0;
-
-    public void enqueue(Animal a) {
-        a.order = order;
-        order++;
-        if (a instanceof Dog) {
-            dogs.addLast((Dog) a);
-        } else if (a instanceof Cat) {
-            cats.addLast((Cat) a);
-        }
-    }
-
-    public Animal dequeueAny() {
-        if (dogs.size() == 0) {
-            return dequeueCats();
-        } else if (cats.size() == 0) {
-            return dequeueDogs();
-        }
-        Dog dog = dogs.peek();
-        Cat cat = cats.peek();
-        if (dog.isOlderThan(cat)) {
-            return dogs.poll();
-        } else {
-            return cats.poll();
-        }
-    }
-
-    public Animal peek() {
-        if (dogs.size() == 0) {
-            return cats.peek();
-        } else if (cats.size() == 0) {
-            return dogs.peek();
-        }
-        Dog dog = dogs.peek();
-        Cat cat = cats.peek();
-        if (dog.isOlderThan(cat)) {
-            return dog;
-        } else {
-            return cat;
-        }
-    }
-
-    public int size() {
-        return dogs.size() + cats.size();
-    }
-
-    public Dog dequeueDogs() {
-        return dogs.poll();
-    }
-
-    public Dog peekDogs() {
-        return dogs.peek();
-    }
-
-    public Cat dequeueCats() {
-        return cats.poll();
-    }
-
-    public Cat peekCats() {
-        return cats.peek();
-    }
 }
 </code></pre>
 ]]></content>
