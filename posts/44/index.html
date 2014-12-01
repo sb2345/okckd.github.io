@@ -856,101 +856,84 @@ private ListNode add(ListNode a, ListNode b, ListNode pre, int extra) {
         <td>Adjusted Difficulty</td>
         <td bgcolor="red">5</td>
     </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">infiinty</td>
-    </tr>
 </table>
 
 
-<h3>Analysis</h3>
-
-<p><strong>This is a very tough question</strong>. I read a lot but struggles even now.</p>
-
-<p>Note that the 2 arrays have <strong>different sizes</strong> (i.e. m and n). <strong>If the size of the 2 arrays are same</strong> (which is a special case of this question), there is a much easier &ldquo;Divide and Conquer&rdquo; solution. The idea is to compare the median of 2 arrays and eliminate half of each array every time. Details, look <a href="http://www.geeksforgeeks.org/median-of-two-sorted-arrays/">this post</a>.</p>
-
-<p>Now for this questions.</p>
-
-<p>This solution is covered in the <a href="http://www2.myoops.org/course_material/mit/NR/rdonlyres/Electrical-Engineering-and-Computer-Science/6-046JFall-2005/30C68118-E436-4FE3-8C79-6BAFBB07D935/0/ps9sol.pdf">MIT CLRS handouts</a>. The basic idea is, finding the median of the first array, then assuming this number is the final median, and look where this element should have been put in the second array. There are 3 possible conditions. For example, if the arrays are {1, 4, 5, 6, 26} and {2, 13, 34}. We first get number 5, and compare it with 13. Then we know that median shall be large than 5, and we continue this (sort of) binary search with O(lgn) complexity.</p>
-
 <h3>Solution</h3>
 
-<p>I referred to NineChap for the &lsquo;find (K)th&rsquo; solution.</p>
+<p><strong>This is a tough question</strong>.</p>
+
+<p><strong>If the size of the 2 arrays (i.e. m and n) are same</strong>, this would become a much easier question with simple &ldquo;Divide and Conquer&rdquo; solution. Well, not extremely easy like everyone can solve it, but a much simpler one. I do recommend you to read more at <a href="http://www.geeksforgeeks.org/median-of-two-sorted-arrays/">this post</a> before you procceed.</p>
+
+<p>However, this question is not as simple. Let&rsquo;s talk about it.</p>
+
+<p>This first solution is well covered in the <a href="http://www2.myoops.org/course_material/mit/NR/rdonlyres/Electrical-Engineering-and-Computer-Science/6-046JFall-2005/30C68118-E436-4FE3-8C79-6BAFBB07D935/0/ps9sol.pdf">MIT CLRS handouts</a>. The basic idea is, finding the median of the first array, then assuming this number is the final median, and look where this element should have been put in the second array. There are 3 possible conditions. For example, if the arrays are {1, 4, 5, 6, 26} and {2, 13, 34}. We first get number 5, and compare it with 13. Then we know that median shall be large than 5, and we continue this (like) binary search with O(lgn) complexity. This solution is complex and difficult in thinking. I would like to focus on a different solution.</p>
+
+<p>Second solution, credit goes to <a href="http://answer.ninechapter.com/solutions/median-of-two-sorted-arrays/">ninechap</a>. Finding the median is like finding the (k)th element from the combination of 2 arrays. We might have to search for (k)th element twice, but the overall complexity is always O(lg n).</p>
 
 <h3>My code</h3>
 
-<p><strong>Code from <a href="http://answer.ninechapter.com/solutions/median-of-two-sorted-arrays/">ninechap</a></strong></p>
+<pre><code>public class Solution {
+    public double findMedianSortedArrays(int A[], int B[]) {
+        if (A == null || B == null) {
+            return 0;
+        }
+        int len = A.length + B.length;
+        int k1 = (len - 1) / 2;
+        int k2 = len / 2;
 
-<pre><code>public double findMedianSortedArrays(int A[], int B[]) {
-    int len = A.length + B.length;
-    if (len % 2 == 0) {
-        return (findKth(A, 0, B, 0, len / 2) + findKth(A, 0, B, 0, len / 2 + 1)) / 2.0 ;
-    } else {
-        return findKth(A, 0, B, 0, len / 2 + 1);
+        // now get 2 median numbes (they might be same)
+        // then return the calculated median number:
+        double mid1 = getKth(A, B, 0, 0, k1);
+        double mid2 = getKth(A, B, 0, 0, k2);
+        return (mid1 + mid2) / 2;
     }
-}
 
-// find kth number of two sorted array
-public static int findKth(int[] A, int A_start, int[] B, int B_start, int k){       
-    if(A_start &gt;= A.length) 
-        return B[B_start + k - 1];
-    if(B_start &gt;= B.length)
-        return A[A_start + k - 1];
+    private double getKth(int[] A, int[] B, int a, int b, int k) {
+        if (a == A.length) {
+            // all elements in A is used up
+            return B[b + k];
+        } else if (b == B.length) {
+            // all elements in B is used up
+            return A[a + k];
+        }
+        // now both A[a] and B[b] are valid elements, check half of k
+        if (k == 0) {
+            // if we only have to compare 2 elements
+            return Math.min(A[a], B[b]);
+        } else {
+            // 'half' number of elements will be discard from either A or B
+            // since k is large than 0, half must be larger than 0
+            int half = (k + 1) / 2;
 
-    if (k == 1)
-        return Math.min(A[A_start], B[B_start]);
+            // mid1 and mid2 are boundary indexes to be discarded
+            // mid1 is equals or larger than a
+            int mid1 = a + half - 1;
+            int mid2 = b + half - 1;
 
-    int A_key = A_start + k / 2 - 1 &lt; A.length
-                ? A[A_start + k / 2 - 1]
-                : Integer.MAX_VALUE;
-    int B_key = B_start + k / 2 - 1 &lt; B.length
-                ? B[B_start + k / 2 - 1]
-                : Integer.MAX_VALUE; 
+            // val1 and val2 are boundary values to be discarded
+            int val1;
+            int val2;
+            if (mid1 &gt;= A.length) {
+                val1 = Integer.MAX_VALUE;
+            } else {
+                val1 = A[mid1];
+            }
+            if (mid2 &gt;= B.length) {
+                val2 = Integer.MAX_VALUE;
+            } else {
+                val2 = B[mid2];
+            }
 
-    if (A_key &lt; B_key) {
-        return findKth(A, A_start + k / 2, B, B_start, k - k / 2);
-    } else {
-        return findKth(A, A_start, B, B_start + k / 2, k - k / 2);
-    }
-}
-</code></pre>
-
-<p><strong>Updated on July 6th</strong>: I finally wrote this code by myself. It&rsquo;s difficult to write.</p>
-
-<pre><code>public double findMedianSortedArrays(int A[], int B[]) {
-    int len1 = A.length;
-    int len2 = B.length;
-    if ((len1 + len2) % 2 == 1) {
-        return findKth(A, B, 0, 0, (len1 + len2) / 2);
-    } else {
-        int num1 = findKth(A, B, 0, 0, (len1 + len2) / 2 - 1);
-        int num2 = findKth(A, B, 0, 0, (len1 + len2) / 2);
-        return (double) (num1 + num2) / 2;
-    }
-}
-
-private int findKth(int A[], int B[], int start1, int start2, int k) {
-    int len1 = A.length;
-    int len2 = B.length;
-    if (start1 &gt;= len1) {
-        return B[start2 + k];
-    } 
-    if (start2 &gt;= len2) {
-        return A[start1 + k];
-    } 
-    if (k == 0) {
-        return Math.min(A[start1], B[start2]);
-    }
-    // now eliminate half of the size of k (half &gt;= 1)
-    int half = (k + 1) / 2;
-    int aMid = start1 + half - 1 &lt; len1 ? A[start1 + half - 1] : Integer.MAX_VALUE;
-    int bMid = start2 + half - 1 &lt; len2 ? B[start2 + half - 1] : Integer.MAX_VALUE;
-    if (aMid &lt; bMid) {
-        // discard size of half from A
-        return findKth(A, B, start1 + half, start2, k - half);
-    } else {
-        // discard size of half from B
-        return findKth(A, B, start1, start2 + half, k - half);
+            // compare val1 and val2 and discard all elements to the left 
+            // of the smaller one, inclusively
+            if (val1 &gt; val2) {
+                // discard mid2 and all elements to the left of it
+                return getKth(A, B, a, mid2 + 1, k - half);
+            } else {
+                return getKth(A, B, mid1 + 1, b, k - half);
+            }
+        }
     }
 }
 </code></pre>
