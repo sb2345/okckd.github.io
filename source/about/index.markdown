@@ -9,15 +9,15 @@ footer: true
 
 {% img middle /assets/images/7275831.png 300 %}
 
-Hello guys! My name is Michael.
+Hello guys! My name is Michael.I'm from Singapore. 
 
-I'm from Singapore. 
+I love to watch NBA, my favorite player is Kevin Durant. 
 
-I love OKC thunder, and I love Kevin Durant. (That's why we're called okckd.github.io)
+I love Snoopy. Woodstock (the name of this blog) is Snoopy's pet. 
 
-I also love Java and my girfriend >_<
+I love Java and my girfriend >_< (yes, I have a girlfriend and I'm a developer)
 
-I love gadgets, tech news and startups.
+I love tech gadgets, tech news and startups.
 
 I write about IT, algorithm and interviews tricks. 
 
