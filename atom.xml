@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-11-17T18:50:08+08:00</updated>
+  <updated>2014-12-01T11:39:50+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,1004 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 18.7 Longest Word Made From Other Words]]></title>
+    <link href="http://okckd.github.io/blog/2014/10/02/longest-word-made-from-other/"/>
+    <updated>2014-10-02T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/10/02/longest-word-made-from-other</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Given a list of words, write a program to find the longest word made of other words in the list.</p>
+
+<p>EXAMPLE</p>
+
+<p>Input: cat, banana, dog, nana, walk, walker, dogwalker</p>
+
+<p>Output: dogwalker</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Search it recursively from longest to shortest</strong>. Use HashSet to help us search for words quickly.</p>
+
+<p>This question might look difficult at first, it&rsquo;s actually a very classical recursive search.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static void printLongestWord(String[] arr) {
+    Arrays.sort(arr, new LengthComparator());
+    HashSet&lt;String&gt; set = new HashSet&lt;String&gt;();
+    for (String str : arr) {
+        set.add(str);
+    }
+    for (String word : arr) {
+        if (canDivide(word, 0, set)) {
+            System.out.println(word);
+            return;
+        }
+    }
+    System.out.println("can not find such word");
+}
+
+private static boolean canDivide(String word, int from, HashSet&lt;String&gt; set) {
+    if (from == word.length()) {
+        return true;
+    }
+    for (int i = from; i &lt; word.length(); i++) {
+        String str = word.substring(from, i + 1);
+        if (from == 0 &amp;&amp; i == word.length() - 1) {
+            continue;
+        } else if (!set.contains(str)) {
+            continue;
+        }
+        if (canDivide(word, i + 1, set)) {
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 17.14 Optimal Way to Unconcatenate Doc]]></title>
+    <link href="http://okckd.github.io/blog/2014/10/01/optimal-unconcatenate-doc/"/>
+    <updated>2014-10-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/10/01/optimal-unconcatenate-doc</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Given a lengthy document without spaces, punctuation, and capitalization:</p>
+
+<p>eg: iresetthecomputeritstilldidntboot</p>
+
+<p>Now add back in the punctation and capitalization.</p>
+
+<p>Most of the words will be in a dictionary, but some strings, like proper names, will not. Given a dictionary (a list of words), design an algorithm to find the optimal way of &ldquo;unconcatenating&rdquo; a sequence of words (by minimizing unrecognized sequences of characters).</p>
+
+<p>For example, the string &ldquo;jesslookedjustliketimherbrother&rdquo; would be optimally parsed as &ldquo;JESS looked just like TIM her brother&rdquo;. This parsing has seven unrecognized characters, which we have capitalized for clarity.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The solution given in the book is very hard to understand. It uses HashMap to memorize the previous result.</p>
+
+<p>After long time of struggle, I finally solved it with traditional DP approach. The key idea is to consider: &ldquo;<strong>whether I insert a space after this char, or not</strong>&rdquo;.</p>
+
+<p>The code is concise and easy to read.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int parse(String doc, Trie dict) {
+    int len = doc.length();
+    int[] dp = new int[len + 1];
+    // dp[i] denotes the number of special chars in first i chars of docs
+    for (int i = 1; i &lt;= len; i++) {
+        dp[i] =  Integer.MAX_VALUE;
+        for (int j = 0; j &lt; i; j++) {
+            String str = doc.substring(j, i);
+            if (dict.contains(str, true)) {
+                // consider (i to j) a valid word
+                dp[i] = Math.min(dp[i], dp[j]);
+            } else {
+                // consider (i to j) special chars
+                dp[i] = Math.min(dp[i], dp[j] + i - j);
+            }
+        }
+    }
+    return dp[len];
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 17.13 Convert BST to Doubly-Linked List]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/30/convert-bst-doubly-linked-list/"/>
+    <updated>2014-09-30T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/30/convert-bst-doubly-linked-list</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Consider a simple node-like data structure called BiNode, which has pointers to two other nodes.</p></blockquote>
+
+<pre><code>public class BiNode {
+    public BiNode node1, node2;
+    public int data;
+}
+</code></pre>
+
+<blockquote><p>The data structure BiNode could be used to represent both a binary tree (where node1 is the left node and node2 is the right node) or a doubly linked list (where node1 is the previous node and node2 is the next node). Implement a method to convert a binary search tree (implemented with BiNode) into a doubly linked list. The values should be kept in order and the operation should be performed in place (that is, on the original data structure).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>At another post <strong>[LeetCode Plus] Convert BST to Doubly-Linked List</strong>, we already discussed 2 approaches:</p>
+
+<ol>
+<li>in-order traversal approach</li>
+<li>divide and conquer approach</li>
+</ol>
+
+
+<p>First approach isn&rsquo;t intuitive. We will further discuss D&amp;C approach here.</p>
+
+<p><strong>The key of the solution is how we return both HEAD and TAIL</strong>. The book suggests 3 ways:</p>
+
+<ol>
+<li>Build a <strong>data structure</strong> to store both head and tail</li>
+<li><strong>Just return head</strong>, and retrieve tail by traversing thru &ndash; bad time complexity O(n<sup>2</sup>)</li>
+<li><strong>Use circular linked-list</strong>! Time O(n).</li>
+</ol>
+
+
+<p>I wrote the code for 2nd suggestion.</p>
+
+<p><strong>The circular list is a great idea</strong>. It&rsquo;s already covered in previous post. Do keep in mind <strong>why we need the list to be circular</strong>!</p>
+
+<h3>Code</h3>
+
+<p><strong>Just return head approach</strong></p>
+
+<pre><code>public static BiNode convert(BiNode root) {
+    if (root == null) {
+        return null;
+    }
+    return helper(root);
+}
+
+private static BiNode helper(BiNode node) {
+    // node is not null
+    BiNode newHead = node;
+    // do left part
+    if (node.node1 != null) {
+        newHead = helper(node.node1);
+        BiNode leftTail = getListTail(newHead);
+        leftTail.node2 = node;
+        node.node1 = leftTail;
+    }
+    // do right part
+    if (node.node2 != null) {
+        BiNode rightHead = helper(node.node2);
+        node.node2 = rightHead;
+        rightHead.node1 = node;
+    }
+    return newHead;
+}
+
+private static BiNode getListTail(BiNode head) {
+    // head is not null
+    while (head.node2 != null) {
+        head = head.node2;
+    }
+    return head;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 11.8 Get Rank in Stream of Integers]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/28/get-rank-stream-integers/"/>
+    <updated>2014-09-28T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/28/get-rank-stream-integers</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values less than or equal to x).</p>
+
+<p>Implement the data structures and algorithms to support these operations. That is,implement the method <strong>track(int x)</strong>, which is called when each number is generated, and the method <strong>getRankOfNumber(int x)</strong>, which returns the number of values less than or equal to x (not including x itself).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This question requires a special type of Data Structure</strong>. It basically is a modified BST like this:</p>
+
+<blockquote><p>The tree node stores both number value and the <strong>count of node on left subtree</strong></p></blockquote>
+
+<p><img class="middle" src="http://okckd.github.io/assets/images/get-rank-number-stream.png"></p>
+
+<p>Suppose we want to find the rank of 24 in the tree above. We would compare 24 with the root, 20, and find that 24 must reside on the right. The root has 4 nodes in its left subtree, and when we include the root itself, this gives us five total nodes smaller than 24. We set counter to 5.</p>
+
+<p>Then, we compare 24 with node 25 and find that 24 must be on the left. The value of counter does not update, since we&rsquo;re not &ldquo;passing over&rdquo; any smaller nodes. The value of counter is still 5.</p>
+
+<p>Next, we compare 24 with node 23,and find that 24 must be on the right. Counter gets incremented by just 1 (to 6), since 23 has no left nodes.</p>
+
+<p>Finally, we find 24 and we return counter: 6.</p>
+
+<h3>Code</h3>
+
+<p>I did not write code myself. It&rsquo;s too complex!</p>
+
+<p><strong>RankNode.java</strong></p>
+
+<pre><code>public class RankNode {
+    public int left_size = 0;
+    public RankNode left;
+    public RankNode right;
+    public int data = 0;
+    public RankNode(int d) {
+        data = d;
+    }
+
+    public void insert(int d) {
+        if (d &lt;= data) {
+            if (left != null) {
+                left.insert(d);
+            } else {
+                left = new RankNode(d);
+            }
+            left_size++;
+        } else {
+            if (right != null) {
+                right.insert(d);
+            } else {
+                right = new RankNode(d);
+            }
+        }
+    }
+
+    public int getRank(int d) {
+        if (d == data) {
+            return left_size;
+        } else if (d &lt; data) {
+            if (left == null) {
+                return -1;
+            } else {
+                return left.getRank(d);
+            }
+        } else {
+            int right_rank = right == null ? -1 : right.getRank(d);
+            if (right_rank == -1) {
+                return -1;
+            } else {
+                return left_size + 1 + right_rank;
+            }
+        }
+    }
+}
+</code></pre>
+
+<p><strong>Main Class</strong>:</p>
+
+<pre><code>public class Question {
+    private static RankNode root = null;
+
+    public static void track(int number) {
+        if (root == null) {
+            root = new RankNode(number);
+        } else {
+            root.insert(number);
+        }
+    }
+
+    public static int getRankOfNumber(int number) {
+        return root.getRank(number);
+    }
+
+    public static void main(String[] args) {
+        int size = 100;
+        int[] list = AssortedMethods.randomArray(size, -100, 100);
+        for (int i = 0; i &lt; list.length; i++) {
+            track(list[i]);
+        }
+
+        int[] tracker = new int[size];
+        for (int i = 0; i &lt; list.length; i++) {
+            int v = list[i];
+            int rank1 = root.getRank(list[i]);
+            tracker[rank1] = v;
+        }
+
+        for (int i = 0; i &lt; tracker.length - 1; i++) {
+            if (tracker[i] != 0 &amp;&amp; tracker[i + 1] != 0) {
+                if (tracker[i] &gt; tracker[i + 1]) {
+                    System.out.println("ERROR at " + i);
+                }
+            }
+        }
+
+        System.out.println("Array: " + AssortedMethods.arrayToString(list));
+        System.out.println("Ranks: " + AssortedMethods.arrayToString(tracker));
+    }
+
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 17.6 Order an Array by Sorting Middle]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle/"/>
+    <updated>2014-09-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
+
+<blockquote><ol>
+<li><p>找到heading的最长递增序列.</p></li>
+<li><p>找到tailing的最长的递增序列.</p></li>
+</ol>
+</blockquote>
+
+<p>After that:</p>
+
+<blockquote><ol>
+<li><p>用中间部分的min去shrink左边.</p></li>
+<li><p>用中间部分的max去shrink右边.</p></li>
+</ol>
+</blockquote>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static void findUnsortedSequence(int[] array, int[] ans) {
+    int len = array.length;
+    ans[0] = 0;
+    ans[1] = 0;
+
+    // find increasing sequence on left and on right
+    int leftPeak = 0;
+    while (leftPeak &lt; len - 1) {
+        if (array[leftPeak] &lt; array[leftPeak + 1]) {
+            leftPeak++;
+        } else {
+            break;
+        }
+    }
+    if (leftPeak == len - 1) {
+        return;
+    }
+    int rightBottom = len - 1;
+    while (rightBottom &gt; 0) {
+        if (array[rightBottom] &gt; array[rightBottom - 1]) {
+            rightBottom--;
+        } else {
+            break;
+        }
+    }
+
+    // leftPeak and rightBottom are found, now read mid part
+    int midMin = Integer.MAX_VALUE;
+    int midMax = Integer.MIN_VALUE;
+    for (int i = leftPeak; i &lt;= rightBottom; i++) {
+        midMin = Math.min(midMin, array[i]);
+        midMax = Math.max(midMax, array[i]);
+    }
+
+    // find left boudary and right boundary
+    int leftBound = leftPeak;
+    while (leftBound &gt;= 0) {
+        if (array[leftBound] &lt; midMin) {
+            break;
+        }
+        leftBound--;
+    }
+    int rightBound = rightBottom;
+    while (rightBound &lt; len) {
+        if (array[rightBound] &gt; midMax) {
+            break;
+        }
+        rightBound++;
+    }
+
+    // finish it up
+    ans[0] = leftBound + 1;
+    ans[1] = rightBound - 1;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 14.6 Implement CircularArray in Java]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/26/implement-circular-array-java/"/>
+    <updated>2014-09-26T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/26/implement-circular-array-java</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Implement a <strong>CircularArray</strong> class that supports an array-like data structure which can be efficiently rotated.</p>
+
+<p>The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>First part of the question is solved by using an array and a pointer</strong>. The solution simplifies the question by fixing the array size (not a dynamic-resizing array).</p>
+
+<p><strong>The difficult part is how to write iterator</strong>.</p>
+
+<p>Note that we should support <strong>Java Generics</strong>:</p>
+
+<pre><code>class MyCircularArray&lt;T&gt;
+</code></pre>
+
+<p>Implement <strong>Iterable Interface</strong>:</p>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+}
+</code></pre>
+
+<p>Override <strong>iterator() method</strong>:</p>
+
+<pre><code>@Override
+public Iterator&lt;T&gt; iterator() {
+    return new MyIterator&lt;T&gt;(this);
+}
+</code></pre>
+
+<p>Write our own <strong>Iterator Class</strong>:</p>
+
+<pre><code>class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+}
+</code></pre>
+
+<p>Finish it up</p>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+        return new MyIterator&lt;T&gt;(this);
+    }
+
+    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+        @Override
+        public boolean hasNext() {
+        }
+
+        @Override
+        public T next() {
+        }
+
+        @Override
+        public void remove() {
+        }
+    }
+}
+</code></pre>
+
+<p>It might be confusing when implementing <strong>Iterable</strong> and <strong>Iterator</strong> Class.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+
+    T[] items;
+
+    int head;
+    int cur;
+
+    public MyCircularArray(int size) {
+        // this is really important (casting the type)
+        items = (T[]) new Object[size];
+
+        head = 0;
+        cur = 0;
+    }
+
+    public void put(T item) {
+        items[cur++] = item;
+        cur = cur % items.length;
+    }
+
+    public T get(int i) {
+        int newIndex = (i + head) % items.length;
+        return items[newIndex];
+    }
+
+    public void rotate(int shiftRight) {
+        head += shiftRight;
+        head = head % items.length;
+    }
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+        return new MyIterator&lt;T&gt;(this);
+    }
+
+    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+
+        T[] items;
+        int head;
+        int count;
+
+        public MyIterator(MyCircularArray&lt;T&gt; array) {
+            this.items = array.items;
+            this.head = array.head;
+            this.count = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.count != items.length;
+        }
+
+        @Override
+        public T next() {
+            if (hasNext()) {
+                return items[(head + count++) % items.length];
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+        }
+    }
+
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 12.0 Example - Troubleshoot Google Chrome]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/24/troubleshoot-google-chrome/"/>
+    <updated>2014-09-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/24/troubleshoot-google-chrome</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>You&#8217;reworking on the Google Chrome team when you receivea bug report: Chrome crashes on launch. What would you do?</p></blockquote>
+
+<h3>Step 1: Understand the Scenario</h3>
+
+<ol>
+<li>How long has user seen this issue?</li>
+<li>version of browser and OS?</li>
+<li>Does this happen consistently? How often, and when?</li>
+</ol>
+
+
+<h3>Step 2: Break Down the Problem</h3>
+
+<p>Flow of situation:</p>
+
+<ol>
+<li>start menu</li>
+<li>click chrome</li>
+<li>browser starts</li>
+<li>browser load settings</li>
+<li>browser issues HTTP response</li>
+<li>browser get HTTP response</li>
+<li>browser parses webpage</li>
+<li>browser displays content</li>
+</ol>
+
+
+<p><strong>At some points in this process, something fails</strong>. A good tester would iterate thru the elements of this scenario and diagnose the problem.</p>
+
+<h3>Step 3: Create Specific, Manageable Tests</h3>
+
+<p>Come up with realistic instructions.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 11.4 Sort 20GB File]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/24/sort-20GB-file/"/>
+    <updated>2014-09-24T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/24/sort-20GB-file</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Imagine you have a 20 GB file with one string per line.</p>
+
+<p>Explain how you would sort the file.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Use <strong>External Sort</strong>.</p>
+
+<ol>
+<li><p>First divide the file into chunks which are x megabytes each, where x is the amount of memory we have available.</p></li>
+<li><p>Each chunk is sorted separately and then saved back to the file system.</p></li>
+<li><p>Once all the chunks are sorted, we then merge the chunks, one by one.</p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 9.10 Stack Up the Boxes]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/17/stack-up-boxes/"/>
+    <updated>2014-09-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/17/stack-up-boxes</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>You have a stack of n boxes, with widths w., heights h, and depths d. The boxes can only be stacked on top of one another if each box is strictly larger than the box above it in width, height, and depth.</p>
+
+<p>Implement a method to build the tallest stack possible, where the height of a stack is the sum of the heights of each box.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is appearantly a DP question. I did it in the normal way, and the solution turns out to be very good:</p>
+
+<pre><code>DP solution is        2638ms
+Recursive solution is 1322ms
+My solution is         370ms
+</code></pre>
+
+<p>I could not understand the 2 solutions given in the book. Sorry.</p>
+
+<p>The coding is a bit lengthy, and we keeps 2 DP arrays. <strong>Not an easy question of course</strong>, but the solution is actually standard.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static ArrayList&lt;Box&gt; createStack(Box[] boxes) {
+    ArrayList&lt;Box&gt; ans = new ArrayList&lt;Box&gt;();
+    int len = boxes.length;
+    int[] heights = new int[len];
+    int[] preMap = new int[len];
+    int maxIndex = 0;
+
+    // start DP
+    for (int i = 0; i &lt; len; i++) {
+        heights[i] = boxes[i].height;
+        preMap[i] = -1;
+        for (int j = 0; j &lt; i; j++) {
+            if (boxes[j].canBeAbove(boxes[i])) {
+                int newHeight = heights[j] + boxes[i].height;
+                if (newHeight &gt; heights[i]) {
+                    heights[i] = newHeight;
+                    preMap[i] = j;
+                }
+            }
+        }
+        // now updated maxIndex
+        if (heights[i] &gt; heights[maxIndex]) {
+            maxIndex = i;
+        }
+    }
+
+    // print from maxIndex all the way backwards
+    while (maxIndex != -1) {
+        ans.add(boxes[maxIndex]);
+        // the print order is reversed, so...
+        maxIndex = preMap[maxIndex];
+    }
+    return ans;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 9.11 Parenthesize the Expression]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/17/parenthesize-expression/"/>
+    <updated>2014-09-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/17/parenthesize-expression</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Given a boolean expression consisting of the symbols 0, 1, &lsquo;&amp;&rsquo;, &lsquo;|&rsquo;, and &lsquo;^&rsquo;, and a desired boolean result value &lsquo;result&rsquo;.</p>
+
+<p>Now implement a function to count the number of ways of <strong>parenthesizing the expression</strong> such that it evaluates to &lsquo;result&rsquo;.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult question</strong>.</p>
+
+<blockquote><p>Each parenthesized expression must have an outermost pair of
+parentheses.</p>
+
+<p>That is, we can iterate through the expression, treating each operator as the first operator to be parenthesized.</p></blockquote>
+
+<p>Nice idea suggested in the book! So <strong>for each operator, we consider is as first operator (to evaluate)</strong>, and then we shall if the total possible count.</p>
+
+<p>(Note that while coding, we DO NOT WRITE {if-else if-else&hellip;} but instead use {if&hellip; if&hellip; if&hellip;} in order to get the total count. )</p>
+
+<p>DP is more time-efficient.</p>
+
+<p><strong>Like CC150v5 Q9.10, the code given in the book is very hard to read</strong>. I have my own code posted below.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int countMyAnswer(String exp, boolean result) {
+    if (exp.length() == 1) {
+        return convertIntToBool(exp.charAt(0)) == result ? 1 : 0;
+    }
+    // eg. 1^0|0|1
+    // result: true
+    int totalCount = 0;
+    for (int i = 1; i &lt; exp.length(); i += 2) {
+
+        char op = exp.charAt(i);
+        String firstHalf = exp.substring(0, i);
+        String secondHalf = exp.substring(i + 1);
+
+        int firstHalfTrue = countMyAnswer(firstHalf, true);
+        int firstHalfFalse = countMyAnswer(firstHalf, false);
+        int secondHalfTrue = countMyAnswer(secondHalf, true);
+        int secondHalfFalse = countMyAnswer(secondHalf, false);
+
+        if (evaluate('0', op, '0') == result) {
+            totalCount += firstHalfFalse * secondHalfFalse;
+        }
+        if (evaluate('0', op, '1') == result) {
+            totalCount += firstHalfFalse * secondHalfTrue;
+        }
+        if (evaluate('1', op, '0') == result) {
+            totalCount += firstHalfTrue * secondHalfFalse;
+        }
+        if (evaluate('1', op, '1') == result) {
+            totalCount += firstHalfTrue * secondHalfTrue;
+        }
+    }
+    return totalCount;
+}
+
+private static boolean convertIntToBool(char num) {
+    if (num == '1') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+private static boolean evaluate(char num1, char op, char num2) {
+    boolean b1 = convertIntToBool(num1);
+    boolean b2 = convertIntToBool(num2);
+    if (op == '&amp;') {
+        return b1 &amp; b2;
+    } else if (op == '|') {
+        return b1 | b2;
+    } else if (op == '^') {
+        return b1 ^ b2;
+    }
+    System.out.println("Did not found operator " + op);
+    return false;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 9.7 Paint Fill in Map]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/17/paint-fill-map/"/>
+    <updated>2014-09-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/17/paint-fill-map</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Implement the &ldquo;paint fill&rdquo; function that one might see on many image editing programs.</p>
+
+<p>That is, given a screen (represented by a two-dimensional array of colors), a point, and a new color, <strong>fill in the surrounding area</strong> until the color changes from the original color.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a BFS/DFS question, very similar to <strong>[LeetCode 130] Surrounded Regions</strong>.</p>
+
+<p><strong>However, this question is not same as surrounding region</strong>, because no temporary storage of state is needed, <strong>and we DO NOT NEED TO keep track of the visited positions</strong>!</p>
+
+<p>Why is this?</p>
+
+<ol>
+<li>This question, we simple change the color <strong>from A to B</strong>.</li>
+<li>Surrounding Region is <strong>change A to B, and B to A</strong>.</li>
+</ol>
+
+
+<p>That&rsquo;s why, the nature of 2 questions are different.</p>
+
+<p>Code 1 is my first solution, and Code 2 is doing a BFS and set color directly to expected value. This type of questions is highly frequent and sometimes may cause confusions.</p>
+
+<h3>Code</h3>
+
+<p><strong>my code 1</strong>, with &lsquo;temp&rsquo; state</p>
+
+<pre><code>public static void PaintFill1(Color[][] screen, int posX, int posY,
+        Color ncolor) {
+    // the queue keeps the list of positions that I'm going to visit
+    Queue&lt;Position&gt; q = new LinkedList&lt;Position&gt;();
+    int len = screen.length;
+    Color original = screen[posX][posY];
+    // visited origin node first
+    q.offer(new Position(posX, posY));
+    while (!q.isEmpty()) {
+        // visit positions in q one by one (mark color as 'Temp')
+        Position p = q.poll();
+        if (p.x &lt; 0 || p.x &gt;= len || p.y &lt; 0 || p.y &gt;= len) {
+            // invalid pos coordinate
+            continue;
+        } else if (screen[p.x][p.y] == Color.Temp
+                || screen[p.x][p.y] != original) {
+            continue;
+        }
+        screen[p.x][p.y] = Color.Temp;
+        q.offer(new Position(p.x - 1, p.y));
+        q.offer(new Position(p.x + 1, p.y));
+        q.offer(new Position(p.x, p.y - 1));
+        q.offer(new Position(p.x, p.y + 1));
+    }
+    // finish visiting all positions that's original color
+    for (int i = 0; i &lt; len; i++) {
+        for (int j = 0; j &lt; len; j++) {
+            if (screen[i][j] == Color.Temp) {
+                screen[i][j] = ncolor;
+            }
+        }
+    }
+}
+</code></pre>
+
+<p><strong>my code 2</strong>, without &lsquo;temp&rsquo; state</p>
+
+<pre><code>public static void PaintFill2(Color[][] screen, int posX, int posY,
+        Color ncolor) {
+    // the queue keeps the list of positions that I'm going to visit
+    Queue&lt;Position&gt; q = new LinkedList&lt;Position&gt;();
+    int len = screen.length;
+    Color original = screen[posX][posY];
+    // visited origin node first
+    q.offer(new Position(posX, posY));
+    while (!q.isEmpty()) {
+        // visit positions in q one by one (mark color as 'Temp')
+        Position p = q.poll();
+        if (p.x &lt; 0 || p.x &gt;= len || p.y &lt; 0 || p.y &gt;= len) {
+            // invalid pos coordinate
+            continue;
+        } else if (screen[p.x][p.y] != original) {
+            continue;
+        }
+        screen[p.x][p.y] = ncolor;
+        q.offer(new Position(p.x - 1, p.y));
+        q.offer(new Position(p.x + 1, p.y));
+        q.offer(new Position(p.x, p.y - 1));
+        q.offer(new Position(p.x, p.y + 1));
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 9.3 Find Magic Index]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/17/find-magic-index/"/>
+    <updated>2014-09-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/17/find-magic-index</id>
+    <content type="html"><![CDATA[<h3>Question 1</h3>
+
+<blockquote><p>A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i.</p>
+
+<p>Given a sorted array of distinct integers, write a method to find a magic index, if one exists, in array A.</p></blockquote>
+
+<h3>Question 2</h3>
+
+<blockquote><p>FOLLOW UP: What if the values are not distinct?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult binary search question</strong>!</p>
+
+<p><strong>Question 1 is slightly easier</strong>: we simplyl use binary search, and we are able to discard half of the array each time.</p>
+
+<ol>
+<li>if (array[mid] > mid), then we discard the right half.</li>
+<li>if (array[mid] &lt; mid), then we discard the left half.</li>
+</ol>
+
+
+<p><strong>Question 2 is difficult</strong>. We cannot discard half of the input any more. Instead, we discard a range between (mid) and (array[mid]). Then check left and right part seperately.</p>
+
+<p>So, I wrote the following code:</p>
+
+<pre><code>int mid = left + (right - left) / 2;
+if (array[mid] == mid) {
+    return mid;
+} else {
+    int smaller = Math.min(array[mid], mid);
+    int larger = Math.max(array[mid], mid);
+    int leftResult = helper(array, left, smaller);
+    if (leftResult != -1) {
+        return leftResult;
+    } else {
+        return helper(array, larger, right);
+    }
+}
+</code></pre>
+
+<p>This becomes an endless loop. We did not discard point &lsquo;mid&rsquo; in the code above. The correct code is posted below.</p>
+
+<h3>Code</h3>
+
+<p><strong>code for non-duplicate input</strong></p>
+
+<pre><code>public static int myAnswerNonDup(int[] array) {
+    int len = array.length;
+    return helper(array, 0, len - 1);
+}
+
+public static int helper(int[] array, int left, int right) {
+    if (right &lt; left) {
+        return -1;
+    }
+    int mid = left + (right - left) / 2;
+    if (array[mid] == mid) {
+        return mid;
+    } else if (array[mid] &lt; mid) {
+        // discard all element to the left of array[mid]
+        return helper(array, mid + 1, right);
+    } else {
+        return helper(array, left, mid - 1);
+    }
+}
+</code></pre>
+
+<p><strong>code for have-duplicate input</strong></p>
+
+<pre><code>public static int myAnswerWithDup(int[] array) {
+    int len = array.length;
+    return helper(array, 0, len - 1);
+}
+
+public static int helper(int[] array, int left, int right) {
+    if (right &lt; left) {
+        return -1;
+    }
+    int mid = left + (right - left) / 2;
+    if (array[mid] == mid) {
+        return mid;
+    } else {
+        int smaller = 0;
+        int larger = 0;
+        if (array[mid] &lt; mid) {
+            smaller = array[mid];
+            larger = mid + 1;
+        } else if (array[mid] &gt; mid) {
+            smaller = mid - 1;
+            larger = array[mid];
+        }
+        int leftResult = helper(array, left, smaller);
+        if (leftResult != -1) {
+            return leftResult;
+        } else {
+            return helper(array, larger, right);
+        }
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 5.6 Swap Odd and Even Bits]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/16/swap-odd-even-bits/"/>
+    <updated>2014-09-16T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/16/swap-odd-even-bits</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Write a program to swap odd and even bits in an integer with as few instructions as possible (e.g., bit 0 and bit 1 are swapped, bit 2 and bit 3 are swapped, and so on).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Mask odd and even bits seperately.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int swapOddEvenBits(int x) {
+    return (((x &amp; 0xaaaaaaaa) &gt;&gt; 1) | ((x &amp; 0x55555555) &lt;&lt; 1));
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Guess Password]]></title>
@@ -47,145 +1045,93 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Design] DNS Communication Protocol]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/12/DNS-communication-protocol/"/>
-    <updated>2014-09-12T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/12/DNS-communication-protocol</id>
+    <title type="html"><![CDATA[[CC150v5] 5.5 Calculate Bits Conversion Required]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/16/calculate-bits-convertions/"/>
+    <updated>2014-09-16T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/16/calculate-bits-convertions</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<blockquote><p>What protocol is used for communicating with a DNS?</p></blockquote>
+<blockquote><p>Write a function to determine the number of bits (change) required to convert integer A to integer B.</p></blockquote>
 
-<h3>Answer</h3>
+<h3>Solution</h3>
 
-<p><a href="http://en.wikipedia.org/wiki/Domain_Name_System">Domain Name System</a> (DNS) is a hierarchical distributed naming system for computers, services, or any resource connected to the Internet or a private network. It associates various information with domain names assigned to each of the participating entities. Most prominently, it translates easily memorized domain names to the numerical IP addresses needed for the purpose of locating computer services and devices worldwide. The Domain Name System is an essential component of the functionality of the Internet.</p>
+<p>The only thing to know is <strong>how to count the number of &lsquo;1&rsquo;s in a integer</strong>. It&rsquo;s like this:</p>
 
-<p><a href="http://en.wikipedia.org/wiki/Domain_Name_System#Protocol_transport">DNS primarily uses</a> <strong>User Datagram Protocol (UDP)</strong> on port number 53 to serve requests.</p>
+<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
 
-<p>DNS queries consist of a single UDP request from the client followed by a single UDP reply from the server.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Barrier, Goods Van and Distance]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/11/barrier-goods-van-and-distance/"/>
-    <updated>2014-09-11T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/11/barrier-goods-van-and-distance</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
+<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
 
-<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32631467_0_1.html">link</a></p>
+<h3>Code</h3>
 
-<blockquote><p>2d array ＊代表障碍物 ＃代表货物 空白就是正常的路</p>
+<p><strong>code 1</strong></p>
 
-<p>问如何找到一个点为出发点 能实现总共取货路径最短？ 每次只能拿一个货物，遇到障碍需要绕开，拿到以后要放回出发点，然后再取另一个.</p></blockquote>
-
-<pre><code>＊＊＊＊＊＊＊＊＊＊
-＊  #           ＊
-＊  ＊＊＊  ＊   ＊
-＊              ＊
-＊     ＊＊   ＊ ＊
-＊  #    # # ＊＊＊
-＊＊＊＊＊＊＊＊＊＊
+<pre><code>public static int calcBitsSwapMe1(int a, int b) {
+    int num = a ^ b;
+    int count = 0;
+    while (num != 0) {
+        count += num &amp; 1;
+        num = num &gt;&gt;&gt; 1;
+    }
+    return count;
+}
 </code></pre>
 
-<h3>Solution</h3>
+<p><strong>code 2</strong></p>
 
-<p>This looks like a very difficult question, especially during a phone interview.</p>
-
-<p><strong>The 10th floor gives the best solution</strong>:</p>
-
-<blockquote><p><strong>BFS from every box</strong>. in each box, a non-blocking cell (include box position, but exclude hazard position) will have a weight value, stand for the distance to the box.</p>
-
-<p>after bfs from all the boxes, each cell will have k weight, k is the number of boxes. sum all the weight in each cell, and find the cell with smallest sum of weight.</p>
-
-<p>One problem of this solution may lead to a cell of a box. We can then sort the cell by sum of weight and find the first position that is not a box.</p>
-
-<p>complexity O(k*n<sup>2</sup>)</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Arithmetic Progression Triplet]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/11/arithmetic-progression-triplet/"/>
-    <updated>2014-09-11T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/11/arithmetic-progression-triplet</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">link</a></p>
-
-<blockquote><p>Given a sorted set, find if there exist three elements in Arithmetic Progression or not.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a rather simple Arithmetic Progression question</strong>.</p>
-
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">To find the three elements</a>, we first fix an element as middle element and search for other two (one smaller and one greater).</p></blockquote>
-
-<p>O(n<sup>2</sup>) time.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public boolean longest(int[] A) {
-    int len = A.length;
-    for (int i = 1; i &lt; len - 1; i++) {
-        int left = i - 1;
-        int right = i + 1;
-        while (left &gt;= 0 &amp;&amp; right &lt; len) {
-            int total = A[left] + A[right];
-            if (total &gt; 2 * A[i]) {
-                left--;
-            } else if (total &lt; 2 * A[i]) {
-                right++;
-            } else {
-                return true;
-            }
-        }
+<pre><code>public static int calcBitsSwapMe2(int a, int b) {
+    int num = a ^ b;
+    int count = 0;
+    while (num != 0) {
+        num = num &amp; (num - 1);
+        count++;
     }
-    return false;
+    return count;
 }
 </code></pre>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Google] Arithmetic Progression Longest]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/11/arithmetic-progression-longest/"/>
-    <updated>2014-09-11T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/11/arithmetic-progression-longest</id>
+    <title type="html"><![CDATA[[Brain Teaser] 6.1 Bottles of Pills]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/16/bottles-of-spills/"/>
+    <updated>2014-09-16T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/16/bottles-of-spills</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<p><a href="http://www.careercup.com/question?id=8211177">link</a></p>
+<blockquote><p>You have 20 bottles of pills. 19 bottles have 1.0 gram pills, but one has pills of weight 1.1 grams.</p>
 
-<blockquote><p>Given an array of integers A, give an algorithm to find the longest Arithmetic progression in it, i.e find a sequence i1 &lt; i2 &lt; … &lt; ik, such that</p>
-
-<p>A[i1], A[i2], …, A[ik] forms an arithmetic progression, and k is the largest possible.</p>
-
-<p>The sequence S1, S2, …, Sk is called an arithmetic progression if S(j+1) – S(j) is a constant.</p></blockquote>
+<p>Given a scale, how to find the heavy bottle <strong>only scaling ONCE</strong>?</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>This is a rather difficult Arithmetic Progression question</strong>.</p>
+<p>Take 1 pill from Bottle 1, 2 pills from Bottle 2, and so on. We&rsquo;ll expect (1 + 2 + &hellip; + 20) = 210 gram of pills.</p>
 
-<p>The solution is 2-D DP.</p>
+<p>The answer would be {(weight &ndash; 210 grams) / 0.1}.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 5.1 Binary Merge 2 Numbers]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/16/binary-merge-two-numbers/"/>
+    <updated>2014-09-16T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/16/binary-merge-two-numbers</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
 
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">The idea is</a> to create a 2D table dp[n][n]. An entry dp[i][j] in this table stores LLAP with input[i] and input[j] as first two elements of AP(j > i).</p>
+<blockquote><p>You are given two 32-bit numbers, N andM, and two bit positions, i and j. Write a method to insert M into Nsuch that M starts at bit j and ends at bit i. You can assume that the bits j through i have enough space to fit all ofM. That is, ifM= 10011, you can assume that there are at least 5 bits between j and i. You would not, for example, have j-3 and i=2, because M could not fully fit between bit 3 and bit 2.</p>
 
-<p>The last column of the table is always 2. Rest of the table is filled <strong>from bottom right to top left</strong>.</p>
+<p>EXAMPLE:</p>
 
-<p>To fill rest of the table, j (second element in AP) is first fixed. i and k are searched for a fixed j. If i and k are found such that i, j, k form an AP, then <strong>the value of dp[i][j] is set as dp[j][k] + 1</strong>.</p>
+<p>Input: N = 16000000000, M = 10011, i = 2, j = 6</p>
 
-<p><strong>Note that the value of dp[j][k] must have been filled</strong> before as the loop traverses from right to left columns.</p></blockquote>
+<p>Output: N = 10001001100</p></blockquote>
 
-<p>The 2 difficult points of this question:</p>
+<h3>Solution</h3>
+
+<p><strong>This is a basic bit manipulation question</strong>. The key is to use binary maks. Two things to note:</p>
 
 <ol>
-<li>how to come up with the transation formula. (i.e. <strong>dp[i][j] = dp[j][k] + 1</strong>, when (i, j, k) forms a AP).</li>
-<li>how to fill up all dp[i][j] in each loop of j. (Once inside the if-else, once outside the main while-loop)</li>
+<li><p>The &lsquo;~&rsquo; means negate. So (~0) is a sequence of 1 (the value equals to -1).</p></li>
+<li><p>When shifting bits, <strong>DO NOT USE &lsquo;>>&rsquo; because it&rsquo;s signed shift</strong>. Instead, <strong>use &lsquo;>>>&rsquo; (unsigned right shift operator)</strong>.</p></li>
 </ol>
 
 
@@ -193,437 +1139,152 @@
 
 <p><strong>written by me</strong></p>
 
-<pre><code>public int longest(int[] A) {
-    int len = A.length;
-    int[][] dp = new int[len][len];
-    for (int i = 0; i &lt; len; i++) {
-        // the pair ending at last position is always a progression
-        dp[i][len - 1] = 2;
-    }
-    int longest = 1;
-    for (int j = len - 2; j &gt;= 0; j--) {
-        // for each j, find i and k that makes 1 progression
-        int i = j - 1;
-        int k = j + 1;
-        while (i &gt;= 0 &amp;&amp; k &lt; len) {
-            int total = A[i] + A[k];
-            if (total &gt; 2 * A[j]) {
-                // this is important!
-                dp[i][j] = 2;
-                i--;
-            } else if (total &lt; 2 * A[j]) {
-                k++;
-            } else {
-                // found a valid progression triplet A(i, j, k)
-                dp[i][j] = dp[j][k] + 1;
-                longest = Math.max(longest, dp[i][j]);
-                i--;
-                k++;
-            }
-        }
-        // this is important!
-        while (i &gt;= 0) {
-            dp[i][j] = 2;
-            i--;
-            // If the loop was stopped due to k becoming more than
-            // n-1, set the remaining dp[i][j] as 2
-        }
-    }
-    return longest;
+<pre><code>public static int myAnswer(int n, int m, int i, int j) {
+    int rr = (~0 &gt;&gt;&gt; (31 - j));
+    int ll = (~0 &lt;&lt; i);
+    // printBinary(rr);
+    // printBinary(ll);
+
+    int middleMask = ll &amp; rr;
+    int twoEndMask = ll ^ rr;
+
+    n = n &amp; twoEndMask;
+    m = (m &lt;&lt; i) &amp; middleMask;
+
+    return n | m;
 }
 </code></pre>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Google] Winner of Tic-tac-toe]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/09/Winner-tic-tac-toe/"/>
-    <updated>2014-09-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/09/Winner-tic-tac-toe</id>
+    <title type="html"><![CDATA[[CC150v5] 3.7 Stack of Animals]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/15/stack-of-animals/"/>
+    <updated>2014-09-15T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/15/stack-of-animals</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<p><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">link</a></p>
+<blockquote><p>An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would prefer a dog or a cat (and will receive the oldest animal of that type). They cannot select which specific animal they would like.</p>
 
-<blockquote><p>How would you determine if someone has won a game of tic-tac-toe on a board of any size?</p></blockquote>
-
-<p>(This is also on CC150v4 19.2 and CC150v4 17.2)</p>
+<p>Create the data structures to maintain this system and implement operations such as enqueue, dequeueAny, dequeueDog and dequeueCat. You may use the built-in LinkedList data structure.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>First, confirm that when the number of pieces in a line equals to the dimension of the board, one person wins. Eg. for 10 * 10 board, 10 pieces need to be in 1 line.</p>
+<p>There are 2 solutions.</p>
 
-<p><strong><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">We can determine</a> if someone has won during a game in real time</strong>, as in checking after every move.</p>
+<p><strong>First one is using a single queue</strong>. This makes &lsquo;dequeueAny&rsquo; easy, but &lsquo;dequeueCat&rsquo; and &lsquo;dequeueDog&rsquo; difficult.</p>
 
-<blockquote><p>Create an array of size 2n+2 at the beginning of the game and fill it with zeros. Each spot in the array will be a sum of X&rsquo;s or O&rsquo;s horizontally (the first n places in the array), vertically (the second n places in the array) and diagonally (the last 2 places). Then with every move, you add 1 to the 2 places (or 3 if on a diagnol) of the array if X, and subtract 1 if its an O. After adding you check and see if the value of the array is equal to n or -n, if it is, n mean X has won and -n means O has won.</p></blockquote>
+<p><strong>Second approach would be using 2 queues for dogs and cats</strong>. We need something like timestamp to be stored (more space usage).</p>
 
-<p>This is uses O(2n+2) space, but it&rsquo;s the best solution I can find online. I wrote code posted below.</p>
+<p>When we return, we peek both queues are choose the older one. <strong>This is recommended solution in the book</strong>.</p>
 
 <h3>Code</h3>
 
-<p><strong>written by me</strong></p>
+<p><strong>from the book</strong></p>
 
-<pre><code>enum Piece {
-    Empty, Red, Blue
-};
+<p>Animal.java</p>
 
-public static Piece hasWon3(Piece[][] board) {
+<pre><code>public abstract class Animal {
+    int order;
+    String name;
 
-    int N = board.length;
+    public Animal(String n) {
+        name = n;
+    }
 
-    // O(2n+2) space to store count info
-    int[] rowCnt = new int[N];
-    int[] colCnt = new int[N];
-    int[] digCnt = new int[2];
+    public abstract String name();
 
-    for (int i = 0; i &lt; N; i++) {
-        for (int j = 0; j &lt; N; j++) {
+    public boolean isOlderThan(Animal a) {
+        return this.order &lt; a.order;
+    }
+}
 
-            int pieceValue = 0;
-            if (board[i][j] == Piece.Blue) {
-                pieceValue = 1;
-            } else if (board[i][j] == Piece.Red) {
-                pieceValue = -1;
-            }
+class Cat extends Animal {
+    public Cat(String n) {
+        super(n);
+    }
 
-            // if empty, pieceValue is 0
-            // if blue, add 1 in count
-            // if red, subtract 1 in count
-            rowCnt[i] += pieceValue;
-            if (checkFinish(rowCnt[i], N) != null) {
-                return checkFinish(rowCnt[i], N);
-            }
+    public String name() {
+        return "Cat: " + name;
+    }
+}
 
-            // after adding the count, check if the game finishes
-            colCnt[j] += pieceValue;
-            if (checkFinish(colCnt[j], N) != null) {
-                return checkFinish(colCnt[j], N);
-            }
+class Dog extends Animal {
+    public Dog(String n) {
+        super(n);
+    }
 
-            if (i == j) {
-                digCnt[0] += pieceValue;
-                if (checkFinish(digCnt[0], N) != null) {
-                    return checkFinish(digCnt[0], N);
-                }
-            } else if (i + j == N) {
-                digCnt[1] += pieceValue;
-                if (checkFinish(digCnt[1], N) != null) {
-                    return checkFinish(digCnt[1], N);
-                }
-            }
+    public String name() {
+        return "Dog: " + name;
+    }
+}
+</code></pre>
+
+<p>AnimalQueue.java</p>
+
+<pre><code>public class AnimalQueue {
+    LinkedList&lt;Dog&gt; dogs = new LinkedList&lt;Dog&gt;();
+    LinkedList&lt;Cat&gt; cats = new LinkedList&lt;Cat&gt;();
+    private int order = 0;
+
+    public void enqueue(Animal a) {
+        a.order = order;
+        order++;
+        if (a instanceof Dog) {
+            dogs.addLast((Dog) a);
+        } else if (a instanceof Cat) {
+            cats.addLast((Cat) a);
         }
     }
-    // game not finished, continue
-    return Piece.Empty;
-}
 
-private static Piece checkFinish(int count, int N) {
-    if (count == N)
-        return Piece.Blue;
-    else if (count == -1 * N)
-        return Piece.Red;
-    else
-        return null;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Form a Palindrome With Insertion]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/06/Form-palindrome-with-insertion/"/>
-    <updated>2014-09-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/06/Form-palindrome-with-insertion</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Given-a-string-convert-it-into-a-palindrome-with-the-lease-number-of-insertions-possible-QTN_729122.htm">link</a></p>
-
-<blockquote><p>Given a string, convert it into a palindrome with the lease number of insertions possible.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a DP question. There&rsquo;re 2 approaches.</p>
-
-<p><strong>First, is direct DP</strong>. This is the nicest solution, not intuitive at first, but actually good.</p>
-
-<blockquote><p>P[i, j] = P[i+1, j-1], if S[i] = S[j]</p>
-
-<p>P[i, j] = 1 + min(P[i,j-1], P[i+1,j]), otherwise</p></blockquote>
-
-<p>contributed by <a href="http://stackoverflow.com/a/10732879">this guy</a>.</p>
-
-<p><strong>Second approach is to calculate the longest palindrome subsequence</strong>, and the answer would be string length minus this value.</p>
-
-<p>I wrote code for both apporaches.</p>
-
-<p>According to <a href="http://www.geeksforgeeks.org/dynamic-programming-set-28-minimum-insertions-to-form-a-palindrome/">G4G</a>, we can actually calculate the <strong>Longest Common Subsequence of the string and its reverse</strong>, and this value shall be same as the longest palindrome subsequence that we got in second approach. It&rsquo;s nice to know this idea.</p>
-
-<h3>Code</h3>
-
-<p><strong>direct</strong></p>
-
-<pre><code>public int solve1(String str) {
-    // direct dp
-    if (str == null)
-        return 0;
-    int len = str.length();
-    int[][] dp = new int[len][len];
-    for (int i = len - 1; i &gt;= 0; i--) {
-        for (int j = i; j &lt; len; j++) {
-            if (i == j) {
-                dp[i][j] = 0;
-            } else if (i + 1 == j) {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 0 : 1;
-            } else {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? dp[i + 1][j - 1]
-                        : 1 + Math.min(dp[i + 1][j], dp[i][j - 1]);
-            }
+    public Animal dequeueAny() {
+        if (dogs.size() == 0) {
+            return dequeueCats();
+        } else if (cats.size() == 0) {
+            return dequeueDogs();
         }
-    }
-    return dp[0][len - 1];
-}
-</code></pre>
-
-<p><strong>longest palindrome subsequence</strong></p>
-
-<pre><code>public int solve2(String str) {
-    // longest palindrome subsequence
-    if (str == null)
-        return 0;
-    int len = str.length();
-    int[][] dp = new int[len][len];
-    for (int i = len - 1; i &gt;= 0; i--) {
-        for (int j = i; j &lt; len; j++) {
-            if (i == j) {
-                dp[i][j] = 1;
-            } else if (i + 1 == j) {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 2 : 1;
-            } else {
-                dp[i][j] = str.charAt(i) == str.charAt(j) ? 2 + dp[i + 1][j - 1]
-                        : Math.max(dp[i + 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-    return len - dp[0][len - 1];
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Unsolved Mystery of UTF8 Encoding]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/04/unsolved-mystery-of-utf8/"/>
-    <updated>2014-09-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/04/unsolved-mystery-of-utf8</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://algorithmguru.com/blog/?p=148">link</a></p>
-
-<blockquote><p>UTF-8 is a variable-length encoding of letters or runes. If the most significant bit of the first byte is 0, the letter is 1 byte long. Otherwise, its length is the number of leading 1’s in the first byte. If a letter is more than one byte long, all subsequent runes start with 10. Here’s a chart:</p>
-
-<p>UTF-8 encoding scheme is described below:</p></blockquote>
-
-<pre><code>0XXXXXXX = this is the entire rune
-10XXXXXX = this is a continuation of the rune from the previous byte
-110XXXXX = this is the start of a 2-byte rune.
-1110XXXX = this is the start of a 3-byte rune.
-11110XXX = this is the start of a 4-byte rune.
-111110XX = this is the start of a 5-byte rune.
-1111110X = this is the start of a 6-byte rune.
-11111110 = this is the start of a 7-byte rune.
-11111111 = this is the start of a 8-byte rune.
-</code></pre>
-
-<blockquote><p>For example, a 3-byte rune would be 1110XXXX 10XXXXXX 10XXXXXX.</p>
-
-<p>Write a function that decides whether a given byte array (or string) is valid UTF-8 encoded text.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is an easy question, just put here for reference.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Find Second Shortest Path]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/04/Find-second-shortest-path/"/>
-    <updated>2014-09-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/04/Find-second-shortest-path</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=16922663">link</a></p>
-
-<blockquote><p>You are given a graph and an algorithm that can find the shortest path b/w any two nodes.</p>
-
-<p>Now you have to find the second shortest path between same two nodes.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>From the top answer:</p>
-
-<blockquote><p><strong>Find the shortest path</strong> between any two nodes. Let them be A and B.</p>
-
-<p>Now to get second shortest path between the same nodes, <strong>remove any one edge that is involved in the shortest path</strong> between the same nodes and calculate the shortest path.</p>
-
-<p>Do the above process for each of the node involved in shortest path and keep track of the minimum second shortest path found.</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Code a HashMap]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/04/Code-a-hashmap/"/>
-    <updated>2014-09-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/04/Code-a-hashmap</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
-
-<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We already write 2 post before:</p>
-
-<ol>
-<li><p><strong>[Question] Implement a HashMap</strong></p></li>
-<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
-</ol>
-
-
-<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
-
-<ol>
-<li>The basic structure is an array. It can be:
-
-<ol>
-<li>An array of linked nodes (with a next pointer).</li>
-<li>An array of linked list.</li>
-</ol>
-</li>
-<li>There should be a hash function.</li>
-<li>There should be a function to convert the hash value to corresponding array index.</li>
-<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
-<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
-</ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Weird Sort Array]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/03/weird-sort-array/"/>
-    <updated>2014-09-03T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/03/weird-sort-array</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32772813.html">link</a></p>
-
-<blockquote><p>数组排序， 排成 a1<a2>a3<a4>a5。。。这种形式。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>The are 2 solutions</strong>. The easy one is this:</p>
-
-<blockquote><p>sort first, then 把临近的奇数换到偶数(index)上, O(nlog n).</p></blockquote>
-
-<p><strong>There&rsquo;s a great O(n) solution however</strong>, not easy to think:</p>
-
-<blockquote><p>两两比较相邻数字，把大的数字放到下标为奇数的位置。 O(n).</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>O(nlgn) solution</strong></p>
-
-<pre><code>public void solutionOnlgn(int[] A) {
-    // this is a O(nlgn) solution
-    Arrays.sort(A);
-    for (int i = 2; i &lt; A.length; i += 2) {
-        swap(A, i - 1, i);
-    }
-}
-
-private void swap(int[] A, int a, int b) {
-    A[a] ^= A[b];
-    A[b] ^= A[a];
-    A[a] ^= A[b];
-}
-</code></pre>
-
-<p><strong>O(n) solution</strong></p>
-
-<pre><code>public void solutionOn(int[] A) {
-    // this is a O(n) solution
-    for (int i = 1; i &lt; A.length; i++) {
-        // compare (i)th with (i-1)th, and put the large value
-        // at odd-indexed positions
-        if ((A[i - 1] &lt; A[i] &amp;&amp; i % 2 == 0)
-                || (A[i - 1] &gt; A[i] &amp;&amp; i % 2 == 1)) {
-            swap(A, i - 1, i);
-        }
-    }
-}
-
-private void swap(int[] A, int a, int b) {
-    A[a] ^= A[b];
-    A[b] ^= A[a];
-    A[a] ^= A[b];
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] String Replacement Question]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/03/String-replacement-question/"/>
-    <updated>2014-09-03T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/03/String-replacement-question</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32766461.html">link</a></p>
-
-<blockquote><p>String replace, 给一个原string，一个target，一个替换的新str，把所有出现
-target str的地方都换成新的str， 长度可以任意.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>If the question asks for an in-place algo, then we can refer to <strong>Question 1.5 in CC150v4</strong>.</p>
-
-<h3>Question</h3>
-
-<blockquote><p>1.5 Write a method to replace all spaces in a string with ‘%20’.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><strong>pre-processing</strong>, count the number of spaces in string</li>
-<li>parse the string from end to beginning.</li>
-</ol>
-
-
-<p>Need 2 pass.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong></p>
-
-<pre><code>public static void ReplaceFun(char[] str, int length) {
-    int spaceCount = 0, newLength, i = 0;
-    for (i = 0; i &lt; length; i++) {
-        if (str[i] == ' ') {
-            spaceCount++;
-        }
-    }
-    newLength = length + spaceCount * 2;
-    str[newLength] = '\0';
-    for (i = length - 1; i &gt;= 0; i--) {
-        if (str[i] == ' ') {
-            str[newLength - 1] = '0';
-            str[newLength - 2] = '2';
-            str[newLength - 3] = '%';
-            newLength = newLength - 3;
+        Dog dog = dogs.peek();
+        Cat cat = cats.peek();
+        if (dog.isOlderThan(cat)) {
+            return dogs.poll();
         } else {
-            str[newLength - 1] = str[i];
-            newLength = newLength - 1;
+            return cats.poll();
         }
+    }
+
+    public Animal peek() {
+        if (dogs.size() == 0) {
+            return cats.peek();
+        } else if (cats.size() == 0) {
+            return dogs.peek();
+        }
+        Dog dog = dogs.peek();
+        Cat cat = cats.peek();
+        if (dog.isOlderThan(cat)) {
+            return dog;
+        } else {
+            return cat;
+        }
+    }
+
+    public int size() {
+        return dogs.size() + cats.size();
+    }
+
+    public Dog dequeueDogs() {
+        return dogs.poll();
+    }
+
+    public Dog peekDogs() {
+        return dogs.peek();
+    }
+
+    public Cat dequeueCats() {
+        return cats.poll();
+    }
+
+    public Cat peekCats() {
+        return cats.peek();
     }
 }
 </code></pre>
@@ -631,410 +1292,160 @@ target str的地方都换成新的str， 长度可以任意.</p></blockquote>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Design] Leader Election]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/03/Leader-election/"/>
-    <updated>2014-09-03T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/03/Leader-election</id>
+    <title type="html"><![CDATA[[CC150v5] 3.2 Stack Min Value]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/15/stack-get-min-value/"/>
+    <updated>2014-09-15T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/15/stack-get-min-value</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<p>(this question is from MIT handouts B)</p>
+<blockquote><p>How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element?</p>
 
-<blockquote><p>Describe a technique to identify a &ldquo;leader&rdquo; among a group of 10 identical servers that are all connected to every other server.</p>
-
-<p>There are no prior distinguishing characteristics of any of them and the same program to identify the leader starts running on all of them at the same time. After an answer is given, ask how much network traffic it requires and, if &ldquo;ties&rdquo; are possible, ask how you can break ties.</p></blockquote>
-
-<h3>Leader Election</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Leader_election">Leader Election</a></strong> is the process of designating a single process as the organizer of some task distributed among several computers. After running this algorithm, each node throughout the network recognizes a unique node as the task leader.</p>
-
-<p>The good answer would be:</p>
-
-<p>Have each server wait a random amount of time and then say &ldquo;I&rsquo;m it.&rdquo; The &ldquo;I&rsquo;m it&rdquo; <strong>announcement is time‐stamped</strong>, and the computer that <strong>time‐stamped its announcement first</strong> is elected the leader.</p>
-
-<p>This approach requires sending out 9 messages. <strong>If there is a tie</strong>, the computers can repeat the procedure.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Listener / Observer Pattern]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/02/Listener-Observer-pattern/"/>
-    <updated>2014-09-02T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/02/Listener-Observer-pattern</id>
-    <content type="html"><![CDATA[<h3>Observer pattern</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Observer_pattern">The observer pattern</a></strong> is a software design pattern in which an object(subject) maintains a list of dependents(observers), and notifies them automatically of any state changes (usually by calling one of their methods).</p>
-
-<p>The Observer pattern is mainly used to implement distributed event handling systems. It&rsquo;s also a key part in MVC architectural.</p>
-
-<h3>Example</h3>
-
-<p>A mailing list example.</p>
-
-<p>Each student in the mailing list would be a listener/observer, and teacher would be announcer/subject.</p>
-
-<p>So in the code, there&rsquo;s a Listener Interface that all students implement. There&rsquo;s a update() method in the interface, where each student define their own implementation.</p>
-
-<p>Teacher would keep a list of Listeners. When there&rsquo;s any news, teacher would call update() on each object.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Find Anagrams in Dictionary]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/02/Find-anagrams-in-dictionary/"/>
-    <updated>2014-09-02T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/02/Find-anagrams-in-dictionary</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=3088">link</a></p>
-
-<blockquote><p>Imagine you had a dictionary. How would you print all anagrams of a word? What if you had to do this repeatedly? Could you optimize it?</p></blockquote>
+<p>Push, pop and min should all operate in 0(1) time.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>A very <a href="http://stackoverflow.com/a/12477976">nice solution</a>:</p>
+<p>This is <strong>a very tricky question</strong>.</p>
 
-<ol>
-<li><p>Open dictionary</p></li>
-<li><p>Create empty hashmap H</p></li>
-<li><p>For each word in dictionary:</p>
+<p>The key is how to use the minimum space to achieve O(1) query min operation. The trick is to count how many times the same min-value occur. Eg.</p>
 
-<ol>
-<li><p>Create a key that is the word&rsquo;s letters sorted alphabetically (and forced to one case)</p></li>
-<li><p>Add the word to the list of words accessed by the hash key in H</p></li>
-</ol>
-</li>
-</ol>
+<blockquote><p>input: 5,3,3,1,1,2,2,2,2,2,2,2.</p>
 
+<p>stack: 5,3,3,1,1.</p></blockquote>
 
-<p>There&rsquo;s another <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">very interesting idea</a>, if the length of the word is not too long.</p>
-
-<blockquote><p>Another approach could be we can assign each letters from a..z a prime numbers (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, .. so on)</p>
-
-<p>and then for any word, we can calculate its key as the multiples of all the prime number corresponding to characters in the word.</p>
-
-<p>The char &ndash;> int assignment may look like:</p></blockquote>
-
-<pre><code>a=2, b=3, c=5, d=7, e=11, f=13, g=17, h=19, i=23, j=29, 
-k=31, l=37, m=41, n=43, o=47, p=53, q=59, r=61, s=67, t=71, 
-u=73, v=79, w=83, x=89, y=97, z=101
-</code></pre>
+<p>So we can pop &lsquo;1&rsquo; twice, pop &lsquo;3&rsquo; twice, and pop &lsquo;5&rsquo; once. Read the code!</p>
 
 <h3>Code</h3>
 
-<p><strong>not written by me</strong>, <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">link</a></p>
+<pre><code>public class StackMyAnswer extends Stack&lt;Integer&gt; {
 
-<pre><code>private static HashMap&lt;String, ArrayList&lt;String&gt;&gt; anagramMap = new HashMap&lt;String, ArrayList&lt;String&gt;&gt;();
+    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
 
-public static void findAnagrams(String[] dictionary) {
-    int len = dictionary.length;
-
-    for (int i = 0; i &lt; len; i++) {
-        String sortedWord = sortWordLexicographically(dictionary[i]);
-        ArrayList&lt;String&gt; wordList = anagramMap.get(sortedWord);
-        if (wordList == null) {
-            wordList = new ArrayList&lt;String&gt;();
+    public void push(int value) {
+        if (min.isEmpty() || value &lt;= min.peek()) {
+            min.push(value);
         }
-        wordList.add(dictionary[i]);
-        anagramMap.put(sortedWord, wordList);
-    }
-}
-
-public ArrayList&lt;String&gt; getAnagrams(String word) {
-    if (word == null) {
-        return null;
+        super.push(value);
     }
 
-    String sortedWord = sortWordLexicographically(word);
-    return anagramMap.get(sortedWord);
+    public Integer pop() {
+        int val = super.pop();
+        if (!min.isEmpty() &amp;&amp; val == min.peek()) {
+            min.pop();
+        }
+        return val;
+    }
+
+    public int min() {
+        if (min.isEmpty()) {
+            return Integer.MAX_VALUE;
+        }
+        return min.peek();
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[CC150v5] 2.7 Linked List Palindrome]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/15/linked-list-palindrome/"/>
+    <updated>2014-09-15T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/15/linked-list-palindrome</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<blockquote><p>Implement a function to check if a linked list is a palindrome.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are multiple solutions for this question.</p>
+
+<p><strong>First, maybe the simplest solution of all</strong>, is to compare the list with the reversed list (compare first half would be enough). This is a very nice idea.</p>
+
+<p><strong>Second solution is iterative approach</strong>. My code below is to first get the total length, then <strong>use a Stack</strong>. Alternatively, we can also use <strong>fast/slow pointer</strong> to find the mid point. This solution is easiest to write.</p>
+
+<p><strong>Third solution is recursive</strong>. We basically uses a public pointer to:</p>
+
+<ol>
+<li>get starting value</li>
+<li>check middle parts</li>
+<li>get ending value</li>
+<li>if starting == ending and middle part is valid, then true.</li>
+</ol>
+
+
+<p>This code is not easy to write, and hard to think.</p>
+
+<p>It&rsquo;s best to know both iterative and recursive solution.</p>
+
+<h3>Code</h3>
+
+<p>Iterative</p>
+
+<pre><code>public static boolean isPalindrome1(LinkedListNode head) {
+    int len = getListLength(head);
+    int half = len / 2;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    for (int i = 0; i &lt; half; i++) {
+        stack.push(head.data);
+        head = head.next;
+    }
+    if (len % 2 == 1) {
+        head = head.next;
+    }
+    for (int i = 0; i &lt; half; i++) {
+        if (head.data != stack.pop()) {
+            return false;
+        }
+        head = head.next;
+    }
+    return true;
+}
+</code></pre>
+
+<p>Recursive</p>
+
+<pre><code>private static LinkedListNode p;
+
+public static boolean isPalindrome2(LinkedListNode head) {
+    p = head;
+    int len = getListLength(head);
+    return helper2(0, len - 1);
 }
 
-public void printAnagrams(String word) {
-    if (word == null) {
-        System.out.println("Input word is null!");
+public static boolean helper2(int from, int to) {
+    if (from &gt; to) {
+        return true;
+    } else if (from == to) {
+        p = p.next;
+        return true;
     } else {
-        ArrayList&lt;String&gt; wordList = getAnagrams(word);
-        if (wordList == null) {
-            System.out.println("No anagrams exists for : " + word);
-        } else {
-            Iterator&lt;String&gt; iter = wordList.iterator();
-            while (iter.hasNext()) {
-                System.out.print(iter.next());
-            }
+        // first get fromVal, then check middlep part, last, get toVal
+        int fromVal = p.data;
+        p = p.next;
+        if (!helper2(from + 1, to - 1)) {
+            return false;
+        }
+        int toVal = p.data;
+        p = p.next;
+        if (fromVal != toVal) {
+            return false;
         }
     }
+    return true;
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Array Distance A(i)+A(j)+(j-i)]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)/"/>
-    <updated>2014-09-02T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
 
-<p><a href="http://www.mitbbs.com/article/JobHunting/32772225_3.html">link</a></p>
+<p>Shared method:</p>
 
-<blockquote><p>Given an int array A[], define:</p>
-
-<p>distance = A[i] + A[j] + (j-i), j >= i.</p>
-
-<p>Find max distance in A[]</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Solution suggested on floor 8 of <a href="http://www.mitbbs.com/mitbbs_article_t.php?board=JobHunting&amp;gid=32772225&amp;ftype=0">this post</a>.</p>
-
-<ol>
-<li><p>distance = (A[i] &ndash; i) + (A[j] + j), so we do 2 iteration in the array and calculate (A[i] &ndash; i) and (A[j] + j) respectively.</p></li>
-<li><p>save the max value of (A[i] &ndash; i) from left to right</p></li>
-<li><p>save the max value of (A[j] + j) from right to left</p></li>
-<li><p>last iteration, calculate result.</p></li>
-</ol>
-
-
-<p>Eg. input = {3, 3, 3, 5, 6, 4}</p>
-
-<blockquote><p>max value of (A[i] &ndash; i) from left to right: {3, 3, 3, 3, 3, 3}</p>
-
-<p>max value of (A[j] + j) from right to left: {10, 10, 10, 10, 10, 9}</p>
-
-<p>final result: 13</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public int distance(int[] A) {
-    int len = A.length;
-    int[] arrayI = new int[len];
-    int[] arrayJ = new int[len];
-
-    arrayI[0] = A[0] - 0;
-    // arrayI stores max value of (A[i]-i) from left to right
-    arrayJ[len - 1] = A[len - 1] + (len - 1);
-    // arrayJ stores max value of (A[i]+i) from right to left
-
-    for (int i = 1; i &lt; len; i++) {
-        arrayI[i] = Math.max(arrayI[i - 1], A[i] - i);
+<pre><code>private static int getListLength(LinkedListNode node) {
+    int count = 0;
+    while (node != null) {
+        count++;
+        node = node.next;
     }
-
-    for (int i = len - 2; i &gt;= 0; i--) {
-        arrayJ[i] = Math.max(arrayJ[i + 1], A[i] + i);
-    }
-
-    Common.printArray(arrayI);
-    Common.printArray(arrayJ);
-
-    int max = Integer.MIN_VALUE;
-    for (int i = 0; i &lt; len; i++) {
-        max = Math.max(max, arrayI[i] + arrayJ[i]);
-    }
-    return max;
+    return count;
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Multithreading - Deadlock Prevention]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/01/Multithreading-deadlock-prevention/"/>
-    <updated>2014-09-01T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/01/Multithreading-deadlock-prevention</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>How to prevent deadlock? (question from MIT handouts 1)</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Preventing one of the 4 conditions will prevent deadlock:</p>
-
-<ol>
-<li><p>Removing the <strong>mutual exclusion condition</strong>, but not very possible.</p></li>
-<li><p>The <strong>hold and wait</strong> conditions may be removed by requiring processes to request all the resources they will need before starting up.</p></li>
-<li><p>The <strong>no preemption condition</strong> may also be difficult or impossible to avoid as a process has to be able to have a resource for a certain amount of time, or the processing outcome may be inconsistent or thrashing may occur.</p></li>
-<li><p>The final condition is the <strong>circular wait condition</strong>. Approaches that avoid circular waits include disabling interrupts during critical sections and using a hierarchy to determine a partial ordering of resources.</p></li>
-</ol>
-
-
-<h3>Answer</h3>
-
-<p><strong>Assign an order to our locks</strong> (require that the locks always acquired in order).</p>
-
-<p>This prevent 2 thread waiting to get the resource in each other&rsquo;s hand.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Crosswod Solver]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/01/Crossword-solver/"/>
-    <updated>2014-09-01T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/01/Crossword-solver</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/8585090/algorithm-for-crossword-puzzle-with-given-grid">link</a></p>
-
-<blockquote><p>Given a wordlist like this:</p></blockquote>
-
-<pre><code>1. ccaa
-1. baca
-1. baaa
-1. bbbb
-</code></pre>
-
-<blockquote><p>and a Grid like this:</p></blockquote>
-
-<pre><code>X X 
-XXXX
-X X 
-XXXX
-</code></pre>
-
-<blockquote><p>Now solve this crossword. One possible solution:</p></blockquote>
-
-<pre><code>b c 
-baca
-b a 
-baaa
-</code></pre>
-
-<h3>Solution</h3>
-
-<p><a href="http://stackoverflow.com/a/8586102">The corssword problem</a> is NP-Complete, so your best shot is brute force: just try all possibilities, and stop when a possibility is a valid. Return failure when you exhausted all possible solutions.</p>
-
-<h3>Code</h3>
-
-<p><strong>Pseudo code for brute force</strong>. (this just serve as a guide, not a complete/correct solution)</p>
-
-<pre><code>solve(words,grid):
-   if words is empty:
-       if grid.isValudSol():
-          return grid
-       else:
-          return None
-   for each word in words:
-       possibleSol &lt;- grid.fillFirst(word)
-       ret &lt;- solve(words\{word},possibleSol)
-       if (ret != None):
-          return ret
-   return None
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Classic] Travelling Salesman Problem]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/30/Travelling-salesman-problem/"/>
-    <updated>2014-08-30T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/30/Travelling-salesman-problem</id>
-    <content type="html"><![CDATA[<h3>TSP problem</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Travelling_salesman_problem">Given a list of cities</a> and the distances between each pair of cities, what is the shortest possible route that visits each city exactly once and returns to the origin city?</p>
-
-<p>It is an NP-hard problem in combinatorial optimization. We will discuss 2 category of solutions:</p>
-
-<ol>
-<li>Exact algorithms</li>
-<li>Heuristic and approximation algorithms</li>
-</ol>
-
-
-<h3>Exact algorithms</h3>
-
-<ol>
-<li><p><strong>Brute force search</strong>, which the run time is O(n!), which is impossible for 20 cities.</p></li>
-<li><p><strong>DP</strong> Held–Karp algorithm. O(n<sup>2</sup> x 2<sup>n</sup>).</p></li>
-<li><p><strong>Branch-and-bound</strong> algorithm. This can process 40-60 cities.</p></li>
-</ol>
-
-
-<h3>Heuristic and approximation algorithms</h3>
-
-<ol>
-<li><p><strong>Greedy</strong>, or Nearest Neighbour algorithm. (an improved version is called Nearest Fragment algorithm, which connect NN in groups)</p></li>
-<li><p><strong>Minimum Spanning Tree (MST)</strong>, build the <a href="http://en.m.wikipedia.org/wiki/Minimum_spanning_tree">MST</a> using <a href="http://en.wikipedia.org/wiki/Kruskal's_algorithm">Kruskal&rsquo;s algorithm</a> and then do a <strong>Depth-first Tree Tour</strong>. <a href="http://www.youtube.com/watch?v=HWHZAtQl1vI">link</a> to video.</p>
-
-<ol>
-<li><p>Sort all edges from small to large, then add edges into MST as long as no cycle is created. In the end, a MST is achieved.</p></li>
-<li><p>Do Depth-first Tree Tour(DFTT)</p></li>
-<li><p>Length of DFTT is 2 x weight of MST.</p></li>
-<li><p>Skip some nodes that&rsquo;s only visited once.</p></li>
-<li><p>We get an legitimate solution.</p></li>
-</ol>
-</li>
-</ol>
-
-
-<h3>Iterative improvement</h3>
-
-<p>Now these are the solutions. However we can improve it by doing <strong>2-opt Swap</strong>.</p>
-
-<p>It means selecting 2 edges at random. If swapping results in an improvement, then keep it. Keep doing this. <a href="http://www.youtube.com/watch?v=SC5CX8drAtU">link</a> to video.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Classic] MinMax Algorithm]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/30/Man-max-algorithm/"/>
-    <updated>2014-08-30T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/30/Man-max-algorithm</id>
-    <content type="html"><![CDATA[<h3>Definition</h3>
-
-<p>For every two-person, zero-sum game with finitely many strategies, there exists a value V and a mixed strategy for each player, such that</p>
-
-<ol>
-<li>Given player 2&rsquo;s strategy, the best payoff possible for player 1 is V, and</li>
-<li>Given player 1&rsquo;s strategy, the best payoff possible for player 2 is −V.</li>
-</ol>
-
-
-<p>Equivalently, Player 1&rsquo;s strategy guarantees him a payoff of V regardless of Player 2&rsquo;s strategy.</p>
-
-<p>Put it in a simple way: MAX tries to <strong>max the utility</strong>, and MIN try to <strong>min it</strong>.</p>
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/minmax-example-1.png"></p>
-
-<h3>Steps</h3>
-
-<ol>
-<li>Have a <strong>heuristic evaluation function</strong>, which gives a value to non-final game states.</li>
-<li>Generate the values down to terminal states.</li>
-<li>Min-max calculate the utility, like this:</li>
-</ol>
-
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/minmax-example-2.png"></p>
-
-<h3>An example</h3>
-
-<p>Othello game:</p>
-
-<blockquote><p>A player can place a new piece in a position if there exists at least one straight (horizontal, vertical, or diagonal) occupied line between the new piece and another piece of the same kind, with one or more contiguous pieces from the opponent player between them.</p>
-
-<p>After placing the new piece, the pieces from the opponent player will be captured and become the pieces from the same player.</p>
-
-<p>The player with the most pieces on the board wins.</p></blockquote>
-
-<p>First, the <strong>heuristic evaluation function</strong>:</p>
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/minmax-example-2.png"></p>
-
-<p>Now, generate terminal level utility values:</p>
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/minmax-example-3.png"></p>
-
-<p>Now, do min-max algorithm:</p>
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/minmax-example-4.png"></p>
-
-<h3>Pruning</h3>
-
-<p>The performance of the naïve minimax algorithm may be improved dramatically, without affecting the result, <a href="http://en.wikipedia.org/wiki/Minimax#Minimax_algorithm_with_alternate_moves">by the use of</a> <strong>alpha-beta pruning</strong>.</p>
-
-<p><a href="http://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning">Alpha–beta pruning</a> is a search algorithm that seeks to decrease the number of nodes that are evaluated by the minimax algorithm in its search tree.</p>
-
-<p><img class="middle" src="http://okckd.github.io/assets/images/minmax-ab-pruning.png"></p>
 ]]></content>
   </entry>
   

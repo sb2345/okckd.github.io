@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Merge k sorted linked lists and return it as one sorted list. Analyze and describe its complexity. Stats Frequency 4 Difficulty 3 &hellip;">
+  <meta name="description" content="Question link Given a binary tree, return the zigzag level order traversal of its nodes&#8217; values. (ie, from left to right, then right to left &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/11/Merge-k-Sorted-Lists/">[LeetCode 23] Merge K Sorted Lists</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/25/Binary-Tree-Zigzag-Level-Order-Traversal/">[LeetCode 103] Binary Tree Zigzag Level Order Traversal</a></h1>
     
     
       <p class="meta">
@@ -100,10 +100,10 @@
   
 
 
-<time datetime="2014-05-11T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/11/Merge-k-Sorted-Lists/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/11/Merge-k-Sorted-Lists/">Comments</a>
+           | <a href="/blog/2014/05/25/Binary-Tree-Zigzag-Level-Order-Traversal/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Binary-Tree-Zigzag-Level-Order-Traversal/">Comments</a>
         
       </p>
     
@@ -112,12 +112,316 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://oj.leetcode.com/problems/merge-k-sorted-lists/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/binary-tree-zigzag-level-order-traversal/">link</a></p>
 
 <div class="question-content">
-            <p></p><p>
-Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and describe its complexity.
-</p><p></p>
+            <p></p><p>Given a binary tree, return the <i>zigzag level order</i> traversal of its nodes&#8217; values. (ie, from left to right, then right to left for the next level and alternate between).</p>
+
+<p>
+For example:<br>
+Given binary tree <code>{3,9,20,#,#,15,7}</code>,<br>
+</p><pre>    3
+   / \
+  9  20
+    /  \
+   15   7
+</pre>
+<p></p>
+<p>
+return its zigzag level order traversal as:<br>
+</p><pre>[
+  [3],
+  [20,9],
+  [15,7]
+]
+</pre>
+<p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This question is based on &ldquo;Binary Tree Level Order Traversal&rdquo;</strong>.</p>
+
+<p>Altough this is difficulty level 4, the real difficult part is solving &ldquo;Binary Tree Level Order Traversal&rdquo;. If that question is solved, only slight modification is needed for this question.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Instead of using queue</strong> like in &ldquo;Binary Tree Level Order Traversal&rdquo;, <strong>this question is solved by using Stack</strong>. And it&rsquo;s not hard to see why. The only additional things to note:</p>
+
+<ol>
+<li><p>There is no &lsquo;single stack solution&rsquo;, we must use <strong>2 stacks</strong>. (because when push, it&rsquo;s pushed to top).</p></li>
+<li><p>Keep a boolean variable to remember rightToLeft or leftToRight.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>First, standard BFS solution</strong> using 2 stacks.</p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; zigzagLevelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    Stack&lt;TreeNode&gt; q = new Stack&lt;TreeNode&gt;();
+    q.push(root);
+    boolean reverse = true;
+    while (! q.isEmpty()) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+        Stack&lt;TreeNode&gt; qq = new Stack&lt;TreeNode&gt;();
+        int curSize = q.size();
+        for (int i = 0; i &lt; curSize; i ++) {
+            TreeNode node = q.pop();
+            ans.get(ans.size() - 1).add(node.val);
+            if (reverse) {
+                if (node.left != null) qq.push(node.left);
+                if (node.right != null) qq.push(node.right);
+            }
+            else {
+                if (node.right != null) qq.push(node.right);
+                if (node.left != null) qq.push(node.left);
+            }
+        }
+        q = qq;
+        reverse = ! reverse;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Second, DFS solution written by me</strong>, and yes, I love DFS more.</p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; zigzagLevelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    helper(ans, root, 1);
+    return ans;
+}
+
+private void helper(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, TreeNode node, int level) {
+    if (node == null) return;
+    if (ans.size() &lt; level) {
+        ArrayList&lt;Integer&gt; lv = new ArrayList&lt;Integer&gt;();
+        lv.add(node.val);
+        ans.add(lv);
+    }
+    else {
+        if (level % 2 == 0) 
+            ans.get(level - 1).add(0, node.val);
+        else
+            ans.get(level - 1).add(node.val);
+    }
+    helper(ans, node.left, level + 1);
+    helper(ans, node.right, level + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal-II/">[LeetCode 107] Binary Tree Level Order Traversal II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Binary-Tree-Level-Order-Traversal-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-level-order-traversal-ii/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a binary tree, return the <i>bottom-up level order</i> traversal of its nodes&#8217; values. (ie, from left to right, level by level from leaf to root).</p>
+
+<p>
+For example:<br>
+Given binary tree <code>{3,9,20,#,#,15,7}</code>,<br>
+</p><pre>    3
+   / \
+  9  20
+    /  \
+   15   7
+</pre>
+<p></p>
+<p>
+return its bottom-up level order traversal as:<br>
+</p><pre>[
+  [15,7]
+  [9,20],
+  [3],
+]
+</pre>
+<p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">very easy</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is the same question as previous one</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>There are also 2 solution: BFS and DFS</strong>.</p>
+
+<p>I post BFS code below. Only 2 lines are different: ans.get() and ans.add().</p>
+
+<h3>Code</h3>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrderBottom(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    Queue&lt;TreeNode&gt; q = new LinkedList&lt;TreeNode&gt;();
+    q.add(root);
+    while (! q.isEmpty()) {
+        ans.add(0, new ArrayList&lt;Integer&gt;());
+        int curSize = q.size();
+        for (int i = 0; i &lt; curSize; i ++) {
+            TreeNode node = q.remove();
+            ans.get(0).add(node.val);
+            if (node.left != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
+        }
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal/">[LeetCode 102] Binary Tree Level Order Traversal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Binary-Tree-Level-Order-Traversal/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-level-order-traversal/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a binary tree, return the <i>level order</i> traversal of its nodes&#8217; values. (ie, from left to right, level by level).</p>
+
+<p>
+For example:<br>
+Given binary tree <code>{3,9,20,#,#,15,7}</code>,<br>
+</p><pre>    3
+   / \
+  9  20
+    /  \
+   15   7
+</pre>
+<p></p>
+<p>
+return its level order traversal as:<br>
+</p><pre>[
+  [3],
+  [9,20],
+  [15,7]
+]
+</pre>
+<p></p>
           </div>
 
 
@@ -134,11 +438,11 @@ Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
+        <td bgcolor="lime">2</td>
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="red">Difficult</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
@@ -147,141 +451,100 @@ Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and
 
 <h3>Analysis</h3>
 
-<p>There are two ways to solve this problem.</p>
+<p><strong>This is a really classic question</strong>.</p>
 
-<ul>
-<li>k &ndash; number of lists</li>
-<li>n &ndash; String length of each list</li>
-</ul>
+<p>It is not difficult, however, it&rsquo;s important to understand 2 different ways to solve this problem: <strong>DFS and BFS</strong>.</p>
 
+<p><strong>The different between Inorder, preorder, postorder and Level-order</strong> is explained very well in <a href="http://leetcode.com/2010/09/printing-binary-tree-in-level-order.html">this post</a>.</p>
 
-<p><strong>First approach is merge sort</strong>. Using divide and conquer approach, divide the entire input into halves, and then merge 2 list each time. Instead of merging 1 by 1 which the time complexity is O(nk x (k-1)), the 2 lists to be merged is always similar length, thus time complexity is reduced to O(nk x logk).</p>
+<blockquote><p>pre-order, in-order, and post-order tree traversal are called Depth First Search (DFS), since they visit the tree by proceeding deeper and deeper until it reaches the leaf nodes.</p>
 
-<p><strong>You may wonder how I calculate time complexity</strong>. See, each round of sort, nk nodes are read and sorted. This happened O(logk) times, where k is the number of lists. Thus totoal time take is O(nk x logk).</p>
+<p>DFS uses a data structure called Stack and is commonly implemented using recursion. If recursion is not allowed, we can simulate the recursion by using iterative method with the help of stack. For example in the question &ldquo;Binary Search Tree In-Order Traversal&rdquo;, we have a iterative DFS solution using a stack.</p>
 
-<p><strong>Second approach is heap sort</strong>. The idea of this is to always keep a sorted list of the head of each list. But before the code, what actually is heap/priority queue?</p>
+<p>The most natural solution for level-order traversal is Breadth First Search (BFS), since it visits the nodes level by level. BFS requires the use of a data structure called Queue.</p></blockquote>
 
-<blockquote><p><strong><a href="http://en.wikipedia.org/wiki/Heap_%28data_structure%29">Heap</a> is a specialized tree-based data structure</strong>. Heap is crucial in Dijkstra&rsquo;s algorithm and heapsort.</p>
+<p><strong>To summarize, Inorder, preorder and postorder is DFS implemented by Stack. Level-order is BFS implemented by Queue</strong>. It is very important to forever make it clear and take it into your grave 60 years later (maybe more, if not less).</p>
 
-<p>We take max heap for example. The keys of parent nodes are always greater than or equal to the children node.</p>
+<p>One mor thing, <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Stack.html">Stack</a> is a Java class that inherit from <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Vector.html">Vector</a>.</p>
 
-<p><strong>The heap is an implementation of priority queue</strong>. In fact, priority queues are often referred to as &ldquo;heaps&rdquo;, regardless of how they may be implemented.</p>
+<blockquote><p>The Vector class implements a growable array of objects. Like an array, it contains components that can be accessed using an integer index. However, the size of a Vector can grow or shrink as needed to accommodate adding and removing items after the Vector has been created.</p>
 
-<p>Note that despite the similarity of the name &ldquo;heap&rdquo; to &ldquo;stack&rdquo; and &ldquo;queue&rdquo;, the latter two are <strong>abstract data types</strong>, while a heap is a <strong>specific data structure</strong>, and &ldquo;priority queue&rdquo; is the proper term for the abstract data type.</p></blockquote>
+<p>ArrayList is roughly equivalent to Vector, except that it is unsynchronized.</p></blockquote>
 
-
-
-<table class="tg">
-  <tr>
-    <th class="tg-s6z2">Heap</th>
-    <th class="tg-s6z2">Time</th>
-  </tr>
-  <tr>
-    <td class="tg-031e">Find max</td>
-    <td class="tg-s6z2">O(1)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Delete</td>
-    <td class="tg-s6z2">O(lgn)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Insert</td>
-    <td class="tg-s6z2">O(lgn)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Merge</td>
-    <td class="tg-s6z2">O(n)</td>
-  </tr>
-</table>
-
-
-<br />
-
-
-<p>Both method are well explained in <a href="http://blog.csdn.net/linhuanmars/article/details/19899259">this csdn blog</a>. Time complexity analysis is given by <a href="http://n00tc0d3r.blogspot.sg/2013/04/merge-k-sorted-lists.html">nootcoder blog</a>.</p>
+<p>However, <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Queue.html">Queue</a> is an interface, not a class. What is the most popular Queue implementation in Java? It is not <strong>PriorityQueue</strong>, it&rsquo;s <strong>LinkedList</strong>!</p>
 
 <h3>Solution</h3>
 
-<p>First, divide and conquer code is lengthy but medium difficulty.</p>
+<p><strong>As said, level-order is BFS</strong>. The first code posted below is implemented with a queue. A lot of people used 2 queues, which I don&rsquo;t like.</p>
 
-<p>Second solution, however, is not as easy. <strong>Especially when we have to write Comparator on our own</strong>.  A priority queue (heap) is implemented and head of each list is inserted into the heap. Then poll elements out from the heap until heap is empty.</p>
+<p><strong>Second code is DFS</strong>. This is my initial solution, maybe because I&rsquo;m more familiar with DFS.</p>
 
-<h3>My code</h3>
+<h3>Code</h3>
 
-<p><strong>Merge sort code, written by me</strong></p>
+<p><strong>First, BFS code using 1 queue</strong></p>
 
-<pre><code>public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
-    if (lists == null || lists.size() == 0) {
-        return null;
-    }
-    return mergeHelper(lists, 0, lists.size() - 1);
-}
-
-private ListNode mergeHelper(List&lt;ListNode&gt; lists, int start, int end) {
-    if (start == end) {
-        return lists.get(start);
-    } 
-    int mid = start + (end - start) / 2;
-    ListNode firstHalf = mergeHelper(lists, start, mid);
-    ListNode secondHalf = mergeHelper(lists, mid + 1, end);
-    return mergeTwo(firstHalf, secondHalf);
-}
-
-private ListNode mergeTwo(ListNode head1, ListNode head2) {
-    ListNode dummy = new ListNode(0);
-    ListNode p = dummy;
-    while (head1 != null &amp;&amp; head2 != null) {
-        if (head1.val &lt; head2.val) {
-            p.next = head1;
-            head1 = head1.next;
-            p = p.next;
-        } else {
-            p.next = head2;
-            head2 = head2.next;
-            p = p.next;
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    int level = 0;
+    Queue&lt;TreeNode&gt; q = new LinkedList&lt;TreeNode&gt;();
+    q.add(root);
+    while (! q.isEmpty()) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+        int curSize = q.size();
+        for (int i = 0; i &lt; curSize; i ++) {
+            TreeNode node = q.remove();
+            ans.get(level).add(node.val);
+            if (node.left != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
         }
+        level ++;
     }
-    if (head1 == null) {
-        p.next = head2;
-    } else {
-        p.next = head1;
-    }
-    return dummy.next;
+    return ans;
 }
 </code></pre>
 
-<p><strong>Heap sort code, written by me</strong>. <a href="http://answer.ninechapter.com/solutions/merge-k-sorted-lists/">source</a></p>
+<p><strong>First code revised</strong>: I do not really need the variable &lsquo;level&rsquo;.</p>
 
-<pre><code>public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
-    if (lists == null || lists.size() == 0) {
-        return null;
-    }
-    int size = lists.size();
-    NodeComparator comparator = new NodeComparator();
-    Queue&lt;ListNode&gt; queue = new PriorityQueue&lt;ListNode&gt;(size, comparator);
-    for (ListNode node: lists) {
-        if (node == null) {
-            continue;
-        }
-        queue.offer(node);
-    }
-    ListNode dummy = new ListNode(0);
-    ListNode p = dummy;
-    while (!queue.isEmpty()) {
-        p.next = queue.poll();
-        p = p.next;
-        if (p.next != null) {
-            queue.offer(p.next);
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    Queue&lt;TreeNode&gt; q = new LinkedList&lt;TreeNode&gt;();
+    q.add(root);
+    while (! q.isEmpty()) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+        int curSize = q.size();
+        for (int i = 0; i &lt; curSize; i ++) {
+            TreeNode node = q.remove();
+            ans.get(ans.size() - 1).add(node.val);
+            if (node.left != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
         }
     }
-    p.next = null;
-    return dummy.next;
+    return ans;
+}
+</code></pre>
+
+<p><strong>Second, DFS code</strong></p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    traverse(ans, root, 0);
+    return ans;
 }
 
-class NodeComparator implements Comparator&lt;ListNode&gt; {
-    public int compare(ListNode o1, ListNode o2) {
-        return o1.val - o2.val;
+private void traverse (ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, TreeNode node, int level) {
+    if (node == null) return;
+    if (ans.size() &gt;= level + 1) 
+        ans.get(level).add(node.val);
+    else {
+        ArrayList&lt;Integer&gt; temp = new ArrayList&lt;Integer&gt;();
+        temp.add(node.val);
+        ans.add(temp);
     }
+    traverse(ans, node.left, level + 1);
+    traverse(ans, node.right, level + 1);
 }
 </code></pre>
 </div>
@@ -296,7 +559,7 @@ class NodeComparator implements Comparator&lt;ListNode&gt; {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/10/Substring-with-Concatenation-All-Words/">[LeetCode 30] Substring With Concatenation of All Words</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/24/Restore-IP-Addresses/">[LeetCode 93] Restore IP Addresses</a></h1>
     
     
       <p class="meta">
@@ -312,10 +575,10 @@ class NodeComparator implements Comparator&lt;ListNode&gt; {
   
 
 
-<time datetime="2014-05-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/10/Substring-with-Concatenation-All-Words/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/10/Substring-with-Concatenation-All-Words/">Comments</a>
+           | <a href="/blog/2014/05/24/Restore-IP-Addresses/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/24/Restore-IP-Addresses/">Comments</a>
         
       </p>
     
@@ -324,22 +587,246 @@ class NodeComparator implements Comparator&lt;ListNode&gt; {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://oj.leetcode.com/problems/substring-with-concatenation-of-all-words/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/restore-ip-addresses/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a string containing only digits, restore it by returning all possible valid IP address combinations.</p>
+
+<p>
+For example:<br>
+Given <code>"25525511135"</code>,
+</p>
+<p>
+return <code>["255.255.11.135", "255.255.111.35"]</code>. (Order does not matter)
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">40 minutes</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This is question can be solved by <strong>either DFS or Brute Force</strong>, both are fine.</p>
+
+<h3>Solution</h3>
+
+<p><strong>The DFS solution is obvious, I have the code for it</strong>.</p>
+
+<p>However, there&rsquo;s <a href="http://blog.csdn.net/u011095253/article/details/9158449">another person</a> who wrote much less code while implementing the same solution as mine. I will post his code as a good example to learn.</p>
+
+<p><strong>The brute force solution in this case</strong> does not sound like a bad idea. This is the <strong>most top-rated idea on <a href="https://oj.leetcode.com/discuss/77/restore-ip-addresses">official forum</a></strong> as well.</p>
+
+<blockquote><p> You can get points&#8217; positions by i, j, k. Using these positions, you can divide s into candidate ip-form. Then, you can judge whether the candidate fits ip. To improve the efficiency, you can narrow the scope of i, j, k.</p></blockquote>
+
+<p>So, this BF code is also posted below.</p>
+
+<p>Just one more thing. I tested the <strong>exact same BF code written in C++</strong>. Compared to the <strong>420ms</strong> it took Java to pass OJ test, C++ takes <strong>8ms</strong> only! I was kind of shocked.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, DFS, my code</strong></p>
+
+<p>Note: I could have just insert as string, so that convert() method would not be needed.</p>
+
+<pre><code>public ArrayList&lt;String&gt; restoreIpAddresses(String s) {
+    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    helper(ans, new ArrayList&lt;String&gt;(), s, 0);
+    return ans;
+}
+
+private void helper(ArrayList&lt;String&gt; ans, ArrayList&lt;String&gt; cur, String s, int from) {
+    int len = s.length();
+    if (from &gt;= len) return;
+    if (cur.size() == 3) {
+        String lastStr = s.substring(from);
+        if (isValidIpNumber(lastStr)) {
+            ArrayList&lt;String&gt; oneAns = new ArrayList&lt;String&gt;(cur);
+            oneAns.add(lastStr);
+            ans.add(convert(oneAns));
+        }
+    }
+    else {
+        // cur.size less than 3, so get next num (length = 1, 2 or 3)
+        for (int i = 1; i &lt;= 3 &amp;&amp; from + i &lt;= len; i ++) {
+            String nextStr = s.substring(from, from + i);
+            if (isValidIpNumber(nextStr)) {
+                cur.add(nextStr);
+                helper(ans, cur, s, from + i);
+                cur.remove(cur.size() - 1);
+            }
+        }
+    }
+}
+
+private boolean isValidIpNumber(String str) {
+    if (str.length() == 0 || str.length() &gt; 3) return false;
+    if (str.charAt(0) == '0' &amp;&amp; str.length() != 1) return false;
+    int num = Integer.parseInt(str);
+    return (0 &lt;= num &amp;&amp; num &lt;= 255);
+}
+
+private String convert(ArrayList&lt;String&gt; l) {
+    String ans = "";
+    for (String a: l)
+        ans += "." + a;
+    return ans.substring(1);
+}
+</code></pre>
+
+<p><strong>Second, DFS, shorter version code</strong></p>
+
+<pre><code>public ArrayList&lt;String&gt; restoreIpAddresses(String s) {
+    ArrayList&lt;String&gt; res = new ArrayList&lt;String&gt;();  
+    if (s.length()&lt;4||s.length()&gt;12) return res;  
+    dfs(s,"",res,0);  
+    return res;  
+}  
+
+public void dfs(String s, String tmp, ArrayList&lt;String&gt; res, int count){  
+    if (count == 3 &amp;&amp; isValid(s)) {  
+        res.add(tmp + s);  
+        return;  
+    }  
+    for(int i=1; i&lt;4 &amp;&amp; i&lt;s.length(); i++){  
+        String substr = s.substring(0,i);  
+        if (isValid(substr)){  
+            dfs(s.substring(i), tmp + substr + '.', res, count+1);  
+        }  
+    }  
+}  
+
+public boolean isValid(String s){  
+    if (s.charAt(0)=='0') return s.equals("0");  
+    int num = Integer.parseInt(s);  
+    return num&lt;=255 &amp;&amp; num&gt;0;  
+}  
+</code></pre>
+
+<p><strong>Third, BF code using triple nested loop (Java)</strong></p>
+
+<pre><code>public ArrayList&lt;String&gt; restoreIpAddresses(String s) {
+    ArrayList&lt;String&gt; res = new ArrayList&lt;String&gt;();  
+    if (s.length() &gt; 12 || s.length() &lt; 4) return res;
+    for (int i = 1; i &lt; 4; i ++) {
+        String first = s.substring(0, i);
+        if (! isValid(first)) continue;
+        for (int j = 1; i + j &lt; s.length() &amp;&amp; j &lt; 4; j ++) {
+            String second = s.substring(i, i + j);
+            if (! isValid(second)) continue;
+            for (int k = 1; i + j + k &lt; s.length() &amp;&amp; k &lt; 4; k ++) {
+                String third = s.substring(i + j, i + j + k);
+                String fourth = s.substring(i + j + k);
+                if (isValid(third) &amp;&amp; isValid(fourth)) 
+                    res.add(first + "." + second + "." + third + "." + fourth);
+            }
+        }
+    }
+    return res;
+}  
+
+public boolean isValid(String s) {
+    if (s.length() &gt; 1 &amp;&amp; s.charAt(0) == '0') return false;
+    return 0 &lt;= Integer.parseInt(s) &amp;&amp; Integer.parseInt(s) &lt;= 255;  
+}
+</code></pre>
+
+<p><strong>Fourth, same BF code (C++)</strong></p>
+
+<pre><code>vector&lt;string&gt; restoreIpAddresses(string s) {
+    vector&lt;string&gt; res;
+    if (s.size() &gt; 12 || s.size() &lt; 4) return res;
+    for (int i=1; i&lt;4; i++) {
+        string first = s.substr(0, i);
+        if (!isValid(first)) continue;
+        for (int j=1; i+j &lt; s.size() &amp;&amp; j&lt;4; j++) {
+            string second = s.substr(i, j);
+            if (!isValid(second)) continue;
+            for (int k=1; i+j+k &lt; s.size() &amp;&amp; k&lt;4; k++) {
+                string third = s.substr(i+j, k);
+                string fourth = s.substr(i+j+k);
+                if (isValid(third) &amp;&amp; isValid(fourth)) {
+                    string temp = first+"."+second+"."+third+"."+fourth;
+                    res.push_back(temp);
+                }
+            }
+        }
+    }
+    return res;
+}
+
+bool isValid(string s) {
+    if (s.size() &gt; 1 &amp;&amp; s[0] == '0') return false;
+    if (stoi(s) &lt;= 255 &amp;&amp; stoi(s) &gt;= 0) return true;
+    else return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/24/Maximal-Rectangle/">[LeetCode 85] Maximal Rectangle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/24/Maximal-Rectangle/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/24/Maximal-Rectangle/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/maximal-rectangle/">link</a></p>
 
 <div class="question-content">
             <p></p><p>
-You are given a string, <b>S</b>, and a list of words, <b>L</b>, that are all of the same length. Find all starting indices of substring(s) in S that is a concatenation of each word in L exactly once and without any intervening characters.
-</p>
-
-<p>
-For example, given:<br>
-<b>S</b>: <code>"barfoothefoobarman"</code><br>
-<b>L</b>: <code>["foo", "bar"]</code>
-</p>
-
-<p>
-You should return the indices: <code>[0,9]</code>.<br>
-(order does not matter).
+Given a 2D binary matrix filled with 0&#8217;s and 1&#8217;s, find the largest rectangle containing all ones and return its area.
 </p><p></p>
           </div>
 
@@ -352,214 +839,16 @@ You should return the indices: <code>[0,9]</code>.<br>
         <td bgcolor="white">1</td>
     </tr>
     <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">more than hour</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>There are 2 ways to solve this question. <strong>The naive approach takes around 1200ms to pass</strong>, and <strong>the KPM-like approach takes around half of that time</strong>. Both methods are explained well in <a href="http://n00tc0d3r.blogspot.sg/2013/06/substring-with-concatenation-of-all.html">this blog</a>.</p>
-
-<h4>The HashMap</h4>
-
-<p>Before the solution, I will like to do a recap on <strong>HashMap</strong>.</p>
-
-<blockquote cite="http://www.sparknotes.com/cs/searching/hashtables/section1.html">
-<div>
-<a href="http://www.sparknotes.com/cs/searching/hashtables/section1.html">link</a>
-</div>
-<p>
-A hash table is made up of two parts: an array (the actual table where the data to be searched is stored) and a mapping function, known as a hash function. 
-</p>
-<p>
-The hash function is a mapping from the input space to the integer space that defines the indices of the array. In other words, the hash function provides a way for assigning numbers to the input data such that the data can then be stored at the array index corresponding to the assigned number.
-</p>
-</blockquote>
-
-
-<p>For example, if I want to store &lt;&ldquo;Durant&rdquo;>, I pass &ldquo;Durant&rdquo; into the hash function, and get (let&rsquo;s say) number 3. So in the Hash Table, it will store table(3 &ndash;> &ldquo;Durant&rdquo;).</p>
-
-<p>In this way, the <strong>searching of HashMap can almost achieve  O(1) time in best case</strong> (like array access).</p>
-
-<p>However,</p>
-
-<blockquote cite="http://stackoverflow.com/a/9214421">
-<div>
-<a href="http://stackoverflow.com/a/9214421">link</a>
-</div>
-<p>
-For average case, It really is (as the wikipedia page says) O(1+n/k) where K is the hash table size. If K is large enough, then the result is effectively O(1). But suppose K is 10 and N is 100. In that case each bucket will have on average 10 entries, so the search time is definitely not O(1); it is a linear search through up to 10 entries.
-</p>
-</blockquote>
-
-
-<p>In practise, we will just assume search in HashMap always O(1).</p>
-
-<p>Below is a great conclusion.</p>
-
-<blockquote cite="http://stackoverflow.com/a/9214594">
-<div>
-<a href="http://stackoverflow.com/a/9214594">link</a>
-</div>
-<p><a href="http://en.wikipedia.org/wiki/Hash_table">Hash tables</a> are <code>O(1)</code> <strong>average and <a href="http://en.wikipedia.org/wiki/Amortized_analysis">amortized</a></strong> case complexity, however is suffers from <code>O(n)</code> <strong>worst case</strong> time complexity. [And I think this is where your confusion is]</p>
-
-<p>Hash tables suffer from <code>O(n)</code> worst time complexity due to two reasons:</p>
-
-<ol>
-<li>If too many elements were hashed into the same key: looking inside this key may take <code>O(n)</code> time.</li>
-<li>Once a hash table has passed its <a href="http://en.wikipedia.org/wiki/Load_balancing_%28computing%29">load balance</a> - it has to rehash [create a new bigger table, and re-insert each element to the table]. </li>
-</ol>
-
-<p>However, it is said to be <code>O(1)</code> average and amortized case because:</p>
-
-<ol>
-<li>It is very rare that many items will be hashed to the same key [if you chose a good hash function and you don&#8217;t have too big load balance.</li>
-<li>The rehash operation, which is <code>O(n)</code>, can at most happen after <code>n/2</code> ops, which are all assumed <code>O(1)</code>: Thus when you sum the average time per op, you get : <code>(n*O(1) + O(n)) / n) = O(1)</code></li>
-</ol>
-</blockquote>
-
-
-<h3>Solution</h3>
-
-<p><strong>The naive approach uses a HashMap</strong>. Reason 1 is because there can be duplications in L, and reason 2 is the searching is faster.</p>
-
-<p><strong>Time complexity of this solution is O((n &ndash; k * m) x m)</strong>, and <strong>space is the size of list L, O(m)</strong>. If m is not very big, the time can be regarded as O(n).</p>
-
-<p><strong>some variables used in this question</strong>.</p>
-
-<ul>
-<li>n &ndash; length of the input string</li>
-<li>L &ndash; a list of words (dictionary)</li>
-<li>m &ndash; the size of L</li>
-<li>k &ndash; the length of each word in L (all words have same length)</li>
-<li>(k * m) &ndash; this is the length of a possible concatenation</li>
-<li>(n &ndash; k * m) &ndash; this is the number of possible concatenation exist</li>
-</ul>
-
-
-<h3>My code</h3>
-
-<p><strong>Updated on July 7th</strong>, code.</p>
-
-<pre><code>public List&lt;Integer&gt; findSubstring(String S, String[] L) {
-    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    if (S == null || L == null || S.length() == 0 || L.length == 0) {
-        return ans;
-    }
-    HashMap&lt;String, Integer&gt; set = new HashMap&lt;String, Integer&gt;();
-    for (String str: L) {
-        if (set.containsKey(str)) {
-            set.put(str, set.get(str) + 1);
-        } else {
-            set.put(str, 1);
-        }
-    }
-    int num = L.length;
-    int len = L[0].length();
-    for (int i = 0; i &lt;= S.length() - num * len; i++) {
-        // start from i, check (num) words of length (len)
-        HashMap&lt;String, Integer&gt; setCopy = new HashMap&lt;String, Integer&gt;(set);
-        for (int j = 0; j &lt; num; j++) {
-            String cur = S.substring(i + j * len, i + (j + 1) * len);
-            if (setCopy.containsKey(cur)) {
-                if (setCopy.get(cur) == 1) {
-                    setCopy.remove(cur);
-                } else {
-                    setCopy.put(cur, setCopy.get(cur) - 1);
-                }
-            } else {
-                break;
-            }
-        }
-        if (setCopy.isEmpty()) {
-            ans.add(i);
-        }
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/10/Implement-strStr/">[LeetCode 28] Implement strStr</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/10/Implement-strStr/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/10/Implement-strStr/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/implement-strstr/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Implement strStr().
-</p>
-<p>
-Returns a pointer to the first occurrence of needle in haystack, or <b>null</b> if needle is not part of haystack.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
+        <td>Difficulty</td>
         <td bgcolor="red">5</td>
     </tr>
     <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
+        <td bgcolor="red">5</td>
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="yellow">KMP is difficult</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
@@ -568,37 +857,133 @@ Returns a pointer to the first occurrence of needle in haystack, or <b>null</b> 
 
 <h3>Analysis</h3>
 
-<p>There are 2 ways to solve this problem. <strong>The most easy and common way</strong> is to use nested loop (many online solutions use this method).</p>
+<p><strong>This is a very difficult question</strong>. It is similar and also related to &ldquo;<strong>Largest Rectangle in Histogram</strong>&rdquo;.</p>
 
-<p>However, <strong>this question can also be solved by <a href="http://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm">KPM algorithm</a></strong>.</p>
+<p>Two solutions are available for this question.</p>
+
+<p><strong>First solution is O(n<sup>2</sup>)</strong>. This makes use of solution of &ldquo;<strong>Largest Rectangle in Histogram</strong>&rdquo;, which is to say, we are finding the max rectangle for each row (as base) in the matrix.</p>
+
+<p>This solution is very easy to write once you realize this connection &ndash; I guess not many people would. That&rsquo;s why I have the next solution.</p>
+
+<p><strong>Second solution is a clever Brute Force, time complexity is O(n<sup>3</sup>)</strong>. The fundamental idea is to make a 2-D array storing the number of &lsquo;1&rsquo;s occured before current node (inclusive). After this is done, there&rsquo;re 2 different ways to implement. Read code 2 and code 3.</p>
 
 <h3>Solution</h3>
 
-<p>I post my standard solution below. This is the most standard solution online, for example it is in <a href="http://goo.gl/2MNOS2">this post</a>.</p>
+<p>FIrst code is easy.</p>
 
-<p><strong>I have yet to written KPM solution</strong>. <a href="http://discuss.leetcode.com/questions/76/implement-strstr">This blog</a> and <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-implement-strstr.html">this blog</a> have good KMP solution posted.</p>
+<p>Second code is the idea from <a href="http://blog.csdn.net/fightforyourdream/article/details/17711893">this blog</a>. For every node in the 2-D array, checks all possible rectangles ending at this node (which mean check all the way up/left).</p>
 
-<h3>My code</h3>
+<p>Third code from <a href="http://leetcodenotes.wordpress.com/2013/10/19/leetcode-maximal-rectangle-0101%E7%BB%84%E6%88%90%E7%9A%84%E7%9F%A9%E9%98%B5%EF%BC%8C%E6%B1%82%E9%87%8C%E9%9D%A2%E5%85%A8%E6%98%AF1%E7%9A%84%E7%9F%A9%E5%BD%A2%E7%9A%84%E6%9C%80%E5%A4%A7%E9%9D%A2/">this blog</a>. It is similar to second, but it&rsquo;s checking all rectangles that shared same width as current line. So it&rsquo;s checking up then down, both direction. Read the code and it&rsquo;s easy to understand.</p>
 
-<p><strong>Simple solution</strong></p>
+<h3>Code</h3>
 
-<pre><code>public String strStr(String haystack, String needle) {
-        if (needle.length() == 0) return haystack;
-        for (int i = 0; i &lt;= haystack.length() - needle.length(); i ++) {
-                if (haystack.charAt(i) != needle.charAt(0)) continue;
-                int j = 0;
-                for (; j &lt; needle.length(); j ++) {
-                        if (haystack.charAt(i + j) != needle.charAt(j)) break;
-                }
-                if (j == needle.length()) return haystack.substring(i);
+<p><strong>First, solution making use of &ldquo;Largest rectangle&rdquo;</strong></p>
+
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0 || matrix[0].length == 0) return 0;
+    int[][] m = new int[matrix.length][matrix[0].length];
+    for (int i = 0; i &lt; matrix.length; i ++) {
+        for (int j = 0; j &lt; matrix[i].length; j ++) {
+            if (i == 0 || matrix[i][j] == '0') 
+                m[i][j] = matrix[i][j] - '0';
+            else 
+                m[i][j] = m[i-1][j] + 1;
         }
-        return null;
+    }
+    int max = 0;
+    for (int i = 0; i &lt; m.length; i ++) {
+        max = Math.max(max, largestRectangleArea(m[i]));
+    }
+    return max;
+}
+
+// the following code is the solution for "Largest Rectangle in Histogram"
+public int largestRectangleArea(int[] height) {
+    int len = height.length;
+    if (len == 0) return 0;
+    int max = Integer.MIN_VALUE;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    for (int i = 0; i &lt; len; i ++) {
+        if (stack.isEmpty() || height[stack.peek()] &lt;= height[i]) stack.push(i);
+        else {
+            int temp = stack.pop();
+            // here I must do a check of stack.isEmpty(), 
+            // And do nto use (i-height[temp]) instead use (i-stack.peek()-1])
+            max = Math.max(max, height[temp] * 
+                (stack.isEmpty() ? i : (i - stack.peek() - 1)));
+            i --;
+        }
+    }
+    while (! stack.isEmpty()) {
+            int temp = stack.pop();
+            max = Math.max(max, height[temp] * 
+                (stack.isEmpty() ? len : (len - stack.peek() - 1)));
+    }
+    return max;
 }
 </code></pre>
 
-<p><strong>KPM solution</strong></p>
+<p><strong>Second </strong></p>
 
-<p>Only need to understand to principles.</p>
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    int rows = matrix.length;  
+    if (rows == 0) return 0;  
+    int cols = matrix[0].length;  
+    int [][] hOnes = new int[rows][cols];
+    int max = 0;
+    for (int i=0; i&lt;rows; i++)
+        for(int j=0; j&lt;cols; j++) 
+            if(matrix[i][j] == '1')
+                if(j == 0) hOnes[i][j] = 1;
+                else hOnes[i][j] = hOnes[i][j-1] + 1;
+    for (int i=0; i&lt;rows; i++)
+        for (int j=0; j&lt;cols; j++){  
+            if (hOnes[i][j] != 0){  
+                int minI = i;
+                int minRowWidth = hOnes[i][j];
+                while (minI &gt;= 0){
+                    minRowWidth = Math.min(minRowWidth, hOnes[minI][j]);  
+                    int area = minRowWidth * (i-minI+1);  
+                    max = Math.max(max, area);  
+                    minI--;  
+                }
+            }
+        }
+    return max;  
+}
+</code></pre>
+
+<p><strong>Third</strong></p>
+
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0) return 0;
+    int res = 0;
+    int m = matrix.length, n = matrix[0].length;
+    int[][] d = new int[m][n];
+    for (int i = 0; i &lt; m; i++) {
+        d[i][0] = matrix[i][0] - '0';
+        for (int j = 1; j &lt; n; j++) 
+            d[i][j] = matrix[i][j] == '1' ? d[i][j - 1] + 1 : 0;
+    }
+    for (int i = 0; i &lt; m; i++) 
+        for (int j = 0; j &lt; n; j++) 
+            res = Math.max(res, expand(d, i, j));
+    return res;
+}
+
+private int expand(int[][] d, int I, int J) {
+    int height = 0, width = d[I][J];
+    //go up
+    for (int i = I - 1; i &gt;= 0; i--)
+        if (d[i][J] &gt;= width) height++;
+        else break;
+    //go down
+    for (int i = I; i &lt; d.length; i++) 
+        if (d[i][J] &gt;= width) height++;
+        else break;
+    return width * height;
+}
+</code></pre>
 </div>
   
   
@@ -611,7 +996,7 @@ Returns a pointer to the first occurrence of needle in haystack, or <b>null</b> 
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/10/Divide-Two-Integers/">[LeetCode 29] Divide Two Integers</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/24/Interleaving-String/">[LeetCode 97] Interleaving String</a></h1>
     
     
       <p class="meta">
@@ -627,10 +1012,10 @@ Returns a pointer to the first occurrence of needle in haystack, or <b>null</b> 
   
 
 
-<time datetime="2014-05-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/10/Divide-Two-Integers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/10/Divide-Two-Integers/">Comments</a>
+           | <a href="/blog/2014/05/24/Interleaving-String/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/24/Interleaving-String/">Comments</a>
         
       </p>
     
@@ -639,11 +1024,22 @@ Returns a pointer to the first occurrence of needle in haystack, or <b>null</b> 
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://oj.leetcode.com/problems/divide-two-integers/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/interleaving-string/">link</a></p>
 
 <div class="question-content">
             <p></p><p>
-Divide two integers without using multiplication, division and mod operator.
+Given <i>s1</i>, <i>s2</i>, <i>s3</i>, find whether <i>s3</i> is formed by the interleaving of <i>s1</i> and <i>s2</i>.
+</p>
+
+<p>
+For example,<br>
+Given:<br>
+<i>s1</i> = <code>"aabcc"</code>,<br>
+<i>s2</i> = <code>"dbbca"</code>,
+</p>
+<p>
+When <i>s3</i> = <code>"aadbbcbcac"</code>, return true.<br>
+When <i>s3</i> = <code>"aadbbbaccc"</code>, return false.
 </p><p></p>
           </div>
 
@@ -653,19 +1049,19 @@ Divide two integers without using multiplication, division and mod operator.
 <table border="2">
     <tr>
         <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
+        <td bgcolor="lime">2</td>
     </tr>
     <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="red">4</td>
+        <td>Difficulty</td>
+        <td bgcolor="red">5</td>
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
+        <td bgcolor="yellow">3</td>
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="red">really long time</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
@@ -674,121 +1070,42 @@ Divide two integers without using multiplication, division and mod operator.
 
 <h3>Analysis</h3>
 
-<p><strong>This question is more difficult than you thought</strong>!</p>
+<p><strong>This is a DP question</strong>.</p>
 
-<p>I had little experience with <strong>Java bit operation</strong>, so I was struggling in the beginning. I&rsquo;m still not good at it now. Below is a quick tutorial on this topic.</p>
+<p>At first look it might look like very easily solved by DFS. It it, but TLE exception.</p>
 
-<table border="2">
-  <tr>
-    <th>operator</th>
-    <th>what is means</th>
-  </tr>
-  <tr>
-    <td>~</td>
-    <td>invert every bit</td>
-  </tr>
-  <tr>
-    <td>&lt;&lt;</td>
-    <td>shift left (same as *2)</td>
-  </tr>
-  <tr>
-    <td>&gt;&gt;</td>
-    <td>signed shift right</td>
-  </tr>
-  <tr>
-    <td>&gt;&gt;&gt;</td>
-    <td>unsigned shift right</td>
-  </tr>
-  <tr>
-    <td>^</td>
-    <td>XOR</td>
-  </tr>
-  <tr>
-    <td>|</td>
-    <td>OR</td>
-  </tr>
-</table>
-
-
-<br />
-
-
-<p>Note the unsigned right shift operator &ldquo;>>>&rdquo; shifts a <strong>zero into the leftmost position</strong>, while the leftmost position after &ldquo;>>&rdquo; <strong>depends on sign extension</strong>.</p>
-
-<p>After the knowledge barriers of big operation is cleared, this problem basically is <strong>a while loop that keeps subtracting (divisor * (2 ^ n)) from dividend</strong>. There is various ways to do it.</p>
-
-<p><strong>But remember that overflow always can happen</strong>, especially when you dealing with Integer.MAX_VALUE and Integer.MIN_VALUE.</p>
+<p>So, I learnt the idea from <a href="http://blog.csdn.net/u011095253/article/details/9248073">this blog</a>. It&rsquo;s easy to realize this is a <strong>very standard DP question</strong>.</p>
 
 <h3>Solution</h3>
 
-<p>I will post 2 solutions, <strong>first of which is written by me</strong> using the idea from <a href="http://leetcodenotes.wordpress.com/2013/10/19/divide-two-integers/">this blog</a>. This is also the most common solution from the net.</p>
+<p>Declare a 2-D array for DP, and dp(i)(j) denotes whether it&rsquo;s possible to construct s3 (of length i+j) by using s1 (of length i) and s2 (of length j).</p>
 
-<p><strong>Second solution is from</strong> <a href="http://discuss.leetcode.com/questions/209/divide-two-integers/385">this post</a> and I translated the c++ into Java with a bit refactoring work. This code is extremely concise and beautiful.</p>
+<p>Only thing needs to mention is the size of dp is (m+1)*(n+1), because i = [0, m] and j = [0, n].</p>
 
-<h3>My code</h3>
+<h3>Code</h3>
 
-<p><strong>First code is written by me</strong>. Please take a look at this line:</p>
+<p><strong>DP solution</strong></p>
 
-<blockquote><p>a = 0 &ndash; (long) dividend;</p></blockquote>
-
-<p>Previously I was using the 2 pieces of code below, and both won&rsquo;t work:</p>
-
-<blockquote><p>a = dividend * -1;</p>
-
-<p>a = 0 &ndash; dividend;</p></blockquote>
-
-<p>Some extra attentions should be taken on this.</p>
-
-<pre><code>public int divide(int dividend, int divisor) {
-    long sign = 1, a = dividend, b = divisor;
-    if (dividend &lt; 0) {
-        sign *= -1;
-        // this is where caused my error for last submission
-        a = 0 - (long) dividend;
-    }
-    if (divisor &lt; 0) {
-        sign *= -1;
-        b = 0 - (long) divisor;
-    }
-    return (int) (sign * helper(a, b));
-}
-
-public long helper(long a, long b) {
-    if (a &lt; b) return 0;
-    long remain = a, ans = 0;
-    while (remain != 0) {
-        long count = 1, num = b;
-        if (num &gt; remain) {
-            remain = 0;
-            break;
-        }
-        while (num + num &gt; 0 &amp;&amp; num + num &lt;= remain) {
-            num = num &lt;&lt; 1;
-            count = count &lt;&lt; 1;
-        }
-        remain -= num;
-        ans += count;
-    }
-    return ans;
-}
-</code></pre>
-
-<p><strong>Second code, translated from c plus plus</strong>.</p>
-
-<pre><code>public int divide(int dividend, int divisor) {
-    long a = dividend &gt;&gt;&gt; 31 == 0 ? dividend : 0 - (long) dividend;
-    long b = divisor &gt;&gt;&gt; 31 == 0 ? divisor : 0 - (long) divisor;
-    long ret = 0;
-    while (a &gt;= b) {
-        long c = b;
-        int i = 0;
-        while (a &gt;= c) {
-            a -= c;
-            ret += 1 &lt;&lt; i++;
-            c &lt;&lt;= 1;
+<pre><code>public boolean isInterleave(String s1, String s2, String s3) {
+    int len1 = s1.length();
+    int len2 = s2.length();
+    int len3 = s3.length();
+    if (len1 + len2 != len3) return false;
+    boolean[][] dp = new boolean[len1 + 1][len2 + 1];
+    dp[0][0] = true;
+    for (int i = 1; i &lt;= len2; i ++)
+        dp[0][i] = dp[0][i - 1] &amp; s2.charAt(i-1) == s3.charAt(i-1);
+    for (int i = 1; i &lt;= len1; i ++)
+        dp[i][0] = dp[i-1][0] &amp; s1.charAt(i-1) == s3.charAt(i-1);
+    for (int i = 1; i &lt;= len1; i ++) {
+        for (int j = 1; j &lt;= len2; j ++) {
+            if (s1.charAt(i-1) == s3.charAt(i+j-1) &amp;&amp; dp[i-1][j])
+                dp[i][j] = true;
+            if (s2.charAt(j-1) == s3.charAt(i+j-1) &amp;&amp; dp[i][j-1])
+                dp[i][j] = true;
         }
     }
-    return (int) ((dividend ^ divisor) &gt;&gt;&gt; 31 == 0 ? ret : 0 - ret);
+    return dp[len1][len2];
 }
 </code></pre>
 </div>
@@ -803,7 +1120,7 @@ public long helper(long a, long b) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/09/Valid-Parentheses/">[LeetCode 20] Valid Parentheses</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/24/Binary-Tree-Inorder-Traversal/">[LeetCode 94] Binary Tree Inorder Traversal</a></h1>
     
     
       <p class="meta">
@@ -819,10 +1136,10 @@ public long helper(long a, long b) {
   
 
 
-<time datetime="2014-05-09T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/09/Valid-Parentheses/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/09/Valid-Parentheses/">Comments</a>
+           | <a href="/blog/2014/05/24/Binary-Tree-Inorder-Traversal/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/24/Binary-Tree-Inorder-Traversal/">Comments</a>
         
       </p>
     
@@ -831,12 +1148,27 @@ public long helper(long a, long b) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://oj.leetcode.com/problems/valid-parentheses/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/binary-tree-inorder-traversal/">link</a></p>
 
 <div class="question-content">
-            <p></p><p>Given a string containing just the characters <code>'('</code>, <code>')'</code>, <code>'{'</code>, <code>'}'</code>, <code>'['</code> and <code>']'</code>, determine if the input string is valid.</p>
+            <p></p><p>Given a binary tree, return the <i>inorder</i> traversal of its nodes&#8217; values.</p>
 
-<p>The brackets must close in the correct order, <code>"()"</code> and <code>"()[]{}"</code> are all valid but <code>"(]"</code> and <code>"([)]"</code> are not.</p>
+<p>
+For example:<br>
+Given binary tree <code>{1,#,2,3}</code>,<br>
+</p><pre>   1
+    \
+     2
+    /
+   3
+</pre>
+<p></p>
+<p>
+return <code>[1,3,2]</code>.
+</p>
+
+<p><b>Note:</b> Recursive solution is trivial, could you do it iteratively?</p>
+
 <p></p>
           </div>
 
@@ -846,631 +1178,576 @@ public long helper(long a, long b) {
 <table border="2">
     <tr>
         <td>Frequency</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>Standard solution around the internet is to use stack</strong>.</p>
-
-<p>I though using String is also fine, so I tried it. I also works.</p>
-
-<h3>Solution</h3>
-
-<p>The code is easy.</p>
-
-<h3>My code</h3>
-
-<pre><code>public boolean isValid(String s) {
-        String p = "";
-        for (int i = 0; i &lt; s.length(); i ++) {
-            char cur = s.charAt(i);
-            if (cur == '(' || cur == '{' || cur == '[') {
-                p += cur;
-            } else {
-                if (p.length() == 0) return false;
-                if (p.charAt(p.length()-1) - cur &lt;= 2)
-                    p = p.substring(0, p.length()-1);
-            }
-        }
-        if (p.length() == 0) return true;
-        return false;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/09/Swap-Nodes-in-Pairs/">[LeetCode 24] Swap Nodes in Pairs</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/09/Swap-Nodes-in-Pairs/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/09/Swap-Nodes-in-Pairs/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/swap-nodes-in-pairs/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a linked list, swap every two adjacent nodes and return its head.
-</p>
-
-<p>
-For example,<br>
-Given <code>1-&gt;2-&gt;3-&gt;4</code>, you should return the list as <code>2-&gt;1-&gt;4-&gt;3</code>.
-</p>
-
-<p>
-Your algorithm should use only constant space. You may <b>not</b> modify the values in the list, only nodes itself can be changed.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
         <td bgcolor="red">4</td>
     </tr>
     <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
+        <td>Difficulty</td>
         <td bgcolor="yellow">3</td>
     </tr>
     <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an very very interesting question</strong>. We can use either recursions or link operations to solve the problem (the second being more difficult). I have write code for both.</p>
-
-<p>However, looking around the internet, I realize <strong>the solution can be extremely concise</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>I post 3 pieces of code below.</p>
-
-<p>I will explain second code a little bit. <strong>The idea is keep 3 pointers always</strong>: pre, cur and (cur.next). Inside the while loop, I will swap cur and (cur.next), and let pre point to (cur.next). Then I can proceed to next loop, with the updated pre and cur pointer.</p>
-
-<p><strong>However, looking at the last code, I realize previous approach is too complex</strong>. <a href="http://oj.leetcode.com/discuss/3608/seeking-for-a-better-solution">This idea</a> is keeping only 1 pointer at a time, and swap the next 2 nodes following this pointer. In this way, the code is extremely concise and the logic is much more easier to understand.</p>
-
-<h3>My code</h3>
-
-<p>Recursion code, by me.</p>
-
-<pre><code>public ListNode swapPairs(ListNode head) {
-        if (head == null || head.next == null) return head;
-        ListNode newHead = head.next;
-        head.next = swapPairs(newHead.next);
-        newHead.next = head;
-        return newHead;
-}
-</code></pre>
-
-<p>Direct approach, written by me. Many blogs including <a href="http://gongxuns.blogspot.sg/2012/12/leetcodeswap-nodes-in-pairs.html">this one</a> gives the same solution.</p>
-
-<pre><code>public ListNode swapPairs(ListNode head) {
-        if (head == null) return head;
-        ListNode preHead = new ListNode(1);
-        preHead.next = head;
-        ListNode cur = head, pre = preHead;
-        while (cur != null &amp;&amp; cur.next != null) {
-            pre.next = cur.next;
-            ListNode newCur = cur.next.next;
-            cur.next.next = cur;
-            cur.next = newCur;
-            pre = cur;
-            cur = newCur;
-        }
-        return preHead.next;
-}
-</code></pre>
-
-<p>This is a great solution by <a href="http://oj.leetcode.com/discuss/3608/seeking-for-a-better-solution">leetcode user Tao2014</a>.</p>
-
-<pre><code>public ListNode swapPairs(ListNode head) {
-        ListNode start = new ListNode(0); 
-        start.next = head;
-        for (ListNode cur = start; cur.next != null &amp;&amp; cur.next.next != null; 
-                cur = cur.next.next) {
-            cur.next = swap(cur.next, cur.next.next);
-        }
-        return start.next;
-}
-
-private ListNode swap(ListNode next1, ListNode next2) {
-        next1.next = next2.next;
-        next2.next = next1;
-        return next2;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/09/Remove-Element/">[LeetCode 27] Remove Element</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/09/Remove-Element/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/09/Remove-Element/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/remove-element/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given an array and a value, remove all instances of that value in place and return the new length.
-</p>
-
-<p>
-The order of elements can be changed. It doesn&#8217;t matter what you leave beyond the new length.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
+        <td>Adjusted Difficulty</td>
         <td bgcolor="red">4</td>
     </tr>
     <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
         <td>Time to use</td>
-        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
 
 <p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
 
-<h3>Analysis</h3>
-
-<p>This question is easy.</p>
-
 <h3>Solution</h3>
 
-<p><strong>I thought 6 lines is the most concise solution, until I read</strong> <a href="http://needjobasap.blogspot.sg/2014/01/removeelement-leetcode.html">this blog</a>.</p>
+<p><strong>This is a classic AND EXTREMELY IMPORTANT question</strong>.</p>
 
-<h3>My code</h3>
+<p>Solution is well explained in <a href="http://leetcode.com/2010/04/binary-search-tree-in-order-traversal.html">this blog</a>:</p>
 
-<pre><code>public int removeElement(int[] A, int elem) {
-        int left = 0, right = 0;
-        while (right &lt; A.length) {
-            if (A[right] == elem) right++;
-            else A[left ++] = A[right ++];
+<blockquote><p>First, the current pointer is initialized to the root. Keep traversing to its left child while pushing visited nodes onto the stack. When you reach a NULL node (ie, you&rsquo;ve reached a leaf node), you would pop off an element from the stack and set it to current. Now is the time to print current&rsquo;s value. Then, current is set to its right child and repeat the process again. When the stack is empty, this means you&rsquo;re done printing.</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>concise code, hard to think of</strong></p>
+
+<pre><code>public ArrayList&lt;Integer&gt; inorderTraversal(TreeNode root) {
+    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    TreeNode p = root;
+    while (p != null || ! stack.isEmpty()) {
+        if (p != null) {
+            stack.push(p);
+            p = p.left;
         }
-        return left;
+        else if (! stack.isEmpty()) {
+            TreeNode temp = stack.pop();
+            ans.add(temp.val);
+            p = temp.right;
+        }
+    }
+    return ans;
 }
 </code></pre>
 
-<p>Change while loop to for loop, the solution is only 4 lines of code.</p>
-
-<pre><code>public int removeElement(int[] A, int elem) {
-        int p = 0;
-        for (int i = 0; i &lt; A.length; i ++)
-            if (A[i] != elem) A[p ++] = A[i];
-        return p;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/09/Remove-Duplicates-from-Sorted-Array/">[LeetCode 26] Remove Duplicates From Sorted Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/09/Remove-Duplicates-from-Sorted-Array/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/09/Remove-Duplicates-from-Sorted-Array/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/remove-duplicates-from-sorted-array/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a sorted array, remove the duplicates in place such that each element appear only <i>once</i> and return the new length.</p>
-
-<p>
-Do not allocate extra space for another array, you must do this in place with constant memory.
-</p>
-
-<p>
-For example,<br>
-Given input array A = <code>[1,1,2]</code>,
-</p>
-<p>
-Your function should return length = <code>2</code>, and A is now <code>[1,2]</code>.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>This question is easy.</p>
-
-<h3>Solution</h3>
-
-<p>Two pointer operations.</p>
-
-<h3>My code</h3>
-
-<pre><code>public int removeDuplicates(int[] A) {
-        if (A.length == 0) return 0;
-        int left = 1, right = 1;
-        int pre = A[0];
-        while(right &lt; A.length){
-            if (A[right] != pre) {
-                A[left] = A[right];
-                pre = A[left];
-                left ++;
-            }
-            right ++;
-        }
-        return left;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/09/Merge-Two-Sorted-Lists/">[LeetCode 21] Merge Two Sorted Lists</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/09/Merge-Two-Sorted-Lists/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/09/Merge-Two-Sorted-Lists/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/merge-two-sorted-lists/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Merge two sorted linked lists and return it as a new list. The new list should be made by splicing together the nodes of the first two lists.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This question is easy</strong>. There are difficult ways to solve.</p>
-
-<h3>Solution</h3>
-
-<p>I wrote 2 versions of code, one using recursion and one using direct approach (fake header + link operations). <strong>Surprisingly my second code is EXACTLY same</strong> as the code written in <a href="http://www.programcreek.com/2012/12/leetcode-merge-two-sorted-lists-java/">this blog</a>.</p>
-
-<h3>My code</h3>
-
-<p>Recursion:</p>
-
-<pre><code>public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-        if (l1 == null) return l2;
-        if (l2 == null) return l1;
-        if (l1.val &gt; l2.val) {
-            l2.next = mergeTwoLists(l1, l2.next);
-            return l2;
-        }
-        else{
-            l1.next = mergeTwoLists(l1.next, l2);
-            return l1;
-        }
-
-}
-</code></pre>
-
-<p>Fake header + link operations</p>
-
-<pre><code>public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-        ListNode pre = new ListNode(Integer.MIN_VALUE);
-        ListNode cur = pre;
-        while (l1 != null &amp;&amp; l2 != null) {
-            if (l1.val &lt; l2.val) {
-                cur.next = l1;
-                l1 = l1.next;
-            } else {
-                cur.next = l2;
-                l2 = l2.next;
-            }
-            cur = cur.next;
-        }
-        if (l1 == null) cur.next = l2;
-        else cur.next = l1;
-        return pre.next;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/09/Generate-Parentheses/">[LeetCode 22] Generate Parentheses</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/09/Generate-Parentheses/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/09/Generate-Parentheses/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/valid-parentheses/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given <i>n</i> pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
-</p>
-
-<p>
-For example, given <i>n</i> = 3, a solution set is:
-</p>
-<p>
-<code>"((()))", "(()())", "(())()", "()(())", "()()()"</code>
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>Most popular solutions online are using recursive calls</strong>. For example, <a href="http://www.geeksforgeeks.org/print-all-combinations-of-balanced-parentheses/">this blog</a>. I also used this method.</p>
-
-<h3>Solution</h3>
-
-<p>I kept 2 integers: <strong>open</strong> (number of unclosed left parenthesis) and <strong>remain</strong> (number of parenthesis that can be addded to the current string). I optimized my previous code and made it cleaner.</p>
-
-<h3>My code</h3>
-
-<pre><code>public ArrayList&lt;String&gt; generateParenthesis(int n) {
-        return helper(new ArrayList&lt;String&gt;(), 0, n, "");
-}
-
-private ArrayList&lt;String&gt; helper(ArrayList&lt;String&gt; ans, 
-                int open, int remain, String cur) {
-        if (open == 0 &amp;&amp; remain == 0) ans.add(cur);
-        if (remain &gt; 0) helper(ans, open + 1, remain - 1, cur + "(");
-        if (open &gt; 0) helper(ans, open - 1, remain, cur + ")");
+<p><strong>more intuitive code, written by Oct 8th, 2014</strong></p>
+
+<pre><code>public List&lt;Integer&gt; inorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+    if (root == null) {
         return ans;
+    }
+
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    TreeNode p = root;
+    while (p != null) {
+        stack.push(p);
+        p = p.left;
+    }
+    while (!stack.isEmpty()) {
+        p = stack.pop();
+        ans.add(p.val);
+        p = p.right;
+        while (p != null) {
+            stack.push(p);
+            p = p.left;
+        }
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/23/Scramble-String/">[LeetCode 87] Scramble String</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/23/Scramble-String/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/23/Scramble-String/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/scramble-string/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a string <i>s1</i>, we may represent it as a binary tree by partitioning it to two non-empty substrings recursively.
+</p>
+<p>
+Below is one possible representation of <i>s1</i> = <code>"great"</code>:
+</p>
+<pre>    great
+   /    \
+  gr    eat
+ / \    /  \
+g   r  e   at
+           / \
+          a   t
+</pre>
+<p>
+To scramble the string, we may choose any non-leaf node and swap its two children.
+</p>
+<p>
+For example, if we choose the node <code>"gr"</code> and swap its two children, it produces a scrambled string <code>"rgeat"</code>.
+</p>
+<pre>    rgeat
+   /    \
+  rg    eat
+ / \    /  \
+r   g  e   at
+           / \
+          a   t
+</pre>
+<p>
+We say that <code>"rgeat"</code> is a scrambled string of <code>"great"</code>.
+</p>
+<p>
+Similarly, if we continue to swap the children of nodes <code>"eat"</code> and <code>"at"</code>, it produces a scrambled string <code>"rgtae"</code>.
+</p>
+<pre>    rgtae
+   /    \
+  rg    tae
+ / \    /  \
+r   g  ta  e
+       / \
+      t   a
+</pre>
+<p>
+We say that <code>"rgtae"</code> is a scrambled string of <code>"great"</code>.
+</p>
+<p>
+Given two strings <i>s1</i> and <i>s2</i> of the same length, determine if <i>s2</i> is a scrambled string of <i>s1</i>.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This is problem can be solved by <strong>either DFS or DP.</strong></p>
+
+<p><strong><a href="http://zhaohongze.com/wordpress/2013/12/12/leetcode-scramble-string/">This blog</a> have a very good analysis of the DFS approach</strong>.</p>
+
+<blockquote>
+<p>Note that the binary tree can be constructed arbitrarily. So the general idea to tackle this problem is to enumerate every possible binary trees using DFS to see if two strings are scrambled strings. We can accelerate this process by adding a very efficient pruning.<br>
+Given two strings, s1, s2. First check if they have same letters and same length, denote as len.<br>
+For any l (1 &lt;= l &lt;= len): partition s1 into s11 = s1[0 : l), s12 = s1[l : len). We have two ways to partition s1:</p>
+<ol>
+<li>s21 = s2[0 : 1), s22 = s2[l : len). In this case, check s11 and s21 have same letters and are scrambled strings. And check s12 and s22 have same letters and are scrambled strings</li>
+<li>s21 = s2[0 : len – l), s22 = s2[len – l : len). In this case, check s11 and s22 have same letters and are scrambled strings. Then check s12 and s21 have same letters and are scrambled strings </li>
+</ol>
+</blockquote>
+
+
+<p><strong><a href="http://blog.sina.com.cn/s/blog_b9285de20101gy6n.html">This blog</a> have a very good DP analysis</strong>.</p>
+
+<blockquote>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+dp[i][j][k] 代表了s1从i开始，s2从j开始，长度为k的两个substring是否为scramble
+string。</span><br>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+有三种情况需要考虑：</span><br>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+1. 如果两个substring相等的话，则为true</span><br>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+2. 如果两个substring中间某一个点，左边的substrings为scramble string，
+同时右边的substrings也为scramble string，则为true</span><br>
+<span style="font-family: Arial; vertical-align: baseline; white-space: pre-wrap;">
+3. 如果两个substring中间某一个点，s1左边的substring和s2右边的substring为scramble
+string, 同时s1右边substring和s2左边的substring也为scramble
+string，则为true</span><br>
+</blockquote>
+
+
+<p>For more explanation, <a href="http://yihuad.blogspot.sg/2013/10/scramble-string-leetcode.html">this blog</a> and <a href="http://www.blogjava.net/sandy/archive/2013/05/22/399605.html">this blog</a> and <a href="http://blog.csdn.net/linhuanmars/article/details/24506703">this blog</a> have discussed about it.</p>
+
+<h3>Code</h3>
+
+<p><strong>my code</strong></p>
+
+<pre><code>public boolean isScramble(String s1, String s2) {
+    if (! sameLetters(s1, s2)) return false;
+    if (s1.equals(s2)) return true;
+    for (int i = 1; i &lt; s1.length(); i ++) {
+        String left1 = s1.substring(0,  i);
+        String right1 = s1.substring(i, s1.length());
+        String left2 = s2.substring(0,  i);
+        String right2 = s2.substring(i, s2.length());
+        if (isScramble(left1, left2) &amp;&amp; isScramble(right1, right2))
+            return true;
+        left2 = s2.substring(0, s2.length() - i);
+        right2 = s2.substring(s2.length() - i, s2.length());
+        if (isScramble(left1, right2) &amp;&amp; isScramble(right1, left2))
+            return true;
+    }
+    return false;
+}
+
+private boolean sameLetters(String a, String b) {
+    if (a.length() != b.length()) return false;
+    int[] count = new int[26];
+    for (Character aa: a.toCharArray()) 
+        count[aa - 'a'] ++;
+    for (Character bb: b.toCharArray()) 
+        if (count[bb - 'a'] -- &lt;= 0) 
+            return false;
+    return true;
+}
+</code></pre>
+
+<p><strong>Updated on July 5th, 2014</strong>: written again with less substring operations and more variables inside the method:</p>
+
+<pre><code>public boolean isScramble(String s1, String s2) {
+    if (s1 == null || s2 == null || s1.length() != s2.length()) {
+        return false;
+    }
+    int len = s1.length();
+    return helper(s1, 0, len - 1, s2, 0, len - 1);
+}
+
+private boolean helper(String s1, int a1, int b1, String s2, int a2, int b2) {
+    if (a1 - b1 != a2 - b2) 
+        return false;
+    // check s1[a1, b1] and s2[a2, b2] have same set of letters
+    int[] count = new int[26];
+    for (int i = a1; i &lt;= b1; i++) 
+        count[s1.charAt(i) - 'a'] ++;
+    for (int i = a2; i &lt;= b2; i++) 
+        if (count[s2.charAt(i) - 'a'] -- &lt;= 0) 
+            return false;
+    // check s1[a1, b1] and s2[a2, b2] is scramble or not
+    if (a1 == b1) {
+        return (s1.charAt(a1) == s2.charAt(a2));
+    }
+    for (int i = 0; i &lt; b1 - a1; i++) {
+        boolean check = helper(s1, a1, a1 + i, s2, a2, a2 + i) 
+                    &amp;&amp; helper(s1, a1 + i + 1, b1, s2, a2 + i + 1, b2);
+        if (check) return true;
+        check = helper(s1, a1, a1 + i, s2, b2 - i, b2) 
+                    &amp;&amp; helper(s1, a1 + i + 1, b1, s2, a2, b2 - i - 1);
+        if (check) return true;
+    }
+    return false;
+}
+</code></pre>
+
+<p><strong>DP code</strong>, not written by me</p>
+
+<pre><code>public boolean isScramble(String s1, String s2) {
+    int n = s1.length();
+    boolean[][][] dp = new boolean[n][n][n + 1];
+    for (int i = n - 1; i &gt;= 0; i--)
+        for (int j = n - 1; j &gt;= 0; j--)
+            for (int k = 1; k &lt;= n - Math.max(i, j); k++) {
+                if (s1.substring(i, i + k).equals(s2.substring(j, j + k)))
+                    dp[i][j][k] = true;
+                else {
+                    for (int l = 1; l &lt; k; l++) {
+                        if (dp[i][j][l] &amp;&amp; dp[i + l][j + l][k - l] 
+                            || dp[i][j + k - l][l] &amp;&amp; dp[i + l][j][k - l]) {
+                            dp[i][j][k] = true;
+                            break;
+                        }
+                    }
+                }
+            }
+    return dp[0][0][n];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/23/Reverse-Linked-List-II/">[LeetCode 92] Reverse Linked List II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/23/Reverse-Linked-List-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/23/Reverse-Linked-List-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/reverse-linked-list-ii/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Reverse a linked list from position <i>m</i> to <i>n</i>. Do it in-place and in one-pass.
+</p>
+
+<p>
+For example:<br>
+Given <code>1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL</code>, <i>m</i> = 2 and <i>n</i> = 4,
+</p>
+<p>
+return <code>1-&gt;4-&gt;3-&gt;2-&gt;5-&gt;NULL</code>.
+</p>
+<p>
+<b>Note:</b><br>
+Given <i>m</i>, <i>n</i> satisfy the following condition:<br>
+1 ≤ <i>m</i> ≤ <i>n</i> ≤ length of list.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">18 minutes</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a very standard interview question of LinkedList</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Keep 2 pointers, one of which points to preReversePosition, another one points to finalTailOfTheReversedPart</strong>. Each time, I will get next element and insert it between the 2 pointers mentioned above. See below image for details:</p>
+
+<p><img class="middle" src="/assets/images/reverse-linked-list-ii.png"></p>
+
+<p>The coding isn&rsquo;t easy, there can be a lot of details being omitted. Just think of it in this way: in the above picture, 123 is broken away from 45678. Each time, get next element from 45678, and insert it right after 2. Do this 2 times, so that 4,5 are moved. In the end, make 3 point to 6, and solution done.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, my code</strong></p>
+
+<pre><code>public ListNode reverseBetween(ListNode head, int m, int n) {
+    ListNode preHead = new ListNode(0);
+    preHead.next = head;
+    ListNode before = preHead;
+    for (int i = 1; i &lt; m; i ++)
+        before = before.next;
+    ListNode rTail = before.next;
+    ListNode cur = before.next.next;
+    for (int i = 0; i &lt; n - m; i ++) {
+        ListNode temp = cur.next;
+        cur.next = before.next;
+        before.next = cur;
+        cur = temp;
+    }
+    rTail.next = cur;
+    return preHead.next;
+}
+</code></pre>
+
+<p><strong>Second, </strong></p>
+
+<p>A lot of people have similar solutions, so I won&rsquo;t post any of their code. Reading it won&rsquo;t help, write it yourself is actually important.</p>
+
+<p>A lot of people have complained about this problem not easy to write.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/23/Partition-List/">[LeetCode 86] Partition List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/23/Partition-List/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/23/Partition-List/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/partition-list/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a linked list and a value <i>x</i>, partition it such that all nodes less than <i>x</i> come before nodes greater than or equal to <i>x</i>.
+</p>
+<p>
+You should preserve the original relative order of the nodes in each of the two partitions.
+</p>
+<p>
+For example,<br>
+Given <code>1-&gt;4-&gt;3-&gt;2-&gt;5-&gt;2</code> and <i>x</i> = 3,<br>
+return <code>1-&gt;2-&gt;2-&gt;4-&gt;3-&gt;5</code>.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">15 minutes</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This question is not very difficult</strong>, but can be confusing if the code don&rsquo;t have good logic.</p>
+
+<h3>Solution</h3>
+
+<p>There is no fancy algorithm solution. I got it wrong in 10 submissions at first. After a few days, I did this problem again and passed with 1 attempt.</p>
+
+<p>So just keep practicing.</p>
+
+<h3>Code</h3>
+
+<p><strong>my code</strong></p>
+
+<pre><code>public ListNode partition(ListNode head, int x) {
+    if (head == null) return head;
+    ListNode PH = new ListNode(1);
+    PH.next = head;
+    ListNode left = PH, preRight = PH, right = head;
+    while (right != null) {
+        if (right.val &lt; x) {
+            if (preRight != left) {
+                preRight.next = right.next;
+                right.next = left.next;
+                left.next = right;
+                left = right;
+                right = preRight.next;
+            } else {
+                left = left.next;
+                preRight = left;
+                right = right.next;
+            }
+        } else {
+            preRight = right;
+            right = preRight.next;
+        }
+    }
+    return PH.next;
 }
 </code></pre>
 </div>
@@ -1495,8 +1772,11 @@ private ArrayList&lt;String&gt; helper(ArrayList&lt;String&gt; ans,
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
+<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (152)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1504,9 +1784,10 @@ private ArrayList&lt;String&gt; helper(ArrayList&lt;String&gt; ans,
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (3)</a></li>
-<li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (4)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
+<li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
   </ul>
 </section>
@@ -1515,23 +1796,23 @@ private ArrayList&lt;String&gt; helper(ArrayList&lt;String&gt; ans,
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
+        <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a>
+        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a>
+        <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a>
+        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a>
+        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
       </li>
     
   </ul>

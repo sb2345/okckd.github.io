@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Overview A functional language allows you to write a mathematical function, i.e. a function that takes n arguments and returns a value. If the &hellip;">
+  <meta name="description" content="Question link Code a hashmap which you would be happy to place into a production environment. Solution We already write 2 post before: [Question] &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/09/Functional-programming/">[Design] Functional Programming</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/09/04/Code-a-hashmap/">[Google] Code a HashMap</a></h1>
     
     
       <p class="meta">
@@ -100,377 +100,10 @@
   
 
 
-<time datetime="2014-08-09T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-04T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/09/Functional-programming/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/09/Functional-programming/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p><strong><a href="http://stackoverflow.com/a/23290">A functional language</a> allows you to write a mathematical function</strong>, i.e. a function that takes n arguments and returns a value. If the program is executed, this function is evaluated.</p>
-
-<p>A purely functional program <strong>always yields the same value for an input</strong>, and the order of evaluation is not well-defined; which means that uncertain values like user input or random values are hard to model in purely functional languages.</p>
-
-<h3>One Sentence</h3>
-
-<p><strong>Functional programming is like describing your <a href="http://stackoverflow.com/a/23475">problem to a mathematician</a>. Imperative programming is like giving instructions to an idiot</strong>.</p>
-
-<h3>Pros and Cons</h3>
-
-<p>Functional Programming allows coding <a href="http://stackoverflow.com/a/24294">with fewer potentials for bugs</a> because each component is completely isolated. Also, using recursion and first-class functions allows for <strong>simple proofs of correctness</strong> which typically mirror the structure of the code.</p>
-
-<p>Functional programming languages are typically <a href="http://en.wikipedia.org/wiki/Functional_programming#Efficiency_issues">less efficient</a> in their use of CPU and memory than imperative languages such as C and Pascal.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Thread-pool-pattern/">[Design] Thread Pool Pattern</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/08/Thread-pool-pattern/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/08/Thread-pool-pattern/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p><a href="http://programmers.stackexchange.com/a/173580">Thread pool</a> is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue.</p>
-
-<p><img class="middle" src="/assets/images/thread-pool.png"></p>
-
-<p><a href="http://en.wikipedia.org/wiki/Thread_pool_pattern">A sample thread pool</a> (green boxes) with waiting tasks (blue) and completed tasks (yellow)</p>
-
-<h3>Why Thread Pool?</h3>
-
-<p><a href="http://www.ibm.com/developerworks/library/j-jtp0730/">Many server applications</a>, such as <strong>Web servers (eg. Tomcat)</strong>, database servers, file servers, or mail servers must process a large number of tasks received from a network protocol. Often, the task is short-lived and the number of requests is large.</p>
-
-<p><strong>Thread Pools are useful when you need to limit the number of threads</strong> running in your application at the same time.</p>
-
-<h3>More details</h3>
-
-<p>A thread pool is a group of pre-instantiated, idle threads which stand ready to be given work. These are preferred over instantiating new threads for each task when there is <strong>a large number of short tasks</strong> to be done <strong>rather than a small number of long ones</strong>.</p>
-
-<p>Instead of starting a new thread for every task to execute concurrently, the <strong>task can be passed to a thread pool</strong>. As soon as the pool has any idle threads the task is assigned to one of them and executed.</p>
-
-<p>Thread pools are often used in multi threaded servers. Each connection <strong>arriving at the server via the network is wrapped as a task</strong> and passed on to a thread pool. The threads in the thread pool will process the requests on the connections concurrently.</p>
-
-<h3>Code</h3>
-
-<p><strong>a <a href="http://tutorials.jenkov.com/java-concurrency/thread-pools.html">simple thread pool implementation</a></strong></p>
-
-<p>Pool Class:</p>
-
-<pre><code>public class ThreadPool {
-
-  private BlockingQueue taskQueue = null;
-  private List&lt;PoolThread&gt; threads = new ArrayList&lt;PoolThread&gt;();
-  private boolean isStopped = false;
-
-  public ThreadPool(int noOfThreads, int maxNoOfTasks){
-    taskQueue = new BlockingQueue(maxNoOfTasks);
-
-    for(int i=0; i&lt;noOfThreads; i++){
-      threads.add(new PoolThread(taskQueue));
-    }
-    for(PoolThread thread : threads){
-      thread.start();
-    }
-  }
-
-  public void synchronized execute(Runnable task){
-    if(this.isStopped) throw
-      new IllegalStateException("ThreadPool is stopped");
-
-    this.taskQueue.enqueue(task);
-  }
-
-  public synchronized void stop(){
-    this.isStopped = true;
-    for(PoolThread thread : threads){
-      thread.stop();
-    }
-  }
-}
-</code></pre>
-
-<p>Thread Class:</p>
-
-<pre><code>public class PoolThread extends Thread {
-
-  private BlockingQueue taskQueue = null;
-  private boolean       isStopped = false;
-
-  public PoolThread(BlockingQueue queue){
-    taskQueue = queue;
-  }
-
-  public void run(){
-    while(!isStopped()){
-      try{
-        Runnable runnable = (Runnable) taskQueue.dequeue();
-        runnable.run();
-      } catch(Exception e){
-        //log or otherwise report exception,
-        //but keep pool thread alive.
-      }
-    }
-  }
-
-  public synchronized void stop(){
-    isStopped = true;
-    this.interrupt(); //break pool thread out of dequeue() call.
-  }
-
-  public synchronized void isStopped(){
-    return isStopped;
-  }
-}
-</code></pre>
-
-<p>An explanation:</p>
-
-<blockquote><p>The thread pool implementation consists of two parts. A ThreadPool class which is the public interface to the thread pool, and a PoolThread class which implements the threads that execute the tasks.</p>
-
-<p>To execute a task the method ThreadPool.execute(Runnable r) is called with a Runnable implementation as parameter. The Runnable is enqueued in the blocking queue internally, waiting to be dequeued.</p>
-
-<p>The Runnable will be dequeued by an idle PoolThread and executed. You can see this in the PoolThread.run() method. After execution the PoolThread loops and tries to dequeue a task again, until stopped.</p>
-
-<p>To stop the ThreadPool the method ThreadPool.stop() is called. The stop called is noted internally in the isStopped member. Then each thread in the pool is stopped by calling PoolThread.stop(). Notice how the execute() method will throw an IllegalStateException if execute() is called after stop() has been called.</p>
-
-<p>The threads will stop after finishing any task they are currently executing. Notice the this.interrupt() call in PoolThread.stop(). This makes sure that a thread blocked in a wait() call inside the taskQueue.dequeue() call breaks out of the wait() call, and leaves the dequeue() method call with an InterruptedException thrown. This exception is caught in the PoolThread.run() method, reported, and then the isStopped variable is checked. Since isStopped is now true, the PoolThread.run() will exit and the thread dies.</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Producer-consumer-problem/">[Design] Producer Consumer Problem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/08/Producer-consumer-problem/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/08/Producer-consumer-problem/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p>Producer-consumer problem illustrates the need for <strong>synchronization</strong> in systems where <strong>many processes share a resource</strong>.</p>
-
-<p><a href="http://cs.gmu.edu/cne/modules/ipc/aqua/producer.html">In the problem</a>, two processes share a fixed-size buffer. One process produces information and puts it in the buffer, while the other process consumes information from the buffer. These processes do not take turns accessing the buffer, they both work concurrently.</p>
-
-<h3>Inadequate Solution</h3>
-
-<p><img class="middle" src="/assets/images/producer-workflow.gif"></p>
-
-<p><img class="middle" src="/assets/images/consumer-workflow.gif"></p>
-
-<p><strong>The code might look like this</strong>:</p>
-
-<pre><code>BufferSize = 3;
-count = 0;
-
-Producer()
-{
-    int widget;
-    WHILE (true) {                     // loop forever
-       make_new(widget);               // create a new widget to put in the buffer
-       IF(count==BufferSize)
-           Sleep();                    // if the buffer is full, sleep
-       put_item(widget);               // put the item in the buffer
-       count = count + 1;              // increment count of items
-       IF (count==1)
-           Wakeup(Consumer);           // if the buffer was previously empty, wake
-    }                                  //  the consumer
-}
-
-Consumer()
-{
-    int widget;
-    WHILE(true) {                    // loop forever
-      IF(count==0)
-           Sleep();                  // if the buffer is empty, sleep
-      remove_item(widget);           // take an item from the buffer
-      count = count + 1;             // decrement count of items
-      IF(count==N-1)
-            Wakeup(Producer);        // if buffer was previously full, wake
-                                     //  the producer
-      Consume_item(widget);          // consume the item
-    }
-}
-</code></pre>
-
-<p>This <a href="http://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem#Inadequate_implementation">will cause problems</a>, because <strong>it contains a race condition</strong> that can lead to a deadlock. Or in simply words, it has the potential of <a href="http://cs.gmu.edu/cne/modules/ipc/purple/prodsem.html">losing wakeups</a>.</p>
-
-<p>An alternative analysis is that if the programming language does not define the semantics of <strong>concurrent accesses to shared variables (in this case itemCount)</strong> without use of synchronization, then the solution is unsatisfactory for that reason, without needing to explicitly demonstrate a race condition.</p>
-
-<p>Solutions are: <strong>semaphores or monitors</strong>.</p>
-
-<h3>Semaphore</h3>
-
-<pre><code>semaphore mutex = 1;
-semaphore fillCount = 0;
-semaphore emptyCount = BUFFER_SIZE;
-
-procedure producer() {
-    while (true) {
-        item = produceItem();
-        down(emptyCount);
-            down(mutex);
-                putItemIntoBuffer(item);
-            up(mutex);
-        up(fillCount);
-    }
-}
-
-procedure consumer() {
-    while (true) {
-        down(fillCount);
-            down(mutex);
-                item = removeItemFromBuffer();
-            up(mutex);
-        up(emptyCount);
-        consumeItem(item);
-    }
-}
-</code></pre>
-
-<h3>Monitor</h3>
-
-<pre><code>monitor ProducerConsumer {
-    int itemCount;
-    condition full;
-    condition empty;
-
-    procedure add(item) {
-        while (itemCount == BUFFER_SIZE) {
-            wait(full);
-        }
-
-        putItemIntoBuffer(item);
-        itemCount = itemCount + 1;
-
-        if (itemCount == BUFFER_SIZE -1) {
-            notify(full);
-        }
-    }
-    procedure remove() {
-        while (itemCount == 0) {
-            wait(empty);
-        }
-
-        item = removeItemFromBuffer();
-        itemCount = itemCount - 1;
-
-        if (itemCount == 1) {
-            notify(empty);
-        }
-
-
-        return item;
-    }
-}
-
-procedure producer() {
-    while (true) {
-        item = produceItem();
-        ProducerConsumer.add(item);
-    }
-}
-
-procedure consumer() {
-    while (true) {
-        item = ProducerConsumer.remove();
-        consumeItem(item);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Max-sum-non-consecutive/">[Question] Max Sum of Non-Consecutive Elements</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/08/Max-sum-non-consecutive/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/08/Max-sum-non-consecutive/">Comments</a>
+           | <a href="/blog/2014/09/04/Code-a-hashmap/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/04/Code-a-hashmap/">Comments</a>
         
       </p>
     
@@ -479,156 +112,36 @@ procedure consumer() {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://tech-queries.blogspot.sg/2009/05/max-possible-sum-of-non-consecutive.html">link</a></p>
+<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
 
-<blockquote><p>There is an integer array consisting positive numbers only.</p>
-
-<p>Find maximum possible sum of elements such that there are no 2 consecutive elements present in the sum.</p></blockquote>
+<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>It&rsquo;s a little tricky to write the equation. Always remember the <strong>basic principle of DP</strong> is to assume that solution is found for (i -1), and then we calculate solution for input (i).</p>
+<p>We already write 2 post before:</p>
 
-<p><strong>Don&rsquo;t miss the (i-1) part</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public int maxSumNonConsec(int[] input) {
-    int len = input.length;
-    int[] dp = new int[len];
-    dp[0] = input[0];
-    dp[1] = Math.max(input[0], input[1]);
-    for (int i = 2; i &lt; len; i++) {
-        dp[i] = Math.max(dp[i - 1], input[i] + dp[i - 2]);
-    }
-    return dp[len - 1];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Decimal-to-Hex/">[Question] Decimal to Hexadecimal</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/08/Decimal-to-Hex/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/08/Decimal-to-Hex/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/13465098/decimal-to-hexadecimal-converter-in-java">link</a></p>
-
-<blockquote><p>Decimal to Hexadecimal conversion.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Convert binary to hex as a group of 4 bits.</p>
-
-<p>Read code.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>private final char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7',
-        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-private final int flag = 0x0F;
-
-public String decToHex(int dec) {
-    char[] hex = new char[8];
-    for (int i = 7; i &gt;= 0; i--) {
-        int oneDigit = flag &amp; dec;
-        dec &gt;&gt;= 4;
-        hex[i] = hexDigits[oneDigit];
-    }
-    return String.valueOf(hex);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Composition-over-inheritance/">[Design] Composition Over Inheritance</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/08/Composition-over-inheritance/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/08/Composition-over-inheritance/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Composition_over_inheritance">Composition over inheritance</a> in OOP is a technique by which classes achieve <strong>polymorphic behavior and code reuse</strong> by containing other classes <strong>instead of</strong> through inheritance.</p>
-
-<h3>Benefits</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Composition_over_inheritance#Benefits">It gives</a> the design <strong>higher flexibility</strong>, giving business-domain classes and more stable business domain in the long term. In other words, HAS-A can be better than an IS-A relationship.</p>
-
-<p><strong>And inheritance <a href="http://stackoverflow.com/a/891908">breaks encapsulation</a></strong>! This post also points out these (which is hard to understand):</p>
-
-<blockquote><ol>
-<li><p>You can&rsquo;t change the implementation inherited from super classes at runtime (obviously because inheritance is defined at compile time).</p></li>
-<li><p>Inheritance exposes a subclass to details of its parent&rsquo;s class implementation, that&rsquo;s why it&rsquo;s often said that inheritance breaks encapsulation (in a sense that you really need to focus on interfaces only not implementation, so reusing by sub classing is not always preferred).</p></li>
-<li><p>The tight coupling provided by inheritance makes the implementation of a subclass very bound up with the implementation of a super class that any change in the parent implementation will force the sub class to change.</p></li>
-<li><p>Excessive reusing by sub-classing can make the inheritance stack very deep and very confusing too.</p></li>
+<ol>
+<li><p><strong>[Question] Implement a HashMap</strong></p></li>
+<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
 </ol>
-</blockquote>
+
+
+<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
+
+<ol>
+<li>The basic structure is an array. It can be:
+
+<ol>
+<li>An array of linked nodes (with a next pointer).</li>
+<li>An array of linked list.</li>
+</ol>
+</li>
+<li>There should be a hash function.</li>
+<li>There should be a function to convert the hash value to corresponding array index.</li>
+<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
+<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
+</ol>
+
 </div>
   
   
@@ -641,7 +154,7 @@ public String decToHex(int dec) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Add-integer-without-plus-sign/">[Question] Add Integers Without +/++</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/09/03/weird-sort-array/">[Google] Weird Sort Array</a></h1>
     
     
       <p class="meta">
@@ -657,10 +170,10 @@ public String decToHex(int dec) {
   
 
 
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-03T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/08/Add-integer-without-plus-sign/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/08/Add-integer-without-plus-sign/">Comments</a>
+           | <a href="/blog/2014/09/03/weird-sort-array/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/03/weird-sort-array/">Comments</a>
         
       </p>
     
@@ -669,53 +182,473 @@ public String decToHex(int dec) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://javarevisited.blogspot.sg/2013/06/how-to-add-two-integer-numbers-without-plus-arithmetic-operator-java-example.html">link</a></p>
+<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32772813.html">link</a></p>
 
-<blockquote><p>Add two numbers (integers) without using + or plus arithmetic operator.</p></blockquote>
+<blockquote><p>数组排序， 排成 a1<a2>a3<a4>a5。。。这种形式。</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>Bit operations</strong>.</p>
+<p><strong>The are 2 solutions</strong>. The easy one is this:</p>
 
-<p>We could not do this in 1 pass, because multiple rounding issues.</p>
+<blockquote><p>sort first, then 把临近的奇数换到偶数(index)上, O(nlog n).</p></blockquote>
 
-<p>So we do it in while-loop then! 2 solutions available: <strong>iteratively and recursively</strong>.</p>
+<p><strong>There&rsquo;s a great O(n) solution however</strong>, not easy to think:</p>
+
+<blockquote><p>两两比较相邻数字，把大的数字放到下标为奇数的位置。 O(n).</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>O(nlgn) solution</strong></p>
+
+<pre><code>public void solutionOnlgn(int[] A) {
+    // this is a O(nlgn) solution
+    Arrays.sort(A);
+    for (int i = 2; i &lt; A.length; i += 2) {
+        swap(A, i - 1, i);
+    }
+}
+
+private void swap(int[] A, int a, int b) {
+    A[a] ^= A[b];
+    A[b] ^= A[a];
+    A[a] ^= A[b];
+}
+</code></pre>
+
+<p><strong>O(n) solution</strong></p>
+
+<pre><code>public void solutionOn(int[] A) {
+    // this is a O(n) solution
+    for (int i = 1; i &lt; A.length; i++) {
+        // compare (i)th with (i-1)th, and put the large value
+        // at odd-indexed positions
+        if ((A[i - 1] &lt; A[i] &amp;&amp; i % 2 == 0)
+                || (A[i - 1] &gt; A[i] &amp;&amp; i % 2 == 1)) {
+            swap(A, i - 1, i);
+        }
+    }
+}
+
+private void swap(int[] A, int a, int b) {
+    A[a] ^= A[b];
+    A[b] ^= A[a];
+    A[a] ^= A[b];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/03/String-replacement-question/">[Google] String Replacement Question</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/03/String-replacement-question/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/03/String-replacement-question/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32766461.html">link</a></p>
+
+<blockquote><p>String replace, 给一个原string，一个target，一个替换的新str，把所有出现
+target str的地方都换成新的str， 长度可以任意.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>If the question asks for an in-place algo, then we can refer to <strong>Question 1.5 in CC150v4</strong>.</p>
+
+<h3>Question</h3>
+
+<blockquote><p>1.5 Write a method to replace all spaces in a string with ‘%20’.</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li><strong>pre-processing</strong>, count the number of spaces in string</li>
+<li>parse the string from end to beginning.</li>
+</ol>
+
+
+<p>Need 2 pass.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>public static void ReplaceFun(char[] str, int length) {
+    int spaceCount = 0, newLength, i = 0;
+    for (i = 0; i &lt; length; i++) {
+        if (str[i] == ' ') {
+            spaceCount++;
+        }
+    }
+    newLength = length + spaceCount * 2;
+    str[newLength] = '\0';
+    for (i = length - 1; i &gt;= 0; i--) {
+        if (str[i] == ' ') {
+            str[newLength - 1] = '0';
+            str[newLength - 2] = '2';
+            str[newLength - 3] = '%';
+            newLength = newLength - 3;
+        } else {
+            str[newLength - 1] = str[i];
+            newLength = newLength - 1;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/03/Leader-election/">[Design] Leader Election</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/03/Leader-election/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/03/Leader-election/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p>(this question is from MIT handouts B)</p>
+
+<blockquote><p>Describe a technique to identify a &ldquo;leader&rdquo; among a group of 10 identical servers that are all connected to every other server.</p>
+
+<p>There are no prior distinguishing characteristics of any of them and the same program to identify the leader starts running on all of them at the same time. After an answer is given, ask how much network traffic it requires and, if &ldquo;ties&rdquo; are possible, ask how you can break ties.</p></blockquote>
+
+<h3>Leader Election</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Leader_election">Leader Election</a></strong> is the process of designating a single process as the organizer of some task distributed among several computers. After running this algorithm, each node throughout the network recognizes a unique node as the task leader.</p>
+
+<p>The good answer would be:</p>
+
+<p>Have each server wait a random amount of time and then say &ldquo;I&rsquo;m it.&rdquo; The &ldquo;I&rsquo;m it&rdquo; <strong>announcement is time‐stamped</strong>, and the computer that <strong>time‐stamped its announcement first</strong> is elected the leader.</p>
+
+<p>This approach requires sending out 9 messages. <strong>If there is a tie</strong>, the computers can repeat the procedure.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/02/Listener-Observer-pattern/">[Design] Listener / Observer Pattern</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/02/Listener-Observer-pattern/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/02/Listener-Observer-pattern/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Observer pattern</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Observer_pattern">The observer pattern</a></strong> is a software design pattern in which an object(subject) maintains a list of dependents(observers), and notifies them automatically of any state changes (usually by calling one of their methods).</p>
+
+<p>The Observer pattern is mainly used to implement distributed event handling systems. It&rsquo;s also a key part in MVC architectural.</p>
+
+<h3>Example</h3>
+
+<p>A mailing list example.</p>
+
+<p>Each student in the mailing list would be a listener/observer, and teacher would be announcer/subject.</p>
+
+<p>So in the code, there&rsquo;s a Listener Interface that all students implement. There&rsquo;s a update() method in the interface, where each student define their own implementation.</p>
+
+<p>Teacher would keep a list of Listeners. When there&rsquo;s any news, teacher would call update() on each object.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/02/Find-anagrams-in-dictionary/">[Google] Find Anagrams in Dictionary</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/02/Find-anagrams-in-dictionary/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/02/Find-anagrams-in-dictionary/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=3088">link</a></p>
+
+<blockquote><p>Imagine you had a dictionary. How would you print all anagrams of a word? What if you had to do this repeatedly? Could you optimize it?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>A very <a href="http://stackoverflow.com/a/12477976">nice solution</a>:</p>
+
+<ol>
+<li><p>Open dictionary</p></li>
+<li><p>Create empty hashmap H</p></li>
+<li><p>For each word in dictionary:</p>
+
+<ol>
+<li><p>Create a key that is the word&rsquo;s letters sorted alphabetically (and forced to one case)</p></li>
+<li><p>Add the word to the list of words accessed by the hash key in H</p></li>
+</ol>
+</li>
+</ol>
+
+
+<p>There&rsquo;s another <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">very interesting idea</a>, if the length of the word is not too long.</p>
+
+<blockquote><p>Another approach could be we can assign each letters from a..z a prime numbers (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, .. so on)</p>
+
+<p>and then for any word, we can calculate its key as the multiples of all the prime number corresponding to characters in the word.</p>
+
+<p>The char &ndash;> int assignment may look like:</p></blockquote>
+
+<pre><code>a=2, b=3, c=5, d=7, e=11, f=13, g=17, h=19, i=23, j=29, 
+k=31, l=37, m=41, n=43, o=47, p=53, q=59, r=61, s=67, t=71, 
+u=73, v=79, w=83, x=89, y=97, z=101
+</code></pre>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong>, <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">link</a></p>
+
+<pre><code>private static HashMap&lt;String, ArrayList&lt;String&gt;&gt; anagramMap = new HashMap&lt;String, ArrayList&lt;String&gt;&gt;();
+
+public static void findAnagrams(String[] dictionary) {
+    int len = dictionary.length;
+
+    for (int i = 0; i &lt; len; i++) {
+        String sortedWord = sortWordLexicographically(dictionary[i]);
+        ArrayList&lt;String&gt; wordList = anagramMap.get(sortedWord);
+        if (wordList == null) {
+            wordList = new ArrayList&lt;String&gt;();
+        }
+        wordList.add(dictionary[i]);
+        anagramMap.put(sortedWord, wordList);
+    }
+}
+
+public ArrayList&lt;String&gt; getAnagrams(String word) {
+    if (word == null) {
+        return null;
+    }
+
+    String sortedWord = sortWordLexicographically(word);
+    return anagramMap.get(sortedWord);
+}
+
+public void printAnagrams(String word) {
+    if (word == null) {
+        System.out.println("Input word is null!");
+    } else {
+        ArrayList&lt;String&gt; wordList = getAnagrams(word);
+        if (wordList == null) {
+            System.out.println("No anagrams exists for : " + word);
+        } else {
+            Iterator&lt;String&gt; iter = wordList.iterator();
+            while (iter.hasNext()) {
+                System.out.print(iter.next());
+            }
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)/">[Google] Array Distance A(i)+A(j)+(j-i)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/02/Array-distance-A(i)+A(j)+(j-i)/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article/JobHunting/32772225_3.html">link</a></p>
+
+<blockquote><p>Given an int array A[], define:</p>
+
+<p>distance = A[i] + A[j] + (j-i), j >= i.</p>
+
+<p>Find max distance in A[]</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Solution suggested on floor 8 of <a href="http://www.mitbbs.com/mitbbs_article_t.php?board=JobHunting&amp;gid=32772225&amp;ftype=0">this post</a>.</p>
+
+<ol>
+<li><p>distance = (A[i] &ndash; i) + (A[j] + j), so we do 2 iteration in the array and calculate (A[i] &ndash; i) and (A[j] + j) respectively.</p></li>
+<li><p>save the max value of (A[i] &ndash; i) from left to right</p></li>
+<li><p>save the max value of (A[j] + j) from right to left</p></li>
+<li><p>last iteration, calculate result.</p></li>
+</ol>
+
+
+<p>Eg. input = {3, 3, 3, 5, 6, 4}</p>
+
+<blockquote><p>max value of (A[i] &ndash; i) from left to right: {3, 3, 3, 3, 3, 3}</p>
+
+<p>max value of (A[j] + j) from right to left: {10, 10, 10, 10, 10, 9}</p>
+
+<p>final result: 13</p></blockquote>
 
 <h3>Code</h3>
 
 <p><strong>written by me</strong></p>
 
-<pre><code>public int add(int x, int y) {
-    // add y into x (and y results to 0)
-    while (y != 0) {
-        int carry = x &amp; y;
-        int sum = x ^ y;
-        x = sum;
-        y = carry &lt;&lt; 1;
+<pre><code>public int distance(int[] A) {
+    int len = A.length;
+    int[] arrayI = new int[len];
+    int[] arrayJ = new int[len];
+
+    arrayI[0] = A[0] - 0;
+    // arrayI stores max value of (A[i]-i) from left to right
+    arrayJ[len - 1] = A[len - 1] + (len - 1);
+    // arrayJ stores max value of (A[i]+i) from right to left
+
+    for (int i = 1; i &lt; len; i++) {
+        arrayI[i] = Math.max(arrayI[i - 1], A[i] - i);
     }
-    return x;
-}
-</code></pre>
 
-<p><strong>recursive</strong></p>
-
-<pre><code>public int add2(int x, int y) {
-    if (y == 0) {
-        return x;
+    for (int i = len - 2; i &gt;= 0; i--) {
+        arrayJ[i] = Math.max(arrayJ[i + 1], A[i] + i);
     }
-    int carry = (x &amp; y) &lt;&lt; 1;
-    return add2(x ^ y, carry);
-}
-</code></pre>
 
-<p><strong>updated on Sep 10th, 2014</strong>: this question appears on cc150v4 20.1. I wrote the following code:</p>
+    Common.printArray(arrayI);
+    Common.printArray(arrayJ);
 
-<pre><code>public static int add_no_arithm(int a, int b) {
-    if (b == 0)
-        return a;
-    int addition = a ^ b;
-    int carry = (a &amp; b) &lt;&lt; 1;
-    return add_no_arithm(addition, carry);
+    int max = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; len; i++) {
+        max = Math.max(max, arrayI[i] + arrayJ[i]);
+    }
+    return max;
 }
 </code></pre>
 </div>
@@ -730,7 +663,7 @@ public String decToHex(int dec) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/07/Random-error-debugging-1/">[Testing] Random Error Debugging 1</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/09/01/Multithreading-deadlock-prevention/">[Design] Multithreading - Deadlock Prevention</a></h1>
     
     
       <p class="meta">
@@ -746,10 +679,10 @@ public String decToHex(int dec) {
   
 
 
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-01T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/07/Random-error-debugging-1/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/Random-error-debugging-1/">Comments</a>
+           | <a href="/blog/2014/09/01/Multithreading-deadlock-prevention/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/01/Multithreading-deadlock-prevention/">Comments</a>
         
       </p>
     
@@ -758,165 +691,198 @@ public String decToHex(int dec) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://stackoverflow.com/questions/4531742/debugging-a-program-that-crashes-10-times-in-different-places">link</a></p>
-
-<blockquote><p>You are given the source to an application which is crashing during run time. After running it 10 times in a debugger, you find it never crashes in the same place.</p>
-
-<p>What programming errors could be causing this crash? How would you test each one?</p></blockquote>
+<blockquote><p>How to prevent deadlock? (question from MIT handouts 1)</p></blockquote>
 
 <h3>Analysis</h3>
 
+<p>Preventing one of the 4 conditions will prevent deadlock:</p>
+
 <ol>
-<li><p>code depends on <strong>system time or RNG</strong></p></li>
-<li><p>disk full, i.e. other processes may delete a different file causing more space to be available</p></li>
-<li><p>memory issue, i.e. other processes allocate and/or free memory</p></li>
-<li><p>a pointer points to a random location in memory that is changed by another process causing some values be &ldquo;valid&rdquo; (very rare though)</p></li>
+<li><p>Removing the <strong>mutual exclusion condition</strong>, but not very possible.</p></li>
+<li><p>The <strong>hold and wait</strong> conditions may be removed by requiring processes to request all the resources they will need before starting up.</p></li>
+<li><p>The <strong>no preemption condition</strong> may also be difficult or impossible to avoid as a process has to be able to have a resource for a certain amount of time, or the processing outcome may be inconsistent or thrashing may occur.</p></li>
+<li><p>The final condition is the <strong>circular wait condition</strong>. Approaches that avoid circular waits include disabling interrupts during critical sections and using a hierarchy to determine a partial ordering of resources.</p></li>
 </ol>
 
-
-<p><a href="http://stackoverflow.com/a/4531769">In general</a> a situation <strong>with other process</strong> is likely.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/07/Million-phone-numbers/">[Google] Million Phone Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/07/Million-phone-numbers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/Million-phone-numbers/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question 1</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/How-would-you-store-1-million-phone-numbers-QTN_456.htm">link</a></p>
-
-<blockquote><p>How would you store 1 million phone numbers?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>BitMap.</p>
-
-<blockquote><p>The key here is that 1 million phone numbers will be within some range, likely 10 million or so. 10 million bits = 10<sup>7</sup> bits ~ 0.12 GB. Just have a bit array where the first bit being set implies that the first phone number is set (e.g., 10 000 000) and the last bit indicates the last phone number (10 999 999). If you find a number in the list, just set the appropriate bit. You now have a bit vector of size 1million bits, sorted, and to check for a particular number, you just check whether the corresponding bit is set.</p></blockquote>
-
-<h3>Question 2</h3>
-
-<p><a href="http://www.careercup.com/question?id=7997766">link</a></p>
-
-<blockquote><p>How would you sort 1 million phone numbers?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>BitMap or radix sort, both are O(n) complexity.</p>
-
-<p>Read more <a href="http://www.vex.net/~trebla/compsci/sorting-phone-numbers.html">here</a>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/07/Distributed-network-bottleneck/">[Design] Distributed Network Bottleneck</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/07/Distributed-network-bottleneck/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/Distributed-network-bottleneck/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Question</h2>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32702821.html">link</a></p>
-
-<blockquote><p>一个distributed的环境，有很多机器，现在你发现性能有问题，可能是网络带宽造成的，你怎么解决？ (你不能更换网络设备的前提下)</p></blockquote>
 
 <h3>Answer</h3>
 
-<ol>
-<li>Identify problem</li>
-</ol>
+<p><strong>Assign an order to our locks</strong> (require that the locks always acquired in order).</p>
+
+<p>This prevent 2 thread waiting to get the resource in each other&rsquo;s hand.</p>
+</div>
+  
+  
 
 
-<p>首先得判定是否真的是网络造成的，就算是网络问题，哪些机器之间的网络问题？ 这个得先大概了解high level component dependency relationship，</p>
-
-<p>看看是不是cpu memory disk都没有问题。 可以profile几个机器看看是不是 a lot of time spent waiting for network calls.</p>
-
-<ol>
-<li>Locate the faulty component</li>
-</ol>
-
-
-<p>判定是网络问题之后看是哪些components之间，或是某个component里面有很多网络通讯。</p>
-
-<ol>
-<li>Improvement</li>
-</ol>
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/01/Hamming-distance-of-array/">[Facebook] Hamming Distance of Array</a></h1>
+    
+    
+      <p class="meta">
+        
 
 
-<p>不能更换设备的话，能不能改network topology来让critical path machine之间的带宽有改善。</p>
-
-<p>要是不能改topology就只能改程序了。还是先identify top offender,然后就只能慢慢改了</p>
-
-<ol>
-<li>What&rsquo;s more</li>
-</ol>
 
 
-<p>要还有时间的话就可以聊聊问啥不能换设备，是资金问题还是用的已经是top of the line了？</p>
 
-<p>或者是在public cloud上？</p>
 
-<p>Answer suggested by user <strong>remus</strong>.</p>
+
+
+  
+
+
+<time datetime="2014-09-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/01/Hamming-distance-of-array/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/01/Hamming-distance-of-array/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/-a-first-write-a-function-to-calculate-the-hamming-distance-between-two-binary-numbers-b-write-a-function-that-takes-QTN_450885.htm">link</a></p>
+
+<blockquote><p><a href="http://en.wikipedia.org/wiki/Hamming_distance">Hamming distance</a> between two strings of equal length is the number of positions at which the corresponding symbols are different.</p>
+
+<p>Write a function that takes a list of binary numbers and returns the sum of the hamming distances for each pair.</p>
+
+<p>Do it in O(n) time.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The naive solution is O(n<sup>2</sup>), so we simplify this question by using {0,0,0,1,1} as input. The output in this case would be 6. Why? Because 3 x 2 = 6.</p>
+
+<p>So the equation for solution would be:</p>
+
+<blockquote><p>distance (for a bit) = number of &lsquo;1&rsquo;s * number of &#8216;0&rsquo;s</p></blockquote>
+
+<p>The final answer would be the sum of distances for all bits. The solution is from <a href="http://se7so.blogspot.sg/2014/02/how-to-prepare-for-interview-9.html">this blog</a>.</p>
+
+<h3>Code</h3>
+
+<p>Great solution, <strong>not written by me</strong></p>
+
+<pre><code>int hammingDist(int[] nums) {
+
+    int[] bits = new int[32];
+
+    for (int i = 0; i &lt; nums.length; i++) {
+        int one = 1;
+        int j = 0;
+
+        while (nums[i] != 0) {
+            if ((nums[i] &amp; one) != 0)
+                bits[j]++;
+            j++;
+            nums[i] = nums[i] &gt;&gt; 1;
+        }
+    }
+
+    int ans = 0;
+    for (int i = 0; i &lt; 32; i++) {
+        ans += bits[i] * (nums.length - bits[i]);
+    }
+
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/01/Crossword-solver/">[Google] Crosswod Solver</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/01/Crossword-solver/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/01/Crossword-solver/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/8585090/algorithm-for-crossword-puzzle-with-given-grid">link</a></p>
+
+<blockquote><p>Given a wordlist like this:</p></blockquote>
+
+<pre><code>1. ccaa
+1. baca
+1. baaa
+1. bbbb
+</code></pre>
+
+<blockquote><p>and a Grid like this:</p></blockquote>
+
+<pre><code>X X 
+XXXX
+X X 
+XXXX
+</code></pre>
+
+<blockquote><p>Now solve this crossword. One possible solution:</p></blockquote>
+
+<pre><code>b c 
+baca
+b a 
+baaa
+</code></pre>
+
+<h3>Solution</h3>
+
+<p><a href="http://stackoverflow.com/a/8586102">The corssword problem</a> is NP-Complete, so your best shot is brute force: just try all possibilities, and stop when a possibility is a valid. Return failure when you exhausted all possible solutions.</p>
+
+<h3>Code</h3>
+
+<p><strong>Pseudo code for brute force</strong>. (this just serve as a guide, not a complete/correct solution)</p>
+
+<pre><code>solve(words,grid):
+   if words is empty:
+       if grid.isValudSol():
+          return grid
+       else:
+          return None
+   for each word in words:
+       possibleSol &lt;- grid.fillFirst(word)
+       ret &lt;- solve(words\{word},possibleSol)
+       if (ret != None):
+          return ret
+   return None
+</code></pre>
 </div>
   
   
@@ -939,8 +905,11 @@ public String decToHex(int dec) {
     <section class="well">
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
-    <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
+<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (152)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -948,9 +917,10 @@ public String decToHex(int dec) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (3)</a></li>
-<li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (4)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
+<li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
   </ul>
 </section>
@@ -959,23 +929,23 @@ public String decToHex(int dec) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a>
+        <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/12/DNS-communication-protocol/">[Design] DNS Communication Protocol</a>
+        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/11/barrier-goods-van-and-distance/">[Google] Barrier, Goods Van and Distance</a>
+        <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a>
+        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a>
+        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
       </li>
     
   </ul>
