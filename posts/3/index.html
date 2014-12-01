@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Implement a stack. Solution Stack uses LinkedNode to implement. Code public class MyStack { Node top; public int pop() { if (top == null) { &hellip;">
+  <meta name="description" content="Question How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element? Push, pop and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,224 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/15/stack-get-min-value/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/stack-get-min-value/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element?</p>
+
+<p>Push, pop and min should all operate in 0(1) time.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is <strong>a very tricky question</strong>.</p>
+
+<p>The key is how to use the minimum space to achieve O(1) query min operation. The trick is to count how many times the same min-value occur. Eg.</p>
+
+<blockquote><p>input: 5,3,3,1,1,2,2,2,2,2,2,2.</p>
+
+<p>stack: 5,3,3,1,1.</p></blockquote>
+
+<p>So we can pop &lsquo;1&rsquo; twice, pop &lsquo;3&rsquo; twice, and pop &lsquo;5&rsquo; once. Read the code!</p>
+
+<h3>Code</h3>
+
+<pre><code>public class StackMyAnswer extends Stack&lt;Integer&gt; {
+
+    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
+
+    public void push(int value) {
+        if (min.isEmpty() || value &lt;= min.peek()) {
+            min.push(value);
+        }
+        super.push(value);
+    }
+
+    public Integer pop() {
+        int val = super.pop();
+        if (!min.isEmpty() &amp;&amp; val == min.peek()) {
+            min.pop();
+        }
+        return val;
+    }
+
+    public int min() {
+        if (min.isEmpty()) {
+            return Integer.MAX_VALUE;
+        }
+        return min.peek();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/15/linked-list-palindrome/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/linked-list-palindrome/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement a function to check if a linked list is a palindrome.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are multiple solutions for this question.</p>
+
+<p><strong>First, maybe the simplest solution of all</strong>, is to compare the list with the reversed list (compare first half would be enough). This is a very nice idea.</p>
+
+<p><strong>Second solution is iterative approach</strong>. My code below is to first get the total length, then <strong>use a Stack</strong>. Alternatively, we can also use <strong>fast/slow pointer</strong> to find the mid point. This solution is easiest to write.</p>
+
+<p><strong>Third solution is recursive</strong>. We basically uses a public pointer to:</p>
+
+<ol>
+<li>get starting value</li>
+<li>check middle parts</li>
+<li>get ending value</li>
+<li>if starting == ending and middle part is valid, then true.</li>
+</ol>
+
+
+<p>This code is not easy to write, and hard to think.</p>
+
+<p>It&rsquo;s best to know both iterative and recursive solution.</p>
+
+<h3>Code</h3>
+
+<p>Iterative</p>
+
+<pre><code>public static boolean isPalindrome1(LinkedListNode head) {
+    int len = getListLength(head);
+    int half = len / 2;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    for (int i = 0; i &lt; half; i++) {
+        stack.push(head.data);
+        head = head.next;
+    }
+    if (len % 2 == 1) {
+        head = head.next;
+    }
+    for (int i = 0; i &lt; half; i++) {
+        if (head.data != stack.pop()) {
+            return false;
+        }
+        head = head.next;
+    }
+    return true;
+}
+</code></pre>
+
+<p>Recursive</p>
+
+<pre><code>private static LinkedListNode p;
+
+public static boolean isPalindrome2(LinkedListNode head) {
+    p = head;
+    int len = getListLength(head);
+    return helper2(0, len - 1);
+}
+
+public static boolean helper2(int from, int to) {
+    if (from &gt; to) {
+        return true;
+    } else if (from == to) {
+        p = p.next;
+        return true;
+    } else {
+        // first get fromVal, then check middlep part, last, get toVal
+        int fromVal = p.data;
+        p = p.next;
+        if (!helper2(from + 1, to - 1)) {
+            return false;
+        }
+        int toVal = p.data;
+        p = p.next;
+        if (fromVal != toVal) {
+            return false;
+        }
+    }
+    return true;
+}
+</code></pre>
+
+<p>Shared method:</p>
+
+<pre><code>private static int getListLength(LinkedListNode node) {
+    int count = 0;
+    while (node != null) {
+        count++;
+        node = node.next;
+    }
+    return count;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -647,203 +865,6 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/10/generate-m-from-array-of-n/">[CC150v4] 20.3 Generate M Int From Array of Size N</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/10/generate-m-from-array-of-n/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/generate-m-from-array-of-n/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a method to randomly generate a set of m integers from an array of size n. Each element must have equal probability of being chosen.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is very similar to another post I wrote: <strong>[Question] Shuffle An Array (Fisher–Yates)</strong>.</p>
-
-<p>The basic idea is to choose element one by one using RNG. After choosing an int, swap it to top and <strong>then mark this element as &lsquo;dead&rsquo;</strong>. Next time, the RNG will not touch on the &lsquo;dead&rsquo; elements.</p>
-
-<p><strong>Very similar to Fisher–Yates Shuffle</strong>, and the code below is written by me.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int[] pickMRandomly(int[] original, int m) {
-    int[] ans = new int[m];
-    for (int i = 0; i &lt; m; i++) {
-        int rand = Question.listRand.get(i);
-        // note: rand is RN in the range [i, max]
-        ans[i] = original[rand];
-        original[rand] = original[i];
-        // now (i)th position in original is dead
-        // no one cares what value is at original[i]
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/10/full-text-search/">[CC150v4] 20.8 Full Text Search</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/10/full-text-search/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/full-text-search/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given a string s and an array of smaller strings T, design a method to search s for each small string in T.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a very classic questio of string</strong>, especially favored by Google.</p>
-
-<p>The solution is <strong>suffix tree</strong>. For example, using &ldquo;bibs&rdquo; to build a suffix tree like this:</p>
-
-<p><img class="middle" src="/assets/images/suffix-tree-example-bibs.png"></p>
-
-<p>The building of suffix tree and searching is not a very lengthy code. It&rsquo;s posted below and it&rsquo;s not written by me.</p>
-
-<h3>Code</h3>
-
-<p>Main method:</p>
-
-<pre><code>public static void main(String[] args) {
-    String testString = "mississippi";
-    String[] stringList = { "is", "sip", "hi", "sis" };
-    SuffixTree tree = new SuffixTree(testString);
-    for (String s : stringList) {
-        ArrayList&lt;Integer&gt; list = tree.getIndexes(s);
-        if (list != null) {
-            System.out.println(s + ": " + list.toString());
-        } else {
-            System.out.println(s + ": does not exist.");
-        }
-    }
-}
-</code></pre>
-
-<p>SuffixTree.java</p>
-
-<pre><code>public class SuffixTree {
-    SuffixTreeNode root = new SuffixTreeNode();
-
-    public SuffixTree(String s) {
-        // create a suffix tree with input string s
-        for (int i = 0; i &lt; s.length(); i++) {
-            String suffix = s.substring(i);
-            root.insertString(suffix, i);
-        }
-    }
-
-    public ArrayList&lt;Integer&gt; getIndexes(String s) {
-        return root.getIndexes(s);
-    }
-}
-</code></pre>
-
-<p>SuffixTreeNode.java</p>
-
-<pre><code>public class SuffixTreeNode {
-
-    char value;
-    HashMap&lt;Character, SuffixTreeNode&gt; children;
-    ArrayList&lt;Integer&gt; indexes = new ArrayList&lt;Integer&gt;();
-
-    public SuffixTreeNode() {
-        children = new HashMap&lt;Character, SuffixTreeNode&gt;();
-    }
-
-    public void insertString(String s, int index) {
-        indexes.add(index);
-        if (s != null &amp;&amp; s.length() &gt; 0) {
-            value = s.charAt(0);
-            SuffixTreeNode child = null;
-            if (children.containsKey(value)) {
-                child = children.get(value);
-            } else {
-                child = new SuffixTreeNode();
-                children.put(value, child);
-            }
-            String remainder = s.substring(1);
-            child.insertString(remainder, index);
-        }
-    }
-
-    public ArrayList&lt;Integer&gt; getIndexes(String s) {
-        if (s == null || s.length() == 0) {
-            return indexes;
-        } else {
-            char first = s.charAt(0);
-            if (children.containsKey(first)) {
-                String remainder = s.substring(1);
-                return children.get(first).getIndexes(remainder);
-            }
-        }
-        return null;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -871,8 +892,10 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
 <li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
+<li class='category'><a href='/blog/categories/read/'>read (1)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
+<li class='category'><a href='/blog/categories/thoughts/'>thoughts (8)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
@@ -881,6 +904,14 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/17/thoughts-who-will-remember-you/">[Thoughts] Who Will Remember You?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/08/read-zhihu-oct/">[Read] 十月以前 知乎摘抄</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
@@ -892,14 +923,6 @@ public static int nthToLastMe(LinkedListNode head, int n) {
     
       <li class="post">
         <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a>
       </li>
     
   </ul>
