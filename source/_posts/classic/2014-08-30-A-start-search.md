@@ -32,8 +32,10 @@ This continues until a goal node has a lower f value than any node in the queue.
 
 __[Dijkstra is a special case](http://stackoverflow.com/a/1332478) for A*__ (when the [heuristics is 0](http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Algorithm)).
 
-Illustration (I wish you can view the gif below):
+Illustration (A-star):
 
 {% img middle /assets/images/path-find-Astar.gif %}
+
+Illustration (Dijkstra's algorithm):
 
 {% img middle /assets/images/path-find-Dijkstras.gif %}
