@@ -167,66 +167,59 @@
             return 0;
         }
         int len = A.length + B.length;
-        int k1 = (len - 1) / 2;
-        int k2 = len / 2;
-
-        // now get 2 median numbes (they might be same)
-        // then return the calculated median number:
-        double mid1 = getKth(A, B, 0, 0, k1);
-        double mid2 = getKth(A, B, 0, 0, k2);
-        return (mid1 + mid2) / 2;
+        int mid1 = (len + 1) / 2;
+        int mid2 = len / 2 + 1;
+        // there are chances the mid1 == mid2, (i.e. when odd elements) 
+        // for simplicity of the code, leave it this way. I admit I'm lazy. 
+        return ((double) getKth(A, B, 0, 0, mid1) 
+                + getKth(A, B, 0, 0, mid2)) / 2;
     }
 
-    private double getKth(int[] A, int[] B, int a, int b, int k) {
-        if (a == A.length) {
-            // all elements in A is used up
-            return B[b + k];
-        } else if (b == B.length) {
-            // all elements in B is used up
-            return A[a + k];
+    private int getKth(int A[], int B[], int start1, int start2, int k) {
+        // note that k start from 1, not from 0
+        int len1 = A.length;
+        int len2 = B.length;
+        if (start1 &gt;= len1) {
+            // all elements in A is used up.
+            return B[start2 + k - 1];
+        } else if (start2 &gt;= len2) {
+            return A[start1 + k - 1];
         }
-        // now both A[a] and B[b] are valid elements, check half of k
-        if (k == 0) {
-            // if we only have to compare 2 elements
-            return Math.min(A[a], B[b]);
+        // now both A and B have elements left
+        if (k == 1) {
+            return Math.min(A[start1], B[start2]);
         } else {
-            // 'half' number of elements will be discard from either A or B
-            // since k is large than 0, half must be larger than 0
-            int half = (k + 1) / 2;
-
-            // mid1 and mid2 are boundary indexes to be discarded
-            // mid1 is equals or larger than a
-            int mid1 = a + half - 1;
-            int mid2 = b + half - 1;
-
-            // val1 and val2 are boundary values to be discarded
-            int val1;
-            int val2;
-            if (mid1 &gt;= A.length) {
-                val1 = Integer.MAX_VALUE;
-            } else {
+            // eliminate half of k. Since k &gt;=2: 
+            int half = k / 2;
+            int mid1 = start1 + half - 1;
+            int mid2 = start2 + half - 1;
+            // this is the critical part. We now have mid1 and mid2
+            // and we try to eliminate all element to the left of
+            // either mid1 or mid2 (inclusively)
+            // so what I need is to compare the value of A[mid1] and B[mid2]
+            int val1 = Integer.MAX_VALUE;
+            if (mid1 &lt; len1) {
                 val1 = A[mid1];
             }
-            if (mid2 &gt;= B.length) {
-                val2 = Integer.MAX_VALUE;
-            } else {
+            int val2 = Integer.MAX_VALUE;
+            if (mid2 &lt; len2) {
                 val2 = B[mid2];
             }
-
-            // compare val1 and val2 and discard all elements to the left 
-            // of the smaller one, inclusively
+            // this is another important point. mid1 and mid2 may be out of bound
+            // if so, the value should be MAX_VALUE because median could not fall on the other array
+            // why? draw it yourself and you'll see. I can't explain without a picture. 
             if (val1 &gt; val2) {
-                // discard mid2 and all elements to the left of it
-                return getKth(A, B, a, mid2 + 1, k - half);
+                // discard mid2 and all elements to the left of it. 
+                return getKth(A, B, start1, mid2 + 1, k - half);
             } else {
-                return getKth(A, B, mid1 + 1, b, k - half);
+                return getKth(A, B, mid1 + 1, start2, k - half);
             }
         }
     }
 }
 </code></pre>
 
-<p>Note: starting from today, I would post my code with more focus on readability, instead of conciseness. Sometimes, the former is much more important than the latter.</p>
+<p>Note: starting from today, I would post my code with more focus on <strong>readability</strong>, instead of conciseness. Sometimes, the former is much more important than the latter.</p>
 </div>
 
 
@@ -300,7 +293,7 @@
 <li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (4)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (152)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
@@ -320,6 +313,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/01/Leetcode-fourth/">[Leetcode] Leetcode Fourth Round</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/11/04/Code-a-hashmap/">[Google] Code a HashMap</a>
       </li>
     
@@ -333,10 +330,6 @@
     
       <li class="post">
         <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
       </li>
     
   </ul>
