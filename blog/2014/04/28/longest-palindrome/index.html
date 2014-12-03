@@ -133,48 +133,91 @@
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="lime">20 min coding only</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
     </tr>
 </table>
 
 
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
 <h3>Analysis</h3>
 
-<p>There are 2 solutions for this question. One is <strong>DP</strong> and another is <strong>direct method</strong>. Both is <strong>O(n<sup>2</sup>) time complexity</strong>. However, DP requires <strong>O(n<sup>2</sup>) space</strong>, while the direct method requires <strong>constant space</strong> and a intelligent brain.</p>
+<p>There are 2 solutions. One is <strong>DP</strong> which is O(N<sup>2</sup>) time and O(N<sup>2</sup>) space. Another is &ldquo;Search around corner&rdquo;, which uses less space.</p>
 
 <h3>Solution</h3>
 
-<p>I will not cover <a href="http://leetcode.com/2011/11/longest-palindromic-substring-part-i.html">DP solution</a> in this post because it&rsquo;s not simple, and it&rsquo;s a bit hard to implement in code, <strong>especially the last nested for loop is quite difficult to think</strong>. The DP solution and code can be a future task.</p>
+<p><strong>DP solution is straight-forward</strong>. Use 2D array to check palindrome intervals and make it as either true or false. Meanwhile, update longest.</p>
 
-<p><strong>Direct solution</strong> is basically iterate through the entire string, and assume each char (or pair of char) as center of the palindrome. The code explains itself very well.</p>
+<p><strong>Search around corner</strong> is basically iterate through the entire string and assume each char (or char pair) as center of the palindrome. The code isn&rsquo;t difficult once you come up with the idea.</p>
+
+<p>For more, read <a href="http://leetcode.com/2011/11/longest-palindromic-substring-part-i.html">this post</a></p>
 
 <h3>My code</h3>
 
-<pre><code>public String longestPalindrome(String s) {
-    if (s.length() &lt;= 1)
-        return s;
-    String largest = s.substring(0, 1);
-    for (int i = 0; i &lt; s.length(); i++) {
-        String first = this.searchAroundCenter(s, i, i);
-        String second = this.searchAroundCenter(s, i, i + 1);
-        if (first.length() &lt; second.length())
-            first = second;
-        if (largest.length() &lt; first.length())
-            largest = first;
-    }
-    return largest;
-}
+<p>DP solution, O(N<sup>2</sup>) time and O(N<sup>2</sup>) space</p>
 
-private String searchAroundCenter(String s, int a, int b) {
-    if (a &lt; 0 || b &gt; s.length() - 1)
-        return "";
-    while (s.charAt(a) == s.charAt(b)) {
-        a--;
-        b++;
-        if (a &lt; 0 || b &gt; s.length() - 1)
-            return s.substring(a + 1, b);
+<pre><code>public class Solution {
+    public String longestPalindrome(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        String longest = "";
+        int len = s.length();
+        // dp[i][j] means substring of s from i to j is palindrome 
+        boolean[][] dp = new boolean[len][len];
+        // why i decrease from (len-1) to 0, but j increase from i to (len-1)?
+        // think about it! 
+        for (int i = len - 1; i &gt;= 0; i--) {
+            for (int j = i; j &lt; len; j++) {
+                if (i == j) {
+                    dp[i][j] = true;
+                } else if (i + 1 == j) {
+                    dp[i][j] = s.charAt(i) == s.charAt(j);
+                } else {
+                    // important to note: dp[i+1][j-1]
+                    // i depends on (i+1), so i from large to small
+                    // j is just the opposite, small to large
+                    dp[i][j] = s.charAt(i) == s.charAt(j) &amp;&amp; dp[i+1][j-1];
+                }
+                if (dp[i][j] &amp;&amp; j + 1 - i &gt; longest.length()) {
+                    longest = s.substring(i, j + 1);
+                }
+            }
+        }
+        return longest;
     }
-    return s.substring(a + 1, b);
+}
+</code></pre>
+
+<p>Search around corner, O(N<sup>2</sup>) time and O(1) space</p>
+
+<pre><code>public class Solution {
+    public String longestPalindrome(String s) {
+        if (s.length() &lt;= 1)
+            return s;
+        String largest = s.substring(0, 1);
+        for (int i = 0; i &lt; s.length(); i++) {
+            String first = this.searchAroundCenter(s, i, i);
+            String second = this.searchAroundCenter(s, i, i + 1);
+            if (first.length() &lt; second.length())
+                first = second;
+            if (largest.length() &lt; first.length())
+                largest = first;
+        }
+        return largest;
+    }
+
+    private String searchAroundCenter(String s, int a, int b) {
+        if (a &lt; 0 || b &gt; s.length() - 1)
+            return "";
+        while (s.charAt(a) == s.charAt(b)) {
+            a--;
+            b++;
+            if (a &lt; 0 || b &gt; s.length() - 1)
+                return s.substring(a + 1, b);
+        }
+        return s.substring(a + 1, b);
+    }
 }
 </code></pre>
 </div>
