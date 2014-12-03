@@ -368,24 +368,33 @@
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="lime">10 minutes</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8212;-</td>
     </tr>
 </table>
 
 
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
 <h3>Analysis</h3>
 
-<p>This question is very easy. <strong>But 2 points are very tricky.</strong></p>
+<p><strong>There&rsquo;re 2 points that are tricky.</strong></p>
 
-<p>First, <strong>the overflow issue</strong>. This detail is easily omitted. When overflow, we shall return -1. Note that when overflow, the +/&ndash; sign of the number changes. Look at the following overflow case for Java int:</p>
+<p><strong>First, overflow issue</strong>. Look at the following overflow case for Java int:</p>
 
-<pre><code>300000000 * 10 returns -1294967296
--300000000 * 10 returns 1294967296
+<pre><code>+300,000,000 * 10 returns -1294967296
++600,000,000 * 10 returns +1705032704
+-300,000,000 * 10 returns +1294967296
+-600,000,000 * 10 returns -1705032704
+note that max integer is 2,147,483,647
 </code></pre>
 
-<p>So simply check if the number changed sign, we will know if overflow happens.</p>
+<p>We can observe that if overflow happens, <strong>the result is definitely wrong</strong>. The result can be positive or negative.</p>
 
-<p>Second, <strong>how to handle the negative sign</strong>. My solution will convert negative to positive and proceed. However after reading <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-reverse-integer.html">this post</a>, I realize that we do not necessarily need to handle negative sign. The following code almost works fine:</p>
+<p>So, from just +/&ndash; sign, we can&rsquo;t identify an overflow (then how to solve this problem??).</p>
+
+<p><strong>Another interesting thing to note: we actually do not need to handle negative sign</strong>. The sign can be preserved during the conversion. Read <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-reverse-integer.html">this post</a> for more.</p>
+
+<p>Without considering overflow, the following code can (almost) work fine:</p>
 
 <pre><code>public int reverse2(int x) {
     int reverse = 0;
@@ -396,47 +405,56 @@
     return reverse;
 }
 </code></pre>
-
-<p>Though above code looks teriffic, <strong>but it&rsquo;s incorrect because it doesn&rsquo;t handle overflow</strong> (eg. input = 1000000003 or -1000000003). I made small modifications to correct it, and code is shown later.</p>
 
 <h3>Solution</h3>
 
-<p>As shown.</p>
+<p><strong>Two solutions</strong>: 1. use long data type. 2. check if ret > 214748364 or ret &lt; –214748364 before multiplying by 10.</p>
 
 <h3>My code</h3>
 
-<p>First solution, consider +/&ndash; and overflow.</p>
+<p>First, using long type to avoid overflow.</p>
 
-<pre><code>public int reverse1(int x) {
-    if (x &lt; 10 &amp;&amp; x &gt; -10) return x;
-    int sign = 1, num = x;
-    if (x &lt; 0) {
-        sign = -1;
-        num = -1 * x;
+<pre><code>public class Solution {
+    public int reverse(int x) {
+        int sign = 1;
+        long abs = x;
+        long rev = 0;
+        if (x &lt; 0) {
+            sign = -1;
+            abs = 0 - abs;
+        }
+        // now remove numbers from abs one by one
+        // and put these numbers into rev
+        while (abs != 0) {
+            rev *= 10;
+            rev += abs % 10;
+            abs /= 10;
+        }
+        if (rev &gt; Integer.MAX_VALUE) {
+            return 0;
+        } else {
+            return sign * (int) rev;
+        }
     }
-    // now num is absolute value of x
-    int reverse = 0;
-    while (num &gt; 0) {
-        reverse = 10 * reverse + num % 10;
-        num = num / 10;
-    }
-    if (reverse &lt; 0) return -1;
-        else return reverse * sign;
 }
 </code></pre>
 
-<p>Second solution, do not consider +/&ndash;, only consider overflow.</p>
+<p>Second, do limit check in every step. Suggested by Leetcode official book.</p>
 
-<pre><code>public int reverse2(int x) {
-    int reverse = 0;
-    while (x != 0) {
-        if ((long)x * 10 &lt; Integer.MIN_VALUE 
-            || (long)x * 10 &gt; Integer.MAX_VALUE)
-                return -1;
-        reverse = reverse * 10 + x % 10;
-        x /= 10;
+<pre><code>public class Solution {
+
+    public int reverse(int x) {
+        int ret = 0;
+        while (x != 0) {
+            // handle overflow/underflow
+            if (Math.abs(ret) &gt; 214748364) {
+                return 0;
+            }
+            ret = ret * 10 + x % 10;
+            x /= 10;
+        }
+        return ret;
     }
-    return reverse;
 }
 </code></pre>
 </div>
@@ -451,7 +469,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/04/28/longest-palindrome/">[LeetCode 5] Longest Palindromic Substring</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/04/28/longest-palindrome-substr/">[LeetCode 5] Longest Palindromic Substring</a></h1>
     
     
       <p class="meta">
@@ -469,8 +487,8 @@
 
 <time datetime="2014-04-28T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/04/28/longest-palindrome/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/04/28/longest-palindrome/">Comments</a>
+           | <a href="/blog/2014/04/28/longest-palindrome-substr/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/04/28/longest-palindrome-substr/">Comments</a>
         
       </p>
     
@@ -503,7 +521,7 @@
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
+        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
     </tr>
 </table>
 
