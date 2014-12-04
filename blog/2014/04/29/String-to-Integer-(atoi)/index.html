@@ -151,7 +151,7 @@ It is intended for this problem to be specified vaguely (ie, no given input spec
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="lime">30 minutes</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8212;-</td>
     </tr>
 </table>
 
@@ -160,97 +160,127 @@ It is intended for this problem to be specified vaguely (ie, no given input spec
 
 <h3>Analysis</h3>
 
-<p>This question is easy, just handle all cases listed below:</p>
+<p>This question is not difficult, but hard to get it right. Remember to handle all cases listed below:</p>
 
 <ol>
 <li>null or empty string</li>
 <li>white spaces</li>
 <li>+/&ndash; sign</li>
 <li>calculate real value</li>
-<li>handle min &amp; max</li>
+<li>return int.min or int.max</li>
 </ol>
 
 
 <h3>Solution</h3>
 
-<p>I&rsquo;m using <strong>one loop to read it through, and in the end do some checking</strong>. I think my code is quite optimized. There is another <a href="http://www.programcreek.com/2012/12/leetcode-string-to-integer-atoi/">good solution</a> from online. Idea is same.</p>
+<p><strong>Use one loop to read through, and in the end do some checking</strong>. There is a very good <a href="http://www.programcreek.com/2012/12/leetcode-string-to-integer-atoi/">explanation</a> from online.</p>
+
+<p>My original code is, though not ideal for coding, very worthy to read.</p>
 
 <h3>My code</h3>
 
-<pre><code>public int atoi(String str) {
-    char[] in = str.toCharArray();
-    int start = -1, end = -1, sign = 1;
-    for (int i = 0; i &lt; in.length; i++) {
-        if (start == -1) {
-            if (in[i] == ' ') continue;
-            else if (in[i] == '+')
-                start = end = i + 1;
-            else if (in[i] == '-') {
-                start = end = i + 1;
-                sign = -1;
-            } else if (in[i] &gt;= '0' &amp;&amp; in[i] &lt;= '9') {
-                start = i;
-                end = i + 1;
-            } else
-                return 0;
+<p>My Code.</p>
+
+<pre><code>public class Solution {
+    public int atoi(String str) {
+        if (str == null || str.length() == 0) {
+            return 0;
+        }
+        int p = 0; 
+        int len = str.length();
+        // omit as many space as possible
+        while (p &lt; len) {
+            if (str.charAt(p) != ' ') {
+                break;
+            }
+            p++;
+        }
+        int sign = 1;
+        // check if there is a +/- sign at position p
+        // if there is, store its value and advance p
+        if (p == len) {
+            return 0;
+        } else if (str.charAt(p) == '+') {
+            p++;
+        } else if (str.charAt(p) == '-') {
+            sign = -1;
+            p++;
+        }
+        // check if position p have valid number
+        if (p == len) {
+            return 0;
+        } else if (str.charAt(p) &lt; '0' || str.charAt(p) &gt; '9') {
+            return 0;
+        }
+        // now position p is the start of numerical part.
+        int q = p;
+        while (q &lt; len &amp;&amp; str.charAt(q) &gt;= '0' &amp;&amp; str.charAt(q) &lt;= '9') {
+            q++;
+        }
+        String numPart = str.substring(p, q);
+        // first, check is numPart is too long
+        if (numPart.length() &gt; 15) {
+            if (sign == -1) {
+                return Integer.MIN_VALUE;
+            } else {
+                return Integer.MAX_VALUE;
+            }
+        }
+        // second, convert to numerical format and check value against Integer.MIN and MAX
+        long num = sign * Long.parseLong(numPart);
+        if (num &gt; Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        } else if (num &lt; Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
         } else {
-            if (in[i] &gt;= '0' &amp;&amp; in[i] &lt;= '9')
-                end = i + 1;
-            else break;
+            return (int) num;
         }
     }
-    if (start == -1 || start == end || start &gt;= in.length)
-        return 0;
-    BigInteger num = new BigInteger(str.substring(start, end));
-    if (num.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) &gt; 0)
-        return (sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE);
-    return sign * num.intValue();
 }
 </code></pre>
 
-<p><strong>updated on Aug 13th, 2014</strong>. Happy Birthday.</p>
+<p>My initial code. It&rsquo;s shorter and very optimized, though I do not recommend writing like this (a bit too complex).</p>
 
-<pre><code>public int atoi(String str) {
-    if (str == null || str.length() == 0) {
-        return 0;
-    } 
-    // remove space in heading
-    str = str.trim();
-    if (str.length() == 0) {
-        return 0;
-    }
-    // get the correct +/- sign for the number
-    int sign = 1;
-    if (str.charAt(0) == '+') {
-        str = str.substring(1);
-    } else if (str.charAt(0) == '-') {
-        sign = -1;
-        str = str.substring(1);
-    }
-    // find the first instance of non-number char
-    int p = 0;
-    while (p &lt; str.length()) {
-        char c = str.charAt(p);
-        if (c &lt; '0' || c &gt; '9') {
-            break;
-        } else {
-            p++;
+<pre><code>public class Solution {
+
+    public int atoi(String str) {
+        char[] in = str.toCharArray();
+        int start = -1, end = -1, sign = 1;
+        for (int i = 0; i &lt; in.length; i++) {
+            if (start == -1) {
+                if (in[i] == ' ')
+                    continue;
+                else if (in[i] == '+')
+                    start = end = i + 1;
+                else if (in[i] == '-') {
+                    start = end = i + 1;
+                    sign = -1;
+                } else if (in[i] &gt;= '0' &amp;&amp; in[i] &lt;= '9') {
+                    start = i;
+                    end = i + 1;
+                } else
+                    return 0;
+            } else {
+                if (in[i] &gt;= '0' &amp;&amp; in[i] &lt;= '9')
+                    end = i + 1;
+                else
+                    break;
+            }
         }
-    }
-    if (p == 0) {
-        return 0;
-    }
-    // now string (0, p) shall be the absolute value part 
-    String absValStr = str.substring(0, p);
-    long absVal = Long.parseLong(absValStr);
-    long finalVal = sign * absVal;
-    // return the correct value;
-    if (finalVal &gt; Integer.MAX_VALUE) {
-        return Integer.MAX_VALUE;
-    } else if (finalVal &lt; Integer.MIN_VALUE) {
-        return Integer.MIN_VALUE;
-    } else {
-        return (int) finalVal;
+        if (start == -1 || start == end || start &gt;= in.length) {
+            return 0;
+        } else if (end - start &gt; 15) {
+            return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        }
+
+        long num = sign * Long.parseLong(str.substring(start, end));
+        if (num &gt; Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        } else if (num &lt; Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        } else {
+            return (int) num;
+        }
     }
 }
 </code></pre>
