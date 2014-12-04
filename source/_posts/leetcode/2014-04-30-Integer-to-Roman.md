@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/integer-to-roman/)
 
 <div class="question-content">
@@ -17,6 +17,7 @@ tags: [  ]
 </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -32,7 +33,7 @@ tags: [  ]
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">35 minutes</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
@@ -67,50 +68,11 @@ So for each number, just do convert according to the above table.
 
 The question states that input is less than 3999, so we have 2 "n.a." in the table. 
 
-### Solution
+### Analysis
 
-__The code itself is really straight-forward__. This time my code is better than last month's, so I post it below. It is followed by someone else's code, which is even better and easy to understand. 
+This question seems quite straight-forward. 
 
-### My code 
-
-    char[][] roman = { { 'I', 'V', 'X' }, 
-               { 'X', 'L', 'C' }, 
-               { 'C', 'D', 'M' },
-               { 'M', '*', '*' } };
-
-    public String intToRoman(int num) {
-        String ans = "";
-        int base = 1, count = 0, temp = num;
-        while (temp > 1) {
-            base *= 10;
-            count++;
-            temp /= 10;
-        }
-        while (base > 0) {
-            int cur = num / base;
-            // now convert cur into roman string
-            if (cur >= 6 && cur <= 8) {
-                ans += roman[count][1];
-                cur = cur % 5;
-            }
-            if (cur >= 1 && cur <= 3)
-                for (int k = 0; k < cur; k++)
-                    ans += roman[count][0];
-            else if (cur == 5)
-                ans += roman[count][1];
-            else if (cur == 4)
-                ans += roman[count][0] + "" + roman[count][1];
-            else if (cur == 9)
-                ans += roman[count][0] + "" + roman[count][2];
-            num = num % base;
-            base /= 10;
-            count--;
-        }
-        return ans;
-    }
-
-
-This is a very [simple solution](http://stackoverflow.com/a/19759564) by stackoverflow user bhlangonijr. This method __makes use of Java__ [TreeMap.floorKey](http://goo.gl/e8ryim)
+There is a very [short code](http://stackoverflow.com/a/19759564) by stackoverflow user bhlangonijr. This method __makes use of Java [TreeMap.floorKey](http://goo.gl/e8ryim)__, thus ONLY read it if you have interest. 
 
 > TreeMap.floorKey - Returns the greatest key less than or equal to the given key, or null if there is no such key.
 
@@ -134,4 +96,110 @@ This is a very [simple solution](http://stackoverflow.com/a/19759564) by stackov
             return map.get(num);
         }
         return map.get(l) + intToRoman3(num - l);
+    }
+
+### Solution
+
+I present 2 solutions below. First is my original solution. It's comparatively shorter. Second is my new solution, where I improved the readability of the code, and have better strucutre of logic. 
+
+Both code would be fine, and aren't so difficult. However, it really takes a lot of time. 
+
+### My code 
+
+Code 1
+
+    public class Solution {
+
+        char[][] roman = {
+            { 'I', 'V', 'X' }, 
+            { 'X', 'L', 'C' }, 
+            { 'C', 'D', 'M' },
+            { 'M', '*', '*' } 
+        };
+
+        public String intToRoman(int num) {
+            String ans = "";
+            int base = 1, count = 0, temp = num;
+            while (temp > 1) {
+                base *= 10;
+                count++;
+                temp /= 10;
+            }
+            while (base > 0) {
+                int cur = num / base;
+                // now convert cur into roman string
+                if (cur >= 6 && cur <= 8) {
+                    ans += roman[count][1];
+                    cur = cur % 5;
+                }
+                if (cur >= 1 && cur <= 3)
+                    for (int k = 0; k < cur; k++)
+                        ans += roman[count][0];
+                else if (cur == 5)
+                    ans += roman[count][1];
+                else if (cur == 4)
+                    ans += roman[count][0] + "" + roman[count][1];
+                else if (cur == 9)
+                    ans += roman[count][0] + "" + roman[count][2];
+                num = num % base;
+                base /= 10;
+                count--;
+            }
+            return ans;
+        }
+
+    }
+
+Code 2
+
+    public class Solution {
+
+        HashMap<Integer, String> map = new HashMap<Integer, String>();
+
+        public String intToRoman(int num) {
+
+            map.put(1000, "M");
+            map.put(500, "D");
+            map.put(100, "C");
+            map.put(50, "L");
+            map.put(10, "X");
+            map.put(5, "V");
+            map.put(1, "I");
+
+            String roman = "";
+            int base = 1000;
+            int digit = 0;
+            while (num != 0) {
+                digit = num / base;
+                num = num % base;
+                roman = roman + convert(digit, base);
+                base /= 10;
+            }
+            return roman;
+        }
+
+        private String convert(int digit, int base) {
+            String ans = "";
+            String one = map.get(base);
+            String five = map.get(base * 5);
+            if (digit == 0) {
+                return "";
+            } else if (digit <= 3) {
+                for (int i = 0; i < digit; i++) {
+                    ans += one;
+                }
+            } else if (digit == 4) {
+                ans += one;
+                ans += convert(5, base);
+            } else if (digit == 5) {
+                ans += five;
+            } else if (digit <= 8) {
+                ans += convert(5, base);
+                ans += convert(digit - 5, base);
+            } else if (digit == 9) {
+                ans += one;
+                ans += convert(1, base * 10);
+            }
+            return ans;
+        }
     }

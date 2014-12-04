@@ -15,6 +15,7 @@ tags: [  ]
 <p></p></div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -30,49 +31,73 @@ tags: [  ]
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow"> > 1 hour</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 
+Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
+
 ### Analysis
 
-This question looks easy, but it took me a while to figure out the algorithm. Small details of the implementation are easily omitted. **This definitely is a tough question**, and I spend half of the time with algorithm and another half trying to debug. 
+This question looks easy (well, isn't it?), but it __really is not easy__!. 
 
-The basic idea is to read char by char for just 1 iteration. In the meanwhile, an array of pointers are stored to keep track of the last occurance position of each char. Thus it's going to be something like __array = int\\\[256\\\]__, and we set value in this way __array\\\[char\\\] = 1__.
+__The main idea is__: an array of int(128) is used to keep track of the last occurance position of each character. So we iterate thru the characters while constently checking the last occurrence of the letter. Meanwhile, keep updating the longest distance. 
+
+__There is 1 place where it's extremely easy to make mistake__, that is the condition of update left points: 
+
+    if (previousPos != -1&& previousPos >= left) {
+        left = previousPos + 1;
+    }
+
+If you have an idea of using array int(128) to __store last occurrence__, and you got the above __if condition__ correct, then you nailed it! 
+
+Again, this is a tough question. There's a seemingly more intuitive solution using the sliding window method. It's very similar to [LeetCode 76] Minimum Window Substring. 
 
 ### Solution
 
-As explain, read char by char and keep an array of size 256. 
-
-__The tricky part is when a repeating char is found__. A pointer is kept to record this position 'k' (which is the last position where repeat happens). Later whenever a repeat happens before k, it shall be ignored. This is one mistake that might happen during coding.
+Note what happens when a repeating char is found (2 different conditions).
 
 {% img middle /assets/images/20130901224716625.png %}
 
 ### My code 
 
-    public int lengthOfLongestSubstring(String s) {
-        if (s.length() == 0)
-            return 0;
-        int[] pos = new int[255];
-        for (int j = 0; j < pos.length; j++) {
-            pos[j] = -1;
-        }
-        int start = 0, max = 0;
-        char[] ss = s.toCharArray();
-        for (int i = 0; i < ss.length; i++) {
-            char cur = ss[i];
-            if (pos[cur] == -1 || pos[cur] < start) {
-                pos[cur] = i;
-            } else {
-                max = Math.max(max, i - start);
-                start = pos[cur] + 1;
-                pos[cur] = i;
+The proper way: 
+
+    public class Solution {
+        public int lengthOfLongestSubstring(String s) {
+            if (s == null || s.length() == 0) {
+                return 0;
             }
+
+            int[] flag = new int[128];
+            for (int i = 0; i < flag.length; i++) {
+                flag[i] = -1;
+            }
+            // left and right pointer defines the valid range
+            int left = 0;
+            int right = 0;
+            int longest = 0;
+            int len = s.length();
+
+            while (right < len) {
+                char letter = s.charAt(right);
+                int previousPos = flag[letter];
+                if (previousPos != -1&& previousPos >= left) {
+                    // if right pointer points to an old letter, and is within current range
+                    // then we need to update our left pointer: 
+                    // to bypass the previous occurrence of that letter
+                    left = previousPos + 1;
+                }
+                flag[letter] = right;
+                // advance right pointer to the next letter, and calculate longest distance
+                right++;
+                longest = Math.max(longest, right - left);
+            }
+            return longest;
         }
-        return Math.max(max, ss.length - start);
     }
 
-Sliding window solution, not efficient enough
+The sliding window way:
 
     public class Solution {
         public int lengthOfLongestSubstring(String s) {
