@@ -1,11 +1,10 @@
 ---
 layout: post
-title: "[LeetCode 7] Reverse Integer"
+title: "[LeetCode 7] Reverse Integer "
 comments: true
 category: Leetcode
 tags: [  ]
 ---
-
 
 ### Question 
 
@@ -28,6 +27,7 @@ tags: [  ]
 </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -43,25 +43,31 @@ tags: [  ]
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="lime">10 minutes</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
+Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
+
 ### Analysis
 
-This question is very easy. __But 2 points are very tricky.__
+__There're 2 points that are tricky.__
 
-First, __the overflow issue__. This detail is easily omitted. When overflow, we shall return -1. Note that when overflow, the +/- sign of the number changes. Look at the following overflow case for Java int: 
+__First, overflow issue__. Look at the following overflow case for Java int: 
 
+	+300,000,000 * 10 returns -1294967296
+    +600,000,000 * 10 returns +1705032704
+	-300,000,000 * 10 returns +1294967296
+	-600,000,000 * 10 returns -1705032704
+    note that max integer is 2,147,483,647
 
-	300000000 * 10 returns -1294967296
-	-300000000 * 10 returns 1294967296
+We can observe that if overflow happens, __the result is definitely wrong__. The result can be either positive or negative. 
 
+So, from just +/- sign of the result, we can't identify an overflow (then how to solve this problem??). 
 
-So simply check if the number changed sign, we will know if overflow happens. 
+__Another interesting thing to note: we actually do not need to handle negative sign__. The sign can be preserved during the conversion. Read [this post](http://fisherlei.blogspot.sg/2012/12/leetcode-reverse-integer.html) for more. 
 
-Second, __how to handle the negative sign__. My solution will convert negative to positive and proceed. However after reading [this post](http://fisherlei.blogspot.sg/2012/12/leetcode-reverse-integer.html), I realize that we do not necessarily need to handle negative sign. The following code almost works fine: 
-
+Without considering overflow, the following code can (almost) work fine: 
 
     public int reverse2(int x) {
         int reverse = 0;
@@ -71,46 +77,55 @@ Second, __how to handle the negative sign__. My solution will convert negative t
         }
         return reverse;
     }
-
-
-Though above code looks teriffic, __but it's incorrect because it doesn't handle overflow__ (eg. input = 1000000003 or -1000000003). I made small modifications to correct it, and code is shown later.
 
 ### Solution
 
-As shown. 
+__Two solutions__: 1. use long data type. 2. check if ret > 214748364 or ret < –214748364 before multiplying by 10. 
 
 ### My code 
 
-First solution, consider +/- and overflow.
+First, using long type to avoid overflow.
 
-    public int reverse1(int x) {
-        if (x < 10 && x > -10) return x;
-        int sign = 1, num = x;
-        if (x < 0) {
-            sign = -1;
-            num = -1 * x;
+    public class Solution {
+        public int reverse(int x) {
+            int sign = 1;
+            long abs = x;
+            long rev = 0;
+            if (x < 0) {
+                sign = -1;
+                abs = 0 - abs;
+            }
+            // now remove numbers from abs one by one
+            // and put these numbers into rev
+            while (abs != 0) {
+                rev *= 10;
+                rev += abs % 10;
+                abs /= 10;
+            }
+            if (rev > Integer.MAX_VALUE) {
+                return 0;
+            } else {
+                return sign * (int) rev;
+            }
         }
-        // now num is absolute value of x
-        int reverse = 0;
-        while (num > 0) {
-            reverse = 10 * reverse + num % 10;
-            num = num / 10;
-        }
-        if (reverse < 0) return -1;
-            else return reverse * sign;
     }
 
-Second solution, do not consider +/-, only consider overflow.
+Second, do boundary check in every step. Suggested by Leetcode official book. 
 
-    public int reverse2(int x) {
-        int reverse = 0;
-        while (x != 0) {
-        	if ((long)x * 10 < Integer.MIN_VALUE 
-        		|| (long)x * 10 > Integer.MAX_VALUE)
-        			return -1;
-            reverse = reverse * 10 + x % 10;
-            x /= 10;
+Note that max integer is 2,147,483,647
+
+    public class Solution {
+
+        public int reverse(int x) {
+            int ret = 0;
+            while (x != 0) {
+                // handle overflow/underflow
+                if (Math.abs(ret) > 214748364) {
+                    return 0;
+                }
+                ret = ret * 10 + x % 10;
+                x /= 10;
+            }
+            return ret;
         }
-        return reverse;
     }
-
