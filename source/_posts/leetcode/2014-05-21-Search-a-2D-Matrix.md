@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](https://oj.leetcode.com/problems/search-a-2d-matrix/)
 
 <div class="question-content">
@@ -36,6 +36,7 @@ Consider the following matrix:
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>

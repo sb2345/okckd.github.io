@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/remove-nth-node-from-end-of-list/)
 
 <div class="question-content">
@@ -29,6 +29,7 @@ Try to do this in one pass.
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -44,7 +45,7 @@ Try to do this in one pass.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="white">--------</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
@@ -52,30 +53,53 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-__This question is easy__. Just keep 2 pointers of a certain distance, and move together. 
+Note the special case: if the head node needs to be removed! 
 
 ### Solution
 
-The code explains itself. 
+The code explains itself. Just don't forget the special cases. 
 
 ### My code 
 
-
-    public ListNode removeNthFromEnd(ListNode head, int n) {
-            ListNode p1 = head;
-            ListNode p2 = head;
-            for (int i=0 ; i<n ; i++){
-                p2 = p2.next;
+    /**
+     * Definition for singly-linked list.
+     * public class ListNode {
+     *     int val;
+     *     ListNode next;
+     *     ListNode(int x) {
+     *         val = x;
+     *         next = null;
+     *     }
+     * }
+     */
+    public class Solution {
+        public ListNode removeNthFromEnd(ListNode head, int n) {
+            if (head == null) {
+                return null;
             }
-            if (p2 == null){
+            ListNode left = head;
+            ListNode right = head;
+            // important to note that head node can be removed as well!
+            // advance right pointer now
+            for (int i = 0; i < n; i++) {
+                right = right.next;
+                if (right == null) {
+                    right = head;
+                }
+            }
+            // advance left and right pointer together
+            while (right.next != null) {
+                left = left.next;
+                right = right.next;
+            }
+            // remove the node after left pointer
+            // again, the below error check is not necessary
+            if (left.next == null) {
+                // need to remove the header in this case
                 return head.next;
+            } else {
+                left.next = left.next.next;
+                return head;
             }
-            // now p1 and p2 move together
-            while(p2.next != null){
-                p1 = p1.next;
-                p2 = p2.next;
-            }
-            p1.next = p1.next.next;
-            return head;
+        }
     }
-
