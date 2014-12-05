@@ -72,7 +72,7 @@ The question states that input is less than 3999, so we have 2 "n.a." in the tab
 
 This question seems quite straight-forward. 
 
-There is a very [short code](http://stackoverflow.com/a/19759564) by stackoverflow user bhlangonijr. This method __makes use of Java [TreeMap.floorKey](http://goo.gl/e8ryim)__, thus ONLY read it if you have interest. 
+There is a very [short code](http://stackoverflow.com/a/19759564) by stackoverflow user bhlangonijr. This method __makes use of Java [TreeMap.floorKey](http://goo.gl/e8ryim)__. Read it ONLY if you are interested. 
 
 > TreeMap.floorKey - Returns the greatest key less than or equal to the given key, or null if there is no such key.
 

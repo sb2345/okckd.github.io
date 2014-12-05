@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/valid-parentheses/)
 
 <div class="question-content">
@@ -18,6 +18,7 @@ tags: [  ]
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -33,7 +34,7 @@ tags: [  ]
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">--------</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 
@@ -41,9 +42,7 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-__Standard solution around the internet is to use stack__. 
-
-I though using String is also fine, so I tried it. I also works. 
+Either stack or string would work.
 
 ### Solution
 
@@ -51,20 +50,29 @@ The code is easy.
 
 ### My code 
 
-
-    public boolean isValid(String s) {
-            String p = "";
-            for (int i = 0; i < s.length(); i ++) {
-                char cur = s.charAt(i);
-                if (cur == '(' || cur == '{' || cur == '[') {
-                    p += cur;
+    public class Solution {
+        public boolean isValid(String s) {
+            if (s == null || s.length() == 0) {
+                return false;
+            }
+            Stack<Character> stack = new Stack<Character>();
+            // process s char by char
+            for (char c: s.toCharArray()) {
+                if (c == '(' || c == '[' || c == '{') {
+                    stack.push(c);
                 } else {
-                    if (p.length() == 0) return false;
-                    if (p.charAt(p.length()-1) - cur <= 2)
-                        p = p.substring(0, p.length()-1);
+                    if (stack.isEmpty()) {
+                        // eg. input = "())))"
+                        return false;
+                    }
+                    char top = stack.pop();
+                    if (Math.abs(top - c) > 2) {
+                        // parentheses does not match
+                        return false;
+                    }
                 }
             }
-            if (p.length() == 0) return true;
-            return false;
+            // after this, stack should be empty (if parentheses valid)
+            return stack.isEmpty();
+        }
     }
-

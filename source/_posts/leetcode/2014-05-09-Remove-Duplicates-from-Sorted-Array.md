@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[LeetCode 26] Remove Duplicates from Sorted Array"
+title: "[LeetCode 26] Remove Duplicates from Sorted Array "
 comments: true
 category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/remove-duplicates-from-sorted-array/)
 
 <div class="question-content">
@@ -25,9 +25,10 @@ Given input array A = <code>[1,1,2]</code>,
 <p>
 Your function should return length = <code>2</code>, and A is now <code>[1,2]</code>.
 </p><p></p>
-          </div>
+</div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -43,7 +44,7 @@ Your function should return length = <code>2</code>, and A is now <code>[1,2]</c
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="white">--------</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 
@@ -55,23 +56,25 @@ This question is easy.
 
 ### Solution
 
-Two pointer operations. 
+Two pointer operations. A very similar question is __[LeetCode 27] Remove Element__. 
 
 ### My code 
 
-
-    public int removeDuplicates(int[] A) {
-            if (A.length == 0) return 0;
-            int left = 1, right = 1;
-            int pre = A[0];
-            while(right < A.length){
-                if (A[right] != pre) {
-                    A[left] = A[right];
-                    pre = A[left];
-                    left ++;
+    public class Solution {
+        public int removeDuplicates(int[] A) {
+            if (A == null || A.length == 0) {
+                return 0;
+            }
+            int len = A.length;
+            int left = 0;
+            int right = 0;
+            while (right < len) {
+                A[left++] = A[right++];
+                // advance right pionter to a new value 
+                while (right < len && A[right - 1] == A[right]) {
+                    right++;
                 }
-                right ++;
             }
             return left;
+        }
     }
-

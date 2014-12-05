@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/3sum-closest/)
 
 <div class="question-content">
@@ -20,6 +20,7 @@ tags: [  ]
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -35,7 +36,7 @@ tags: [  ]
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">20 minutes coding only</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
@@ -43,34 +44,49 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-This is a simplified version of 3Sum. __The method is exactly the same as 3Sum, except the return is integer instead of a list of solutions__. This makes life easier because __we do not need to consider duplications__. 
+This question is a simplified version of __[LeetCode 15] 3Sum__. The required return is an integer instead of a list. 
 
-Why? Because in 3Sum, when there is duplicate solution, we need to find them all. But in this question, if a solution is found, the closest value = 0, and is immediately returned. 
+This makes life easier because __we do not need to consider duplications__ (think about it, why?). 
 
 ### Solution
 
-The code explains itself. 
+The code is 3Sum solution without duplication avoidance. 
 
 ### My code 
 
-
-    public int threeSumClosest(int[] num, int target) {
-        if (num.length < 3) return 0;
-        Arrays.sort(num);
-        int diff = Integer.MAX_VALUE, realSum = -1;
-        for (int i = 0; i < num.length - 2; i++) {
-            int left = i + 1, right = num.length - 1;
-            while (left < right) {
-                int sum = num[i] + num[left] + num[right];
-                if (sum == target) return target;
-                else if (sum < target) left++;
-                else right--;
-                if (diff > Math.abs(sum - target)) {
-                    diff = Math.abs(sum - target);
-                    realSum = sum;
+    public class Solution {
+        public int threeSumClosest(int[] num, int target) {
+            if (num == null || num.length < 3) {
+                return 0;
+            }
+            Arrays.sort(num);
+            int len = num.length;
+            int ans = num[0] + num[1] + num[2];
+            for (int i = 0; i < len; i++) {
+                // if (i != 0 && num[i - 1] == num[i]) {
+                //     continue;
+                // }
+                // similar to 3sum question, but without dup avoidance
+                int left = i + 1;
+                int right = len - 1;
+                while (left < right) {
+                    int sum = num[i] + num[left] + num[right];
+                    // if found triplet that sums to target, return!
+                    if (sum == target) {
+                        return target;
+                    }
+                    // then update ans variable - if it's closer to target
+                    if (Math.abs(sum - target) < Math.abs(ans - target)) {
+                        ans = sum;
+                    }
+                    // now move either left or right pointer
+                    if (sum >  target) {
+                        right--;
+                    } else {
+                        left++;
+                    }
                 }
             }
+            return ans;
         }
-        return realSum;
     }
-

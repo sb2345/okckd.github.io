@@ -1,14 +1,14 @@
 ---
 layout: post
-title: "[LeetCode 22] Generate Parentheses"
+title: "[LeetCode 22] Generate Parentheses "
 comments: true
 category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
-[link](http://oj.leetcode.com/problems/valid-parentheses/)
+
+[link](https://oj.leetcode.com/problems/generate-parentheses/)
 
 <div class="question-content">
             <p></p><p>
@@ -21,9 +21,10 @@ For example, given <i>n</i> = 3, a solution set is:
 <p>
 <code>"((()))", "(()())", "(())()", "()(())", "()()()"</code>
 </p><p></p>
-          </div>
+</div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -39,32 +40,39 @@ For example, given <i>n</i> = 3, a solution set is:
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="lime">--------</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-__Most popular solutions online are using recursive calls__. For example, [this blog](http://www.geeksforgeeks.org/print-all-combinations-of-balanced-parentheses/). I also used this method. 
-
 ### Solution
 
-I kept 2 integers: __open__ (number of unclosed left parenthesis) and __remain__ (number of parenthesis that can be addded to the current string). I optimized my previous code and made it cleaner. 
+Very standard permutation search. You can read more from [this link](http://www.geeksforgeeks.org/print-all-combinations-of-balanced-parentheses/).
 
 ### My code 
 
-
-    public ArrayList<String> generateParenthesis(int n) {
-            return helper(new ArrayList<String>(), 0, n, "");
-    }
-
-    private ArrayList<String> helper(ArrayList<String> ans, 
-                    int open, int remain, String cur) {
-            if (open == 0 && remain == 0) ans.add(cur);
-            if (remain > 0) helper(ans, open + 1, remain - 1, cur + "(");
-            if (open > 0) helper(ans, open - 1, remain, cur + ")");
+    public class Solution {
+        public List<String> generateParenthesis(int n) {
+            List<String> ans = new ArrayList<String>();
+            if (n == 0) {
+                return ans;
+            }
+            helper(ans, "", n, n);
             return ans;
-    }
+        }
 
+        private void helper(List<String> ans, String path, int left, int right) {
+            if (left == 0 && right == 0) {
+                ans.add(path);
+                return;
+            }
+            // add either left or right parenthese
+            if (left > 0) {
+                helper(ans, path + "(", left - 1, right);
+            }
+            if (right > left) {
+                helper(ans, path + ")", left, right - 1);
+            }
+        }
+    }
