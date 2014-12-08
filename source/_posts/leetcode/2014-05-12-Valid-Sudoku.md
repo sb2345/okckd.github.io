@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/valid-sudoku/)
 
 <div class="question-content">
@@ -26,6 +26,7 @@ A valid Sudoku board (partially filled) is not necessarily solvable. Only the fi
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -41,7 +42,7 @@ A valid Sudoku board (partially filled) is not necessarily solvable. Only the fi
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="lime">--------</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 

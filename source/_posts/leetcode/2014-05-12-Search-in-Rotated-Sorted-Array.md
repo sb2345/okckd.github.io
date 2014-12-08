@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/search-in-rotated-sorted-array/)
 
 <div class="question-content">
@@ -21,6 +21,7 @@ tags: [  ]
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -36,7 +37,7 @@ tags: [  ]
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">Did not solved</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 

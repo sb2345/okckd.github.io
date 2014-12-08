@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/search-for-a-range/)
 
 <div class="question-content">
@@ -25,6 +25,7 @@ return <code>[3, 4]</code>.
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -40,7 +41,7 @@ return <code>[3, 4]</code>.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">Difficult</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 

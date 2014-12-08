@@ -12,7 +12,9 @@ tags: [ src ]
 
 ### Solution
 
-The only thing to know is __how to count the number of '1's in a integer__. It's like this: 
+Using XOR operation, we can find out number of bits that are different. 
+
+The next important thing is to know __how to count the number of '1's in a integer__. It's like this: 
 
 > c = c & (c - l) clears the least significant bit of '1'. 
 >
