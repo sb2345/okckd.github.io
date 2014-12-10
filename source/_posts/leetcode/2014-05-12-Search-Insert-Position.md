@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[LeetCode 35] Search Insert Position"
+title: "[LeetCode 35] Search Insert Position "
 comments: true
 category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/search-insert-position/)
 
 <div class="question-content">
@@ -22,9 +22,10 @@ Here are few examples.<br>
 <code>[1,3,5,6]</code>, 7 → 4<br>
 <code>[1,3,5,6]</code>, 0 → 0
 </p><p></p>
-          </div>
+</div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -40,7 +41,7 @@ Here are few examples.<br>
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="lime">--------</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 
