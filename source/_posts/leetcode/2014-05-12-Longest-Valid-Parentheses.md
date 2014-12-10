@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[LeetCode 32] Longest Valid Parentheses"
+title: "[LeetCode 32] Longest Valid Parentheses "
 comments: true
 category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/longest-valid-parentheses/)
 
 <div class="question-content">
@@ -22,6 +22,7 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
           </div>
           
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>

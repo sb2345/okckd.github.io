@@ -15,7 +15,7 @@ tags: [  ]
     
     Pass/submit: 
 
-### Need Attention
+### Medium
 
 1. [LeetCode 1] Two Sum
 1. [LeetCode 5] Longest Palindromic Substring
@@ -26,6 +26,10 @@ tags: [  ]
 1. [LeetCode 19] Remove Nth Node From End of List
 1. [LeetCode 18] 4Sum
 1. [LeetCode 27] Remove Element
+1. [LeetCode 30] Substring With Concatenation of All Words
+1. [LeetCode 23] Merge K Sorted Lists
+1. [LeetCode 25] Reverse Nodes in k-Groups
+1. [LeetCode 32] Longest Valid Parentheses
 
 ### Difficult
 
@@ -33,5 +37,13 @@ tags: [  ]
 1. [LeetCode 3] Longest Substring Without Repeating Characters
 1. [LeetCode 10] Regular Expression Matching
 1. [LeetCode 15] 3Sum
+1. [LeetCode 29] Divide Two Integers (undone yet)
 
-19 posted written on or before May 3 2014 are updated. 
+Posts are updated up to: [LeetCode 20] Valid Parentheses
+	<tr>
+		<td>Time to use</td>
+		<td bgcolor="white">----------</td>
+	</tr>
+</table>
+
+Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
