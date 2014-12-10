@@ -7,6 +7,7 @@ tags: [  ]
 ---
 
 ### Question 
+
 [link](http://oj.leetcode.com/problems/substring-with-concatenation-of-all-words/)
 
 <div class="question-content">
@@ -27,6 +28,7 @@ You should return the indices: <code>[0,9]</code>.<br>
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -42,7 +44,7 @@ You should return the indices: <code>[0,9]</code>.<br>
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">more than hour</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 

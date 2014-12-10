@@ -52,7 +52,7 @@ The number of ways decoding <code>"12"</code> is 2.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">--------</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 

@@ -6,17 +6,18 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/divide-two-integers/)
 
 <div class="question-content">
             <p></p><p>
 Divide two integers without using multiplication, division and mod operator.
 </p><p></p>
-          </div>
+</div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -32,7 +33,7 @@ Divide two integers without using multiplication, division and mod operator.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">really long time</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 

@@ -7,18 +7,20 @@ tags: [  ]
 ---
 
 ### Question 
+
 [link](http://oj.leetcode.com/problems/implement-strstr/)
 
 <div class="question-content">
-            <p></p><p>
+<p></p><p>
 Implement strStr().
 </p>
 <p>
 Returns a pointer to the first occurrence of needle in haystack, or <b>null</b> if needle is not part of haystack.
 </p><p></p>
-          </div>
+</div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -34,7 +36,7 @@ Returns a pointer to the first occurrence of needle in haystack, or <b>null</b> 
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">KMP is difficult</td>
+		<td bgcolor="white">----------</td>
 	</tr>
 </table>
 
@@ -42,33 +44,43 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-There are 2 ways to solve this problem. __The most easy and common way__ is to use nested loop (many online solutions use this method). 
+There are 2 ways to solve this problem. 
 
-However, __this question can also be solved by [KPM algorithm](http://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm)__. 
+1. __Most common way__ is using 2 nested loop 
+
+1. Also can be solved by [KPM algorithm](http://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm)
 
 ### Solution
 
-I post my standard solution below. This is the most standard solution online, for example it is in [this post](http://goo.gl/2MNOS2).
+Standard solution is posted below. Read [this post](http://www.programcreek.com/2012/12/leetcode-implement-strstr-java/) for more.
 
-__I have yet to written KPM solution__. [This blog](http://discuss.leetcode.com/questions/76/implement-strstr) and [this blog](http://fisherlei.blogspot.sg/2012/12/leetcode-implement-strstr.html) have good KMP solution posted. 
+As for KMP algo, I have to admit I am not able to do it. Plz refer to [this blog](http://discuss.leetcode.com/questions/76/implement-strstr) and [this blog](http://fisherlei.blogspot.sg/2012/12/leetcode-implement-strstr.html) for more! 
 
 ### My code 
 
-__Simple solution__
-
-    public String strStr(String haystack, String needle) {
-            if (needle.length() == 0) return haystack;
-            for (int i = 0; i <= haystack.length() - needle.length(); i ++) {
-                    if (haystack.charAt(i) != needle.charAt(0)) continue;
-                    int j = 0;
-                    for (; j < needle.length(); j ++) {
-                            if (haystack.charAt(i + j) != needle.charAt(j)) break;
-                    }
-                    if (j == needle.length()) return haystack.substring(i);
+    public class Solution {
+        public int strStr(String haystack, String needle) {
+            if (haystack == null || needle == null) {
+                return -1;
+            } else if (haystack.length() < needle.length()) {
+                return -1;
+            } else if (haystack.length() == 0 && needle.length() == 0) {
+                return 0;
             }
-            return null;
+            for (int i = 0; i <= haystack.length() - needle.length(); i++) {
+                int j;
+                // try to match part of haystack (starting from i) to needle 
+                for (j = 0; j < needle.length(); j++) {
+                    if (haystack.charAt(i + j) != needle.charAt(j)) {
+                        break;
+                    }
+                }
+                // if part of haystack (starting from i) matches needle 
+                if (j == needle.length()) {
+                    return i;
+                }
+                // if not match, proceed to next loop
+            }
+            return -1;
+        }
     }
-
-__KPM solution__
-
-Only need to understand to principles. 

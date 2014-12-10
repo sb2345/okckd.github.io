@@ -1,17 +1,17 @@
 ---
 layout: post
-title: "[LeetCode 25] Reverse Nodes in k-Groups"
+title: "[LeetCode 25] Reverse Nodes in k-Groups "
 comments: true
 category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/reverse-nodes-in-k-group/)
 
 <div class="question-content">
-            <p></p><p>
+<p></p><p>
 Given a linked list, reverse the nodes of a linked list <i>k</i> at a time and return its modified list.
 </p>
 
@@ -34,9 +34,10 @@ For <i>k</i> = 2, you should return: <code>2-&gt;1-&gt;4-&gt;3-&gt;5</code>
 <p>
 For <i>k</i> = 3, you should return: <code>3-&gt;2-&gt;1-&gt;4-&gt;5</code>
 </p><p></p>
-          </div>
+</div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -52,7 +53,7 @@ For <i>k</i> = 3, you should return: <code>3-&gt;2-&gt;1-&gt;4-&gt;5</code>
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">having some difficulty</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 

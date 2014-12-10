@@ -1,21 +1,23 @@
 ---
 layout: post
-title: "[LeetCode 23] Merge k Sorted Lists"
+title: "[LeetCode 23] Merge k Sorted Lists "
 comments: true
 category: Leetcode
 tags: [  ]
 ---
 
 ### Question 
+
 [link](http://oj.leetcode.com/problems/merge-k-sorted-lists/)
 
 <div class="question-content">
             <p></p><p>
 Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and describe its complexity.
 </p><p></p>
-          </div>
+</div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -31,7 +33,7 @@ Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">Difficult</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
