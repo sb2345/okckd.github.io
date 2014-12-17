@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Read] 十月以前 知乎摘抄 "
+title: "[Read] 知乎摘抄 "
 comments: true
 category: Read
 tags: [  ]
