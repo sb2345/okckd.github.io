@@ -30,6 +30,8 @@ tags: [  ]
 1. [LeetCode 23] Merge K Sorted Lists
 1. [LeetCode 25] Reverse Nodes in k-Groups
 1. [LeetCode 32] Longest Valid Parentheses
+1. [LeetCode 50] Pow(x, N)
+1. [LeetCode 55] Jump Game
 
 ### Difficult
 
@@ -38,6 +40,13 @@ tags: [  ]
 1. [LeetCode 10] Regular Expression Matching
 1. [LeetCode 15] 3Sum
 1. [LeetCode 29] Divide Two Integers (undone yet)
+1. [LeetCode 37] Sudoku Solver
+
+skip:
+
+Wildcard Matching
+Spiral Matrix II
+Minimum Window Substring
 
 Posts are updated up to: [LeetCode 20] Valid Parentheses
 	<tr>
