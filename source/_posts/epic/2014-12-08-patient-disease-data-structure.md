@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Facebook] Patient Disease Data Structure "
+title: "[Epic] Patient Disease Data Structure "
 comments: true
-category: Facebook
+category: Epic
 tags: [  ]
 ---
 

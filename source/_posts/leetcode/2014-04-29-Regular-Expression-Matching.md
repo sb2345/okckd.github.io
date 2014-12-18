@@ -57,7 +57,7 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-__Very important to note: Do not use DP__. Why? Because eg. "a*b" will be considered as 2 parts: "a*" part and "b" part. Because star is considered to be bundled with previous char, it gives us difficulty in determine the size of the DP array. Of course, we still can do it, but I see nobody have provided a nice DP solution online. Let's just forget about it for now. 
+__Very important to note: Do not use DP__. Why? Because eg. "a\*b" will be considered as 2 parts: "a\*" part and "b" part. Because star is considered to be bundled with previous char, it gives us difficulty in determine the size of the DP array. Of course, we still can do it, but I see nobody have provided a nice DP solution online. Let's just forget about it for now. 
 
 The solution I'm giving in this post, is to trim String and compare. 
 
