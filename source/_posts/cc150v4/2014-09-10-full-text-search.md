@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v4] 20.8 Full Text Search "
+title: "[CC150v4] 20.8 Full Text Search (suffix tree) "
 comments: true
 categories:
 - CC150v4
@@ -14,9 +14,9 @@ tags: [  ]
 
 ### Solution
 
-__This is a very classic questio of string__, especially favored by Google. 
+__This is a very classic question of string search__, favored by Google and Facebook. 
 
-The solution is __suffix tree__. For example, using "bibs" to build a suffix tree like this: 
+The solution is __suffix tree__ (to be distinguished from __trie__, or prefix tree, which searched word by its prefix). Suffix tree is good for search a proportion of a long string. For example, using "bibs" to build a suffix tree like this: 
 
 {% img middle /assets/images/suffix-tree-example-bibs.png %}
 

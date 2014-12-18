@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Facebook] Large String Find Substring "
+title: "[Facebook] Large String Find Substring (Trie, prefix tree) "
 comments: true
 categories:
 - Facebook
