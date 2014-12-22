@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values &hellip;">
+  <meta name="description" content="Question Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,164 +78,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/28/get-rank-stream-integers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/28/get-rank-stream-integers/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values less than or equal to x).</p>
-
-<p>Implement the data structures and algorithms to support these operations. That is,implement the method <strong>track(int x)</strong>, which is called when each number is generated, and the method <strong>getRankOfNumber(int x)</strong>, which returns the number of values less than or equal to x (not including x itself).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This question requires a special type of Data Structure</strong>. It basically is a modified BST like this:</p>
-
-<blockquote><p>The tree node stores both number value and the <strong>count of node on left subtree</strong></p></blockquote>
-
-<p><img class="middle" src="/assets/images/get-rank-number-stream.png"></p>
-
-<p>Suppose we want to find the rank of 24 in the tree above. We would compare 24 with the root, 20, and find that 24 must reside on the right. The root has 4 nodes in its left subtree, and when we include the root itself, this gives us five total nodes smaller than 24. We set counter to 5.</p>
-
-<p>Then, we compare 24 with node 25 and find that 24 must be on the left. The value of counter does not update, since we&rsquo;re not &ldquo;passing over&rdquo; any smaller nodes. The value of counter is still 5.</p>
-
-<p>Next, we compare 24 with node 23,and find that 24 must be on the right. Counter gets incremented by just 1 (to 6), since 23 has no left nodes.</p>
-
-<p>Finally, we find 24 and we return counter: 6.</p>
-
-<h3>Code</h3>
-
-<p>I did not write code myself. It&rsquo;s too complex!</p>
-
-<p><strong>RankNode.java</strong></p>
-
-<pre><code>public class RankNode {
-    public int left_size = 0;
-    public RankNode left;
-    public RankNode right;
-    public int data = 0;
-    public RankNode(int d) {
-        data = d;
-    }
-
-    public void insert(int d) {
-        if (d &lt;= data) {
-            if (left != null) {
-                left.insert(d);
-            } else {
-                left = new RankNode(d);
-            }
-            left_size++;
-        } else {
-            if (right != null) {
-                right.insert(d);
-            } else {
-                right = new RankNode(d);
-            }
-        }
-    }
-
-    public int getRank(int d) {
-        if (d == data) {
-            return left_size;
-        } else if (d &lt; data) {
-            if (left == null) {
-                return -1;
-            } else {
-                return left.getRank(d);
-            }
-        } else {
-            int right_rank = right == null ? -1 : right.getRank(d);
-            if (right_rank == -1) {
-                return -1;
-            } else {
-                return left_size + 1 + right_rank;
-            }
-        }
-    }
-}
-</code></pre>
-
-<p><strong>Main Class</strong>:</p>
-
-<pre><code>public class Question {
-    private static RankNode root = null;
-
-    public static void track(int number) {
-        if (root == null) {
-            root = new RankNode(number);
-        } else {
-            root.insert(number);
-        }
-    }
-
-    public static int getRankOfNumber(int number) {
-        return root.getRank(number);
-    }
-
-    public static void main(String[] args) {
-        int size = 100;
-        int[] list = AssortedMethods.randomArray(size, -100, 100);
-        for (int i = 0; i &lt; list.length; i++) {
-            track(list[i]);
-        }
-
-        int[] tracker = new int[size];
-        for (int i = 0; i &lt; list.length; i++) {
-            int v = list[i];
-            int rank1 = root.getRank(list[i]);
-            tracker[rank1] = v;
-        }
-
-        for (int i = 0; i &lt; tracker.length - 1; i++) {
-            if (tracker[i] != 0 &amp;&amp; tracker[i + 1] != 0) {
-                if (tracker[i] &gt; tracker[i + 1]) {
-                    System.out.println("ERROR at " + i);
-                }
-            }
-        }
-
-        System.out.println("Array: " + AssortedMethods.arrayToString(list));
-        System.out.println("Ranks: " + AssortedMethods.arrayToString(tracker));
-    }
-
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
   
   
     <article>
@@ -1185,6 +1027,71 @@ public static int helper(int[] array, int left, int right) {
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/16/google-guess-password/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/google-guess-password/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">link</a></p>
+
+<blockquote><p>给你一个password 假定6位</p>
+
+<p>有个function, 每call一次就给你一个triplet 是password 里的随即三位(order不变)。比如google, 可能返回: ggl, goe, oog, ool&hellip;</p>
+
+<p>问如何最有效破译这个密码?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is just a rough idea suggested by Level 6 of <a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">this post</a>.</p>
+
+<blockquote><p>六位密码随机给三位，应该有C(6, 3) = 20个bucket。</p>
+
+<p>如果密码是abcdef，那么以a开头的bucket应该是 C(5, 2) = 10个。以b开头的buckt应该是C(4, 2) = 6个，以c开头的是3个，以d开头的是1个&hellip;. from this, we know the probability of the occurrance of each letter.</p></blockquote>
+
+<p>In this case, we generate many triplets, and calculate based on their frequencies. However, the guy also wrote about this condition:</p>
+
+<blockquote><p>如果abcd中间有相同(there are same letters in the 6-char password)，那么就会出现以a开头的是11个（abca)，13个(abad)，14个(abaa)，16个(aacd)，17个(aaca),19个(aaad)或者20个(aaaa).</p>
+
+<p>思路是比较清楚，不过算法还要想想。</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>not written</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1205,18 +1112,16 @@ public static int helper(int[] array, int left, int right) {
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
+<li class='category'><a href='/blog/categories/experience/'>experience (2)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (6)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
-<li class='category'><a href='/blog/categories/read/'>read (1)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/thoughts/'>thoughts (8)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
 <li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
 
@@ -1225,6 +1130,10 @@ public static int helper(int[] array, int left, int right) {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/22/Ruby/">[Ruby]</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum (Undone)</a>
@@ -1240,10 +1149,6 @@ public static int helper(int[] array, int left, int right) {
     
       <li class="post">
         <a href="/blog/2014/12/01/Leetcode-fourth/">[Leetcode] Leetcode Fourth Round</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/04/Code-a-hashmap/">[Google] Code a HashMap</a>
       </li>
     
   </ul>
