@@ -2,7 +2,7 @@
 layout: post
 title: "[Octopress] Clone Octopress Blog From A Different Computer"
 comments: true
-category: octopress
+category: experience
 tags: [  ]
 ---
 
@@ -19,7 +19,8 @@ I've had a little confusions about how to develop my Octopress blog on 2 differe
 To set up a new local repository from an online github octopress blog repo, follow the instructions: 
 
 1. __clone the source branch to the local octopress folder__
-> git clone -b source git@github.com:willran168/willran168.github.io.git octopress
+
+> git clone -b source git@github.com:okckd/okckd.github.io.git octopress
 
 1. __run the rake installation to configure everything__
 
