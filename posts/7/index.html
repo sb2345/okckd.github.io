@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Write an algorithm to find the ‘next’ node (i.e., in-order successor) of a given node in a binary search tree where each node has a link to &hellip;">
+  <meta name="description" content="Question You are given a binary tree in which each node contains a value. Design an algorithm to print all paths which sum up to that value. Note &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,214 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/06/print-path-sum-to-value/">[CC150v4] 4.8 Print Path Sum to Value</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/06/print-path-sum-to-value/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/06/print-path-sum-to-value/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You are given a binary tree in which each node contains a value. Design an algorithm to print all paths which sum up to that value. Note that it can be any path in the tree &ndash; it does not have to start at the root.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Keep a list of items as buffer</strong>, and check the following condition:</p>
+
+<blockquote><p>“does this node complete a path with the sum?”</p></blockquote>
+
+<p>There&rsquo;re n nodes in total, and the max size of buffer is lg(n), so the time complexity is O(nlgn).</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static void find(TreeNode head, int target) {
+    findSum(head, target, new ArrayList&lt;Integer&gt;());
+}
+
+private static void findSum(TreeNode node, int target, List&lt;Integer&gt; buffer) {
+    if (node == null)
+        return;
+
+    buffer.add(node.data);
+    int sum = 0;
+    for (int i = buffer.size() - 1; i &gt;= 0; i--) {
+        sum += buffer.get(i);
+        if (sum == target) {
+            // from (i)th element until the last element is a valid path
+            printPath(buffer, i);
+        }
+    }
+
+    List&lt;Integer&gt; clone1 = new ArrayList&lt;Integer&gt;(buffer);
+    findSum(node.left, target, clone1);
+
+    List&lt;Integer&gt; clone2 = new ArrayList&lt;Integer&gt;(buffer);
+    findSum(node.right, target, clone2);
+}
+
+private static void printPath(List&lt;Integer&gt; buffer, int start) {
+    System.out.print("Path: ");
+    for (int i = start; i &lt; buffer.size(); i++) {
+        System.out.print(buffer.get(i) + " ");
+    }
+    System.out.println();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/06/hanoi-tower/">[CC150v4] 3.4 Towers of Hanoi</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/06/hanoi-tower/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/06/hanoi-tower/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>In the classic problem of the Towers of Hanoi, you have 3 rods and N disks of di!erent sizes which can slide onto any tower. The puzzle starts with disks sorted in ascending order of size from top to bottom (e.g., each disk sits on top of an even larger one). You have the following constraints:</p></blockquote>
+
+<ol>
+<li>Only one disk can be moved at a time.</li>
+<li>A disk is slid o! the top of one rod onto the next rod.</li>
+<li>A disk can only be placed on top of a larger disk.</li>
+</ol>
+
+
+<blockquote><p>Write a program to move the disks from the &ldquo;rst rod to the last using Stacks.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a <strong>classic recursive question</strong>. The solution code is supposed to be very concise.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong>, slightly different from the answer in the book, but good.</p>
+
+<p>Main class:</p>
+
+<pre><code>public class HanoiMyAnswer {
+
+    private static Rod r0, r1, r2;
+    private static final int NUM_DISKS = 5;
+
+    public static void main(String[] args) {
+        // Hanoi Tower always have 3 rods
+        r0 = new Rod(0);
+        r1 = new Rod(1);
+        r2 = new Rod(2);
+
+        // Put some disks on the 1st rod, leaving 2nd and 3rd rod empty
+        r0.setDisks(NUM_DISKS);
+
+        // start main algorithm
+        System.out.println("My answer: ");
+        moveDisks(NUM_DISKS, r0, r2, r1);
+    }
+
+    private static void moveDisks(int number, Rod from, Rod to, Rod buffer) {
+        if (number == 1) {
+            int topValue = from.disks.pop();
+            to.disks.push(topValue);
+            displayMessage(topValue, from.name, to.name);
+        } else {
+            moveDisks(number - 1, from, buffer, to);
+            int bottomValue = from.disks.pop();
+            to.disks.push(bottomValue);
+            displayMessage(bottomValue, from.name, to.name);
+            moveDisks(number - 1, buffer, to, from);
+        }
+    }
+
+    private static void displayMessage(int disk, int from, int to) {
+        System.out.println("Disk[" + disk + "]: Rod" + from + "--&gt;" + to);
+    }
+}
+</code></pre>
+
+<p>Rod.java</p>
+
+<pre><code>class Rod {
+
+    int name;
+    Stack&lt;Integer&gt; disks = new Stack&lt;Integer&gt;();
+
+    public Rod(int rodIndex) {
+        this.name = rodIndex;
+    }
+
+    public void setDisks(int n) {
+        // this method will insert n disks on this Rod
+        // the bottom disk is indexed as (n-1) and top one is 0
+        disks.clear();
+        for (int i = n - 1; i &gt;= 0; i--) {
+            disks.push(i);
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -712,178 +920,6 @@ target str的地方都换成新的str， 长度可以任意.</p></blockquote>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/02/Listener-Observer-pattern/">[Design] Listener / Observer Pattern</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/02/Listener-Observer-pattern/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/02/Listener-Observer-pattern/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Observer pattern</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Observer_pattern">The observer pattern</a></strong> is a software design pattern in which an object(subject) maintains a list of dependents(observers), and notifies them automatically of any state changes (usually by calling one of their methods).</p>
-
-<p>The Observer pattern is mainly used to implement distributed event handling systems. It&rsquo;s also a key part in MVC architectural.</p>
-
-<h3>Example</h3>
-
-<p>A mailing list example.</p>
-
-<p>Each student in the mailing list would be a listener/observer, and teacher would be announcer/subject.</p>
-
-<p>So in the code, there&rsquo;s a Listener Interface that all students implement. There&rsquo;s a update() method in the interface, where each student define their own implementation.</p>
-
-<p>Teacher would keep a list of Listeners. When there&rsquo;s any news, teacher would call update() on each object.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/02/Find-anagrams-in-dictionary/">[Google] Find Anagrams in Dictionary</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/02/Find-anagrams-in-dictionary/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/02/Find-anagrams-in-dictionary/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=3088">link</a></p>
-
-<blockquote><p>Imagine you had a dictionary. How would you print all anagrams of a word? What if you had to do this repeatedly? Could you optimize it?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>A very <a href="http://stackoverflow.com/a/12477976">nice solution</a>:</p>
-
-<ol>
-<li><p>Open dictionary</p></li>
-<li><p>Create empty hashmap H</p></li>
-<li><p>For each word in dictionary:</p>
-
-<ol>
-<li><p>Create a key that is the word&rsquo;s letters sorted alphabetically (and forced to one case)</p></li>
-<li><p>Add the word to the list of words accessed by the hash key in H</p></li>
-</ol>
-</li>
-</ol>
-
-
-<p>There&rsquo;s another <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">very interesting idea</a>, if the length of the word is not too long.</p>
-
-<blockquote><p>Another approach could be we can assign each letters from a..z a prime numbers (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, .. so on)</p>
-
-<p>and then for any word, we can calculate its key as the multiples of all the prime number corresponding to characters in the word.</p>
-
-<p>The char &ndash;> int assignment may look like:</p></blockquote>
-
-<pre><code>a=2, b=3, c=5, d=7, e=11, f=13, g=17, h=19, i=23, j=29, 
-k=31, l=37, m=41, n=43, o=47, p=53, q=59, r=61, s=67, t=71, 
-u=73, v=79, w=83, x=89, y=97, z=101
-</code></pre>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong>, <a href="http://karmaandcoding.blogspot.sg/2012/02/print-all-anagrams-for-word-from.html">link</a></p>
-
-<pre><code>private static HashMap&lt;String, ArrayList&lt;String&gt;&gt; anagramMap = new HashMap&lt;String, ArrayList&lt;String&gt;&gt;();
-
-public static void findAnagrams(String[] dictionary) {
-    int len = dictionary.length;
-
-    for (int i = 0; i &lt; len; i++) {
-        String sortedWord = sortWordLexicographically(dictionary[i]);
-        ArrayList&lt;String&gt; wordList = anagramMap.get(sortedWord);
-        if (wordList == null) {
-            wordList = new ArrayList&lt;String&gt;();
-        }
-        wordList.add(dictionary[i]);
-        anagramMap.put(sortedWord, wordList);
-    }
-}
-
-public ArrayList&lt;String&gt; getAnagrams(String word) {
-    if (word == null) {
-        return null;
-    }
-
-    String sortedWord = sortWordLexicographically(word);
-    return anagramMap.get(sortedWord);
-}
-
-public void printAnagrams(String word) {
-    if (word == null) {
-        System.out.println("Input word is null!");
-    } else {
-        ArrayList&lt;String&gt; wordList = getAnagrams(word);
-        if (wordList == null) {
-            System.out.println("No anagrams exists for : " + word);
-        } else {
-            Iterator&lt;String&gt; iter = wordList.iterator();
-            while (iter.hasNext()) {
-                System.out.print(iter.next());
-            }
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/8">&larr; Older</a>
@@ -903,7 +939,8 @@ public void printAnagrams(String word) {
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (5)</a></li>
+<li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (6)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -925,7 +962,15 @@ public void printAnagrams(String word) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/12/08/patient-disease-data-structure/">[Facebook] Patient Disease Data Structure</a>
+        <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum (Undone)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/08/patient-disease-data-structure/">[Epic] Patient Disease Data Structure</a>
       </li>
     
       <li class="post">
@@ -934,14 +979,6 @@ public void printAnagrams(String word) {
     
       <li class="post">
         <a href="/blog/2014/11/04/Code-a-hashmap/">[Google] Code a HashMap</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/17/thoughts-who-will-remember-you/">[Thoughts] Who Will Remember You?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/08/read-zhihu-oct/">[Read] 十月以前 知乎摘抄</a>
       </li>
     
   </ul>

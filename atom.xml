@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-12-12T15:52:39+08:00</updated>
+  <updated>2014-12-22T10:35:07+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,7 +14,177 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[Facebook] Patient Disease Data Structure]]></title>
+    <title type="html"><![CDATA[[Facebook] Binary Search Tree 3Sum (Undone)]]></title>
+    <link href="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/"/>
+    <updated>2014-12-18T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
+
+<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
+
+<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
+
+<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
+
+<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
+
+<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
+
+<h3>Code</h3>
+
+<p><strong>DLL way, written by me</strong></p>
+
+<pre><code>public void findTriplet(TreeNode root, int target) {
+    TreeNode[] dll = convertToDll(root);
+    TreeNode head = dll[0];
+    TreeNode tail = dll[1];
+    // note that the bst inorder dll should already in sorted by value
+    TreeNode first = head;
+    while (first.right != null) {
+        TreeNode left = first.right;
+        TreeNode right = tail;
+        while (left.val &lt; right.val) {
+            int diff = first.val + left.val + right.val - target;
+            if (diff == 0) {
+                System.out.println("Found triplet: " + first.val + " "
+                        + left.val + " " + right.val + " for sum of "
+                        + target);
+            }
+            if (diff &lt;= 0) {
+                left = left.right;
+            }
+            if (diff &gt;= 0) {
+                right = right.left;
+            }
+        }
+        first = first.right;
+    }
+}
+
+private TreeNode[] convertToDll(TreeNode node) {
+    TreeNode[] ans = new TreeNode[2];
+    // do the left side of node
+    if (node.left == null) {
+        ans[0] = node;
+    } else {
+        TreeNode[] preAns = convertToDll(node.left);
+        ans[0] = preAns[0];
+        node.left = preAns[1];
+        preAns[1].right = node;
+    }
+    // do the right side of node
+    if (node.right == null) {
+        ans[1] = node;
+    } else {
+        TreeNode[] postAns = convertToDll(node.right);
+        ans[1] = postAns[1];
+        node.right = postAns[0];
+        postAns[0].left = node;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>inorder way</strong></p>
+
+<p>undone</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Print a Binary Tree in Vertical Order]]></title>
+    <link href="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/"/>
+    <updated>2014-12-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
+
+<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
+
+<pre><code>           1
+        /    \
+       2      3
+      / \    / \
+     4   5  6   7
+             \   \
+              8   9 
+
+The output of print this tree vertically will be:
+4
+2
+1 5 6
+3 8
+7
+9 
+</code></pre>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
+<li><p>Iterate for each vertical line at distance minimum to maximum from root.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+
+    // 1. find the range of left bound and right bound
+    int[] range = new int[2];
+    findRange(root, range, 0);
+
+    // 2. calculate number of columns in the result
+    int rootIndex = 0 - range[0];
+    int columns = range[1] - range[0] + 1;
+    for (int i = 0; i &lt; columns; i++) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+    }
+
+    // 3. fill in vertically in a recursive manner
+    fillNode(ans, root, rootIndex);
+
+    return ans;
+}
+
+private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
+    if (node == null) {
+        return;
+    }
+    ans.get(index).add(node.val);
+    fillNode(ans, node.left, index - 1);
+    fillNode(ans, node.right, index + 1);
+}
+
+private void findRange(TreeNode node, int[] range, int position) {
+    if (node == null) {
+        return;
+    }
+    if (position &lt; range[0]) {
+        range[0] = position;
+    }
+    if (position &gt; range[1]) {
+        range[1] = position;
+    }
+    findRange(node.left, range, position - 1);
+    findRange(node.right, range, position + 1);
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Epic] Patient Disease Data Structure]]></title>
     <link href="http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure/"/>
     <updated>2014-12-08T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure</id>
@@ -64,35 +234,53 @@ Pass/day:
 Pass/submit: 
 </code></pre>
 
-<h3>Medium</h3>
+<h3>Easy</h3>
 
 <ol>
 <li>[LeetCode 1] Two Sum</li>
 <li>[LeetCode 5] Longest Palindromic Substring</li>
-<li>[LeetCode 7] Reverse Integer</li>
 <li>[LeetCode 6] ZigZag Conversion</li>
+<li>[LeetCode 7] Reverse Integer</li>
 <li>[LeetCode 12] Integer to Roman</li>
 <li>[LeetCode 16] 3Sum Closest</li>
-<li>[LeetCode 19] Remove Nth Node From End of List</li>
 <li>[LeetCode 18] 4Sum</li>
-<li>[LeetCode 27] Remove Element</li>
-<li>[LeetCode 30] Substring With Concatenation of All Words</li>
+<li>[LeetCode 19] Remove Nth Node From End of List</li>
 <li>[LeetCode 23] Merge K Sorted Lists</li>
 <li>[LeetCode 25] Reverse Nodes in k-Groups</li>
+<li>[LeetCode 27] Remove Element</li>
+<li>[LeetCode 30] Substring With Concatenation of All Words</li>
 <li>[LeetCode 32] Longest Valid Parentheses</li>
+<li>[LeetCode 36] Valid Sudoku</li>
+<li>[LeetCode 41] First Missing Positive</li>
+<li>[LeetCode 42] Trapping Rain Water</li>
+<li>[LeetCode 45] Jump Game II</li>
+<li>[LeetCode 50] Pow(x, N)</li>
+<li>[LeetCode 55] Jump Game</li>
+<li>[LeetCode 72] Edit Distance</li>
+<li>[LeetCode 79] Word Search</li>
+<li>[LeetCode 80] Remove Duplicates From Sorted Array II</li>
+<li>[LeetCode 94] Binary Tree Inorder Traversal</li>
 </ol>
 
 
 <h3>Difficult</h3>
 
 <ol>
-<li>[LeetCode 4] Median of Two Sorted Arrays</li>
 <li>[LeetCode 3] Longest Substring Without Repeating Characters</li>
+<li>[LeetCode 4] Median of Two Sorted Arrays</li>
 <li>[LeetCode 10] Regular Expression Matching</li>
 <li>[LeetCode 15] 3Sum</li>
-<li>[LeetCode 29] Divide Two Integers (undone yet)</li>
+<li>[LeetCode 29] Divide Two Integers</li>
+<li>[LeetCode 37] Sudoku Solver</li>
+<li>[LeetCode 44] Wildcard Matching</li>
 </ol>
 
+
+<p>skip:</p>
+
+<pre><code>Minimum Window Substring
+Largest Rectangle in Histogram
+</code></pre>
 
 <p>Posts are updated up to: [LeetCode 20] Valid Parentheses</p>
 
@@ -168,7 +356,7 @@ Pass/submit:
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Read] 十月以前 知乎摘抄]]></title>
+    <title type="html"><![CDATA[[Read] 知乎摘抄]]></title>
     <link href="http://okckd.github.io/blog/2014/10/08/read-zhihu-oct/"/>
     <updated>2014-10-08T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/10/08/read-zhihu-oct</id>
@@ -1321,90 +1509,6 @@ public static int helper(int[] array, int left, int right) {
 
 <pre><code>public static int swapOddEvenBits(int x) {
     return (((x &amp; 0xaaaaaaaa) &gt;&gt; 1) | ((x &amp; 0x55555555) &lt;&lt; 1));
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Guess Password]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/16/google-guess-password/"/>
-    <updated>2014-09-16T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/16/google-guess-password</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">link</a></p>
-
-<blockquote><p>给你一个password 假定6位</p>
-
-<p>有个function, 每call一次就给你一个triplet 是password 里的随即三位(order不变)。比如google, 可能返回: ggl, goe, oog, ool&hellip;</p>
-
-<p>问如何最有效破译这个密码?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is just a rough idea suggested by Level 6 of <a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">this post</a>.</p>
-
-<blockquote><p>六位密码随机给三位，应该有C(6, 3) = 20个bucket。</p>
-
-<p>如果密码是abcdef，那么以a开头的bucket应该是 C(5, 2) = 10个。以b开头的buckt应该是C(4, 2) = 6个，以c开头的是3个，以d开头的是1个&hellip;. from this, we know the probability of the occurrance of each letter.</p></blockquote>
-
-<p>In this case, we generate many triplets, and calculate based on their frequencies. However, the guy also wrote about this condition:</p>
-
-<blockquote><p>如果abcd中间有相同(there are same letters in the 6-char password)，那么就会出现以a开头的是11个（abca)，13个(abad)，14个(abaa)，16个(aacd)，17个(aaca),19个(aaad)或者20个(aaaa).</p>
-
-<p>思路是比较清楚，不过算法还要想想。</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 5.5 Calculate Bits Conversion Required]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/16/calculate-bits-convertions/"/>
-    <updated>2014-09-16T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/16/calculate-bits-convertions</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Write a function to determine the number of bits (change) required to convert integer A to integer B.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Using XOR operation, we can find out number of bits that are different.</p>
-
-<p>The next important thing is to know <strong>how to count the number of &lsquo;1&rsquo;s in a integer</strong>. It&rsquo;s like this:</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>code 1</strong></p>
-
-<pre><code>public static int calcBitsSwapMe1(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        count += num &amp; 1;
-        num = num &gt;&gt;&gt; 1;
-    }
-    return count;
-}
-</code></pre>
-
-<p><strong>code 2</strong></p>
-
-<pre><code>public static int calcBitsSwapMe2(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        num = num &amp; (num - 1);
-        count++;
-    }
-    return count;
 }
 </code></pre>
 ]]></content>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Facebook | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/facebook/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-12-12T15:52:39+08:00</updated>
+  <updated>2014-12-22T10:35:07+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,38 +14,167 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[Facebook] Patient Disease Data Structure]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure/"/>
-    <updated>2014-12-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure</id>
+    <title type="html"><![CDATA[[Facebook] Binary Search Tree 3Sum (Undone)]]></title>
+    <link href="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/"/>
+    <updated>2014-12-18T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.mitbbs.com/article_t0/JobHunting/32844253.html)
+DLL - [link](http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/)
 
-> Suppose N patients and M diseases. N is sufficiently large number and M is 
-relatively small, say 30-ish. Each patient can have possible 0 to M kinds of
-diseases.
+Inorder - [link](http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/)
 
-> Given one patient’s name, show me a list of similar patients sharing same 
-deseases within 2-3 seconds.
+> Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise. 
 
 ### Solution
 
-__Use 1 bit to represent a disease__. So every patient's conditin can be put into an integer of 32 bits. 
+We will solve the question just like we do __[LeetCode 15] 3Sum__. What is missing is an random access of tree nodes, like we have in array.
 
-How do we calculate the similarity of 2 patients?
+In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough. 
 
-Refer to __[CC150v5] 5.5 Calculate Bits Conversion Required__ for a special bit operation (remove last '1' from bit): 
+Now there're 2 solution. __First is to convert the tree to Double-linked list__, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n^2). however doing this modifies the original tree. 
 
-> c = c & (c - l) clears the least significant bit of '1'. 
->
-> Keep doing this until all '1's are cleared. 
-
-For each patient, we simply calculate the XOR and count '1's. 
+__Second solution is to to inorder traversal and reversed inorder traversal__. This is a better solution, personally. And the time and space used is same. 
 
 ### Code
 
-no code. 
+__DLL way, written by me__ 
+
+	public void findTriplet(TreeNode root, int target) {
+		TreeNode[] dll = convertToDll(root);
+		TreeNode head = dll[0];
+		TreeNode tail = dll[1];
+		// note that the bst inorder dll should already in sorted by value
+		TreeNode first = head;
+		while (first.right != null) {
+			TreeNode left = first.right;
+			TreeNode right = tail;
+			while (left.val < right.val) {
+				int diff = first.val + left.val + right.val - target;
+				if (diff == 0) {
+					System.out.println("Found triplet: " + first.val + " "
+							+ left.val + " " + right.val + " for sum of "
+							+ target);
+				}
+				if (diff <= 0) {
+					left = left.right;
+				}
+				if (diff >= 0) {
+					right = right.left;
+				}
+			}
+			first = first.right;
+		}
+	}
+
+	private TreeNode[] convertToDll(TreeNode node) {
+		TreeNode[] ans = new TreeNode[2];
+		// do the left side of node
+		if (node.left == null) {
+			ans[0] = node;
+		} else {
+			TreeNode[] preAns = convertToDll(node.left);
+			ans[0] = preAns[0];
+			node.left = preAns[1];
+			preAns[1].right = node;
+		}
+		// do the right side of node
+		if (node.right == null) {
+			ans[1] = node;
+		} else {
+			TreeNode[] postAns = convertToDll(node.right);
+			ans[1] = postAns[1];
+			node.right = postAns[0];
+			postAns[0].left = node;
+		}
+		return ans;
+	}
+
+__inorder way__
+
+undone
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Print a Binary Tree in Vertical Order]]></title>
+    <link href="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/"/>
+    <updated>2014-12-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.geeksforgeeks.org/print-binary-tree-vertical-order/)
+
+> Given a binary tree, print it vertically. The following example illustrates vertical order traversal.
+
+               1
+            /    \
+           2      3
+          / \    / \
+         4   5  6   7
+                 \   \
+                  8   9 
+
+    The output of print this tree vertically will be:
+    4
+    2
+    1 5 6
+    3 8
+    7
+    9 
+
+### Solution
+
+1. Traverse the tree once and get the minimum and maximum horizontal distance with respect to root. 
+
+2. Iterate for each vertical line at distance minimum to maximum from root. 
+
+### Code
+
+__written by me__ 
+
+    public List<List<Integer>> printVertically(TreeNode root) {
+        List<List<Integer>> ans = new ArrayList<List<Integer>>();
+
+        // 1. find the range of left bound and right bound
+        int[] range = new int[2];
+        findRange(root, range, 0);
+
+        // 2. calculate number of columns in the result
+        int rootIndex = 0 - range[0];
+        int columns = range[1] - range[0] + 1;
+        for (int i = 0; i < columns; i++) {
+            ans.add(new ArrayList<Integer>());
+        }
+        
+        // 3. fill in vertically in a recursive manner
+        fillNode(ans, root, rootIndex);
+
+        return ans;
+    }
+
+    private void fillNode(List<List<Integer>> ans, TreeNode node, int index) {
+        if (node == null) {
+            return;
+        }
+        ans.get(index).add(node.val);
+        fillNode(ans, node.left, index - 1);
+        fillNode(ans, node.right, index + 1);
+    }
+
+    private void findRange(TreeNode node, int[] range, int position) {
+        if (node == null) {
+            return;
+        }
+        if (position < range[0]) {
+            range[0] = position;
+        }
+        if (position > range[1]) {
+            range[1] = position;
+        }
+        findRange(node.left, range, position - 1);
+        findRange(node.right, range, position + 1);
+    }
 ]]></content>
   </entry>
   
@@ -136,7 +265,7 @@ http://www.itint5.com/discuss/8/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6java%E7%A8%8
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Facebook] Large String Find Substring]]></title>
+    <title type="html"><![CDATA[[Facebook] Large String Find Substring (Trie, Prefix Tree)]]></title>
     <link href="http://okckd.github.io/blog/2014/08/14/Large-string-find-substring/"/>
     <updated>2014-08-14T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/08/14/Large-string-find-substring</id>
@@ -205,26 +334,6 @@ __read it from [here](http://www.itint5.com/discuss/203/%E8%B6%85%E7%AE%80%E5%8D
         }
         return false;
     }
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Facebook] F Question List]]></title>
-    <link href="http://okckd.github.io/blog/2014/07/19/F-question-list/"/>
-    <updated>2014-07-19T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/07/19/F-question-list</id>
-    <content type="html"><![CDATA[### Leetcode Questions
-
-1. Inverse Integer
-1. Anagrams
-1. Edit distance
-
-### Difficult Questions
-
-1. Binary hamming code
-1. 有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。
-1. Given a dictionary and some words. Check whether these words exists in the dictionary. 
-
 ]]></content>
   </entry>
   

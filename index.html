@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Suppose N patients and M diseases. N is sufficiently large number and M is
-relatively small, say 30-ish. Each patient can have possible &hellip;">
+  <meta name="description" content="Question DLL &ndash; link Inorder &ndash; link Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,7 +84,237 @@ relatively small, say 30-ish. Each patient can have possible &hellip;">
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/12/08/patient-disease-data-structure/">[Facebook] Patient Disease Data Structure</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum (Undone)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
+
+<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
+
+<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
+
+<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
+
+<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
+
+<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
+
+<h3>Code</h3>
+
+<p><strong>DLL way, written by me</strong></p>
+
+<pre><code>public void findTriplet(TreeNode root, int target) {
+    TreeNode[] dll = convertToDll(root);
+    TreeNode head = dll[0];
+    TreeNode tail = dll[1];
+    // note that the bst inorder dll should already in sorted by value
+    TreeNode first = head;
+    while (first.right != null) {
+        TreeNode left = first.right;
+        TreeNode right = tail;
+        while (left.val &lt; right.val) {
+            int diff = first.val + left.val + right.val - target;
+            if (diff == 0) {
+                System.out.println("Found triplet: " + first.val + " "
+                        + left.val + " " + right.val + " for sum of "
+                        + target);
+            }
+            if (diff &lt;= 0) {
+                left = left.right;
+            }
+            if (diff &gt;= 0) {
+                right = right.left;
+            }
+        }
+        first = first.right;
+    }
+}
+
+private TreeNode[] convertToDll(TreeNode node) {
+    TreeNode[] ans = new TreeNode[2];
+    // do the left side of node
+    if (node.left == null) {
+        ans[0] = node;
+    } else {
+        TreeNode[] preAns = convertToDll(node.left);
+        ans[0] = preAns[0];
+        node.left = preAns[1];
+        preAns[1].right = node;
+    }
+    // do the right side of node
+    if (node.right == null) {
+        ans[1] = node;
+    } else {
+        TreeNode[] postAns = convertToDll(node.right);
+        ans[1] = postAns[1];
+        node.right = postAns[0];
+        postAns[0].left = node;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>inorder way</strong></p>
+
+<p>undone</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
+
+<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
+
+<pre><code>           1
+        /    \
+       2      3
+      / \    / \
+     4   5  6   7
+             \   \
+              8   9 
+
+The output of print this tree vertically will be:
+4
+2
+1 5 6
+3 8
+7
+9 
+</code></pre>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
+<li><p>Iterate for each vertical line at distance minimum to maximum from root.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+
+    // 1. find the range of left bound and right bound
+    int[] range = new int[2];
+    findRange(root, range, 0);
+
+    // 2. calculate number of columns in the result
+    int rootIndex = 0 - range[0];
+    int columns = range[1] - range[0] + 1;
+    for (int i = 0; i &lt; columns; i++) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+    }
+
+    // 3. fill in vertically in a recursive manner
+    fillNode(ans, root, rootIndex);
+
+    return ans;
+}
+
+private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
+    if (node == null) {
+        return;
+    }
+    ans.get(index).add(node.val);
+    fillNode(ans, node.left, index - 1);
+    fillNode(ans, node.right, index + 1);
+}
+
+private void findRange(TreeNode node, int[] range, int position) {
+    if (node == null) {
+        return;
+    }
+    if (position &lt; range[0]) {
+        range[0] = position;
+    }
+    if (position &gt; range[1]) {
+        range[1] = position;
+    }
+    findRange(node.left, range, position - 1);
+    findRange(node.right, range, position + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/08/patient-disease-data-structure/">[Epic] Patient Disease Data Structure</a></h1>
     
     
       <p class="meta">
@@ -187,35 +416,53 @@ Pass/day:
 Pass/submit: 
 </code></pre>
 
-<h3>Medium</h3>
+<h3>Easy</h3>
 
 <ol>
 <li>[LeetCode 1] Two Sum</li>
 <li>[LeetCode 5] Longest Palindromic Substring</li>
-<li>[LeetCode 7] Reverse Integer</li>
 <li>[LeetCode 6] ZigZag Conversion</li>
+<li>[LeetCode 7] Reverse Integer</li>
 <li>[LeetCode 12] Integer to Roman</li>
 <li>[LeetCode 16] 3Sum Closest</li>
-<li>[LeetCode 19] Remove Nth Node From End of List</li>
 <li>[LeetCode 18] 4Sum</li>
-<li>[LeetCode 27] Remove Element</li>
-<li>[LeetCode 30] Substring With Concatenation of All Words</li>
+<li>[LeetCode 19] Remove Nth Node From End of List</li>
 <li>[LeetCode 23] Merge K Sorted Lists</li>
 <li>[LeetCode 25] Reverse Nodes in k-Groups</li>
+<li>[LeetCode 27] Remove Element</li>
+<li>[LeetCode 30] Substring With Concatenation of All Words</li>
 <li>[LeetCode 32] Longest Valid Parentheses</li>
+<li>[LeetCode 36] Valid Sudoku</li>
+<li>[LeetCode 41] First Missing Positive</li>
+<li>[LeetCode 42] Trapping Rain Water</li>
+<li>[LeetCode 45] Jump Game II</li>
+<li>[LeetCode 50] Pow(x, N)</li>
+<li>[LeetCode 55] Jump Game</li>
+<li>[LeetCode 72] Edit Distance</li>
+<li>[LeetCode 79] Word Search</li>
+<li>[LeetCode 80] Remove Duplicates From Sorted Array II</li>
+<li>[LeetCode 94] Binary Tree Inorder Traversal</li>
 </ol>
 
 
 <h3>Difficult</h3>
 
 <ol>
-<li>[LeetCode 4] Median of Two Sorted Arrays</li>
 <li>[LeetCode 3] Longest Substring Without Repeating Characters</li>
+<li>[LeetCode 4] Median of Two Sorted Arrays</li>
 <li>[LeetCode 10] Regular Expression Matching</li>
 <li>[LeetCode 15] 3Sum</li>
-<li>[LeetCode 29] Divide Two Integers (undone yet)</li>
+<li>[LeetCode 29] Divide Two Integers</li>
+<li>[LeetCode 37] Sudoku Solver</li>
+<li>[LeetCode 44] Wildcard Matching</li>
 </ol>
 
+
+<p>skip:</p>
+
+<pre><code>Minimum Window Substring
+Largest Rectangle in Histogram
+</code></pre>
 
 <p>Posts are updated up to: [LeetCode 20] Valid Parentheses</p>
 
@@ -359,7 +606,7 @@ Pass/submit:
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/10/08/read-zhihu-oct/">[Read] 十月以前 知乎摘抄</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/10/08/read-zhihu-oct/">[Read] 知乎摘抄</a></h1>
     
     
       <p class="meta">
@@ -827,283 +1074,6 @@ private static BiNode getListTail(BiNode head) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/28/get-rank-stream-integers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/28/get-rank-stream-integers/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values less than or equal to x).</p>
-
-<p>Implement the data structures and algorithms to support these operations. That is,implement the method <strong>track(int x)</strong>, which is called when each number is generated, and the method <strong>getRankOfNumber(int x)</strong>, which returns the number of values less than or equal to x (not including x itself).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This question requires a special type of Data Structure</strong>. It basically is a modified BST like this:</p>
-
-<blockquote><p>The tree node stores both number value and the <strong>count of node on left subtree</strong></p></blockquote>
-
-<p><img class="middle" src="/assets/images/get-rank-number-stream.png"></p>
-
-<p>Suppose we want to find the rank of 24 in the tree above. We would compare 24 with the root, 20, and find that 24 must reside on the right. The root has 4 nodes in its left subtree, and when we include the root itself, this gives us five total nodes smaller than 24. We set counter to 5.</p>
-
-<p>Then, we compare 24 with node 25 and find that 24 must be on the left. The value of counter does not update, since we&rsquo;re not &ldquo;passing over&rdquo; any smaller nodes. The value of counter is still 5.</p>
-
-<p>Next, we compare 24 with node 23,and find that 24 must be on the right. Counter gets incremented by just 1 (to 6), since 23 has no left nodes.</p>
-
-<p>Finally, we find 24 and we return counter: 6.</p>
-
-<h3>Code</h3>
-
-<p>I did not write code myself. It&rsquo;s too complex!</p>
-
-<p><strong>RankNode.java</strong></p>
-
-<pre><code>public class RankNode {
-    public int left_size = 0;
-    public RankNode left;
-    public RankNode right;
-    public int data = 0;
-    public RankNode(int d) {
-        data = d;
-    }
-
-    public void insert(int d) {
-        if (d &lt;= data) {
-            if (left != null) {
-                left.insert(d);
-            } else {
-                left = new RankNode(d);
-            }
-            left_size++;
-        } else {
-            if (right != null) {
-                right.insert(d);
-            } else {
-                right = new RankNode(d);
-            }
-        }
-    }
-
-    public int getRank(int d) {
-        if (d == data) {
-            return left_size;
-        } else if (d &lt; data) {
-            if (left == null) {
-                return -1;
-            } else {
-                return left.getRank(d);
-            }
-        } else {
-            int right_rank = right == null ? -1 : right.getRank(d);
-            if (right_rank == -1) {
-                return -1;
-            } else {
-                return left_size + 1 + right_rank;
-            }
-        }
-    }
-}
-</code></pre>
-
-<p><strong>Main Class</strong>:</p>
-
-<pre><code>public class Question {
-    private static RankNode root = null;
-
-    public static void track(int number) {
-        if (root == null) {
-            root = new RankNode(number);
-        } else {
-            root.insert(number);
-        }
-    }
-
-    public static int getRankOfNumber(int number) {
-        return root.getRank(number);
-    }
-
-    public static void main(String[] args) {
-        int size = 100;
-        int[] list = AssortedMethods.randomArray(size, -100, 100);
-        for (int i = 0; i &lt; list.length; i++) {
-            track(list[i]);
-        }
-
-        int[] tracker = new int[size];
-        for (int i = 0; i &lt; list.length; i++) {
-            int v = list[i];
-            int rank1 = root.getRank(list[i]);
-            tracker[rank1] = v;
-        }
-
-        for (int i = 0; i &lt; tracker.length - 1; i++) {
-            if (tracker[i] != 0 &amp;&amp; tracker[i + 1] != 0) {
-                if (tracker[i] &gt; tracker[i + 1]) {
-                    System.out.println("ERROR at " + i);
-                }
-            }
-        }
-
-        System.out.println("Array: " + AssortedMethods.arrayToString(list));
-        System.out.println("Ranks: " + AssortedMethods.arrayToString(tracker));
-    }
-
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/27/Order-array-by-sorting-middle/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
-
-<blockquote><ol>
-<li><p>找到heading的最长递增序列.</p></li>
-<li><p>找到tailing的最长的递增序列.</p></li>
-</ol>
-</blockquote>
-
-<p>After that:</p>
-
-<blockquote><ol>
-<li><p>用中间部分的min去shrink左边.</p></li>
-<li><p>用中间部分的max去shrink右边.</p></li>
-</ol>
-</blockquote>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static void findUnsortedSequence(int[] array, int[] ans) {
-    int len = array.length;
-    ans[0] = 0;
-    ans[1] = 0;
-
-    // find increasing sequence on left and on right
-    int leftPeak = 0;
-    while (leftPeak &lt; len - 1) {
-        if (array[leftPeak] &lt; array[leftPeak + 1]) {
-            leftPeak++;
-        } else {
-            break;
-        }
-    }
-    if (leftPeak == len - 1) {
-        return;
-    }
-    int rightBottom = len - 1;
-    while (rightBottom &gt; 0) {
-        if (array[rightBottom] &gt; array[rightBottom - 1]) {
-            rightBottom--;
-        } else {
-            break;
-        }
-    }
-
-    // leftPeak and rightBottom are found, now read mid part
-    int midMin = Integer.MAX_VALUE;
-    int midMax = Integer.MIN_VALUE;
-    for (int i = leftPeak; i &lt;= rightBottom; i++) {
-        midMin = Math.min(midMin, array[i]);
-        midMax = Math.max(midMax, array[i]);
-    }
-
-    // find left boudary and right boundary
-    int leftBound = leftPeak;
-    while (leftBound &gt;= 0) {
-        if (array[leftBound] &lt; midMin) {
-            break;
-        }
-        leftBound--;
-    }
-    int rightBound = rightBottom;
-    while (rightBound &lt; len) {
-        if (array[rightBound] &gt; midMax) {
-            break;
-        }
-        rightBound++;
-    }
-
-    // finish it up
-    ans[0] = leftBound + 1;
-    ans[1] = rightBound - 1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1121,7 +1091,8 @@ private static BiNode getListTail(BiNode head) {
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (5)</a></li>
+<li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (6)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1143,7 +1114,15 @@ private static BiNode getListTail(BiNode head) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/12/08/patient-disease-data-structure/">[Facebook] Patient Disease Data Structure</a>
+        <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum (Undone)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/08/patient-disease-data-structure/">[Epic] Patient Disease Data Structure</a>
       </li>
     
       <li class="post">
@@ -1152,14 +1131,6 @@ private static BiNode getListTail(BiNode head) {
     
       <li class="post">
         <a href="/blog/2014/11/04/Code-a-hashmap/">[Google] Code a HashMap</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/17/thoughts-who-will-remember-you/">[Thoughts] Who Will Remember You?</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/08/read-zhihu-oct/">[Read] 十月以前 知乎摘抄</a>
       </li>
     
   </ul>
