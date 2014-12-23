@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Facebook | Woodstock Blog]]></title>
+  <link href="http://okckd.github.io/blog/categories/facebook/atom.xml" rel="self"/>
+  <link href="http://okckd.github.io/"/>
+  <updated>2014-12-23T13:47:18+08:00</updated>
+  <id>http://okckd.github.io/</id>
+  <author>
+    <name><![CDATA[Charlie Brown]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Maximum Sum Such That No Two Elements Are Adjacent]]></title>
+    <link href="http://okckd.github.io/blog/2014/12/22/Maximum-sum-no-adjacent/"/>
+    <updated>2014-12-22T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/12/22/Maximum-sum-no-adjacent</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.geeksforgeeks.org/maximum-sum-such-that-no-two-elements-are-adjacent/)
+
+> Given an array of positive numbers, find the maximum sum of a subsequence that no 2 numbers should be adjacent. 
+
+> Eg. (3, 2, 7, 10) should return 13 (3+10) 
+
+> Eg. (3, 2, 5, 10, 7) should return 15 (3+5+7).
+
+### Solution
+
+It is an modified version of "max sum subsequence". Answer given on [gfg](http://www.geeksforgeeks.org/maximum-sum-such-that-no-two-elements-are-adjacent/) is: 
+
+> Loop for all elements in arr[] and maintain two sums 'incl' and 'excl' where: 
+
+> incl = Max sum including the previous element 
+>
+> excl = Max sum excluding the previous element
+
+### Code
+
+__written by me__
+
+	public int solve(int[] A) {
+		if (A == null || A.length == 0) {
+			return 0;
+		} else if (A.length == 1) {
+			return A[0];
+		} else if (A.length == 2) {
+			return Math.max(A[0], A[1]);
+		}
+
+		// prePreMax is the max non-adjacency sequence ending 2 position ahead
+		// preMax is the max non-adjacency sequence ending 1 position ahead
+		int prePreMax = A[0];
+		int preMax = A[1];
+		int ans = 0;
+
+		for (int i = 2; i < A.length; i++) {
+			ans = Math.max(ans, prePreMax + A[i]);
+			// set the 2 variables: prePreMax, preMax
+			int temp = preMax;
+			preMax = Math.max(0, prePreMax + A[i]);
+			prePreMax = Math.max(prePreMax, temp);
+		}
+		return ans;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Binary Search Tree 3Sum (Undone)]]></title>
+    <link href="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/"/>
+    <updated>2014-12-18T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum</id>
+    <content type="html"><![CDATA[### Question 
+
+DLL - [link](http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/)
+
+Inorder - [link](http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/)
+
+> Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise. 
+
+### Solution
+
+We will solve the question just like we do __[LeetCode 15] 3Sum__. What is missing is an random access of tree nodes, like we have in array.
+
+In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough. 
+
+Now there're 2 solution. __First is to convert the tree to Double-linked list__, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n^2). however doing this modifies the original tree. 
+
+__Second solution is to to inorder traversal and reversed inorder traversal__. This is a better solution, personally. And the time and space used is same. 
+
+### Code
+
+__DLL way, written by me__ 
+
+	public void findTriplet(TreeNode root, int target) {
+		TreeNode[] dll = convertToDll(root);
+		TreeNode head = dll[0];
+		TreeNode tail = dll[1];
+		// note that the bst inorder dll should already in sorted by value
+		TreeNode first = head;
+		while (first.right != null) {
+			TreeNode left = first.right;
+			TreeNode right = tail;
+			while (left.val < right.val) {
+				int diff = first.val + left.val + right.val - target;
+				if (diff == 0) {
+					System.out.println("Found triplet: " + first.val + " "
+							+ left.val + " " + right.val + " for sum of "
+							+ target);
+				}
+				if (diff <= 0) {
+					left = left.right;
+				}
+				if (diff >= 0) {
+					right = right.left;
+				}
+			}
+			first = first.right;
+		}
+	}
+
+	private TreeNode[] convertToDll(TreeNode node) {
+		TreeNode[] ans = new TreeNode[2];
+		// do the left side of node
+		if (node.left == null) {
+			ans[0] = node;
+		} else {
+			TreeNode[] preAns = convertToDll(node.left);
+			ans[0] = preAns[0];
+			node.left = preAns[1];
+			preAns[1].right = node;
+		}
+		// do the right side of node
+		if (node.right == null) {
+			ans[1] = node;
+		} else {
+			TreeNode[] postAns = convertToDll(node.right);
+			ans[1] = postAns[1];
+			node.right = postAns[0];
+			postAns[0].left = node;
+		}
+		return ans;
+	}
+
+__inorder way__
+
+undone
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Print a Binary Tree in Vertical Order]]></title>
+    <link href="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/"/>
+    <updated>2014-12-17T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.geeksforgeeks.org/print-binary-tree-vertical-order/)
+
+> Given a binary tree, print it vertically. The following example illustrates vertical order traversal.
+
+               1
+            /    \
+           2      3
+          / \    / \
+         4   5  6   7
+                 \   \
+                  8   9 
+
+    The output of print this tree vertically will be:
+    4
+    2
+    1 5 6
+    3 8
+    7
+    9 
+
+### Solution
+
+1. Traverse the tree once and get the minimum and maximum horizontal distance with respect to root. 
+
+2. Iterate for each vertical line at distance minimum to maximum from root. 
+
+### Code
+
+__written by me__ 
+
+    public List<List<Integer>> printVertically(TreeNode root) {
+        List<List<Integer>> ans = new ArrayList<List<Integer>>();
+
+        // 1. find the range of left bound and right bound
+        int[] range = new int[2];
+        findRange(root, range, 0);
+
+        // 2. calculate number of columns in the result
+        int rootIndex = 0 - range[0];
+        int columns = range[1] - range[0] + 1;
+        for (int i = 0; i < columns; i++) {
+            ans.add(new ArrayList<Integer>());
+        }
+        
+        // 3. fill in vertically in a recursive manner
+        fillNode(ans, root, rootIndex);
+
+        return ans;
+    }
+
+    private void fillNode(List<List<Integer>> ans, TreeNode node, int index) {
+        if (node == null) {
+            return;
+        }
+        ans.get(index).add(node.val);
+        fillNode(ans, node.left, index - 1);
+        fillNode(ans, node.right, index + 1);
+    }
+
+    private void findRange(TreeNode node, int[] range, int position) {
+        if (node == null) {
+            return;
+        }
+        if (position < range[0]) {
+            range[0] = position;
+        }
+        if (position > range[1]) {
+            range[1] = position;
+        }
+        findRange(node.left, range, position - 1);
+        findRange(node.right, range, position + 1);
+    }
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Hamming Distance of Array]]></title>
+    <link href="http://okckd.github.io/blog/2014/09/01/Hamming-distance-of-array/"/>
+    <updated>2014-09-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/09/01/Hamming-distance-of-array</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.glassdoor.com/Interview/-a-first-write-a-function-to-calculate-the-hamming-distance-between-two-binary-numbers-b-write-a-function-that-takes-QTN_450885.htm)
+
+> [Hamming distance](http://en.wikipedia.org/wiki/Hamming_distance) between two strings of equal length is the number of positions at which the corresponding symbols are different. 
+
+> Write a function that takes a list of binary numbers and returns the sum of the hamming distances for each pair. 
+
+> Do it in O(n) time. 
+
+### Solution
+
+The naive solution is O(n^2), so we simplify this question by using {0,0,0,1,1} as input. The output in this case would be 6. Why? Because 3 x 2 = 6. 
+
+So the equation for solution would be: 
+
+> distance (for a bit) = number of '1's * number of '0's
+
+The final answer would be the sum of distances for all bits. The solution is from [this blog](http://se7so.blogspot.sg/2014/02/how-to-prepare-for-interview-9.html). 
+
+### Code
+
+Great solution, __not written by me__ 
+
+	int hammingDist(int[] nums) {
+
+		int[] bits = new int[32];
+
+		for (int i = 0; i < nums.length; i++) {
+			int one = 1;
+			int j = 0;
+
+			while (nums[i] != 0) {
+				if ((nums[i] & one) != 0)
+					bits[j]++;
+				j++;
+				nums[i] = nums[i] >> 1;
+			}
+		}
+
+		int ans = 0;
+		for (int i = 0; i < 32; i++) {
+			ans += bits[i] * (nums.length - bits[i]);
+		}
+
+		return ans;
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Task Scheduling Question (`)]]></title>
+    <link href="http://okckd.github.io/blog/2014/08/15/Task-scheduling-question/"/>
+    <updated>2014-08-15T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/08/15/Task-scheduling-question</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.itint5.com/oj/#10)
+
+> 有n个任务需要完成（编号1到n），任务之间有一些依赖关系，如果任务a依赖于任务b和c，那么只有当任务b和任务c完成之后才能完成任务a。给定所有的依赖关系，判断这些任务是否能够完成。如果能够完成，请给出一个合法的任务完成序列。
+
+> 样例：
+>
+>n=5
+>
+>1->2,3
+>
+>3->4
+>
+>上述样例中任务1依赖于任务2和任务3，任务3依赖于任务4，那么存在合法的任务完成序列4,3,2,1,5
+
+### Solution
+
+http://www.itint5.com/discuss/8/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6java%E7%A8%8B%E5%BA%8F
+
+### Code
+
+
+]]></content>
+  </entry>
+  
+</feed>
