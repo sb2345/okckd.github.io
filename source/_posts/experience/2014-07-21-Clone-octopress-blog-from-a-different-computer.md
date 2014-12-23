@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Octopress] Clone Octopress Blog From A Different Computer"
+title: "[Octopress] Clone Octopress Blog From A Different Computer "
 comments: true
 category: experience
 tags: [  ]
