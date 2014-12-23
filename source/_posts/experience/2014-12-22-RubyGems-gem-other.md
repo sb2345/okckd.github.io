@@ -8,7 +8,7 @@ tags: [  ]
 
 Sometme I found the different concepts in Ruby very confusing for beginners. That's why I write this post to clarify some terminologies. 
 
-### RubyGems 
+### RubyGems (tool)
 
 __[RubyGems](http://en.wikipedia.org/wiki/RubyGems)__ is a package manager for the Ruby programming language. 
 
@@ -16,7 +16,7 @@ It is a tool to manage the installation of gems, and a server for distributing t
 
 RubyGems is very similar to apt-get, portage, and yum in functionality.
 
-### 'gem' command
+### gem (command)
 
 'gem' command allows you to interact with RubyGems. It is used build, upload, download, and install Gem packages. 
 
@@ -36,13 +36,21 @@ Listing available gems, e.g.:
 
     gem list --remote
 
-### gem
+### Gemfile (text file)
+
+[A Gemfile](http://bundler.io/man/gemfile.5.html) describes the gem dependencies required to execute associated Ruby code.
+
+It is placed in the root of the directory containing the associated code. 
+
+A Gemfile is evaluated as Ruby code, in a context which makes available a number of methods used to describe the gem requirements.
+
+### gem (program) 
 
 [ref1](http://stackoverflow.com/questions/5233924/what-is-a-ruby-gem), [ref2](http://guides.rubygems.org/what-is-a-gem/)
 
 A gem is a module/Library that you can install and use in every project on your server. 
 
-Each gem has a __name, version, and platform__. For example, rake gem has a 10.3.2 version on platform Ruby.
+Each gem has a __name, version, and platform__. For example, __rake gem__ has a 10.3.2 version on platform Ruby.
 
 Inside a gems are the following components: 
 
@@ -64,7 +72,7 @@ Standard code structure:
     ├── Rakefile
     └── freewill.gemspec
 
-### Bundler
+### Bundler (dependency manager)
 
 [ref](http://bundler.io/)
 
