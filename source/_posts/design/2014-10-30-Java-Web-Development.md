@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Design] Java Web Development (`)"
+title: "[Design] Java Web Development (`) "
 comments: true
 category: Design
 tags: [  ]

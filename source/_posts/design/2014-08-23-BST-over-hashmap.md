@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Design] Binary Search Trees over Hash Tables"
+title: "[Design] Merits of BST over HashTables"
 comments: true
 category: Design
 tags: [  ]
