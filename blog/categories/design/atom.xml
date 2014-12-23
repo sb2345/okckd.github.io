@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2014-12-23T15:10:24+08:00</updated>
+  <updated>2014-12-23T21:40:32+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,50 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Java Runtime Exception]]></title>
+    <link href="http://okckd.github.io/blog/2014/12/23/Java-runtime-exception/"/>
+    <updated>2014-12-23T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2014/12/23/Java-runtime-exception</id>
+    <content type="html"><![CDATA[### Exceptions in Java
+
+In Java, there are [3 types of exceptions](http://www.tutorialspoint.com/java/java_exceptions.htm): 
+
+1. checked exceptions
+    1. Typically a user error
+    1. eg. if a file cannot be found. 
+    1. These exceptions cannot simply be ignored at the time of compilation.
+    
+1. runtime exceptions (also called un-checked exceptions)
+    1. exception that could have been avoided by the programmer
+    1. eg. NullPointerException
+    1. ignored at the time of compilation
+
+1. error
+    1. These are not exceptions at all
+    1. eg. stack overflow occurs
+    1. also ignored at the time of compilation
+
+#### checked exception
+
+[A checked exception](http://stackoverflow.com/a/2190175) __must be handled explicitly__ by the code (by either putting a try/catch block around the code, or adding a "throws" clause to the method).
+
+The [class Exception](http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html) and any subclasses that are not also subclasses of RuntimeException are __checked exceptions__. 
+
+Note: __java.lang.RuntimeException__ is a subclass of __java.lang.Exception__. 
+
+#### un-checked exceptions (RuntimeException)
+
+A un-checked exception __does not need__ to be explicitly handled. 
+
+[RuntimeException](http://docs.oracle.com/javase/7/docs/api/java/lang/RuntimeException.html) and its subclasses are __unchecked exceptions__. 
+
+[Generally](http://stackoverflow.com/a/2190177) RuntimeExceptions __can be prevented__ programmatically. E.g NullPointerException, ArrayIndexOutOfBoundException. If you check for null before calling any method, NullPointerException would never occur. Similarly ArrayIndexOutOfBoundException would never occur if you check the index first. RuntimeException are not checked by the compiler, so it is clean code.
+
+The runtime exception classes __[are exempted](http://stackoverflow.com/a/2190659) from compile-time checking__, since the compiler cannot establish that run-time exceptions cannot occur. 
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] Override/overload Java Main Method]]></title>
@@ -149,17 +193,17 @@ Well, a single implementation works for the both methods. This implementation wo
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Design] Discussion of Polymorphism (Undone)]]></title>
+    <title type="html"><![CDATA[[Design] Discussion of Polymorphism]]></title>
     <link href="http://okckd.github.io/blog/2014/12/22/Discussion-of-Polymorphism/"/>
     <updated>2014-12-22T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2014/12/22/Discussion-of-Polymorphism</id>
     <content type="html"><![CDATA[### Polymorphism
 
-Polymorphism is to use common interface instead of concrete implementation while coding. The most common use of polymorphism in OOP occurs when a parent class reference is used to refer to a child class object.
+Polymorphism is to [use common interface](http://javarevisited.blogspot.sg/2011/08/what-is-polymorphism-in-java-example.html) instead of concrete implementation while coding. 
 
-http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html
+When we program for interface our code is capable of handling any new requirement or enhancement arise in near future due to new implementation of our common interface. If we don't use common interface and rely on concrete implementation, we always need to change and duplicate most of our code to support new implementation. 
 
-http://javarevisited.blogspot.sg/2011/08/what-is-polymorphism-in-java-example.html
+The most common use of polymorphism in OOP occurs when a parent class reference is used to refer to a child class object.
 
 ### Example 
 
@@ -218,25 +262,87 @@ The output:
     The RoadBike has 23 MM tires.
 
 Referring to the same page, __JVM calls the appropriate method for the object that is referred to in each variable__. It does not call the method that is defined by the variable's type. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] DNS Communication Protocol]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/12/DNS-communication-protocol/"/>
-    <updated>2014-09-12T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/12/DNS-communication-protocol</id>
-    <content type="html"><![CDATA[### Question 
 
-> What protocol is used for communicating with a DNS? 
+### Another example
 
-### Answer
+Cylinder is a subclass of Circle. We can say that Cylinder "is-a" Circle.
 
-[Domain Name System](http://en.wikipedia.org/wiki/Domain_Name_System) (DNS) is a hierarchical distributed naming system for computers, services, or any resource connected to the Internet or a private network. It associates various information with domain names assigned to each of the participating entities. Most prominently, it translates easily memorized domain names to the numerical IP addresses needed for the purpose of locating computer services and devices worldwide. The Domain Name System is an essential component of the functionality of the Internet. 
+We can create an instance of Cylinder, and assign it to a Circle reference: 
 
-[DNS primarily uses](http://en.wikipedia.org/wiki/Domain_Name_System#Protocol_transport) __User Datagram Protocol (UDP)__ on port number 53 to serve requests. 
+> Circle c1 = new Cylinder();
 
-DNS queries consist of a single UDP request from the client followed by a single UDP reply from the server. 
+You can invoke all the methods defined in the Circle class, but __you cannot invoke methods defined in the Cylinder class__. c1 is a reference to the Circle class, which does not know about the methods defined in the subclass Cylinder.
+
+__The reference c1, however, retains its internal identity__. Since Cylinder overrides getArea() method, calling c1.getArea() will invokes the overridden version defined in subclass Cylinder, instead of in Circle. This is because c1 is holding a Cylinder object internally.
+
+The code is below: 
+
+    public class PolymorphismSubstitutabilityDemo {
+
+        public static void main(String[] args) {
+            Circle c1 = new Cylinder(1, "white", 10);
+            System.out.println(c1.getClass());
+            System.out.println(c1.getRadius());
+            System.out.println(c1.getColor());
+            System.out.println(c1.getArea());
+        }
+    }
+
+    class Circle {
+        int radius;
+        String color;
+
+        public Circle(int a, String b) {
+            this.radius = a;
+            this.color = b;
+        }
+
+        public int getRadius() {
+            return radius;
+        }
+
+        public String getColor() {
+            return color;
+        }
+
+        public double getArea() {
+            return 3.14159 * Math.pow(radius, 2);
+        }
+    }
+
+    class Cylinder extends Circle {
+        int height;
+
+        public Cylinder(int a, String b, int c) {
+            super(a, b);
+            this.height = c;
+        }
+
+        public int getHeight() {
+            return height;
+        }
+
+        public double getArea() {
+            return super.getArea() * height;
+        }
+    }
+
+The output of execution: 
+
+    class Cylinder
+    1
+    white
+    31.4159
+
+### Summary: 
+
+[ref](http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html)
+
+1. A subclass instance can be assigned (substituted) to a superclass' reference.
+
+1. Once substituted, we can invoke methods defined in the superclass; we cannot invoke methods defined in the subclass.
+
+1. However, if the subclass overrides inherited methods from the superclass, the subclass (overridden) versions will be invoked.
 ]]></content>
   </entry>
   

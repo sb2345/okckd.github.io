@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Global variable? There is no such thing as a &lsquo;global variable&rsquo; in Java. In computer programming, a global variable is a variable that is &hellip;">
+  <meta name="description" content="Question link1, link2. Variant 1: Given a Binary Search Tree, serialize and deserialize it. Variant 2: Given a Binary Tree, serialize and deserialize &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,306 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/16/Binary-tree-serialize-deserialize/">[LeetCode Plus] Binary Tree Serialize and Deserialize</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/16/Binary-tree-serialize-deserialize/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/16/Binary-tree-serialize-deserialize/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2010/09/serializationdeserialization-of-binary.html">link1</a>, <a href="http://leetcode.com/2010/09/saving-binary-search-tree-to-file.html">link2</a>.</p>
+
+<blockquote><p>Variant 1: Given a Binary Search Tree, serialize and deserialize it.</p>
+
+<p>Variant 2: Given a Binary Tree, serialize and deserialize it.</p></blockquote>
+
+<h3>Variant 1 &ndash; Binary search tree</h3>
+
+<p><strong>We must only use pre-order</strong>.</p>
+
+<p>Think about why, or read <a href="http://leetcode.com/2010/09/serializationdeserialization-of-binary.html">link1</a>. So, serialization is simple &ndash; preorder traversal.</p>
+
+<p>The desecialization would make use of the first element, and range validation method. This is very similar to another question &lsquo;validate BST&rsquo;. Rmb the key is:</p>
+
+<blockquote><p>Each time we add a number, we also pass the valid range within which the number can lie between.</p></blockquote>
+
+<h4>Code</h4>
+
+<p>The code is concise, but may not be easy to write:</p>
+
+<pre><code>void readBSTHelper(int min, int max, int &amp;insertVal,
+                   BinaryTree *&amp;p, ifstream &amp;fin) {
+  if (insertVal &gt; min &amp;&amp; insertVal &lt; max) {
+    int val = insertVal;
+    p = new BinaryTree(val);
+    if (fin &gt;&gt; insertVal) {
+      readBSTHelper(min, val, insertVal, p-&gt;left, fin);
+      readBSTHelper(val, max, insertVal, p-&gt;right, fin);
+    }
+  }
+}
+
+void readBST(BinaryTree *&amp;root, ifstream &amp;fin) {
+  int val;
+  fin &gt;&gt; val;
+  readBSTHelper(INT_MIN, INT_MAX, val, root, fin);
+}
+</code></pre>
+
+<h3>Variant 2 &ndash; Binary tree</h3>
+
+<p>For binary tree, we could not use above solution any more. We must use some NULL pointers to fill in empty slots. For this variant, <strong>pre-order and level-order both would work</strong>.</p>
+
+<p>Then which of these 2 is a better choice?</p>
+
+<pre>
+   1
+  / \
+ 2   3
+</pre>
+
+
+<blockquote><p>Given the tree above:</p>
+
+<p>The pre-order serialization is: {1, 2, #, #, 3, #, #}</p>
+
+<p>The level-order serialization is: {1, 2, 3}</p>
+
+<p>We can see that level-order is a better idea, because last level null pointers need not be handled.</p></blockquote>
+
+<h4>Code (preorder)</h4>
+
+<p>The serializaion is a simple traversal.</p>
+
+<pre><code>void writeBinaryTree(BinaryTree *p, ostream &amp;out) {
+  if (!p) {
+    out &lt;&lt; "# ";
+  } else {
+    out &lt;&lt; p-&gt;data &lt;&lt; " ";
+    writeBinaryTree(p-&gt;left, out);
+    writeBinaryTree(p-&gt;right, out);
+  }
+}
+</code></pre>
+
+<p>The deserialization is a little bit like &ldquo;convert linked list to balanced tree&rdquo; (where we use first element of the list as root of the tree).</p>
+
+<pre><code>void readBinaryTree(BinaryTree *&amp;p, ifstream &amp;fin) {
+  int token;
+  bool isNumber;
+  if (!readNextToken(token, fin, isNumber)) 
+    return;
+  if (isNumber) {
+    p = new BinaryTree(token);
+    readBinaryTree(p-&gt;left, fin);
+    readBinaryTree(p-&gt;right, fin);
+  }
+}
+</code></pre>
+
+<p>I did not find any code for level-order, but it&rsquo;s similar to &lsquo;level-order traversal&rsquo;.</p>
+
+<h3>One more thing</h3>
+
+<p>A Binary Search Tree (BST) is useful for storing phone book records in a memory limited device, such as a cell phone. The records are always maintained in sorted order, inserting and deleting a record takes O(lg n) time (slower than linked list, but much better than array).</p>
+
+<h3>One more one-more-thing</h3>
+
+<p><strong>This post we use # as a sentinel</strong>. There is also <strong><a href="http://stackoverflow.com/a/15044868">another idea</a> of doing both Inorder and Preorder traversal</strong> to searialize the tree data, and use the solution to &ldquo;Construct Binary Tree from Preorder and Inorder&rdquo; to deserialize it.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/15/NineChap-Binary-Tree-additional/">[NineChap 3.4] Binary Tree Additional</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/15/NineChap-Binary-Tree-additional/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/15/NineChap-Binary-Tree-additional/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>These are some additional questions that are not covered in previous NineChap posts. Some questions are non-standard and difficult to solve, and some are not found in OJ websites. But these are real questions that has been asked during interviews.</p>
+
+<h2>Question list</h2>
+
+<ol>
+<li><p><strong><a href="/blog/2014/06/15/BST-find-upper-lower-bound/">Binary Search Tree find upper/lower bound</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/14/Iterator-of-Tree/">Implement iterator of Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/16/Binary-tree-serialize-deserialize/">Binary Tree Serialize and Deserialize</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node/">Populating Next Right Pointers in Each Node</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node-II/">Populating Next Right Pointers in Each Node II</a></strong> &ndash; difficult</p></li>
+<li><p><strong><a href="/blog/2014/05/26/Symmetric-Tree/">Symmetric Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/25/Same-Tree/">Same Tree</a></strong></p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<p><strong>Binary Search Tree find upper/lower bound</strong></p>
+
+<p>Find the new post.</p>
+
+<p><strong>Implement iterator of Binary Search Tree</strong></p>
+
+<p>Find the new post.</p>
+
+<p><strong>Binary Tree Serialize and Deserialize</strong></p>
+
+<p>Find the new post.</p>
+
+<p><strong>Populating Next Right Pointers in Each Node</strong></p>
+
+<pre><code>public void connect(TreeLinkNode root) {
+    TreeLinkNode dummy = new TreeLinkNode(0);
+    dummy.left = root;
+    helper(dummy, root);
+}
+
+private void helper(TreeLinkNode parent, TreeLinkNode child) {
+    if (child == null) {
+        return;
+    }
+    if (child == parent.left) {
+        child.next = parent.right;
+    } else if (child == parent.right) {
+        if (parent.next != null) {
+            child.next = parent.next.left;
+        }
+    }
+    helper(child, child.left);
+    helper(child, child.right);
+}
+</code></pre>
+
+<p><strong>Populating Next Right Pointers in Each Node II</strong></p>
+
+<p>This is a very tricky variant of DFS where the left sub-tree is making use of right sub-tree. I did not solve it even at second time.</p>
+
+<pre><code>public void connect(TreeLinkNode root) {
+    if (root == null) return;
+    if (root.left == null &amp;&amp; root.right == null) return;
+    TreeLinkNode levelNext = root.next;
+    TreeLinkNode lowerNext = null;
+    while (levelNext != null &amp;&amp; lowerNext == null) {
+        if (levelNext.left != null) {
+            lowerNext = levelNext.left;
+            break;
+        } else if (levelNext.right != null) {
+            lowerNext = levelNext.right;
+            break;
+        } else {
+            // if there is no child node of levelNext
+            levelNext = levelNext.next;
+        }
+    }
+    if (root.left == null) {
+        root.right.next = lowerNext;
+    } else if (root.right == null) {
+        root.left.next = lowerNext;
+    } else {
+        root.left.next = root.right;
+        root.right.next = lowerNext;
+    }
+    connect(root.right);
+    connect(root.left);
+}
+</code></pre>
+
+<p><strong>Symmetric Tree</strong></p>
+
+<pre><code>public boolean isSymmetric(TreeNode root) {
+    if (root == null) {
+        return true;
+    }
+    return mirror(root.left, root.right);
+}
+
+private boolean mirror(TreeNode left, TreeNode right) {
+    if (left == null &amp;&amp; right == null) {
+        return true;
+    }
+    if (left == null || right == null) {
+        return false;
+    }
+    return (left.val == right.val) 
+        &amp; mirror(left.left, right.right)
+        &amp; mirror(left.right, right.left);
+}
+</code></pre>
+
+<p><strong>Same Tree</strong></p>
+
+<pre><code>public boolean isSameTree(TreeNode left, TreeNode right) {
+    if (left == null &amp;&amp; right == null) {
+        return true;
+    }
+    if (left == null || right == null) {
+        return false;
+    }
+    return (left.val == right.val) 
+        &amp; isSameTree(left.left, right.left)
+        &amp; isSameTree(left.right, right.right);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1236,318 +1536,6 @@ private void helper(List&lt;String&gt; ans, String path, String[] pad, String di
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/11/NineChap-strStr-coding-style/">[NineChap 1.1] strStr and Coding Style</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/11/NineChap-strStr-coding-style/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/11/NineChap-strStr-coding-style/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>strStr Question</h2>
-
-<p><strong><a href="/blog/2014/05/10/Implement-strStr/">Implement strStr</a></strong></p>
-
-<p>Before solving the problem, it&rsquo;s very important to ask this questions:</p>
-
-<blockquote><p><strong>Can we use system library (eg. str.substring() or indexOf())</strong></p></blockquote>
-
-<p>The answer is &lsquo;No&rsquo;, but asking this question shows that you think deep into questions. Keep in mind the characteristics for a candidate is judged by 4 things:</p>
-
-<ol>
-<li>Code readability &ndash; how long does it take to review your code?</li>
-<li>Coding convention &ndash; do you have the habit to write efficient code?</li>
-<li>Testing &ndash; it&rsquo;s good habit to write test case before asked to.</li>
-<li>Communication skills</li>
-</ol>
-
-
-<p>Solution of this question is double for-loop. It&rsquo;s not linear time complexity, but it&rsquo;s OK. After getting the code correct, it&rsquo;s best to tell the O(n) time KMP solution. However, it&rsquo;s most probably not required to implement.</p>
-
-<p><strong>my code</strong></p>
-
-<pre><code>public String strStr(String haystack, String needle) {
-    if (haystack == null || needle == null) {
-        return null;
-    }
-    int len1 = haystack.length();
-    int len2 = needle.length();
-    for (int i = 0; i &lt;= len1 - len2; i ++) {
-        // start from i, match chars
-        boolean match = true;
-        for (int j = 0; j &lt; len2; j ++) {
-            if (haystack.charAt(i + j) != needle.charAt(j)) {
-                match = false;
-                break;
-            }
-        }
-        if (match) {
-            return haystack.substring(i);
-        }
-    }
-    return null;
-}
-</code></pre>
-
-<p>alternative code from <a href="http://answer.ninechapter.com/solutions/implement-strstr/">ninechap</a></p>
-
-<pre><code>public String strStr(String haystack, String needle) {
-    if(haystack == null || needle == null) {
-        return null;
-    }
-    int i, j;
-    for(i = 0; i &lt; haystack.length() - needle.length() + 1; i++) {
-        for(j = 0; j &lt; needle.length(); j++) {
-            if(haystack.charAt(i + j) != needle.charAt(j)) {
-                break;
-            }
-        }
-        if(j == needle.length()) {
-            return haystack.substring(i);
-        }
-    }
-    return null;
-}
-</code></pre>
-
-<h2>Google Coding Style</h2>
-
-<h4>if &hellip; else &hellip;</h4>
-
-<pre><code>if (condition) {
-    statements;
-} else if (condition) {
-    statements;
-} else {
-    statements;
-}
-</code></pre>
-
-<h4>自增/自减</h4>
-
-<pre><code>while （d++ = s++） {
-    n++;
-}
-</code></pre>
-
-<p>To be continued.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/11/BST-insert-and-delete/">[Design] BST Node Insertion / Deletion</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/11/BST-insert-and-delete/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/11/BST-insert-and-delete/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>First Word</h2>
-
-<p>For BST it&rsquo;s very important to do insert and delete (balancing not required).</p>
-
-<p>Insertion is easy, but deletion is very difficult. However, it&rsquo;s a good idea to at least know the principles.</p>
-
-<h3>Insert a node</h3>
-
-<h4>Steps:</h4>
-
-<ol>
-<li><p>check whether new value = current node value. If not, proceed.</p></li>
-<li><p>if new value is less, than:</p>
-
-<ol>
-<li><p>if current node has no left child, set left to new value, and return</p></li>
-<li><p>otherwise, go to left child and start over</p></li>
-</ol>
-</li>
-<li><p>if new value is greater, than:</p>
-
-<ol>
-<li><p>if current node has no right child, set right to new value</p></li>
-<li><p>otherwise, go to right child and start over</p></li>
-</ol>
-</li>
-</ol>
-
-
-<h4>Note:</h4>
-
-<p>The BST may not be balanced after the insertion.</p>
-
-<h4>Code</h4>
-
-<p>Code snippet from <a href="http://www.algolist.net/Data_structures/Binary_search_tree/Insertion">this article</a></p>
-
-<pre><code>public boolean add(TreeNode node, int value) {
-    if (value == node.val)
-        return false;
-    if (value &lt; node.val) {
-        if (node.left == null) {
-            node.left = new TreeNode(value);
-            return true;
-        } else {
-            return add(node.left, value);
-        }
-    } else if (value &gt; node.val) {
-        if (node.right == null) {
-            node.right = new TreeNode(value);
-            return true;
-        } else {
-            return add(node.right, value);
-        }
-    }
-    return false;
-}
-</code></pre>
-
-<h3>Delete a node</h3>
-
-<h4>Steps:</h4>
-
-<ol>
-<li>Find the node</li>
-<li>Find the maximum node in the left subtree</li>
-<li>Replace the node with the maximum node in the left subtree.</li>
-</ol>
-
-
-<h4>Special Cases:</h4>
-
-<ol>
-<li>The node doest have a left child.</li>
-<li>The maximum node in the left subtree has a left child.</li>
-<li>The node is the root of the tree</li>
-</ol>
-
-
-<h4>Code</h4>
-
-<p>The source code given by <a href="http://answer.ninechapter.com/solutions/delete-a-node-in-binary-search-tree/">ninechap</a></p>
-
-<pre><code>private void myDeleteNode(TreeNode parent, TreeNode node) {
-    if (node.left == null) {
-        if (parent.right == node) {
-            parent.right = node.right;
-        } else {
-            parent.left = node.right;
-        }
-    } else {
-        TreeNode maxNodeParent = node;
-        TreeNode maxNode = node.left;
-
-        // find the maximum node in the left sub tree
-        while (maxNode.right != null) {
-            maxNodeParent = maxNode;
-            maxNode = maxNode.right;
-        }
-
-        if (maxNodeParent.left == maxNode) {
-            maxNodeParent.left = maxNode.left;
-        } else {
-            maxNodeParent.right = maxNode.left;
-        }
-
-        // move replacedNode to node
-        maxNode.left = node.left;
-        maxNode.right = node.right;
-        if (parent.left == node) {
-            parent.left = maxNode;
-        } else {
-            parent.right = maxNode;
-        }
-    }
-}
-
-private void findAndDelete(TreeNode parent, TreeNode node, int val) {
-    if (node == null) {
-        return;
-    }
-    if (node.val == val) {
-        myDeleteNode(parent, node);
-    } else if (node.val &lt; val) {
-        findAndDelete(node, node.right, val);
-    } else {
-        findAndDelete(node, node.left, val);
-    }
-}
-
-public TreeNode deleteNode(TreeNode root, int val) {
-    TreeNode dummyNode = new TreeNode(0);
-    dummyNode.left = root;
-    findAndDelete(dummyNode, root, val);
-    return dummyNode.left;
-}
-</code></pre>
-
-<h3>A little bit on balancing</h3>
-
-<p>There are 2 ways to balance a tree. <strong>Most common method is tree rotation</strong>:</p>
-
-<p><img class="middle" src="/assets/images/rotate-tree.png"></p>
-
-<p>An AVL Trees means a self-balancing search trees. If balance gets out of range −1&hellip;+1, the subtree is rotated to bring into balance.</p>
-
-<p><strong>Second way is to convert tree into a linkedlist</strong>, then build the tree again (we have discussed this algorithm before, pick the middle element).</p>
-
-<p>This method is slow if we insert and re-balance on each step, but we can do bulk insert/delete forgetting about the re-balancing for a while. This will make the data structure faster! <a href="http://java.dzone.com/articles/algorithm-week-balancing">more details</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/28">&larr; Older</a>
@@ -1566,9 +1554,9 @@ public TreeNode deleteNode(TreeNode root, int val) {
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (56)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (57)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
-<li class='category'><a href='/blog/categories/experience/'>experience (2)</a></li>
+<li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
@@ -1588,6 +1576,14 @@ public TreeNode deleteNode(TreeNode root, int val) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/23/Java-runtime-exception/">[Design] Java Runtime Exception</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/23/Endless-error-gem-dependencies/">[Ruby] Endless Error With Gem Dependencies</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/22/overload-override-java-main-method/">[Design] Override/overload Java Main Method</a>
       </li>
     
@@ -1597,14 +1593,6 @@ public TreeNode deleteNode(TreeNode root, int val) {
     
       <li class="post">
         <a href="/blog/2014/12/22/can-interface-extend-interface/">[Design] Interface Extend Another Interface</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/RubyGems-gem-other/">[Ruby] RubyGems, Gem and Other</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/Maximum-sum-no-adjacent/">[Facebook] Maximum Sum Such That No Two Elements Are Adjacent</a>
       </li>
     
   </ul>

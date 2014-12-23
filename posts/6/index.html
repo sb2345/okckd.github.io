@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Explain what object reflection is in Java and why it is useful. Solution Java Reflection makes it possible to inspect classes, interfaces, &hellip;">
+  <meta name="description" content="Question Write a method to find the number of employees in each department. Answer select Dept_Name, Departments.Dept_ID, count(*) as ‘num_employees &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,148 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/08/sql-count-group-by/">[CC150v4] 15.1 SQL Count and Group by Statement</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/08/sql-count-group-by/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/08/sql-count-group-by/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a method to find the number of employees in each department.</p></blockquote>
+
+<h3>Answer</h3>
+
+<pre><code>select 
+    Dept_Name, 
+    Departments.Dept_ID, 
+    count(*) as ‘num_employees’
+from 
+    Departments
+left join 
+    Employees
+on 
+    Employees.Dept_ID = Departments.Dept_ID
+group by 
+    Departments.Dept_ID, Dept_Name
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/08/random-error-debugging-2/">[CC150v4] 11.2 Random Error Debugging 2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/08/random-error-debugging-2/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/08/random-error-debugging-2/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You are given the source to an application which crashes when it is run After running it ten times in a debugger, you find it never crashes in the same place The application is single threaded, and uses only the C standard library What programming errors could be causing this crash? How would you test each one?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The solution is from <strong>both CC150v4 and CC150v5</strong>. My previous post <strong>[Testing] Random error debugging 1</strong> already covered this question.</p>
+
+<p>Again, the answer is very similar:</p>
+
+<ol>
+<li>Depends on random variable
+
+<ol>
+<li>RNG</li>
+<li>depends on user input</li>
+<li>depends on system date/time</li>
+</ol>
+</li>
+<li>Uninitialized variable
+
+<ol>
+<li>can take on arbitrary value</li>
+<li>can execute in different path</li>
+</ol>
+</li>
+<li>Memory Leak
+
+<ol>
+<li>out of RAM</li>
+<li>heap overflow</li>
+<li>stack data corruption</li>
+</ol>
+</li>
+<li>System Dependency
+
+<ol>
+<li>depends on external module</li>
+<li>depends on some system attributed that&rsquo;s being modified by another application (this is especially for hardware-facing applications)</li>
+</ol>
+</li>
+</ol>
+
+
+<p>In general, <strong>Web server is more prone to Memory Leak</strong>, and program that runs <strong>close to system level</strong> is more prone to system dependency errors.</p>
+
+<p>Additionally, we may be able to use tools to check for specific situations. For example, to investigate issue #2, we can <strong>utilize runtime tools which check for uninitialized variables</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -762,178 +904,6 @@ public boolean equals(Object o) {}
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/07/search-array-containing-empty-string/">[CC150v4] 9.5 Search Array Containing Empty String</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/07/search-array-containing-empty-string/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/07/search-array-containing-empty-string/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given a sorted array of strings which is interspersed with empty strings, write a method to find the location of a given string.</p>
-
-<p>Example: find “ball” in [“at”, “”, “”, “”, “ball”, “”, “”, “car”, “”, “”, “dad”, “”, “”] will return 4</p>
-
-<p>Example: find “ballcar” in [“at”, “”, “”, “”, “”, “ball”, “car”, “”, “”, “dad”, “”, “”] will return -1</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The solution is binary search, but when reads empty, <strong>advance to the next non-empty string</strong>.</p>
-
-<p>But wait, <strong>there can be a very big problem that causes looping forever</strong>. Eg.</p>
-
-<blockquote><p>&ldquo;a&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;&rdquo;, &ldquo;c&rdquo; (5 items), look for &ldquo;b&rdquo;</p>
-
-<p>Now &lsquo;left&rsquo; points to 1st string(&ldquo;a&rdquo;) and &lsquo;right&rsquo; points to 4th(&ldquo;&rdquo;). If we read read &lsquo;mid&rsquo; value and advance to the next non-empty string, it&rsquo;ll be &ldquo;c&rdquo;.</p>
-
-<p>since &ldquo;c&rdquo; is large than &ldquo;b&rdquo;, &lsquo;right&rsquo; is set to the 4th index. It&rsquo;s a endless loop!</p></blockquote>
-
-<p>There&rsquo;re various ways to solve this. The book suggests <strong>locate &lsquo;right&rsquo; pointer at non-empty string</strong> by moving left, and then <strong>locate &lsquo;mid&rsquo; pointer at non-empty</strong> by moving right. This avoids endless loop.</p>
-
-<p>My approach is to use 2 instances of &lsquo;mid&rsquo;:</p>
-
-<ol>
-<li>calculatedMid</li>
-<li>comparisonMid</li>
-</ol>
-
-
-<p>Both ways are fine.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int search(String[] input, String target) {
-    if (target == null || target.length() == 0) {
-        return -1;
-    }
-    int len = input.length;
-    int left = 0, right = len - 1;
-    while (left &lt; right) {
-        int calculatedMid = left + (right - left) / 2;
-        int comparisonMid = calculatedMid;
-        while (comparisonMid &lt; len &amp;&amp; input[comparisonMid].length() == 0) {
-            comparisonMid++;
-        }
-        if (input[comparisonMid].equals(target)) {
-            return comparisonMid;
-        } else if (input[comparisonMid].compareTo(target) &lt; 0) {
-            left = comparisonMid + 1;
-        } else {
-            right = calculatedMid - 1;
-        }
-    }
-    if (left &lt; len &amp;&amp; input[left].equals(target)) {
-        return left;
-    } else {
-        return -1;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/07/generate-permutation-recursively/">[CC150v4] 8.4 Generate Permutation Recursively</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/07/generate-permutation-recursively/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/07/generate-permutation-recursively/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a method to compute all permutations of a string.</p>
-
-<p>Do it recursively.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Get first char.</p></li>
-<li><p>Permute the reminder of the string.</p></li>
-<li><p>Insert that char into all possible positions.</p></li>
-</ol>
-
-
-<p>The code is more concise that doing it iteratively, <strong>and no visited array needed</strong>!</p>
-
-<h3>Code</h3>
-
-<pre><code>public static ArrayList&lt;String&gt; getPerms(String s) {
-    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-    if (s.length() == 1) {
-        ans.add(s);
-        return ans;
-    }
-    char single = s.charAt(0);
-    ArrayList&lt;String&gt; partialPerms = getPerms(s.substring(1));
-    for (String part : partialPerms) {
-        for (int i = 0; i &lt;= part.length(); i++) {
-            ans.add(part.substring(0, i) + single + part.substring(i));
-        }
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/7">&larr; Older</a>
@@ -952,9 +922,9 @@ public boolean equals(Object o) {}
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (56)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (57)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
-<li class='category'><a href='/blog/categories/experience/'>experience (2)</a></li>
+<li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
@@ -974,6 +944,14 @@ public boolean equals(Object o) {}
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/23/Java-runtime-exception/">[Design] Java Runtime Exception</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/23/Endless-error-gem-dependencies/">[Ruby] Endless Error With Gem Dependencies</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/22/overload-override-java-main-method/">[Design] Override/overload Java Main Method</a>
       </li>
     
@@ -983,14 +961,6 @@ public boolean equals(Object o) {}
     
       <li class="post">
         <a href="/blog/2014/12/22/can-interface-extend-interface/">[Design] Interface Extend Another Interface</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/RubyGems-gem-other/">[Ruby] RubyGems, Gem and Other</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/Maximum-sum-no-adjacent/">[Facebook] Maximum Sum Such That No Two Elements Are Adjacent</a>
       </li>
     
   </ul>

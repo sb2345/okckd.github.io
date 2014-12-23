@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Implement a function to check if a linked list is a palindrome. Solution There are multiple solutions for this question. First, maybe the &hellip;">
+  <meta name="description" content="Question An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,255 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-of-animals/">[CC150v5] 3.7 Stack of Animals</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/15/stack-of-animals/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/stack-of-animals/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would prefer a dog or a cat (and will receive the oldest animal of that type). They cannot select which specific animal they would like.</p>
+
+<p>Create the data structures to maintain this system and implement operations such as enqueue, dequeueAny, dequeueDog and dequeueCat. You may use the built-in LinkedList data structure.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are 2 solutions.</p>
+
+<p><strong>First one is using a single queue</strong>. This makes &lsquo;dequeueAny&rsquo; easy, but &lsquo;dequeueCat&rsquo; and &lsquo;dequeueDog&rsquo; difficult.</p>
+
+<p><strong>Second approach would be using 2 queues for dogs and cats</strong>. We need something like timestamp to be stored (more space usage).</p>
+
+<p>When we return, we peek both queues are choose the older one. <strong>This is recommended solution in the book</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>from the book</strong></p>
+
+<p>Animal.java</p>
+
+<pre><code>public abstract class Animal {
+    int order;
+    String name;
+
+    public Animal(String n) {
+        name = n;
+    }
+
+    public abstract String name();
+
+    public boolean isOlderThan(Animal a) {
+        return this.order &lt; a.order;
+    }
+}
+
+class Cat extends Animal {
+    public Cat(String n) {
+        super(n);
+    }
+
+    public String name() {
+        return "Cat: " + name;
+    }
+}
+
+class Dog extends Animal {
+    public Dog(String n) {
+        super(n);
+    }
+
+    public String name() {
+        return "Dog: " + name;
+    }
+}
+</code></pre>
+
+<p>AnimalQueue.java</p>
+
+<pre><code>public class AnimalQueue {
+    LinkedList&lt;Dog&gt; dogs = new LinkedList&lt;Dog&gt;();
+    LinkedList&lt;Cat&gt; cats = new LinkedList&lt;Cat&gt;();
+    private int order = 0;
+
+    public void enqueue(Animal a) {
+        a.order = order;
+        order++;
+        if (a instanceof Dog) {
+            dogs.addLast((Dog) a);
+        } else if (a instanceof Cat) {
+            cats.addLast((Cat) a);
+        }
+    }
+
+    public Animal dequeueAny() {
+        if (dogs.size() == 0) {
+            return dequeueCats();
+        } else if (cats.size() == 0) {
+            return dequeueDogs();
+        }
+        Dog dog = dogs.peek();
+        Cat cat = cats.peek();
+        if (dog.isOlderThan(cat)) {
+            return dogs.poll();
+        } else {
+            return cats.poll();
+        }
+    }
+
+    public Animal peek() {
+        if (dogs.size() == 0) {
+            return cats.peek();
+        } else if (cats.size() == 0) {
+            return dogs.peek();
+        }
+        Dog dog = dogs.peek();
+        Cat cat = cats.peek();
+        if (dog.isOlderThan(cat)) {
+            return dog;
+        } else {
+            return cat;
+        }
+    }
+
+    public int size() {
+        return dogs.size() + cats.size();
+    }
+
+    public Dog dequeueDogs() {
+        return dogs.poll();
+    }
+
+    public Dog peekDogs() {
+        return dogs.peek();
+    }
+
+    public Cat dequeueCats() {
+        return cats.poll();
+    }
+
+    public Cat peekCats() {
+        return cats.peek();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/15/stack-get-min-value/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/stack-get-min-value/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element?</p>
+
+<p>Push, pop and min should all operate in 0(1) time.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is <strong>a very tricky question</strong>.</p>
+
+<p>The key is how to use the minimum space to achieve O(1) query min operation. The trick is to count how many times the same min-value occur. Eg.</p>
+
+<blockquote><p>input: 5,3,3,1,1,2,2,2,2,2,2,2.</p>
+
+<p>stack: 5,3,3,1,1.</p></blockquote>
+
+<p>So we can pop &lsquo;1&rsquo; twice, pop &lsquo;3&rsquo; twice, and pop &lsquo;5&rsquo; once. Read the code!</p>
+
+<h3>Code</h3>
+
+<pre><code>public class StackMyAnswer extends Stack&lt;Integer&gt; {
+
+    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
+
+    public void push(int value) {
+        if (min.isEmpty() || value &lt;= min.peek()) {
+            min.push(value);
+        }
+        super.push(value);
+    }
+
+    public Integer pop() {
+        int val = super.pop();
+        if (!min.isEmpty() &amp;&amp; val == min.peek()) {
+            min.pop();
+        }
+        return val;
+    }
+
+    public int min() {
+        if (min.isEmpty()) {
+            return Integer.MAX_VALUE;
+        }
+        return min.peek();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -725,126 +974,6 @@ public static int nthToLastMe(LinkedListNode head, int n) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/10/submatrix-with-largest-sum/">[CC150v4] 20.12 Sub-matrix With Largest Sum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/10/submatrix-with-largest-sum/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/submatrix-with-largest-sum/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given an NxN matrix of positive and negative integers, write code to find the sub-matrix with the largest possible sum.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>I wrote about this question before: <strong>[Question] Max Sum In A 2D Array (sub-matrix)</strong>, and the solution gave a better time complexity (O(n<sup>3</sup>)) than in the book (O(n<sup>4</sup>)).</p>
-
-<ol>
-<li>locate a row &ndash; O(n)</li>
-<li>locate another row &ndash; O(n)</li>
-<li>compute sub value of that column &ndash; O(n), and then find largest subarray in array &ndash; also O(n)</li>
-<li>The above 3 steps each take O(n) time, total time is O(n<sup>3</sup>).</li>
-</ol>
-
-
-<p>Please refer to the other post for more detail.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/10/generate-m-from-array-of-n/">[CC150v4] 20.3 Generate M Int From Array of Size N</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/10/generate-m-from-array-of-n/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/generate-m-from-array-of-n/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a method to randomly generate a set of m integers from an array of size n. Each element must have equal probability of being chosen.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is very similar to another post I wrote: <strong>[Question] Shuffle An Array (Fisher–Yates)</strong>.</p>
-
-<p>The basic idea is to choose element one by one using RNG. After choosing an int, swap it to top and <strong>then mark this element as &lsquo;dead&rsquo;</strong>. Next time, the RNG will not touch on the &lsquo;dead&rsquo; elements.</p>
-
-<p><strong>Very similar to Fisher–Yates Shuffle</strong>, and the code below is written by me.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int[] pickMRandomly(int[] original, int m) {
-    int[] ans = new int[m];
-    for (int i = 0; i &lt; m; i++) {
-        int rand = Question.listRand.get(i);
-        // note: rand is RN in the range [i, max]
-        ans[i] = original[rand];
-        original[rand] = original[i];
-        // now (i)th position in original is dead
-        // no one cares what value is at original[i]
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -863,9 +992,9 @@ public static int nthToLastMe(LinkedListNode head, int n) {
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (56)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (57)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
-<li class='category'><a href='/blog/categories/experience/'>experience (2)</a></li>
+<li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
@@ -885,6 +1014,14 @@ public static int nthToLastMe(LinkedListNode head, int n) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/23/Java-runtime-exception/">[Design] Java Runtime Exception</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/23/Endless-error-gem-dependencies/">[Ruby] Endless Error With Gem Dependencies</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/22/overload-override-java-main-method/">[Design] Override/overload Java Main Method</a>
       </li>
     
@@ -894,14 +1031,6 @@ public static int nthToLastMe(LinkedListNode head, int n) {
     
       <li class="post">
         <a href="/blog/2014/12/22/can-interface-extend-interface/">[Design] Interface Extend Another Interface</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/RubyGems-gem-other/">[Ruby] RubyGems, Gem and Other</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/Maximum-sum-no-adjacent/">[Facebook] Maximum Sum Such That No Two Elements Are Adjacent</a>
       </li>
     
   </ul>
