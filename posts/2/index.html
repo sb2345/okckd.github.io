@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Suppose N patients and M diseases. N is sufficiently large number and M is
-relatively small, say 30-ish. Each patient can have possible &hellip;">
+  <meta name="description" content="Question link Given a binary tree, print it vertically. The following example illustrates vertical order traversal. 1 / \ 2 3 / \ / \ 4 5 6 7 \ \ 8 9 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +78,122 @@ relatively small, say 30-ish. Each patient can have possible &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
+
+<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
+
+<pre><code>           1
+        /    \
+       2      3
+      / \    / \
+     4   5  6   7
+             \   \
+              8   9 
+
+The output of print this tree vertically will be:
+4
+2
+1 5 6
+3 8
+7
+9 
+</code></pre>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
+<li><p>Iterate for each vertical line at distance minimum to maximum from root.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+
+    // 1. find the range of left bound and right bound
+    int[] range = new int[2];
+    findRange(root, range, 0);
+
+    // 2. calculate number of columns in the result
+    int rootIndex = 0 - range[0];
+    int columns = range[1] - range[0] + 1;
+    for (int i = 0; i &lt; columns; i++) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+    }
+
+    // 3. fill in vertically in a recursive manner
+    fillNode(ans, root, rootIndex);
+
+    return ans;
+}
+
+private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
+    if (node == null) {
+        return;
+    }
+    ans.get(index).add(node.val);
+    fillNode(ans, node.left, index - 1);
+    fillNode(ans, node.right, index + 1);
+}
+
+private void findRange(TreeNode node, int[] range, int position) {
+    if (node == null) {
+        return;
+    }
+    if (position &lt; range[0]) {
+        range[0] = position;
+    }
+    if (position &gt; range[1]) {
+        range[1] = position;
+    }
+    findRange(node.left, range, position - 1);
+    findRange(node.right, range, position + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -229,13 +344,7 @@ Pass/submit:
 </ol>
 
 
-<p>skip:</p>
-
-<pre><code>Minimum Window Substring
-Largest Rectangle in Histogram
-</code></pre>
-
-<p>Posts are updated up to: [LeetCode 20] Valid Parentheses</p>
+<p>[LeetCode 20] Valid Parentheses</p>
 
 <pre><code>&lt;tr&gt;
     &lt;td&gt;Time to use&lt;/td&gt;
@@ -1053,78 +1162,6 @@ public Iterator&lt;T&gt; iterator() {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] 12.0 Example - Troubleshoot Google Chrome</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/24/troubleshoot-google-chrome/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/24/troubleshoot-google-chrome/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You&#8217;reworking on the Google Chrome team when you receivea bug report: Chrome crashes on launch. What would you do?</p></blockquote>
-
-<h3>Step 1: Understand the Scenario</h3>
-
-<ol>
-<li>How long has user seen this issue?</li>
-<li>version of browser and OS?</li>
-<li>Does this happen consistently? How often, and when?</li>
-</ol>
-
-
-<h3>Step 2: Break Down the Problem</h3>
-
-<p>Flow of situation:</p>
-
-<ol>
-<li>start menu</li>
-<li>click chrome</li>
-<li>browser starts</li>
-<li>browser load settings</li>
-<li>browser issues HTTP response</li>
-<li>browser get HTTP response</li>
-<li>browser parses webpage</li>
-<li>browser displays content</li>
-</ol>
-
-
-<p><strong>At some points in this process, something fails</strong>. A good tester would iterate thru the elements of this scenario and diagnose the problem.</p>
-
-<h3>Step 3: Create Specific, Manageable Tests</h3>
-
-<p>Come up with realistic instructions.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1143,7 +1180,7 @@ public Iterator&lt;T&gt; iterator() {
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (57)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
@@ -1165,6 +1202,10 @@ public Iterator&lt;T&gt; iterator() {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/23/Java-runtime-exception/">[Design] Java Runtime Exception</a>
       </li>
     
@@ -1178,10 +1219,6 @@ public Iterator&lt;T&gt; iterator() {
     
       <li class="post">
         <a href="/blog/2014/12/22/common-root-java-class/">[Design] Common Root of Java Classes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/can-interface-extend-interface/">[Design] Interface Extend Another Interface</a>
       </li>
     
   </ul>

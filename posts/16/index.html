@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Overview Internet protocol suite is a networking model and communications protocols used by the Internet. It is commonly known as TCP/IP. Four &hellip;">
+  <meta name="description" content="Question link Write an algorithm to find the ‘next’ post-order successor of a given node in a binary tree and binary search tree. where each node has &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,73 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/06/Postorder-successor-Binary-Tree/">[Google] Postorder Successor in Binary Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/06/Postorder-successor-Binary-Tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/06/Postorder-successor-Binary-Tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5173972006076416">link</a></p>
+
+<blockquote><p>Write an algorithm to find the ‘next’ post-order successor of a given node in a binary tree and binary search tree.</p>
+
+<ol>
+<li>where each node has a link to its parent.</li>
+<li>without parent pointer</li>
+</ol>
+
+
+<p>Implement 2 versions of the algorithm: 1.) binary tree 2.) BST</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>In postorder, any node below current node shall be &lsquo;predecessor&rsquo; of current node. Thus we only care about current node&rsquo;s parent.</p>
+
+<p>Suggested by a user:</p>
+
+<pre><code>1) parent pointer is given. 
+- go to the parent of the current node. 
+- if current node is the right child of its parent =&gt; print parent. 
+- else return leftmost node of the right sub-tree of parent. 
+
+2) parent pointer is not given. 
+- traverse the tree and find the parent of the current node 
+- do the same as method (1). 
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -809,142 +876,6 @@ private void helper(List&lt;String&gt; result, char[] letters, int pos) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/05/MapReduce-Common-Friends/">[Design] MapReduce Common Friends Example</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/05/MapReduce-Common-Friends/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/05/MapReduce-Common-Friends/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/a/12375878">link</a></p>
-
-<blockquote><p>Facebook&rsquo;s &ldquo;You and Joe have 230 friends in common&rdquo; feature. Sure you could use a decent caching strategy, but for now, use MapReduce.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>This list doesn&rsquo;t change frequently so it&rsquo;d be wasteful to recalculate it every time. We&rsquo;re going to use mapreduce to calculate everyone&rsquo;s common friends once a day and store those results.</p>
-
-<p>Note that friends are <strong>bi-directional</strong>. If I&rsquo;m your friend, you&rsquo;re mine. (follow-up: how to do it for follower system?)</p>
-
-<h4>Input</h4>
-
-<p>Assume the friends are stored as Person->[List of Friends], our friends list is then:</p>
-
-<pre><code>A -&gt; B C D
-B -&gt; A C D E
-C -&gt; A B D E
-D -&gt; A B C E
-E -&gt; B C D
-</code></pre>
-
-<h4>Map</h4>
-
-<p>The mapper will output a key-value pair. The key will be a friend along with the person. The value will be the list of friends. The key will be sorted so that the friends are in order, causing all pairs of friends to go to the same reducer.</p>
-
-<p>For map(A &ndash;> B C D) :</p>
-
-<pre><code>(A B) -&gt; B C D
-(A C) -&gt; B C D
-(A D) -&gt; B C D
-</code></pre>
-
-<p>For map(B &ndash;> A C D E) : (Note that A comes before B in the key)</p>
-
-<pre><code>(A B) -&gt; A C D E
-(B C) -&gt; A C D E
-(B D) -&gt; A C D E
-(B E) -&gt; A C D E
-</code></pre>
-
-<p>For map(C &ndash;> A B D E) :</p>
-
-<pre><code>(A C) -&gt; A B D E
-(B C) -&gt; A B D E
-(C D) -&gt; A B D E
-(C E) -&gt; A B D E
-</code></pre>
-
-<p>For map(D &ndash;> A B C E) :</p>
-
-<pre><code>(A D) -&gt; A B C E
-(B D) -&gt; A B C E
-(C D) -&gt; A B C E
-(D E) -&gt; A B C E
-</code></pre>
-
-<p>And finally for map(E &ndash;> B C D):</p>
-
-<pre><code>(B E) -&gt; B C D
-(C E) -&gt; B C D
-(D E) -&gt; B C D
-</code></pre>
-
-<p>Before we send these key-value pairs to the reducers, we group them by their keys and get:</p>
-
-<pre><code>(A B) -&gt; (A C D E) (B C D)
-(A C) -&gt; (A B D E) (B C D)
-(A D) -&gt; (A B C E) (B C D)
-(B C) -&gt; (A B D E) (A C D E)
-(B D) -&gt; (A B C E) (A C D E)
-(B E) -&gt; (A C D E) (B C D)
-(C D) -&gt; (A B C E) (A B D E)
-(C E) -&gt; (A B D E) (B C D)
-(D E) -&gt; (A B C E) (B C D)
-</code></pre>
-
-<p>Each line will be passed as an argument to a reducer.</p>
-
-<h4>Reduce</h4>
-
-<p>The reduce function will simply intersect the lists of values and output the same key with the result of the intersection. After reduction:</p>
-
-<pre><code>(A B) -&gt; (C D)
-(A C) -&gt; (B D)
-(A D) -&gt; (B C)
-(B C) -&gt; (A D E)
-(B D) -&gt; (A C E)
-(B E) -&gt; (C D)
-(C D) -&gt; (A B E)
-(C E) -&gt; (B D)
-(D E) -&gt; (B C)
-</code></pre>
-
-<h4>Result</h4>
-
-<p>Now when D visits B&rsquo;s profile, we can quickly look up (B D) and see that they have three friends in common, (A C E).</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/17">&larr; Older</a>
@@ -963,7 +894,7 @@ E -&gt; B C D
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (57)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
@@ -985,6 +916,10 @@ E -&gt; B C D
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/23/Java-runtime-exception/">[Design] Java Runtime Exception</a>
       </li>
     
@@ -998,10 +933,6 @@ E -&gt; B C D
     
       <li class="post">
         <a href="/blog/2014/12/22/common-root-java-class/">[Design] Common Root of Java Classes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/can-interface-extend-interface/">[Design] Interface Extend Another Interface</a>
       </li>
     
   </ul>

@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a linked list, reverse the nodes of a linked list k at a time and return its modified list. If the number of nodes is not a &hellip;">
+  <meta name="description" content="Question link Given a string containing just the characters '(' and ')', find the length of the longest valid (well-formed) parentheses substring. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,186 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/12/Longest-Valid-Parentheses/">[LeetCode 32] Longest Valid Parentheses</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-12T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/12/Longest-Valid-Parentheses/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/12/Longest-Valid-Parentheses/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/longest-valid-parentheses/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a string containing just the characters <code>'('</code> and <code>')'</code>, find the length of the longest valid (well-formed) parentheses substring.
+</p>
+<p>
+For <code>"(()"</code>, the longest valid parentheses substring is <code>"()"</code>, which has length = 2.
+</p>
+<p>
+Another example is <code>")()())"</code>, where the longest valid parentheses substring is <code>"()()"</code>, which has length = 4.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<h3>Analysis</h3>
+
+<p><strong>There are 2 ways to solve this problem</strong>, stack and DP. I will <strong>not cover DP for now</strong>, but this can be a future task.</p>
+
+<p>There are various way to solve this problem with stack.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Stack method 1 is more straight-forward</strong> (code shown below). The idea is to keep a stack of &ldquo;(&rdquo; indexes, and another variable called &ldquo;last&rdquo;. <strong>Note that only &ldquo;)&rdquo; can violates a pattern</strong>. So whenever I see a &ldquo;(&rdquo;, just push to stack. When the pattern is violated by a &ldquo;)&rdquo;, I update last. The code explains itself very well. If not, <a href="http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488">look here</a></p>
+
+<p><strong>Stack method 2 is more tricky</strong>. This time I will not only push the index of &ldquo;(&rdquo; to stack, but also the index of &ldquo;)&rdquo; when the pattern got violated. It&rsquo;s hard to explain, and hard to think of at first.</p>
+
+<p><strong>The DP solution is not very difficult</strong>. Basically create an array of same length as string s. dp[i] denotes the length of valid parenthese ending with index i. The idea is similar to <a href="http://blog.csdn.net/abcbc/article/details/8826782">this blog</a>, but he used reverse DP, and I use normal DP.</p>
+
+<p>I will explain DP with an example of input &ldquo;<strong>)()()</strong>&rdquo;. For this string, we have <strong>dp[0] = 0, dp[1] = 0, dp[2] = 2, dp[3] = 0</strong>. For dp[4], I check the 3rd position first, and find that dp[4] = 2. Then I also have to add dp[2] into dp[4] to make it complete. The end result is dp[4] = 2 + 2 = 4.</p>
+
+<h3>My code</h3>
+
+<p>Stack method 1</p>
+
+<pre><code>public int longestValidParentheses(String s) {
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    int last = -1, max = 0;
+    char[] ss = s.toCharArray();
+    for (int i = 0; i &lt; ss.length; i++) {
+        if (ss[i] == '(') stack.push(i);
+        else if (stack.isEmpty()) last = i;
+        else {
+            stack.pop();
+            if (stack.isEmpty()) max = Math.max(max, i - last);
+            else max = Math.max(max, i - stack.peek());
+        }
+    }
+    return max;
+}
+</code></pre>
+
+<p>Stack method 2</p>
+
+<pre><code>public int longestValidParentheses(String s) {
+    int res = 0;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    char[] arr = s.toCharArray();
+    for (int i = 0; i &lt; arr.length; i++) {
+        if (arr[i] == ')' &amp;&amp; !stack.isEmpty() &amp;&amp; arr[stack.peek()] == '(') {
+            stack.pop();
+            if (stack.isEmpty()) res = i + 1;
+            else res = Math.max(res, i - stack.peek());
+        } else stack.push(i);
+    }
+    return res;
+}
+</code></pre>
+
+<p>DP solution</p>
+
+<pre><code>public int longestValidParentheses(String s) {
+    int len = s.length();
+    if (len &lt;= 1) return 0;
+    int max = Integer.MIN_VALUE;
+    int[] dp = new int[len];
+    for (int i = 1; i &lt; len; i ++) {
+        if (s.charAt(i) == '(') dp[i] = 0;
+        else {
+            int j = i - 1 - dp[i - 1];
+            if (j &gt;= 0 &amp;&amp; s.charAt(j) =='(') {
+                dp[i] = dp[i - 1] + 2;
+                if (j &gt;= 1) dp[i] += dp[j - 1];
+            }
+            else dp[i] = 0;
+        }
+        max = Math.max(max, dp[i]);
+    }
+    return max;
+}
+</code></pre>
+
+<p><strong>Updated on July 18th, 2014</strong>, rewrite the stack method 1.</p>
+
+<pre><code>public int longestValidParentheses(String s) {
+    if (s == null || s.length() == 0) {
+        return 0;
+    }
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    int start = -1;
+    int longest = 0;
+    char[] input = s.toCharArray();
+    for (int i = 0; i &lt; input.length; i++) {
+        if (input[i] == '(') {
+            stack.push(i);
+        } else if (input[i] == ')' &amp;&amp; stack.isEmpty()) {
+            start = i;
+        } else if (input[i] == ')') {
+            stack.pop();
+            if (stack.isEmpty()) {
+                longest = Math.max(longest, i - start);
+            } else {
+                longest = Math.max(longest, i - stack.peek());
+            }
+        }
+    }
+    return longest;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1492,154 +1672,6 @@ Your function should return length = <code>2</code>, and A is now <code>[1,2]</c
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/09/Merge-Two-Sorted-Lists/">[LeetCode 21] Merge Two Sorted Lists</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/09/Merge-Two-Sorted-Lists/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/09/Merge-Two-Sorted-Lists/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/merge-two-sorted-lists/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Merge two sorted linked lists and return it as a new list. The new list should be made by splicing together the nodes of the first two lists.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This question is easy</strong>. There are difficult ways to solve.</p>
-
-<h3>Solution</h3>
-
-<p>There are 2 ways to solve this problem. First and the easy one is to <strong>do recursion</strong>.</p>
-
-<p>Second solution, also my original solution is to <strong>use a &lsquo;fakeHead&rsquo; to help</strong>. Read <a href="http://www.programcreek.com/2012/12/leetcode-merge-two-sorted-lists-java/">this blog</a>.</p>
-
-<h3>My code</h3>
-
-<p>Recursion:</p>
-
-<pre><code>/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) {
- *         val = x;
- *         next = null;
- *     }
- * }
- */
-public class Solution {
-    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-        if (l1 == null) {
-            return l2;
-        } else if (l2 == null) {
-            return l1;
-        } else {
-            if (l1.val &lt; l2.val) {
-                l1.next = mergeTwoLists(l1.next, l2);
-                return l1;
-            } else {
-                l2.next = mergeTwoLists(l1, l2.next);
-                return l2;
-            }
-        }
-    }
-}
-</code></pre>
-
-<p>Temporary header + link operations</p>
-
-<pre><code>/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) {
- *         val = x;
- *         next = null;
- *     }
- * }
- */
-public class Solution {
-    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-        ListNode pre = new ListNode(0);
-        ListNode cur = pre;
-        while (l1 != null &amp;&amp; l2 != null) {
-            if (l1.val &lt; l2.val) {
-                cur.next = l1;
-                l1 = l1.next;
-            } else {
-                cur.next = l2;
-                l2 = l2.next;
-            }
-            cur = cur.next;
-        }
-        if (l1 == null) cur.next = l2;
-        else cur.next = l1;
-        return pre.next;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/43">&larr; Older</a>
@@ -1658,7 +1690,7 @@ public class Solution {
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (57)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
@@ -1680,6 +1712,10 @@ public class Solution {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/23/Java-runtime-exception/">[Design] Java Runtime Exception</a>
       </li>
     
@@ -1693,10 +1729,6 @@ public class Solution {
     
       <li class="post">
         <a href="/blog/2014/12/22/common-root-java-class/">[Design] Common Root of Java Classes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/can-interface-extend-interface/">[Design] Interface Extend Another Interface</a>
       </li>
     
   </ul>
