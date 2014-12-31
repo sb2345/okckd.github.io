@@ -144,121 +144,59 @@ Divide two integers without using multiplication, division and mod operator.
 
 <h3>Analysis</h3>
 
-<p><strong>This question is more difficult than you thought</strong>!</p>
+<p><strong>This question might be more difficult than you thought</strong>. So do not overlook it because of its seemingly simple description. First of all, please refer to <strong>[Fundamental] Java Bit Operation</strong> for information on bit operators.</p>
 
-<p>I had little experience with <strong>Java bit operation</strong>, so I was struggling in the beginning. I&rsquo;m still not good at it now. Below is a quick tutorial on this topic.</p>
-
-<table border="2">
-  <tr>
-    <th>operator</th>
-    <th>what is means</th>
-  </tr>
-  <tr>
-    <td>~</td>
-    <td>invert every bit</td>
-  </tr>
-  <tr>
-    <td>&lt;&lt;</td>
-    <td>shift left (same as *2)</td>
-  </tr>
-  <tr>
-    <td>&gt;&gt;</td>
-    <td>signed shift right</td>
-  </tr>
-  <tr>
-    <td>&gt;&gt;&gt;</td>
-    <td>unsigned shift right</td>
-  </tr>
-  <tr>
-    <td>^</td>
-    <td>XOR</td>
-  </tr>
-  <tr>
-    <td>|</td>
-    <td>OR</td>
-  </tr>
-</table>
-
-
-<br />
-
-
-<p>Note the unsigned right shift operator &ldquo;>>>&rdquo; shifts a <strong>zero into the leftmost position</strong>, while the leftmost position after &ldquo;>>&rdquo; <strong>depends on sign extension</strong>.</p>
-
-<p>After the knowledge barriers of big operation is cleared, this problem basically is <strong>a while loop that keeps subtracting (divisor * (2 ^ n)) from dividend</strong>. There is various ways to do it.</p>
-
-<p><strong>But remember that overflow always can happen</strong>, especially when you dealing with Integer.MAX_VALUE and Integer.MIN_VALUE.</p>
+<p>And <strong>remember&hellip; overflow can happen</strong>, especially when you dealing with Integer.MAX_VALUE and Integer.MIN_VALUE.</p>
 
 <h3>Solution</h3>
 
-<p>I will post 2 solutions, <strong>first of which is written by me</strong> using the idea from <a href="http://leetcodenotes.wordpress.com/2013/10/19/divide-two-integers/">this blog</a>. This is also the most common solution from the net.</p>
+<p>This solution is <strong>a while loop that keeps subtracting (divisor * (2 ^ n)) from dividend</strong>. You can find a good solution from <a href="http://leetcodenotes.wordpress.com/2013/10/19/divide-two-integers/">this blog</a>.</p>
 
-<p><strong>Second solution is from</strong> <a href="http://discuss.leetcode.com/questions/209/divide-two-integers/385">this post</a> and I translated the c++ into Java with a bit refactoring work. This code is extremely concise and beautiful.</p>
+<h3>code</h3>
 
-<h3>My code</h3>
-
-<p><strong>First code is written by me</strong>. Please take a look at this line:</p>
-
-<blockquote><p>a = 0 &ndash; (long) dividend;</p></blockquote>
-
-<p>Previously I was using the 2 pieces of code below, and both won&rsquo;t work:</p>
-
-<blockquote><p>a = dividend * -1;</p>
-
-<p>a = 0 &ndash; dividend;</p></blockquote>
-
-<p>Some extra attentions should be taken on this.</p>
-
-<pre><code>public int divide(int dividend, int divisor) {
-    long sign = 1, a = dividend, b = divisor;
-    if (dividend &lt; 0) {
-        sign *= -1;
-        // this is where caused my error for last submission
-        a = 0 - (long) dividend;
-    }
-    if (divisor &lt; 0) {
-        sign *= -1;
-        b = 0 - (long) divisor;
-    }
-    return (int) (sign * helper(a, b));
-}
-
-public long helper(long a, long b) {
-    if (a &lt; b) return 0;
-    long remain = a, ans = 0;
-    while (remain != 0) {
-        long count = 1, num = b;
-        if (num &gt; remain) {
-            remain = 0;
-            break;
+<pre><code>public class Solution {
+    public int divide(int dividend, int divisor) {
+        int sign = 1;
+        long x = dividend;
+        long y = divisor;
+        if (x &lt; 0) {
+            x = x * -1;
+            sign *= -1;
         }
-        while (num + num &gt; 0 &amp;&amp; num + num &lt;= remain) {
-            num = num &lt;&lt; 1;
-            count = count &lt;&lt; 1;
+        if (y &lt; 0) {
+            y = y * -1;
+            sign *= -1;
         }
-        remain -= num;
-        ans += count;
+        return divide(sign, x, y);
     }
-    return ans;
-}
-</code></pre>
 
-<p><strong>Second code, translated from c plus plus</strong>.</p>
-
-<pre><code>public int divide(int dividend, int divisor) {
-    long a = dividend &gt;&gt;&gt; 31 == 0 ? dividend : 0 - (long) dividend;
-    long b = divisor &gt;&gt;&gt; 31 == 0 ? divisor : 0 - (long) divisor;
-    long ret = 0;
-    while (a &gt;= b) {
-        long c = b;
-        int i = 0;
-        while (a &gt;= c) {
-            a -= c;
-            ret += 1 &lt;&lt; i++;
-            c &lt;&lt;= 1;
+    private int divide(int sign, long x, long y) {
+        // both x and y are positive numbers
+        if (x &lt; y) {
+            return 0;
+        }
+        long quotient = 0;
+        long partialQuotient;
+        long partialSubtract;
+        while (x &gt;= y) {
+            // the idea is to subtract a certain times of x from y
+            // and save the remainder value back to x
+            partialQuotient = 1;
+            partialSubtract = y;
+            while ((partialSubtract &lt;&lt; 1) &lt;= x) {
+                partialQuotient &lt;&lt;= 1; // doubles quotient
+                partialSubtract &lt;&lt;= 1; // doubles subtraction
+            }
+            x -= partialSubtract;
+            quotient += partialQuotient;
+        }
+        long finalQuo = sign * quotient;
+        if (finalQuo &lt; Integer.MIN_VALUE || finalQuo &gt; Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        } else {
+            return (int) finalQuo;
         }
     }
-    return (int) ((dividend ^ divisor) &gt;&gt;&gt; 31 == 0 ? ret : 0 - ret);
 }
 </code></pre>
 </div>
@@ -330,11 +268,11 @@ public long helper(long a, long b) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -386,7 +324,7 @@ public long helper(long a, long b) {
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Charlie Brown -
+  Copyright &copy; 2015 - Charlie Brown -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
