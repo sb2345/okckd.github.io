@@ -148,13 +148,9 @@
 
 <h3>Analysis</h3>
 
-<p><strong>This question is actually not difficult</strong>.</p>
+<p><strong>This question is not very difficult</strong>, yet commonly seen in interviews.</p>
 
-<p>There are 2 ways to solve using binary search.</p>
-
-<p><strong>First solution, find the pivot and then decide on</strong> which side of the sorted array shall I continue searching. I implmented this code.</p>
-
-<p><strong>Second solution is a very clever way to solve this problem</strong>. Without having any knowledge of pivot, directly check the mid-point against left number and right number. The idea is from <a href="http://leetcode.com/2010/04/searching-element-in-rotated-array.html">this blog</a>.</p>
+<p>Without having any knowledge of pivot, we can check the mid-point value against left value and right value. Read <a href="http://leetcode.com/2010/04/searching-element-in-rotated-array.html">this blog</a> for more.</p>
 
 <h3>Solution</h3>
 
@@ -162,56 +158,43 @@
 
 <h3>My code</h3>
 
-<p>Find pivot and then binary search (written by me)</p>
-
-<pre><code>public int search(int[] A, int target) {
-    int len = A.length;
-    if (len == 0) return 0;
-    int left = 0, right = len - 1;
-    while (right - left &gt; 1) {
-        int mid = (left + right) / 2;
-        if (A[mid] &gt; A[left]) left = mid;
-        else right = mid;
-    }
-    // left now points to max value, and right the min value
-    if (target &gt;= A[0]) {
-        right = left;
-        left = 0;
-    } else {
-        left = right;
-        right = len - 1;
-    }
-    // now search for target between left and right
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (A[mid] == target) return mid;
-        else if (A[mid] &gt; target) right = mid - 1;
-        else if (A[mid] &lt; target) left = mid + 1;
-    }
-    if (right &gt;= 0 &amp;&amp; left &lt; len &amp;&amp; A[left] == target) return left;
-    else return -1;
-}
-</code></pre>
-
-<p><strong>Without knowledge of pivot</strong>, a great solution.</p>
-
 <p>Pay special attention to different larger/smaller conditions. It&rsquo;s very easy to miss a equal sign or something.</p>
 
-<pre><code>public int search(int[] A, int target) {
-    int left = 0;
-    int right = A.length - 1;
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (target == A[mid]) return mid;
-        if (A[left] &lt;= A[mid]) {
-            if (A[left] &lt;= target &amp;&amp; target &lt;= A[mid]) right = mid;
-            else left = mid + 1;
-        } else {
-            if (A[mid] &lt;= target &amp;&amp; target &lt;= A[right]) left = mid;
-            else right = mid - 1;
+<pre><code>public class Solution {
+    public int search(int[] A, int target) {
+        if (A == null || A.length == 0) {
+            return -1;
         }
+        int len = A.length;
+        int left = 0; 
+        int right = len - 1;
+        while (left + 1 &lt; right) {
+            int mid = left + (right - left) / 2;
+            if (A[mid] == target) {
+                return mid;
+            } else if (A[left] &lt; A[mid]) {
+            // remember to pay attention to (A[left] == target) case
+                if (A[left] &lt;= target &amp;&amp; target &lt; A[mid]) {
+                    right = mid;
+                } else {
+                    left = mid;
+                }
+            } else {
+            // remember to pay attention to (A[right] == target) case
+                if (A[mid] &lt; target &amp;&amp; target &lt;= A[right]) {
+                    left = mid;
+                } else {
+                    right = mid;
+                }
+            }
+        }
+        if (A[left] == target) {
+            return left;
+        } else if (A[right] == target) {
+            return right;
+        }
+        return -1;
     }
-    return -1;
 }
 </code></pre>
 </div>

@@ -145,15 +145,11 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
 </table>
 
 
-<h3>Analysis</h3>
-
-<p><strong>There are 2 ways to solve this problem</strong>, stack and DP. I will <strong>not cover DP for now</strong>, but this can be a future task.</p>
-
-<p>There are various way to solve this problem with stack.</p>
-
 <h3>Solution</h3>
 
-<p><strong>Stack method 1 is more straight-forward</strong> (code shown below). The idea is to keep a stack of &ldquo;(&rdquo; indexes, and another variable called &ldquo;last&rdquo;. <strong>Note that only &ldquo;)&rdquo; can violates a pattern</strong>. So whenever I see a &ldquo;(&rdquo;, just push to stack. When the pattern is violated by a &ldquo;)&rdquo;, I update last. The code explains itself very well. If not, <a href="http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488">look here</a></p>
+<p><strong>There are 2 ways to solve this problem</strong>, stack and DP.</p>
+
+<p><strong>Stack method 1 is more straight-forward</strong> (code shown below). The idea is to keep a stack of &ldquo;(&rdquo; indexes, and another variable called &ldquo;last&rdquo;. <strong>Note that only &ldquo;)&rdquo; can violates a pattern</strong>. So whenever I see a &ldquo;(&rdquo;, just push to stack. When the pattern is violated by a &ldquo;)&rdquo;, I update &ldquo;last&rdquo;. The code explains itself very well. If not, <a href="http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488">look here</a></p>
 
 <p><strong>Stack method 2 is more tricky</strong>. This time I will not only push the index of &ldquo;(&rdquo; to stack, but also the index of &ldquo;)&rdquo; when the pattern got violated. It&rsquo;s hard to explain, and hard to think of at first.</p>
 
@@ -163,22 +159,42 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
 
 <h3>My code</h3>
 
-<p>Stack method 1</p>
+<p>Stack method 1 (recommended)</p>
 
-<pre><code>public int longestValidParentheses(String s) {
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    int last = -1, max = 0;
-    char[] ss = s.toCharArray();
-    for (int i = 0; i &lt; ss.length; i++) {
-        if (ss[i] == '(') stack.push(i);
-        else if (stack.isEmpty()) last = i;
-        else {
-            stack.pop();
-            if (stack.isEmpty()) max = Math.max(max, i - last);
-            else max = Math.max(max, i - stack.peek());
+<pre><code>public class Solution {
+    public int longestValidParentheses(String s) {
+        if (s == null || s.length() == 0) {
+            return 0;
         }
+        int len = s.length();
+        int longest = 0;
+        Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+        int start = 0;
+        for (int i = 0; i &lt; len; i++) {
+            char ch = s.charAt(i);
+            if (ch == '(') {
+                // well, no matter what, '(' is alway a valid part
+                // push the index to the stack
+                stack.push(i);
+            } else if (ch == ')') {
+                if (stack.isEmpty()) {
+                    // invalid ')', update 'start' variable
+                    start = i + 1;
+                } else {
+                    int pos = stack.pop();
+                    if (stack.isEmpty()) {
+                        // this is why we need 'start' variable
+                        longest = Math.max(longest, i - start + 1);
+                    } else {
+                        // important: must peek stack again.
+                        // eg. (()()  if don't peek again 
+                        longest = Math.max(longest, i - stack.peek());
+                    }
+                }
+            }
+        }
+        return longest;
     }
-    return max;
 }
 </code></pre>
 
@@ -199,7 +215,7 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
 }
 </code></pre>
 
-<p>DP solution</p>
+<p>DP</p>
 
 <pre><code>public int longestValidParentheses(String s) {
     int len = s.length();
@@ -219,34 +235,6 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
         max = Math.max(max, dp[i]);
     }
     return max;
-}
-</code></pre>
-
-<p><strong>Updated on July 18th, 2014</strong>, rewrite the stack method 1.</p>
-
-<pre><code>public int longestValidParentheses(String s) {
-    if (s == null || s.length() == 0) {
-        return 0;
-    }
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    int start = -1;
-    int longest = 0;
-    char[] input = s.toCharArray();
-    for (int i = 0; i &lt; input.length; i++) {
-        if (input[i] == '(') {
-            stack.push(i);
-        } else if (input[i] == ')' &amp;&amp; stack.isEmpty()) {
-            start = i;
-        } else if (input[i] == ')') {
-            stack.pop();
-            if (stack.isEmpty()) {
-                longest = Math.max(longest, i - start);
-            } else {
-                longest = Math.max(longest, i - stack.peek());
-            }
-        }
-    }
-    return longest;
 }
 </code></pre>
 </div>

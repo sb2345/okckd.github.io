@@ -159,65 +159,56 @@ You should return the indices: <code>[0,9]</code>.<br>
 
 <p><strong>The naive approach takes around 1200ms to pass</strong>, and <strong>the KPM-like approach takes around half of that time</strong>. Both methods are explained well in <a href="http://n00tc0d3r.blogspot.sg/2013/06/substring-with-concatenation-of-all.html">this blog</a>.</p>
 
-<p>I will only explain naive approach.</p>
+<p>I will cover only the naive approach.</p>
 
 <h3>Naive approach</h3>
 
-<p><strong>The naive approach uses a HashMap</strong> for 2 reasons. Reason 1 is because there can be duplications in L, and reason 2 is the searching is faster.</p>
+<p><strong>The naive approach uses a HashMap</strong> for 2 reasons. Reason 1 is because there can be duplications in L, and reason 2 is the searching is faster. For information on HashMap, refer to <strong>[Fundamental] Recap on Java HashMap</strong>.</p>
 
-<p><strong>Time complexity of this solution is O((n &ndash; k * m) x m)</strong>, and <strong>space is the size of list L, O(m)</strong>. If m is not very big, the time can be regarded as O(n).</p>
-
-<p><strong>some variables used in this question</strong>.</p>
-
-<ul>
-<li>n &ndash; length of the input string</li>
-<li>L &ndash; a list of words (dictionary)</li>
-<li>m &ndash; the size of L</li>
-<li>k &ndash; the length of each word in L (all words have same length)</li>
-<li>(k * m) &ndash; this is the length of a possible concatenation</li>
-<li>(n &ndash; k * m) &ndash; this is the number of possible concatenation exist</li>
-</ul>
-
+<p><strong>Time complexity of this solution is O((n &ndash; k * m) x m)</strong>, and space is the size of list L, O(m). If m is not very big, the time can be regarded as O(n).</p>
 
 <h3>My code</h3>
 
-<p><strong>Updated on July 7th</strong>, code.</p>
-
-<pre><code>public List&lt;Integer&gt; findSubstring(String S, String[] L) {
-    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    if (S == null || L == null || S.length() == 0 || L.length == 0) {
-        return ans;
-    }
-    HashMap&lt;String, Integer&gt; set = new HashMap&lt;String, Integer&gt;();
-    for (String str: L) {
-        if (set.containsKey(str)) {
-            set.put(str, set.get(str) + 1);
-        } else {
-            set.put(str, 1);
+<pre><code>public class Solution {
+    public List&lt;Integer&gt; findSubstring(String S, String[] L) {
+        List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+        if (L == null || L.length == 0 || S == null || S.length() == 0) {
+            return ans;
         }
-    }
-    int num = L.length;
-    int len = L[0].length();
-    for (int i = 0; i &lt;= S.length() - num * len; i++) {
-        // start from i, check (num) words of length (len)
-        HashMap&lt;String, Integer&gt; setCopy = new HashMap&lt;String, Integer&gt;(set);
-        for (int j = 0; j &lt; num; j++) {
-            String cur = S.substring(i + j * len, i + (j + 1) * len);
-            if (setCopy.containsKey(cur)) {
-                if (setCopy.get(cur) == 1) {
-                    setCopy.remove(cur);
-                } else {
-                    setCopy.put(cur, setCopy.get(cur) - 1);
-                }
+        int num = L.length;
+        int len = L[0].length();
+        if (num * len &gt; S.length()) {
+            return ans;
+        }
+        // build a hashset, for simplifying the hashmap generation later on
+        HashMap&lt;String, Integer&gt; set = new HashMap&lt;String, Integer&gt;();
+        for (String str: L) {
+            if (set.containsKey(str)) {
+                set.put(str, set.get(str) + 1);
             } else {
-                break;
+                set.put(str, 1);
             }
         }
-        if (setCopy.isEmpty()) {
-            ans.add(i);
+        // starting from i, check Concatenation of All Words
+        for (int i = 0; i &lt;= S.length() - (num * len); i++) {
+            // first build a HashMap from the set that we acquired before
+            HashMap&lt;String, Integer&gt; map = new HashMap&lt;String, Integer&gt;(set);
+            for (int j = 0; j &lt; num; j++) {
+                String str = S.substring(i + j * len, i + (j + 1) * len);
+                if (!map.containsKey(str)) {
+                    break;
+                } else if (map.get(str) &gt; 1) {
+                    map.put(str, map.get(str) - 1);
+                } else if (map.get(str) == 1) {
+                    map.remove(str);
+                }
+            }
+            if (map.isEmpty()) {
+                ans.add(i);
+            }
         }
+        return ans;
     }
-    return ans;
 }
 </code></pre>
 </div>

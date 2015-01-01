@@ -164,8 +164,6 @@ For <i>k</i> = 3, you should return: <code>3-&gt;2-&gt;1-&gt;4-&gt;5</code>
 
 <h3>Analysis</h3>
 
-<p>I solved this problem at first, but second time when I try to do it again, I am faced with great difficulty (maybe I didn&rsquo;t slept well laterly?).</p>
-
 <p><strong>The problem is solved in 2 steps</strong>. First, get the next k-group. If remaining items is less than k, terminate the program. Otherwise, reserve this k-group and keep going.</p>
 
 <p>To solve this question is very tricky. <strong>We need to be clear about this: 4 nodes need to be kept track of</strong>: 2 elements before and after the k-group, and 2 elements within the k-group.</p>
@@ -174,68 +172,48 @@ For <i>k</i> = 3, you should return: <code>3-&gt;2-&gt;1-&gt;4-&gt;5</code>
 
 <h3>Solution</h3>
 
-<p>Used template to solve.</p>
+<p>Use Linkedlist Template from NineChap to solve.</p>
 
-<h3>My code</h3>
-
-<p>A standard solution from <a href="http://blog.csdn.net/linhuanmars/article/details/19957455">this blog</a></p>
-
-<pre><code>public ListNode reverseKGroup(ListNode head, int k) {  
-    if(head == null) return null;
-    ListNode dummy = new ListNode(0);  
-    dummy.next = head;  
-    int count = 0;  
-    ListNode pre = dummy, cur = head;  
-    while(cur != null) {  
-        cur = cur.next;
-        if(++count == k) {
-            pre = reverse(pre, cur);  
-            count = 0; 
+<pre><code>/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (k &lt;= 1 || head == null) {
+            return head;
         }
+        ListNode nextGroup = head;
+        for (int i = 0; i &lt; k; i++) {
+            if (nextGroup == null) {
+                // there isn't k nodes in this list
+                return head;
+            }
+            nextGroup = nextGroup.next;
+        }
+        // now we're sure the list have at least k nodes
+        // reverse this list (by re-connecting the next pointer k times)
+        ListNode newHead = head;
+        ListNode tail = null;
+        for (int i = 0; i &lt; k; i++) {
+            ListNode temp = newHead.next;
+            newHead.next = tail;
+            tail = newHead;
+            newHead = temp;
+        }
+        // now newHead is pointing to the actual new head
+        // temp (which is not accessable here) is same as nextGroup
+        // last step, reconnect everything and call recursion method
+        head.next = reverseKGroup(nextGroup, k);
+        return tail;
     }
-    return dummy.next;  
-}  
-private ListNode reverse(ListNode pre, ListNode end) {
-    ListNode head = pre.next;  
-    ListNode cur = pre.next.next;  
-    while(cur!=end) {  
-        ListNode next = cur.next;  
-        cur.next = pre.next;  
-        pre.next = cur;  
-        cur = next;  
-    }  
-    head.next = end;  
-    return head;  
-} 
-</code></pre>
-
-<p><strong>Updated on June 21st, 2014</strong>, I used Linkedlist Template from NineChap and solved this problem fast and neat!</p>
-
-<pre><code>public ListNode reverseKGroup(ListNode head, int k) {
-    ListNode p = head;
-    int count = 0;
-    while (p != null) {
-        p = p.next;
-        count++;
-    }
-    return helper(head, k, count);
-}
-
-public ListNode helper(ListNode head, int k, int count) {
-    if (head == null || k &lt; 1 || count &lt; k) {
-        return head;
-    }
-    ListNode result = null;
-    ListNode cur = head;
-    for (int i = 0; i &lt; k; i++) {
-        if (cur == null) break;
-        ListNode temp = cur.next;
-        cur.next = result;
-        result = cur;
-        cur = temp;
-    }
-    head.next = helper(cur, k, count - k);
-    return result;
 }
 </code></pre>
 </div>

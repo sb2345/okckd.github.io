@@ -796,56 +796,65 @@ A valid Sudoku board (partially filled) is not necessarily solvable. Only the fi
 
 <p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
 
-<h3>Analysis</h3>
+<h3>Solution</h3>
 
 <p><strong>This is not a difficult problem</strong>.</p>
 
-<p>Most online solutions are same as mine, which make use of <strong>three for-loops</strong> and <strong>nine arrays of length 9</strong> (for each loop) to mark the status.</p>
+<p>Make use of <strong>three for-loops</strong> and <strong>nine arrays of length 9</strong> (for each loop) to mark the status, then do DFS search.</p>
 
-<p>However, <strong>I also found a tricky solution</strong>. See code for details.</p>
-
-<h3>Solution</h3>
-
-<p>Both code are straight-forward.</p>
+<p>However, <strong>I also found a very concise solution</strong>. Read below.</p>
 
 <h3>My code</h3>
 
-<p>Below is my code.</p>
-
-<pre><code>public boolean isValidSudoku(char[][] board) {
-    // first, validate rows
-    for (int i = 0; i &lt; 9; i ++) {
-        int[] mark = new int[9];
-        for(char a: board[i]) 
-            if (a != '.') mark[a-'1'] ++;
-        for (int b: mark) if (b &gt; 1) return false;
-    }
-    // second, validate columns
-    for (int i = 0; i &lt; 9; i ++) {
-        int[] mark = new int[9];
-        for(char[] a: board) 
-            if (a[i] != '.') mark[a[i]-'1'] ++;
-        for (int b: mark) if (b &gt; 1) return false;
-    }
-    // third, validate box
-    for (int a = 0; a &lt;= 6; a += 3) {
-        for (int b = 0; b &lt;= 6; b += 3) {
-            int[] mark = new int[9];
-            for (int i = 0; i &lt;= 2; i ++) 
-                for (int j = 0; j &lt;= 2; j ++) 
-                    // the 9 values are represented at (a+i, b+j)
-                    if (board[a+i][b+j] != '.') mark[board[a+i][b+j]-'1'] ++;
-            for (int c: mark) if (c &gt; 1) return false;
+<pre><code>public class Solution {
+    public boolean isValidSudoku(char[][] board) {
+        if (board == null || board.length == 0) {
+            return false;
         }
+        int N = board.length;
+        for (int i = 0; i &lt; N; i++) {
+            boolean[] foo = new boolean[N];
+            // validate each row
+            for (int j = 0; j &lt; N; j++) {
+                if (board[i][j] != '.') {
+                    if (foo[board[i][j] - '1']) {
+                        return false;
+                    }
+                    foo[board[i][j] - '1'] = true;
+                }
+            }
+            foo = new boolean[N];
+            // validate each column
+            for (int j = 0; j &lt; N; j++) {
+                if (board[j][i] != '.') {
+                    if (foo[board[j][i] - '1']) {
+                        return false;
+                    }
+                    foo[board[j][i] - '1'] = true;
+                }
+            }
+        }
+        for (int a = 0; a &lt; 3; a++) {
+            for (int b = 0; b &lt; 3; b++) {
+                boolean[] foo = new boolean[N];
+                for (int c = 0; c &lt; 3; c++) {
+                    for (int d = 0; d &lt; 3; d++) {
+                        if (board[a * 3 + c][b * 3 + d] != '.') {
+                            if (foo[board[a * 3 + c][b * 3 + d] - '1']) {
+                                return false;
+                            }
+                            foo[board[a * 3 + c][b * 3 + d] - '1'] = true;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
-    // finished validation. if still survives at this point of time, congratulations!
-    return true;
 }
 </code></pre>
 
-<p><strong>The following solution</strong> is from <a href="http://www.cnblogs.com/zhaolizhen/p/Sudoku.html">this blog</a>. It&rsquo;s a very clever and tricky solution!</p>
-
-<p><strong>Note that default value of Java boolean type is false</strong>, so no need to set value after declaration.</p>
+<p><strong>The following solution</strong> is from <a href="http://www.cnblogs.com/zhaolizhen/p/Sudoku.html">this blog</a>. It&rsquo;s a very clever and surprisingly concise code.</p>
 
 <pre><code>public boolean isValidSudoku(char[][] board) {
     boolean[][] rows = new boolean[9][9];
@@ -942,13 +951,9 @@ A valid Sudoku board (partially filled) is not necessarily solvable. Only the fi
 
 <h3>Analysis</h3>
 
-<p><strong>This question is actually not difficult</strong>.</p>
+<p><strong>This question is not very difficult</strong>, yet commonly seen in interviews.</p>
 
-<p>There are 2 ways to solve using binary search.</p>
-
-<p><strong>First solution, find the pivot and then decide on</strong> which side of the sorted array shall I continue searching. I implmented this code.</p>
-
-<p><strong>Second solution is a very clever way to solve this problem</strong>. Without having any knowledge of pivot, directly check the mid-point against left number and right number. The idea is from <a href="http://leetcode.com/2010/04/searching-element-in-rotated-array.html">this blog</a>.</p>
+<p>Without having any knowledge of pivot, we can check the mid-point value against left value and right value. Read <a href="http://leetcode.com/2010/04/searching-element-in-rotated-array.html">this blog</a> for more.</p>
 
 <h3>Solution</h3>
 
@@ -956,56 +961,43 @@ A valid Sudoku board (partially filled) is not necessarily solvable. Only the fi
 
 <h3>My code</h3>
 
-<p>Find pivot and then binary search (written by me)</p>
-
-<pre><code>public int search(int[] A, int target) {
-    int len = A.length;
-    if (len == 0) return 0;
-    int left = 0, right = len - 1;
-    while (right - left &gt; 1) {
-        int mid = (left + right) / 2;
-        if (A[mid] &gt; A[left]) left = mid;
-        else right = mid;
-    }
-    // left now points to max value, and right the min value
-    if (target &gt;= A[0]) {
-        right = left;
-        left = 0;
-    } else {
-        left = right;
-        right = len - 1;
-    }
-    // now search for target between left and right
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (A[mid] == target) return mid;
-        else if (A[mid] &gt; target) right = mid - 1;
-        else if (A[mid] &lt; target) left = mid + 1;
-    }
-    if (right &gt;= 0 &amp;&amp; left &lt; len &amp;&amp; A[left] == target) return left;
-    else return -1;
-}
-</code></pre>
-
-<p><strong>Without knowledge of pivot</strong>, a great solution.</p>
-
 <p>Pay special attention to different larger/smaller conditions. It&rsquo;s very easy to miss a equal sign or something.</p>
 
-<pre><code>public int search(int[] A, int target) {
-    int left = 0;
-    int right = A.length - 1;
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (target == A[mid]) return mid;
-        if (A[left] &lt;= A[mid]) {
-            if (A[left] &lt;= target &amp;&amp; target &lt;= A[mid]) right = mid;
-            else left = mid + 1;
-        } else {
-            if (A[mid] &lt;= target &amp;&amp; target &lt;= A[right]) left = mid;
-            else right = mid - 1;
+<pre><code>public class Solution {
+    public int search(int[] A, int target) {
+        if (A == null || A.length == 0) {
+            return -1;
         }
+        int len = A.length;
+        int left = 0; 
+        int right = len - 1;
+        while (left + 1 &lt; right) {
+            int mid = left + (right - left) / 2;
+            if (A[mid] == target) {
+                return mid;
+            } else if (A[left] &lt; A[mid]) {
+            // remember to pay attention to (A[left] == target) case
+                if (A[left] &lt;= target &amp;&amp; target &lt; A[mid]) {
+                    right = mid;
+                } else {
+                    left = mid;
+                }
+            } else {
+            // remember to pay attention to (A[right] == target) case
+                if (A[mid] &lt; target &amp;&amp; target &lt;= A[right]) {
+                    left = mid;
+                } else {
+                    right = mid;
+                }
+            }
+        }
+        if (A[left] == target) {
+            return left;
+        } else if (A[right] == target) {
+            return right;
+        }
+        return -1;
     }
-    return -1;
 }
 </code></pre>
 </div>
@@ -1089,7 +1081,7 @@ return <code>[3, 4]</code>.
 
 <p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
 
-<h3>Analysis</h3>
+<h3>Solution</h3>
 
 <p><strong>The key to solve this problem is binary search</strong>. Previously my solution is to find the element first, then check left bound and right bound 1 by 1. In worst case, this will take O(n) time. I wrote the code in 20 minutes and passed, but unfortunately, this is not the correct solution.</p>
 
@@ -1097,37 +1089,46 @@ return <code>[3, 4]</code>.
 
 <p><strong>First solution is from <a href="http://xixiaogualu.blogspot.sg/2013/09/search-for-range.html">this blog</a></strong>. Using binary search to search twice &ndash; once for left bound, and once for right bound. Code is below.</p>
 
-<p><strong>Second solution is from <a href="http://rleetcode.blogspot.sg/2014/02/search-for-range-java.html">this blog</a></strong>. This idea is still using binary search, but a tricky way. Instead of searching the number, it searches (number &ndash; 0.5) and (number + 0.5).</p>
-
-<h3>Solution</h3>
-
-<p>I will not explains the code, since it&rsquo;s easy to understand (but hard to write). It&rsquo;s important that I <strong>practice implementing this code by myself</strong> some time.</p>
+<p><strong>Second solution is from <a href="http://rleetcode.blogspot.sg/2014/02/search-for-range-java.html">this blog</a></strong>. This idea is still using binary search, also search twice, but a more tricky manner. Instead of searching the number, it searches (number &ndash; 0.5) and (number + 0.5).</p>
 
 <h3>My code</h3>
 
 <p>Solution 1</p>
 
-<pre><code>public int[] searchRange(int[] A, int target) {
-    int i = 0, j = A.length - 1;
-    int[] result = { -1, -1 };
-    // the idea is to put the lower bound in i
-    while (i &lt; j) {
-        int mid = i + (j - i) / 2;
-        if (target &lt;= A[mid]) j = mid;
-        else i = mid + 1;
+<pre><code>public class Solution {
+    public int[] searchRange(int[] A, int target) {
+        int[] ans = new int[] {-1, -1};
+        if (A == null || A.length == 0) {
+            return ans;
+        }
+        int len = A.length;
+        int left = 0, right = len - 1;
+        while (left &lt; right) {
+            int mid = left + (right - left) / 2;
+            if (A[mid] &gt;= target) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        if (A[left] == target) {
+            ans[0] = left;
+        } else {
+            return ans;
+        }
+        left = 0;
+        right = len - 1;
+        while (left &lt; right) {
+            int mid = left + (right - left + 1) / 2;
+            if (A[mid] &lt;= target) {
+                left = mid;
+            } else {
+                right = mid - 1;
+            }
+        }
+        ans[1] = right;
+        return ans;
     }
-    if (A[i] == target) result[0] = i;
-    else return result;
-    i = 0; 
-    j = A.length;
-    // the idea is to put the upper bound in j-1
-    while (i &lt; j) {
-        int mid = i + (j - i) / 2;
-        if (target &gt;= A[mid]) i = mid + 1;
-        else j = mid;
-    }
-    result[1] = j - 1;
-    return result;
 }
 </code></pre>
 
@@ -1237,41 +1238,38 @@ Here are few examples.<br>
 
 <h3>Analysis</h3>
 
-<p><strong>This is a very basic, yet very difficult question</strong>. It is not easy to get it correct within less then 3 attempts.</p>
+<p><strong>This is a very basic, yet very difficult question</strong>. It is not easy to get it correct at first attempt.</p>
 
-<h3>Solution</h3>
-
-<p>I post 2 solutions, first written by me, second copied from <a href="http://blog.csdn.net/fightforyourdream/article/details/14216321">this blog</a>. Both works the same.</p>
+<p>Read <a href="http://blog.csdn.net/fightforyourdream/article/details/14216321">this blog</a> for more.</p>
 
 <h3>My code</h3>
 
-<pre><code>public int searchInsert(int[] A, int target) {
-    int len = A.length;
-    if (len == 0) return 0;
-    int left = 0, right = len - 1;
-    while (left &lt; right) {
-        int mid = (left + right) / 2;
-        if (A[mid] &gt;= target) right = mid;
-        else left = mid + 1;
+<pre><code>public class Solution {
+    public int searchInsert(int[] A, int target) {
+        if (A == null || A.length == 0) {
+            return 0;
+        }
+        int len = A.length;
+        int left = 0;
+        int right = len - 1;
+        while (left + 1 &lt; right) {
+            int mid = left + (right - left) / 2;
+            if (A[mid] &gt;= target) {
+                right = mid;
+            } else {
+                left = mid;
+            }
+        }
+        // now are have a adjacent range [left, right]
+        if (target &lt;= A[left]) {
+            return left;
+        } else if (target &lt;= A[right]) {
+            // remember not to miss the == case
+            return right;
+        } else {
+            return right + 1;
+        }
     }
-    if (A[left] &lt; target) return left + 1;
-    return left;
-}
-</code></pre>
-
-<p>Another code</p>
-
-<pre><code>public int searchInsert(int[] A, int target) {
-    int len = A.length;
-    if (len == 0) return 0;
-    int left = 0, right = len - 1;
-    while (left &lt;= right) {
-        int mid = (left + right) / 2;
-        if (A[mid] &gt; target) right = mid - 1;
-        else if (A[mid] &lt; target) left = mid + 1;
-        else return mid;
-    }
-    return left;
 }
 </code></pre>
 </div>
@@ -1359,73 +1357,59 @@ Here are some examples. Inputs are in the left-hand column and its corresponding
 
 <h3>Analysis</h3>
 
-<p><strong>There is only 1 popular solution on the Internet</strong>, which is same as mine.</p>
-
-<p>The image below explains it very well (for the input number &ldquo;687432&rdquo;).</p>
+<p>The image below explains the solution very well (for the input number &ldquo;687432&rdquo;).</p>
 
 <p><img class="middle" src="/assets/images/next_permutation.png"></p>
 
 <h3>Solution</h3>
 
-<p>My first attempted code is a bit lenthy but works perfectly.</p>
+<p>Read <a href="http://blog.csdn.net/havenoidea/article/details/12176737">this blog</a> for a very nice piece of code.</p>
 
-<p>Second time, I read <a href="http://blog.csdn.net/havenoidea/article/details/12176737">this blog</a> and optimized my code. It&rsquo;s same solution, actually.</p>
+<p>The following code is written by me.</p>
 
 <h3>My code</h3>
 
-<p>My first code.</p>
-
-<pre><code>public void nextPermutation(int[] num) {
-    if (num.length &lt; 2) return;
-    // locate 2 pointers: m and n
-    int m = num.length - 2;
-    while (m &gt;= 0 &amp;&amp; num[m] &gt;= num[m+1]) m --;
-    if (m == -1) {
-        Arrays.sort(num);
-        return;
+<pre><code>public class Solution {
+    public void nextPermutation(int[] num) {
+        if (num == null || num.length &lt;= 1) {
+            return;
+        }
+        int len = num.length;
+        int p = len - 2;
+        // note that when values are equals, proceed the pointer! 
+        // same for line 22
+        while (p &gt;= 0 &amp;&amp; num[p] &gt;= num[p + 1]) {
+            // move p to left as long as its value is larger than next num
+            // we want to find the end of increasing sequence (from end to start)
+            p--;
+        }
+        if (p == -1) {
+            // the input is a strictly decreasing sequence
+            Arrays.sort(num);
+            return;
+        }
+        // replace number at p with an larger value found in the right of p
+        int w = len - 1;
+        while (num[w] &lt;= num[p]) {
+            w--;
+        }
+        // ok, now swap number at p and w
+        swop(num, p, w);
+        // reverse all numbers to the right of p
+        reverse(num, p + 1, len - 1);
     }
-    int n = num.length - 1;
-    while (num[n] &lt;= num[m]) n --;
-    // now number pointer by m and n should be swopped
-    num = swopNum(num, m, n);
-    // then, head and tail swop from position (m+1) to the end
-    int left = m + 1, right = num.length - 1;
-    while (left &lt; right)
-        num = swopNum(num, left++, right--);
-}
 
-private int[] swopNum(int[] num, int a, int b) {
-    num[a] = num[a] + num[b];
-    num[b] = num[a] - num[b];
-    num[a] = num[a] - num[b];
-    return num;
-}
-</code></pre>
-
-<p>Second time code.</p>
-
-<pre><code>public void nextPermutation(int[] num) {
-    int len = num.length;
-    if (len &lt; 2) return;
-    int posStartReverse = 0, last = len - 1;
-    for (int i = len - 2; i &gt;= 0; i --) {
-        if (num[i] &gt;= num[i+1]) continue;
-        for (int j = len - 1; j &gt; i; j --) 
-            if (num[i] &lt; num[j]) {
-                swapNum(num, i, j);
-                break;
-            }
-        posStartReverse = i + 1;
-        break;
+    private void swop(int[] num, int a, int b) {
+        int temp = num[a];
+        num[a] = num[b];
+        num[b] = temp;
     }
-    while (posStartReverse &lt; last) swapNum(num, posStartReverse++, last--);
-}
 
-private int[] swapNum(int[] num, int a, int b) {
-    num[a] = num[a] + num[b];
-    num[b] = num[a] - num[b];
-    num[a] = num[a] - num[b];
-    return num;
+    private void reverse(int[] num, int a, int b) {
+        while (a &lt; b) {
+            swop(num, a++, b--);
+        }
+    }
 }
 </code></pre>
 </div>

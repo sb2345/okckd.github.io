@@ -148,15 +148,11 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
 </table>
 
 
-<h3>Analysis</h3>
-
-<p><strong>There are 2 ways to solve this problem</strong>, stack and DP. I will <strong>not cover DP for now</strong>, but this can be a future task.</p>
-
-<p>There are various way to solve this problem with stack.</p>
-
 <h3>Solution</h3>
 
-<p><strong>Stack method 1 is more straight-forward</strong> (code shown below). The idea is to keep a stack of &ldquo;(&rdquo; indexes, and another variable called &ldquo;last&rdquo;. <strong>Note that only &ldquo;)&rdquo; can violates a pattern</strong>. So whenever I see a &ldquo;(&rdquo;, just push to stack. When the pattern is violated by a &ldquo;)&rdquo;, I update last. The code explains itself very well. If not, <a href="http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488">look here</a></p>
+<p><strong>There are 2 ways to solve this problem</strong>, stack and DP.</p>
+
+<p><strong>Stack method 1 is more straight-forward</strong> (code shown below). The idea is to keep a stack of &ldquo;(&rdquo; indexes, and another variable called &ldquo;last&rdquo;. <strong>Note that only &ldquo;)&rdquo; can violates a pattern</strong>. So whenever I see a &ldquo;(&rdquo;, just push to stack. When the pattern is violated by a &ldquo;)&rdquo;, I update &ldquo;last&rdquo;. The code explains itself very well. If not, <a href="http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488">look here</a></p>
 
 <p><strong>Stack method 2 is more tricky</strong>. This time I will not only push the index of &ldquo;(&rdquo; to stack, but also the index of &ldquo;)&rdquo; when the pattern got violated. It&rsquo;s hard to explain, and hard to think of at first.</p>
 
@@ -166,22 +162,42 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
 
 <h3>My code</h3>
 
-<p>Stack method 1</p>
+<p>Stack method 1 (recommended)</p>
 
-<pre><code>public int longestValidParentheses(String s) {
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    int last = -1, max = 0;
-    char[] ss = s.toCharArray();
-    for (int i = 0; i &lt; ss.length; i++) {
-        if (ss[i] == '(') stack.push(i);
-        else if (stack.isEmpty()) last = i;
-        else {
-            stack.pop();
-            if (stack.isEmpty()) max = Math.max(max, i - last);
-            else max = Math.max(max, i - stack.peek());
+<pre><code>public class Solution {
+    public int longestValidParentheses(String s) {
+        if (s == null || s.length() == 0) {
+            return 0;
         }
+        int len = s.length();
+        int longest = 0;
+        Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+        int start = 0;
+        for (int i = 0; i &lt; len; i++) {
+            char ch = s.charAt(i);
+            if (ch == '(') {
+                // well, no matter what, '(' is alway a valid part
+                // push the index to the stack
+                stack.push(i);
+            } else if (ch == ')') {
+                if (stack.isEmpty()) {
+                    // invalid ')', update 'start' variable
+                    start = i + 1;
+                } else {
+                    int pos = stack.pop();
+                    if (stack.isEmpty()) {
+                        // this is why we need 'start' variable
+                        longest = Math.max(longest, i - start + 1);
+                    } else {
+                        // important: must peek stack again.
+                        // eg. (()()  if don't peek again 
+                        longest = Math.max(longest, i - stack.peek());
+                    }
+                }
+            }
+        }
+        return longest;
     }
-    return max;
 }
 </code></pre>
 
@@ -202,7 +218,7 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
 }
 </code></pre>
 
-<p>DP solution</p>
+<p>DP</p>
 
 <pre><code>public int longestValidParentheses(String s) {
     int len = s.length();
@@ -222,34 +238,6 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
         max = Math.max(max, dp[i]);
     }
     return max;
-}
-</code></pre>
-
-<p><strong>Updated on July 18th, 2014</strong>, rewrite the stack method 1.</p>
-
-<pre><code>public int longestValidParentheses(String s) {
-    if (s == null || s.length() == 0) {
-        return 0;
-    }
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    int start = -1;
-    int longest = 0;
-    char[] input = s.toCharArray();
-    for (int i = 0; i &lt; input.length; i++) {
-        if (input[i] == '(') {
-            stack.push(i);
-        } else if (input[i] == ')' &amp;&amp; stack.isEmpty()) {
-            start = i;
-        } else if (input[i] == ')') {
-            stack.pop();
-            if (stack.isEmpty()) {
-                longest = Math.max(longest, i - start);
-            } else {
-                longest = Math.max(longest, i - stack.peek());
-            }
-        }
-    }
-    return longest;
 }
 </code></pre>
 </div>
@@ -347,8 +335,6 @@ For <i>k</i> = 3, you should return: <code>3-&gt;2-&gt;1-&gt;4-&gt;5</code>
 
 <h3>Analysis</h3>
 
-<p>I solved this problem at first, but second time when I try to do it again, I am faced with great difficulty (maybe I didn&rsquo;t slept well laterly?).</p>
-
 <p><strong>The problem is solved in 2 steps</strong>. First, get the next k-group. If remaining items is less than k, terminate the program. Otherwise, reserve this k-group and keep going.</p>
 
 <p>To solve this question is very tricky. <strong>We need to be clear about this: 4 nodes need to be kept track of</strong>: 2 elements before and after the k-group, and 2 elements within the k-group.</p>
@@ -357,68 +343,48 @@ For <i>k</i> = 3, you should return: <code>3-&gt;2-&gt;1-&gt;4-&gt;5</code>
 
 <h3>Solution</h3>
 
-<p>Used template to solve.</p>
+<p>Use Linkedlist Template from NineChap to solve.</p>
 
-<h3>My code</h3>
-
-<p>A standard solution from <a href="http://blog.csdn.net/linhuanmars/article/details/19957455">this blog</a></p>
-
-<pre><code>public ListNode reverseKGroup(ListNode head, int k) {  
-    if(head == null) return null;
-    ListNode dummy = new ListNode(0);  
-    dummy.next = head;  
-    int count = 0;  
-    ListNode pre = dummy, cur = head;  
-    while(cur != null) {  
-        cur = cur.next;
-        if(++count == k) {
-            pre = reverse(pre, cur);  
-            count = 0; 
+<pre><code>/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (k &lt;= 1 || head == null) {
+            return head;
         }
+        ListNode nextGroup = head;
+        for (int i = 0; i &lt; k; i++) {
+            if (nextGroup == null) {
+                // there isn't k nodes in this list
+                return head;
+            }
+            nextGroup = nextGroup.next;
+        }
+        // now we're sure the list have at least k nodes
+        // reverse this list (by re-connecting the next pointer k times)
+        ListNode newHead = head;
+        ListNode tail = null;
+        for (int i = 0; i &lt; k; i++) {
+            ListNode temp = newHead.next;
+            newHead.next = tail;
+            tail = newHead;
+            newHead = temp;
+        }
+        // now newHead is pointing to the actual new head
+        // temp (which is not accessable here) is same as nextGroup
+        // last step, reconnect everything and call recursion method
+        head.next = reverseKGroup(nextGroup, k);
+        return tail;
     }
-    return dummy.next;  
-}  
-private ListNode reverse(ListNode pre, ListNode end) {
-    ListNode head = pre.next;  
-    ListNode cur = pre.next.next;  
-    while(cur!=end) {  
-        ListNode next = cur.next;  
-        cur.next = pre.next;  
-        pre.next = cur;  
-        cur = next;  
-    }  
-    head.next = end;  
-    return head;  
-} 
-</code></pre>
-
-<p><strong>Updated on June 21st, 2014</strong>, I used Linkedlist Template from NineChap and solved this problem fast and neat!</p>
-
-<pre><code>public ListNode reverseKGroup(ListNode head, int k) {
-    ListNode p = head;
-    int count = 0;
-    while (p != null) {
-        p = p.next;
-        count++;
-    }
-    return helper(head, k, count);
-}
-
-public ListNode helper(ListNode head, int k, int count) {
-    if (head == null || k &lt; 1 || count &lt; k) {
-        return head;
-    }
-    ListNode result = null;
-    ListNode cur = head;
-    for (int i = 0; i &lt; k; i++) {
-        if (cur == null) break;
-        ListNode temp = cur.next;
-        cur.next = result;
-        result = cur;
-        cur = temp;
-    }
-    head.next = helper(cur, k, count - k);
-    return result;
 }
 </code></pre>
 </div>
@@ -500,7 +466,7 @@ Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and
 
 <ul>
 <li>k &ndash; number of lists</li>
-<li>n &ndash; String length of each list</li>
+<li>n &ndash; length of each list</li>
 </ul>
 
 
@@ -508,7 +474,9 @@ Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and
 
 <p><strong>You may wonder how I calculate time complexity</strong>. See, each round of sort, nk nodes are read and sorted. This happened O(logk) times, where k is the number of lists. Thus totoal time take is O(nk x logk).</p>
 
-<p><strong>Second approach is heap sort</strong>. The idea of this is to always keep a sorted list of the head of each list. But before the code, what actually is heap/priority queue?</p>
+<p><strong>Second approach is heap sort</strong>. The idea of this is to always keep a sorted list of the head of each list. When we retrieve items from the heap, it only take O(logk) time to find the next smallest element.</p>
+
+<p>In case you do not know about heap (or priority queue):</p>
 
 <blockquote><p><strong><a href="http://en.wikipedia.org/wiki/Heap_%28data_structure%29">Heap</a> is a specialized tree-based data structure</strong>. Heap is crucial in Dijkstra&rsquo;s algorithm and heapsort.</p>
 
@@ -551,7 +519,7 @@ Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and
 
 <h3>Solution</h3>
 
-<p>First, divide and conquer code is lengthy but medium difficulty.</p>
+<p>Divide and conquer code is lengthy but medium difficulty.</p>
 
 <p>Second solution, however, is not as easy. <strong>Especially when we have to write Comparator on our own</strong>.  A priority queue (heap) is implemented and head of each list is inserted into the heap. Then poll elements out from the heap until heap is empty.</p>
 
@@ -559,77 +527,103 @@ Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and
 
 <p><strong>Merge sort code, written by me</strong></p>
 
-<pre><code>public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
-    if (lists == null || lists.size() == 0) {
-        return null;
-    }
-    return mergeHelper(lists, 0, lists.size() - 1);
-}
-
-private ListNode mergeHelper(List&lt;ListNode&gt; lists, int start, int end) {
-    if (start == end) {
-        return lists.get(start);
-    } 
-    int mid = start + (end - start) / 2;
-    ListNode firstHalf = mergeHelper(lists, start, mid);
-    ListNode secondHalf = mergeHelper(lists, mid + 1, end);
-    return mergeTwo(firstHalf, secondHalf);
-}
-
-private ListNode mergeTwo(ListNode head1, ListNode head2) {
-    ListNode dummy = new ListNode(0);
-    ListNode p = dummy;
-    while (head1 != null &amp;&amp; head2 != null) {
-        if (head1.val &lt; head2.val) {
-            p.next = head1;
-            head1 = head1.next;
-            p = p.next;
-        } else {
-            p.next = head2;
-            head2 = head2.next;
-            p = p.next;
+<pre><code>/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
+        if (lists == null || lists.size() == 0) {
+            return null;
         }
+        return mergeHelper(lists, 0, lists.size() - 1);
     }
-    if (head1 == null) {
-        p.next = head2;
-    } else {
-        p.next = head1;
+
+    private ListNode mergeHelper(List&lt;ListNode&gt; lists, int start, int end) {
+        if (start == end) {
+            return lists.get(start);
+        } 
+        int mid = start + (end - start) / 2;
+        ListNode firstHalf = mergeHelper(lists, start, mid);
+        ListNode secondHalf = mergeHelper(lists, mid + 1, end);
+        return mergeTwo(firstHalf, secondHalf);
     }
-    return dummy.next;
+
+    private ListNode mergeTwo(ListNode head1, ListNode head2) {
+        ListNode dummy = new ListNode(0);
+        ListNode p = dummy;
+        while (head1 != null &amp;&amp; head2 != null) {
+            if (head1.val &lt; head2.val) {
+                p.next = head1;
+                head1 = head1.next;
+                p = p.next;
+            } else {
+                p.next = head2;
+                head2 = head2.next;
+                p = p.next;
+            }
+        }
+        if (head1 == null) {
+            p.next = head2;
+        } else {
+            p.next = head1;
+        }
+        return dummy.next;
+    }
 }
 </code></pre>
 
 <p><strong>Heap sort code, written by me</strong>. <a href="http://answer.ninechapter.com/solutions/merge-k-sorted-lists/">source</a></p>
 
-<pre><code>public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
-    if (lists == null || lists.size() == 0) {
-        return null;
-    }
-    int size = lists.size();
-    NodeComparator comparator = new NodeComparator();
-    Queue&lt;ListNode&gt; queue = new PriorityQueue&lt;ListNode&gt;(size, comparator);
-    for (ListNode node: lists) {
-        if (node == null) {
-            continue;
+<pre><code>/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
+        if (lists == null || lists.size() == 0) {
+            return null;
         }
-        queue.offer(node);
-    }
-    ListNode dummy = new ListNode(0);
-    ListNode p = dummy;
-    while (!queue.isEmpty()) {
-        p.next = queue.poll();
-        p = p.next;
-        if (p.next != null) {
-            queue.offer(p.next);
+        int size = lists.size();
+        // create a heap with Java priority queue, set the initial size
+        Queue&lt;ListNode&gt; heap = new PriorityQueue(size, new NodeComparator());
+        // add all ListNode into the heap
+        for (ListNode node: lists) {
+            if (node != null) {
+                heap.add(node);
+            }
         }
+        // start to link nodes from smallest to largest
+        ListNode dummy = new ListNode(0);
+        ListNode p = dummy;
+        while (!heap.isEmpty()) {
+            p.next = heap.remove();
+            p = p.next;
+            if (p.next != null) {
+                heap.add(p.next);
+            }
+        }
+        return dummy.next;
     }
-    p.next = null;
-    return dummy.next;
-}
 
-class NodeComparator implements Comparator&lt;ListNode&gt; {
-    public int compare(ListNode o1, ListNode o2) {
-        return o1.val - o2.val;
+    class NodeComparator implements Comparator&lt;ListNode&gt; {
+        public int compare(ListNode n1, ListNode n2) {
+            return n1.val - n2.val;
+        }
     }
 }
 </code></pre>
@@ -723,65 +717,56 @@ You should return the indices: <code>[0,9]</code>.<br>
 
 <p><strong>The naive approach takes around 1200ms to pass</strong>, and <strong>the KPM-like approach takes around half of that time</strong>. Both methods are explained well in <a href="http://n00tc0d3r.blogspot.sg/2013/06/substring-with-concatenation-of-all.html">this blog</a>.</p>
 
-<p>I will only explain naive approach.</p>
+<p>I will cover only the naive approach.</p>
 
 <h3>Naive approach</h3>
 
-<p><strong>The naive approach uses a HashMap</strong> for 2 reasons. Reason 1 is because there can be duplications in L, and reason 2 is the searching is faster.</p>
+<p><strong>The naive approach uses a HashMap</strong> for 2 reasons. Reason 1 is because there can be duplications in L, and reason 2 is the searching is faster. For information on HashMap, refer to <strong>[Fundamental] Recap on Java HashMap</strong>.</p>
 
-<p><strong>Time complexity of this solution is O((n &ndash; k * m) x m)</strong>, and <strong>space is the size of list L, O(m)</strong>. If m is not very big, the time can be regarded as O(n).</p>
-
-<p><strong>some variables used in this question</strong>.</p>
-
-<ul>
-<li>n &ndash; length of the input string</li>
-<li>L &ndash; a list of words (dictionary)</li>
-<li>m &ndash; the size of L</li>
-<li>k &ndash; the length of each word in L (all words have same length)</li>
-<li>(k * m) &ndash; this is the length of a possible concatenation</li>
-<li>(n &ndash; k * m) &ndash; this is the number of possible concatenation exist</li>
-</ul>
-
+<p><strong>Time complexity of this solution is O((n &ndash; k * m) x m)</strong>, and space is the size of list L, O(m). If m is not very big, the time can be regarded as O(n).</p>
 
 <h3>My code</h3>
 
-<p><strong>Updated on July 7th</strong>, code.</p>
-
-<pre><code>public List&lt;Integer&gt; findSubstring(String S, String[] L) {
-    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    if (S == null || L == null || S.length() == 0 || L.length == 0) {
-        return ans;
-    }
-    HashMap&lt;String, Integer&gt; set = new HashMap&lt;String, Integer&gt;();
-    for (String str: L) {
-        if (set.containsKey(str)) {
-            set.put(str, set.get(str) + 1);
-        } else {
-            set.put(str, 1);
+<pre><code>public class Solution {
+    public List&lt;Integer&gt; findSubstring(String S, String[] L) {
+        List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
+        if (L == null || L.length == 0 || S == null || S.length() == 0) {
+            return ans;
         }
-    }
-    int num = L.length;
-    int len = L[0].length();
-    for (int i = 0; i &lt;= S.length() - num * len; i++) {
-        // start from i, check (num) words of length (len)
-        HashMap&lt;String, Integer&gt; setCopy = new HashMap&lt;String, Integer&gt;(set);
-        for (int j = 0; j &lt; num; j++) {
-            String cur = S.substring(i + j * len, i + (j + 1) * len);
-            if (setCopy.containsKey(cur)) {
-                if (setCopy.get(cur) == 1) {
-                    setCopy.remove(cur);
-                } else {
-                    setCopy.put(cur, setCopy.get(cur) - 1);
-                }
+        int num = L.length;
+        int len = L[0].length();
+        if (num * len &gt; S.length()) {
+            return ans;
+        }
+        // build a hashset, for simplifying the hashmap generation later on
+        HashMap&lt;String, Integer&gt; set = new HashMap&lt;String, Integer&gt;();
+        for (String str: L) {
+            if (set.containsKey(str)) {
+                set.put(str, set.get(str) + 1);
             } else {
-                break;
+                set.put(str, 1);
             }
         }
-        if (setCopy.isEmpty()) {
-            ans.add(i);
+        // starting from i, check Concatenation of All Words
+        for (int i = 0; i &lt;= S.length() - (num * len); i++) {
+            // first build a HashMap from the set that we acquired before
+            HashMap&lt;String, Integer&gt; map = new HashMap&lt;String, Integer&gt;(set);
+            for (int j = 0; j &lt; num; j++) {
+                String str = S.substring(i + j * len, i + (j + 1) * len);
+                if (!map.containsKey(str)) {
+                    break;
+                } else if (map.get(str) &gt; 1) {
+                    map.put(str, map.get(str) - 1);
+                } else if (map.get(str) == 1) {
+                    map.remove(str);
+                }
+            }
+            if (map.isEmpty()) {
+                ans.add(i);
+            }
         }
+        return ans;
     }
-    return ans;
 }
 </code></pre>
 </div>
