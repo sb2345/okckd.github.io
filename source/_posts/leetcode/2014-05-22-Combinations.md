@@ -46,7 +46,7 @@ If <i>n</i> = 4 and <i>k</i> = 2, a solution is:
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">Code#2 takes time</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 
@@ -60,9 +60,9 @@ The solution is standard, and we must be able to write it without even using our
 
 ### Solution
 
-__Almost EVERYBODY online use recursive DFS calls to solve this problem__. My first attempt is also this method. It's quite easy to write. 
+Solution 1, recursive DFS calls. 
 
-__However, after a re-think, I solved with nested loop__. I think this is a very good solution. Code shown below. 
+Solution 2, nested loop. Code is shown below. 
 
 ### Code
 

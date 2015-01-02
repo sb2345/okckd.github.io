@@ -48,7 +48,7 @@ If there are multiple such windows, you are guaranteed that there will always be
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">real long time</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 

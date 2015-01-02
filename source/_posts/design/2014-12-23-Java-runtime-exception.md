@@ -8,7 +8,7 @@ tags: [  ]
 
 ### Exceptions in Java
 
-In Java, there are [3 types of exceptions](http://www.tutorialspoint.com/java/java_exceptions.htm): 
+In Java, there are [3 categories of exceptions](http://www.tutorialspoint.com/java/java_exceptions.htm): 
 
 1. checked exceptions
     1. Typically a user error
@@ -25,7 +25,7 @@ In Java, there are [3 types of exceptions](http://www.tutorialspoint.com/java/ja
     1. eg. stack overflow occurs
     1. also ignored at the time of compilation
 
-#### checked exception
+#### 1. checked exception
 
 [A checked exception](http://stackoverflow.com/a/2190175) __must be handled explicitly__ by the code (by either putting a try/catch block around the code, or adding a "throws" clause to the method).
 
@@ -33,7 +33,7 @@ The [class Exception](http://docs.oracle.com/javase/7/docs/api/java/lang/Excepti
 
 Note: __java.lang.RuntimeException__ is a subclass of __java.lang.Exception__. 
 
-#### un-checked exceptions (RuntimeException)
+#### 2. un-checked exceptions (RuntimeException)
 
 A un-checked exception __does not need__ to be explicitly handled. 
 

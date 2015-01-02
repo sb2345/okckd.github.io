@@ -52,23 +52,17 @@ Given <b>board</b> =
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">50 minutes</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-__This is a very classical DFS question__. Being able to write this solution fast and precise is very very essential. 
-
-The solution is recursive DFS search. 
-
 ### Solution
 
-__I posted my code first, on which I spend nearly an hour's time__. 
+__This is a very classical DFS question__. Writing this solution fast and precise is very importnt. 
 
-This idea is good, but I had made a serious mistakes. That is, when the find() method returns true, I shall terminate the program immediately. I got it wrong at first, and wasted a ton of time in debugging. 
+The solution is recursive DFS search. 
 
 __The second code posted below comes from [this blog](http://needjobasap.blogspot.sg/2014/01/word-search-leetcode.html)__. The code is slightly shorter because it checks __visited_array__ at the beginning of search() method, instead of for each directions. Other than that, it's basically same solution. 
 

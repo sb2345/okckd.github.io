@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/spiral-matrix/)
 
 <div class="question-content">
@@ -30,6 +30,7 @@ You should return <code>[1,2,3,6,9,8,7,4,5]</code>.
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -45,7 +46,7 @@ You should return <code>[1,2,3,6,9,8,7,4,5]</code>.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">an hour</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
@@ -53,33 +54,11 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-__This question is basic mathematics__. There is another similar question __Spiral Matrix II__. 
+__This question is basic mathematics__. There is another similar question __Spiral Matrix__. 
 
 The difficult part is writing the code. 
 
-### Solution
-
-Code is easy to read. 
-
 ### My code
-
-I spent 30 min coding, and another 30 min debugging. __This is not an easy question__! 
-
-I spent a long time in this part: 
-
-
-    if (cur >= m / 2) {
-        // Take m=4, n=100, cur=2, no fill required
-        // Take m=5, n=100, cur=2, fill in from (2,2) to (2,97) inclusive
-        // which is (cur,cur) to (cur,n-cur-1)
-        if (m % 2 == 0) return;
-        for (int i = cur; i < n - cur; i++)
-            ans.add(matrix[cur][i]);
-    }
-
-
-I shall take care of it next time. 
-
 
     public ArrayList<Integer> spiralOrder(int[][] matrix) {
         ArrayList<Integer> ans = new ArrayList<Integer>();

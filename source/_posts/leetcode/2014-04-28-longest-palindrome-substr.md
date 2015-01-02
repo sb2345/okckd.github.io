@@ -45,13 +45,17 @@ There are 2 solutions. One is __DP__ which is O(N^2) time and O(N^2) space. Anot
 
 __DP solution is straight-forward__. Use 2D array to check palindrome intervals and make it as either true or false. Meanwhile, update longest. 
 
+O(N^2) time and O(N^2) space
+
 __Search around corner__ is basically iterate through the entire string and assume each char (or char pair) as center of the palindrome. The code isn't difficult once you come up with the idea. 
 
 For more, read [this post](http://leetcode.com/2011/11/longest-palindromic-substring-part-i.html)
 
+O(N^2) time and O(1) space
+
 ### My code 
 
-DP solution, O(N^2) time and O(N^2) space
+DP solution
 
     public class Solution {
         public String longestPalindrome(String s) {
@@ -85,7 +89,7 @@ DP solution, O(N^2) time and O(N^2) space
         }
     }
 
-Search around corner, O(N^2) time and O(1) space
+Search around corner
 
     public class Solution {
         public String longestPalindrome(String s) {

@@ -53,15 +53,13 @@ Write the code that will take a string and make this conversion given a number o
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-__Two ways to work out this problem__. We can solve it naitively, or use some math function to achieve the result. 
-
 ### Solution
 
-1. Insert string s vertically into a 2d array, char by char. After this is finished, make the result string by reading the 2d array horizontally. See code 1 below. 
+__Two ways to work out this problem__.
 
-1. Calculate and find out which char from s should be inserted into the result list. Then build the result list directly. See code 2 and code 3 below. 
+Solution 1. Insert string s vertically into a 2d array, char by char. After this is finished, make the result string by reading the 2d array horizontally. See code 1 below. 
+
+Solution 2. Calculate and find out (in sequence) which char from s should be inserted into the result list. Then build the result list directly. See code 2 below. 
 
 ### My code 
 
@@ -116,7 +114,7 @@ One. Fill in the whole string, then parse the result.
         }
     }
 
-Two. Pick the correct char and form the result string. 
+Two. Pick the correct char and form the result string, and fill it in the result string. 
 
     public class Solution {
         public String convert(String s, int nRows) {
@@ -141,24 +139,5 @@ Two. Pick the correct char and form the result string.
             if (temp < s.length())
                 return s.substring(temp, temp + 1);
             return "";
-        }
-    }
-
-Three. A super-concise version of above code, credit goes to [this blog](http://blog.csdn.net/linhuanmars/article/details/21145039). 
-
-    public class Solution {
-        public String convert(String s, int nRows) {
-            if (s == null || s.length() == 0 || nRows <= 0) return "";
-            if (nRows == 1) return s;
-            StringBuilder res = new StringBuilder();
-            int size = 2 * nRows - 2;
-            for (int i = 0; i < nRows; i++) {
-                for (int j = i; j < s.length(); j += size) {
-                    res.append(s.charAt(j));
-                    if (i != 0 && i != nRows - 1 && j + size - 2 * i < s.length())
-                        res.append(s.charAt(j + size - 2 * i));
-                }
-            }
-            return res.toString();
         }
     }

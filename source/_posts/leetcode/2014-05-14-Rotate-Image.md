@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/rotate-image/)
 
 <div class="question-content">
@@ -18,6 +18,7 @@ Could you do this in-place?</p><p></p>
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -39,41 +40,46 @@ Could you do this in-place?</p><p></p>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
+### Solution
 
 This question is easy, just swap numbers in place. 
 
-### Solution
-
-Code is easy.
-
 ### My code 
 
-My solution
-
-
-    public void rotate(int[][] matrix) {
-        int n = matrix.length;
-        for (int a = 0; a <= n / 2 - 1; a ++) {
-            for (int b = 0; b <= (n - 1) / 2; b ++){
-                int temp = matrix[a][b];
-                matrix[a][b] = matrix[n-1-b][a];
-                matrix[n-1-b][a] = matrix[n-1-a][n-1-b];
-                matrix[n-1-a][n-1-b] = matrix[b][n-1-a];
-                matrix[b][n-1-a] = temp;
+    public class Solution {
+        public void rotate(int[][] matrix) {
+            if (matrix == null) {
+                return;
+            }
+            int N = matrix.length;
+            // 5 - 2/3
+            // 6 - 3/3
+            int m = N / 2;
+            int n = (N + 1) / 2;
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    // eg. N = 4, i = 0, j = 1
+                    // (0, 1) <- (2, 0)
+                    // (2, 0) <- (3, 2)
+                    // (3, 2) <- (1, 3)
+                    // (1, 3) <- (0, 1)
+                    int temp = matrix[i][j];
+                    matrix[i][j] = matrix[N - 1 - j][i];
+                    matrix[N - 1 - j][i] = matrix[N - 1 - i][N - 1 - j];
+                    matrix[N - 1 - i][N - 1 - j] = matrix[j][N - 1 - i];
+                    matrix[j][N - 1 - i] = temp;
+                }
             }
         }
     }
 
-
 A cleaner version from [this blog](http://blog.csdn.net/kenden23/article/details/17200067). 
 
-This code is very concise and beautiful, but actually it just __added 2 more variables__ compared to my solution. 
+This code is very concise and beautiful, because it __added the following 2 variables__: 
 
 > x = n-1-a
-
+>
 > y = n-1-b
-
 
     public void rotate(int[][] matrix) {
         for (int a = 0, x = matrix.length - 1; a < x; a++, x--) {

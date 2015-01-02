@@ -7,10 +7,11 @@ tags: [  ]
 ---
 
 ### Question 
+
 [link](http://oj.leetcode.com/problems/sudoku-solver/)
 
 <div class="question-content">
-            <p></p><p>Write a program to solve a Sudoku puzzle by filling the empty cells.</p>
+<p></p><p>Write a program to solve a Sudoku puzzle by filling the empty cells.</p>
 
 <p>Empty cells are indicated by the character <code>'.'</code>.</p>
 
@@ -28,6 +29,7 @@ tags: [  ]
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -43,98 +45,72 @@ tags: [  ]
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">Difficult</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-__This is a very classic DFS search problem__, and it is not easy! 
-
 ### Solution
 
-__The solution simply brute force DFS__. 
+__This is a very classic DFS search problem__, and it is not easy.
+
+The solution simply brute force DFS. Read more at [this blog](http://xixiaogualu.blogspot.sg/2013/09/leetcode-sudoku-solver.html).
 
 ### My code 
 
-The following solution is from [this blog](http://xixiaogualu.blogspot.sg/2013/09/leetcode-sudoku-solver.html)
-
-    public void solveSudoku(char[][] board) {
-        helper(board, 0, 0);
-    }
-
-    private boolean helper(char[][] board, int i, int j) {
-        if (j >= 9)	return helper(board, i + 1, 0);
-        if (i == 9) return true;
-        if (board[i][j] == '.') {
-            for (int k = 1; k <= 9; k++) {
-                board[i][j] = (char) (k + '0');
-                if (isValid(board, i, j)) 
-                    if (helper(board, i, j + 1))
-                        return true;
-                board[i][j] = '.';
+    public class Solution {
+        public void solveSudoku(char[][] board) {
+            if (board == null || board.length == 0) {
+                return;
             }
-        } else return helper(board, i, j + 1);
-        return false;
-    }
-
-    private boolean isValid(char[][] board, int i, int j) {
-        boolean[] map = new boolean[9];
-        for (int k = 0; k < 9; k++) 
-            if (k != j && board[i][k] == board[i][j])
-                return false;
-        for (int k = 0; k < 9; k++) 
-            if (k != i && board[k][j] == board[i][j])
-                return false;
-        for (int row = i / 3 * 3; row < i / 3 * 3 + 3; row++) 
-            for (int col = j / 3 * 3; col < j / 3 * 3 + 3; col++) 
-                if ((row != i || col != j) && board[row][col] == board[i][j])
-                    return false;
-        return true;
-    }
-
-__Updated on July 7th__, code:
-
-    public void solveSudoku(char[][] board) {
-        helper(board, 0, 0);
-    }
-    
-    private boolean helper(char[][] b, int m, int n) {
-        if (n == 9) {
-            m += 1;
-            n = 0;
+            int N = board.length;
+            board = helper(board, N, 0, 0);
         }
-        if (m == 9) {
+
+        private char[][] helper(char[][] board, int N, int x, int y) {
+            if (x == N) {
+                return board;
+            } else if (y == N) {
+                return helper(board, N, x + 1, 0);
+            } else if (board[x][y] != '.') {
+                // made a mistake here with (y+1) instead of (x+1) 
+                return helper(board, N, x, y + 1);
+            } else {
+                // put in from 1 to 9, and then check validation
+                for (int i = 1; i <= 9; i++) {
+                    board[x][y] = (char) ('0' + i);
+                    if (isValid(board, x, y)) {
+                        // if the number we just put in is valid inside the board
+                        char[][] ans = helper(board, N, x, y + 1);
+                        if (ans != null) {
+                            return ans;
+                        } else {
+                            // putting in this number (i) will not work, so...
+                            // put in next number and try, until 9
+                        }
+                    }
+                    // this is important for backtarcking - set the char back to its original value!!! 
+                    board[x][y] = '.';
+                }
+            }
+            // in fact, we can just return true/false for this question. 
+            return null;
+        }
+
+        // this validation method we borrowed from my old code
+        private boolean isValid(char[][] board, int i, int j) {
+            boolean[] map = new boolean[9];
+            for (int k = 0; k < 9; k++) 
+                if (k != j && board[i][k] == board[i][j])
+                    return false;
+            for (int k = 0; k < 9; k++) 
+                if (k != i && board[k][j] == board[i][j])
+                    return false;
+            for (int row = i / 3 * 3; row < i / 3 * 3 + 3; row++) 
+                for (int col = j / 3 * 3; col < j / 3 * 3 + 3; col++) 
+                    if ((row != i || col != j) && board[row][col] == board[i][j])
+                        return false;
             return true;
         }
-        if (b[m][n] != '.') {
-            return helper(b, m, n + 1);
-        }
-        for (int i = 1; i <= 9; i++) {
-            b[m][n] = (char) ('0' + i);
-            if (!validate(b, m, n)) {
-                continue;
-            }
-            if (helper(b, m, n + 1)) {
-                return true;
-            }
-        }
-        b[m][n] = '.';
-        return false;
-    }
-    
-    private boolean validate(char[][] board, int i, int j) {
-        for (int k = 0; k < 9; k++) 
-            if (k != j && board[i][k] == board[i][j])
-                return false;
-        for (int k = 0; k < 9; k++) 
-            if (k != i && board[k][j] == board[i][j])
-                return false;
-        for (int row = i / 3 * 3; row < i / 3 * 3 + 3; row++) 
-            for (int col = j / 3 * 3; col < j / 3 * 3 + 3; col++) 
-                if ((row != i || col != j) && board[row][col] == board[i][j])
-                    return false;
-        return true;
     }

@@ -49,7 +49,7 @@ isMatch("aab", "c*a*b") → false
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">did not solve</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 

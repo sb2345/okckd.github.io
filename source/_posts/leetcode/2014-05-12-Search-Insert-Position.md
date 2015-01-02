@@ -49,40 +49,36 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-__This is a very basic, yet very difficult question__. It is not easy to get it correct within less then 3 attempts. 
+__This is a very basic, yet very difficult question__. It is not easy to get it correct at first attempt.
 
-### Solution
-
-I post 2 solutions, first written by me, second copied from [this blog](http://blog.csdn.net/fightforyourdream/article/details/14216321). Both works the same. 
+Read [this blog](http://blog.csdn.net/fightforyourdream/article/details/14216321) for more. 
 
 ### My code 
 
-
-    public int searchInsert(int[] A, int target) {
-        int len = A.length;
-        if (len == 0) return 0;
-        int left = 0, right = len - 1;
-        while (left < right) {
-            int mid = (left + right) / 2;
-            if (A[mid] >= target) right = mid;
-            else left = mid + 1;
+    public class Solution {
+        public int searchInsert(int[] A, int target) {
+            if (A == null || A.length == 0) {
+                return 0;
+            }
+            int len = A.length;
+            int left = 0;
+            int right = len - 1;
+            while (left + 1 < right) {
+                int mid = left + (right - left) / 2;
+                if (A[mid] >= target) {
+                    right = mid;
+                } else {
+                    left = mid;
+                }
+            }
+            // now are have a adjacent range [left, right]
+            if (target <= A[left]) {
+                return left;
+            } else if (target <= A[right]) {
+                // remember not to miss the == case
+                return right;
+            } else {
+                return right + 1;
+            }
         }
-        if (A[left] < target) return left + 1;
-        return left;
     }
-
-Another code
-
-    public int searchInsert(int[] A, int target) {
-        int len = A.length;
-        if (len == 0) return 0;
-        int left = 0, right = len - 1;
-        while (left <= right) {
-            int mid = (left + right) / 2;
-            if (A[mid] > target) right = mid - 1;
-            else if (A[mid] < target) left = mid + 1;
-            else return mid;
-        }
-        return left;
-    }
-

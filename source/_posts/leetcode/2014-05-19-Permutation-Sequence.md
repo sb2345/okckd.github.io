@@ -45,7 +45,7 @@ We get the following sequence (ie, for <i>n</i> = 3):
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">long time</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 

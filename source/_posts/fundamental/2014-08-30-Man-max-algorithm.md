@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Classic] MinMax Algorithm "
+title: "[Fundamental] MinMax Algorithm "
 comments: true
-category: Classic
+category: Fundamental
 tags: [  ]
 ---
 

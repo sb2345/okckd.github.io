@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Classic] A-Star Search "
+title: "[Fundamental] A-Star Search "
 comments: true
-category: Classic
+category: Fundamental
 tags: [  ]
 ---
 

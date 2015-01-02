@@ -31,7 +31,7 @@ __Ruby DevKit is a self-extracting archive__. After extracting the files, we sho
 
 __clone the source branch to the local octopress folder__
 
-> using HTTPS: 
+> using HTTPS
 >
 > git clone -b source https://github.com/okckd/okckd.github.io.git octopress
 
@@ -39,9 +39,13 @@ __clone the source branch to the local octopress folder__
 >
 > git clone -b source git@github.com:okckd/okckd.github.io.git octopress
 
-I would recommend using SSH over HTTPS, because: 
+I would recommend using SSH over HTTPS, because __using HTTPS, you will need to type your username and password everytime you push__. 
 
-1. Using HTTPS, you will need to type your username and password everytime you push. 
+To correct 'HTTPS' to 'SSH', follow [this instruction](http://stackoverflow.com/a/6565661): 
+
+> git remote set-url origin git@github.com:username/repo.git
+
+More info about HTTPS and SSH is [available](https://help.github.com/articles/which-remote-url-should-i-use/). 
 
 ### Install dependencies
 

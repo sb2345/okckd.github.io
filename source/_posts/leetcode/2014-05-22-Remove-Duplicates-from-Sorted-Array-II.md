@@ -40,7 +40,7 @@ Your function should return length = <code>5</code>, and A is now <code>[1,1,2,2
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="lime">18 minutes</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 

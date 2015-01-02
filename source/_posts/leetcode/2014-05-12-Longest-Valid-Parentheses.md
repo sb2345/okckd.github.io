@@ -42,15 +42,11 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
 	</tr>
 </table>
 
-### Analysis
-
-__There are 2 ways to solve this problem__, stack and DP. I will __not cover DP for now__, but this can be a future task. 
-
-There are various way to solve this problem with stack. 
-
 ### Solution
 
-__Stack method 1 is more straight-forward__ (code shown below). The idea is to keep a stack of "(" indexes, and another variable called "last". __Note that only ")" can violates a pattern__. So whenever I see a "(", just push to stack. When the pattern is violated by a ")", I update last. The code explains itself very well. If not, [look here](http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488)
+__There are 2 ways to solve this problem__, stack and DP.
+
+__Stack method 1 is more straight-forward__ (code shown below). The idea is to keep a stack of "(" indexes, and another variable called "last". __Note that only ")" can violates a pattern__. So whenever I see a "(", just push to stack. When the pattern is violated by a ")", I update "last". The code explains itself very well. If not, [look here](http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488)
 
 __Stack method 2 is more tricky__. This time I will not only push the index of "(" to stack, but also the index of ")" when the pattern got violated. It's hard to explain, and hard to think of at first. 
 
@@ -60,25 +56,43 @@ I will explain DP with an example of input "__)()()__". For this string, we have
 
 ### My code 
 
-Stack method 1
+Stack method 1 (recommended)
 
-
-    public int longestValidParentheses(String s) {
-        Stack<Integer> stack = new Stack<Integer>();
-        int last = -1, max = 0;
-        char[] ss = s.toCharArray();
-        for (int i = 0; i < ss.length; i++) {
-            if (ss[i] == '(') stack.push(i);
-            else if (stack.isEmpty()) last = i;
-            else {
-                stack.pop();
-                if (stack.isEmpty()) max = Math.max(max, i - last);
-                else max = Math.max(max, i - stack.peek());
+    public class Solution {
+        public int longestValidParentheses(String s) {
+            if (s == null || s.length() == 0) {
+                return 0;
             }
+            int len = s.length();
+            int longest = 0;
+            Stack<Integer> stack = new Stack<Integer>();
+            int start = 0;
+            for (int i = 0; i < len; i++) {
+                char ch = s.charAt(i);
+                if (ch == '(') {
+                    // well, no matter what, '(' is alway a valid part
+                    // push the index to the stack
+                    stack.push(i);
+                } else if (ch == ')') {
+                    if (stack.isEmpty()) {
+                        // invalid ')', update 'start' variable
+                        start = i + 1;
+                    } else {
+                        int pos = stack.pop();
+                        if (stack.isEmpty()) {
+                            // this is why we need 'start' variable
+                            longest = Math.max(longest, i - start + 1);
+                        } else {
+                            // important: must peek stack again.
+                            // eg. (()()  if don't peek again 
+                            longest = Math.max(longest, i - stack.peek());
+                        }
+                    }
+                }
+            }
+            return longest;
         }
-        return max;
     }
-
 
 Stack method 2
 
@@ -96,7 +110,7 @@ Stack method 2
         return res;
     }
 
-DP solution
+DP 
 
     public int longestValidParentheses(String s) {
         int len = s.length();
@@ -116,31 +130,4 @@ DP solution
             max = Math.max(max, dp[i]);
         }
         return max;
-    }
-
-__Updated on July 18th, 2014__, rewrite the stack method 1. 
-
-    public int longestValidParentheses(String s) {
-        if (s == null || s.length() == 0) {
-            return 0;
-        }
-        Stack<Integer> stack = new Stack<Integer>();
-        int start = -1;
-        int longest = 0;
-        char[] input = s.toCharArray();
-        for (int i = 0; i < input.length; i++) {
-            if (input[i] == '(') {
-                stack.push(i);
-            } else if (input[i] == ')' && stack.isEmpty()) {
-                start = i;
-            } else if (input[i] == ')') {
-                stack.pop();
-                if (stack.isEmpty()) {
-                    longest = Math.max(longest, i - start);
-                } else {
-                    longest = Math.max(longest, i - stack.peek());
-                }
-            }
-        }
-        return longest;
     }

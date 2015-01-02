@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/length-of-last-word/)
 
 <div class="question-content">
@@ -25,6 +25,7 @@ return <code>5</code>.
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -45,10 +46,6 @@ return <code>5</code>.
 </table>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
-
-### Analysis
-
-__This is a easy question__.
 
 ### Solution
 

@@ -52,7 +52,7 @@ Consider the following matrix:
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">1-D search</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 
