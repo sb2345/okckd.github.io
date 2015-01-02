@@ -100,7 +100,7 @@
   
 
 
-<time datetime="2014-05-16T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-16T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/16/Jump-Game/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/16/Jump-Game/">Comments</a>
@@ -165,14 +165,20 @@ A = <code>[3,2,1,0,4]</code>, return <code>false</code>.
 
 <h3>My code</h3>
 
-<pre><code>public boolean canJump(int[] A) {
-    int len = A.length, max = 0;
-    if (len == 0) return true;
-    for (int i = 0; i &lt; len &amp;&amp; i &lt;= max; i ++) {
-        max = Math.max(max, i + A[i]);
-        if (max &gt;= len - 1) return true;
+<pre><code>public class Solution {
+    public boolean canJump(int[] A) {
+        if (A == null || A.length &lt;= 1) {
+            return true;
+        }
+        int len = A.length;
+        int left = 0;
+        int right = 0;
+        while (left &lt;= right &amp;&amp; right &lt; len -1) {
+            right = Math.max(right, left + A[left]);
+            left++;
+        }
+        return right &gt;= len - 1;
     }
-    return (max &gt;= len - 1);
 }
 </code></pre>
 </div>
@@ -203,7 +209,7 @@ A = <code>[3,2,1,0,4]</code>, return <code>false</code>.
   
 
 
-<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-15T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/15/Wildcard-Matching/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/15/Wildcard-Matching/">Comments</a>
@@ -266,108 +272,74 @@ isMatch("aab", "c*a*b") → false
 
 <h3>Analysis</h3>
 
-<p>This question is similar to &ldquo;Regex Matching&rdquo;, and in fact can be solved using similar (DFS recursion) approach. <a href="http://n00tc0d3r.blogspot.sg/2013/05/wildcard-matching.html">This blog</a> has the best coverage of analysis and solutions overall.</p>
+<p>This question is similar to &ldquo;Regex Matching&rdquo;, and in fact can be solved using similar (DFS recursion) approach. <a href="http://n00tc0d3r.blogspot.sg/2013/05/wildcard-matching.html">This blog</a> has the best analysis and solutions.</p>
 
-<p><strong>The solution is DP</strong>. The equation is not very difficult to write, but keep in mind to <strong>check character count before entering the algorithm</strong>. Failing to do so results in TLE!</p>
+<p><strong>The solution is DP</strong>. The equation is not very difficult to write, but keep in mind to <strong>check character count before entering the algorithm</strong>. Failing to do so results in TLE.</p>
 
 <h3>My code</h3>
 
-<p><strong>Updated on July 8th</strong>, my DP solution. 1200 ms.</p>
+<pre><code>public class Solution {
+    public boolean isMatch(String s, String p) {
+        if (s == null || p == null) {
+            return true;
+        }
 
-<pre><code>public boolean isMatch(String s, String p) {
-    int len1 = s.length();
-    int len2 = p.length();
+        // pre-check
+        int count = 0;
+        for (int i = 0; i &lt; p.length(); i++) {
+            if (p.charAt(i)!='*') count++;
+        }
+        if(count &gt; s.length()) {
+            return false;  
+        }
+        // end of pre-check
 
-    int count = 0;
-    for (int i = 0; i &lt; p.length(); i++) {
-        if (p.charAt(i)!='*')
-            count++;
-    }
-    if(count &gt; s.length()) {
-        return false;  
-    }
-
-    boolean[][] dp = new boolean[len2 + 1][len1 + 1];
-    for (int i = 0; i &lt;= len2; i++) {
-        for (int j = 0; j &lt;= len1; j++) {
-            if (i == 0 &amp;&amp; j == 0) {
-                dp[i][j] = true;
-            } else if (i == 0) {
-                dp[i][j] = false;
-            } else if (j == 0) {
-                if (p.charAt(i - 1) == '*') {
-                    dp[i][j] = dp[i - 1][j];
-                } else {
+        int m = s.length();
+        int n = p.length();
+        // note the order is n,m, 
+        // cuz we match each chars of p with chars of s
+        boolean[][] dp = new boolean[n + 1][m + 1];
+        for (int i = 0; i &lt;= n; i++) {
+            for (int j = 0; j &lt;= m; j++) {
+                if (i == 0 &amp;&amp; j == 0) {
+                    dp[i][j] = true;
+                } else if (i == 0) {
                     dp[i][j] = false;
-                }
-            } else {
-                if (p.charAt(i - 1) == '*') {
-                    for (int k = j; k &gt;= 0; k--) {
-                        if(dp[i - 1][k]) {
+                } else if (j == 0) {
+                    // there is a special case: ("", "*")
+                    if (p.charAt(i - 1) == '*' &amp;&amp; dp[i-1][j]) {
+                        dp[i][j] = true;
+                    } else {
+                        dp[i][j] = false;
+                    }
+                } else if (p.charAt(i - 1) != '*') {
+                    if (dp[i-1][j-1]) {
+                        if (p.charAt(i - 1) == '?' || p.charAt(i - 1) == s.charAt(j - 1)) {
+                            // single char matches
                             dp[i][j] = true;
-                            break;
                         }
                     }
-                } else if (p.charAt(i - 1) == '?') {
-                    dp[i][j] = dp[i - 1][j - 1];
                 } else {
-                    dp[i][j] = dp[i - 1][j - 1] 
-                        &amp; p.charAt(i - 1) == s.charAt(j - 1);
-                }
-            }
-        }
-    }
-    return dp[len2][len1];
-}
-</code></pre>
-
-<p><strong>Updated on July 23th</strong>, optimized DP solution. 700 ms.</p>
-
-<pre><code>public boolean isMatch(String s, String p) {
-    int len1 = s.length();
-    int len2 = p.length();
-
-    int count = 0;
-    for (int i = 0; i &lt; p.length(); i++) {
-        if (p.charAt(i)!='*')
-            count++;
-    }
-    if(count &gt; s.length()) {
-        return false;  
-    }
-
-    boolean[][] dp = new boolean[len1 + 1][len2 + 1];
-    for (int j = 0; j &lt;= len2; j++) {
-        for (int i = 0; i &lt;= len1; i++) {
-            if (i == 0 &amp;&amp; j == 0) {
-                dp[i][j] = true;
-            } else if (j == 0) {
-                dp[i][j] = false;
-            } else if (i == 0) {
-                dp[i][j] = p.charAt(j - 1) == '*' &amp;&amp; dp[i][j - 1];
-            }else {
-                char wildCardChar = p.charAt(j - 1);
-                if (wildCardChar == '*') {
-                    // find the first match between dp[0][j-1] and dp[len1][j-1]
-                    int q = 0;
-                    while (q &lt;= len1 &amp;&amp; !dp[q][j-1]) {
-                        q++;
+                    // current char from p is a star
+                    // find the first place at which p matches with s
+                    int pos = 0;
+                    while (pos &lt;= m &amp;&amp; !dp[i-1][pos]) {
+                        pos++;
                     }
-                    while (q &lt;= len1) {
-                        dp[q][j] = true;
-                        q++;
+                    // starting from pos, all subsequent substring of s matches p
+                    while (pos &lt;= m) {
+                        dp[i][pos++] = true;
                     }
+                    // important to break the for loop here and do not check for row i any more
+                    // this requires changing the nested loop to put j outside of i
+                    // the execution time decrease from TLE/1800ms to 800ms by adding this line
                     break;
-                } else if (wildCardChar == '?') {
-                    dp[i][j] = dp[i - 1][j - 1];
-                } else {
-                    dp[i][j] = s.charAt(i - 1) == p.charAt(j - 1)
-                            &amp;&amp; dp[i - 1][j - 1];
+                    // this break finished off all check for row i, and i advance to next row
                 }
             }
         }
+        return dp[n][m];
     }
-    return dp[len1][len2];
 }
 </code></pre>
 </div>
@@ -398,7 +370,7 @@ isMatch("aab", "c*a*b") → false
   
 
 
-<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-15T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/15/PowXN/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/15/PowXN/">Comments</a>
@@ -446,17 +418,15 @@ isMatch("aab", "c*a*b") → false
 
 <p><strong>This question have many interesting solutions</strong>. The bottom line is solving in O(lgn) time.</p>
 
-<p><strong>First, is keep calculating power(x, 2 ^ n)</strong>.</p>
+<p>First approach, we can <strong>keep cumulating power(x, 2 ^ n)</strong>.</p>
 
-<p><strong>Second, divide and conquer</strong> which is explained in <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-powx-n.html">this blog</a>. The code is easier to write.</p>
-
-<p><strong>Third, is the best solution I ever found</strong>. It is from <a href="https://github.com/yuanx/leetcode/blob/master/Pow.java">this repo</a>. It is similar to divide and conquer, but no more special case for negative n, and no additional method used.</p>
+<p>Second approach, <strong>divide and conquer</strong> which is explained in <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-powx-n.html">this blog</a> and <a href="https://github.com/yuanx/leetcode/blob/master/Pow.java">this code</a>.</p>
 
 <p>Read code below.</p>
 
 <h3>My code</h3>
 
-<p><strong>One, keep calculating power(x, 2<sup>n</sup>)</strong></p>
+<p>code 1, divide and conquer</p>
 
 <pre><code>public class Solution {
     public double pow(double x, int n) {
@@ -478,7 +448,7 @@ isMatch("aab", "c*a*b") → false
 }
 </code></pre>
 
-<p><strong>Two, divide and conquer</strong></p>
+<p>code 2, divide and conquer</p>
 
 <pre><code>public double pow(double x, int n) {
     if (n &lt; 0) return 1 / helper(x, 0-n);
@@ -492,7 +462,7 @@ private double helper(double x, int n) {
 }
 </code></pre>
 
-<p><strong>Three, best solution</strong></p>
+<p>code 3</p>
 
 <pre><code>public double pow(double x, int n) {
     if (n == 0) return 1;
@@ -531,7 +501,7 @@ private double helper(double x, int n) {
   
 
 
-<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-15T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/15/Anagrams/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/15/Anagrams/">Comments</a>
@@ -640,7 +610,7 @@ private double helper(double x, int n) {
   
 
 
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-14T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/14/Trapping-Rain-Water/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Trapping-Rain-Water/">Comments</a>
@@ -829,7 +799,7 @@ Given <code>[0,1,0,2,1,0,1,3,2,1,2,1]</code>, return <code>6</code>.
   
 
 
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-14T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/14/Sudoku-Solver/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Sudoku-Solver/">Comments</a>
@@ -978,7 +948,7 @@ Given <code>[0,1,0,2,1,0,1,3,2,1,2,1]</code>, return <code>6</code>.
   
 
 
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-14T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/14/Rotate-Image/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Rotate-Image/">Comments</a>
@@ -1106,7 +1076,7 @@ Could you do this in-place?</p><p></p>
   
 
 
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-14T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/14/Permutations-II/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Permutations-II/">Comments</a>
@@ -1237,7 +1207,7 @@ For example,<br>
   
 
 
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-14T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/14/Permutations/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Permutations/">Comments</a>
@@ -1434,7 +1404,7 @@ For example,<br>
   
 
 
-<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-14T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/05/14/Multiply-Strings/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Multiply-Strings/">Comments</a>
@@ -1559,17 +1529,18 @@ For example,<br>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (48)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (18)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (82)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
@@ -1586,7 +1557,7 @@ For example,<br>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/12/23/Java-runtime-exception/">[Design] Java Runtime Exception</a>
+        <a href="/blog/2014/12/23/Java-runtime-exception/">[Java OOP] Java Runtime Exception</a>
       </li>
     
       <li class="post">
@@ -1594,11 +1565,11 @@ For example,<br>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/12/22/overload-override-java-main-method/">[Design] Override/overload Java Main Method</a>
+        <a href="/blog/2014/12/22/overload-override-java-main-method/">[Java OOP] Override/overload Java Main Method</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/12/22/common-root-java-class/">[Design] Common Root of Java Classes</a>
+        <a href="/blog/2014/12/22/common-root-java-class/">[Java OOP] Common Root of Java Classes</a>
       </li>
     
   </ul>

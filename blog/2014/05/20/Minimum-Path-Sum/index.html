@@ -97,7 +97,7 @@
   
 
 
-<time datetime="2014-05-20T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-20T00:00:00+09:00" pubdate data-updated="true"></time>
         
            | <a href="#disqus_thread"
              data-disqus-identifier="http://okckd.github.io">Comments</a>
@@ -150,53 +150,43 @@
 
 <h3>Solution</h3>
 
-<p><strong>Solution One is the DP solution that I did in first attempt</strong>. It uses a 2-D array and it works fine.</p>
+<p><strong>Code 1 is 2-D DP</strong>.</p>
 
-<p><strong>Second solution is using no extra space</strong>. It basically works in place.</p>
+<p><strong>2nd code is from <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-minimum-path-sum.html">this blog</a></strong>. Instead of 2-D array, it simply uses a &ldquo;rotational array&rdquo; (滚动数组), or 1-D array.</p>
 
-<p><strong>Third solution is from <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-minimum-path-sum.html">this blog</a></strong>. Instead of 2-D array, it simply uses a &ldquo;rotational array&rdquo; (滚动数组), because previous status is no longer used after the traverse. It&rsquo;s the first time I see this idea, very interesting.</p>
+<p><strong>3rd code is using no extra space</strong>. It works in place.</p>
 
 <h3>My code</h3>
 
-<p><strong>My DP solution, using 2D array</strong></p>
+<p><strong>2D array</strong></p>
 
-<pre><code>public int minPathSum(int[][] grid) {
-    int m = grid.length;
-    if (m == 0) return 0;
-    int n = grid[0].length;
-    if (n == 0) return 0;
-    int[][] dp = new int[m][n];
-    dp[0][0] = grid[0][0];
-    for (int i = 0; i &lt; m; i ++) {
-        for (int j = 0; j &lt; n; j ++) {
-            if (i == 0 &amp;&amp; j == 0) continue;
-            else if (i == 0 &amp;&amp; j &gt; 0) dp[i][j] = grid[i][j] + dp[i][j-1];
-            else if (j == 0 &amp;&amp; i &gt; 0) dp[i][j] += grid[i][j] + dp[i-1][j];
-            else {
-                dp[i][j] = Math.min(dp[i-1][j], dp[i][j-1]) + grid[i][j];
+<pre><code>public class Solution {
+    public int minPathSum(int[][] grid) {
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+        int m = grid.length;
+        int n = grid[0].length;
+        int[][] dp = new int[m][n];
+        for (int i = 0; i &lt; m; i++) {
+            for (int j = 0; j &lt; n; j++) {
+                if (i == 0 &amp;&amp; j == 0) {
+                    dp[i][j] = grid[i][j];
+                } else if (i == 0) {
+                    dp[i][j] = grid[i][j] + dp[i][j - 1];
+                } else if (j == 0) {
+                    dp[i][j] = grid[i][j] + dp[i - 1][j];
+                } else {
+                    dp[i][j] = grid[i][j] + Math.min(dp[i - 1][j], dp[i][j - 1]);
+                }
             }
         }
+        return dp[m - 1][n - 1];
     }
-    return dp[m-1][n-1];
 }
 </code></pre>
 
-<p><strong>My DP solution, in-place</strong></p>
-
-<pre><code>public int minPathSum(int[][] grid) {
-    if (grid.length == 0) return 0;
-    if (grid[0].length == 0) return 0;
-    for (int i = 0; i &lt; grid.length; i ++) 
-        for (int j = 0; j &lt; grid[0].length; j ++) 
-            if (i == 0 &amp;&amp; j == 0) continue;
-            else if (i == 0) grid[i][j] = grid[i][j] + grid[i][j-1];
-            else if (j == 0) grid[i][j] = grid[i][j] + grid[i-1][j];
-            else grid[i][j] = Math.min(grid[i-1][j], grid[i][j-1]) + grid[i][j];
-    return grid[grid.length-1][grid[0].length-1];
-}
-</code></pre>
-
-<p><strong>DP solution, using 1-D array</strong></p>
+<p><strong>1-D array</strong></p>
 
 <pre><code>public int minPathSum(int[][] grid) {
     if (grid.length == 0) return 0;
@@ -209,6 +199,21 @@
             else if (j == 0) dp[j] += grid[i][j];
             else dp[j] = Math.min(dp[j-1], dp[j]) + grid[i][j];
     return dp[dp.length-1];
+}
+</code></pre>
+
+<p><strong>in-place</strong></p>
+
+<pre><code>public int minPathSum(int[][] grid) {
+    if (grid.length == 0) return 0;
+    if (grid[0].length == 0) return 0;
+    for (int i = 0; i &lt; grid.length; i ++) 
+        for (int j = 0; j &lt; grid[0].length; j ++) 
+            if (i == 0 &amp;&amp; j == 0) continue;
+            else if (i == 0) grid[i][j] = grid[i][j] + grid[i][j-1];
+            else if (j == 0) grid[i][j] = grid[i][j] + grid[i-1][j];
+            else grid[i][j] = Math.min(grid[i-1][j], grid[i][j-1]) + grid[i][j];
+    return grid[grid.length-1][grid[0].length-1];
 }
 </code></pre>
 </div>
@@ -233,7 +238,7 @@
   
 
 
-<time datetime="2014-05-20T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-20T00:00:00+09:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -280,17 +285,18 @@
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (48)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (18)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (82)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
@@ -307,7 +313,7 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2014/12/23/Java-runtime-exception/">[Design] Java Runtime Exception</a>
+        <a href="/blog/2014/12/23/Java-runtime-exception/">[Java OOP] Java Runtime Exception</a>
       </li>
     
       <li class="post">
@@ -315,11 +321,11 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2014/12/22/overload-override-java-main-method/">[Design] Override/overload Java Main Method</a>
+        <a href="/blog/2014/12/22/overload-override-java-main-method/">[Java OOP] Override/overload Java Main Method</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/12/22/common-root-java-class/">[Design] Common Root of Java Classes</a>
+        <a href="/blog/2014/12/22/common-root-java-class/">[Java OOP] Common Root of Java Classes</a>
       </li>
     
   </ul>
