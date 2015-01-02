@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/n-queens-ii/)
 
 <div class="question-content">
@@ -19,6 +19,7 @@ tags: [  ]
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -40,10 +41,6 @@ tags: [  ]
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-This question have the same solution is __N queens__. 
-
 ### Solution
 
 I posted 2 solution by me. Second code is same as [this guy's code](https://github.com/rffffffff007/leetcode/blob/master/N-Queens%20II.java).
@@ -51,7 +48,6 @@ I posted 2 solution by me. Second code is same as [this guy's code](https://gith
 ### My code
 
 __Using global variable__
-
 
     int ans = 0;
 
@@ -78,9 +74,7 @@ __Using global variable__
         }
     }
 
-
 __Without using global variable__
-
 
     public int totalNQueens(int n) {
         return solve(0, n, new int[n]);
@@ -100,4 +94,3 @@ __Without using global variable__
         }
         return ans;
     }
-

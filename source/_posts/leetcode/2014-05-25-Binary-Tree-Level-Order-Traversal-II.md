@@ -50,7 +50,7 @@ return its bottom-up level order traversal as:<br>
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="white">very easy</td>
+		<td bgcolor="white">----------</td>
 	</tr>
 </table>
 

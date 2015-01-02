@@ -48,58 +48,64 @@ A valid Sudoku board (partially filled) is not necessarily solvable. Only the fi
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
+### Solution
 
 __This is not a difficult problem__. 
 
-Most online solutions are same as mine, which make use of __three for-loops__ and __nine arrays of length 9__ (for each loop) to mark the status. 
+Make use of __three for-loops__ and __nine arrays of length 9__ (for each loop) to mark the status, then do DFS search. 
 
-However, __I also found a tricky solution__. See code for details. 
-
-### Solution
-
-Both code are straight-forward. 
+However, __I also found a very concise solution__. Read below. 
 
 ### My code 
 
-Below is my code.
-
-
-    public boolean isValidSudoku(char[][] board) {
-        // first, validate rows
-        for (int i = 0; i < 9; i ++) {
-            int[] mark = new int[9];
-            for(char a: board[i]) 
-                if (a != '.') mark[a-'1'] ++;
-            for (int b: mark) if (b > 1) return false;
-        }
-        // second, validate columns
-        for (int i = 0; i < 9; i ++) {
-            int[] mark = new int[9];
-            for(char[] a: board) 
-                if (a[i] != '.') mark[a[i]-'1'] ++;
-            for (int b: mark) if (b > 1) return false;
-        }
-        // third, validate box
-        for (int a = 0; a <= 6; a += 3) {
-            for (int b = 0; b <= 6; b += 3) {
-                int[] mark = new int[9];
-                for (int i = 0; i <= 2; i ++) 
-                    for (int j = 0; j <= 2; j ++) 
-                        // the 9 values are represented at (a+i, b+j)
-                        if (board[a+i][b+j] != '.') mark[board[a+i][b+j]-'1'] ++;
-                for (int c: mark) if (c > 1) return false;
+    public class Solution {
+        public boolean isValidSudoku(char[][] board) {
+            if (board == null || board.length == 0) {
+                return false;
             }
+            int N = board.length;
+            for (int i = 0; i < N; i++) {
+                boolean[] foo = new boolean[N];
+                // validate each row
+                for (int j = 0; j < N; j++) {
+                    if (board[i][j] != '.') {
+                        if (foo[board[i][j] - '1']) {
+                            return false;
+                        }
+                        foo[board[i][j] - '1'] = true;
+                    }
+                }
+                foo = new boolean[N];
+                // validate each column
+                for (int j = 0; j < N; j++) {
+                    if (board[j][i] != '.') {
+                        if (foo[board[j][i] - '1']) {
+                            return false;
+                        }
+                        foo[board[j][i] - '1'] = true;
+                    }
+                }
+            }
+            for (int a = 0; a < 3; a++) {
+                for (int b = 0; b < 3; b++) {
+                    boolean[] foo = new boolean[N];
+                    for (int c = 0; c < 3; c++) {
+                        for (int d = 0; d < 3; d++) {
+                            if (board[a * 3 + c][b * 3 + d] != '.') {
+                                if (foo[board[a * 3 + c][b * 3 + d] - '1']) {
+                                    return false;
+                                }
+                                foo[board[a * 3 + c][b * 3 + d] - '1'] = true;
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
         }
-        // finished validation. if still survives at this point of time, congratulations!
-        return true;
     }
 
-
-__The following solution__ is from [this blog](http://www.cnblogs.com/zhaolizhen/p/Sudoku.html). It's a very clever and tricky solution! 
-
-__Note that default value of Java boolean type is false__, so no need to set value after declaration. 
-
+__The following solution__ is from [this blog](http://www.cnblogs.com/zhaolizhen/p/Sudoku.html). It's a very clever and surprisingly concise code. 
 
     public boolean isValidSudoku(char[][] board) {
         boolean[][] rows = new boolean[9][9];

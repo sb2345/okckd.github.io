@@ -11,8 +11,7 @@ tags: [  ]
 [link](http://oj.leetcode.com/problems/spiral-matrix-ii/)
 
 <div class="question-content">
-            <p></p><p>Given an integer <i>n</i>, generate a square matrix filled with elements from 1 to <i>n</i><sup>2</sup> in spiral order.</p>
-
+<p></p><p>Given an integer <i>n</i>, generate a square matrix filled with elements from 1 to <i>n</i><sup>2</sup> in spiral order.</p>
 <p>
 For example,<br>
 Given <i>n</i> = <code>3</code>,
@@ -25,7 +24,9 @@ You should return the following matrix:
 ]
 </pre><p></p>
           </div>
+
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -52,10 +53,6 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 __This question is basic mathematics__. There is another similar question __Spiral Matrix__. 
 
 The difficult part is writing the code. 
-
-### Solution
-
-Code is easy to read. 
 
 ### My code
 

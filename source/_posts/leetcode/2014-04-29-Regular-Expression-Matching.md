@@ -71,7 +71,7 @@ Two, the next char is a star sign, this will require some effort.
 
 In case of one letter bundled with a star sign, we iterate thru all possible number of repetition of current char (from 0 until large), and check validation one by one.
 
-Again, __this question very much looks like DP, but NOT DP__. 
+A final important note, __this question very much looks like DP, but NOT DP__. 
 
 ### My code 
 

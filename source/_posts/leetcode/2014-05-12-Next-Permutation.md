@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/next-permutation/)
 
 <div class="question-content">
@@ -43,79 +43,63 @@ Here are some examples. Inputs are in the left-hand column and its corresponding
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">half hour</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
 ### Analysis
 
-__There is only 1 popular solution on the Internet__, which is same as mine. 
-
-The image below explains it very well (for the input number "687432").
+The image below explains the solution very well (for the input number "687432").
 
 {% img middle /assets/images/next_permutation.png %}
 
 ### Solution
 
-My first attempted code is a bit lenthy but works perfectly. 
+Read [this blog](http://blog.csdn.net/havenoidea/article/details/12176737) for a very nice piece of code. 
 
-Second time, I read [this blog](http://blog.csdn.net/havenoidea/article/details/12176737) and optimized my code. It's same solution, actually. 
+The following code is written by me. 
 
 ### My code 
 
-My first code. 
-
-
-    public void nextPermutation(int[] num) {
-        if (num.length < 2) return;
-        // locate 2 pointers: m and n
-        int m = num.length - 2;
-        while (m >= 0 && num[m] >= num[m+1]) m --;
-        if (m == -1) {
-            Arrays.sort(num);
-            return;
+    public class Solution {
+        public void nextPermutation(int[] num) {
+            if (num == null || num.length <= 1) {
+                return;
+            }
+            int len = num.length;
+            int p = len - 2;
+            // note that when values are equals, proceed the pointer! 
+            // same for line 22
+            while (p >= 0 && num[p] >= num[p + 1]) {
+                // move p to left as long as its value is larger than next num
+                // we want to find the end of increasing sequence (from end to start)
+                p--;
+            }
+            if (p == -1) {
+                // the input is a strictly decreasing sequence
+                Arrays.sort(num);
+                return;
+            }
+            // replace number at p with an larger value found in the right of p
+            int w = len - 1;
+            while (num[w] <= num[p]) {
+                w--;
+            }
+            // ok, now swap number at p and w
+            swop(num, p, w);
+            // reverse all numbers to the right of p
+            reverse(num, p + 1, len - 1);
         }
-        int n = num.length - 1;
-        while (num[n] <= num[m]) n --;
-        // now number pointer by m and n should be swopped
-        num = swopNum(num, m, n);
-        // then, head and tail swop from position (m+1) to the end
-        int left = m + 1, right = num.length - 1;
-        while (left < right)
-            num = swopNum(num, left++, right--);
-    }
 
-    private int[] swopNum(int[] num, int a, int b) {
-        num[a] = num[a] + num[b];
-        num[b] = num[a] - num[b];
-        num[a] = num[a] - num[b];
-        return num;
-    }
-
-
-Second time code.
-
-
-    public void nextPermutation(int[] num) {
-        int len = num.length;
-        if (len < 2) return;
-        int posStartReverse = 0, last = len - 1;
-        for (int i = len - 2; i >= 0; i --) {
-            if (num[i] >= num[i+1]) continue;
-            for (int j = len - 1; j > i; j --) 
-                if (num[i] < num[j]) {
-                    swapNum(num, i, j);
-                    break;
-                }
-            posStartReverse = i + 1;
-            break;
+        private void swop(int[] num, int a, int b) {
+            int temp = num[a];
+            num[a] = num[b];
+            num[b] = temp;
         }
-        while (posStartReverse < last) swapNum(num, posStartReverse++, last--);
-    }
 
-    private int[] swapNum(int[] num, int a, int b) {
-        num[a] = num[a] + num[b];
-        num[b] = num[a] - num[b];
-        num[a] = num[a] - num[b];
-        return num;
+        private void reverse(int[] num, int a, int b) {
+            while (a < b) {
+                swop(num, a++, b--);
+            }
+        }
     }

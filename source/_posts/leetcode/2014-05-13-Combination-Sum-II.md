@@ -69,67 +69,48 @@ __Main part of this solution is same as "Combination Sum"__. There is only 2 lin
 
 __First change__, When go into the next recursive call, instead of: 
 
-> helper(cand, ans, i, ... )
+    helper(ans, cand, path, i, len, target - cand[i]);
 
 Change it to 
 
-> helper(cand, ans, i + 1, ... )
+    helper(ans, cand, path, i + 1, len, target - cand[i]);
 
-__Second change__, inside the for-loop, instead of getting next element from array, get the next element with different value. The 2 types of modifications below both works: 
+__Second change__, inside the for-loop, instead of getting next element right away, we get the element with different value. The additional code is: 
 
-> At the beginning of the for-loop: if (i > start && cand\[i\] == cand\[i-1\]) continue;
-
-> At the end of the for-loop: while(i < cand.length - 1 && cand\[i\] == cand\[i + 1\]) i++;
-
-The 2 kinds of code are shown below. 
+    if (i > pos && candidates[i] == candidates[i - 1]) {
+        continue;
+    }
 
 ### My code 
 
-This idea is from [this blog](http://fisherlei.blogspot.sg/2013/01/leetcode-combination-sum-ii-solution.html). This is also the most popular solution online. 
+    public class Solution {
+        public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+            List<List<Integer>> ans = new ArrayList<List<Integer>>();
+            if (candidates == null || candidates.length == 0) {
+                return ans;
+            }
+            Arrays.sort(candidates);
+            int len = candidates.length;
+            helper(ans, candidates, new ArrayList<Integer>(), 0, len, target);
+            return ans;
+        }
 
-
-    public ArrayList<ArrayList<Integer>> combinationSum2(int[] num, int target) {
-        ArrayList<ArrayList<Integer>> ans = new ArrayList<ArrayList<Integer>>();
-        Arrays.sort(num);
-        helper(num, ans, 0, new ArrayList<Integer>(), target);
-        return ans;
-    }
-
-    private void helper(int[] cand, ArrayList<ArrayList<Integer>> ans, 
-                        int start, ArrayList<Integer> items, int target) {
-        if (start >= cand.length || target < cand[start]) return;
-        for (int i = start; i < cand.length; i ++) {
-            if (cand[i] > target) break;
-            items.add(cand[i]);
-            if (cand[i] == target) ans.add(new ArrayList<Integer>(items));
-            else helper(cand, ans, i + 1, items, target - cand[i]);
-            items.remove(items.size() - 1);
-            while(i < cand.length - 1 && cand[i] == cand[i + 1]) i++;
+        private void helper(List<List<Integer>> ans, int[] cand, List<Integer> path, int pos, int len, int target) {
+            if (target == 0) {
+                ans.add(new ArrayList<Integer>(path));
+                return;
+            } else if (target < 0) {
+                return;
+            }
+            for (int i = pos; i < len; i++) {
+                // if 'i' points to a repeated number, skip.
+                if (i > pos && cand[i] == cand[i - 1]) {
+                    continue;
+                }
+                // insert cand[i] into path list, and continue search dfs
+                path.add(cand[i]);
+                helper(ans, cand, path, i + 1, len, target - cand[i]);
+                path.remove(path.size() - 1);
+            }
         }
     }
-
-
-The idea from [this blog](http://blog.csdn.net/linhuanmars/article/details/20829099). Only difference is the way to remove duplications (no while-loop at the end, instead, a checking method at the beginning of the for-loop).
-
-
-    public ArrayList<ArrayList<Integer>> combinationSum2(int[] num, int target) {
-        ArrayList<ArrayList<Integer>> ans = new ArrayList<ArrayList<Integer>>();
-        Arrays.sort(num);
-        helper(num, ans, 0, new ArrayList<Integer>(), target);
-        return ans;
-    }
-
-    private void helper(int[] cand, ArrayList<ArrayList<Integer>> ans, 
-                        int start, ArrayList<Integer> items, int target) {
-        if (start >= cand.length || target < cand[start]) return;
-        for (int i = start; i < cand.length; i ++) {
-            if (i > start && cand[i] == cand[i-1]) continue;
-            if (cand[i] > target) break;
-            items.add(cand[i]);
-            if (cand[i] == target) ans.add(new ArrayList<Integer>(items));
-            else helper(cand, ans, i + 1, items, target - cand[i]);
-            items.remove(items.size() - 1);
-            // while(i < cand.length - 1 && cand[i] == cand[i + 1]) i++;
-        }
-    }
-

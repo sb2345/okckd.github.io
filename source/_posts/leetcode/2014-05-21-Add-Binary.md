@@ -39,7 +39,7 @@ Return <code>"100"</code>.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">Not very fast</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 

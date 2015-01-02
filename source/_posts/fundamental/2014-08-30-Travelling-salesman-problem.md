@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Classic] Travelling salesman problem "
+title: "[Fundamental] Travelling salesman problem "
 comments: true
-category: Classic
+category: Fundamental
 tags: [  ]
 ---
 

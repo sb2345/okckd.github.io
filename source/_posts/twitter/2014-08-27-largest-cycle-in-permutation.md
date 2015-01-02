@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Twitter] Largest Cycle in Permutation"
+title: "[Twitter] Largest Cycle in Permutation "
 comments: true
 category: Twitter
 tags: [  ]
@@ -30,4 +30,4 @@ Keeping that in mind, I take (5,4,3,2,1) as an example. First, we fetch 5, and w
 
 We continue doing this until __all numbers of value v is in the (v)th position__, we should know the largest length of cycle during this process. 
 
-I did not write code for this, and there's little resource online that's relevant. 
+I did not write code, and I found very little relevant resources. If you did, please leave a comment below. 

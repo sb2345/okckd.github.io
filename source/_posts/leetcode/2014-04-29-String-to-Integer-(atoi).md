@@ -69,11 +69,9 @@ This question is not difficult, but hard to get it right. Remember to handle all
 
 __Use one loop to read through, and in the end do some checking__. There is a very good [explanation](http://www.programcreek.com/2012/12/leetcode-string-to-integer-atoi/) from online. 
 
-My original code takes another approach. It is, though not ideal for coding, very worthy to read. 
+This is a standard string question, and try think of some special test cases. 
 
 ### My code 
-
-My Code.
 
     public class Solution {
         public int atoi(String str) {
@@ -112,7 +110,7 @@ My Code.
                 q++;
             }
             String numPart = str.substring(p, q);
-            // first, check is numPart is too long
+            // first, check if numPart is too long
             if (numPart.length() > 15) {
                 if (sign == -1) {
                     return Integer.MIN_VALUE;
@@ -122,51 +120,6 @@ My Code.
             }
             // second, convert to numerical format and check value against Integer.MIN and MAX
             long num = sign * Long.parseLong(numPart);
-            if (num > Integer.MAX_VALUE) {
-                return Integer.MAX_VALUE;
-            } else if (num < Integer.MIN_VALUE) {
-                return Integer.MIN_VALUE;
-            } else {
-                return (int) num;
-            }
-        }
-    }
-
-My initial code. It's shorter and very optimized, though I do not recommend writing like this (a bit too complex). 
-
-    public class Solution {
-
-        public int atoi(String str) {
-            char[] in = str.toCharArray();
-            int start = -1, end = -1, sign = 1;
-            for (int i = 0; i < in.length; i++) {
-                if (start == -1) {
-                    if (in[i] == ' ')
-                        continue;
-                    else if (in[i] == '+')
-                        start = end = i + 1;
-                    else if (in[i] == '-') {
-                        start = end = i + 1;
-                        sign = -1;
-                    } else if (in[i] >= '0' && in[i] <= '9') {
-                        start = i;
-                        end = i + 1;
-                    } else
-                        return 0;
-                } else {
-                    if (in[i] >= '0' && in[i] <= '9')
-                        end = i + 1;
-                    else
-                        break;
-                }
-            }
-            if (start == -1 || start == end || start >= in.length) {
-                return 0;
-            } else if (end - start > 15) {
-                return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-            }
-
-            long num = sign * Long.parseLong(str.substring(start, end));
             if (num > Integer.MAX_VALUE) {
                 return Integer.MAX_VALUE;
             } else if (num < Integer.MIN_VALUE) {

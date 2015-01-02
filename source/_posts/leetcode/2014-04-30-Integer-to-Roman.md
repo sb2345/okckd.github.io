@@ -66,13 +66,11 @@ So for each number, just do convert according to the above table.
 
 > 400=>CD. 
 
-The question states that input is less than 3999, so we have 2 "n.a." in the table. 
+The question states that input is less than 3999. 
 
 ### Analysis
 
-This question seems quite straight-forward. 
-
-There is a very [short code](http://stackoverflow.com/a/19759564) by stackoverflow user bhlangonijr. This method __makes use of Java [TreeMap.floorKey](http://goo.gl/e8ryim)__. Read it ONLY if you are interested. 
+Before I present my solution, there is a very short code written by stackoverflow user [bhlangonijr](http://stackoverflow.com/a/19759564). This method __makes use of Java [TreeMap.floorKey](http://goo.gl/e8ryim)__. Read it ONLY if you are interested! 
 
 > TreeMap.floorKey - Returns the greatest key less than or equal to the given key, or null if there is no such key.
 
@@ -100,13 +98,15 @@ There is a very [short code](http://stackoverflow.com/a/19759564) by stackoverfl
 
 ### Solution
 
-I present 2 solutions below. First is my original solution. It's comparatively shorter. Second is my new solution, where I improved the readability of the code, and have better strucutre of logic. 
+I will present 2 solutions below. 
 
-Both code would be fine, and aren't so difficult. However, it really takes a lot of time. 
+First is an iterative solution. It's comparatively shorter, and enjoys beter performance. 
+
+Second is my new idea. It has improved readability, but slightly worse performance, because it's recursive. 
 
 ### My code 
 
-Code 1
+Code 1, iterative. 
 
     public class Solution {
 
@@ -150,7 +150,7 @@ Code 1
 
     }
 
-Code 2
+Code 2, recursive. 
 
     public class Solution {
 

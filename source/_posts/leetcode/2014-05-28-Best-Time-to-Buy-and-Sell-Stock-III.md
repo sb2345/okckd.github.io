@@ -47,7 +47,7 @@ __This is much harder to solve then previous 2 question combined__.
 
 ### Solution
 
-__Almost all solutions online are same__, I think [this blog](http://rleetcode.blogspot.sg/2014/02/best-time-to-buy-and-sell-stock-iii-java.html) explains it best. 
+The best solution is explained in [this blog](http://rleetcode.blogspot.sg/2014/02/best-time-to-buy-and-sell-stock-iii-java.html). 
 
 > we can just dived the whole prices array at every point, try to calculate max profit from left and from right respectively...
 
