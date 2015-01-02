@@ -149,102 +149,15 @@ For example,<br>
 
 <p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
 
-<h3>Analysis</h3>
-
-<p><strong>This question is based on the solution for &ldquo;Permutations&rdquo;</strong>.</p>
-
-<p>This question, together with &ldquo;Permutations&rdquo;, is very classic and frequent questions during interview, and is the basis for many similar problems. <strong>We must be able to write the solution in 1 go without even looking</strong>.</p>
-
 <h3>Solution</h3>
 
-<p>The solution is simply the solution for &ldquo;Permutations&rdquo; <strong>plus some duplication avoidance techniques</strong>. This reminds me of the question &ndash; [LeetCode 40] Combination Sum II.</p>
+<p><strong>This question is based on &ldquo;Permutations&rdquo;</strong>, plus duplication avoidance.</p>
 
-<p><strong>I solved this problem quickly by using previous &ldquo;adding elements one by one&rdquo; solution</strong>. The idea is when getting element from remaining list and add to current list, check for duplication. If the number occured before, skip operation. (Don&rsquo;t forget sorting is required at first) This is just 2 line of code, and it works like magic.</p>
+<p>This question, together with &ldquo;Permutations&rdquo;, is very classic and frequent questions, thus the basis for many similar DFS problems. Read <a href="http://www.programcreek.com/2013/02/leetcode-permutations-ii-java/">this blog</a> for more.</p>
 
-<p>Solutions based on other &ldquo;Permutations&rdquo; solutions will be similar. <strong>The main idea is to always find the next different value before proceed the recursion</strong>. I will post another solution from <a href="http://www.programcreek.com/2013/02/leetcode-permutations-ii-java/">this blog</a>, which is based on the swapping element method.</p>
+<p>The idea is when getting element from remaining list and add to current list, check for duplication. <strong>If the number occured before, skip operation</strong>. (Don&rsquo;t forget sorting is required at first).</p>
 
-<h3>My code</h3>
-
-<p><strong>My code</strong>, based on &ldquo;adding elements one by one&rdquo; solution from previous question.</p>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; permuteUnique(int[] num) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    ArrayList&lt;Integer&gt; remain = new ArrayList&lt;Integer&gt;();
-    Arrays.sort(num);
-    for (Integer a: num)
-        remain.add(a);
-    helper(ans, new ArrayList&lt;Integer&gt;(), remain);
-    return ans;
-}
-
-private void helper(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, 
-        ArrayList&lt;Integer&gt; cur, ArrayList&lt;Integer&gt; remain) {
-    int len = remain.size();
-    if (len == 0) {
-        ans.add(new ArrayList(cur));
-        return;
-    }
-    for (int i = 0; i &lt; len; i ++) {
-        if (i != 0 &amp;&amp; remain.get(i-1) == remain.get(i)) 
-            continue;
-        int t = remain.remove(i);
-        cur.add(t);
-        helper(ans, cur, remain);
-        remain.add(i, t);
-        cur.remove(cur.size() - 1);
-    }
-}
-</code></pre>
-
-<p><strong>Another solution based on the swapping element method</strong></p>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; permuteUnique(int[] num) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    permuteUnique(num, 0, result);
-    return result;
-}
-
-private void permuteUnique(int[] num, int start, ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result) {
-
-    if (start &gt;= num.length ) {
-        ArrayList&lt;Integer&gt; item = convertArrayToList(num);
-        result.add(item);
-    }
-
-    for (int j = start; j &lt;= num.length-1; j++) {
-        if (containsDuplicate(num, start, j)) {
-            swap(num, start, j);
-            permuteUnique(num, start + 1, result);
-            swap(num, start, j);
-        }
-    }
-}
-
-private ArrayList&lt;Integer&gt; convertArrayToList(int[] num) {
-    ArrayList&lt;Integer&gt; item = new ArrayList&lt;Integer&gt;();
-    for (int h = 0; h &lt; num.length; h++) {
-        item.add(num[h]);
-    }
-    return item;
-}
-
-private boolean containsDuplicate(int[] arr, int start, int end) {
-    for (int i = start; i &lt;= end-1; i++) {
-        if (arr[i] == arr[end]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-private void swap(int[] a, int i, int j) {
-    int temp = a[i];
-    a[i] = a[j];
-    a[j] = temp;
-}
-</code></pre>
-
-<p><strong>Updated on June 13th</strong>. The way to remove duplicate is very difficult. The key points to keep in mind:</p>
+<p>The key points to keep in mind:</p>
 
 <ol>
 <li>Use another array to flag the &lsquo;visited&rsquo; items</li>
@@ -252,35 +165,39 @@ private void swap(int[] a, int i, int j) {
 </ol>
 
 
-<p>I post the new code written by me using template (actually same as first code)</p>
+<h3>My code</h3>
 
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; permuteUnique(int[] num) {
-    List&lt;List&lt;Integer&gt;&gt; ans = new LinkedList&lt;List&lt;Integer&gt;&gt;();
-    if (num == null || num.length == 0) {
+<pre><code>public class Solution {
+    public List&lt;List&lt;Integer&gt;&gt; permuteUnique(int[] num) {
+        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+        if (num == null || num.length == 0) {
+            return ans;
+        }
+        int len = num.length;
+        Arrays.sort(num);
+        helper(ans, new ArrayList&lt;Integer&gt;(), num, len, new boolean[len]);
         return ans;
     }
-    Arrays.sort(num);
-    helper(ans, new LinkedList&lt;Integer&gt;(), num, new boolean[num.length]);
-    return ans;
-}
 
-private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num, boolean[] visited) {
-    if (path.size() == num.length) {
-        ans.add(new LinkedList&lt;Integer&gt;(path));
-        return;
-    }
-    for (int i = 0; i &lt; num.length; i++) {
-        if (visited[i]) {
-            continue;
+    private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num, int len, boolean[] visited) {
+        if (path.size() == len) {
+            ans.add(new ArrayList&lt;Integer&gt;(path));
+            return;
         }
-        if (i &gt; 0 &amp;&amp; !visited[i - 1] &amp;&amp; num[i - 1] == num[i]) {
-            continue;
+        for (int i = 0; i &lt; len; i++) {
+            if (i &gt; 0 &amp;&amp; num[i - 1] == num[i] &amp;&amp; !visited[i - 1]) {
+                // important: if previous number have same value as (i)th
+                // but have never been visited, then skip current number
+                continue;
+            }
+            if (!visited[i]) {
+                path.add(num[i]);
+                visited[i] = true;
+                helper(ans, path, num, len, visited);
+                path.remove(path.size() - 1);
+                visited[i] = false;
+            }
         }
-        path.add(num[i]);
-        visited[i] = true;
-        helper(ans, path, num, visited);
-        path.remove(path.size() - 1);
-        visited[i] = false;
     }
 }
 </code></pre>

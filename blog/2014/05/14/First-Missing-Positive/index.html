@@ -160,34 +160,61 @@ Your algorithm should run in <i>O</i>(<i>n</i>) time and uses constant space.
 
 <p>The tricky part of this question is the limit in space/time. If we sort and check, the space is constent, but time is increased.</p>
 
-<p><strong>The key to solve this problem is to make use of the position index of the array</strong>.</p>
+<p>The key is to <strong>make use of the position index of the array</strong>.</p>
 
 <h3>Solution</h3>
 
-<p>The basic idea of the solution is to <strong>make sure that (i)th item of the array stores value (i+1)</strong>. The image below and the quoted text from <a href="http://tianrunhe.wordpress.com/2012/07/15/finding-the-1st-missing-positive-int-in-an-array-first-missing-positive/">this blog</a> are very good explanations.</p>
+<p><strong>Make sure that (i)th item of the array stores value (i+1)</strong>. The image below and the quoted text from <a href="http://tianrunhe.wordpress.com/2012/07/15/finding-the-1st-missing-positive-int-in-an-array-first-missing-positive/">this blog</a> are very good explanations.</p>
 
 <p><img class="middle" src="/assets/images/first_missing_pos.jpg"></p>
 
-<blockquote><p>The idea is simple. What is the most desired array we want to see? Something like [1,2,3] then we know 4 is missing, or [1, 8, 3, 4] then we know 2 is missing. In other word, “all the numbers are in their correct positions”. What are correct positions? For any i, A[i] = i+1. So our goal is to rearrange those numbers (in place) to their correct positions. We then need to decide how to arrange them. Let’s take the [3, 4, -1, 1] as an example. The 1st number, 3, we know it should stay in position 2. So we swap A[0] = 3 with A[2]. We then get [-1, 4, 3, 1]. We can’t do anything about -1 so we leave it there. The 2nd number, 4, we know it should sit in A[3]. So we swap A[1] = 4 with A[3]. We then get [-1, 1, 3, 4]. Now 1 should stay in A[0], so we keep swapping and we get [1, -1, 3, 4]. Notice now every positive number is staying in their correct position (A[0]=1, A[2]=3 and A[3]=4). We then need one more scan to find out 2 is missing.</p></blockquote>
+<blockquote><p>The idea is simple. What is the most desired array we want to see? Something like [1,2,3] then we know 4 is missing, or [1, 8, 3, 4] then we know 2 is missing. In other word, “all the numbers are in their correct positions”.</p>
+
+<p>What are correct positions? For any i, A[i] = i+1. So our goal is to rearrange those numbers (in place) to their correct positions.</p>
+
+<p>We then need to decide how to arrange them. Let’s take the [3, 4, -1, 1] as an example. The 1st number, 3, we know it should stay in position 2. So we swap A[0] = 3 with A[2]. We then get [-1, 4, 3, 1]. We can’t do anything about -1 so we leave it there. The 2nd number, 4, we know it should sit in A[3]. So we swap A[1] = 4 with A[3]. We then get [-1, 1, 3, 4]. Now 1 should stay in A[0], so we keep swapping and we get [1, -1, 3, 4]. Notice now every positive number is staying in their correct position (A[0]=1, A[2]=3 and A[3]=4). We then need one more scan to find out 2 is missing.</p></blockquote>
 
 <h3>My code</h3>
 
-<p>Code below is written by me. It is slightly different from the code in that blog, but quite good also.</p>
-
-<pre><code>public int firstMissingPositive(int[] A) {
-    int len = A.length, i = 0;
-    while (i &lt; len) {
-        if (A[i] == i + 1 || A[i] &lt;= 0 || A[i] &gt; len || A[i] == A[A[i] - 1])
-            i ++;
-        else { // swap (i)th element with (A[i]-1)th element
-            int temp = A[i];
-            A[i] = A[temp - 1];
-            A[temp - 1] = temp;
+<pre><code>public class Solution {
+    public int firstMissingPositive(int[] A) {
+        if (A == null || A.length == 0) {
+            return 1;
         }
+        int len = A.length;
+        int p = 0;
+        while (p &lt; len) {
+            if (A[p] == p + 1) {
+                // the number is in its correct position~
+                p++;
+                continue;
+            } else if (A[p] &lt;= 0 || A[p] &gt; len) {
+                // the number is out of range, leave it alone then.
+                p++;
+                continue;
+            } else if (A[p] == A[A[p] - 1]) {
+                // this is an important case!!! I missed it just now~
+                p++;
+                continue; 
+            }
+            swop(A, p, A[p] - 1);
+        }
+        // now check and find the first number that is not in correct position
+        p = 0;
+        while (p &lt; len) {
+            if (A[p] != p + 1) {
+                return p + 1;
+            }
+            p++;
+        }
+        return p + 1;
     }
-    for (i = 0; i &lt; len; i ++)
-        if (A[i] != i + 1) return i + 1;
-    return len + 1;
+
+    private void swop(int[] A, int x, int y) {
+        int temp = A[x];
+        A[x] = A[y];
+        A[y] = temp;
+    }
 }
 </code></pre>
 </div>
@@ -238,7 +265,7 @@ Your algorithm should run in <i>O</i>(<i>n</i>) time and uses constant space.
         <a class="basic-alignment left" href="/blog/2014/05/13/Count-And-Say/" title="Previous Post: [LeetCode 38] Count and Say">&laquo; [LeetCode 38] Count and Say</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/05/14/Jump-Game-II/" title="Next Post: [LeetCode 45] Jump Game II">[LeetCode 45] Jump Game II &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/05/14/Jump-Game-II/" title="Next Post: [LeetCode 45] Jump Game II ">[LeetCode 45] Jump Game II  &raquo;</a>
       
     </p>
   </footer>

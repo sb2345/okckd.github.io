@@ -112,7 +112,7 @@
 <p><a href="http://oj.leetcode.com/problems/sudoku-solver/">link</a></p>
 
 <div class="question-content">
-            <p></p><p>Write a program to solve a Sudoku puzzle by filling the empty cells.</p>
+<p></p><p>Write a program to solve a Sudoku puzzle by filling the empty cells.</p>
 
 <p>Empty cells are indicated by the character <code>'.'</code>.</p>
 
@@ -154,95 +154,68 @@
 
 <p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
 
-<h3>Analysis</h3>
-
-<p><strong>This is a very classic DFS search problem</strong>, and it is not easy!</p>
-
 <h3>Solution</h3>
 
-<p><strong>The solution simply brute force DFS</strong>.</p>
+<p><strong>This is a very classic DFS search problem</strong>, and it is not easy.</p>
+
+<p>The solution simply brute force DFS. Read more at <a href="http://xixiaogualu.blogspot.sg/2013/09/leetcode-sudoku-solver.html">this blog</a>.</p>
 
 <h3>My code</h3>
 
-<p>The following solution is from <a href="http://xixiaogualu.blogspot.sg/2013/09/leetcode-sudoku-solver.html">this blog</a></p>
-
-<pre><code>public void solveSudoku(char[][] board) {
-    helper(board, 0, 0);
-}
-
-private boolean helper(char[][] board, int i, int j) {
-    if (j &gt;= 9) return helper(board, i + 1, 0);
-    if (i == 9) return true;
-    if (board[i][j] == '.') {
-        for (int k = 1; k &lt;= 9; k++) {
-            board[i][j] = (char) (k + '0');
-            if (isValid(board, i, j)) 
-                if (helper(board, i, j + 1))
-                    return true;
-            board[i][j] = '.';
+<pre><code>public class Solution {
+    public void solveSudoku(char[][] board) {
+        if (board == null || board.length == 0) {
+            return;
         }
-    } else return helper(board, i, j + 1);
-    return false;
-}
-
-private boolean isValid(char[][] board, int i, int j) {
-    boolean[] map = new boolean[9];
-    for (int k = 0; k &lt; 9; k++) 
-        if (k != j &amp;&amp; board[i][k] == board[i][j])
-            return false;
-    for (int k = 0; k &lt; 9; k++) 
-        if (k != i &amp;&amp; board[k][j] == board[i][j])
-            return false;
-    for (int row = i / 3 * 3; row &lt; i / 3 * 3 + 3; row++) 
-        for (int col = j / 3 * 3; col &lt; j / 3 * 3 + 3; col++) 
-            if ((row != i || col != j) &amp;&amp; board[row][col] == board[i][j])
-                return false;
-    return true;
-}
-</code></pre>
-
-<p><strong>Updated on July 7th</strong>, code:</p>
-
-<pre><code>public void solveSudoku(char[][] board) {
-    helper(board, 0, 0);
-}
-
-private boolean helper(char[][] b, int m, int n) {
-    if (n == 9) {
-        m += 1;
-        n = 0;
+        int N = board.length;
+        board = helper(board, N, 0, 0);
     }
-    if (m == 9) {
+
+    private char[][] helper(char[][] board, int N, int x, int y) {
+        if (x == N) {
+            return board;
+        } else if (y == N) {
+            return helper(board, N, x + 1, 0);
+        } else if (board[x][y] != '.') {
+            // made a mistake here with (y+1) instead of (x+1) 
+            return helper(board, N, x, y + 1);
+        } else {
+            // put in from 1 to 9, and then check validation
+            for (int i = 1; i &lt;= 9; i++) {
+                board[x][y] = (char) ('0' + i);
+                if (isValid(board, x, y)) {
+                    // if the number we just put in is valid inside the board
+                    char[][] ans = helper(board, N, x, y + 1);
+                    if (ans != null) {
+                        return ans;
+                    } else {
+                        // putting in this number (i) will not work, so...
+                        // put in next number and try, until 9
+                    }
+                }
+                // this is important for backtarcking - set the char back to its original value!!! 
+                board[x][y] = '.';
+            }
+        }
+        // in fact, we can just return true/false for this question. 
+        return null;
+    }
+
+    // this validation method we borrowed from my old code
+    private boolean isValid(char[][] board, int i, int j) {
+        boolean[] map = new boolean[9];
+        for (int k = 0; k &lt; 9; k++) 
+            if (k != j &amp;&amp; board[i][k] == board[i][j])
+                return false;
+        for (int k = 0; k &lt; 9; k++) 
+            if (k != i &amp;&amp; board[k][j] == board[i][j])
+                return false;
+        for (int row = i / 3 * 3; row &lt; i / 3 * 3 + 3; row++) 
+            for (int col = j / 3 * 3; col &lt; j / 3 * 3 + 3; col++) 
+                if ((row != i || col != j) &amp;&amp; board[row][col] == board[i][j])
+                    return false;
         return true;
     }
-    if (b[m][n] != '.') {
-        return helper(b, m, n + 1);
-    }
-    for (int i = 1; i &lt;= 9; i++) {
-        b[m][n] = (char) ('0' + i);
-        if (!validate(b, m, n)) {
-            continue;
-        }
-        if (helper(b, m, n + 1)) {
-            return true;
-        }
-    }
-    b[m][n] = '.';
-    return false;
-}
-
-private boolean validate(char[][] board, int i, int j) {
-    for (int k = 0; k &lt; 9; k++) 
-        if (k != j &amp;&amp; board[i][k] == board[i][j])
-            return false;
-    for (int k = 0; k &lt; 9; k++) 
-        if (k != i &amp;&amp; board[k][j] == board[i][j])
-            return false;
-    for (int row = i / 3 * 3; row &lt; i / 3 * 3 + 3; row++) 
-        for (int col = j / 3 * 3; col &lt; j / 3 * 3 + 3; col++) 
-            if ((row != i || col != j) &amp;&amp; board[row][col] == board[i][j])
-                return false;
-    return true;
 }
 </code></pre>
 </div>
@@ -293,7 +266,7 @@ private boolean validate(char[][] board, int i, int j) {
         <a class="basic-alignment left" href="/blog/2014/05/14/Rotate-Image/" title="Previous Post: [LeetCode 48] Rotate Image">&laquo; [LeetCode 48] Rotate Image</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/05/14/Trapping-Rain-Water/" title="Next Post: [LeetCode 42] Trapping Rain Water">[LeetCode 42] Trapping Rain Water &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/05/14/Trapping-Rain-Water/" title="Next Post: [LeetCode 42] Trapping Rain Water ">[LeetCode 42] Trapping Rain Water  &raquo;</a>
       
     </p>
   </footer>
