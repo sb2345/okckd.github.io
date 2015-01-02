@@ -60,35 +60,51 @@ The difficult part is writing the code.
 
 ### My code
 
-    public ArrayList<Integer> spiralOrder(int[][] matrix) {
-        ArrayList<Integer> ans = new ArrayList<Integer>();
-        if (matrix.length == 0 || matrix[0].length == 0) ;
-        else solve(ans, matrix, 0, matrix.length, matrix[0].length);
-        return ans;
-    }
-
-    private void solve(ArrayList<Integer> ans, int[][] matrix, int cur, int m,
-            int n) {
-        if (cur >= m / 2) {
-            // Take m=4, n=100, cur=2, no fill required
-            // Take m=5, n=100, cur=2, fill in from (2,2) to (2,97) inclusive
-            // which is (cur,cur) to (cur,n-cur-1)
-            if (m % 2 == 0) return;
-            for (int i = cur; i < n - cur; i++)
-                ans.add(matrix[cur][i]);
-        } else if (cur >= n / 2) {
-            if (n % 2 == 0) return;
-            for (int i = cur; i < m - cur; i++)
-                ans.add(matrix[i][cur]);
-        } else {
-            for (int k = cur; k <= n - 2 - cur; k++)
-                ans.add(matrix[cur][k]);
-            for (int l = cur; l <= m - 2 - cur; l++)
-                ans.add(matrix[l][n - cur - 1]);
-            for (int p = n - cur - 1; p >= cur + 1; p--)
-                ans.add(matrix[m - cur - 1][p]);
-            for (int q = m - cur - 1; q >= cur + 1; q--)
-                ans.add(matrix[q][cur]);
-            solve(ans, matrix, cur + 1, m, n);
-        }
-    }
+	public class Solution {
+	    public List<Integer> spiralOrder(int[][] matrix) {
+			List<Integer> ans = new ArrayList<Integer>();
+			if (matrix == null || matrix.length == 0 
+				|| matrix[0] == null || matrix[0].length == 0) {
+				return ans;
+			}
+			int m = matrix.length;
+			int n = matrix[0].length;
+			int a = 0;
+			int b = 0;
+			while (a < (m + 1) / 2 && b < (n + 1) / 2) {
+				// special cases
+				if (2 * a + 1 == m && 2 * b + 1 == n) {
+					ans.add(matrix[a][b]);
+					break;
+				} else if (2 * a + 1 == m) {
+					for (int j = b; j <= n - 1 - b; j++) {
+						ans.add(matrix[a][j]);
+					}
+					break;
+				} else if (2 * b + 1 == n) {
+					for (int i = a; i <= m - 1 - a; i++) {
+						ans.add(matrix[i][b]);
+					}
+					break;
+				}
+				// now is the general case
+				// first horizontal row without last element
+				for (int j = b; j < n - 1 - b; j++) {
+					ans.add(matrix[a][j]);
+				}
+				// vertical column on right-hand side
+				for (int i = a; i < m - 1 - a; i++) {
+					ans.add(matrix[i][n - 1 - b]);
+				}
+				for (int j = n - 1 - b; j > b; j--) {
+					ans.add(matrix[m - 1 - a][j]);
+				}
+				for (int i = m - 1 - a; i > a; i--) {
+					ans.add(matrix[i][b]);
+				}
+				a++;
+				b++;
+			}
+			return ans;
+	    }
+	}

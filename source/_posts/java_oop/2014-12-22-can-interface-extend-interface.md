@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Interface extend another Interface "
+title: "[Java OOP] Interface extend another Interface "
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 

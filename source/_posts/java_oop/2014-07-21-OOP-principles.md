@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] OOP - 4 major principles"
+title: "[Java OOP] OOP - 4 major principles"
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 

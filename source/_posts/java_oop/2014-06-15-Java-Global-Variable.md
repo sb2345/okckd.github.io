@@ -1,11 +1,10 @@
 ---
 layout: post
-title: "[Question] Java Global Variable"
+title: "[Java OOP] Java Global Variable"
 comments: true
-category: Question
+category: Java OOP
 tags: [  ]
 ---
-
 
 ### Global variable?
 

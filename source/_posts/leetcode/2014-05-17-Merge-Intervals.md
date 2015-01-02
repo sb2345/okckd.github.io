@@ -59,7 +59,7 @@ __And from__ [wikipedia](http://en.wikipedia.org/wiki/Insertion_sort#Variants):
 
 > If the cost of comparisons exceeds the cost of swaps, as is the case for example with string keys stored by reference or with human interaction (such as choosing one of a pair displayed side-by-side), then using binary insertion sort may yield better performance. Binary insertion sort employs a binary search to determine the correct location to insert new elements, and therefore performs ⌈log2(n)⌉ comparisons in the worst case, which is O(n log n). The algorithm as a whole still has a running time of O(n^2) on average because of the series of swaps required for each insertion.
 
-So this sorting algorithm may not be the best. 
+So insertion sort algorithm may not be the best choice for us! 
 
 __A more popular solution is using Collection.sort function__. 
 
@@ -129,40 +129,43 @@ insertion sort, then merge:
         return ans;
     }
 
-
 __Recommended solution__. Creating a new Comparator class 
 
-    public class Solution {
-        public ArrayList<Interval> merge(ArrayList<Interval> intervals) {
-            int len = intervals.size();
-            if (len == 0 || len == 1) return intervals;
-
-            ArrayList<Interval> ans = new ArrayList<Interval>();
-            Collections.sort(intervals, new IntervalComparator());
-
-            Interval tmp = intervals.get(0);
-            for (int i = 1; i < len; i++) {
-                Interval itv = intervals.get(i);
-                if (tmp.end >= itv.start) { // mergeable
-                    int left = Math.min(tmp.start, itv.start);
-                    int right = Math.max(tmp.end, itv.end);
-                    tmp = new Interval(left, right);
-                }
-                else {
-                    ans.add(tmp);
-                    tmp = intervals.get(i);
-                }
-            }
-            ans.add(tmp);
-            return ans;
-        }
-    }
-
-    class IntervalComparator implements Comparator<Interval> {
-        public int compare(Interval a, Interval b) {
-            return a.start - b.start;
-        }
-    }
+	/**
+	 * Definition for an interval.
+	 * public class Interval {
+	 *     int start;
+	 *     int end;
+	 *     Interval() { start = 0; end = 0; }
+	 *     Interval(int s, int e) { start = s; end = e; }
+	 * }
+	 */
+	public class Solution {
+	    public List<Interval> merge(List<Interval> intervals) {
+	        if (intervals == null || intervals.size() == 0) {
+	            return intervals;
+	        }
+	        Collections.sort(intervals, new IntervalComparator());
+	        int p = 0;
+	        // if p is the last element of the list, we should stop merging
+	        while (p < intervals.size() - 1) {
+	            // merge p with the next interval, if possible
+	            if (intervals.get(p).end >= intervals.get(p + 1).start) {
+	                intervals.get(p).end = Math.max(intervals.get(p).end, intervals.get(p + 1).end);
+	                intervals.remove(p + 1);
+	            } else {
+	                p++;
+	            }
+	        }
+	        return intervals;
+	    }
+	    
+	    class IntervalComparator implements Comparator<Interval> {
+	        public int compare(Interval a, Interval b) {
+	            return a.start - b.start;
+	        }
+	    }
+	}
 
 __Third solution__, different way of writing Comparator.
 

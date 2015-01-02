@@ -2,7 +2,9 @@
 layout: post
 title: "[CC150v4] 14.2 Java Finally Statement "
 comments: true
-category: CC150v4
+categories:
+- CC150v4
+- Java OOP
 tags: [  ]
 ---
 

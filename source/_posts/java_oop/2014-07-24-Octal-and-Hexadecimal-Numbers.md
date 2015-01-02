@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Octal and Hexadecimal Numbers in Java"
+title: "[Java OOP] Octal and Hexadecimal Numbers in Java"
 comments: true
-category: Question
+category: Java OOP
 tags: [ src ]
 ---
 

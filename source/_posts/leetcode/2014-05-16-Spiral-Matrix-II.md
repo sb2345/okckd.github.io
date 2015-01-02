@@ -56,22 +56,7 @@ The difficult part is writing the code.
 
 ### My code
 
-__My code, this is pure math__.
-
-    public int[][] generateMatrix(int n) {
-        int[][] ans = new int[n][n];
-        int num = 1;
-        for (int i = 0; i < n / 2; i ++) {
-            for (int k = i; k <= n-2-i; k ++) ans[i][k] = num ++;
-            for (int l = i; l <= n-2-i; l ++) ans[l][n-i-1] = num ++;
-            for (int p = n-i-1; p >=i+1 ; p --) ans[n-i-1][p] = num ++;
-            for (int q = n-i-1; q >=i+1 ; q --) ans[q][i] = num ++;
-        }
-        if (n % 2 == 1) ans[n/2][n/2] = num;
-        return ans;
-    }
-
-__Updated on Oct 9th, 2014__, a better piece of code:
+__Updated on Oct 9th, 2014__:
 
     public int[][] generateMatrix(int n) {
         int small = 0;

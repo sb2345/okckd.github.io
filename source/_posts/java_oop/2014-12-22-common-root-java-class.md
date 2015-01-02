@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Common Root of Java Classes "
+title: "[Java OOP] Common Root of Java Classes "
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 

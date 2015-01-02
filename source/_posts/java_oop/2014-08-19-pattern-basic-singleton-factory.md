@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Design Pattern - Singleton & Factory"
+title: "[Java OOP] Design Pattern - Singleton & Factory"
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 
