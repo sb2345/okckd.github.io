@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] About Singleton"
+title: "[Java OOP] About Singleton"
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 
@@ -58,7 +58,7 @@ Singleton instance is [static and final variable](http://javarevisited.blogspot.
 		}
 	}
 
-### About thread-saft
+### About thread-safety
 
 [Prior to Java 5](http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html) __double checked locking__ mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn't see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class. 
 

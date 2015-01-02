@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/unique-paths/)
 
 <div class="question-content">
@@ -26,6 +26,7 @@ tags: [  ]
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -47,47 +48,37 @@ tags: [  ]
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
+### Solution
 
 __This is an easy question__.
 
-__My first idea is not the most classic solution, but the best solution I know of so far__. Basically to walk from (0,0) to (m,n), robot have to walk down (m-1) steps and rightward (n-1) steps. Then this problem simply becomes [Number of k-combinations](http://en.wikipedia.org/wiki/Combination#Number_of_k-combinations) (also known as choose m from n problem). The code is just concise and short. 
-
-__My second solution is a DP solution__ making use of a 1-D array. This is very similar to the question "Minimum Path Sum". 
-
-### Solution
-
-The code is easy to read. 
+Basically to walk from (0,0) to (m,n), robot have to walk down (m-1) steps and rightward (n-1) steps. Then this problem simply becomes [Number of k-combinations](http://en.wikipedia.org/wiki/Combination#Number_of_k-combinations) (also known as choose m from n problem). The code is just concise and short. 
 
 ### My code
 
-__Number of k-combinations solution__
-
-
-    public int uniquePaths(int m, int n) {
-        if (m == 1 || n == 1) return 1;
-        long sum = 1L;
-        int a = Math.min(m - 1, n - 1);
-        int b = Math.max(m - 1, n - 1);
-        for (int i = 0; i < a; i ++) 
-            sum = sum * (a + b - i);
-        for (int i = 0; i < a; i ++) 
-            sum = sum / (a - i);
-        return (int)sum;
-    }
-
-
-__DP solution__
-
-
-    public int uniquePaths(int m, int n) {
-        if (m <= 0 || n <= 0) return 0;
-        if (m == 1 || n == 1) return 1;
-        int[] dp = new int[n];
-        for (int i = 0; i < m; i ++) 
-            for (int j = 0; j < n; j ++)
-                if (i == 0 || j == 0) dp[j] = 1;
-                else dp[j] += dp[j-1];
-        return dp[n-1];
-    }
-
+	public class Solution {
+	    public int uniquePaths(int m, int n) {
+	        m--;
+	        n--;
+	        if (m < 0 || n < 0) {
+	            return 0;
+	        } else if (m == 0 || n == 0) {
+	            return 1;
+	        }
+	        long sum = 1;
+	        // the answer would be "choose m from (m + n)"
+	        if (m > n) {
+	            int temp = m;
+	            m = n;
+	            n = temp;
+	        }
+	        int num = m + n;
+	        for (int i = 0; i < m; i++) {
+	            sum *= (num - i);
+	        }
+	        for (int i = 0; i < m; i++) {
+	            sum /= (i + 1);
+	        }
+	        return (int) sum;
+	    }
+	}

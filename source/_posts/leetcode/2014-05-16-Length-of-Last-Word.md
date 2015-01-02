@@ -52,13 +52,23 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 This is a easy question.
 
 ### My code
-
-
-    public int lengthOfLastWord(String s) {
-        s = s.trim();
-        int l = s.length() - 1;
-        while (l >= 0) 
-            if (s.charAt(l--) == ' ') return s.length() - l - 2;
-        return s.length();
-    }
-
+	
+	public class Solution {
+	    public int lengthOfLastWord(String s) {
+	        if (s == null || s.length() == 0) {
+	            return 0;
+	        }
+	        int p = s.length() - 1;
+	        while (p >= 0 && s.charAt(p) == ' ') {
+	            p--;
+	        }
+	        if (p == -1) {
+	            return 0;
+	        }
+	        int q = p;
+	        while (q >= 0 && s.charAt(q) != ' ') {
+	            q--;
+	        }
+	        return p - q;
+	    }
+	}

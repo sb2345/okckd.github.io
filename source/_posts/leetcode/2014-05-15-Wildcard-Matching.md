@@ -57,105 +57,72 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-This question is similar to "Regex Matching", and in fact can be solved using similar (DFS recursion) approach. [This blog](http://n00tc0d3r.blogspot.sg/2013/05/wildcard-matching.html) has the best coverage of analysis and solutions overall.
+This question is similar to "Regex Matching", and in fact can be solved using similar (DFS recursion) approach. [This blog](http://n00tc0d3r.blogspot.sg/2013/05/wildcard-matching.html) has the best analysis and solutions.
 
-__The solution is DP__. The equation is not very difficult to write, but keep in mind to __check character count before entering the algorithm__. Failing to do so results in TLE! 
+__The solution is DP__. The equation is not very difficult to write, but keep in mind to __check character count before entering the algorithm__. Failing to do so results in TLE. 
 
 ### My code 
 
-__Updated on July 8th__, my DP solution. 1200 ms. 
-
-    public boolean isMatch(String s, String p) {
-        int len1 = s.length();
-        int len2 = p.length();
-        
-        int count = 0;
-        for (int i = 0; i < p.length(); i++) {
-            if (p.charAt(i)!='*')
-                count++;
-        }
-        if(count > s.length()) {
-            return false;  
-        }
-        
-        boolean[][] dp = new boolean[len2 + 1][len1 + 1];
-        for (int i = 0; i <= len2; i++) {
-            for (int j = 0; j <= len1; j++) {
-                if (i == 0 && j == 0) {
-                    dp[i][j] = true;
-                } else if (i == 0) {
-                    dp[i][j] = false;
-                } else if (j == 0) {
-                    if (p.charAt(i - 1) == '*') {
-                        dp[i][j] = dp[i - 1][j];
-                    } else {
-                        dp[i][j] = false;
-                    }
-                } else {
-                    if (p.charAt(i - 1) == '*') {
-                        for (int k = j; k >= 0; k--) {
-                            if(dp[i - 1][k]) {
-                                dp[i][j] = true;
-                                break;
-                            }
-                        }
-                    } else if (p.charAt(i - 1) == '?') {
-                        dp[i][j] = dp[i - 1][j - 1];
-                    } else {
-                        dp[i][j] = dp[i - 1][j - 1] 
-                            & p.charAt(i - 1) == s.charAt(j - 1);
-                    }
-                }
-            }
-        }
-        return dp[len2][len1];
-    }
-
-__Updated on July 23th__, optimized DP solution. 700 ms. 
-
-	public boolean isMatch(String s, String p) {
-		int len1 = s.length();
-		int len2 = p.length();
-		
-        int count = 0;
-        for (int i = 0; i < p.length(); i++) {
-            if (p.charAt(i)!='*')
-                count++;
-        }
-        if(count > s.length()) {
-            return false;  
-        }
-
-		boolean[][] dp = new boolean[len1 + 1][len2 + 1];
-		for (int j = 0; j <= len2; j++) {
-		    for (int i = 0; i <= len1; i++) {
-				if (i == 0 && j == 0) {
-					dp[i][j] = true;
-				} else if (j == 0) {
-					dp[i][j] = false;
-				} else if (i == 0) {
-				    dp[i][j] = p.charAt(j - 1) == '*' && dp[i][j - 1];
-				}else {
-					char wildCardChar = p.charAt(j - 1);
-					if (wildCardChar == '*') {
-						// find the first match between dp[0][j-1] and dp[len1][j-1]
-						int q = 0;
-						while (q <= len1 && !dp[q][j-1]) {
-						    q++;
-						}
-						while (q <= len1) {
-						    dp[q][j] = true;
-						    q++;
-						}
-						break;
-					} else if (wildCardChar == '?') {
-						dp[i][j] = dp[i - 1][j - 1];
-					} else {
-						dp[i][j] = s.charAt(i - 1) == p.charAt(j - 1)
-								&& dp[i - 1][j - 1];
-					}
-				}
-			}
-		}
-		return dp[len1][len2];
+	public class Solution {
+	    public boolean isMatch(String s, String p) {
+	        if (s == null || p == null) {
+	            return true;
+	        }
+	        
+	        // pre-check
+	        int count = 0;
+	        for (int i = 0; i < p.length(); i++) {
+	            if (p.charAt(i)!='*') count++;
+	        }
+	        if(count > s.length()) {
+	            return false;  
+	        }
+	        // end of pre-check
+	        
+	        int m = s.length();
+	        int n = p.length();
+	        // note the order is n,m, 
+	        // cuz we match each chars of p with chars of s
+	        boolean[][] dp = new boolean[n + 1][m + 1];
+	        for (int i = 0; i <= n; i++) {
+	            for (int j = 0; j <= m; j++) {
+	                if (i == 0 && j == 0) {
+	                    dp[i][j] = true;
+	                } else if (i == 0) {
+	                    dp[i][j] = false;
+	                } else if (j == 0) {
+	                    // there is a special case: ("", "*")
+	                    if (p.charAt(i - 1) == '*' && dp[i-1][j]) {
+	                        dp[i][j] = true;
+	                    } else {
+	                        dp[i][j] = false;
+	                    }
+	                } else if (p.charAt(i - 1) != '*') {
+	                    if (dp[i-1][j-1]) {
+	                        if (p.charAt(i - 1) == '?' || p.charAt(i - 1) == s.charAt(j - 1)) {
+	                            // single char matches
+	                            dp[i][j] = true;
+	                        }
+	                    }
+	                } else {
+	                    // current char from p is a star
+	                    // find the first place at which p matches with s
+	                    int pos = 0;
+	                    while (pos <= m && !dp[i-1][pos]) {
+	                        pos++;
+	                    }
+	                    // starting from pos, all subsequent substring of s matches p
+	                    while (pos <= m) {
+	                        dp[i][pos++] = true;
+	                    }
+	                    // important to break the for loop here and do not check for row i any more
+	                    // this requires changing the nested loop to put j outside of i
+	                    // the execution time decrease from TLE/1800ms to 800ms by adding this line
+	                    break;
+	                    // this break finished off all check for row i, and i advance to next row
+	                }
+	            }
+	        }
+	        return dp[n][m];
+	    }
 	}

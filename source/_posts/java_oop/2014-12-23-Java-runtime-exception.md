@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Java Runtime Exception "
+title: "[Java OOP] Java Runtime Exception "
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 

@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Listener / Observer pattern "
+title: "[Java OOP] Listener / Observer pattern "
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 

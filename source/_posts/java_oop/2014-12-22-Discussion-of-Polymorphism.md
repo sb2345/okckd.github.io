@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Discussion of Polymorphism "
+title: "[Java OOP] Discussion of Polymorphism "
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 

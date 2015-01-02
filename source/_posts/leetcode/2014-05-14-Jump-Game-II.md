@@ -67,7 +67,7 @@ So __I come up with a solution using 2 pointers__: 'left' and 'right' that denot
 
 ### My code 
 
-DP
+traditional DP
 
     public class Solution {
         public int jump(int[] A) {
@@ -89,6 +89,43 @@ DP
             return 0;
         }
     }
+
+DP without array (recommended)
+
+	public class Solution {
+	    public int jump(int[] A) {
+	        if (A == null || A.length <= 1) {
+	            return 0;
+	        }
+	        int len = A.length;
+	        // note that this is a DP question, but considering the required out, 
+	        // we do not need dp array (i.e.) 
+	        // int[] dp = new int[len];
+	        
+	        int jumps = 0;
+	        int left = 0;
+	        int right = 0;
+	        
+	        while (right < len) {
+	            int reachable = right;
+	            jumps++;
+	            for (int i = left; i <= right; i++) {
+	                reachable = Math.max(reachable, i + A[i]);
+	            }
+	            if (reachable == right) {
+	                // unable to jump forward
+	                return -1;
+	            }
+	            if (reachable >= len - 1) {
+	                return jumps;
+	            } else {
+	                left = right + 1;
+	                right = reachable;
+	            }
+	        }
+	        return -1;
+	    }
+	}
 
 non-DP
 

@@ -67,7 +67,40 @@ __Third code is from [this blog](http://www.programcreek.com/2012/12/leetcode-in
 
 __My code__
 
-
+	/**
+	 * Definition for an interval.
+	 * public class Interval {
+	 *     int start;
+	 *     int end;
+	 *     Interval() { start = 0; end = 0; }
+	 *     Interval(int s, int e) { start = s; end = e; }
+	 * }
+	 */
+	public class Solution {
+	    public List<Interval> insert(List<Interval> intervals, Interval newInterval) {
+	        if (intervals == null) {
+	            return null;
+	        }
+	        int p = 0;
+	        while (p < intervals.size() && intervals.get(p).start < newInterval.start) {
+	            p++;
+	        }
+	        intervals.add(p, newInterval);
+	        if (p > 0) {
+	            p--;
+	        }
+	        // start merging from (p)th element
+	        while (p < intervals.size() - 1) {
+	            if (intervals.get(p).end >= intervals.get(p + 1).start) {
+	                intervals.get(p).end = Math.max(intervals.get(p).end, intervals.get(p + 1).end);
+	                intervals.remove(p + 1);
+	            } else {
+	                p++;
+	            }
+	        }
+	        return intervals;
+	    }
+	}
 
 __Second code__. 
 

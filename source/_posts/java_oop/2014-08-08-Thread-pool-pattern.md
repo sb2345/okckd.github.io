@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Thread pool pattern"
+title: "[Java OOP] Thread pool pattern"
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 

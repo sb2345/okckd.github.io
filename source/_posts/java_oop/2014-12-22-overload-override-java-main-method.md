@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Override/overload Java main method "
+title: "[Java OOP] Override/overload Java main method "
 comments: true
-category: Design
+category: Java OOP
 tags: [  ]
 ---
 

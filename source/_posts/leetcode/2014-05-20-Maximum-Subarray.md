@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/maximum-subarray/)
 
 <div class="question-content">
@@ -26,6 +26,7 @@ the contiguous subarray <code>[4,−1,2,1]</code> has the largest sum = <code>6<
 </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -59,7 +60,7 @@ __Divide and Conquer approach is difficult__. Not only the idea of solution is h
 
 First 2 code posted below are DP solutions. 
 
-__Third code is from [this article](http://cs.slu.edu/~goldwasser/courses/slu/csci314/2012_Fall/lectures/maxsubarray/) (Algorithm 3)__. The idea is to divide the list by half, and find the max of this 3 values: 
+__2nd code is from [this article](http://cs.slu.edu/~goldwasser/courses/slu/csci314/2012_Fall/lectures/maxsubarray/) (Algorithm 3)__. The idea is to divide the list by half, and find the max of this 3 values: 
 
 1. max subarray to the left of mid-point (exclusive)
 2. max subarray to the right of mid-point (exclusive)
@@ -67,52 +68,28 @@ __Third code is from [this article](http://cs.slu.edu/~goldwasser/courses/slu/cs
 
 For 1 and 2 are easy, for 3 is not. It needs to read left until the end, and right until the end (which means basically read n times). __The total time complexity is O(nlgn)__. 
 
-(One more thing, if you look at Algorithm 4 of the same article, it's actually the second code below)
+__3rd code is from [this blog](http://fisherlei.blogspot.sg/2012/12/leetcode-maximum-subarray.html)__. It's exactly same method, just coding a bit different. 
 
-__Fourth code is from [this blog](http://fisherlei.blogspot.sg/2012/12/leetcode-maximum-subarray.html)__. It's exactly same method, just coding a bit different. 
-
-The coding is not easy, I did not managed to write the correct code by myself. 
-
-__The most difficult part of this problem, is when there are negative inputs__, I can not initiate sum to 0. Instead I should do Integer.MIN_VALUE. Meanwhile, the sum should be initiated to 0, and cannot be Integer.MIN_VALUE. 
+Note there can be negative number! We can not initiate sum to 0. Instead I should do Integer.MIN_VALUE. Meanwhile, the sum should be initiated to 0, and cannot be Integer.MIN_VALUE. 
 
 ### My code
 
-__My code, DP__
+	public class Solution {
+	    public int maxSubArray(int[] A) {
+	        if (A == null || A.length == 0) {
+	            return 0;
+	        }
+	        int pre = 0;
+	        int max = Integer.MIN_VALUE;
+	        for (int i = 0; i < A.length; i++) {
+	            max = Math.max(max, pre + A[i]);
+	            pre = Math.max(0, pre + A[i]);
+	        }
+	        return max;
+	    }
+	}
 
-Note that I set __max = dp\[0\] = A\[0\]__, what happens if A\[0\] is negative?
-
-That is fine, because at position 0, the max subarray must be the 1st element, thus sum is equal to A\[0\].
-
-
-    public int maxSubArray(int[] A) {
-        int len = A.length;
-        if (len == 0) return 0;
-        int[] dp = new int[len];
-        int max = dp[0] = A[0];
-        for (int i = 1; i < len; i ++) {
-            dp[i] = Math.max(A[i], dp[i-1] + A[i]);
-            max = Math.max(max, dp[i]);
-        }
-        return max;
-    }
-
-
-__DP solution without using array__. The idea of [this blog](http://fisherlei.blogspot.sg/2012/12/leetcode-maximum-subarray.html).
-
-
-    public int maxSubArray(int[] A) {
-        if (A.length == 0) return 0;
-        int pre = 0, max = Integer.MIN_VALUE;
-        for (int i = 0; i < A.length; i ++) {
-            pre = Math.max(pre + A[i], A[i]);
-            max = Math.max(max, pre);
-        }
-        return max;
-    }
-
-
-__Third code__
-
+__2nd code__
 
     public int maxSubArray(int[] A) {
         return recmax(A, 0, A.length - 1);
@@ -142,9 +119,7 @@ __Third code__
                 + rmax);
     }
 
-
-__Fourth code__
-
+__3rd code__
 
     public int maxSubArray(int[] A) {
         return maxArray(A, 0, A.length - 1, Integer.MIN_VALUE);

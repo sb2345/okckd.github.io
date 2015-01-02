@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Design] Upcasting, Downcasting and Object Slicing"
+title: "[Java OOP] Upcasting, Downcasting and Object Slicing"
 comments: true
-category: Design
+category: Java OOP
 tags: [ src ]
 ---
 

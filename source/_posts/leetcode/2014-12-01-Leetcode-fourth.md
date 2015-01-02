@@ -51,14 +51,3 @@ tags: [  ]
 1. [LeetCode 29] Divide Two Integers
 1. [LeetCode 37] Sudoku Solver
 1. [LeetCode 44] Wildcard Matching
-
-
-[LeetCode 36] Valid Sudoku
-
-	<tr>
-		<td>Time to use</td>
-		<td bgcolor="white">----------</td>
-	</tr>
-</table>
-
-Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
