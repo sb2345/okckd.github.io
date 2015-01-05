@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a binary tree, print it vertically. The following example illustrates vertical order traversal. 1 / \ 2 3 / \ / \ 4 5 6 7 \ \ 8 9 &hellip;">
+  <meta name="description" content="Question DLL &ndash; link Inorder &ndash; link Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,120 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum (Undone)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-18T00:00:00+09:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
+
+<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
+
+<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
+
+<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
+
+<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
+
+<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
+
+<h3>Code</h3>
+
+<p><strong>DLL way, written by me</strong></p>
+
+<pre><code>public void findTriplet(TreeNode root, int target) {
+    TreeNode[] dll = convertToDll(root);
+    TreeNode head = dll[0];
+    TreeNode tail = dll[1];
+    // note that the bst inorder dll should already in sorted by value
+    TreeNode first = head;
+    while (first.right != null) {
+        TreeNode left = first.right;
+        TreeNode right = tail;
+        while (left.val &lt; right.val) {
+            int diff = first.val + left.val + right.val - target;
+            if (diff == 0) {
+                System.out.println("Found triplet: " + first.val + " "
+                        + left.val + " " + right.val + " for sum of "
+                        + target);
+            }
+            if (diff &lt;= 0) {
+                left = left.right;
+            }
+            if (diff &gt;= 0) {
+                right = right.left;
+            }
+        }
+        first = first.right;
+    }
+}
+
+private TreeNode[] convertToDll(TreeNode node) {
+    TreeNode[] ans = new TreeNode[2];
+    // do the left side of node
+    if (node.left == null) {
+        ans[0] = node;
+    } else {
+        TreeNode[] preAns = convertToDll(node.left);
+        ans[0] = preAns[0];
+        node.left = preAns[1];
+        preAns[1].right = node;
+    }
+    // do the right side of node
+    if (node.right == null) {
+        ans[1] = node;
+    } else {
+        TreeNode[] postAns = convertToDll(node.right);
+        ans[1] = postAns[1];
+        node.right = postAns[0];
+        postAns[0].left = node;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>inorder way</strong></p>
+
+<p>undone</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -980,177 +1094,6 @@ private static BiNode getListTail(BiNode head) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-26T00:00:00+09:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/26/implement-circular-array-java/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/26/implement-circular-array-java/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement a <strong>CircularArray</strong> class that supports an array-like data structure which can be efficiently rotated.</p>
-
-<p>The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>First part of the question is solved by using an array and a pointer</strong>. The solution simplifies the question by fixing the array size (not a dynamic-resizing array).</p>
-
-<p><strong>The difficult part is how to write iterator</strong>.</p>
-
-<p>Note that we should support <strong>Java Generics</strong>:</p>
-
-<pre><code>class MyCircularArray&lt;T&gt;
-</code></pre>
-
-<p>Implement <strong>Iterable Interface</strong>:</p>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-}
-</code></pre>
-
-<p>Override <strong>iterator() method</strong>:</p>
-
-<pre><code>@Override
-public Iterator&lt;T&gt; iterator() {
-    return new MyIterator&lt;T&gt;(this);
-}
-</code></pre>
-
-<p>Write our own <strong>Iterator Class</strong>:</p>
-
-<pre><code>class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-}
-</code></pre>
-
-<p>Finish it up</p>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-
-    @Override
-    public Iterator&lt;T&gt; iterator() {
-        return new MyIterator&lt;T&gt;(this);
-    }
-
-    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-        @Override
-        public boolean hasNext() {
-        }
-
-        @Override
-        public T next() {
-        }
-
-        @Override
-        public void remove() {
-        }
-    }
-}
-</code></pre>
-
-<p>It might be confusing when implementing <strong>Iterable</strong> and <strong>Iterator</strong> Class.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-
-    T[] items;
-
-    int head;
-    int cur;
-
-    public MyCircularArray(int size) {
-        // this is really important (casting the type)
-        items = (T[]) new Object[size];
-
-        head = 0;
-        cur = 0;
-    }
-
-    public void put(T item) {
-        items[cur++] = item;
-        cur = cur % items.length;
-    }
-
-    public T get(int i) {
-        int newIndex = (i + head) % items.length;
-        return items[newIndex];
-    }
-
-    public void rotate(int shiftRight) {
-        head += shiftRight;
-        head = head % items.length;
-    }
-
-    @Override
-    public Iterator&lt;T&gt; iterator() {
-        return new MyIterator&lt;T&gt;(this);
-    }
-
-    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-
-        T[] items;
-        int head;
-        int count;
-
-        public MyIterator(MyCircularArray&lt;T&gt; array) {
-            this.items = array.items;
-            this.head = array.head;
-            this.count = 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.count != items.length;
-        }
-
-        @Override
-        public T next() {
-            if (hasNext()) {
-                return items[(head + count++) % items.length];
-            }
-            return null;
-        }
-
-        @Override
-        public void remove() {
-        }
-    }
-
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1171,7 +1114,7 @@ public Iterator&lt;T&gt; iterator() {
 <li class='category'><a href='/blog/categories/design/'>design (47)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (7)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (8)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
@@ -1192,6 +1135,10 @@ public Iterator&lt;T&gt; iterator() {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/06/Json-prettifier/">[Facebook] Write a Json Prettifier</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a>
       </li>
     
@@ -1205,10 +1152,6 @@ public Iterator&lt;T&gt; iterator() {
     
       <li class="post">
         <a href="/blog/2014/12/22/overload-override-java-main-method/">[Java OOP] Override/overload Java Main Method</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/common-root-java-class/">[Java OOP] Common Root of Java Classes</a>
       </li>
     
   </ul>
