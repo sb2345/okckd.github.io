@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Write a program that breaks up a string of words with no spaces into a string with the appropriate spaces. Follow the following process: &hellip;">
+  <meta name="description" content="Definition A* is a computer algorithm that is widely used in pathfinding and graph traversal. It uses a knowledge-plus-heuristic cost function like &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,6 +84,437 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/08/30/A-start-search/">[Fundamental] A-Star Search</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/30/A-start-search/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/30/A-start-search/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Definition</h3>
+
+<p>A* is a computer algorithm that is widely used in pathfinding and graph traversal.</p>
+
+<p>It uses a knowledge-plus-heuristic cost function like this:</p>
+
+<blockquote><p>f (n) = g(n) + h(n)</p>
+
+<p>f (n): estimated total cost of path through n to goal</p>
+
+<p>g(x) = past path-cost function</p>
+
+<p>h(x) = future path-cost function, which is an admissible &ldquo;heuristic estimate&rdquo; of the distance from x to the goal</p></blockquote>
+
+<p>What sets A* <strong>apart from a greedy best-first search</strong> is that it also takes the distance already traveled into account.</p>
+
+<h3>Implementation</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/A*_search_algorithm#Process">Maintains a priority queue</a> (lower f(x) means higher priority). At each step, node with the lowest f(x) value is removed from the queue, and neighbors are added to the queue.</p>
+
+<p>This continues until a goal node has a lower f value than any node in the queue. Goal found!</p>
+
+<h3>Relationship with Dijkstra</h3>
+
+<p><strong><a href="http://stackoverflow.com/a/1332478">Dijkstra is a special case</a> for A*</strong> (when the <a href="http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Algorithm">heuristics is 0</a>).</p>
+
+<p>Illustration (A-star):</p>
+
+<p><img class="middle" src="/assets/images/path-find-Astar.gif"></p>
+
+<p>Illustration (Dijkstra&rsquo;s algorithm):</p>
+
+<p><img class="middle" src="/assets/images/path-find-Dijkstras.gif"></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/29/Boggle-solver/">[Google] Boggle Solver (Search Words From Matrix)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/29/Boggle-solver/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/29/Boggle-solver/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/746082/how-to-find-list-of-possible-words-from-a-letter-matrix-boggle-solver">link</a></p>
+
+<blockquote><p>Boggle Game:</p></blockquote>
+
+<pre><code>F X I E
+A M L O
+E W B X
+A S T U
+</code></pre>
+
+<blockquote><p>The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference.</p></blockquote>
+
+<h3>Variation</h3>
+
+<p><strong>Another version of questions states in <a href="http://www.glassdoor.com/Interview/I-was-asked-to-write-an-algorithm-to-solve-a-crossword-like-puzzle-I-forget-the-name-but-started-with-a-B-As-opposed-QTN_435641.htm">here</a></strong></p>
+
+<blockquote><p>&hellip; Boggle Game. As opposed to simply vertical, horizontal, and diagonal placement of words, they were allowed to snake around the grid in any way.</p></blockquote>
+
+<p>For this version of question, no &lsquo;visited&rsquo; memory needs to be stored. In other words, it&rsquo;s a simpler version of above question.</p>
+
+<h3>Solution</h3>
+
+<p><strong><a href="http://stackoverflow.com/a/4314056">The best solution</a> is to use Trie</strong>, then do DFS search. However it might not be as intuitive as it seems.</p>
+
+<p>The idea is from <a href="http://stackoverflow.com/a/746102">this answer</a> (However this guy admits that his solution does not handle &lsquo;visited&rsquo; nodes properly, means the same char might be visited again to produce a word).</p>
+
+<p>We need to first define a class called Item:</p>
+
+<pre><code>class Item {
+    public final int x, y;
+    public final String prefix;
+
+    public Item(int row, int column, String prefix) {
+        this.x = row;
+        this.y = column;
+        this.prefix = prefix;
+    }
+}
+</code></pre>
+
+<p>So when we start doing DFS, we pass in an Item object which stores 2 information:</p>
+
+<ol>
+<li>The next position that we&rsquo;re going to visit.</li>
+<li>The prefix string that we have validated so far (before visiting this position).</li>
+</ol>
+
+
+<p>For example:</p>
+
+<pre><code>F X I E
+A M L O
+E W B X
+A S T U
+</code></pre>
+
+<p>We&rsquo;ll have Items objects like (0, 0, &ldquo;&rdquo;), (0, 1, &ldquo;F&rdquo;), (0, 2, &ldquo;FA&rdquo;) &hellip; We guarantee that the prefix must be a valid prefix by searching them in the Trie.</p>
+
+<p>How to tell whether a string is a prefix of word, or it&rsquo;s an actual word? We have a property in TrieNode called TrieNode.isWord() to help us.</p>
+
+<p>That&rsquo;s about it. I spend quite some time writing the code below, by refering to the Java solution by <a href="http://stackoverflow.com/a/11698898">zouzhile</a>.</p>
+
+<h3>Code</h3>
+
+<p>BoggleSolver.java</p>
+
+<pre><code>public class BoggleSolver {
+
+    private static BufferedReader in = null;
+    private static final String INPUT_FILE = "dictionary.txt";
+
+    public static void beginFileReader() {
+        try {
+            in = new BufferedReader(new FileReader(new File(BoggleSolver.class
+                    .getResource(INPUT_FILE).toURI())));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Trie buildTrie() {
+        Trie trie = new Trie();
+        beginFileReader();
+        String line = null;
+        try {
+            while ((line = in.readLine()) != null) {
+                String[] words = line.split(" ");
+                for (String word : words) {
+                    word = word.trim().toLowerCase();
+                    trie.addWord(word);
+                }
+            }
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        return trie;
+    }
+
+    public Set&lt;String&gt; findWords(char[][] map, Trie dict) {
+        Set&lt;String&gt; ans = new TreeSet&lt;String&gt;();
+        int m = map.length;
+        int n = map[0].length;
+        for (int i = 0; i &lt; m; i++) {
+            for (int j = 0; j &lt; n; j++) {
+                boolean[][] visited = new boolean[m][n];
+                findWordsDfs(ans, dict, map, visited, new Item(i, j, ""));
+                // item have 3 parameters:
+                // location x,y and the prefix string before reaching (i.j)
+            }
+        }
+        return ans;
+    }
+
+    public void findWordsDfs(Set&lt;String&gt; ans, Trie dict, char[][] map,
+            boolean[][] visited, Item item) {
+        // item: the location that we're going to test
+        // item.prefix is the word prefix before reaching (x, y)
+
+        int m = map.length;
+        int n = map[0].length;
+        int x = item.x;
+        int y = item.y;
+
+        // check whether cur.(x,y) is a valid position
+        if (x &lt; 0 || x &gt;= m || y &lt; 0 || y &gt;= n) {
+            return;
+        } else if (visited[x][y]) {
+            return;
+        }
+        String newWord = item.prefix + map[x][y];
+        // check whether cur.prefix is a valid prefix
+        TrieNode findWord = dict.match(newWord);
+        if (findWord == null) {
+            // up to this position (x, y), the word dont' exists
+            return;
+        }
+        // now cur is in a valid position, with a valid prefix
+        if (findWord.isWord()) {
+            ans.add(newWord);
+        }
+        // visit this position, and continue in 4 different directions
+        visited[x][y] = true;
+        findWordsDfs(ans, dict, map, visited, new Item(x, y - 1, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x, y + 1, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x - 1, y, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x + 1, y, newWord));
+        visited[x][y] = false;
+    }
+
+    public static void main(String[] args) {
+        String[] rows = "eela,elps,weut,korn".split(",");
+        char[][] input = new char[4][4];
+        for (int i = 0; i &lt; 4; i++) {
+            input[i] = rows[i].toCharArray();
+        }
+
+        // prepare test data
+        BoggleSolver solver = new BoggleSolver();
+        Trie dictionary = solver.buildTrie();
+        // start finding words
+        Set&lt;String&gt; set = solver.findWords(input, dictionary);
+        // present the result
+        System.out.println(set.size() + " words are found, they are: ");
+        for (String str : set) {
+            System.out.println(str);
+        }
+    }
+
+    class Item {
+        public final int x, y;
+        public final String prefix;
+
+        public Item(int row, int column, String prefix) {
+            this.x = row;
+            this.y = column;
+            this.prefix = prefix;
+        }
+    }
+}
+</code></pre>
+
+<p>Trie.java</p>
+
+<pre><code>public class Trie {
+    private TrieNode root;
+
+    public Trie() {
+        this.root = new TrieNode();
+    }
+
+    public void addWord(String word) {
+        TrieNode node = this.root;
+        for (char c : word.toCharArray()) {
+            node = node.addChild(c);
+            if (node == null)
+                return;
+        }
+        node.setWord(true);
+    }
+
+    public TrieNode match(String s) {
+        TrieNode node = this.root;
+        for (char c : s.toCharArray()) {
+            node = node.get(c);
+            if (node == null)
+                return null;
+        }
+        return node;
+    }
+}
+</code></pre>
+
+<p>TrieNode.java</p>
+
+<pre><code>public class TrieNode {
+    private TrieNode[] children;
+    private boolean isWord = false;
+
+    public TrieNode() {
+        this.children = new TrieNode[26];
+    }
+
+    public TrieNode addChild(char child) {
+        if (child &lt; 'a' || child &gt; 'z')
+            return null;
+
+        int offset = child - 'a';
+        if (this.children[offset] == null) {
+            this.children[offset] = new TrieNode();
+        }
+        return this.children[offset];
+    }
+
+    public boolean isWord() {
+        return isWord;
+    }
+
+    public void setWord(boolean isWord) {
+        this.isWord = isWord;
+    }
+
+    public TrieNode get(char c) {
+        int offset = c - 'a';
+        return this.children[offset];
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/28/ugly-numbers/">[CC150v4] 10.7 Ugly Numbers (Hamming Numbers)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/28/ugly-numbers/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/28/ugly-numbers/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Design an algorithm to find the kth number such that the only prime factors are 3, 5, and 7.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is very difficult question</strong>. All I can say is, just memorize this solution.</p>
+
+<p>It works like this:</p>
+
+<ol>
+<li>Init 3 queues, with initial value of 3, 5 and 7 respectively.</li>
+<li>Fetch the smallest element x at the head of 3 queues.</li>
+<li>Add number x to the result list, then:
+
+<ol>
+<li>if number x comes from queue3, add 3x, 5x and 7x into 3 queues</li>
+<li>if number x comes from queue5, add 5x and 7x into queue5 and queue7</li>
+<li>if number x comes from queue7, add 7x into queue7</li>
+</ol>
+</li>
+<li>Fetch next smallest element and do this recursively.</li>
+</ol>
+
+
+<p>A <a href="http://www.geeksforgeeks.org/ugly-numbers/">dp solution</a> is available. It&rsquo;s using the same method actually, but less intuitive.</p>
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/08/28/google-pre-interview-coaching/">[Google] Google Pre-interview Coaching</a></h1>
     
     
@@ -100,7 +531,7 @@
   
 
 
-<time datetime="2014-08-28T00:00:00+09:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/28/google-pre-interview-coaching/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/08/28/google-pre-interview-coaching/">Comments</a>
@@ -187,7 +618,7 @@
   
 
 
-<time datetime="2014-08-28T00:00:00+09:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/28/Http-cookie/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/08/28/Http-cookie/">Comments</a>
@@ -278,7 +709,7 @@
   
 
 
-<time datetime="2014-08-27T00:00:00+09:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/27/largest-cycle-in-permutation/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/08/27/largest-cycle-in-permutation/">Comments</a>
@@ -341,7 +772,7 @@
   
 
 
-<time datetime="2014-08-27T00:00:00+09:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/27/google-api-read-4096/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/08/27/google-api-read-4096/">Comments</a>
@@ -437,7 +868,7 @@ public String read(int n) {
   
 
 
-<time datetime="2014-08-27T00:00:00+09:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/27/Duplicate-rows-in-matrix/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/08/27/Duplicate-rows-in-matrix/">Comments</a>
@@ -565,7 +996,7 @@ class TrieNode {
   
 
 
-<time datetime="2014-08-27T00:00:00+09:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/27/Count-visible-nodes-binary-tree/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/08/27/Count-visible-nodes-binary-tree/">Comments</a>
@@ -642,7 +1073,7 @@ private int helper(TreeNode node, int ancesterMax) {
   
 
 
-<time datetime="2014-08-26T00:00:00+09:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-26T00:00:00+08:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/26/Virtual-memory-page-fault-thrashing/#disqus_thread"
              data-disqus-identifier="http://okckd.github.io/blog/2014/08/26/Virtual-memory-page-fault-thrashing/">Comments</a>
@@ -764,371 +1195,6 @@ for (i=0; i&lt;256; i++) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/26/Test-hashcode-function/">[Testing] Test hashCode() Function</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-26T00:00:00+09:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/26/Test-hashcode-function/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/26/Test-hashcode-function/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>How to test hashCode() function? Example:</p></blockquote>
-
-<pre><code>public int hashCode(){
-    int result = 17 + hashDouble(re);
-    result = 31 * result + hashDouble(im);
-    return result;
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>We need to test that the hash function is <a href="http://stackoverflow.com/a/4449791">reflexive, symmetric, and transitive</a>.</p>
-
-<h3>Code</h3>
-
-<p>Not including &lsquo;not equal&rsquo; test.</p>
-
-<pre><code>@Test
-public void testEquals_Symmetric() {
-    Person x = new Person("Foo Bar");  // equals and hashCode check name field value
-    Person y = new Person("Foo Bar");
-    Assert.assertTrue(x.equals(y) &amp;&amp; y.equals(x));
-    Assert.assertTrue(x.hashCode() == y.hashCode());
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/26/Design-OOD-elevator/">[Design] OOD Design of Elevator</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-26T00:00:00+09:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/26/Design-OOD-elevator/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/26/Design-OOD-elevator/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://thought-works.blogspot.sg/2012/11/object-oriented-design-for-elevator-in.html">link</a></p>
-
-<blockquote><p>Object Oriented design for Elevator in a multi-storied apartment</p></blockquote>
-
-<h3>A Single Elevator</h3>
-
-<p>Use Case:</p>
-
-<ol>
-<li>User
-
-<ol>
-<li>press a button to summon the lift</li>
-<li>press a button to get to a specific floor</li>
-</ol>
-</li>
-<li>Button
-
-<ol>
-<li>floor button and level button</li>
-<li>illuminates when pressed</li>
-<li>place an &lsquo;elevator request&rsquo; when pressed</li>
-</ol>
-</li>
-<li>Elevator
-
-<ol>
-<li>moves up/down</li>
-<li>open/close the door</li>
-</ol>
-</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/elevator-class-diagram.png"></p>
-
-<p><strong>ElevatorRequests Class</strong></p>
-
-<p>Each button press results in an elevator request which has to be served. Each of these requests is tracked at a global place. ElevatorRequests, the class which stores elevator requests can use different strategies to schedule the elevator requests.</p>
-
-<p><strong>ElevatorController</strong></p>
-
-<p>The elevator is controlled by a controller class which we call ElevatorController. The elevator controller instructs the elevator what to do and also can shutdown/start up the elevator of the building. The elevator controller reads the next elevator request to be processed and serves it.</p>
-
-<p><strong>Button (Abstract) Class</strong></p>
-
-<p>Button is abstract class defining common behavior like illuminate, doNotIlluminate. FloorButton, ElevatorButton extend Button type and define placeRequest() which is invoked when the button is pressed.</p>
-
-<p>In conclusion, <strong>ElevatorController</strong> runs the show by reading the <strong>ElevatorRequests</strong> to process and instructing the <strong>Elevator</strong> what to do. User send request by pressing <strong>Buttons</strong>.</p>
-
-<h3>Extend the answer to multiple elevators</h3>
-
-<ol>
-<li><p>Each elevator have 1 controller.</p></li>
-<li><p>Floor based requests can be served by any elevator, thus these requests are added to a common area accessible by all controllers.</p></li>
-<li><p>Each elevator controller runs as a separate thread and checks if it can process a floor request. Mind synchronization issues.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/25/design-parking-lot/">[CC150v5] 8.4 Design a Parking Lot</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-25T00:00:00+09:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/25/design-parking-lot/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/25/design-parking-lot/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Design a Parking Lot.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Class hierarchy:</p>
-
-<ol>
-<li>A parking lot has multiple Levels.</li>
-<li>A Level has multiple Parking Spot.</li>
-<li>A Spot can park motorcycle, car or bus, which all belongs to Vehicle.</li>
-</ol>
-
-
-<p>Implement methods:</p>
-
-<ol>
-<li>Vehicle.parkInSpot(Spot s)</li>
-<li>Vehicle.leaveSpot(Spot s)</li>
-<li>Vehicle.canFitIn(Spot s)</li>
-<li>ParkingLot.parkVehicle(Vehicle v)</li>
-<li>Level.parkVehicle(Vehicle v)</li>
-<li>Level.parkVehicleAtSpot(Vehicle v, Spot s)</li>
-<li>Level.findAvailableSpot(VehicleType vt)</li>
-</ol>
-
-
-<p><strong>ParkingLot Class is just a wrapper class of Levels</strong>. By doing this, we seperated out parking logic from other broader actions (like Spot management).</p>
-
-<p>The code below is from CC150v5. <strong>Its design is a bit strange</strong> (a car can occupy multiple spots), so just use this code as a guide but not a reference.</p>
-
-<h3>Code</h3>
-
-<p>ParkingLot.java</p>
-
-<pre><code>public class ParkingLot {
-    private Level[] levels;
-    private final int NUM_LEVELS = 5;
-
-    public ParkingLot() {
-        levels = new Level[NUM_LEVELS];
-        for (int i = 0; i &lt; NUM_LEVELS; i++) {
-            levels[i] = new Level(i, 30);
-        }
-    }
-
-    /* Park the vehicle in a spot (or multiple spots). Return false if failed. */
-    public boolean parkVehicle(Vehicle vehicle) {
-        for (int i = 0; i &lt; levels.length; i++) {
-            if (levels[i].parkVehicle(vehicle)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void print() {
-        for (int i = 0; i &lt; levels.length; i++) {
-            System.out.print("Level" + i + ": ");
-            levels[i].print();
-            System.out.println("");
-        }
-        System.out.println("");
-    }
-}
-</code></pre>
-
-<p>Level.java</p>
-
-<pre><code>/* Represents a level in a parking garage */
-public class Level {
-    private int floor;
-    private ParkingSpot[] spots;
-    private int availableSpots = 0; // number of free spots
-    private static final int SPOTS_PER_ROW = 10;
-
-    public Level(int flr, int numberSpots) {
-        floor = flr;
-        spots = new ParkingSpot[numberSpots];
-        int largeSpots = numberSpots / 4;
-        int bikeSpots = numberSpots / 4;
-        int compactSpots = numberSpots - largeSpots - bikeSpots;
-        for (int i = 0; i &lt; numberSpots; i++) {
-            VehicleSize sz = VehicleSize.Motorcycle;
-            if (i &lt; largeSpots) {
-                sz = VehicleSize.Large;
-            } else if (i &lt; largeSpots + compactSpots) {
-                sz = VehicleSize.Compact;
-            }
-            int row = i / SPOTS_PER_ROW;
-            spots[i] = new ParkingSpot(this, row, i, sz);
-        }
-        availableSpots = numberSpots;
-    }
-
-    public int availableSpots() {
-        return availableSpots;
-    }
-
-    /* Try to find a place to park this vehicle. Return false if failed. */
-    public boolean parkVehicle(Vehicle vehicle) {
-        if (availableSpots() &lt; vehicle.getSpotsNeeded()) {
-            return false;
-        }
-        int spotNumber = findAvailableSpots(vehicle);
-        if (spotNumber &lt; 0) {
-            return false;
-        }
-        return parkStartingAtSpot(spotNumber, vehicle);
-    }
-
-    /* Park a vehicle starting at the spot spotNumber, and continuing until vehicle.spotsNeeded. */
-    private boolean parkStartingAtSpot(int spotNumber, Vehicle vehicle) {
-        vehicle.clearSpots();
-        boolean success = true;
-        for (int i = spotNumber; i &lt; spotNumber + vehicle.spotsNeeded; i++) {
-             success &amp;= spots[i].park(vehicle);
-        }
-        availableSpots -= vehicle.spotsNeeded;
-        return success;
-    }
-
-    /* find a spot to park this vehicle. Return index of spot, or -1 on failure. */
-    private int findAvailableSpots(Vehicle vehicle) {
-        int spotsNeeded = vehicle.getSpotsNeeded();
-        int lastRow = -1;
-        int spotsFound = 0;
-        for (int i = 0; i &lt; spots.length; i++) {
-            ParkingSpot spot = spots[i];
-            if (lastRow != spot.getRow()) {
-                spotsFound = 0;
-                lastRow = spot.getRow();
-            }
-            if (spot.canFitVehicle(vehicle)) {
-                spotsFound++;
-            } else {
-                spotsFound = 0;
-            }
-            if (spotsFound == spotsNeeded) {
-                return i - (spotsNeeded - 1);
-            }
-        }
-        return -1;
-    }
-
-    public void print() {
-        int lastRow = -1;
-        for (int i = 0; i &lt; spots.length; i++) {
-            ParkingSpot spot = spots[i];
-            if (spot.getRow() != lastRow) {
-                System.out.print("  ");
-                lastRow = spot.getRow();
-            }
-            spot.print();
-        }
-    }
-
-    /* When a car was removed from the spot, increment availableSpots */
-    public void spotFreed() {
-        availableSpots++;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/11">&larr; Older</a>
@@ -1146,7 +1212,7 @@ public class Level {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (47)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (50)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (8)</a></li>
@@ -1170,23 +1236,23 @@ public class Level {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/06/Json-prettifier/">[Facebook] Write a Json Prettifier</a>
+        <a href="/blog/2015/01/06/distributed-hash-table/">[Design] Distributed Hash Table (Undone)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/06/cloud-grid-cluster/">[Design] Cloud, Grid and Cluster (Undone)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/06/big-data-storage/">[Design] Big Data Storage</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/06/Json-prettifier/">[Facebook] Write a Json Prettifier (Undone)</a>
       </li>
     
       <li class="post">
         <a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/23/Java-runtime-exception/">[Java OOP] Java Runtime Exception</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/23/Endless-error-gem-dependencies/">[Ruby] Endless Error With Gem Dependencies</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/22/overload-override-java-main-method/">[Java OOP] Override/overload Java Main Method</a>
       </li>
     
   </ul>
