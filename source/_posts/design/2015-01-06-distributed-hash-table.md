@@ -36,7 +36,7 @@ DHT has the following properties:
 2. Distribute __range space__ for all nodes in the network. 
 3. The desinated node stores the location of the file. (this is indirect approach)
 
-{% img middle /assets/images/range-space.png %}
+{% img middle /assets/images/range-space.PNG %}
 
 #### Search in DHT
 
@@ -69,7 +69,7 @@ Consistent hashing is based on mapping each object to a point on the edge of a c
 
 For a very detailed steps of consistent hashing, read [this Chinese blog](http://blog.csdn.net/sparkliang/article/details/5279393).
 
-{% img middle /assets/images/consistent-hashing.png %}
+{% img middle /assets/images/consistent-hashing.PNG %}
 
 In this way, 一致性Hash在node加入/离开时，不会导致映射关系的重大变化。
 
@@ -85,7 +85,7 @@ We'll now discuss __Chord Routing__.
 
 Each node stores more info __closely following it__ on the identifier circle than nodes further away. That is, the subsequent nodes at position 1, 2, 4, 8, 16, 32... (each entry is called a __finger__)
 
-{% img middle /assets/images/consistent-hashing.png %}
+{% img middle /assets/images/chord-routing.PNG %}
 
 为网络中每个Node分配一个唯一id（可以通过机器的mac地址做Hash），假设整个网络有N 个节点，我们可以认为这些整数首尾相连形成一个环，称之为Chord环。两个节点间的距离定义为节点间下标差，每个节点会存储一张路由表(Finger表)，表内顺时针按照离本节点2、4、8、16、32.……2i的距离选定log2N个其他节点的ip信息来记录。
 
@@ -97,6 +97,6 @@ __Query routing__ take O(logN) time.
 
 It's very much like insertion and removal in Doubly Linked List. Read it yourself. 
 
-{% img middle /assets/images/chord-routing.PNG %}
+{% img middle /assets/images/join-in-chord.PNG %}
 
 Special thanks to the online resources written by some CSDN bloggers. 

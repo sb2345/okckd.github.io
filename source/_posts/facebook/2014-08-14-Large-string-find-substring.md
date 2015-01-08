@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Facebook] Large String Find Substring (Trie, prefix tree) "
+title: "[Facebook] Large String Find Query (HashMap, prefix array) "
 comments: true
 categories:
 - Facebook
