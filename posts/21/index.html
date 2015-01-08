@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link In how many ways can one tile a 2 X N strip of square cells with 1 X 2 dominos? Solution X(n+1) = X(n) + X(n-1) It&rsquo;s a Fibonacci &hellip;">
+  <meta name="description" content="Question link You have n types of items, where the ith item type has an integer size si and a real value vi. You need to ﬁll a knapsack of total &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,98 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Knapsack-problem-with-duplication/">[Question] Knapsack Problem With Duplications</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/07/27/Knapsack-problem-with-duplication/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/07/27/Knapsack-problem-with-duplication/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://tech-queries.blogspot.sg/2011/04/integer-knapsack-problem-duplicate.html">link</a></p>
+
+<blockquote><p>You have n types of items, where the ith item type has an integer size si and a real value vi. You need to ﬁll a knapsack of total capacity C with a selection of items of maximum value. You can add multiple items of the same type to the knapsack.</p>
+
+<p>This is similar to &ldquo;0-1 Knapsack Problem&rdquo;, but duplication is allowed for this question.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Of course this is DP, and it&rsquo;s 1-D DP. However, <strong>there is one very tricky special case</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>Using &rsquo;M(j)&lsquo; to denote the max value for total weight j, &#8216;w&rsquo; to denote weight, and &lsquo;v&rsquo; to denote value, the equation is:</p>
+
+<blockquote><p>M(j) = max{M(j − 1), max(i=1&hellip;n) M(j − wi) + vi}</p></blockquote>
+
+<p><strong>Note the 2 cases are</strong>:</p>
+
+<ol>
+<li>when (j)th spot is not filled, the max value is <strong>M(j-1)</strong></li>
+<li>when (j)th spot is filled, the max value is <strong>max(i=1&hellip;n) M(j − wi) + vi</strong></li>
+</ol>
+
+
+<p>This question is trickier than &ldquo;0-1 Knapsack Problem&rdquo;, if not more difficult. <strong>Study the 2 question together</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>int knapsack(int value[], int weight[], int n, int C, vector&lt;int&gt; backtrack) {
+ int *M = new int[C+1];  
+ int i, j, tmp, pos;  
+ for(i=1; i&lt;= C; i++) {  
+     M[i] = M[i-1];  
+     pos = i-1;               
+     for(j=0; j&lt; n; j++)  
+     {  
+         if (i &gt;= weight[j])  
+             tmp = M[i-weight[j]] + value[j];  
+         if (tmp &gt; M[i]){  
+             M[i] = tmp;  
+             pos = i - weight[j];  
+         }  
+     }  
+     backtrack.push_back(pos);  
+ }   
+ int ans = M[C];  
+ delete[] M;        
+ return ans;  
+}  
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -896,61 +988,6 @@ private static int partition(int[] list, int left, int right) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/25/Semaphore-mutex-toilet-example/">[Design] Semaphore Mutex Toilet Example</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/07/25/Semaphore-mutex-toilet-example/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/07/25/Semaphore-mutex-toilet-example/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Mutex vs. Semaphore</h2>
-
-<p><strong>Mutex is a <a href="http://koti.mbnet.fi/niclasw/MutexSemaphore.html">key to a toilet</a></strong>. One person can have the key &ndash; occupy the toilet. When finished, the person gives (frees) the key to the next person in queue.</p>
-
-<p>A mutex is really a semaphore with value 1.</p>
-
-<p><strong>Semaphore is the number of free identical toilet keys</strong>. Example, say we have four toilets with identical locks and keys. The semaphore count is set to 4 at beginning, then the count decrease as people are coming in, etc.</p>
-
-<h3>A mutex is not a binary semaphore</h3>
-
-<p><strong>A mutex is <a href="http://www.geeksforgeeks.org/mutex-vs-semaphore/">locking mechanism</a></strong> used to synchronize access to a resource. Only one task can acquire the mutex.</p>
-
-<p>It means there will be ownership associated with mutex, and only the owner can release the lock.</p>
-
-<p><strong>Semaphore is signaling mechanism</strong> (&ldquo;I am done, you can carry on&rdquo; kind of signal).</p>
-
-<p>For example, if you are listening songs (assume it as one task) on your mobile and at the same time your friend called you, an interrupt will be triggered upon which an interrupt service routine (ISR) will signal the call processing task to wakeup.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/22">&larr; Older</a>
@@ -971,7 +1008,7 @@ private static int partition(int[] list, int left, int right) {
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (8)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
@@ -992,6 +1029,10 @@ private static int partition(int[] list, int left, int right) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/">[Facebook] Scheduling Jobs With Max Cost</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/07/P2P-technology/">[Design] P2P Technology</a>
       </li>
     
@@ -1005,10 +1046,6 @@ private static int partition(int[] list, int left, int right) {
     
       <li class="post">
         <a href="/blog/2015/01/06/big-data-storage/">[Design] Big Data Storage</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/06/Json-prettifier/">[Facebook] Write a Json Prettifier</a>
       </li>
     
   </ul>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Facebook | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/facebook/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-07T21:57:37+08:00</updated>
+  <updated>2015-01-08T16:54:50+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,96 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Scheduling Jobs With Max Cost]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/07/scheduling-jobs-with-max-cost/"/>
+    <updated>2015-01-07T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/07/scheduling-jobs-with-max-cost</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.glassdoor.com/Interview/Given-a-set-of-n-jobs-with-start-time-end-time-cost-find-a-subset-so-that-no-2-jobs-overlap-and-the-cost-is-maximum-QTN_440168.htm)
+
+> Given a set of n jobs with [start time, end time, cost], find a subset so that no 2 jobs overlap and the cost is maximum.
+
+> Let's assume the input is already sorted by start_time. 
+
+### Solution
+
+[Somebody](http://cs.stackexchange.com/a/14237) mentioned __Interval Graph__, so check it out if you interested! 
+
+I am going to discuss both DP and recursive solution. 
+
+This question reminds me of __[Question] 0-1 Knapsack Problem__ and __[Question] Coin Change Problem__, cuz the basic idea is to compare 2 conditions: 
+
+1. include current element
+1. or, not include current element
+
+A very good DP solution is presented in [here](http://cs.stackexchange.com/a/16842). The code below is written by me and it's very intuitive to read. 
+
+Leave me a comment if you have questions. And one more thing~ Happy new year! 
+
+### Code
+
+Dp
+
+	private int dpSolution(Job[] jobs, int size) {
+		int[] dp = new int[size];
+		dp[size - 1] = jobs[size - 1].cost;
+		// cost of last job equals to just itself
+		for (int k = size - 2; k >= 0; k--) {
+			int next = findNextJob(jobs, k);
+			int includeK = jobs[k].cost;
+			if (next < size) {
+				includeK += dp[next];
+			}
+			int excludeK = dp[k + 1];
+			dp[k] = Math.max(includeK, excludeK);
+		}
+		return dp[0];
+	}
+
+	private int findNextJob(Job[] jobs, int k) {
+		int finishTime = jobs[k].finish;
+		int next = k + 1;
+		while (next < jobs.length) {
+			if (jobs[next].start < finishTime) {
+				next++;
+			} else {
+				break;
+			}
+		}
+		return next;
+	}
+
+Recursion
+
+	public int recursiveSolution(Job[] jobs, int size, int k) {
+		// max cost from (k)th job and onwards
+		if (k == size) {
+			return 0;
+		}
+		// (k)th job must not conflict with any previous job
+		int next = findNextJob(jobs, k);
+		int includeK = jobs[k].cost + recursiveSolution(jobs, size, next);
+		int excludeK = recursiveSolution(jobs, size, k + 1);
+		return Math.max(includeK, excludeK);
+	}
+
+	private int findNextJob(Job[] jobs, int k) {
+		int finishTime = jobs[k].finish;
+		int next = k + 1;
+		while (next < jobs.length) {
+			if (jobs[next].start < finishTime) {
+				next++;
+			} else {
+				break;
+			}
+		}
+		return next;
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Facebook] Write a Json Prettifier]]></title>
@@ -347,61 +437,6 @@ __written by me__
         findRange(node.left, range, position - 1);
         findRange(node.right, range, position + 1);
     }
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Facebook] Hamming Distance of Array]]></title>
-    <link href="http://okckd.github.io/blog/2014/09/01/Hamming-distance-of-array/"/>
-    <updated>2014-09-01T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/09/01/Hamming-distance-of-array</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.glassdoor.com/Interview/-a-first-write-a-function-to-calculate-the-hamming-distance-between-two-binary-numbers-b-write-a-function-that-takes-QTN_450885.htm)
-
-> [Hamming distance](http://en.wikipedia.org/wiki/Hamming_distance) between two strings of equal length is the number of positions at which the corresponding symbols are different. 
-
-> Write a function that takes a list of binary numbers and returns the sum of the hamming distances for each pair. 
-
-> Do it in O(n) time. 
-
-### Solution
-
-The naive solution is O(n^2), so we simplify this question by using {0,0,0,1,1} as input. The output in this case would be 6. Why? Because 3 x 2 = 6. 
-
-So the equation for solution would be: 
-
-> distance (for a bit) = number of '1's * number of '0's
-
-The final answer would be the sum of distances for all bits. The solution is from [this blog](http://se7so.blogspot.sg/2014/02/how-to-prepare-for-interview-9.html). 
-
-### Code
-
-Great solution, __not written by me__ 
-
-	int hammingDist(int[] nums) {
-
-		int[] bits = new int[32];
-
-		for (int i = 0; i < nums.length; i++) {
-			int one = 1;
-			int j = 0;
-
-			while (nums[i] != 0) {
-				if ((nums[i] & one) != 0)
-					bits[j]++;
-				j++;
-				nums[i] = nums[i] >> 1;
-			}
-		}
-
-		int ans = 0;
-		for (int i = 0; i < 32; i++) {
-			ans += bits[i] * (nums.length - bits[i]);
-		}
-
-		return ans;
-	}
 ]]></content>
   </entry>
   

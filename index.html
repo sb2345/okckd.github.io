@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Overview Peer-to-peer (P2P) networking is a distributed application architecture that partitions tasks or work loads between peers. Peers are both &hellip;">
+  <meta name="description" content="Question link Given a set of n jobs with [start time, end time, cost], find a subset so that no 2 jobs overlap and the cost is maximum. Let&rsquo;s &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,131 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/">[Facebook] Scheduling Jobs With Max Cost</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/07/scheduling-jobs-with-max-cost/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/Given-a-set-of-n-jobs-with-start-time-end-time-cost-find-a-subset-so-that-no-2-jobs-overlap-and-the-cost-is-maximum-QTN_440168.htm">link</a></p>
+
+<blockquote><p>Given a set of n jobs with [start time, end time, cost], find a subset so that no 2 jobs overlap and the cost is maximum.</p>
+
+<p>Let&rsquo;s assume the input is already sorted by start_time.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><a href="http://cs.stackexchange.com/a/14237">Somebody</a> mentioned <strong>Interval Graph</strong>, so check it out if you interested!</p>
+
+<p>I am going to discuss both DP and recursive solution.</p>
+
+<p>This question reminds me of <strong>[Question] 0-1 Knapsack Problem</strong> and <strong>[Question] Coin Change Problem</strong>, cuz the basic idea is to compare 2 conditions:</p>
+
+<ol>
+<li>include current element</li>
+<li>or, not include current element</li>
+</ol>
+
+
+<p>A very good DP solution is presented in <a href="http://cs.stackexchange.com/a/16842">here</a>. The code below is written by me and it&rsquo;s very intuitive to read.</p>
+
+<p>Leave me a comment if you have questions. And one more thing~ Happy new year!</p>
+
+<h3>Code</h3>
+
+<p>Dp</p>
+
+<pre><code>private int dpSolution(Job[] jobs, int size) {
+    int[] dp = new int[size];
+    dp[size - 1] = jobs[size - 1].cost;
+    // cost of last job equals to just itself
+    for (int k = size - 2; k &gt;= 0; k--) {
+        int next = findNextJob(jobs, k);
+        int includeK = jobs[k].cost;
+        if (next &lt; size) {
+            includeK += dp[next];
+        }
+        int excludeK = dp[k + 1];
+        dp[k] = Math.max(includeK, excludeK);
+    }
+    return dp[0];
+}
+
+private int findNextJob(Job[] jobs, int k) {
+    int finishTime = jobs[k].finish;
+    int next = k + 1;
+    while (next &lt; jobs.length) {
+        if (jobs[next].start &lt; finishTime) {
+            next++;
+        } else {
+            break;
+        }
+    }
+    return next;
+}
+</code></pre>
+
+<p>Recursion</p>
+
+<pre><code>public int recursiveSolution(Job[] jobs, int size, int k) {
+    // max cost from (k)th job and onwards
+    if (k == size) {
+        return 0;
+    }
+    // (k)th job must not conflict with any previous job
+    int next = findNextJob(jobs, k);
+    int includeK = jobs[k].cost + recursiveSolution(jobs, size, next);
+    int excludeK = recursiveSolution(jobs, size, k + 1);
+    return Math.max(includeK, excludeK);
+}
+
+private int findNextJob(Job[] jobs, int k) {
+    int finishTime = jobs[k].finish;
+    int next = k + 1;
+    while (next &lt; jobs.length) {
+        if (jobs[next].start &lt; finishTime) {
+            next++;
+        } else {
+            break;
+        }
+    }
+    return next;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -311,7 +436,7 @@
 </ol>
 
 
-<p><img class="middle" src="/assets/images/range-space.png"></p>
+<p><img class="middle" src="/assets/images/range-space.PNG"></p>
 
 <h4>Search in DHT</h4>
 
@@ -351,7 +476,7 @@
 
 <p>For a very detailed steps of consistent hashing, read <a href="http://blog.csdn.net/sparkliang/article/details/5279393">this Chinese blog</a>.</p>
 
-<p><img class="middle" src="/assets/images/consistent-hashing.png"></p>
+<p><img class="middle" src="/assets/images/consistent-hashing.PNG"></p>
 
 <p>In this way, 一致性Hash在node加入/离开时，不会导致映射关系的重大变化。</p>
 
@@ -367,7 +492,7 @@
 
 <p>Each node stores more info <strong>closely following it</strong> on the identifier circle than nodes further away. That is, the subsequent nodes at position 1, 2, 4, 8, 16, 32&hellip; (each entry is called a <strong>finger</strong>)</p>
 
-<p><img class="middle" src="/assets/images/consistent-hashing.png"></p>
+<p><img class="middle" src="/assets/images/chord-routing.PNG"></p>
 
 <p>为网络中每个Node分配一个唯一id（可以通过机器的mac地址做Hash），假设整个网络有N 个节点，我们可以认为这些整数首尾相连形成一个环，称之为Chord环。两个节点间的距离定义为节点间下标差，每个节点会存储一张路由表(Finger表)，表内顺时针按照离本节点2、4、8、16、32.……2i的距离选定log2N个其他节点的ip信息来记录。</p>
 
@@ -379,7 +504,7 @@
 
 <p>It&rsquo;s very much like insertion and removal in Doubly Linked List. Read it yourself.</p>
 
-<p><img class="middle" src="/assets/images/chord-routing.PNG"></p>
+<p><img class="middle" src="/assets/images/join-in-chord.PNG"></p>
 
 <p>Special thanks to the online resources written by some CSDN bloggers.</p>
 </div>
@@ -1168,90 +1293,6 @@ http://rubydoc.info/github/haml/haml/file/CHANGELOG.md
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/22/common-root-java-class/">[Java OOP] Common Root of Java Classes</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/22/common-root-java-class/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/22/common-root-java-class/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Common Root Class</h3>
-
-<p><strong>java.lang.Object</strong>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html">link</a></p>
-
-<p>All Java classes are derived from this <a href="http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html">common root class</a>, that defines common behaviors.</p>
-
-<p>Common behaviors include multi-threading and garbage collector etc.</p>
-
-<h4>Some methods</h4>
-
-<p><a href="http://docs.oracle.com/javase/tutorial/java/IandI/objectclass.html">ref</a></p>
-
-<p>protected Object clone() throws CloneNotSupportedException</p>
-
-<blockquote><p>Creates and returns a copy of this object.</p></blockquote>
-
-<p>public boolean equals(Object obj)</p>
-
-<blockquote><p>Indicates whether some other object is &ldquo;equal to&rdquo; this one.</p></blockquote>
-
-<p>protected void finalize() throws Throwable</p>
-
-<blockquote><p>Called by the garbage collector on an object when garbage collection determines that there are no more references to the object</p></blockquote>
-
-<p>public final Class getClass()</p>
-
-<blockquote><p>Returns the runtime class of an object.</p></blockquote>
-
-<p>public int hashCode()</p>
-
-<blockquote><p>Returns a hash code value for the object.</p></blockquote>
-
-<p>public String toString()</p>
-
-<blockquote><p>Returns a string representation of the object.</p></blockquote>
-
-<h3>Sync-related methods</h3>
-
-<p>The notify, notifyAll, and wait methods of Object all play a part in synchronizing the activities of independently running threads in a program.</p>
-
-<pre><code>public final void notify()
-public final void notifyAll()
-public final void wait()
-public final void wait(long timeout)
-public final void wait(long timeout, int nanos)
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1270,7 +1311,7 @@ public final void wait(long timeout, int nanos)
 <li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (8)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
@@ -1291,6 +1332,10 @@ public final void wait(long timeout, int nanos)
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/">[Facebook] Scheduling Jobs With Max Cost</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/07/P2P-technology/">[Design] P2P Technology</a>
       </li>
     
@@ -1304,10 +1349,6 @@ public final void wait(long timeout, int nanos)
     
       <li class="post">
         <a href="/blog/2015/01/06/big-data-storage/">[Design] Big Data Storage</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/06/Json-prettifier/">[Facebook] Write a Json Prettifier</a>
       </li>
     
   </ul>

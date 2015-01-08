@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-07T21:57:37+08:00</updated>
+  <updated>2015-01-08T16:54:50+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,101 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Facebook] Scheduling Jobs With Max Cost]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/07/scheduling-jobs-with-max-cost/"/>
+    <updated>2015-01-07T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/07/scheduling-jobs-with-max-cost</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/Given-a-set-of-n-jobs-with-start-time-end-time-cost-find-a-subset-so-that-no-2-jobs-overlap-and-the-cost-is-maximum-QTN_440168.htm">link</a></p>
+
+<blockquote><p>Given a set of n jobs with [start time, end time, cost], find a subset so that no 2 jobs overlap and the cost is maximum.</p>
+
+<p>Let&rsquo;s assume the input is already sorted by start_time.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><a href="http://cs.stackexchange.com/a/14237">Somebody</a> mentioned <strong>Interval Graph</strong>, so check it out if you interested!</p>
+
+<p>I am going to discuss both DP and recursive solution.</p>
+
+<p>This question reminds me of <strong>[Question] 0-1 Knapsack Problem</strong> and <strong>[Question] Coin Change Problem</strong>, cuz the basic idea is to compare 2 conditions:</p>
+
+<ol>
+<li>include current element</li>
+<li>or, not include current element</li>
+</ol>
+
+
+<p>A very good DP solution is presented in <a href="http://cs.stackexchange.com/a/16842">here</a>. The code below is written by me and it&rsquo;s very intuitive to read.</p>
+
+<p>Leave me a comment if you have questions. And one more thing~ Happy new year!</p>
+
+<h3>Code</h3>
+
+<p>Dp</p>
+
+<pre><code>private int dpSolution(Job[] jobs, int size) {
+    int[] dp = new int[size];
+    dp[size - 1] = jobs[size - 1].cost;
+    // cost of last job equals to just itself
+    for (int k = size - 2; k &gt;= 0; k--) {
+        int next = findNextJob(jobs, k);
+        int includeK = jobs[k].cost;
+        if (next &lt; size) {
+            includeK += dp[next];
+        }
+        int excludeK = dp[k + 1];
+        dp[k] = Math.max(includeK, excludeK);
+    }
+    return dp[0];
+}
+
+private int findNextJob(Job[] jobs, int k) {
+    int finishTime = jobs[k].finish;
+    int next = k + 1;
+    while (next &lt; jobs.length) {
+        if (jobs[next].start &lt; finishTime) {
+            next++;
+        } else {
+            break;
+        }
+    }
+    return next;
+}
+</code></pre>
+
+<p>Recursion</p>
+
+<pre><code>public int recursiveSolution(Job[] jobs, int size, int k) {
+    // max cost from (k)th job and onwards
+    if (k == size) {
+        return 0;
+    }
+    // (k)th job must not conflict with any previous job
+    int next = findNextJob(jobs, k);
+    int includeK = jobs[k].cost + recursiveSolution(jobs, size, next);
+    int excludeK = recursiveSolution(jobs, size, k + 1);
+    return Math.max(includeK, excludeK);
+}
+
+private int findNextJob(Job[] jobs, int k) {
+    int finishTime = jobs[k].finish;
+    int next = k + 1;
+    while (next &lt; jobs.length) {
+        if (jobs[next].start &lt; finishTime) {
+            next++;
+        } else {
+            break;
+        }
+    }
+    return next;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] P2P Technology]]></title>
@@ -189,7 +284,7 @@
 </ol>
 
 
-<p><img class="middle" src="http://okckd.github.io/assets/images/range-space.png"></p>
+<p><img class="middle" src="http://okckd.github.io/assets/images/range-space.PNG"></p>
 
 <h4>Search in DHT</h4>
 
@@ -229,7 +324,7 @@
 
 <p>For a very detailed steps of consistent hashing, read <a href="http://blog.csdn.net/sparkliang/article/details/5279393">this Chinese blog</a>.</p>
 
-<p><img class="middle" src="http://okckd.github.io/assets/images/consistent-hashing.png"></p>
+<p><img class="middle" src="http://okckd.github.io/assets/images/consistent-hashing.PNG"></p>
 
 <p>In this way, 一致性Hash在node加入/离开时，不会导致映射关系的重大变化。</p>
 
@@ -245,7 +340,7 @@
 
 <p>Each node stores more info <strong>closely following it</strong> on the identifier circle than nodes further away. That is, the subsequent nodes at position 1, 2, 4, 8, 16, 32&hellip; (each entry is called a <strong>finger</strong>)</p>
 
-<p><img class="middle" src="http://okckd.github.io/assets/images/consistent-hashing.png"></p>
+<p><img class="middle" src="http://okckd.github.io/assets/images/chord-routing.PNG"></p>
 
 <p>为网络中每个Node分配一个唯一id（可以通过机器的mac地址做Hash），假设整个网络有N 个节点，我们可以认为这些整数首尾相连形成一个环，称之为Chord环。两个节点间的距离定义为节点间下标差，每个节点会存储一张路由表(Finger表)，表内顺时针按照离本节点2、4、8、16、32.……2i的距离选定log2N个其他节点的ip信息来记录。</p>
 
@@ -257,7 +352,7 @@
 
 <p>It&rsquo;s very much like insertion and removal in Doubly Linked List. Read it yourself.</p>
 
-<p><img class="middle" src="http://okckd.github.io/assets/images/chord-routing.PNG"></p>
+<p><img class="middle" src="http://okckd.github.io/assets/images/join-in-chord.PNG"></p>
 
 <p>Special thanks to the online resources written by some CSDN bloggers.</p>
 ]]></content>
@@ -1547,65 +1642,6 @@ Pass/submit:
 <li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
 </ol>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[CC150v5] 18.7 Longest Word Made From Other Words]]></title>
-    <link href="http://okckd.github.io/blog/2014/10/02/longest-word-made-from-other/"/>
-    <updated>2014-10-02T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/10/02/longest-word-made-from-other</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<blockquote><p>Given a list of words, write a program to find the longest word made of other words in the list.</p>
-
-<p>EXAMPLE</p>
-
-<p>Input: cat, banana, dog, nana, walk, walker, dogwalker</p>
-
-<p>Output: dogwalker</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Search it recursively from longest to shortest</strong>. Use HashSet to help us search for words quickly.</p>
-
-<p>This question might look difficult at first, it&rsquo;s actually a very classical recursive search.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static void printLongestWord(String[] arr) {
-    Arrays.sort(arr, new LengthComparator());
-    HashSet&lt;String&gt; set = new HashSet&lt;String&gt;();
-    for (String str : arr) {
-        set.add(str);
-    }
-    for (String word : arr) {
-        if (canDivide(word, 0, set)) {
-            System.out.println(word);
-            return;
-        }
-    }
-    System.out.println("can not find such word");
-}
-
-private static boolean canDivide(String word, int from, HashSet&lt;String&gt; set) {
-    if (from == word.length()) {
-        return true;
-    }
-    for (int i = from; i &lt; word.length(); i++) {
-        String str = word.substring(from, i + 1);
-        if (from == 0 &amp;&amp; i == word.length() - 1) {
-            continue;
-        } else if (!set.contains(str)) {
-            continue;
-        }
-        if (canDivide(word, i + 1, set)) {
-            return true;
-        }
-    }
-    return false;
-}
-</code></pre>
 ]]></content>
   </entry>
   
