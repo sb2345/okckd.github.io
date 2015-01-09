@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-08T16:54:50+08:00</updated>
+  <updated>2015-01-09T13:14:55+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,244 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Most Frequent Word From a Book]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/09/most-frequent-word-from-book/"/>
+    <updated>2015-01-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/09/most-frequent-word-from-book</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5715664853532672">link</a></p>
+
+<blockquote><p>Let&rsquo;s say I gave you a long String and I wanted you to tell me the most common word in that String. How would you do that?</p>
+
+<p>Follow-up: how about if I gave you the entire works of Alexandre Dumas, one of the most prolific authors in history. How would your solution work? How could you change it to solve this more specific problem?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are 2 solutions. Either <strong>HashMap</strong> or <strong>Trie</strong>. It&rsquo;s easy to think of first, but remember that Trie is designed to do this kind of job.</p>
+
+<blockquote><p>A trie will be more useful in the second situation where you will have millions of words. You can have a counter at every node to see its frequency</p></blockquote>
+
+<p><strong>Now the follow up</strong>. For big data problems, we can always do <strong>divide and conquer</strong> by hash value.</p>
+
+<p>Alternatively, the comment by <a href="http://www.careercup.com/question?id=5715664853532672">Prince</a> mentioned how to solve with <strong>Map Reduce</strong>:</p>
+
+<blockquote><p>Instead of loading it as a string first I would stream data so that I avoid memory spike. Further our map size might increases as new words are added to it. Also, we can use map reduce type job were we create map&lt;word, frequency> of each play in parallel and later join/collapse them this will reduce the time it will take to get result.</p>
+
+<p>Common phrase should be no different then above algorithm. However we need to rebuild our index with &lt;phase, frequency></p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Match Triplet With Reverse Order]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/09/match-triplet-with-reverse-order/"/>
+    <updated>2015-01-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/09/match-triplet-with-reverse-order</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=11655778">link</a></p>
+
+<blockquote><p>Find the substring of length 3 which is present in the reverse order from the string.</p>
+
+<p>Ex: if the string is abcdcba (cba is the reverse of abc) so we should return cba.</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p><strong>HashMap (recommended)</strong>. Hash all substrings of length 3. O(n). Look up all reverse substrings of length 3 in this hash set. O(n) time and O(n) space.</p></li>
+<li><p><strong>KMP Algo</strong>. Take every substring of length 3. Reverse it and find it in the input using KMP. O(n<sup>2</sup>) time and O(1) space.</p></li>
+<li><p><strong>Build suffix tree</strong> of height 3. Then in reverse order, check triplets.</p></li>
+</ol>
+
+
+<p>The 3 solutions above all work well. Pick the one you love.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Longest Common Contiguous Intersection (Longest Common Substring)]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/09/longest-common-substring/"/>
+    <updated>2015-01-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/09/longest-common-substring</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=12862670">link</a></p>
+
+<blockquote><p>Write Program to find longest common contiguous intersection from 2 lists provided to the function.</p>
+
+<p>Example: list1: abcrfghwetf</p>
+
+<p>list2: abrfghwwetxyab</p>
+
+<p>Ans: rfghw</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a classic <a href="http://en.wikipedia.org/wiki/Longest_common_substring_problem">Longest common substring</a> problem.</p>
+
+<p>Solution 1: <strong>Suffix tree</strong>. Building the tree is O(n) time and the whole program is O(n + m) time.</p>
+
+<p>Solution 2: <strong>DP</strong>, which takes O(nm) time and space. The code for DP is posted below.</p>
+
+<h3>Code</h3>
+
+<p><strong>dp</strong></p>
+
+<pre><code>public String LCSubstr(String s, String t) {
+    int longest = 0;
+    int tPos = -1;
+
+    // dp[i][j] represents the LCSubstr ending at position i and j
+    int[][] dp = new int[t.length() + 1][s.length() + 1];
+    for (int i = 1; i &lt;= t.length(); i++) {
+        for (int j = 1; j &lt;= s.length(); j++) {
+            if (t.charAt(i - 1) == s.charAt(j - 1)) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+                if (dp[i][j] &gt; longest) {
+                    longest = dp[i][j];
+                    tPos = i;
+                }
+            }
+        }
+    }
+    return t.substring(tPos - longest, tPos);
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Number of Distinct Substrings]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/08/number-of-distinct-substrings/"/>
+    <updated>2015-01-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/08/number-of-distinct-substrings</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.quora.com/Given-a-string-how-do-I-find-the-number-of-distinct-substrings-of-the-string">link</a></p>
+
+<blockquote><p>Given a string, find the number of distinct substrings of the string. Example:</p>
+
+<p>input = &ldquo;aaaa&rdquo;,</p>
+
+<p>output = 4 (the 4 substrings are &ldquo;a&rdquo;, &ldquo;aa&rdquo;, &ldquo;aaa&rdquo;, &ldquo;aaaa&rdquo;)</p>
+
+<p>input = &ldquo;abcd&rdquo;,</p>
+
+<p>output = 10 (&ldquo;a&rdquo;, &ldquo;b&rdquo;, &ldquo;c&rdquo;, &ldquo;d&rdquo;, &ldquo;ab&rdquo;, &ldquo;bc&rdquo;, &ldquo;cd&rdquo;, &ldquo;abc&rdquo;, &ldquo;bcd&rdquo;, &ldquo;abcd&rdquo;)</p>
+
+<p>input = &ldquo;banana&rdquo;,</p>
+
+<p>output = 15 (&ldquo;a&rdquo;, &ldquo;an&rdquo;, &ldquo;ana&rdquo;, &ldquo;anan&rdquo;, &ldquo;anana&rdquo;, &ldquo;b&rdquo;, &ldquo;ba&rdquo;, &ldquo;ban&rdquo;, &ldquo;bana&rdquo;, &ldquo;banan&rdquo;, &ldquo;banana&rdquo;, &ldquo;n&rdquo;, &ldquo;na&rdquo;, &ldquo;nan&rdquo;, &ldquo;nana&rdquo;)</p></blockquote>
+
+<p>This is also a question on <a href="http://www.spoj.com/problems/DISUBSTR/">SPOJ</a>.</p>
+
+<h3>Solution</h3>
+
+<p>This is a very good question, which tests Suffix tree, LCP and string manipulation knowledges.</p>
+
+<p><strong>The solution is to build a suffix tree</strong>. This is because:</p>
+
+<blockquote><p>If you look through the <strong><a href="http://qr.ae/6o6Nk">prefixes of each suffix</a></strong> of a string, you have covered all substrings of that string.</p></blockquote>
+
+<p>There are 2 implementations. First one is slightly simpler.</p>
+
+<h4>Implementation 1</h4>
+
+<p><strong>Suffix array + LCP</strong> (longest common prefix). Take &ldquo;Banana&rdquo; as input, then the suffixes:</p>
+
+<pre><code>0) BANANA
+1) ANANA
+2) NANA
+3) ANA
+4) NA
+5) A
+</code></pre>
+
+<p>Sort it:</p>
+
+<pre><code>5) A
+3) ANA
+1) ANANA
+0) BANANA
+4) NA
+2) NANA
+</code></pre>
+
+<p>Then we start calculate number of substring (that is prefixes of suffix). After removing duplicated prefix, the count is:</p>
+
+<pre><code>5) A - 1
+3) ANA - 2
+1) ANANA - 2
+0) BANANA - 6
+4) NA - 2
+2) NANA - 2
+</code></pre>
+
+<p>Total number is:</p>
+
+<pre><code>1 + 2 + 2 + 6 + 2 + 2 = 15
+</code></pre>
+
+<p>But wait, realize something? &ldquo;A&rdquo; is simply duplicate substring in &ldquo;ANA&rdquo;, which appers in &ldquo;ANANA&rdquo;. Keep this in mind, cuz we need to observe this in the 2nd implementation, too.</p>
+
+<p>Finally, the total number is calculated like this:</p>
+
+<pre><code>for each suffix
+    ans += length(suffix) - LCP(suffix, previous suffix)
+</code></pre>
+
+<p>For more details, read <a href="http://qr.ae/6o6Nk">here</a>.</p>
+
+<h4>Implementation 2</h4>
+
+<p>Build a suffix tree, like this:</p>
+
+<p><img class="middle" src="http://okckd.github.io/assets/images/suffix-tree-banana.png"></p>
+
+<p>Number of substrings is simply the <strong>sum of levels of each leaf</strong>. For the 3 branches of the suffix tree, number of levels are: 6, 5 and 4 respectively. Total = 15.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Check All Numbers Given the Decimal Scale]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/08/all-number-given-decimal-scale/"/>
+    <updated>2015-01-08T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/08/all-number-given-decimal-scale</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32859887.html">link</a></p>
+
+<blockquote><p>检查一个字符串是否包含k位a进制数的所有表示形式。</p>
+
+<p>保证原字符串的所有字串都是合法的k位a进制数。</p>
+
+<p>&ldquo;00110, a=2, k=2&rdquo; => true （包括了00，01，10，11）</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>First find all substrings with length == k, then generate all numbers in a scale. This is not a difficult question.</p>
+
+<p>We may want to score the substrings in a HashMap/HashSet. <strong>The hashing procedure is preferrably using <a href="http://en.wikipedia.org/wiki/Rolling_hash">Rolling hash</a></strong>.</p>
+
+<blockquote><p>Rolling Hash</p>
+
+<p>A rolling hash is a hash function where the input is hashed in a window that moves through the input.</p>
+
+<p>A few hash functions allow a rolling hash to be computed very quickly—the new hash value is rapidly calculated given only the old hash value, the old value removed from the window, and the new value added to the window—similar to the way a moving average function can be computed much more quickly than other low-pass filters.</p></blockquote>
+
+<p>The people in the origin post &ndash; they discuss about &ldquo;<strong>slide window check</strong>&rdquo; algorithm. I do not understand what&rsquo;s the benefit of this. If you read this and would like to help me, please leave a comment. Thanks!</p>
+
+<h3>A similar question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32860321.html">This</a> is simply the reverse of the question above:</p>
+
+<blockquote><p>给出最短的字符串, which is used to 表示k位a进制数的所有表示形式.</p></blockquote>
+
+<p>This question is solved using <strong><a href="http://en.wikipedia.org/wiki/De_Bruijn_sequence">De Bruijn sequence</a></strong>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Facebook] Scheduling Jobs With Max Cost]]></title>
@@ -1334,312 +1572,6 @@ white
 <li><p>A subclass instance can be assigned (substituted) to a superclass&#8217; reference.</p></li>
 <li><p>Once substituted, we can invoke methods defined in the superclass; we cannot invoke methods defined in the subclass.</p></li>
 <li><p>However, if the subclass overrides inherited methods from the superclass, the subclass (overridden) versions will be invoked.</p></li>
-</ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Facebook] Binary Search Tree 3Sum (Undone)]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/"/>
-    <updated>2014-12-18T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
-
-<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
-
-<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
-
-<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
-
-<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
-
-<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
-
-<h3>Code</h3>
-
-<p><strong>DLL way, written by me</strong></p>
-
-<pre><code>public void findTriplet(TreeNode root, int target) {
-    TreeNode[] dll = convertToDll(root);
-    TreeNode head = dll[0];
-    TreeNode tail = dll[1];
-    // note that the bst inorder dll should already in sorted by value
-    TreeNode first = head;
-    while (first.right != null) {
-        TreeNode left = first.right;
-        TreeNode right = tail;
-        while (left.val &lt; right.val) {
-            int diff = first.val + left.val + right.val - target;
-            if (diff == 0) {
-                System.out.println("Found triplet: " + first.val + " "
-                        + left.val + " " + right.val + " for sum of "
-                        + target);
-            }
-            if (diff &lt;= 0) {
-                left = left.right;
-            }
-            if (diff &gt;= 0) {
-                right = right.left;
-            }
-        }
-        first = first.right;
-    }
-}
-
-private TreeNode[] convertToDll(TreeNode node) {
-    TreeNode[] ans = new TreeNode[2];
-    // do the left side of node
-    if (node.left == null) {
-        ans[0] = node;
-    } else {
-        TreeNode[] preAns = convertToDll(node.left);
-        ans[0] = preAns[0];
-        node.left = preAns[1];
-        preAns[1].right = node;
-    }
-    // do the right side of node
-    if (node.right == null) {
-        ans[1] = node;
-    } else {
-        TreeNode[] postAns = convertToDll(node.right);
-        ans[1] = postAns[1];
-        node.right = postAns[0];
-        postAns[0].left = node;
-    }
-    return ans;
-}
-</code></pre>
-
-<p><strong>inorder way</strong></p>
-
-<p>undone</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Facebook] Print a Binary Tree in Vertical Order]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/"/>
-    <updated>2014-12-17T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
-
-<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
-
-<pre><code>           1
-        /    \
-       2      3
-      / \    / \
-     4   5  6   7
-             \   \
-              8   9 
-
-The output of print this tree vertically will be:
-4
-2
-1 5 6
-3 8
-7
-9 
-</code></pre>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
-<li><p>Iterate for each vertical line at distance minimum to maximum from root.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
-    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
-
-    // 1. find the range of left bound and right bound
-    int[] range = new int[2];
-    findRange(root, range, 0);
-
-    // 2. calculate number of columns in the result
-    int rootIndex = 0 - range[0];
-    int columns = range[1] - range[0] + 1;
-    for (int i = 0; i &lt; columns; i++) {
-        ans.add(new ArrayList&lt;Integer&gt;());
-    }
-
-    // 3. fill in vertically in a recursive manner
-    fillNode(ans, root, rootIndex);
-
-    return ans;
-}
-
-private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
-    if (node == null) {
-        return;
-    }
-    ans.get(index).add(node.val);
-    fillNode(ans, node.left, index - 1);
-    fillNode(ans, node.right, index + 1);
-}
-
-private void findRange(TreeNode node, int[] range, int position) {
-    if (node == null) {
-        return;
-    }
-    if (position &lt; range[0]) {
-        range[0] = position;
-    }
-    if (position &gt; range[1]) {
-        range[1] = position;
-    }
-    findRange(node.left, range, position - 1);
-    findRange(node.right, range, position + 1);
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Epic] Patient Disease Data Structure]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure/"/>
-    <updated>2014-12-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32844253.html">link</a></p>
-
-<blockquote><p>Suppose N patients and M diseases. N is sufficiently large number and M is
-relatively small, say 30-ish. Each patient can have possible 0 to M kinds of
-diseases.</p>
-
-<p>Given one patient’s name, show me a list of similar patients sharing same
-deseases within 2-3 seconds.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Use 1 bit to represent a disease</strong>. So every patient&rsquo;s conditin can be put into an integer of 32 bits.</p>
-
-<p>How do we calculate the similarity of 2 patients?</p>
-
-<p>Refer to <strong>[CC150v5] 5.5 Calculate Bits Conversion Required</strong> for a special bit operation (remove last &lsquo;1&rsquo; from bit):</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<p>For each patient, we simply calculate the XOR and count &lsquo;1&rsquo;s.</p>
-
-<h3>Code</h3>
-
-<p>no code.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Leetcode] Leetcode Fourth Round]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/01/Leetcode-fourth/"/>
-    <updated>2014-12-01T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/01/Leetcode-fourth</id>
-    <content type="html"><![CDATA[<pre><code>Days:        01/12/2014 - now
-Submission:  
-Pass:        
-
-Submit/day:  
-Pass/day:    
-
-Pass/submit: 
-</code></pre>
-
-<h3>Easy</h3>
-
-<ol>
-<li>[LeetCode 1] Two Sum</li>
-<li>[LeetCode 5] Longest Palindromic Substring</li>
-<li>[LeetCode 6] ZigZag Conversion</li>
-<li>[LeetCode 7] Reverse Integer</li>
-<li>[LeetCode 12] Integer to Roman</li>
-<li>[LeetCode 16] 3Sum Closest</li>
-<li>[LeetCode 18] 4Sum</li>
-<li>[LeetCode 19] Remove Nth Node From End of List</li>
-<li>[LeetCode 23] Merge K Sorted Lists</li>
-<li>[LeetCode 25] Reverse Nodes in k-Groups</li>
-<li>[LeetCode 27] Remove Element</li>
-<li>[LeetCode 30] Substring With Concatenation of All Words</li>
-<li>[LeetCode 32] Longest Valid Parentheses</li>
-<li>[LeetCode 36] Valid Sudoku</li>
-<li>[LeetCode 41] First Missing Positive</li>
-<li>[LeetCode 42] Trapping Rain Water</li>
-<li>[LeetCode 45] Jump Game II</li>
-<li>[LeetCode 50] Pow(x, N)</li>
-<li>[LeetCode 55] Jump Game</li>
-<li>[LeetCode 72] Edit Distance</li>
-<li>[LeetCode 79] Word Search</li>
-<li>[LeetCode 80] Remove Duplicates From Sorted Array II</li>
-<li>[LeetCode 94] Binary Tree Inorder Traversal</li>
-<li>[LeetCode 142] Linked List Cycle II</li>
-</ol>
-
-
-<h3>Difficult</h3>
-
-<ol>
-<li>[LeetCode 3] Longest Substring Without Repeating Characters</li>
-<li>[LeetCode 4] Median of Two Sorted Arrays</li>
-<li>[LeetCode 10] Regular Expression Matching</li>
-<li>[LeetCode 15] 3Sum</li>
-<li>[LeetCode 29] Divide Two Integers</li>
-<li>[LeetCode 37] Sudoku Solver</li>
-<li>[LeetCode 44] Wildcard Matching</li>
-</ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Code a HashMap]]></title>
-    <link href="http://okckd.github.io/blog/2014/11/04/Code-a-hashmap/"/>
-    <updated>2014-11-04T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/11/04/Code-a-hashmap</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
-
-<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We already write 2 post before:</p>
-
-<ol>
-<li><p><strong>[Question] Implement a HashMap</strong></p></li>
-<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
-</ol>
-
-
-<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
-
-<ol>
-<li>The basic structure is an array. It can be:
-
-<ol>
-<li>An array of linked nodes (with a next pointer).</li>
-<li>An array of linked list.</li>
-</ol>
-</li>
-<li>There should be a hash function.</li>
-<li>There should be a function to convert the hash value to corresponding array index.</li>
-<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
-<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
 </ol>
 
 ]]></content>

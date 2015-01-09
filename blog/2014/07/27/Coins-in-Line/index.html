@@ -111,46 +111,56 @@
 
 <p><a href="http://leetcode.com/2011/02/coins-in-line.html">link</a></p>
 
-<blockquote><p>There are n coins in a line. Two players take turns to take a coin from one of the ends of the line until there are no more coins left. The player with the larger amount of money wins. Assume that you go first, describe an algorithm to compute the maximum amount of money you can win.</p></blockquote>
+<blockquote><p>There are n coins in a line. Two players take turns to take a coin from one of the ends of the line until there are no more coins left. The player with the larger amount of money wins. Assume that you go first, describe an algorithm to compute the maximum amount of money you can win.</p>
+
+<p>There might be even or odd number of coins.</p></blockquote>
 
 <h3>Analysis</h3>
 
 <p><strong>There&rsquo;s a guaranteed &lsquo;win strategy&rsquo;</strong>, if the input array is even size. Find the sum of coins at even and odd positions respectively. Then, make sure you always take coin from even (or odd, whichever sum is bigger) position.</p>
 
-<p>This strategy is clever and simple, but <strong>DOES NOT maximize your total sum</strong>.</p>
+<p>This strategy is clever and simple, but <strong>DOES NOT maximize your total sum</strong>, and coins must be even number.</p>
 
 <h3>Solution</h3>
 
-<p><strong>The optimized solution is to use <a href="http://tech-queries.blogspot.sg/2011/06/get-maximum-sum-from-coins-in-line.html">2-D DP</a></strong>. Now we have array A and C(i, j) which is the maximum sum possible when remaining coins are from i to j.</p>
+<p><strong>The optimized solution is to use <a href="http://tech-queries.blogspot.sg/2011/06/get-maximum-sum-from-coins-in-line.html">2D DP</a></strong>. Now we have array A and C(i, j) which is the maximum sum possible when remaining coins are from i to j.</p>
 
 <p>You can take either i or j. Since the opponent is as smart as you, he would have chosen the choice that yields the minimum amount to you.</p>
 
 <p>So, the final equation is:</p>
 
-<blockquote><p>C(i, j) = max { Ai + min{C(i+2, j), C(i+1, j-1)}, Aj + min{C(i+1, j-1), C(i, j-2)} }</p></blockquote>
+<blockquote><p>C(i, j) = MAX {</p>
+
+<pre><code>      Ai + MIN{C(i+2, j), C(i+1, j-1)}, 
+
+      Aj + MIN{C(i+1, j-1), C(i, j-2)} 
+</code></pre>
+
+<p>}</p></blockquote>
+
+<p>If interested, read <strong>[Fundamental] Min-Max Algorithm</strong> for more.</p>
 
 <h3>Code</h3>
 
-<p>C++ code</p>
-
-<pre><code>#define MAX 100  
-int maxMoney(int A[], int N) {
-    int C[MAX][MAX] = {0};  
-    int x, y, z; //x = C[m+2][n], y = C[m+1][n-1], z = C[m][n-2]  
-    for (int i = 0; i &lt; N; i++) {
-        for (int m = 0, n = i; n &lt; N; m++, n++) {
-          //calculate x, y, z  
-          x = (m+2 &lt; N)                         ? C[m+2][n] : 0;  
-          y = (m+1 &lt; N &amp;&amp; n-1 &gt;= 0)    ? C[m+1][n-1] : 0;  
-          z = (n-1 &gt; 0)                            ? C[m][n-2] : 0;  
-          C[m][n] = max(A[m] + min(x,y),  
-                                 A[n] + min(y,z));  
-          //For Debugging        
-          cout &lt;&lt; x &lt;&lt; ", " &lt;&lt; y &lt;&lt; ", " &lt;&lt; z &lt;&lt; endl;  
-          cout &lt;&lt; m &lt;&lt; ", " &lt;&lt; n &lt;&lt; ", " &lt;&lt; C[m][n] &lt;&lt; endl;  
+<pre><code>public int maxMoney(int[] coins) {
+    int len = coins.length;
+    int[][] dp = new int[len][len];
+    for (int i = len - 1; i &gt;= 0; i--) {
+        for (int j = i; j &lt; len; j++) {
+            if (i == j) {
+                dp[i][j] = coins[i];
+            } else if (i + 1 == j) {
+                dp[i][j] = Math.max(coins[i], coins[j]);
+            } else {
+                int chooseHead = coins[i]
+                        + Math.min(dp[i + 2][j], dp[i + 1][j - 1]);
+                int chooseTail = coins[j]
+                        + Math.min(dp[i][j - 2], dp[i + 1][j - 1]);
+                dp[i][j] = Math.max(chooseHead, chooseTail);
+            }
         }
     }
-    return C[0][N-1];
+    return dp[0][len - 1];
 }
 </code></pre>
 </div>
@@ -227,13 +237,13 @@ int maxMoney(int A[], int N) {
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (37)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (82)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
@@ -246,23 +256,23 @@ int maxMoney(int A[], int N) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/">[Facebook] Scheduling Jobs With Max Cost</a>
+        <a href="/blog/2015/01/09/most-frequent-word-from-book/">[Question] Most Frequent Word From a Book</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/07/P2P-technology/">[Design] P2P Technology</a>
+        <a href="/blog/2015/01/09/match-triplet-with-reverse-order/">[Question] Match Triplet With Reverse Order</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/06/distributed-hash-table/">[Design] Distributed Hash Table</a>
+        <a href="/blog/2015/01/09/longest-common-substring/">[Question] Longest Common Contiguous Intersection (Longest Common Substring)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/06/cloud-grid-cluster/">[Design] Cloud, Grid and Cluster</a>
+        <a href="/blog/2015/01/08/number-of-distinct-substrings/">[Google] Number of Distinct Substrings</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/06/big-data-storage/">[Design] Big Data Storage</a>
+        <a href="/blog/2015/01/08/all-number-given-decimal-scale/">[Google] Check All Numbers Given the Decimal Scale</a>
       </li>
     
   </ul>
