@@ -9,13 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question List link link2 Liar truth-teller (skip)
-Toggler brain teaser
-Alien abduction
-Blue forehead room
-Forehead numbers
-Light bulb switching
-Path &hellip;">
+  <meta name="description" content="Question link Topological ordering of a directed graph is a linear ordering of its vertices such that for every directed edge uv from vertex u to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,6 +78,962 @@ Path &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/27/Topology-sorting/">[Question] Topology Sort</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/27/Topology-sorting/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/27/Topology-sorting/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Topological_sorting">link</a></p>
+
+<blockquote><p>Topological ordering of a directed graph is a linear ordering of its vertices such that <strong>for every directed edge uv from vertex u to vertex v, u comes before v in the ordering</strong>.</p>
+
+<p>A topological ordering is possible if and only if the graph has no directed cycles, that is, if it is a <strong>directed acyclic graph (DAG)</strong>.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Canonical application of toposort is to schedule tasks with dependency (project management etc.) It&rsquo;s also used for computing formulas, logic synthesis, order of compilation (&lsquo;make&rsquo; command) and data serialization.</p>
+
+<p><img class="middle" src="/assets/images/topology_sort_example.png"></p>
+
+<h3>Solution</h3>
+
+<p>The usual algorithms have <strong>linear run-time</strong>, i.e. O(V + E).</p>
+
+<blockquote><p>First step is to find a list of &ldquo;start nodes&rdquo; which have no incoming edges. Then insert them into a set S and delete it. At least one such node must exist in an <strong>directed acyclic graph</strong>. From a university <a href="https://courses.cs.washington.edu/courses/cse326/03wi/lectures/RaoLect20.pdf">lecture</a>.</p></blockquote>
+
+<p>From Wiki:</p>
+
+<pre><code>L ← Empty list that will contain the sorted elements
+S ← Set of all nodes with no incoming edges
+while S is non-empty do
+    remove a node n from S
+    add n to tail of L
+    for each node m with an edge e from n to m do
+        remove edge e from the graph
+        if m has no other incoming edges then
+            insert m into S
+if graph has edges then
+    return error (graph has at least one cycle)
+else 
+    return L (a topologically sorted order)
+</code></pre>
+
+<p>If the graph is a DAG, <strong>a solution will be contained in the list L</strong> (the solution is not necessarily unique). Otherwise, the graph must have at least one cycle and therefore <strong>a topological sorting is impossible</strong>.</p>
+
+<h3>Code</h3>
+
+<p>The solution comes from <a href="http://codereview.stackexchange.com/questions/44689/topological-sort-in-java">here</a>.</p>
+
+<p><img class="middle" src="/assets/images/topology_sort.png" width="250" height="250"></p>
+
+<pre><code>public class Graph {
+    private int vertices;
+    private Set&lt;Node&gt; nodes = new HashSet&lt;Node&gt;();
+
+    public Graph(int vertices) {
+        this.vertices = vertices;
+    }
+
+    public void addVertex(Node node) {
+        this.nodes.add(node);
+    }
+
+    public Set&lt;Node&gt; topologicalSort() {
+        Queue&lt;Node&gt; q = new LinkedList&lt;Node&gt;();
+        Set&lt;Node&gt; topoSort = new LinkedHashSet&lt;Node&gt;();
+        int vertexProcessesCtr = 0;
+        for (Node m : this.nodes) {
+            vertexProcessesCtr = addToQueue(m, topoSort, vertexProcessesCtr, q);
+        }
+        while (!q.isEmpty()) {
+            Node m = q.poll();
+            for (Node child : m.getAdjacenctNode()) {
+                int indeq = child.getInDegree() - 1;
+                child.setInDegree(indeq);
+                vertexProcessesCtr = addToQueue(child, topoSort,
+                        vertexProcessesCtr, q);
+            }
+        }
+        if (vertexProcessesCtr &gt; this.vertices) {
+            System.out.println();
+        }
+        return topoSort;
+    }
+
+    private int addToQueue(Node node, Set&lt;Node&gt; topoSort, int vertexProcess,
+            Queue&lt;Node&gt; q) {
+        if (node.getInDegree() == 0) {
+            q.add(node);
+            topoSort.add(node);
+            return vertexProcess + 1;
+        }
+        return vertexProcess;
+    }
+
+    public static void main(String[] args) {
+        Graph g = new Graph(8);
+
+        Node TEN = new Node("10");
+        Node ELEVEN = new Node("11");
+        Node TWO = new Node("2");
+        Node THREE = new Node("3");
+        Node FIVE = new Node("5");
+        Node SEVEN = new Node("7");
+        Node EIGHT = new Node("8");
+        Node NINE = new Node("9");
+
+        SEVEN.AdjacenctNode.add(ELEVEN);
+        ELEVEN.inDegree++;
+        SEVEN.AdjacenctNode.add(EIGHT);
+        EIGHT.inDegree++;
+        FIVE.AdjacenctNode.add(ELEVEN);
+        ELEVEN.inDegree++;
+        THREE.AdjacenctNode.add(EIGHT);
+        EIGHT.inDegree++;
+        THREE.AdjacenctNode.add(TEN);
+        TEN.inDegree++;
+        ELEVEN.AdjacenctNode.add(TEN);
+        TEN.inDegree++;
+        ELEVEN.AdjacenctNode.add(TWO);
+        TWO.inDegree++;
+        ELEVEN.AdjacenctNode.add(NINE);
+        NINE.inDegree++;
+        EIGHT.AdjacenctNode.add(NINE);
+        NINE.inDegree++;
+
+        g.nodes.add(TWO);
+        g.nodes.add(THREE);
+        g.nodes.add(FIVE);
+        g.nodes.add(SEVEN);
+        g.nodes.add(EIGHT);
+        g.nodes.add(NINE);
+
+        System.out.println("Now calling the topologial sorts");
+        Set&lt;Node&gt; result = g.topologicalSort();
+        for (Node node : result) {
+            System.out.println(node.data + " ");
+        }
+    }
+}
+
+class Node {
+    public String data;
+    public int dist;
+    public int inDegree;
+    LinkedList&lt;Node&gt; AdjacenctNode = new LinkedList&lt;Node&gt;();
+
+    public void addAdjNode(final Node Child) {
+        AdjacenctNode.add(Child);
+        Child.inDegree++;
+    }
+
+    public Node(String data) {
+        super();
+        this.data = data;
+    }
+
+    public int getInDegree() {
+        return inDegree;
+    }
+
+    public void setInDegree(int inDegree) {
+        this.inDegree = inDegree;
+    }
+
+    public LinkedList&lt;Node&gt; getAdjacenctNode() {
+        return AdjacenctNode;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/27/Previous-Permutation/">[LintCode] Previous Permutation</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/27/Previous-Permutation/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/27/Previous-Permutation/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.lintcode.com/en/problem/previous-permuation/">link</a></p>
+
+<div style="min-height:100px">
+<p>Given a list of integers, which denote a permutation.</p>
+
+<p>Find the previous permutation in ascending order.</p>
+    
+<div class="m-t-lg m-b-lg">
+      <b>Note</b>
+      <div><p>The list may contains duplicate integers.</p>
+      </div>
+</div>
+    
+<div class="m-t-lg m-b-lg">
+      <b>Example</b>
+      <div><p>For <strong><span style="color:#B22222;">[1,3,2,3]</span></strong>, the previous permutation is <span style="color:#B22222;"><strong>[1,2,3,3]</strong></span></p>
+
+<p>For <span style="color:#B22222;"><strong>[1,2,3,4]</strong></span>, the previous permutation is <span style="color:#B22222;"><strong>[4,3,2,1]</strong></span></p>
+    </div>
+</div>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p>This is almost the same question as &ldquo;Next Permutation&rdquo;.</p>
+
+<ol>
+<li>Find</li>
+<li>Swap</li>
+<li>Replace</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<pre><code>public ArrayList&lt;Integer&gt; previousPermuation(ArrayList&lt;Integer&gt; nums) {
+    // write your code
+    if (nums == null || nums.size() == 0) {
+        return null;
+    }
+    int len = nums.size();
+    int p = len - 2;
+    // 1. find 1st increasing position from the back
+    while (p &gt;= 0 &amp;&amp; nums.get(p) &lt;= nums.get(p + 1)) {
+        p--;
+    }
+    // 2. swap p with the first smaller value from the back
+    if (p != -1) {
+        int q = len - 1;
+        while (nums.get(q) &gt;= nums.get(p)) {
+            q--;
+        }
+        swap(nums, p, q);
+    }
+    // swap array in range of (p+1, end)
+    int left = p + 1;
+    int right = len - 1;
+    while (left &lt; right) {
+        swap(nums, left++, right--);
+    }
+    return nums;
+}
+
+private void swap(ArrayList&lt;Integer&gt; num, int p, int q) {
+    int temp = num.get(p);
+    num.set(p, num.get(q));
+    num.set(q, temp);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/26/NineChap-Graph/">[NineChap 6] Graph and Search</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/26/NineChap-Graph/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/26/NineChap-Graph/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Graph</h2>
+
+<p>For graph, there are only 2 high-frequency questions, which is &lsquo;clone graph&rsquo; and &lsquo;topology sorting&rsquo;.</p>
+
+<h3>Question list</h3>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/30/Clone-Graph/">Clone Graph</a></strong> &ndash; difficult</p></li>
+<li><p><strong><a href="/blog/2014/06/27/Topology-sorting/">Topology Sorting</a></strong></p></li>
+</ol>
+
+
+<h2>Search</h2>
+
+<p>Search have either DFS or BFS.</p>
+
+<p>First, we will cover permutations and combinations using DFS. In this section we solve the famous N-queens question.</p>
+
+<p>Then, there&rsquo;s a few BFS questions. Graph traversal is BFS, and Word ladder is also a classic BFS question.</p>
+
+<h3>Question list</h3>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/22/Subsets/">Subsets</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/22/Subsets-II/">Subsets II</a></strong></p>
+
+<p> difficult</p></li>
+<li><p><strong><a href="/blog/2014/05/14/Permutations/">Permutations</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/14/Permutations-II/">Permutations II</a></strong> &ndash; difficult</p></li>
+<li><p><strong><a href="/blog/2014/05/16/N-Queens/">N-Queens</a></strong></p>
+
+<p> how to use hashmap (and some space) to make it faster? 3 hashmaps to store the row, the (x,y) diff and sum. This will make isValid() method O(1).</p></li>
+<li><p><strong><a href="/blog/2014/05/16/N-Queens-II/">N-Queens II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/12/Next-Permutation/">Next Permutation</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/27/Previous-Permutation/">Previous Permutation</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/29/Palindrome-Partitioning/">Palindrome Partitioning</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/30/Palindrome-Partitioning-II/">Palindrome Partitioning II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/13/Combination-Sum/">Combination Sum</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/13/Combination-Sum/">Combination Sum II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/29/Word-Ladder/">Word Ladder</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/30/Word-Ladder-II/">Word Ladder II</a></strong></p></li>
+</ol>
+
+
+<h3>Additional questions</h3>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/24/Restore-IP-Addresses/">Restore IP Addresses</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/22/Combinations/">Combinations</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/02/Letter-Combinations-of-a-Phone-Number/">Letter Combinations of a Phone Number</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/19/Permutation-Sequence/">Permutation Sequence</a></strong></p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<h3>Graph</h3>
+
+<p><strong>Clone Graph</strong></p>
+
+<pre><code>public UndirectedGraphNode cloneGraph(UndirectedGraphNode node) {
+    if (node == null) return null;
+    HashMap&lt;UndirectedGraphNode, UndirectedGraphNode&gt; map = 
+            new HashMap&lt;UndirectedGraphNode, UndirectedGraphNode&gt;();
+    Queue&lt;UndirectedGraphNode&gt; queue = new LinkedList&lt;UndirectedGraphNode&gt;();
+    map.put(node, new UndirectedGraphNode(node.label));
+    queue.add(node);
+    while (!queue.isEmpty()) {
+        UndirectedGraphNode cur = queue.remove();
+        UndirectedGraphNode copy = map.get(cur);
+        // here the 'copy' must exist. why? because all neighbors 
+        // has been added to the map when they're pushed to queue.
+        // so 'cur' must have a corresponding copy in the hashmap. 
+        for (UndirectedGraphNode neib: cur.neighbors) {
+            if (!map.containsKey(neib)) {
+                queue.add(neib);
+                map.put(neib, new UndirectedGraphNode(neib.label));
+            }
+            copy.neighbors.add(map.get(neib));
+        }
+    }
+    return map.get(node);
+}
+</code></pre>
+
+<p><strong>Topology Sorting</strong></p>
+
+<p>A new post is written for it.</p>
+
+<h3>Search</h3>
+
+<p><strong>Subsets</strong></p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; subsets(int[] num) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new LinkedList&lt;List&lt;Integer&gt;&gt;();
+    if (num == null || num.length == 0) {
+        return ans;
+    }
+    Arrays.sort(num);
+    helper(ans, new LinkedList&lt;Integer&gt;(), num, 0);
+    return ans;
+}
+
+private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num, int pos) {
+    ans.add(new LinkedList&lt;Integer&gt;(path));
+    for (int i = pos; i &lt; num.length; i++) {
+        path.add(num[i]);
+        helper(ans, path, num, i + 1);
+        path.remove(path.size() - 1);
+    }
+}
+</code></pre>
+
+<p><strong>Subsets II</strong></p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; subsetsWithDup(int[] num) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new LinkedList&lt;List&lt;Integer&gt;&gt;();
+    if (num == null || num.length == 0) {
+        return ans;
+    }
+    Arrays.sort(num);
+    helper(ans, new LinkedList&lt;Integer&gt;(), num, 0);
+    return ans;
+}
+
+private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num, int pos) {
+    ans.add(new LinkedList&lt;Integer&gt;(path));
+    for (int i = pos; i &lt; num.length; i++) {
+        if (i &gt; pos &amp;&amp; num[i - 1] == num[i]) {
+            continue;
+        }
+        path.add(num[i]);
+        helper(ans, path, num, i + 1);
+        path.remove(path.size() - 1);
+    }
+}
+</code></pre>
+
+<p><strong>Permutations</strong></p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; permute(int[] num) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new LinkedList&lt;List&lt;Integer&gt;&gt;();
+    if (num == null || num.length == 0) {
+        return ans;
+    }
+    helper(ans, new LinkedList&lt;Integer&gt;(), num);
+    return ans;
+}
+
+private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num){
+    if (path.size() == num.length) {
+        ans.add(new LinkedList&lt;Integer&gt;(path));
+    }
+    for (int i = 0; i &lt; num.length; i++) {
+        if (path.contains(num[i])) {
+            continue;
+        }
+        path.add(num[i]);
+        helper(ans, path, num);
+        path.remove(path.size() - 1);
+    }
+}
+</code></pre>
+
+<p><strong>Permutations II</strong></p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; permuteUnique(int[] num) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new LinkedList&lt;List&lt;Integer&gt;&gt;();
+    if (num == null || num.length == 0) {
+        return ans;
+    }
+    Arrays.sort(num);
+    helper(ans, new LinkedList&lt;Integer&gt;(), num, new int[num.length]);
+    return ans;
+}
+
+private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num, int[] visited){
+    if (path.size() == num.length) {
+        ans.add(new LinkedList&lt;Integer&gt;(path));
+        return;
+    }
+    for (int i = 0; i &lt; num.length; i++) {
+        if (visited[i] == 1) {
+            continue;
+        }
+        if (i &gt; 0 &amp;&amp; visited[i - 1] == 1 &amp;&amp; visited[i] == 0 &amp;&amp; num[i - 1] == num[i]) {
+            // if current number is same as previous, then don't visit current
+            continue;
+        }
+        path.add(num[i]);
+        visited[i] = 1;
+
+        helper(ans, path, num, visited);
+
+        path.remove(path.size() - 1);
+        visited[i] = 0;
+    }
+}
+</code></pre>
+
+<p><strong>N-Queens</strong></p>
+
+<p>一次通关！高兴。</p>
+
+<pre><code>public List&lt;String[]&gt; solveNQueens(int n) {
+    List&lt;String[]&gt; ans = new LinkedList&lt;String[]&gt;();
+    if (n &lt;= 0) {
+        return ans;
+    }
+    helper(ans, new int[n], n, 0);
+    return ans;
+}
+
+private void helper(List&lt;String[]&gt; ans, int[] path, int n, int pos) {
+    if (pos &gt;= n) {
+        ans.add(convert(path, n));
+        return;
+    }
+    for (int i = 0; i &lt; n; i++) {
+        path[pos] = i;
+        if (!isValid(path, pos)) {
+            continue;
+        }
+        helper(ans, path, n, pos + 1);
+    }
+}
+
+private String[] convert(int[] path, int n) {
+    String[] ans = new String[n];
+    for (int j = 0; j &lt; n; j++) {
+        ans[j] = "";
+        for (int i = 0; i &lt; n; i++) {
+            ans[j] += (j == path[i]) ? 'Q' : '.';
+        }
+    }
+    return ans;
+}
+
+private boolean isValid(int[] path, int pos) {
+    for (int i = 0; i &lt; pos; i++) {
+        // check path[i] and path[pos]
+        if (path[i] == path[pos]) {
+            return false;
+        }
+        if (path[i] - path[pos] == pos - i) {
+            return false;
+        }
+        if (path[pos] - path[i] == pos - i) {
+            return false;
+        }
+    }
+    return true;
+}
+</code></pre>
+
+<p><strong>N-Queens II</strong></p>
+
+<pre><code>int total;
+
+public int totalNQueens(int n) {
+    if (n &lt;= 0) {
+        return 0;
+    }
+    helper(new int[n], n, 0);
+    return total;
+}
+
+private void helper(int[] path, int n, int pos) {
+    if (pos &gt;= n) {
+        total++;
+        return;
+    }
+    for (int i = 0; i &lt; n; i++) {
+        path[pos] = i;
+        if (!isValid(path, pos)) {
+            continue;
+        }
+        helper(path, n, pos + 1);
+    }
+}
+
+private boolean isValid(int[] path, int pos) {
+    for (int i = 0; i &lt; pos; i++) {
+        // check path[i] and path[pos]
+        if (path[i] == path[pos]) {
+            return false;
+        }
+        if (path[i] - path[pos] == pos - i) {
+            return false;
+        }
+        if (path[pos] - path[i] == pos - i) {
+            return false;
+        }
+    }
+    return true;
+}
+</code></pre>
+
+<p><strong>Next Permutation</strong></p>
+
+<pre><code>public void nextPermutation(int[] num) {
+    if (num == null || num.length &lt;= 1) {
+        return;
+    }
+    int len = num.length;
+    int p = len - 2;
+    while (p &gt;= 0 &amp;&amp; num[p] &gt;= num[p + 1]) {
+        p--;
+    }
+    if (p &lt; 0) {
+        Arrays.sort(num);
+    } else {
+        int k = len - 1;
+        while (k &gt;= 0 &amp;&amp; num[k] &lt;= num[p]) {
+            k--;
+        }
+        swap(num, p, k);
+        reverse(num, p + 1, len - 1);
+    }
+}
+
+private void swap(int[] num, int p, int k) {
+    num[p] = num[p] + num[k];
+    num[k] = num[p] - num[k];
+    num[p] = num[p] - num[k];
+}
+
+private void reverse(int[] num, int s, int d) {
+    while (s &lt; d) {
+        swap(num, s++, d--);
+    }
+}
+</code></pre>
+
+<p><strong>Previous Permutation</strong></p>
+
+<p>Plz look at the new post.</p>
+
+<p><strong>Palindrome Partitioning</strong></p>
+
+<p>一次通关 again！very 高兴。</p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;String&gt;&gt; partition(String s) {
+    ArrayList&lt;ArrayList&lt;String&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;String&gt;&gt;();
+    if (s == null || s.length() == 0) {
+        return ans;
+    }
+    boolean[][] map = palinMap(s);
+    helper(ans, new ArrayList&lt;String&gt;(), s, map, 0);
+    return ans;
+}
+
+private void helper(ArrayList&lt;ArrayList&lt;String&gt;&gt; ans, ArrayList&lt;String&gt; path, String s, boolean[][] map, int pos) {
+    int len = s.length();
+    if (pos == len) {
+        ans.add(new ArrayList&lt;String&gt;(path));
+        return;
+    }
+    for (int i = pos; i &lt; len; i++) {
+        if (!map[pos][i]) {
+            continue;
+        }
+        path.add(s.substring(pos, i + 1));
+        helper(ans, path, s, map, i + 1);
+        path.remove(path.size() - 1);
+    }
+}
+
+private boolean[][] palinMap(String s) {
+    int len = s.length();
+    boolean[][] map = new boolean[len][len];
+    for (int i = len - 1; i &gt;= 0; i--) {
+        for (int j = 0; j &lt; len; j++) {
+            if (i &gt; j) {
+                continue;
+            } else if (i == j) {
+                map[i][j] = true;
+            } else if (j - i == 1) {
+                map[i][j] = s.charAt(i) == s.charAt(j);
+            } else {
+                map[i][j] = map[i + 1][j - 1] &amp; 
+                        s.charAt(i) == s.charAt(j);
+            }
+        }
+    }
+    return map;
+}
+</code></pre>
+
+<p><strong>Palindrome Partitioning II</strong></p>
+
+<p>This is DP, not Graph &amp; Search.</p>
+
+<p><strong>Combination Sum</strong></p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; combinationSum(int[] candidates, int target) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (candidates == null || candidates.length == 0) {
+        return ans;
+    }
+    Arrays.sort(candidates);
+    helper(ans, new ArrayList&lt;Integer&gt;(), candidates, target, 0);
+    return ans;
+}
+
+private void helper(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, ArrayList&lt;Integer&gt; path, 
+        int[] candidates, int target, int pos) {
+    if (target == 0) {
+        ans.add(new ArrayList&lt;Integer&gt;(path));
+        return;
+    } else if (target &lt; 0) {
+        return;
+    }
+    for (int i = pos; i &lt; candidates.length; i++) {
+        if (target &lt; candidates[i]) {
+            continue;
+        }
+        path.add(candidates[i]);
+        helper(ans, path, candidates, target - candidates[i], i);
+        path.remove(path.size() - 1);
+    }
+}
+</code></pre>
+
+<p><strong>Combination Sum II</strong></p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; combinationSum2(int[] candidates, int target) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (candidates == null || candidates.length == 0) {
+        return ans;
+    }
+    Arrays.sort(candidates);
+    helper(ans, new ArrayList&lt;Integer&gt;(), candidates, target, 0);
+    return ans;
+}
+
+private void helper(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, ArrayList&lt;Integer&gt; path, 
+        int[] candidates, int target, int pos) {
+    if (target == 0) {
+        ans.add(new ArrayList&lt;Integer&gt;(path));
+        return;
+    } else if (target &lt; 0) {
+        return;
+    }
+    for (int i = pos; i &lt; candidates.length; i++) {
+        if (target &lt; candidates[i]) {
+            continue;
+        }
+        if (i &gt; pos &amp;&amp; candidates[i - 1] == candidates[i]) {
+            continue;
+        }
+        path.add(candidates[i]);
+        helper(ans, path, candidates, target - candidates[i], i + 1);
+        path.remove(path.size() - 1);
+    }
+}
+</code></pre>
+
+<p><strong>Word Ladder</strong></p>
+
+<p>Note that this is a <strong>BFS question, not DFS</strong>. I made it wrong and it took me a long time.</p>
+
+<pre><code>public int ladderLength(String start, String end, Set&lt;String&gt; dict) {
+    Queue&lt;String&gt; queue = new LinkedList&lt;String&gt;();
+    queue.add(start);
+    int length = 1;
+
+    while (!queue.isEmpty()) {
+        int currentSize = queue.size();
+        for (int k = 0; k &lt; currentSize; k++) {
+            String word = queue.remove();
+            // insert all adjacent strings of word
+            if (word.equals(end)) {
+                return length;
+            }
+            for (int i = 0; i &lt; word.length(); i++) {
+                char[] letters = word.toCharArray();
+                char originalLetter = letters[i];
+                for (char c = 'a'; c &lt;= 'z'; c++) {
+                    if (c == originalLetter) continue;
+                    letters[i] = c;
+                    String newLetters = String.valueOf(letters);
+                    if (dict.contains(newLetters)) {
+                        queue.add(newLetters);
+                        dict.remove(newLetters);
+                    }
+                }
+                letters[i] = originalLetter;
+            }
+        }
+        length++;
+    }
+    return 0;
+}
+</code></pre>
+
+<p><strong>Word Ladder II</strong></p>
+
+<p>unsolvable</p>
+
+<h3>Additional questions</h3>
+
+<p><strong>Restore IP Addresses</strong></p>
+
+<pre><code>public List&lt;String&gt; restoreIpAddresses(String s) {
+    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    if (s == null || s.length() == 0) {
+        return ans;
+    }
+    helper(ans, new ArrayList&lt;String&gt;(), s, 0);
+    return ans;
+}
+
+private void helper(List&lt;String&gt; ans, List&lt;String&gt; path, String s, int pos) {
+    if (path.size() == 4) {
+        if (pos == s.length()) {
+            ans.add(convert(path));
+        }
+        return;
+    }
+    for (int i = pos + 1; i &lt;= s.length() &amp;&amp; i &lt;= pos + 3; i++) {
+        String nextNum = s.substring(pos, i);
+        if (!isValid(nextNum)) {
+            continue;
+        }
+        path.add(nextNum);
+        helper(ans, path, s, i);
+        path.remove(path.size() - 1);
+    }
+}
+
+private boolean isValid(String str) {
+    if (str.length() == 1) {
+        return true;
+    } else if (str.charAt(0) == '0') {
+        return false;
+    } else {
+        int num = Integer.parseInt(str);
+        return 0 &lt;= num &amp;&amp; num &lt;= 255;
+    }
+}
+
+private String convert(List&lt;String&gt; path) {
+    String str = "";
+    for (String s: path) {
+        str += "." + s;
+    }
+    return str.substring(1);
+}
+</code></pre>
+
+<p><strong>Combinations</strong></p>
+
+<p>skip</p>
+
+<p><strong>Letter Combinations of a Phone Number</strong></p>
+
+<p>skip</p>
+
+<p><strong>Permutation Sequence</strong></p>
+
+<pre><code>public String getPermutation(int n, int k) {
+    List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();
+    int fact = 1;
+    for (int i = 1; i &lt;= n; i++) {
+        list.add(i);
+        fact *= i;
+    }
+    String ans = "";
+    for (int i = n; i &gt; 0; i--) {
+        fact = fact / i;
+        int rank = (k - 1) / fact;
+        k = (k - 1) % fact + 1;
+
+        int curNum = list.remove(rank);
+        ans += String.valueOf(curNum);
+    }
+    return ans;
+}
+</code></pre>
+
+<h2>Conclusion</h2>
+
+<h4>DFS (O(2<sup>n</sup>), O(n!))</h4>
+
+<ol>
+<li>Find all possible solutions</li>
+<li>Permutations / Subsets</li>
+</ol>
+
+
+<h4>BFS (O(m), O(n))</h4>
+
+<ol>
+<li>Graph traversal</li>
+<li>Find shortest path in a simple graph</li>
+</ol>
+
+
+<p><strong>Two most canonical BFS questions</strong>:</p>
+
+<ol>
+<li>Graph traversal and toposort</li>
+<li>Word Ladder</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1506,442 +2456,6 @@ def test(n):
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/18/NineChap-Linked-List-additional/">[NineChap 4.2] Linked List Additional</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-18T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/18/NineChap-Linked-List-additional/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/18/NineChap-Linked-List-additional/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Question list</h2>
-
-<ol>
-<li><p><strong><a href="/blog/2014/06/17/Union-and-intersection-of-linked-list/">Union and Intersection of two Linked Lists</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/30/Insertion-Sort-List/">Insertion Sort List</a></strong> &ndash; difficult</p></li>
-<li><p><strong><a href="/blog/2014/05/28/Flatten-Binary-Tree-to-Linked-List/">Flatten Binary Tree to Linked List</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/26/Convert-Sorted-List-to-Binary-Search-Tree/">Convert Sorted List to Binary Search Tree</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/19/Rotate-List/">Rotate List</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/02/Remove-Nth-Node-From-End-of-List/">Remove Nth Node From End of List</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/06/03/LRU-Cache/">LRU Cache </a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/11/Reverse-Nodes-in-k-Group/">Reverse Nodes in k-Groups</a></strong></p></li>
-<li><p><strong><a href="/blog/2014/05/09/Swap-Nodes-in-Pairs/">Swap Nodes in Pairs</a></strong></p></li>
-</ol>
-
-
-<h2>Code</h2>
-
-<p><strong>Union and Intersection of two Linked Lists</strong></p>
-
-<p>Think about the idea only.</p>
-
-<p><strong>Insertion Sort List</strong></p>
-
-<pre><code>public ListNode insertionSortList(ListNode head) {
-    if (head == null) {
-        return null;
-    }
-    ListNode dummy = new ListNode(0);
-    ListNode cur = head;
-    while (cur != null) {
-        // insert cur into correct pos
-        ListNode pos = dummy;
-        while (pos.next != null &amp;&amp; pos.next.val &lt; cur.val) {
-            pos = pos.next;
-        }
-        ListNode temp = cur.next;
-        cur.next = pos.next;
-        pos.next = cur;
-        cur = temp;
-    }
-    return dummy.next;
-}
-</code></pre>
-
-<p><strong>Flatten Binary Tree to Linked List</strong></p>
-
-<p>I forgot to set &ldquo;root.left = null&rdquo; again, which result in long-time debugging. This is a very common and very silly mistake that I really should avoid.</p>
-
-<pre><code>public void flatten(TreeNode root) {
-    root = helper(root);
-}
-
-private TreeNode helper(TreeNode node) {
-    if (node == null) {
-        return null;
-    } else if (node.left == null &amp;&amp; node.right == null) {
-        return node;
-    } else if (node.left == null) {
-        return helper(node.right);
-    } else if (node.right == null) {
-        node.right = node.left;
-        node.left = null;
-        return helper(node.right);
-    } else {
-        TreeNode tempRight = node.right;
-        node.right = node.left;
-        node.left = null;
-        TreeNode leftTail = helper(node.right);
-        leftTail.right = tempRight;
-        return helper(tempRight);
-    }
-}
-</code></pre>
-
-<p><strong>Convert Sorted List to Binary Search Tree</strong></p>
-
-<p>This is the Mock Interview question. My solution is:</p>
-
-<pre><code>public TreeNode sortedListToBST(ListNode listHead) {
-    if (listHead == null) {
-        return null;
-    }
-    if (listHead.next == null) {
-        return new TreeNode(listHead.val);
-    }
-    ListNode listFirstHalf = listHead;
-    ListNode listPreMid = findMiddle(listHead);
-    ListNode listSecondHalf = null;
-    if (listPreMid.next != null) {
-        listSecondHalf = listPreMid.next.next;
-    }
-    TreeNode head = new TreeNode(listPreMid.next.val);
-    listPreMid.next = null;
-    head.left = sortedListToBST(listFirstHalf);
-    head.right = sortedListToBST(listSecondHalf);
-    return head;
-}
-
-private ListNode findMiddle(ListNode listHead) {
-    if (listHead == null) {
-        return null;
-    }
-    ListNode slow = listHead;
-    ListNode fast = listHead.next;
-    while (fast != null &amp;&amp; fast.next != null&amp;&amp; fast.next.next != null) {
-        slow = slow.next;
-        fast = fast.next.next;
-    }
-    return slow;
-}
-</code></pre>
-
-<p>This is not a good answer, cuz I have to findMid in each recursion.</p>
-
-<p>The best solution is, use a global variable and 2 numbers to simplify this process. Code:</p>
-
-<pre><code>ListNode cur = null;
-
-public TreeNode sortedListToBST(ListNode head) {
-    if (head == null) {
-        return null;
-    }
-    cur = head;
-    int k = 0;
-    ListNode p = head;
-    while (p != null) {
-        k++;
-        p = p.next;
-    }
-    return build(0, k - 1);
-}
-
-private TreeNode build(int start, int end) {
-    if (start &gt; end) {
-        return null;
-    }
-    int mid = start + (end - start) / 2;
-    TreeNode leftBranch = build(start, mid - 1);
-    TreeNode head = new TreeNode(cur.val);
-    cur = cur.next;
-    head.left = leftBranch;
-    head.right = build(mid + 1, end);
-    return head;
-}
-</code></pre>
-
-<p><strong>Rotate List</strong></p>
-
-<p>Naive solution:</p>
-
-<pre><code>public ListNode rotateRight(ListNode head, int n) {
-    if (head == null) {
-        return null;
-    }
-    ListNode p = head;
-    for (int i = 0; i &lt; n; i++) {
-        if (p.next == null) {
-            p = head;
-        } else {
-            p = p.next;
-        }
-    }
-    ListNode q = head;
-    while (p.next != null) {
-        p = p.next;
-        q = q.next;
-    }
-    p.next = head;
-    ListNode newHead = q.next;
-    q.next = null;
-    return newHead;
-}
-</code></pre>
-
-<p>Make a circular list:</p>
-
-<pre><code>public ListNode rotateRight(ListNode head, int n) {
-    if (head == null) {
-        return null;
-    }
-    ListNode p = head;
-    int k = 1;
-    while (p.next != null) {
-        k++;
-        p = p.next;
-    }
-    p.next = head;
-    int steps = k - (n % k);
-    for (int i = 0; i &lt; steps; i++) {
-        p = p.next;
-    }
-    head = p.next;
-    p.next = null;
-    return head;
-}
-</code></pre>
-
-<p><strong>Remove Nth Node From End of List</strong></p>
-
-<pre><code>public ListNode removeNthFromEnd(ListNode head, int n) {
-    if (head == null || n == 0) {
-        return null;
-    }
-    ListNode dummy = new ListNode(0);
-    dummy.next = head;
-    ListNode right = dummy;
-    for (int i = 0; i &lt; n; i++) {
-        right = right.next;
-    }
-    ListNode left = dummy;
-    while (right.next != null) {
-        left = left.next;
-        right = right.next;
-    }
-    left.next = left.next.next;
-    return dummy.next;
-}
-</code></pre>
-
-<p><strong>LRU Cache</strong></p>
-
-<p>I solved it in the original post.</p>
-
-<p><strong>Reverse Nodes in k-Groups</strong></p>
-
-<pre><code>public ListNode reverseKGroup(ListNode head, int k) {
-    ListNode p = head;
-    int count = 0;
-    while (p != null) {
-        p = p.next;
-        count++;
-    }
-    return helper(head, k, count);
-}
-
-public ListNode helper(ListNode head, int k, int count) {
-    if (head == null || k &lt; 1 || count &lt; k) {
-        return head;
-    }
-    ListNode result = null;
-    ListNode cur = head;
-    for (int i = 0; i &lt; k; i++) {
-        if (cur == null) break;
-        ListNode temp = cur.next;
-        cur.next = result;
-        result = cur;
-        cur = temp;
-    }
-    head.next = helper(cur, k, count - k);
-    return result;
-}
-</code></pre>
-
-<p><strong>Swap Nodes in Pairs</strong></p>
-
-<pre><code>public ListNode swapPairs(ListNode head) {
-    if (head == null || head.next == null) {
-        return head;
-    }
-    ListNode result = head.next;
-    ListNode temp = head.next.next;
-    result.next = head;
-    head.next = swapPairs(temp);
-    return result;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/17/Union-and-intersection-of-linked-list/">[Question] Union and Intersection of Two Linked Lists</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-17T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/17/Union-and-intersection-of-linked-list/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/17/Union-and-intersection-of-linked-list/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/union-and-intersection-of-two-linked-lists/">link</a></p>
-
-<blockquote><p>Given two Linked Lists, create union and intersection lists that contain union and intersection of the elements present in the given lists. Order of elments in output lists doesn’t matter.</p>
-
-<p>Example:</p>
-
-<p>Input: &ldquo;10->15->4->20&rdquo; and &ldquo;8->4->2->10&rdquo;</p>
-
-<p>Intersection: 4->10</p>
-
-<p>Union: 2->8->20->4->15->10</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>There are 2 solutions.</p>
-
-<p>First solution is to do mergesort, then do a linear search. Time complexity is O(mlgm + nlgn).</p>
-
-<p>Second solution is using hashing. On time <a href="http://www.geeksforgeeks.org/union-and-intersection-of-two-linked-lists/">complexity</a>:</p>
-
-<blockquote><p>Time complexity of this method depends on the hashing technique used and the distribution of elements in input lists. In practical, this approach may turn out to be better than above method.</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/17/Time-complexity-calculation/">[Design] Time Complexity Calculation (Master Theorem)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-17T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/17/Time-complexity-calculation/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/17/Time-complexity-calculation/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Master theorem</h3>
-
-<p>In the analysis of algorithms, the <a href="http://en.wikipedia.org/wiki/Master_theorem">master theorem</a> provides a cookbook solution in asymptotic terms (using Big O notation) for recurrence relations that occur in many divide and conquer algorithms. It was introduced and popularized by <strong>Introduction to Algorithms</strong>.</p>
-
-<h3>Examples with common algorithms</h3>
-
-
-
-<table class="tg">
-  <tr>
-    <th class="tg-031e">Algorithm</th>
-    <th class="tg-031e">Recurrence</th>
-    <th class="tg-031e">Big-Oh Solution</th>
-  </tr>
-  <tr>
-    <td class="tg-031e">Binary Search</td>
-    <td class="tg-031e">T(n) = T(n/2) + O(1)</td>
-    <td class="tg-031e">O(log n)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">tree traversal</td>
-    <td class="tg-031e">T(n) = 2 T(n/2) + O(1)</td>
-    <td class="tg-031e">O(n)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Mergesort</td>
-    <td class="tg-031e">T(n) = 2 T(n/2) + O(n)</td>
-    <td class="tg-031e">O(n log n)</td>
-  </tr>
-</table>
-
-
-<p><a href="http://www.cs.duke.edu/~ola/ap/recurrence.html">source</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/28">&larr; Older</a>
@@ -1959,7 +2473,7 @@ public ListNode helper(ListNode head, int k, int count) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (51)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (53)</a></li>
 <li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
@@ -1973,14 +2487,18 @@ public ListNode helper(ListNode head, int k, int count) {
 <li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
-<li class='category'><a href='/blog/categories/twitter/'>twitter (3)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
+<li class='category'><a href='/blog/categories/twitter/'>twitter (4)</a></li>
 
   </ul>
 </section>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/09/terminology-ngram/">[Terminology] N-gram</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/01/09/most-frequent-word-from-book/">[Question] Most Frequent Word From a Book</a>
@@ -1995,11 +2513,7 @@ public ListNode helper(ListNode head, int k, int count) {
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/08/number-of-distinct-substrings/">[Google] Number of Distinct Substrings</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/08/all-number-given-decimal-scale/">[Google] Check All Numbers Given the Decimal Scale</a>
+        <a href="/blog/2015/01/09/big-data-top-k-frequency-3/">[Design] Big Data - Top K Frequency 3</a>
       </li>
     
   </ul>
