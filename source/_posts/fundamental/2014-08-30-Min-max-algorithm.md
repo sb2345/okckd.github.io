@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Fundamental] MinMax Algorithm "
+title: "[Fundamental] Min-Max Algorithm "
 comments: true
 category: Fundamental
 tags: [  ]
