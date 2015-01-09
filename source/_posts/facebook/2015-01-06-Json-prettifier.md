@@ -47,7 +47,7 @@ Since I did not find anything useful online, I spent an hour writing the followi
 
 1. __Line break__ after a comma, a left bracket, or prior to a right bracket. A special pattern is "}," - we only do line break once after the comma. 
 
-1. __Indentation__ is important. We reduce indentation BEFORE we print out a right bracket, butut increase indentation __only AFTER the left bracket__. 
+1. __Indentation__ is important. It's a little complex cuz we reduce indentation __BEFORE__ printing out a right bracket, but increase indentation __AFTER the left bracket__. 
 
 ### Code
 

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Google] Connect Nodes and Avoid Intersect"
+title: "[Google] Connect Graph Nodes and Avoid Intersect"
 comments: true
 category: Google
 tags: [  ]

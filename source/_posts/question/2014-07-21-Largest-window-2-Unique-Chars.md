@@ -6,7 +6,7 @@ category: Question
 tags: [ src ]
 ---
 
-### Question 
+### Question
 
 [link](http://www.programcreek.com/2013/02/longest-substring-which-contains-2-unique-characters/)
 
@@ -14,13 +14,19 @@ tags: [ src ]
 
 ### Solution
 
-__This is a naive solution__, which we use 2 pointers and 1 hashset. The code is very readable (written by me). 
+__First, the most basic and naive solution__, which we use 2 pointers and 1 hashset. Read thru and when seeing the 3rd different char, __rebuild the hashset__. Idea is from original post. This approach is not very efficient. 
 
-What if the question change from '2 unique chars' to 'N unique chars'? I think we can __use HashMap instead of HashSet__ (for searching of start pointer). The rest of the is very similar. 
+__Second, we can use HashMap instead of HashSet__, so that we keep couting how many of each char we currently got. This should do the trick well. 
+
+> What if the question change from '2 unique chars' to 'N unique chars'? __Use HashMap instead of HashSet__. The rest of the is very similar. 
+
+__Third solution I found it [here](http://stackoverflow.com/a/15000204)__. It keeps a 'lastGroupStart' pointer, that points to __the last position where character changes__. Eg. "aaaabbbbbcccc", 'lastGroupStart' would pointer to the first occurance of 'b'. When we read until c, we update the window starting point to 'lastGroupStart', and update 'lastGroupStart' to the first occurance of 'c'. 
+
+This is a frequent question. I personally would __recommend 2nd solution: using HashMap__. 
 
 ### Code
 
-__writen by me__
+__first solution__
 
 	private String solution(String input) {
 		HashSet<Character> set = new HashSet<Character>();
@@ -55,3 +61,35 @@ __writen by me__
 		}
 		return longest;
 	}
+
+__third solution__, pay attention to 'lastGroupStart'. 
+
+    // Find the first letter that is not equal to the first one, 
+    // or return the entire string if it consists of one type of characters
+    int start = 0;
+    int i = 1;
+    while (i < str.length() && str[i] == str[start])
+        i++;
+    if (i == str.length())
+        return str;
+
+    // The main algorithm
+    char[2] chars = {str[start], str[i]};
+    int lastGroupStart = 0;
+    while (i < str.length()) {
+        if (str[i] == chars[0] || str[i] == chars[1]) {
+            if (str[i] != str[i - 1])
+                lastGroupStart = i;
+        }
+        else {
+            //TODO: str.substring(start, i) is a locally maximal string; 
+            //      compare it to the longest one so far
+            start = lastGroupStart;
+            lastGroupStart = i;
+            chars[0] = str[start];
+            chars[1] = str[lastGroupStart];
+        }
+        i++;
+    }
+    //TODO: After the loop, str.substring(start, str.length()) 
+    //      is also a potential solution.
