@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Client/Server link Client have direct and full access to the physical database based on their login string. This is the major weakness of the Client/ &hellip;">
+  <meta name="description" content="Question link 有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。 注意：query是动态的输入进行查询的，预先并不知道所有的query。 Solution Basic idea of the solution is to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,197 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/14/Large-string-find-substring/">[Facebook] Large String Find Query (HashMap, Prefix Array)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/14/Large-string-find-substring/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/14/Large-string-find-substring/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#15">link</a></p>
+
+<blockquote><p>有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。</p>
+
+<p>注意：query是动态的输入进行查询的，预先并不知道所有的query。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Basic idea of the solution is to use Prefix Tree (Trie)</strong> and similar alternatives.</p>
+
+<p><strong>Solution 1</strong> is <a href="http://www.itint5.com/discuss/27/%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E9%A2%84%E5%A4%84%E7%90%86">an nice idea using HashMap</a>.</p>
+
+<blockquote><p>我是把所有长度&lt; =10的子串，哈希一下存放到10个哈希表中。</p>
+
+<p>至于哈希函数的选取，随便选一个应该都不会超时。</p></blockquote>
+
+<p><strong>Solution 2</strong> is using so-called &lsquo;<strong>prefix array</strong>&rsquo;. The most important point of this idea is to only make a substring instance <strong>for every 10 characters</strong>.</p>
+
+<blockquote><p>只用=10的子串。然后二分查找</p>
+
+<p>用=10的字串排序即可，如包含更短的串会使得预处理变成O(10nlg(10n))。 查找的复杂度可能没什么变化，使用&lt;=10会是O(lg(10n))，而只使用=10子串初始化的话，因为可能还要进行短query跟长子串间的前缀比较，复杂度会是O(10lgn)，稍微有点提高。</p></blockquote>
+
+<p>Which is to say, using substring length == 10, we comsume <strong>less time for pre-processing</strong>, and a little <strong>more time when querying</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>read it from <a href="http://www.itint5.com/discuss/203/%E8%B6%85%E7%AE%80%E5%8D%95%E7%9A%84prefix-array-java-code">here</a></strong>, note written by me</p>
+
+<pre><code>private List&lt;String&gt; prefixList;
+
+// pre-process the large string
+public void initWithString(String str) {
+    Set&lt;String&gt; strs = new HashSet&lt;String&gt;();
+
+    for(int i = 0; i &lt; str.length(); ++i) {
+        strs.add(str.substring(i, Math.min(str.length(), i + 10)));
+    }
+    prefixList = new ArrayList&lt;String&gt;(strs);
+    Collections.sort(prefixList);
+}
+
+// find the query substring
+public boolean existSubString(String query) {
+    int low = 0;
+    int high = prefixList.size() - 1;
+    while(low &lt;= high) {
+        int mid = (low + high) / 2;
+        int comp = prefixList.get(mid).compareTo(query);
+        if(comp == 0)  {
+            return true;
+        }
+        if(prefixList.get(mid).startsWith(query)) {
+            return true;
+        }
+        if(comp &gt; 0) //mid &gt; query
+        {
+            high = mid - 1;
+        }else{
+            low = mid + 1;
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/12/circus-man-ordering/">[CC150v4] 9.7 Circus Tower Routine</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-12T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/12/circus-man-ordering/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/12/circus-man-ordering/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>A circus is designing a tower routine consisting of people standing atop one another’s shoulders. For practical and aesthetic reasons, each person must be both shorter and lighter than the person below him or her. Given the heights and weights of each person in the circus, write a method to compute the largest possible number of people in such a tower.</p>
+
+<p>EXAMPLE:</p>
+
+<p>Input: (ht, wt): (65, 100) (70, 150) (56, 90) (75, 190) (60, 95) (68, 110)</p>
+
+<p>Output: The longest tower is length 6 and includes from top to bottom: (56, 90) (60,95) (65,100) (68,110) (70,150) (75,190)</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The solution given in the book is unclear, but it&rsquo;s a very simple idea which is pointed out <a href="http://www.careercup.com/question?id=9339758">here</a> and <a href="http://hawstein.com/posts/9.7.html">here</a>.</p>
+
+<ol>
+<li>sort the input persons by &lsquo;height&rsquo;. O(nlogn)</li>
+<li>find the longest increasing &lsquo;weight&rsquo; sequence in the sorted list. This can be done in O(nlogn) with DP.</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int longestTower(List&lt;Man&gt; list) {
+    Collections.sort(list, new ManComparator());
+    // now find the longest increasing sequence of 'weight' property
+    int len = list.size();
+    int maxLen = 1;
+    int[] dp = new int[len];
+    for (int i = 1; i &lt; len; i++) {
+        dp[i] = 1;
+        for (int j = 0; j &lt; i; j++) {
+            if (list.get(i).weight &gt; list.get(j).weight) {
+                dp[i] = Math.max(dp[i], dp[j] + 1);
+            }
+        }
+        maxLen = Math.max(maxLen, dp[i]);
+    }
+    return maxLen;
+}
+
+class ManComparator implements Comparator&lt;Man&gt; {
+    @Override
+    public int compare(Man o1, Man o2) {
+        return o1.height - o2.height;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -668,108 +859,6 @@ k: number of hash functions
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-existence-of-number/">[Design] Big Data - Find Existence of a Number</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/10/big-data-find-existence-of-number/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/10/big-data-find-existence-of-number/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
-
-<blockquote><p>给40亿个不重复的unsigned int的整数，没排过序的，然后再给一个数，如何快速判断这个数是否在那40亿个数当中？</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Categorized under <strong>BitMap</strong>.</p>
-
-<p>There&rsquo;re 4.3 billion unsigned integers in Java. This is a perfect question to use BitMap.</p>
-
-<p>申请512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/">[Design] Big Data - Remove Duplicate Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_JULY_v/article/details/6279498">link</a></p>
-
-<blockquote><p>2.5亿个整数中找出不重复的整数的个数，内存空间不足以容纳这2.5亿个整数。</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Categorized under <strong>双层桶划分</strong> or <strong>BitMap</strong>.</p>
-
-<p>整数个数为2<sup>32</sup>,也就是，我们可以将这2<sup>32</sup>个数，划分为2<sup>8</sup>个区域(比如用单个文件代表一个区域)，然后将数据分离到不同的区域，然后不同的区域在利用bitmap就可以直接解决了。</p>
-
-<p><strong>But how exactly to use BitMap</strong>? 将bit-map扩展一下，用2bit表示一个数即可，0表示未出现，1表示出现一次，2表示出现2次及以上。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/16">&larr; Older</a>
@@ -787,22 +876,20 @@ k: number of hash functions
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (53)</a></li>
-<li class='category'><a href='/blog/categories/epic/'>epic (1)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (54)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (37)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (38)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (5)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (90)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
-<li class='category'><a href='/blog/categories/twitter/'>twitter (4)</a></li>
 
   </ul>
 </section>
@@ -811,7 +898,11 @@ k: number of hash functions
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/09/terminology-ngram/">[Terminology] N-gram</a>
+        <a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a>
       </li>
     
       <li class="post">
@@ -824,10 +915,6 @@ k: number of hash functions
     
       <li class="post">
         <a href="/blog/2015/01/09/longest-common-substring/">[Question] Longest Common Contiguous Intersection (Longest Common Substring)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/09/big-data-top-k-frequency-3/">[Design] Big Data - Top K Frequency 3</a>
       </li>
     
   </ul>
