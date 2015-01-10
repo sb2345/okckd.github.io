@@ -160,6 +160,118 @@ private void insertAtBottom(Stack&lt;Integer&gt; stack, int val) {
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/minimum-range-inclueds-at-least-1/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5103437989543936">link</a></p>
+
+<blockquote><p>There are many sorted arrays. Find a minimum range, so that in each array there&rsquo;s at least one integer within this range.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Min-heap</strong>. <a href="http://www.careercup.com/question?id=16759664">source</a></p>
+
+<blockquote><p>There are k lists of sorted integers. Make a min heap of size k containing 1 element from each list. Keep track of min and max element and calculate the range.</p>
+
+<p>In min heap, minimum element is at top. Delete the minimum element and another element instead of that from the same list to which minimum element belong. Repeat the process till any one of the k list gets empty.</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public void printMinRange(int[][] input) {
+    Comparator&lt;Pointer&gt; compr = new HeapComparator(input);
+    // Note that we pass in 'input' arrays to the comparator
+    PriorityQueue&lt;Pointer&gt; heap = new PriorityQueue&lt;Pointer&gt;(SIZE, compr);
+
+    int maxVal = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; SIZE; i++) {
+        heap.add(new Pointer(i, 0));
+        // insert the head of each array into the heap
+        maxVal = Math.max(maxVal, input[i][0]);
+        // keep additional value to keep track of the max value in heap
+    }
+
+    int left = 0;
+    int right = Integer.MAX_VALUE;
+    while (heap.size() == SIZE) {
+        Pointer p = heap.remove();
+        // first, update the range
+        if (maxVal - input[p.index][p.position] &lt; right - left) {
+            right = maxVal;
+            left = input[p.index][p.position];
+        }
+        // then, push the next element after 'p' to the heap
+        // meanwhile, update 'maxVal'
+        if (p.position + 1 &lt; input[p.index].length) {
+            Pointer nextP = new Pointer(p.index, p.position + 1);
+            heap.add(nextP);
+            maxVal = Math.max(maxVal, input[nextP.index][nextP.position]);
+        }
+        // when 'p' is the last element in the row, terminate loop
+    }
+    System.out.println("Left boundary: " + left);
+    System.out.println("Right boundary: " + right);
+}
+
+class HeapComparator implements Comparator&lt;Pointer&gt; {
+
+    int[][] arrays = null;
+
+    public HeapComparator(int[][] input) {
+        arrays = input;
+    }
+
+    public int compare(Pointer p1, Pointer p2) {
+        return arrays[p1.index][p1.position]
+                - arrays[p2.index][p2.position];
+    }
+}
+
+class Pointer {
+    int index, position;
+
+    public Pointer(int x, int y) {
+        index = x;
+        position = y;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a></h1>
     
     
@@ -428,88 +540,6 @@ private void insertAtBottom(Stack&lt;Integer&gt; stack, int val) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/01/09/longest-common-substring/">[Question] Longest Common Contiguous Intersection (Longest Common Substring)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/09/longest-common-substring/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/longest-common-substring/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=12862670">link</a></p>
-
-<blockquote><p>Write Program to find longest common contiguous intersection from 2 lists provided to the function.</p>
-
-<p>Example: list1: abcrfghwetf</p>
-
-<p>list2: abrfghwwetxyab</p>
-
-<p>Ans: rfghw</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a classic <a href="http://en.wikipedia.org/wiki/Longest_common_substring_problem">Longest common substring</a> problem.</p>
-
-<p>Solution 1: <strong>Suffix tree</strong>. Building the tree is O(n) time and the whole program is O(n + m) time.</p>
-
-<p>Solution 2: <strong>DP</strong>, which takes O(nm) time and space. The code for DP is posted below.</p>
-
-<h3>Code</h3>
-
-<p><strong>dp</strong></p>
-
-<pre><code>public String LCSubstr(String s, String t) {
-    int longest = 0;
-    int tPos = -1;
-
-    // dp[i][j] represents the LCSubstr ending at position i and j
-    int[][] dp = new int[t.length() + 1][s.length() + 1];
-    for (int i = 1; i &lt;= t.length(); i++) {
-        for (int j = 1; j &lt;= s.length(); j++) {
-            if (t.charAt(i - 1) == s.charAt(j - 1)) {
-                dp[i][j] = dp[i - 1][j - 1] + 1;
-                if (dp[i][j] &gt; longest) {
-                    longest = dp[i][j];
-                    tPos = i;
-                }
-            }
-        }
-    }
-    return t.substring(tPos - longest, tPos);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
       <h1 class="entry-title"><a href="/blog/2015/01/09/big-data-top-k-frequency-3/">[Design] Big Data - Top K Frequency 3</a></h1>
     
     
@@ -570,7 +600,7 @@ private void insertAtBottom(Stack&lt;Integer&gt; stack, int val) {
 
 <p>However, the table that stores the data would be so huge such that we have to partition the table physically. One partition scheme is <strong>based on ngrams</strong> of the token. If the token is a single word, it is 1gram. If the token is two-word phrase, it is 2gram.</p></blockquote>
 
-<p>Of course we can also divide the data by the hash value. For information on <strong>ngrams</strong>, read <strong>[Terminology] n-gram</strong>.</p>
+<p>Of course we can also divide the data by the hash value. For information on <strong>ngrams</strong>, read <strong>[Design] Terminology: n-gram</strong>.</p>
 
 <h4>3. Process Incoming Streams</h4>
 
@@ -1041,6 +1071,10 @@ private int findNextJob(Job[] jobs, int k) {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a>
       </li>
     
@@ -1050,10 +1084,6 @@ private int findNextJob(Job[] jobs, int k) {
     
       <li class="post">
         <a href="/blog/2015/01/09/match-triplet-with-reverse-order/">[Question] Match Triplet With Reverse Order</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/09/longest-common-substring/">[Question] Longest Common Contiguous Intersection (Longest Common Substring)</a>
       </li>
     
   </ul>
