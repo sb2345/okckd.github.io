@@ -2,7 +2,7 @@
 layout: post
 title: "[Twitter] Count Visible Nodes in Binary Tree"
 comments: true
-category: Twitter
+category: Question
 tags: [ src ]
 ---
 

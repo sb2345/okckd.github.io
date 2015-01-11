@@ -2,8 +2,10 @@
 layout: post
 title: "[Question] Most Frequent Word from a book "
 comments: true
-category: Question
-tags: [ src ]
+categories:
+- Question
+- String search
+tags: [  ]
 ---
 
 ### Question

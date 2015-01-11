@@ -20,6 +20,8 @@ Q.Pop(): if S2.empty -> S1->S2 S2.pop()
 
 Q.Top(): Similar with Q.Pop()
 
+Learn and compare with another question __[Question] Implement Stack using Two Queues__. 
+
 ### Code
 
 skipped

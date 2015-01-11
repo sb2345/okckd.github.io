@@ -29,7 +29,12 @@ In Java, there are [3 categories of exceptions](http://www.tutorialspoint.com/ja
 
 [A checked exception](http://stackoverflow.com/a/2190175) __must be handled explicitly__ by the code (by either putting a try/catch block around the code, or adding a "throws" clause to the method).
 
-The [class Exception](http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html) and any subclasses that are not also subclasses of RuntimeException are __checked exceptions__. 
+The [class Exception](http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html) and any subclasses that are not also subclasses of RuntimeException are __checked exceptions__. Example: 
+
+1. FileNotFoundException
+1. HttpRetryException
+1. SocketException
+1. IOException
 
 Note: __java.lang.RuntimeException__ is a subclass of __java.lang.Exception__. 
 

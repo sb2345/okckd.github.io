@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Terminology] n-gram "
+title: "[Design] Terminology: n-gram "
 comments: true
 category: Design
 tags: [  ]

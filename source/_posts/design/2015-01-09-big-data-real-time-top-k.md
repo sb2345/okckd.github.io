@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "[Twitter] Big Data - Real Time Top k "
+title: "[Design] Big Data - Real Time Top k "
 comments: true
 categories:
-- Twitter
+- Design
 - Top K
 tags: [  ]
 ---
