@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Code a hashmap which you would be happy to place into a production environment. Solution We already write 2 post before: [Question] &hellip;">
+  <meta name="description" content="Question DLL &ndash; link Inorder &ndash; link Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,392 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum (Undone)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
+
+<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
+
+<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
+
+<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
+
+<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
+
+<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
+
+<h3>Code</h3>
+
+<p><strong>DLL way, written by me</strong></p>
+
+<pre><code>public void findTriplet(TreeNode root, int target) {
+    TreeNode[] dll = convertToDll(root);
+    TreeNode head = dll[0];
+    TreeNode tail = dll[1];
+    // note that the bst inorder dll should already in sorted by value
+    TreeNode first = head;
+    while (first.right != null) {
+        TreeNode left = first.right;
+        TreeNode right = tail;
+        while (left.val &lt; right.val) {
+            int diff = first.val + left.val + right.val - target;
+            if (diff == 0) {
+                System.out.println("Found triplet: " + first.val + " "
+                        + left.val + " " + right.val + " for sum of "
+                        + target);
+            }
+            if (diff &lt;= 0) {
+                left = left.right;
+            }
+            if (diff &gt;= 0) {
+                right = right.left;
+            }
+        }
+        first = first.right;
+    }
+}
+
+private TreeNode[] convertToDll(TreeNode node) {
+    TreeNode[] ans = new TreeNode[2];
+    // do the left side of node
+    if (node.left == null) {
+        ans[0] = node;
+    } else {
+        TreeNode[] preAns = convertToDll(node.left);
+        ans[0] = preAns[0];
+        node.left = preAns[1];
+        preAns[1].right = node;
+    }
+    // do the right side of node
+    if (node.right == null) {
+        ans[1] = node;
+    } else {
+        TreeNode[] postAns = convertToDll(node.right);
+        ans[1] = postAns[1];
+        node.right = postAns[0];
+        postAns[0].left = node;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>inorder way</strong></p>
+
+<p>undone</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
+
+<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
+
+<pre><code>           1
+        /    \
+       2      3
+      / \    / \
+     4   5  6   7
+             \   \
+              8   9 
+
+The output of print this tree vertically will be:
+4
+2
+1 5 6
+3 8
+7
+9 
+</code></pre>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
+<li><p>Iterate for each vertical line at distance minimum to maximum from root.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+
+    // 1. find the range of left bound and right bound
+    int[] range = new int[2];
+    findRange(root, range, 0);
+
+    // 2. calculate number of columns in the result
+    int rootIndex = 0 - range[0];
+    int columns = range[1] - range[0] + 1;
+    for (int i = 0; i &lt; columns; i++) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+    }
+
+    // 3. fill in vertically in a recursive manner
+    fillNode(ans, root, rootIndex);
+
+    return ans;
+}
+
+private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
+    if (node == null) {
+        return;
+    }
+    ans.get(index).add(node.val);
+    fillNode(ans, node.left, index - 1);
+    fillNode(ans, node.right, index + 1);
+}
+
+private void findRange(TreeNode node, int[] range, int position) {
+    if (node == null) {
+        return;
+    }
+    if (position &lt; range[0]) {
+        range[0] = position;
+    }
+    if (position &gt; range[1]) {
+        range[1] = position;
+    }
+    findRange(node.left, range, position - 1);
+    findRange(node.right, range, position + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/08/patient-disease-data-structure/">[Epic] Patient Disease Data Structure</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/08/patient-disease-data-structure/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32844253.html">link</a></p>
+
+<blockquote><p>Suppose N patients and M diseases. N is sufficiently large number and M is
+relatively small, say 30-ish. Each patient can have possible 0 to M kinds of
+diseases.</p>
+
+<p>Given one patient’s name, show me a list of similar patients sharing same
+deseases within 2-3 seconds.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Use 1 bit to represent a disease</strong>. So every patient&rsquo;s conditin can be put into an integer of 32 bits.</p>
+
+<p>How do we calculate the similarity of 2 patients?</p>
+
+<p>Refer to <strong>[CC150v5] 5.5 Calculate Bits Conversion Required</strong> for a special bit operation (remove last &lsquo;1&rsquo; from bit):</p>
+
+<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
+
+<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
+
+<p>For each patient, we simply calculate the XOR and count &lsquo;1&rsquo;s.</p>
+
+<h3>Code</h3>
+
+<p>no code.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/01/Leetcode-fourth/">[Leetcode] Leetcode Fourth Round</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/01/Leetcode-fourth/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/01/Leetcode-fourth/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><pre><code>Days:        01/12/2014 - now
+Submission:  
+Pass:        
+
+Submit/day:  
+Pass/day:    
+
+Pass/submit: 
+</code></pre>
+
+<h3>Easy</h3>
+
+<ol>
+<li>[LeetCode 1] Two Sum</li>
+<li>[LeetCode 5] Longest Palindromic Substring</li>
+<li>[LeetCode 6] ZigZag Conversion</li>
+<li>[LeetCode 7] Reverse Integer</li>
+<li>[LeetCode 12] Integer to Roman</li>
+<li>[LeetCode 16] 3Sum Closest</li>
+<li>[LeetCode 18] 4Sum</li>
+<li>[LeetCode 19] Remove Nth Node From End of List</li>
+<li>[LeetCode 23] Merge K Sorted Lists</li>
+<li>[LeetCode 25] Reverse Nodes in k-Groups</li>
+<li>[LeetCode 27] Remove Element</li>
+<li>[LeetCode 30] Substring With Concatenation of All Words</li>
+<li>[LeetCode 32] Longest Valid Parentheses</li>
+<li>[LeetCode 36] Valid Sudoku</li>
+<li>[LeetCode 41] First Missing Positive</li>
+<li>[LeetCode 42] Trapping Rain Water</li>
+<li>[LeetCode 45] Jump Game II</li>
+<li>[LeetCode 50] Pow(x, N)</li>
+<li>[LeetCode 55] Jump Game</li>
+<li>[LeetCode 72] Edit Distance</li>
+<li>[LeetCode 79] Word Search</li>
+<li>[LeetCode 80] Remove Duplicates From Sorted Array II</li>
+<li>[LeetCode 94] Binary Tree Inorder Traversal</li>
+<li>[LeetCode 142] Linked List Cycle II</li>
+</ol>
+
+
+<h3>Difficult</h3>
+
+<ol>
+<li>[LeetCode 3] Longest Substring Without Repeating Characters</li>
+<li>[LeetCode 4] Median of Two Sorted Arrays</li>
+<li>[LeetCode 10] Regular Expression Matching</li>
+<li>[LeetCode 15] 3Sum</li>
+<li>[LeetCode 29] Divide Two Integers</li>
+<li>[LeetCode 37] Sudoku Solver</li>
+<li>[LeetCode 44] Wildcard Matching</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -720,422 +1106,6 @@ private static BiNode getListTail(BiNode head) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/27/Order-array-by-sorting-middle/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
-
-<blockquote><ol>
-<li><p>找到heading的最长递增序列.</p></li>
-<li><p>找到tailing的最长的递增序列.</p></li>
-</ol>
-</blockquote>
-
-<p>After that:</p>
-
-<blockquote><ol>
-<li><p>用中间部分的min去shrink左边.</p></li>
-<li><p>用中间部分的max去shrink右边.</p></li>
-</ol>
-</blockquote>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static void findUnsortedSequence(int[] array, int[] ans) {
-    int len = array.length;
-    ans[0] = 0;
-    ans[1] = 0;
-
-    // find increasing sequence on left and on right
-    int leftPeak = 0;
-    while (leftPeak &lt; len - 1) {
-        if (array[leftPeak] &lt; array[leftPeak + 1]) {
-            leftPeak++;
-        } else {
-            break;
-        }
-    }
-    if (leftPeak == len - 1) {
-        return;
-    }
-    int rightBottom = len - 1;
-    while (rightBottom &gt; 0) {
-        if (array[rightBottom] &gt; array[rightBottom - 1]) {
-            rightBottom--;
-        } else {
-            break;
-        }
-    }
-
-    // leftPeak and rightBottom are found, now read mid part
-    int midMin = Integer.MAX_VALUE;
-    int midMax = Integer.MIN_VALUE;
-    for (int i = leftPeak; i &lt;= rightBottom; i++) {
-        midMin = Math.min(midMin, array[i]);
-        midMax = Math.max(midMax, array[i]);
-    }
-
-    // find left boudary and right boundary
-    int leftBound = leftPeak;
-    while (leftBound &gt;= 0) {
-        if (array[leftBound] &lt; midMin) {
-            break;
-        }
-        leftBound--;
-    }
-    int rightBound = rightBottom;
-    while (rightBound &lt; len) {
-        if (array[rightBound] &gt; midMax) {
-            break;
-        }
-        rightBound++;
-    }
-
-    // finish it up
-    ans[0] = leftBound + 1;
-    ans[1] = rightBound - 1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/26/implement-circular-array-java/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/26/implement-circular-array-java/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement a <strong>CircularArray</strong> class that supports an array-like data structure which can be efficiently rotated.</p>
-
-<p>The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>First part of the question is solved by using an array and a pointer</strong>. The solution simplifies the question by fixing the array size (not a dynamic-resizing array).</p>
-
-<p><strong>The difficult part is how to write iterator</strong>.</p>
-
-<p>Note that we should support <strong>Java Generics</strong>:</p>
-
-<pre><code>class MyCircularArray&lt;T&gt;
-</code></pre>
-
-<p>Implement <strong>Iterable Interface</strong>:</p>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-}
-</code></pre>
-
-<p>Override <strong>iterator() method</strong>:</p>
-
-<pre><code>@Override
-public Iterator&lt;T&gt; iterator() {
-    return new MyIterator&lt;T&gt;(this);
-}
-</code></pre>
-
-<p>Write our own <strong>Iterator Class</strong>:</p>
-
-<pre><code>class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-}
-</code></pre>
-
-<p>Finish it up</p>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-
-    @Override
-    public Iterator&lt;T&gt; iterator() {
-        return new MyIterator&lt;T&gt;(this);
-    }
-
-    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-        @Override
-        public boolean hasNext() {
-        }
-
-        @Override
-        public T next() {
-        }
-
-        @Override
-        public void remove() {
-        }
-    }
-}
-</code></pre>
-
-<p>It might be confusing when implementing <strong>Iterable</strong> and <strong>Iterator</strong> Class.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-
-    T[] items;
-
-    int head;
-    int cur;
-
-    public MyCircularArray(int size) {
-        // this is really important (casting the type)
-        items = (T[]) new Object[size];
-
-        head = 0;
-        cur = 0;
-    }
-
-    public void put(T item) {
-        items[cur++] = item;
-        cur = cur % items.length;
-    }
-
-    public T get(int i) {
-        int newIndex = (i + head) % items.length;
-        return items[newIndex];
-    }
-
-    public void rotate(int shiftRight) {
-        head += shiftRight;
-        head = head % items.length;
-    }
-
-    @Override
-    public Iterator&lt;T&gt; iterator() {
-        return new MyIterator&lt;T&gt;(this);
-    }
-
-    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-
-        T[] items;
-        int head;
-        int count;
-
-        public MyIterator(MyCircularArray&lt;T&gt; array) {
-            this.items = array.items;
-            this.head = array.head;
-            this.count = 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.count != items.length;
-        }
-
-        @Override
-        public T next() {
-            if (hasNext()) {
-                return items[(head + count++) % items.length];
-            }
-            return null;
-        }
-
-        @Override
-        public void remove() {
-        }
-    }
-
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] 12.0 Example - Troubleshoot Google Chrome</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/24/troubleshoot-google-chrome/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/24/troubleshoot-google-chrome/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You&#8217;reworking on the Google Chrome team when you receivea bug report: Chrome crashes on launch. What would you do?</p></blockquote>
-
-<h3>Step 1: Understand the Scenario</h3>
-
-<ol>
-<li>How long has user seen this issue?</li>
-<li>version of browser and OS?</li>
-<li>Does this happen consistently? How often, and when?</li>
-</ol>
-
-
-<h3>Step 2: Break Down the Problem</h3>
-
-<p>Flow of situation:</p>
-
-<ol>
-<li>start menu</li>
-<li>click chrome</li>
-<li>browser starts</li>
-<li>browser load settings</li>
-<li>browser issues HTTP response</li>
-<li>browser get HTTP response</li>
-<li>browser parses webpage</li>
-<li>browser displays content</li>
-</ol>
-
-
-<p><strong>At some points in this process, something fails</strong>. A good tester would iterate thru the elements of this scenario and diagnose the problem.</p>
-
-<h3>Step 3: Create Specific, Manageable Tests</h3>
-
-<p>Come up with realistic instructions.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/24/sort-20GB-file/">[CC150v5] 11.4 Sort 20GB File</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/24/sort-20GB-file/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/24/sort-20GB-file/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Imagine you have a 20 GB file with one string per line.</p>
-
-<p>Explain how you would sort the file.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Use <strong>External Sort</strong>.</p>
-
-<ol>
-<li><p>First divide the file into chunks which are x megabytes each, where x is the amount of memory we have available.</p></li>
-<li><p>Each chunk is sorted separately and then saved back to the file system.</p></li>
-<li><p>Once all the chunks are sorted, we then merge the chunks, one by one.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -1157,13 +1127,13 @@ public Iterator&lt;T&gt; iterator() {
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (40)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (42)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (90)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (92)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1175,23 +1145,23 @@ public Iterator&lt;T&gt; iterator() {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/11/numer-of-occurrence-given-subsequence/">[Question] Number of Occurence of Given Sub-sequence</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/numer-of-distinct-subsequence/">[Question] Number of Distinct Sub-sequence</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/max-count-array-in-queue/">[Google] Maximum Count Array in a Queue</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/form-queue-given-heights/">[Google] Form a Queue Given Heights</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a>
       </li>
     
   </ul>

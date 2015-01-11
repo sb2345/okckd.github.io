@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link 检查一个字符串是否包含k位a进制数的所有表示形式。 保证原字符串的所有字串都是合法的k位a进制数。 &ldquo;00110, a=2, k=2&rdquo; => true （包括了00，01，10，11） Solution First find all &hellip;">
+  <meta name="description" content="Question link Find the substring of length 3 which is present in the reverse order from the string. Ex: if the string is abcdcba (cba is the reverse &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,363 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/09/match-triplet-with-reverse-order/">[Question] Match Triplet With Reverse Order</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/09/match-triplet-with-reverse-order/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/match-triplet-with-reverse-order/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=11655778">link</a></p>
+
+<blockquote><p>Find the substring of length 3 which is present in the reverse order from the string.</p>
+
+<p>Ex: if the string is abcdcba (cba is the reverse of abc) so we should return cba.</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p><strong>HashMap (recommended)</strong>. Hash all substrings of length 3. O(n). Look up all reverse substrings of length 3 in this hash set. O(n) time and O(n) space.</p></li>
+<li><p><strong>KMP Algo</strong>. Take every substring of length 3. Reverse it and find it in the input using KMP. O(n<sup>2</sup>) time and O(1) space.</p></li>
+<li><p><strong>Build suffix tree</strong> of height 3. Then in reverse order, check triplets.</p></li>
+</ol>
+
+
+<p>The 3 solutions above all work well. Pick the one you love.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/09/big-data-top-k-frequency-3/">[Design] Big Data - Top K Frequency 3</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/09/big-data-top-k-frequency-3/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/big-data-top-k-frequency-3/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/a/3262855">link</a></p>
+
+<blockquote><p>The input is an endless stream of English words or phrases (we refer them as tokens).</p>
+
+<p>Output top N tokens we have seen so far (from all the tokens we have seen!)</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>We will discuss the following details of implementation and optimization.</p>
+
+<ol>
+<li>String into Integer</li>
+<li>Data Storage</li>
+<li>Process Incoming Streams</li>
+<li>Save result</li>
+</ol>
+
+
+<h4>1. String into Integer</h4>
+
+<p>This is a nice trick that improves eficiency a lot.</p>
+
+<blockquote><p>Though there is almost infinite possible words on the Internet, but after accumulating a large set of words, the possibility of finding new words becomes lower and lower.</p>
+
+<p>We have already found 4 million different words, and assigned a unique ID for each. This is important, because sorting and comparisons on integers is <strong>much much faster</strong> than on strings.</p></blockquote>
+
+<h4>2. Data Storage</h4>
+
+<blockquote><p>The system keeps archive data for every token. Basically it&rsquo;s pairs of (Token, Frequency).</p>
+
+<p>However, the table that stores the data would be so huge such that we have to partition the table physically. One partition scheme is <strong>based on ngrams</strong> of the token. If the token is a single word, it is 1gram. If the token is two-word phrase, it is 2gram.</p></blockquote>
+
+<p>Of course we can also divide the data by the hash value. For information on <strong>ngrams</strong>, read <strong>[Design] Terminology: n-gram</strong>.</p>
+
+<h4>3. Process Incoming Streams</h4>
+
+<blockquote><p>The system will absorbs incoming sentences until memory becomes fully utilized (Ya, we need a MemoryManager). After taking N sentences and storing in memory, the system pauses, and starts tokenize each sentence into words and phrases. Each token (word or phrase) is counted.</p></blockquote>
+
+<p>This data processing logic runs as a process under Memory-Manager. The next part is another processing running concurrently.</p>
+
+<h4>4. Save result</h4>
+
+<blockquote><p>Meanwhile, there will be another process that is activated once it finds any disk file generated by the system, then start merging it. Since the disk file is sorted, merging would take <strong>a similar process like merge sort</strong>.</p></blockquote>
+
+<p>There is <a href="http://stackoverflow.com/a/3262855">some more steps</a> afterwards, but they&rsquo;re trivial. I have listed out the basic steps for processing large stream of incoming data (as string), and how to find out the Top K keywords.</p>
+
+<p>I suggest you read previous <strong>[Design] Big Data &ndash; Top k Frequency</strong> posts before reading this.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/09/big-data-real-time-top-k/">[Design] Big Data - Real Time Top K</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/09/big-data-real-time-top-k/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/big-data-real-time-top-k/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/10189685/realtime-tracking-of-top-100-twitter-words-per-min-hour-day">link</a></p>
+
+<blockquote><p>Given a continuous twitter feed, design an algorithm to return the 100 most
+frequent words used at this minute, this hour and this day.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>This is a frequent and useful problem for companies like Google and Twitter.</p>
+
+<p>The first solution below is <strong>an approximation method</strong> which select keywords that occur more than a certain threshold.</p>
+
+<p>The second solution is <strong>more accurate</strong> but RAM-intensive.</p>
+
+<h3>Lossy Count</h3>
+
+<p><strong>Solution 1 is a modified version of <a href="http://stackoverflow.com/a/8033083">Lossy Count</a></strong>. The detailed steps are explained <a href="http://stackoverflow.com/a/3260905">here</a>:</p>
+
+<blockquote><p>Start with an empty map (red-black tree). The keys will be search terms, and the values will be a counter for the term.</p>
+
+<ol>
+<li><p>Look at each item in the stream.</p></li>
+<li><p>If the term exists in the map, increment the associated counter.</p></li>
+<li><p>Otherwise, if the map has fewer candidates than you&rsquo;re looking for, add it to the map with a count of one.</p></li>
+<li><p>However, if the map is &ldquo;full&rdquo;, decrement the counter in each entry. If any counter reaches zero during this process, remove it from the map.</p></li>
+</ol>
+</blockquote>
+
+<p><a href="http://www.cse.ust.hk/vldb2002/VLDB2002-proceedings/slides/S10P03slides.pdf">This slide show</a> explains <strong>Lossy Count</strong>, which is to divide input data into chunks. Then count elements and decrease counter by 1 after each chunk.</p>
+
+<p><strong>Note that the result is NOT the top frequency items</strong>. Instead, the final results are <strong>order-dependent</strong>, giving heavier weight to the counts processed last. It maybe helpful in some cases, cuz we want to check the latest trend. However, if we want more accurate top keywords for all data, we will <strong>do a second pass over the log data</strong>.</p>
+
+<p>Now let&rsquo;s discuss the threshold. Use &ldquo;aaabcd&rdquo; and map size = 2 as example. &lsquo;a&rsquo; will be inserted into map with occurance = 3. Then &lsquo;b&rsquo; is inserted, and removed. &lsquo;c&rsquo; is inserted, and removed. &rsquo;d&#8217; is inserted. Since we always decrease 1 at each step, &lsquo;a&rsquo; should only have occurance of 1 at the end. As explained <a href="http://stackoverflow.com/a/3260905">here</a>:</p>
+
+<blockquote><p>If we limit the map to 99 entries, we are guaranteed to find any term that occurs more than 1/(1 + 99) (1%) of the time.</p></blockquote>
+
+<p>We change the size of the map to change the threshold. The occurance of in the final result does not matter.</p>
+
+<h3>Solution 2</h3>
+
+<p>The lossy count does not actually produce the hourly, daily and monthly result accurately. Solution 2 will discuss how we deal with retiring old data in an accurate way.</p>
+
+<p>Suggested by <a href="http://stackoverflow.com/a/3260768">this answer</a>, <strong>we keep a 30-day list for each keyword</strong>, that counts the daily occurance. This list is FIFO. When we remove and insert a new counter value, we update monthly total.</p>
+
+<p>Alaternatively, <a href="http://stackoverflow.com/a/10190836">this answer</a> suggests keeping 1440 (24 * 60) HashMaps, each storing the information for one minute. <strong>And another 2 HashMap for the rolling total for the past hour, and past day</strong>.</p>
+
+<blockquote><p>You need an array of 1440 (24*60) word+count hash maps organized the way that you describe; these are your minute-by-minute counts. You need two additional hash maps &ndash; for the rolling total of the hour and the day.</p>
+
+<p>Define two operations on hash maps &ndash; add and subtract, with the semantic of merging counts of identical words, and removing words when their count drops to zero.</p>
+
+<p>Each minute you start a new hash map, and update counts from the feed. At the end of the minute, you place that hash map into the array for the current minute, add it to the rolling total for the hour and for the day, and then subtract the hash map of an hour ago from the hourly running total, and subtract the hash map of 24 hours ago from the daily running total.</p></blockquote>
+
+<p>This is a very good solution, which I would recommend as the standard solution to this &ldquo;Real Time Top k&rdquo; problem.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/08/number-of-distinct-substrings/">[Google] Number of Distinct Substrings</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/08/number-of-distinct-substrings/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/08/number-of-distinct-substrings/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.quora.com/Given-a-string-how-do-I-find-the-number-of-distinct-substrings-of-the-string">link</a></p>
+
+<blockquote><p>Given a string, find the number of distinct substrings of the string. Example:</p>
+
+<p>input = &ldquo;aaaa&rdquo;,</p>
+
+<p>output = 4 (the 4 substrings are &ldquo;a&rdquo;, &ldquo;aa&rdquo;, &ldquo;aaa&rdquo;, &ldquo;aaaa&rdquo;)</p>
+
+<p>input = &ldquo;abcd&rdquo;,</p>
+
+<p>output = 10 (&ldquo;a&rdquo;, &ldquo;b&rdquo;, &ldquo;c&rdquo;, &ldquo;d&rdquo;, &ldquo;ab&rdquo;, &ldquo;bc&rdquo;, &ldquo;cd&rdquo;, &ldquo;abc&rdquo;, &ldquo;bcd&rdquo;, &ldquo;abcd&rdquo;)</p>
+
+<p>input = &ldquo;banana&rdquo;,</p>
+
+<p>output = 15 (&ldquo;a&rdquo;, &ldquo;an&rdquo;, &ldquo;ana&rdquo;, &ldquo;anan&rdquo;, &ldquo;anana&rdquo;, &ldquo;b&rdquo;, &ldquo;ba&rdquo;, &ldquo;ban&rdquo;, &ldquo;bana&rdquo;, &ldquo;banan&rdquo;, &ldquo;banana&rdquo;, &ldquo;n&rdquo;, &ldquo;na&rdquo;, &ldquo;nan&rdquo;, &ldquo;nana&rdquo;)</p></blockquote>
+
+<p>This is also a question on <a href="http://www.spoj.com/problems/DISUBSTR/">SPOJ</a>.</p>
+
+<h3>Solution</h3>
+
+<p>This is a very good question, which tests Suffix tree, LCP and string manipulation knowledges.</p>
+
+<p><strong>The solution is to build a suffix tree</strong>. This is because:</p>
+
+<blockquote><p>If you look through the <strong><a href="http://qr.ae/6o6Nk">prefixes of each suffix</a></strong> of a string, you have covered all substrings of that string.</p></blockquote>
+
+<p>There are 2 implementations. First one is slightly simpler.</p>
+
+<h4>Implementation 1</h4>
+
+<p><strong>Suffix array + LCP</strong> (longest common prefix). Take &ldquo;Banana&rdquo; as input, then the suffixes:</p>
+
+<pre><code>0) BANANA
+1) ANANA
+2) NANA
+3) ANA
+4) NA
+5) A
+</code></pre>
+
+<p>Sort it:</p>
+
+<pre><code>5) A
+3) ANA
+1) ANANA
+0) BANANA
+4) NA
+2) NANA
+</code></pre>
+
+<p>Then we start calculate number of substring (that is prefixes of suffix). After removing duplicated prefix, the count is:</p>
+
+<pre><code>5) A - 1
+3) ANA - 2
+1) ANANA - 2
+0) BANANA - 6
+4) NA - 2
+2) NANA - 2
+</code></pre>
+
+<p>Total number is:</p>
+
+<pre><code>1 + 2 + 2 + 6 + 2 + 2 = 15
+</code></pre>
+
+<p>But wait, realize something? &ldquo;A&rdquo; is simply duplicate substring in &ldquo;ANA&rdquo;, which appers in &ldquo;ANANA&rdquo;. Keep this in mind, cuz we need to observe this in the 2nd implementation, too.</p>
+
+<p>Finally, the total number is calculated like this:</p>
+
+<pre><code>for each suffix
+    ans += length(suffix) - LCP(suffix, previous suffix)
+</code></pre>
+
+<p>For more details, read <a href="http://qr.ae/6o6Nk">here</a>.</p>
+
+<h4>Implementation 2</h4>
+
+<p>Build a suffix tree, like this:</p>
+
+<p><img class="middle" src="/assets/images/suffix-tree-banana.png"></p>
+
+<p>Number of substrings is simply the <strong>sum of levels of each leaf</strong>. For the 3 branches of the suffix tree, number of levels are: 6, 5 and 4 respectively. Total = 15.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -788,519 +1145,6 @@ private int findNextJob(Job[] jobs, int k) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/06/Json-prettifier/">[Facebook] Write a Json Prettifier</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/06/Json-prettifier/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/06/Json-prettifier/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Write-a-function-to-prettify-Json-objects-QTN_151361.htm">link</a></p>
-
-<p>Input:</p>
-
-<pre><code>{"firstName":"John","lastName":"Smith","isAlive":true,"age" :25,"height_cm":167.6,"address":{"streetAddress":"212ndStre et","city":"NewYork","state":"NY","postalCode":"10021-3100" },"phoneNumbers":[{"type":"home","number":"212555-1234"},{" type":"office","number":"646555-4567"}],"children":[],"spou se":null}
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>{
-  "firstName": "John",
-  "lastName": "Smith",
-  "isAlive": true,
-  "age": 25,
-  "height_cm": 167.6,
-  "address": {
-    "streetAddress": "21 2nd Street",
-    "city": "New York",
-    "state": "NY",
-    "postalCode": "10021-3100"
-  },
-  "phoneNumbers": [
-    {
-      "type": "home",
-      "number": "212 555-1234"
-    },
-    {
-      "type": "office",
-      "number": "646 555-4567"
-    }
-  ],
-  "children": [],
-  "spouse": null
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Since I did not find anything useful online, I spent an hour writing the following code. These are the things to take into consideration:</p>
-
-<ol>
-<li><p><strong>Line break</strong> after a comma, a left bracket, or prior to a right bracket. A special pattern is &ldquo;},&rdquo; &ndash; we only do line break once after the comma.</p></li>
-<li><p><strong>Indentation</strong> is important. It&rsquo;s a little complex cuz we reduce indentation <strong>BEFORE</strong> printing out a right bracket, but increase indentation <strong>AFTER the left bracket</strong>.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>public void prettify(String input) throws Exception {
-
-    // observation the rules for Json format:
-    // 1. each line end with either a { , or }
-    // 2. indentation depends on number of brackets
-    int len = input.length();
-    int left = 0;
-    int right = 0;
-    int tab = 0;
-
-    while (left &lt; len) {
-        // first, advance right pointer to the next line break point
-        while (right &lt; len) {
-            if (input.charAt(right) == '}' || input.charAt(right) == ']') {
-                // first case, if point to a closing bracket
-                tab--;
-                // indentation should change right away should we find a
-                // closing bracket
-                if (right + 1 &lt; len &amp;&amp; input.charAt(right + 1) != ',') {
-                    break;
-                }
-            } else if (input.charAt(right) == ','
-                    || input.charAt(right) == '{'
-                    || input.charAt(right) == '[') {
-                // second case, break at , or {
-                break;
-            } else if (right + 1 &lt; len
-                    &amp;&amp; (input.charAt(right + 1) == '}' || input
-                            .charAt(right + 1) == ']')) {
-                // third case, break prior to }
-                // we need not swap the order of first and third case,
-                // because when we found a closing bracket, we need to
-                // change indentation right away
-                break;
-            }
-            right++;
-        }
-
-        // now print the chars from left pointer to right inclusively
-        if (right == len) {
-            // end of input
-            if (tab != 0) {
-                throw new Exception("Json format error!");
-            }
-            right--;
-            // this is for the convenience of printing last line
-        }
-        printIndentation(tab);
-        System.out.println(input.substring(left, right + 1));
-        if (input.charAt(right) == '{' || input.charAt(right) == '[') {
-            tab++;
-        }
-
-        // last, update pointers
-        left = ++right;
-    }
-}
-
-private void printIndentation(int tab) {
-    for (int i = 0; i &lt; tab; i++) {
-        System.out.print("    ");
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/27/database-indexing/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/27/database-indexing/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://stackoverflow.com/a/1130">ref 1</a> <a href="http://www.interspire.com/content/2006/02/15/introduction-to-database-indexes/">ref 2</a></p>
-
-<h3>Why Indexing?</h3>
-
-<p>In database disks (we&rsquo;re talking about disk-based storage devices), data is stored as blocks. These blocks are accessed atomically. It&rsquo;s like a linked list with pointers to the blocks.</p>
-
-<p>Because of this, searching in database is linear time. That&rsquo;s why we need indexing.</p>
-
-<p><strong>Indexing is a way of sorting a number of records on multiple fields</strong>. Creating an index on a field in a table creates another data structure which holds the field value, and pointer to the record it relates to. This index structure is then sorted, allowing Binary Searches to be performed on it.</p>
-
-<p>In other words, indexing speed up search.</p>
-
-<h3>Downside</h3>
-
-<p>First disadvantage is <strong>the additional space usage</strong>. For example, in MyISAM engine, indexes are stored together with the data in one table. So the indexing files can quickly reach the size limits if many fields are indexed.</p>
-
-<p>Second disadvantage is that <strong>using too many indexes can actually slow your database down</strong>. Each time a page or database row is updated or removed, the reference or index also has to be updated.</p>
-
-<p>So indexes speed up finding data, but slow down inserting, updating or deleting data.</p>
-
-<h3>Primary keys</h3>
-
-<p><strong>Some fields are automatically indexed</strong>.</p>
-
-<p>A primary key or a field marked as ‘unique’ – for example an email address, a userid or a social security number – are <strong>automatically indexed</strong> so the database can quickly check to make sure that you’re not going to introduce bad data.</p>
-
-<h3>When to use</h3>
-
-<p>Since indexes are <strong>only</strong> used to speed up the searching, it&rsquo;s not wise to have indexing used only for output.</p>
-
-<p><strong>The general rule</strong> is, anything that is used to limit the number of results you’re trying to find. For more details, read <a href="http://www.interspire.com/content/2006/02/15/introduction-to-database-indexes/">ref 2</a>.</p>
-
-<h3>How to create index</h3>
-
-<p><a href="http://stackoverflow.com/a/1157">The following</a> is SQL92 standard that&rsquo;s supported by major RDMBSs:</p>
-
-<pre><code>CREATE INDEX [index name] ON [table name] ( [column name] )
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/23/Java-runtime-exception/">[Java OOP] Java Runtime Exception</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/23/Java-runtime-exception/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/23/Java-runtime-exception/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Exceptions in Java</h3>
-
-<p>In Java, there are <a href="http://www.tutorialspoint.com/java/java_exceptions.htm">3 categories of exceptions</a>:</p>
-
-<ol>
-<li><p>checked exceptions</p>
-
-<ol>
-<li>Typically a user error</li>
-<li>eg. if a file cannot be found.</li>
-<li>These exceptions cannot simply be ignored at the time of compilation.</li>
-</ol>
-</li>
-<li><p>runtime exceptions (also called un-checked exceptions)</p>
-
-<ol>
-<li>exception that could have been avoided by the programmer</li>
-<li>eg. NullPointerException</li>
-<li>ignored at the time of compilation</li>
-</ol>
-</li>
-<li><p>error</p>
-
-<ol>
-<li>These are not exceptions at all</li>
-<li>eg. stack overflow occurs</li>
-<li>also ignored at the time of compilation</li>
-</ol>
-</li>
-</ol>
-
-
-<h4>1. checked exception</h4>
-
-<p><a href="http://stackoverflow.com/a/2190175">A checked exception</a> <strong>must be handled explicitly</strong> by the code (by either putting a try/catch block around the code, or adding a &ldquo;throws&rdquo; clause to the method).</p>
-
-<p>The <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html">class Exception</a> and any subclasses that are not also subclasses of RuntimeException are <strong>checked exceptions</strong>. Example:</p>
-
-<ol>
-<li>FileNotFoundException</li>
-<li>HttpRetryException</li>
-<li>SocketException</li>
-<li>IOException</li>
-</ol>
-
-
-<p>Note: <strong>java.lang.RuntimeException</strong> is a subclass of <strong>java.lang.Exception</strong>.</p>
-
-<h4>2. un-checked exceptions (RuntimeException)</h4>
-
-<p>A un-checked exception <strong>does not need</strong> to be explicitly handled.</p>
-
-<p><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/RuntimeException.html">RuntimeException</a> and its subclasses are <strong>unchecked exceptions</strong>.</p>
-
-<p><a href="http://stackoverflow.com/a/2190177">Generally</a> RuntimeExceptions <strong>can be prevented</strong> programmatically. E.g NullPointerException, ArrayIndexOutOfBoundException. If you check for null before calling any method, NullPointerException would never occur. Similarly ArrayIndexOutOfBoundException would never occur if you check the index first. RuntimeException are not checked by the compiler, so it is clean code.</p>
-
-<p>The runtime exception classes <strong><a href="http://stackoverflow.com/a/2190659">are exempted</a> from compile-time checking</strong>, since the compiler cannot establish that run-time exceptions cannot occur.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/23/Endless-error-gem-dependencies/">[Ruby] Endless Error With Gem Dependencies</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/23/Endless-error-gem-dependencies/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/23/Endless-error-gem-dependencies/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>The problem</h3>
-
-<p>In setting up the octopress environment, we need to install dependencies like this:</p>
-
-<pre><code>gem install bundler
-bundle install
-</code></pre>
-
-<p>First line simply installs bundler (a Ruby dependency manager). The second line is where you might face problems:</p>
-
-<blockquote><p>bundle install</p>
-
-<p><a href="http://bundler.io/man/bundle-install.1.html">Install the dependencies</a> specified in your Gemfile</p></blockquote>
-
-<p>Look at the Gemfile in your octopress folder, it looks like <a href="https://github.com/imathis/octopress/blob/master/Gemfile">this</a>:</p>
-
-<pre><code>source "https://rubygems.org"
-
-group :development do
-  gem 'rake', '~&gt; 10.0'
-  gem 'jekyll', '~&gt; 2.0'
-  gem 'octopress-hooks', '~&gt; 2.2'
-  gem 'octopress-date-format', '~&gt; 2.0'
-  gem 'jekyll-sitemap'
-  gem 'rdiscount', '~&gt; 2.0'
-  gem 'RedCloth', '~&gt; 4.2.9'
-  gem 'haml', '~&gt; 4.0'
-  gem 'compass', '~&gt; 1.0.1'
-  gem 'sass-globbing', '~&gt; 1.0.0'
-  gem 'rubypants', '~&gt; 0.2.0'
-  gem 'rb-fsevent', '~&gt; 0.9'
-  gem 'stringex', '~&gt; 1.4.0'
-end
-
-gem 'sinatra', '~&gt; 1.4.2'
-</code></pre>
-
-<p>When I do &lsquo;bundle install&rsquo;:</p>
-
-<pre><code>$ bundle install
-Fetching gem metadata from https://rubygems.org/........
-Resolving dependencies...
-
-Gem::RemoteFetcher::FetchError: SSL_connect returned=1 errno=0 state=SSLv3 read
-server certificate B: certificate verify failed (https://rubygems.org/gems/rake-
-10.4.2.gem)
-An error occurred while installing rake (10.4.2), and Bundler cannot continue.
-Make sure that `gem install rake -v '10.4.2'` succeeds before bundling.
-</code></pre>
-
-<p>It shows the gem &lsquo;rake&rsquo; is missing. So I did as I was instrcucted to. I type <strong>gem install rake -v &lsquo;10.4.2&rsquo;</strong> into command line, and execute. Again, I was told another gem missing. I kept doing this, until I found this is an endless procedure:</p>
-
-<pre><code>$ bundle install
-Fetching gem metadata from https://rubygems.org/.......
-Using rake 10.3.2
-Using RedCloth 4.2.9
-Using blankslate 2.1.2.4
-
-Gem::RemoteFetcher::FetchError: SSL_connect returned=1 errno=0 state=SSLv3 read
-server certificate B: certificate verify failed (https://rubygems.org/gems/timer
-s-1.1.0.gem)
-An error occurred while installing timers (1.1.0), and Bundler cannot continue.
-Make sure that `gem install timers -v '1.1.0'` succeeds before bundling.
-</code></pre>
-
-<p>Something is very wrong with the execution of &lsquo;bundle install&rsquo;.</p>
-
-<h3>The solution</h3>
-
-<p>Until I found <a href="http://stackoverflow.com/questions/15529451/octopress-installation-stops-during-bundle-install">this post</a>, I was hopelessly searching and learning Ruby gems and related things.</p>
-
-<p>I fact, I just deleted 1 letter by changing <strong>source &ldquo;<a href="https://rubygems.org">https://rubygems.org</a>&rdquo;</strong> to <strong>source &ldquo;<a href="http://rubygems.org">http://rubygems.org</a>&rdquo;</strong> at line 1 of Gemfile in octopress folder.</p>
-
-<p>Then, everything is fine:</p>
-
-<pre><code>$ bundle install
-Fetching gem metadata from http://rubygems.org/........
-Resolving dependencies....
-Installing rake 10.4.2
-Using RedCloth 4.2.9
-Using blankslate 2.1.2.4
-Installing hitimes 1.2.2
-Installing timers 4.0.1
-Installing celluloid 0.16.0
-Installing chunky_png 1.3.3
-Installing fast-stemmer 1.0.2
-Installing classifier-reborn 2.0.2
-Installing coffee-script-source 1.8.0
-Installing execjs 2.2.2
-Installing coffee-script 2.3.0
-Installing colorator 0.1
-Installing multi_json 1.10.1
-Installing sass 3.4.9
-Installing compass-core 1.0.1
-Installing compass-import-once 1.0.5
-Installing rb-fsevent 0.9.4
-Installing ffi 1.9.6
-Installing rb-inotify 0.9.5
-Installing compass 1.0.1
-Installing tilt 1.4.1
-Installing haml 4.0.6
-Installing jekyll-coffeescript 1.0.1
-Installing jekyll-gist 1.1.0
-Installing jekyll-paginate 1.1.0
-Installing jekyll-sass-converter 1.3.0
-Installing listen 2.8.4
-Installing jekyll-watch 1.2.0
-Installing kramdown 1.5.0
-Installing liquid 2.6.1
-Installing mercenary 0.3.5
-Installing posix-spawn 0.3.9
-Installing yajl-ruby 1.1.0
-Installing pygments.rb 0.6.0
-Installing redcarpet 3.2.2
-Installing safe_yaml 1.0.4
-Installing parslet 1.5.0
-Installing toml 0.1.2
-Installing jekyll 2.5.3
-Installing jekyll-sitemap 0.7.0
-Installing octopress-hooks 2.2.3
-Installing octopress-date-format 2.0.2
-Installing rack 1.6.0
-Installing rack-protection 1.5.3
-Installing rdiscount 2.1.7.1
-Installing rubypants 0.2.0
-Installing sass-globbing 1.0.0
-Installing sinatra 1.4.5
-Installing stringex 1.4.0
-Using bundler 1.7.9
-Your bundle is complete!
-Use `bundle show [gemname]` to see where a bundled gem is installed.
-Post-install message from compass:
-    Compass is charityware. If you love it, please donate on our behalf at http:
-//umdf.org/compass Thanks!
-Post-install message from haml:
-
-HEADS UP! Haml 4.0 has many improvements, but also has changes that may break
-your application:
-
-* Support for Ruby 1.8.6 dropped
-* Support for Rails 2 dropped
-* Sass filter now always outputs &lt;style&gt; tags
-* Data attributes are now hyphenated, not underscored
-* html2haml utility moved to the html2haml gem
-* Textile and Maruku filters moved to the haml-contrib gem
-
-For more info see:
-
-http://rubydoc.info/github/haml/haml/file/CHANGELOG.md
-</code></pre>
-
-<p>I guess this is because my network security settings, but I do not know. If you are facing the same issue, I hope my solution helped. Or if you know the reason, please tell me by leaving a comment below. Thanks!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1322,13 +1166,13 @@ http://rubydoc.info/github/haml/haml/file/CHANGELOG.md
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (40)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (42)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (90)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (92)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1340,23 +1184,23 @@ http://rubydoc.info/github/haml/haml/file/CHANGELOG.md
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/11/numer-of-occurrence-given-subsequence/">[Question] Number of Occurence of Given Sub-sequence</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/numer-of-distinct-subsequence/">[Question] Number of Distinct Sub-sequence</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/max-count-array-in-queue/">[Google] Maximum Count Array in a Queue</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/form-queue-given-heights/">[Google] Form a Queue Given Heights</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a>
       </li>
     
   </ul>

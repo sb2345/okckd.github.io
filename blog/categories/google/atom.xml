@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Google | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-10T19:36:19+08:00</updated>
+  <updated>2015-01-11T19:01:38+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,159 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Crazy Distance Between Strings]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/11/crazy-distance-string/"/>
+    <updated>2015-01-11T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/11/crazy-distance-string</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://stackoverflow.com/questions/15061908/google-interview-find-crazy-distance-between-strings)
+
+> X and Y are strings formed by 0 or 1. Distance is define as: 
+
+    D(X,Y) = Remove chars common at the start from both X & Y. 
+    Then add the remaining lengths from both the strings.
+
+> For e.g.
+
+    D(1111, 1000) = Only First alphabet is common. So the remaining string is 111 & 000. Therefore the result length("111") & length("000") = 3 + 3 = 6
+
+> For e.g.
+
+    D(0101, 01100) = Only First two alphabets are common. So the remaining string is 01 & 100. Therefore the result length("01") & length("100") = 2 + 3 = 5
+
+> Now given n input, say like
+
+    1111
+    1000
+    101
+    1100
+
+> Find out the maximum crazy distance between 2 strings.
+
+> __n is__ the number of input strings. __m is__ the max length of any input string. 
+
+### Solution
+
+This is the [source](http://stackoverflow.com/a/15062640). 
+
+> Put the strings into a tree, where 0 means go left and 1 means go right. __O(m*n) time__. 
+
+Example: 
+
+                Root
+                 1
+              0      1
+             0 1*   0  1
+            0*     0*    1*
+
+> where the * means that an element ends there. Constructing this tree clearly takes O(n m).
+
+> Now we have to find __the diameter of the tree__ (the longest path between two nodes). 
+
+How to find out longest path between 2 leaf nodes? Please refer to __[Google] Diameter of a Binary Tree__ for explanation.  
+
+Total time complexity is __O(m*n) time__.
+
+### Code
+
+	public int crazyDist(String[] input) {
+		TreeNode root = this.buildTree(input);
+		return this.findMaxPath(root).path - 1;
+	}
+
+	private Result findMaxPath(TreeNode node) {
+		if (node == null) {
+			return new Result(Integer.MIN_VALUE, 0);
+		}
+		Result lr = this.findMaxPath(node.left);
+		Result rr = this.findMaxPath(node.right);
+		int path = Math.max(lr.path, rr.path);
+		if (lr.depth != 0 && rr.depth != 0) {
+			// this check is important, because if any of the child node is
+			// NULL, this root will not be eligible for computing the path
+			path = Math.max(path, lr.depth + rr.depth + 1);
+			// Why? cuz diameter must go from one leaf, thru root, and reach
+			// another leaf. This is different from "Maximum Path Sum" leetcode
+		}
+		return new Result(path, 1 + Math.max(lr.depth, rr.depth));
+	}
+
+	private TreeNode buildTree(String[] input) {
+		TreeNode root = new TreeNode(123);
+		// share a common root. this root is deducted from the final calculation
+		for (String str : input) {
+			// insert str under the root
+			TreeNode p = root;
+			for (char c : str.toCharArray()) {
+				if (c == '0') {
+					if (p.left == null) {
+						p.left = new TreeNode(124);
+						// if 0, go to left; otherwise go to right
+						// thus value of TreeNodes does not really matter
+					}
+					p = p.left;
+				} else {
+					if (p.right == null) {
+						p.right = new TreeNode(125);
+					}
+					p = p.right;
+				}
+			}
+		}
+		return root;
+	}
+
+	class Result {
+		int path;
+		int depth;
+
+		public Result(int a, int b) {
+			path = a;
+			depth = b;
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Diameter of a Binary Tree]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/11/Diameter-of-Binary-Tree/"/>
+    <updated>2015-01-11T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/11/Diameter-of-Binary-Tree</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.geeksforgeeks.org/diameter-of-a-binary-tree/)
+
+> The diameter of a tree (sometimes called the width) is the number of nodes on the longest path between two leaves in the tree. 
+
+<img class="middle" src="/assets/images/tree-diameter-1.gif">
+
+### Solution
+
+This is a similar question to __[LeetCode 124] Binary Tree Maximum Path Sum__. __However there's a significant difference__ which might be overlooked while coding. 
+
+Look at this example: 
+
+         0
+           1
+            1
+           0  1
+               1
+
+If we only want to find the max path, that would return result of 5, which is root-to-rightmost-leaf. However, the diameter should be 4, which is the distance between 2 leaf nodes. 
+
+A solution is available for reading [here](http://stackoverflow.com/a/3124575). 
+
+For __[Google] Crazy Distance Between Strings__, there is another special case: {"1", "11", "10"}. The program will not output correct result (1), because this is not really the diameter of a tree, but instead, a max path from a non-leaf to a leaf. I leave this part for you to finish. 
+
+### Code
+
+Refer to __[Google] Crazy Distance Between Strings__ for complete code. 
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Reverse a Stack Without DS]]></title>
@@ -155,132 +308,6 @@ Naive approach, O(n^2):
 		}
 		return heightQueue;
 	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Number of Distinct Substrings]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/08/number-of-distinct-substrings/"/>
-    <updated>2015-01-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/08/number-of-distinct-substrings</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.quora.com/Given-a-string-how-do-I-find-the-number-of-distinct-substrings-of-the-string)
-
-> Given a string, find the number of distinct substrings of the string. Example:
-
->input = "aaaa", 
->
->output = 4 (the 4 substrings are "a", "aa", "aaa", "aaaa")
-
->input = "abcd", 
->
->output = 10 ("a", "b", "c", "d", "ab", "bc", "cd", "abc", "bcd", "abcd")
-
->input = "banana", 
->
->output = 15 ("a", "an", "ana", "anan", "anana", "b", "ba", "ban", "bana", "banan", "banana", "n", "na", "nan", "nana")
-
-This is also a question on [SPOJ](http://www.spoj.com/problems/DISUBSTR/). 
-
-### Solution
-
-This is a very good question, which tests Suffix tree, LCP and string manipulation knowledges. 
-
-__The solution is to build a suffix tree__. This is because: 
-
-> If you look through the __[prefixes of each suffix](http://qr.ae/6o6Nk)__ of a string, you have covered all substrings of that string. 
-
-There are 2 implementations. First one is slightly simpler. 
-
-#### Implementation 1
-
-__Suffix array + LCP__ (longest common prefix). Take "Banana" as input, then the suffixes: 
-
-    0) BANANA
-    1) ANANA
-    2) NANA
-    3) ANA
-    4) NA
-    5) A
-
-Sort it: 
-
-    5) A
-    3) ANA
-    1) ANANA
-    0) BANANA
-    4) NA
-    2) NANA
-
-Then we start calculate number of substring (that is prefixes of suffix). After removing duplicated prefix, the count is: 
-
-    5) A - 1
-    3) ANA - 2
-    1) ANANA - 2
-    0) BANANA - 6
-    4) NA - 2
-    2) NANA - 2
-
-Total number is: 
-
-    1 + 2 + 2 + 6 + 2 + 2 = 15
-
-But wait, realize something? "A" is simply duplicate substring in "ANA", which appers in "ANANA". Keep this in mind, cuz we need to observe this in the 2nd implementation, too.
-
-Finally, the total number is calculated like this: 
-
-    for each suffix
-        ans += length(suffix) - LCP(suffix, previous suffix)
-
-For more details, read [here](http://qr.ae/6o6Nk).
-
-#### Implementation 2
-
-Build a suffix tree, like this: 
-
-<img class="middle" src="/assets/images/suffix-tree-banana.png">
-
-Number of substrings is simply the __sum of levels of each leaf__. For the 3 branches of the suffix tree, number of levels are: 6, 5 and 4 respectively. Total = 15. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Check All Numbers Given the Decimal Scale]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/08/all-number-given-decimal-scale/"/>
-    <updated>2015-01-08T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/08/all-number-given-decimal-scale</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.mitbbs.com/article_t/JobHunting/32859887.html)
-
-> 检查一个字符串是否包含k位a进制数的所有表示形式。
-
-> 保证原字符串的所有字串都是合法的k位a进制数。
-
-> "00110, a=2, k=2" => true （包括了00，01，10，11）
-
-### Solution
-
-First find all substrings with length == k, then generate all numbers in a scale. This is not a difficult question. 
-
-We may want to score the substrings in a HashMap/HashSet. __The hashing procedure is preferrably using [Rolling hash](http://en.wikipedia.org/wiki/Rolling_hash)__. 
-
-> Rolling Hash
-
-> A rolling hash is a hash function where the input is hashed in a window that moves through the input.
-
-> A few hash functions allow a rolling hash to be computed very quickly—the new hash value is rapidly calculated given only the old hash value, the old value removed from the window, and the new value added to the window—similar to the way a moving average function can be computed much more quickly than other low-pass filters.
-
-The people in the origin post - they discuss about "__slide window check__" algorithm. I do not understand what's the benefit of this. If you read this and would like to help me, please leave a comment. Thanks! 
-
-### A similar question
-
-[This](http://www.mitbbs.com/article_t/JobHunting/32860321.html) is simply the reverse of the question above: 
-
-> 给出最短的字符串, which is used to 表示k位a进制数的所有表示形式. 
-
-This question is solved using __[De Bruijn sequence](http://en.wikipedia.org/wiki/De_Bruijn_sequence)__. 
 ]]></content>
   </entry>
   
