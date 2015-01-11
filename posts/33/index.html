@@ -9,8 +9,8 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a linked list, return the node where the cycle begins. If there is no cycle, return null. Follow up:
-Can you solve it without &hellip;">
+  <meta name="description" content="Question link Given a binary tree, return the postorder traversal of its nodes&#8217; values. For example:
+Given binary tree {1,#,2,3}, 1 \ 2 / 3 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +79,636 @@ Can you solve it without &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">[LeetCode 145] Binary Tree Postorder Traversal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-postorder-traversal/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">Given a binary tree, return the <i>postorder</i> traversal of its nodes&#8217; values.</p>
+
+<p class="font-color">
+For example:<br>
+Given binary tree <code>{1,#,2,3}</code>,<br>
+</p><pre>   1
+    \
+     2
+    /
+   3
+</pre>
+<p class="font-color"></p>
+<p class="font-color">
+return <code>[3,2,1]</code>.
+</p>
+
+<p class="font-color"><b>Note:</b> Recursive solution is trivial, could you do it iteratively?</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>Unlike pre-order traversal, <strong>this is a very difficult question</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>First, I wrote the solution using a HashSet, and it works</strong>. However, this solution is not good because it uses some space.
+For more generalized way to write DFS code, read another post <strong>Implement DFS using a Stack</strong>.</p>
+
+<p><strong>The best and most popular solution is proposed by <a href="http://leetcode.com/2010/10/binary-tree-post-order-traversal.html">1337c0d3r</a></strong>. It basically uses 1 more pointer to track the current status (whether I&rsquo;m traversing down, or up, and in which direction etc.). The extra pointer is called &lsquo;prev&rsquo;.</p>
+
+<blockquote><p>We use a prev variable to keep track of the previously-traversed node. Let’s assume curr is the current node that’s on top of the stack. When prev is curr‘s parent, we are traversing down the tree. In this case, we try to traverse to curr‘s left child if available (ie, push left child to the stack). If it is not available, we look at curr‘s right child. If both left and right child do not exist (ie, curr is a leaf node), we print curr‘s value and pop it off the stack.</p>
+
+<p>If prev is curr‘s left child, we are traversing up the tree from the left. We look at curr‘s right child. If it is available, then traverse down the right child (ie, push right child to the stack), otherwise print curr‘s value and pop it off the stack.</p>
+
+<p>If prev is curr‘s right child, we are traversing up the tree from the right. In this case, we print curr‘s value and pop it off the stack.</p></blockquote>
+
+<p>Referring to his code, I wrote the 2nd piece of code below and it works.</p>
+
+<p><strong>Amazingly, that code can be simplified, which becomes the 3rd code</strong> (I thought it won&rsquo;t pass at first). The way that code got simplified is by keeping current pointer steady, so that the 2 pointers can meet. Altough program logic is exactly same, this interesting code is worth reading.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, my solution using HashSet</strong></p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    if (root != null) stack.push(root);
+    HashSet&lt;TreeNode&gt; visited = new HashSet&lt;TreeNode&gt;();
+    while (!stack.isEmpty()) {
+        TreeNode cur = stack.pop();
+        if (visited.contains(cur))
+            ans.add(cur.val);
+        else {
+            stack.push(cur);
+            visited.add(cur);
+            if (cur.right != null) stack.push(cur.right);
+            if (cur.left != null) stack.push(cur.left);
+        }
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Second, using 2 pointers</strong></p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
+    if (root == null) {
+        return ans;
+    }
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    stack.push(root);
+    TreeNode pre = null, cur = null;
+    while (!stack.isEmpty()) {
+        cur = stack.peek();
+        if (pre == null || pre.left == cur || pre.right == cur) {
+            if (cur.left == null &amp;&amp; cur.right == null) {
+                ans.add(stack.pop().val);
+            }
+            else if (cur.left != null) {
+                stack.push(cur.left);
+            }
+            else if (cur.right != null) {
+                stack.push(cur.right);
+            }
+        }
+        else if (cur.left == pre) {
+            if (cur.right != null) {
+                stack.push(cur.right);
+            }
+            else {
+                ans.add(stack.pop().val);
+            }
+        }
+        else if (cur.right == pre) {
+            ans.add(stack.pop().val);
+        }
+        pre = cur;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Third, simplified version of 2nd code</strong></p>
+
+<p><strong>Commented on June 10th</strong>: Note that &lsquo;pre&rsquo; and &lsquo;cur&rsquo; are never going to be apart for more then 1 edge (they can overlap)</p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    TreeNode prev = null; // previously traversed node
+    TreeNode curr = root;
+    if (root == null) {
+        return result;
+    }
+    stack.push(root);
+    while (!stack.empty()) {
+        curr = stack.peek();
+        if (prev == null || prev.left == curr || prev.right == curr) {
+        // traverse down the tree
+            if (curr.left != null) {
+                stack.push(curr.left);
+            } else if (curr.right != null) {
+                stack.push(curr.right);
+            }
+        } else if (curr.left == prev) {
+        // traverse up the tree from the left
+            if (curr.right != null) {
+                stack.push(curr.right);
+            }
+        } else if (curr.right == prev || curr == prev){
+        // traverse up the tree from the right
+        // or at a leaf point
+            result.add(curr.val);
+            stack.pop();
+        }
+        prev = curr;
+    }
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Big-endian-little-endian/">[Design] Big Endian and Little Endian</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/03/Big-endian-little-endian/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Big-endian-little-endian/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Difference</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Endianness">Big-endian</a> systems store the most significant byte of a word in the smallest address</strong> and the least significant byte is stored in the largest address.</p>
+
+<p><strong>Little-endian systems, in contrast, store the least significant byte in the smallest address</strong>.</p>
+
+<p>Both forms of endianness are in widespread use in computing and networking.</p>
+
+<h3>Example</h3>
+
+<p><img class="middle" src="/assets/images/big-endian.png"></p>
+
+<p>The data word &ldquo;0A 0B 0C 0D&rdquo; (a set of 4 bytes written out using left-to-right positional, hexadecimal notation) and the four memory locations with addresses a, a+1, a+2 and a+3.</p>
+
+<p>In Big-endian systems, byte 0A is stored in a, 0B in a+1, 0C in a+2 and 0D in a+3. In Little-endian systems, the order is reversed with 0D stored in memory address a, 0C in a+1, 0B in a+2, and 0A in a+3.</p>
+
+<h3>Why ?</h3>
+
+<p>IBMs and Intel x86 are little endian, while Motorolas and Sun are big endian.</p>
+
+<p><strong>Big-endian</strong> is the most common convention in data <strong>networking (including IPv6)</strong>, and <strong>little-endian</strong> is popular among <strong>microprocessors</strong> in part due to Intel.</p>
+
+<p>Why is endianness so important? Suppose you are storing int values to a file, then you send the file to a machine which uses the opposite endianness and read in the value. You&rsquo;ll run into problems because of endianness. You&rsquo;ll read in reversed values that won&rsquo;t make sense.</p>
+
+<p>Endianness is also a big issue when sending numbers over the network. Again, if you send a value from a machine of one endianness to a machine of the opposite endianness, you&rsquo;ll have problems. This is even worse over the network, because you might not be able to determine the endianness of the machine that sent you the data.</p>
+
+<p>The solution is to send 4 byte quantities using <a href="http://www.tutorialspoint.com/unix_sockets/network_byte_orders.htm">network byte order</a> which is arbitrarily picked to be one of the endianness (not sure if it&rsquo;s big or little, but it&rsquo;s one of them). If your machine has the same endianness as network byte order, then great, no change is needed. If not, then you must reverse the bytes.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/02/Word-Break-II/">[LeetCode 140] Word Break II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/02/Word-Break-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Word-Break-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/word-break-ii/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">
+Given a string <i>s</i> and a dictionary of words <i>dict</i>, add spaces in <i>s</i> to construct a sentence where each word is a valid dictionary word.
+</p>
+
+<p class="font-color">
+Return all such possible sentences.
+</p>
+
+<p class="font-color">
+For example, given<br>
+<i>s</i> = <code>"catsanddog"</code>,<br>
+<i>dict</i> = <code>["cat", "cats", "and", "sand", "dog"]</code>.
+</p>
+
+<p class="font-color">
+A solution is <code>["cats and dog", "cat sand dog"]</code>.
+</p>
+<p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a tough question</strong>. Standard DFS search would work, but we need to check &lsquo;breakable&rsquo; first. Otherwise, I got TLE.</p>
+
+<p><strong>Check breakable is a easy DP</strong>, and we do not need to remove any elements from the dictionary. (Word ladder needs remove elements from dictionary, don&rsquo;t confuse them).</p>
+
+<h3>Solution</h3>
+
+<p><strong>Updated on July 4th, 2014</strong>. The DFS code actually standard, but keep in mind to check breakable first (using DP).</p>
+
+<h3>Code</h3>
+
+<p><strong>DFS with pruning and DP breakable check</strong>, with the again-updated code on Sep 12th, 2014.</p>
+
+<pre><code>public List&lt;String&gt; wordBreak(String s, Set&lt;String&gt; dict) {
+    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    if (s == null || s.length() == 0 || dict == null) {
+        return ans;
+    } else if (!canBreak(s, dict)) {
+        return ans;
+    }
+    helper(ans, "", s, 0, dict);
+    return ans;
+}
+
+private void helper(List&lt;String&gt; ans, String str, String s, int pos, Set&lt;String&gt; dict) {
+    int len = s.length();
+    if (pos == len) {
+        ans.add(str.substring(1));
+        return;
+    }
+    for (int i = pos; i &lt; len; i++) {
+        String sub = s.substring(pos, i + 1);
+        if (dict.contains(sub)) {
+            helper(ans, str + " " + sub, s, i + 1, dict);
+        }
+    }
+}
+
+public boolean canBreak(String s, Set&lt;String&gt; dict) {
+    if (s == null || s.length() == 0) {
+        return true;
+    }
+    int len = s.length();
+    boolean[] dp = new boolean[len + 1];
+    dp[0] = true;
+    for (int i = 1; i &lt;= len; i++) {
+        for (int j = 0; j &lt; i; j++) {
+            if (!dp[j]) {
+                continue;
+            }
+            if (dict.contains(s.substring(j, i))) {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp[len];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/02/Word-Break/">[LeetCode 139] Word Break</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/02/Word-Break/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Word-Break/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/word-break/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">
+Given a string <i>s</i> and a dictionary of words <i>dict</i>, determine if <i>s</i> can be segmented into a space-separated sequence of one or more dictionary words.
+</p>
+
+<p class="font-color">For example, given<br>
+<i>s</i> = <code>"leetcode"</code>,<br>
+<i>dict</i> = <code>["leet", "code"]</code>.
+</p>
+
+<p class="font-color">
+Return true because <code>"leetcode"</code> can be segmented as <code>"leet code"</code>.
+</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a standard DP question</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>I see a lot of people solve this DP problem with 2D array. It actually requires only 1D aray.</p>
+
+<p>Declare an boolean array of (input string length) + 1, and dp[i] mean whether or not subtring(0,i) is work-breakable. Then the problem is clear and easy.</p>
+
+<p>Pay attention to index while coding.</p>
+
+<h3>Code</h3>
+
+<p><strong>my code</strong></p>
+
+<pre><code>public boolean wordBreak(String s, Set&lt;String&gt; dict) {
+    int len = s.length();
+    if (len == 0 || dict.isEmpty())  {
+        return false;
+    }
+    boolean[] dp = new boolean[len + 1];
+    dp[0] = true;
+    for (int i = 1; i &lt;= len; i ++)  {
+        for (int j = 0; j &lt; i; j ++)  {
+            if (dp[j] &amp;&amp; dict.contains(s.substring(j, i)))  {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp[len];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/02/Sort-List/">[LeetCode 148] Sort List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/02/Sort-List/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Sort-List/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/sort-list/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">Sort a linked list in <i>O</i>(<i>n</i> log <i>n</i>) time using constant space complexity.</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a difficult question</strong>.</p>
+
+<p>To sort with O(nlgn) time, we must use either quick sort or <strong>merge sort</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>This is a standard merge sort algorithm. The details can be found <a href="http://www.programcreek.com/2012/11/leetcode-solution-merge-sort-linkedlist-in-java/">here</a>.</p>
+
+<p>I am being lazy here, I reused the code from &ldquo;Merge Two Sorted Lists&rdquo;. Surprisingly it worked! Just remember, we must set the last node of first half to point to null.</p>
+
+<h3>Code</h3>
+
+<pre><code>public ListNode sortList(ListNode head) {
+    if (head == null || head.next == null) 
+        return head;
+    int len = 0;
+    ListNode temp = head;
+    while (temp != null) {
+        temp = temp.next;
+        len ++;
+    }
+    temp = head;
+    for (int i = 1; i &lt; len / 2; i ++)
+        temp = temp.next;
+    ListNode firstHalf = head, secondHalf = temp.next;
+    temp.next = null;
+    return mergeTwoLists(sortList(firstHalf), 
+                         sortList(secondHalf));
+}
+
+// The following code is copied from
+// Question - Merge Two Sorted Lists
+public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+    ListNode pre = new ListNode(Integer.MIN_VALUE);
+    ListNode cur = pre;
+    while (l1 != null &amp;&amp; l2 != null) {
+        if (l1.val &lt; l2.val) {
+            cur.next = l1;
+            l1 = l1.next;
+        } else {
+            cur.next = l2;
+            l2 = l2.next;
+        }
+        cur = cur.next;
+    }
+    if (l1 == null) cur.next = l2;
+    else cur.next = l1;
+    return pre.next;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -712,829 +1342,6 @@ Your algorithm should have a linear runtime complexity. Could you implement it w
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/01/Single-Number/">[LeetCode 136] Single Number</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/01/Single-Number/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/01/Single-Number/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/single-number/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">Given an array of integers, every element appears <i>twice</i> except for one. Find that single one.</p>
-
-<p class="font-color">
-<b>Note:</b><br>
-Your algorithm should have a linear runtime complexity. Could you implement it without using extra memory?
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>First solutions is bit manipulation</strong>.</p>
-
-<blockquote><p>If two numbers are the same, then XOR result is 0.</p></blockquote>
-
-<p>And for negative integers:</p>
-
-<blockquote><p>A negative number is a <a href="http://en.wikipedia.org/wiki/Bit_field">bit field</a> just like a positive number. XOR doesn&rsquo;t care</p></blockquote>
-
-<p>Follow-up question, what if the input is not an array in interger, but a bunch of Strings? <a href="http://stackoverflow.com/a/35271">This guy</a> have the answer.</p>
-
-<blockquote><p>There are ways of XORing strings by XORing the individual chars &ndash; you would just have to have a temporary variable as large as the largest string.</p>
-
-<p>What wouldn&rsquo;t work is trying to XOR a linked list or some other complicated data structure.</p></blockquote>
-
-<p>Which is to say, a string is just like an array of chars (integers). For every char (integer), just apply the same method and we shall have the answer.</p>
-
-<p><strong>Second solution is HashSet</strong>, but must use more space. Code is posted below as well.</p>
-
-<p>Someone also sort then find, but this takes more time.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, XOR solution</strong></p>
-
-<pre><code>public int singleNumber(int[] A) {
-    int num = A[0];
-    for (int i = 1; i &lt; A.length; i ++)
-        num = num ^ A[i];
-    return num;
-}
-</code></pre>
-
-<p><strong>Second, HashSet solution</strong></p>
-
-<p>The last line &ldquo;return -1&rdquo; is only for compiling purposes, and will not be executed.</p>
-
-<pre><code>public int singleNumber(int[] A) {
-    HashSet&lt;Integer&gt; set = new HashSet&lt;Integer&gt;();
-    for (int i = 0; i &lt; A.length; i ++) {
-        if (set.contains(A[i]))
-            set.remove(A[i]);
-        else
-            set.add(A[i]);
-    }
-    for (Integer a: set)
-        return a;
-    return -1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/31/Gas-Station/">[LeetCode 134] Gas Station</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-31T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/31/Gas-Station/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/31/Gas-Station/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/gas-station/">link</a></p>
-
-<div class="question-content">
-            <p class="font-color"></p><p class="font-color">
-There are <i>N</i> gas stations along a circular route, where the amount of gas at station <i>i</i> is <code>gas[i]</code>.
-</p>
-
-<p class="font-color">
-You have a car with an unlimited gas tank and it costs <code>cost[i]</code> of gas to travel from station <i>i</i> to its next station (<i>i</i>+1). You begin the journey with an empty tank at one of the gas stations.
-</p>
-
-<p class="font-color">
-Return the starting gas station&#8217;s index if you can travel around the circuit once, otherwise return -1.
-</p>
-
-<p class="font-color">
-<b>Note:</b><br>
-The solution is guaranteed to be unique.
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a tough question, which requires a lot of math-related thinking</strong>.</p>
-
-<p><strong>My solution is IMHO very simple and easy</strong>. I first do a cumulation of gas from beginning to the end, and find the lowest cumulative value of the  gas tank (of course can be negative). That point is where I start the journey, which is to say, I will validate the path from that point, and then return the result.</p>
-
-<p><strong>This idea is not seen on Internet</strong>, although it is just 2 loops thru the list, and time complexity is also O(n). Anyway, there&rsquo;s a great solution which most people uses.</p>
-
-<p><strong>There&rsquo;s a great <a href="https://oj.leetcode.com/discuss/4159/share-some-of-my-ideas">post</a> that gives 2 valid conclusions</strong>:</p>
-
-<blockquote><ol>
-<li>If car starts at A and can not reach B (let&rsquo;s say B is the first station that A can not reach), then any station between A and B can not reach B.</li>
-<li>If the total number of gas is bigger than the total number of cost. There must be a valid solution.</li>
-</ol>
-</blockquote>
-
-<p>From here, a great solution can be found.</p>
-
-<h3>Solution</h3>
-
-<p><strong>A very detailed explanation and code is found from <a href="http://leetcodenotes.wordpress.com/2013/11/21/leetcode-gas-station-%E8%BD%AC%E5%9C%88%E7%9A%84%E5%8A%A0%E6%B2%B9%E7%AB%99%E7%9C%8B%E8%83%BD%E4%B8%8D%E8%83%BD%E8%B5%B0%E4%B8%80%E5%9C%88/">this blog</a></strong>.</p>
-
-<blockquote><ol>
-<li>从i开始，j是当前station的指针，sum += gas[j] – cost[j] （从j站加了油，再算上从i开始走到j剩的油，走到j+1站还能剩下多少油）</li>
-<li>如果sum &lt; 0，说明从i开始是不行的。那能不能从i..j中间的某个位置开始呢？假设能从k (i &lt;=k&lt;=j)走，那么i..j &lt; 0，若k..j >=0，说明i..k – 1更是&lt;0，那从k处就早该断开了，根本轮不到j。</li>
-<li>所以一旦sum&lt;0，i就赋成j + 1，sum归零。</li>
-</ol>
-</blockquote>
-
-<p>And note that if i is moved to j, there is no need to check (0..old_i) again, because this range must be reachable (write code again for beter understanding).</p>
-
-<p>Coding this solution <strong>is not easy</strong>! I failed to do it.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my solution</strong></p>
-
-<pre><code>public int canCompleteCircuit(int[] gas, int[] cost) {
-    int len = gas.length;
-    if (len == 0) return -1;
-    int start = -1, min = Integer.MAX_VALUE, total = 0;
-    for (int i = 0; i &lt; len; i ++) {
-        total += getDiff(gas, cost, i);
-        if (total &lt; min) {
-            min = total;
-            start = i;
-        }
-    }
-    start = (start + 1) % len;
-    // now traverse the route from start 
-    total = 0;
-    for (int i = 0; i &lt; len; i ++) {
-        total += getDiff(gas, cost, (start + i) % len);
-        if (total &lt; 0) return -1; 
-    }
-    return start;
-}
-
-private int getDiff(int[] gas, int[] cost, int i) {
-    return gas[i] - cost[i];
-}
-</code></pre>
-
-<p><strong>Second, best solution</strong></p>
-
-<pre><code>public int canCompleteCircuit(int[] gas, int[] cost) {
-    int i = 0, j = 0;
-    int sum = 0;
-    int total = 0;
-    while (j &lt; gas.length) {
-        int diff = gas[j] - cost[j];
-        if (sum + diff &lt; 0) {
-            i = j + 1;
-            sum = 0;
-        } else {
-            sum += diff;
-        }
-        j++;
-        total += diff;
-    }
-    return total &gt;= 0 ? i : -1;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/31/Candy/">[LeetCode 135] Candy</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-31T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/31/Candy/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/31/Candy/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/candy/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-There are <i>N</i> children standing in a line. Each child is assigned a rating value. 
-</p>
-<p>
-You are giving candies to these children subjected to the following requirements:
-</p>
-<ul>
-<li>Each child must have at least one candy.</li>
-<li>Children with a higher rating get more candies than their neighbors.</li>
-</ul>
-<p>
-What is the minimum candies you must give?
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a difficult question</strong>.</p>
-
-<p>Directly doing it will result in a lot of trace-backs. The following picture gives a clear idea of what the problem is:</p>
-
-<p><img class="middle" src="/assets/images/candy.png"></p>
-
-<p>When traversing from low to high (upward sloping), just increase candy, that&rsquo;s fine. But when sloping down, we would have no idea what value to set until we reach the min point. <strong><a href="http://fisherlei.blogspot.sg/2013/11/leetcode-candy-solution.html">Fish Lei</a> have a good solution of &ldquo;trace-back algorithm&rdquo;</strong> to re-adjust the values by traversing back to the top again.</p>
-
-<p>However, I personally think the 2nd solution is way more splendid, that I will not cover 1st solution in detail.</p>
-
-<h3>Solution</h3>
-
-<p><strong>The 2nd solution is very similar to &ldquo;Trapping Rain Water&rdquo;</strong>. <a href="http://zhaohongze.com/wordpress/2013/12/10/leetcode-candy/">This blog</a> is the best explanation I found from Internet.</p>
-
-<blockquote><ol>
-<li>For the first time, scan from left to right. If current rating is larger than the left one, give one more candy to current child than the left one.</li>
-<li>For the second time, scan from right to left. If current rating is larger than the right one, give one more candy to current child than the right one.</li>
-</ol>
-
-
-<p>We consider the policy as two folds, left policy and right policy. Left policy means a child has more candies than his left one if his rating is higher than his left one. The first scan ensures that the distribution meets left policy. The second scan ensures that the distribution meets right policy. However, it will not violate left policy.</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>2nd solution</strong></p>
-
-<pre><code>public int candy(int[] ratings) {
-    int len = ratings.length;
-    if (len &lt;= 1) return len;
-    int[] candy = new int[len];
-    candy[0] = candy[len-1] = 1;
-    for (int i = 1; i &lt; len; i ++) {
-        if (ratings[i] &gt; ratings[i-1])
-            candy[i] = candy[i-1] + 1;
-        else candy[i] = 1;
-    }
-    for (int i = len-2; i &gt;= 0; i --) {
-        if (ratings[i] &gt; ratings[i+1])
-            candy[i] = Math.max(candy[i], candy[i+1] + 1);
-    }
-    int sum = 0;
-    for (int i = 0; i &lt; len; i ++) sum += candy[i];
-    return sum;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/30/Word-Ladder-II/">[LeetCode 126] Word Ladder II (Unsolvable)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-30T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/30/Word-Ladder-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/30/Word-Ladder-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/word-ladder-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given two words (<i>start</i> and <i>end</i>), and a dictionary, find all shortest transformation sequence(s) from <i>start</i> to <i>end</i>, such that:
-</p>
-<ol>
-<li>Only one letter can be changed at a time</li>
-<li>Each intermediate word must exist in the dictionary</li>
-</ol>
-
-<p>
-For example,
-</p>
-<p>
-Given:<br>
-<i>start</i> = <code>"hit"</code><br>
-<i>end</i> = <code>"cog"</code><br>
-<i>dict</i> = <code>["hot","dot","dog","lot","log"]</code><br>
-</p>
-<p>
-Return<br>
-</p><pre>  [
-    ["hit","hot","dot","dog","cog"],
-    ["hit","hot","lot","log","cog"]
-  ]
-</pre>
-<p></p>
-
-<p>
-<b>Note:</b><br>
-</p><ul>
-<li>All words have the same length.</li>
-<li>All words contain only lowercase alphabetic characters.</li>
-</ul>
-<p></p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an unsolvable question</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>A solution is available <a href="http://blog.csdn.net/whuwangyi/article/details/21611433">here</a>, but I did not solved it and I gave up.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Node {  
-    public int dist;  
-    public String str;  
-    public LinkedList&lt;Node&gt; prev;  
-
-    public Node(int dist, String str) {  
-        this.dist = dist;  
-        this.str = str;  
-        this.prev = new LinkedList&lt;Node&gt;();
-    }
-
-    public void addPrev(Node pNode) {  
-        prev.add(pNode);  
-    }  
-}  
-
-public ArrayList&lt;ArrayList&lt;String&gt;&gt; findLadders(String start,  
-        String end, HashSet&lt;String&gt; dict) {  
-    dict.add(end);  
-
-    // Key: the dictionary string; Value: Node  
-    Map&lt;String, Node&gt; map = new HashMap&lt;String, Node&gt;();  
-    Queue&lt;String&gt; queue = new LinkedList&lt;String&gt;();  
-
-    Node startNode = new Node(1, start);  
-    queue.offer(start);  
-    map.put(start, startNode);  
-
-    ArrayList&lt;ArrayList&lt;String&gt;&gt; ret = new ArrayList&lt;ArrayList&lt;String&gt;&gt;();  
-
-    while (!queue.isEmpty()) {  
-        String str = queue.poll();  
-
-        if (str.equals(end)) {  
-            getPaths(map.get(end), map, new ArrayList&lt;String&gt;(), ret);  
-            return ret;  
-        }  
-
-        for (int i = 0; i &lt; str.length(); i++) {  
-            for (int j = 0; j &lt;= 25; j++) {  
-                // transform it into another word  
-                String newStr = replace(str, i, (char) ('a' + j));  
-
-                // if a new word is explored  
-                if (dict.contains(newStr)) {  
-                    if (!map.containsKey(newStr)) {  
-                        // construct a new node  
-                        Node node = map.get(str);  
-                        Node newNode = new Node(node.dist + 1, newStr);  
-                        newNode.prev = new LinkedList&lt;Node&gt;();  
-                        newNode.prev.add(node);  
-
-                        map.put(newStr, newNode);  
-                        queue.offer(newStr);  
-                    } else {  
-                        Node node = map.get(newStr);  
-                        Node prevNode = map.get(str);  
-
-                        // increase the path set  
-                        if (node.dist == prevNode.dist + 1) {  
-                            node.addPrev(prevNode);  
-                            // queue.offer(newStr); // will cause TLE!!!  
-                        }  
-                    }  
-                }  
-            }  
-        }  
-    }  
-
-    return ret; // return an empty set  
-}  
-
-// replace the index of the given string with the given char  
-private String replace(String str, int index, char c) {  
-    StringBuilder sb = new StringBuilder(str);  
-    sb.setCharAt(index, c);  
-    return sb.toString();  
-}  
-
-// get all the paths by using DFS  
-private void getPaths(Node end, Map&lt;String, Node&gt; map,  
-        ArrayList&lt;String&gt; curPath, ArrayList&lt;ArrayList&lt;String&gt;&gt; paths) {  
-    if (end == null) {  
-        paths.add(curPath);  
-        return;  
-    }  
-
-    curPath.add(0, end.str);  
-    if (!end.prev.isEmpty()) {  
-        for (Node prevNode : end.prev) {  
-            getPaths(prevNode, map, new ArrayList&lt;String&gt;(curPath), paths);  
-        }  
-    } else {  
-        getPaths(null, map, curPath, paths);  
-    }  
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/30/Palindrome-Partitioning-II/">[LeetCode 132] Palindrome Partitioning II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-30T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/30/Palindrome-Partitioning-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/30/Palindrome-Partitioning-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/palindrome-partitioning-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a string <i>s</i>, partition <i>s</i> such that every substring of the partition is a palindrome.
-</p>
-<p>
-Return the minimum cuts needed for a palindrome partitioning of <i>s</i>.
-</p>
-<p>
-For example, given <i>s</i> = <code>"aab"</code>,<br>
-Return <code>1</code> since the palindrome partitioning <code>["aa","b"]</code> could be produced using 1 cut.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is DP, but not traditional DP question</strong></p>
-
-<h4>IT IS DOUBLE DP!</h4>
-
-<p>It is very hard for me to even understand the solution, but <strong>I have found a great analysis from <a href="http://blog.sina.com.cn/s/blog_b9285de20101iwqt.html">peking2&rsquo;s blog</a></strong>.</p>
-
-<blockquote><p>这题一般人一看就是DP，DP公式也很容易推出，算是一道简单的DP。</p>
-
-<p>dp(i) = min( 1+dp(j+1), if substring(i,j) is palindrome)</p>
-
-<p>从以上的分析时间复杂度为O(n<sup>3</sup>), 主要是因为检查回文也需要O(n)的时间。因此这题有意思的一点就是如何降低时间复杂度到O(n<sup>2</sup>)？</p>
-
-<p><strong>其实这题是两个DP混杂在了一起</strong>，这也是这道题最有意思的地方。另外一个DP就是跟检查回文有关了，公式如下</p>
-
-<p>dp(i)(j)=true if s(i)==s(j) &amp;&amp; dp(i+1)(j-1)</p>
-
-<p>也就是说，你要检查一个回文只需要知道头尾的字符相等，并且中间的字串已经成为了回文即可。O(1)复杂度。</p></blockquote>
-
-<p><strong>A more detailed analysis is available in <a href="http://fisherlei.blogspot.sg/2013/03/leetcode-palindrome-partitioning-ii.html">this blog</a></strong>.</p>
-
-<blockquote cite="http://fisherlei.blogspot.sg/2013/03/leetcode-palindrome-partitioning-ii.html">
-
-    <b>[Thoughts]</b>
-    <br>凡是求最优解的，一般都是走DP的路线。这一题也不例外。首先求dp函数，
-    <br>
-    <br>定义函数
-    <br>D[i,n] = 区间[i,n]之间最小的cut数，n为字符串长度
-    <br>
-    <br>&nbsp;a &nbsp; b &nbsp; a &nbsp; b &nbsp; b &nbsp; b &nbsp; a &nbsp; b &nbsp; b &nbsp; a &nbsp; b &nbsp; a
-    <br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;n
-    <br>如果现在求[i,n]之间的最优解？应该是多少？简单看一看，至少有下面一个解
-    <br>
-    <br>
-    <br>&nbsp;a &nbsp; b &nbsp; a &nbsp; b &nbsp; b &nbsp; b &nbsp; a &nbsp; b &nbsp; b &nbsp; a &nbsp; b &nbsp; a
-    <br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-    <span style="color: red;">j</span>&nbsp;
-    <span style="color: red;">j+1</span>&nbsp; &nbsp; n
-    <br>
-    <br>此时 &nbsp;D[i,n] = min(D[i, j] + D[j+1,n]) &nbsp;i&lt;=j &lt;n。这是个二维的函数，实际写代码时维护比较麻烦。所以要转换成一维DP。如果每次，从i往右扫描，每找到一个回文就算一次DP的话，就可以转换为
-    <br>D[i] = 区间[i,n]之间最小的cut数，n为字符串长度， 则,
-    <br>
-    <br>D[i] = min(1+D[j+1] ) &nbsp; &nbsp;i&lt;=j &lt;n
-    <br>
-    <br>有个转移函数之后，一个问题出现了，就是如何判断[i,j]是否是回文？每次都从i到j比较一遍？太浪费了，这里也是一个DP问题。
-    <br>定义函数
-    <br>P[i][j] = true if [i,j]为回文
-    <br>
-    <br>那么
-    <br>P[i][j] = str[i] == str[j] &amp;&amp; P[i+1][j-1];
-    <br>
-</blockquote>
-
-
-<h3>Solution</h3>
-
-<p>The coding is not easy, especially <strong>when 2 DP are written in 1 for-loop</strong>.</p>
-
-<p>I wrote many times until I finally achieved the nice and concise solution that you see below.</p>
-
-<h3>Code</h3>
-
-<p><strong>Doing everything in 1 loop</strong>, not an intuitive code.</p>
-
-<pre><code>public int minCut(String s) {
-    int len = s.length();
-    if (len &lt;= 1) return 0;
-    boolean[][] pl = new boolean[len][len];
-    int[] dp = new int[len];
-    for (int i = len-1; i &gt;= 0; i --) {
-        dp[i] = Integer.MAX_VALUE;
-        for (int j = i; j &lt; len; j ++) {
-            // first set pl[][], then update dp[i]
-            if (j - i &lt;= 1) pl[i][j] = s.charAt(i) == s.charAt(j);
-            else pl[i][j] = s.charAt(i) == s.charAt(j) &amp; pl[i+1][j-1];
-            if (pl[i][j]) {
-                if (j == len-1) dp[i] = 0;
-                else 
-                    dp[i] = Math.min(dp[i], dp[j+1] + 1);
-            }
-        }
-    }
-    return dp[0];
-}
-</code></pre>
-
-<p><strong>Updated on July 18th, 2014</strong>, written by me.</p>
-
-<pre><code>boolean[][] map = null;
-
-public int minCut(String s) {
-    if (s == null || s.length() == 0) {
-        return 0;
-    }
-    map = getMap(s);
-    int len = s.length();
-    int[] dp = new int[len + 1];
-    dp[0] = -1;
-    for (int i = 0; i &lt; len; i++) {
-        dp[i+1] = Integer.MAX_VALUE;
-        for (int j = 0; j &lt;= i; j++) {
-            if (map[j][i]) {
-                dp[i+1] = Math.min(dp[i+1], dp[j] + 1);
-            }
-        }
-    }
-    return dp[len];
-}
-
-private boolean[][] getMap(String s) {
-    int len = s.length();
-    boolean[][] map = new boolean[len][len];
-    for (int i = len - 1; i &gt;= 0; i--) {
-        for (int j = 0; j &lt; len; j++) {
-            if (i &gt; j) {
-                continue;
-            } else if (i == j) {
-                map[i][j] = true;
-            } else {
-                if (i + 1 == j) {
-                    map[i][j] = s.charAt(i) == s.charAt(j);
-                } else {
-                    map[i][j] = s.charAt(i) == s.charAt(j) &amp;&amp; map[i+1][j-1];
-                }
-            }
-        }
-    }
-    return map;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/34">&larr; Older</a>
@@ -1556,13 +1363,13 @@ private boolean[][] getMap(String s) {
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (42)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (43)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (92)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (96)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1582,15 +1389,15 @@ private boolean[][] getMap(String s) {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/01/11/longest-repeating-substring/">[Amazon] Longest Repeating Substring</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a>
+        <a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/">[Google] Check if Repeating Subsequence Exists</a>
       </li>
     
   </ul>

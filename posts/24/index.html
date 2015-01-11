@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Question One: Given a string, find the first non-repeating character in it link Question Two: Given a stream of characters, find the &hellip;">
+  <meta name="description" content="Question link Find Top k smallest element in an array. Analysis There&rsquo;re 2 solutions. First solution, use a max-heap. O(nlgk) time complexity. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,396 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/25/Top-k-Smallest-Element/">[Question] Top K Element (Quick Select)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/07/25/Top-k-Smallest-Element/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/07/25/Top-k-Smallest-Element/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/k-largestor-smallest-elements-in-an-array/">link</a></p>
+
+<blockquote><p>Find Top k smallest element in an array.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>There&rsquo;re 2 solutions.</p>
+
+<p>First solution, <strong>use a max-heap</strong>. O(nlgk) time complexity.</p>
+
+<p>Second solution is called <strong><a href="http://www.geekviewpoint.com/java/search/quickselect">quick select</a></strong>, a type of <a href="http://en.wikipedia.org/wiki/Selection_algorithm">selection algorithm</a> that&rsquo;s based on quicksort. It&rsquo;s averaging O(n) time, but O(n<sup>2</sup>) if pivot selection is poor. The code is posted below. There&rsquo;s also a similar <a href="http://blog.teamleadnet.com/2012/07/quick-select-algorithm-find-kth-element.html">iterative solution</a>.</p>
+
+<p>To <a href="http://www.isnowfy.com/top-k-number/">further optimize this</a>, we can change the pivot selection method by dividing into k group and find median of each. This is called <a href="http://en.wikipedia.org/wiki/Median_of_medians">Median of medians algorithm</a>. The worst case is O(n) time. And this is the best solution for &ldquo;Top k&rdquo; questions.</p>
+
+<h3>Code</h3>
+
+<p><strong>quick select</strong></p>
+
+<pre><code>public static void quickSelect1(int[] list, int k) {
+    selectHelper1(list, 0, list.length - 1, k);
+}
+
+public static void selectHelper1(int[] list, int left, int right, int k) {
+    int pivotIndex = partition(list, left, right);
+    if (pivotIndex == k) {
+        return;
+    } else if (k &lt; pivotIndex) {
+        selectHelper1(list, left, pivotIndex - 1, k);
+    } else {
+        selectHelper1(list, pivotIndex + 1, right, k);
+    }
+}
+
+private static int partition(int[] list, int left, int right) {
+    int pivot = left + (right - left) / 2;
+    swap(list, right, pivot);
+    for (int i = left; i &lt; right; i++) {
+        if (list[i] &lt; list[right]) {
+            swap(list, i, left);
+            left++;
+        }
+    }
+    swap(list, left, right);
+    return left;
+}
+</code></pre>
+
+<p><strong>quick select, iteratively</strong></p>
+
+<pre><code>public static int quickSelect2(int[] arr, int k) {
+    if (arr == null || arr.length &lt;= k)
+        throw new Error();
+    int from = 0, to = arr.length - 1;
+    // if from == to we reached the kth element
+    while (from &lt; to) {
+        int r = from, w = to;
+        int mid = arr[(r + w) / 2];
+        // stop if the reader and writer meets
+        while (r &lt; w) {
+            if (arr[r] &gt;= mid) { // put the large values at the end
+                swap(arr, w, r);
+                w--;
+            } else { // the value is smaller than the pivot, skip
+                r++;
+            }
+        }
+        // if we stepped up (r++) we need to step one down
+        if (arr[r] &gt; mid)
+            r--;
+        // the r pointer is on the end of the first k elements
+        if (k &lt;= r) {
+            to = r;
+        } else {
+            from = r + 1;
+        }
+    }
+    return arr[k];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/25/Semaphore-mutex-toilet-example/">[Design] Semaphore Mutex Toilet Example</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/07/25/Semaphore-mutex-toilet-example/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/07/25/Semaphore-mutex-toilet-example/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Mutex vs. Semaphore</h2>
+
+<p><strong>Mutex is a <a href="http://koti.mbnet.fi/niclasw/MutexSemaphore.html">key to a toilet</a></strong>. One person can have the key &ndash; occupy the toilet. When finished, the person gives (frees) the key to the next person in queue.</p>
+
+<p>A mutex is really a semaphore with value 1.</p>
+
+<p><strong>Semaphore is the number of free identical toilet keys</strong>. Example, say we have four toilets with identical locks and keys. The semaphore count is set to 4 at beginning, then the count decrease as people are coming in, etc.</p>
+
+<h3>A mutex is not a binary semaphore</h3>
+
+<p><strong>A mutex is <a href="http://www.geeksforgeeks.org/mutex-vs-semaphore/">locking mechanism</a></strong> used to synchronize access to a resource. Only one task can acquire the mutex.</p>
+
+<p>It means there will be ownership associated with mutex, and only the owner can release the lock.</p>
+
+<p><strong>Semaphore is signaling mechanism</strong> (&ldquo;I am done, you can carry on&rdquo; kind of signal).</p>
+
+<p>For example, if you are listening songs (assume it as one task) on your mobile and at the same time your friend called you, an interrupt will be triggered upon which an interrupt service routine (ISR) will signal the call processing task to wakeup.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/25/Find-10001st-prime/">[Question] Find 10001st Prime (Sieve of E)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/07/25/Find-10001st-prime/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/07/25/Find-10001st-prime/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/a/2493059">link</a></p>
+
+<blockquote><p>Find 10001st Prime Number</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>Use <a href="http://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a>, or 埃氏筛</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>private static final int INDEX = 10001;
+private static final int LIMIT = 1000000;
+
+private static int get10001stPrime() {
+    boolean[] sieveArray = new boolean[LIMIT];
+    int primeCount = 0;
+    int currentNum = 2;
+    while (primeCount &lt; INDEX) {
+        if (!sieveArray[currentNum]) {
+            primeCount++;
+            for (int i = currentNum; i &lt; LIMIT; i += currentNum) {
+                sieveArray[i] = true;
+            }
+        }
+        currentNum++;
+    }
+    return currentNum - 1;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/Octal-and-Hexadecimal-Numbers/">[Java OOP] Octal and Hexadecimal Numbers in Java</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/07/24/Octal-and-Hexadecimal-Numbers/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/07/24/Octal-and-Hexadecimal-Numbers/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/g-fact-61/">link</a></p>
+
+<blockquote><p>Predict the output of following program.</p></blockquote>
+
+<pre><code>public static void main(String[] args) {
+    int a = 012;
+    System.out.println("a is " + a);
+}
+</code></pre>
+
+<h3>Analysis</h3>
+
+<p>Putting a 0 before an integer constant makes it an <strong>octal number</strong> and putting 0x (or 0X) makes it a <strong>hexadecimal number</strong>.</p>
+
+<p><strong>Answer: 10</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/Multithreading-basics/">[Design] Multithreading Basics</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/07/24/Multithreading-basics/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/07/24/Multithreading-basics/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Terminologies</h2>
+
+<h3>Atomicity, Atomic Operation</h3>
+
+<p><strong><a href="http://www.geeksforgeeks.org/g-fact-57/">Atomicity</a> is unbreakability</strong>, or uninterrupted operation.</p>
+
+<p>Atomic operation helps in understanding reentrancy, critical section, thread safety, synchronization primitives, etc.</p>
+
+<h3>Critical Section</h3>
+
+<p><strong><a href="http://www.geeksforgeeks.org/g-fact-70/">Critical section</a></strong> is group of instructions/statements or region of code that <strong>need to be executed atomically</strong>.</p>
+
+<p>If one thread tries to change a shared data while another thread tries to read, the result is unpredictable. It is critical to understand the importance of race condition while writing kernel mode programming.</p>
+
+<p>A simple solution to critical section:</p>
+
+<pre><code>acquireLock();
+Process Critical Section
+releaseLock();
+</code></pre>
+
+<h3>Synchronization primitives</h3>
+
+<p><a href="http://stackoverflow.com/a/8017629">Synchronization primitives</a> are simple software mechanisms for the purposes of supporting thread or process synchronization.</p>
+
+<p><strong>Mutex, event, conditional variables and semaphores</strong> are all synchronization primitives.</p>
+
+<p><strong>Critical section</strong> is not a synchronization primitive. It&rsquo;s a part of an execution path that must be protected from concurrent execution in order to maintain some invariants.</p>
+
+<p>You need to use some synchronization primitives to protect critical section.</p>
+
+<h3>Producer–consumer</h3>
+
+<p>Two processes, <a href="http://en.wikipedia.org/wiki/Producer-consumer_problem">producer and consumer</a>. Producer thread will collect the data and writes it to the buffer. Consumer thread will process the collected data from the buffer.</p>
+
+<p>Producer won&rsquo;t try to add when buffer&rsquo;s full and consumer won&rsquo;t remove when buffer&rsquo;s empty.</p>
+
+<p><strong>Solution 1: Mutex</strong></p>
+
+<p>A mutex provides mutual exclusion, either producer or consumer can have the key (mutex) and proceed with their work. As long as the buffer is filled by producer, the consumer needs to wait, and vice versa.</p>
+
+<p><strong>Solution 2: Semaphore</strong></p>
+
+<p><a href="http://en.wikipedia.org/wiki/Producer-consumer_problem#Using_semaphores">A semaphore</a> is a generalized mutex. In lieu of single buffer, we can split the 4 KB buffer into four 1 KB buffers (identical resources). A semaphore can be associated with these four buffers. The consumer and producer can work on different buffers at the same time.</p>
+
+<h3>Interrupt service routine</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Interrupt_handler">Interrupt service routine</a> (ISR), is a callback subroutine in an operating system or device driver whose execution is triggered by the reception of an interrupt.</p>
+
+<p><a href="http://stackoverflow.com/a/3392889">One good example</a> is reading from a hard drive. The drive is slow and you don&rsquo;t want your OS to wait for the data to come back; you want the OS to go and do other things. <strong>So you set up the system so that when the disk has the data (ready), it raises an interrupt</strong>. In the <strong>ISR for the disk</strong>, CPU will take the data and return it to the requester.</p>
+
+<p><strong>ISRs often need to happen quickly</strong> as the hardware can have a limited buffer, which will be overwritten by new data if it&rsquo;s now pulled off quickly enough.</p>
+
+<p>It&rsquo;s also important to have your ISR complete quickly as while the CPU is servicing one ISR other interrupts will be masked.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -671,448 +1061,6 @@ private static String removeDigit(String number, int digitIndex) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/22/Bucket-Sort/">[Question] Bucket Sort (Bin Sort)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/07/22/Bucket-Sort/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/07/22/Bucket-Sort/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/bucket-sort-2/">link</a></p>
-
-<blockquote><p>Bucket sort is mainly useful when input is uniformly distributed over a range. For example:</p>
-
-<p>Sort a large set of floating point numbers which are in range from 0.0 to 1.0 and are uniformly distributed across the range. How do we sort the numbers efficiently.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>1) Create n empty buckets (Or lists).</p>
-
-<p>2) Insert each arr[i] into bucket[n*array[i]]</p>
-
-<p>3) Sort individual buckets using <strong>insertion sort</strong>.</p>
-
-<p>4) Concatenate all sorted buckets.</p>
-
-<p>Steps 1 and 2 clearly take O(n) time. Step 4 also takes O(n) time.</p>
-
-<p><strong>The main step to analyze is step 3</strong>. This step also takes O(n) time on average if all numbers are uniformly distributed. <strong>Final time complexity: O(n)</strong>.</p>
-
-<h3>Relationship with other sorting algorithms</h3>
-
-<p>There&rsquo;s a algorithm within the bucket. Now if we use <strong>bucket sort itself</strong> as the sorting function, this becomes a <strong>radix sort</strong>.</p>
-
-<p>If we set the <strong>bucket size as 2</strong>, then this becomes a quick sort (with potentially poor pivot choices).</p>
-
-<h3>Code</h3>
-
-<p>C++ code from G4G</p>
-
-<pre><code>void bucketSort(float arr[], int n) {
-    // 1) Create n empty buckets
-    vector&lt;float&gt; b[n];
-
-    // 2) Put array elements in different buckets
-    for (int i=0; i&lt;n; i++)
-    {
-       int bi = n*arr[i]; // Index in bucket
-       b[bi].push_back(arr[i]);
-    }
-
-    // 3) Sort individual buckets
-    for (int i=0; i&lt;n; i++)
-       sort(b[i].begin(), b[i].end());
-
-    // 4) Concatenate all buckets into arr[]
-    int index = 0;
-    for (int i = 0; i &lt; n; i++)
-        for (int j = 0; j &lt; b[i].size(); j++)
-          arr[index++] = b[i][j];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/max-binary-gap/">[Question] Max Binary Gap</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/07/21/max-binary-gap/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/07/21/max-binary-gap/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.programcreek.com/2013/02/twitter-codility-problem-max-binary-gap/">link</a></p>
-
-<blockquote><p>Problem: Get maximum binary Gap.</p>
-
-<p>For example, 9&rsquo;s binary form is 1001, the gap is 2.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This question is a good practise of binary operations.</p>
-
-<h3>Code</h3>
-
-<p><strong>writen by me</strong></p>
-
-<pre><code>private int solution(int num) {
-    int max = 0;
-    int boundary = -1;
-    for (int i = 0; i &lt; 32; i++) {
-        int t = num &amp; 1;
-        num = num &gt;&gt; 1;
-        if (t == 1) {
-            if (boundary == -1) {
-                boundary = i;
-            } else {
-                max = Math.max(max, i - boundary - 1);
-                boundary = i;
-            }
-        }
-    }
-    return max;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Quick-Sort/">[Question] Quick Sort</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/07/21/Quick-Sort/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/07/21/Quick-Sort/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.programcreek.com/2012/11/quicksort-array-in-java/">link</a></p>
-
-<blockquote><p>Quicksort is a divide and conquer algorithm. It first divides a large list into two smaller sub-lists and then recursively sort the two sub-lists. If we want to sort an array without any extra space, Quicksort is a good option. On average, time complexity is O(n log(n)).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This question is not easy. Practise more!</p>
-
-<h3>Code</h3>
-
-<pre><code>public static void quickSortRan(int[] arr, int low, int high) {
-    if (low &gt;= high) {
-        return;
-    }
-    int pivot = arr[low + (high - low) / 2];
-    int left = low;
-    int right = high;
-    while (left &lt; right) {
-        while (arr[left] &lt; pivot) {
-            left++;
-        }
-        while (arr[right] &gt; pivot) {
-            right--;
-        }
-        if (left &lt;= right) {
-            int temp = arr[left];
-            arr[left] = arr[right];
-            arr[right] = temp;
-            left++;
-            right--;
-        }
-    }
-    quickSortRan(arr, low, right);
-    quickSortRan(arr, left, high);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/OOP-principles/">[Java OOP] OOP - 4 Major Principles</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/07/21/OOP-principles/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/07/21/OOP-principles/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>4 Principles</h3>
-
-<p><a href="http://codebetter.com/raymondlewallen/2005/07/19/4-major-principles-of-object-oriented-programming/">link</a></p>
-
-<ol>
-<li><p>Encapsulation</p></li>
-<li><p>Abstraction</p></li>
-<li><p>Inheritance</p></li>
-<li><p>Polymorphism</p></li>
-</ol>
-
-
-<h3>Encapsulation</h3>
-
-<p><strong>The hiding of data implementation</strong> by restricting access to accessors and mutators.</p>
-
-<h3>Abstraction</h3>
-
-<p><strong>Representation of data in which the implementation details are hidden</strong>.</p>
-
-<p>For examplem, the development of classes, objects, types in terms of their interfaces and functionality, instead of their implementation details.</p>
-
-<p>Abstraction is used to manage complexity (decompose complex systems into smaller components).</p>
-
-<h3>Inheritance</h3>
-
-<p><strong>The ability to derive new classes from existing classes</strong>.</p>
-
-<h3>Polymorphism</h3>
-
-<p>Polymorphism describes a pattern in object oriented programming in which classes have different functionality while sharing a common interface.</p>
-
-<p>Eg. shape object.</p>
-
-<h3>Read more</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/SOLID_">http://en.wikipedia.org/wiki/SOLID_</a>(object-oriented_design)</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/21/Largest-window-2-Unique-Chars/">[Question] Largest Window Containing 2 Unique Characters</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/07/21/Largest-window-2-Unique-Chars/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/07/21/Largest-window-2-Unique-Chars/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.programcreek.com/2013/02/longest-substring-which-contains-2-unique-characters/">link</a></p>
-
-<blockquote><p>Given a string, find the longest substring that contains only two unique characters. For example, given &ldquo;abcbbbbcccbdddadacb&rdquo;, the longest substring that contains 2 unique character is &ldquo;bcbbbbcccb&rdquo;.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>First, the most basic and naive solution</strong>, which we use 2 pointers and 1 hashset. Read thru and when seeing the 3rd different char, <strong>rebuild the hashset</strong>. Idea is from original post. This approach is not very efficient.</p>
-
-<p><strong>Second, we can use HashMap instead of HashSet</strong>, so that we keep couting how many of each char we currently got. This should do the trick well.</p>
-
-<blockquote><p>What if the question change from &lsquo;2 unique chars&rsquo; to &lsquo;N unique chars&rsquo;? <strong>Use HashMap instead of HashSet</strong>. The rest of the is very similar.</p></blockquote>
-
-<p><strong>Third solution I found it <a href="http://stackoverflow.com/a/15000204">here</a></strong>. It keeps a &lsquo;lastGroupStart&rsquo; pointer, that points to <strong>the last position where character changes</strong>. Eg. &ldquo;aaaabbbbbcccc&rdquo;, &lsquo;lastGroupStart&rsquo; would pointer to the first occurance of &lsquo;b&rsquo;. When we read until c, we update the window starting point to &lsquo;lastGroupStart&rsquo;, and update &lsquo;lastGroupStart&rsquo; to the first occurance of &lsquo;c&rsquo;.</p>
-
-<p>This is a frequent question. I personally would <strong>recommend 2nd solution: using HashMap</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>first solution</strong></p>
-
-<pre><code>private String solution(String input) {
-    HashSet&lt;Character&gt; set = new HashSet&lt;Character&gt;();
-    char[] letters = input.toCharArray();
-    set.add(letters[0]);
-
-    int start = 0;
-    String longest = input.substring(0, 1);
-
-    for (int i = 1; i &lt; input.length(); i++) {
-        if (set.add(letters[i])) {
-            if (set.size() &gt; 2) {
-                // first, update the longest substring that exists before i
-                if (i - start &gt; longest.length()) {
-                    longest = input.substring(start, i);
-                }
-                // clear and rebuild the HashSet
-                set.clear();
-                set.add(letters[i]);
-                set.add(letters[i - 1]);
-                // remove 1 char entirely from current substring
-                int p = i - 1;
-                while (p &gt; 0 &amp;&amp; letters[p] == letters[p - 1]) {
-                    p--;
-                }
-                start = p;
-            }
-        }
-    }
-    if (input.length() - start &gt; longest.length()) {
-        longest = input.substring(start);
-    }
-    return longest;
-}
-</code></pre>
-
-<p><strong>third solution</strong>, pay attention to &lsquo;lastGroupStart&rsquo;.</p>
-
-<pre><code>// Find the first letter that is not equal to the first one, 
-// or return the entire string if it consists of one type of characters
-int start = 0;
-int i = 1;
-while (i &lt; str.length() &amp;&amp; str[i] == str[start])
-    i++;
-if (i == str.length())
-    return str;
-
-// The main algorithm
-char[2] chars = {str[start], str[i]};
-int lastGroupStart = 0;
-while (i &lt; str.length()) {
-    if (str[i] == chars[0] || str[i] == chars[1]) {
-        if (str[i] != str[i - 1])
-            lastGroupStart = i;
-    }
-    else {
-        //TODO: str.substring(start, i) is a locally maximal string; 
-        //      compare it to the longest one so far
-        start = lastGroupStart;
-        lastGroupStart = i;
-        chars[0] = str[start];
-        chars[1] = str[lastGroupStart];
-    }
-    i++;
-}
-//TODO: After the loop, str.substring(start, str.length()) 
-//      is also a potential solution.
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/25">&larr; Older</a>
@@ -1134,13 +1082,13 @@ while (i &lt; str.length()) {
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (42)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (43)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (92)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (96)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1160,15 +1108,15 @@ while (i &lt; str.length()) {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/01/11/longest-repeating-substring/">[Amazon] Longest Repeating Substring</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a>
+        <a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/">[Google] Check if Repeating Subsequence Exists</a>
       </li>
     
   </ul>

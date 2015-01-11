@@ -9,10 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given s1, s2, s3, find whether s3 is formed by the interleaving of s1 and s2. For example,
-Given:
-s1 = "aabcc",
-s2 = "dbbca", When s3 &hellip;">
+  <meta name="description" content="Question link Given a binary tree, return the zigzag level order traversal of its nodes&#8217; values. (ie, from left to right, then right to left &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +78,918 @@ s2 = "dbbca", When s3 &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/25/Binary-Tree-Zigzag-Level-Order-Traversal/">[LeetCode 103] Binary Tree Zigzag Level Order Traversal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/25/Binary-Tree-Zigzag-Level-Order-Traversal/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Binary-Tree-Zigzag-Level-Order-Traversal/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-zigzag-level-order-traversal/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a binary tree, return the <i>zigzag level order</i> traversal of its nodes&#8217; values. (ie, from left to right, then right to left for the next level and alternate between).</p>
+
+<p>
+For example:<br>
+Given binary tree <code>{3,9,20,#,#,15,7}</code>,<br>
+</p><pre>    3
+   / \
+  9  20
+    /  \
+   15   7
+</pre>
+<p></p>
+<p>
+return its zigzag level order traversal as:<br>
+</p><pre>[
+  [3],
+  [20,9],
+  [15,7]
+]
+</pre>
+<p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This question is based on &ldquo;Binary Tree Level Order Traversal&rdquo;</strong>.</p>
+
+<p>Altough this is difficulty level 4, the real difficult part is solving &ldquo;Binary Tree Level Order Traversal&rdquo;. If that question is solved, only slight modification is needed for this question.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Instead of using queue</strong> like in &ldquo;Binary Tree Level Order Traversal&rdquo;, <strong>this question is solved by using Stack</strong>. And it&rsquo;s not hard to see why. The only additional things to note:</p>
+
+<ol>
+<li><p>There is no &lsquo;single stack solution&rsquo;, we must use <strong>2 stacks</strong>. (because when push, it&rsquo;s pushed to top).</p></li>
+<li><p>Keep a boolean variable to remember rightToLeft or leftToRight.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>First, standard BFS solution</strong> using 2 stacks.</p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; zigzagLevelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    Stack&lt;TreeNode&gt; q = new Stack&lt;TreeNode&gt;();
+    q.push(root);
+    boolean reverse = true;
+    while (! q.isEmpty()) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+        Stack&lt;TreeNode&gt; qq = new Stack&lt;TreeNode&gt;();
+        int curSize = q.size();
+        for (int i = 0; i &lt; curSize; i ++) {
+            TreeNode node = q.pop();
+            ans.get(ans.size() - 1).add(node.val);
+            if (reverse) {
+                if (node.left != null) qq.push(node.left);
+                if (node.right != null) qq.push(node.right);
+            }
+            else {
+                if (node.right != null) qq.push(node.right);
+                if (node.left != null) qq.push(node.left);
+            }
+        }
+        q = qq;
+        reverse = ! reverse;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Second, DFS solution written by me</strong>, and yes, I love DFS more.</p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; zigzagLevelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    helper(ans, root, 1);
+    return ans;
+}
+
+private void helper(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, TreeNode node, int level) {
+    if (node == null) return;
+    if (ans.size() &lt; level) {
+        ArrayList&lt;Integer&gt; lv = new ArrayList&lt;Integer&gt;();
+        lv.add(node.val);
+        ans.add(lv);
+    }
+    else {
+        if (level % 2 == 0) 
+            ans.get(level - 1).add(0, node.val);
+        else
+            ans.get(level - 1).add(node.val);
+    }
+    helper(ans, node.left, level + 1);
+    helper(ans, node.right, level + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal-II/">[LeetCode 107] Binary Tree Level Order Traversal II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Binary-Tree-Level-Order-Traversal-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-level-order-traversal-ii/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a binary tree, return the <i>bottom-up level order</i> traversal of its nodes&#8217; values. (ie, from left to right, level by level from leaf to root).</p>
+
+<p>
+For example:<br>
+Given binary tree <code>{3,9,20,#,#,15,7}</code>,<br>
+</p><pre>    3
+   / \
+  9  20
+    /  \
+   15   7
+</pre>
+<p></p>
+<p>
+return its bottom-up level order traversal as:<br>
+</p><pre>[
+  [15,7]
+  [9,20],
+  [3],
+]
+</pre>
+<p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is the same question as previous one</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>There are also 2 solution: BFS and DFS</strong>.</p>
+
+<p>I post BFS code below. Only 2 lines are different: ans.get() and ans.add().</p>
+
+<h3>Code</h3>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrderBottom(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    Queue&lt;TreeNode&gt; q = new LinkedList&lt;TreeNode&gt;();
+    q.add(root);
+    while (! q.isEmpty()) {
+        ans.add(0, new ArrayList&lt;Integer&gt;());
+        int curSize = q.size();
+        for (int i = 0; i &lt; curSize; i ++) {
+            TreeNode node = q.remove();
+            ans.get(0).add(node.val);
+            if (node.left != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
+        }
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal/">[LeetCode 102] Binary Tree Level Order Traversal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Binary-Tree-Level-Order-Traversal/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-level-order-traversal/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a binary tree, return the <i>level order</i> traversal of its nodes&#8217; values. (ie, from left to right, level by level).</p>
+
+<p>
+For example:<br>
+Given binary tree <code>{3,9,20,#,#,15,7}</code>,<br>
+</p><pre>    3
+   / \
+  9  20
+    /  \
+   15   7
+</pre>
+<p></p>
+<p>
+return its level order traversal as:<br>
+</p><pre>[
+  [3],
+  [9,20],
+  [15,7]
+]
+</pre>
+<p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a really classic question</strong>.</p>
+
+<p>It is not difficult, however, it&rsquo;s important to understand 2 different ways to solve this problem: <strong>DFS and BFS</strong>.</p>
+
+<p><strong>The different between Inorder, preorder, postorder and Level-order</strong> is explained very well in <a href="http://leetcode.com/2010/09/printing-binary-tree-in-level-order.html">this post</a>.</p>
+
+<blockquote><p>pre-order, in-order, and post-order tree traversal are called Depth First Search (DFS), since they visit the tree by proceeding deeper and deeper until it reaches the leaf nodes.</p>
+
+<p>DFS uses a data structure called Stack and is commonly implemented using recursion. If recursion is not allowed, we can simulate the recursion by using iterative method with the help of stack. For example in the question &ldquo;Binary Search Tree In-Order Traversal&rdquo;, we have a iterative DFS solution using a stack.</p>
+
+<p>The most natural solution for level-order traversal is Breadth First Search (BFS), since it visits the nodes level by level. BFS requires the use of a data structure called Queue.</p></blockquote>
+
+<p><strong>To summarize, Inorder, preorder and postorder is DFS implemented by Stack. Level-order is BFS implemented by Queue</strong>. It is very important to forever make it clear and take it into your grave 60 years later (maybe more, if not less).</p>
+
+<p>One mor thing, <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Stack.html">Stack</a> is a Java class that inherit from <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Vector.html">Vector</a>.</p>
+
+<blockquote><p>The Vector class implements a growable array of objects. Like an array, it contains components that can be accessed using an integer index. However, the size of a Vector can grow or shrink as needed to accommodate adding and removing items after the Vector has been created.</p>
+
+<p>ArrayList is roughly equivalent to Vector, except that it is unsynchronized.</p></blockquote>
+
+<p>However, <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Queue.html">Queue</a> is an interface, not a class. What is the most popular Queue implementation in Java? It is not <strong>PriorityQueue</strong>, it&rsquo;s <strong>LinkedList</strong>!</p>
+
+<h3>Solution</h3>
+
+<p><strong>As said, level-order is BFS</strong>. The first code posted below is implemented with a queue. A lot of people used 2 queues, which I don&rsquo;t like.</p>
+
+<p><strong>Second code is DFS</strong>. This is my initial solution, maybe because I&rsquo;m more familiar with DFS.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, BFS code using 1 queue</strong></p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    int level = 0;
+    Queue&lt;TreeNode&gt; q = new LinkedList&lt;TreeNode&gt;();
+    q.add(root);
+    while (! q.isEmpty()) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+        int curSize = q.size();
+        for (int i = 0; i &lt; curSize; i ++) {
+            TreeNode node = q.remove();
+            ans.get(level).add(node.val);
+            if (node.left != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
+        }
+        level ++;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>First code revised</strong>: I do not really need the variable &lsquo;level&rsquo;.</p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    Queue&lt;TreeNode&gt; q = new LinkedList&lt;TreeNode&gt;();
+    q.add(root);
+    while (! q.isEmpty()) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+        int curSize = q.size();
+        for (int i = 0; i &lt; curSize; i ++) {
+            TreeNode node = q.remove();
+            ans.get(ans.size() - 1).add(node.val);
+            if (node.left != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
+        }
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Second, DFS code</strong></p>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+    if (root == null) return ans;
+    traverse(ans, root, 0);
+    return ans;
+}
+
+private void traverse (ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans, TreeNode node, int level) {
+    if (node == null) return;
+    if (ans.size() &gt;= level + 1) 
+        ans.get(level).add(node.val);
+    else {
+        ArrayList&lt;Integer&gt; temp = new ArrayList&lt;Integer&gt;();
+        temp.add(node.val);
+        ans.add(temp);
+    }
+    traverse(ans, node.left, level + 1);
+    traverse(ans, node.right, level + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/24/Restore-IP-Addresses/">[LeetCode 93] Restore IP Addresses</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/24/Restore-IP-Addresses/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/24/Restore-IP-Addresses/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/restore-ip-addresses/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a string containing only digits, restore it by returning all possible valid IP address combinations.</p>
+
+<p>
+For example:<br>
+Given <code>"25525511135"</code>,
+</p>
+<p>
+return <code>["255.255.11.135", "255.255.111.35"]</code>. (Order does not matter)
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This is question can be solved by <strong>either DFS or Brute Force</strong>, both are fine.</p>
+
+<h3>Solution</h3>
+
+<p><strong>The DFS solution is obvious, I have the code for it</strong>.</p>
+
+<p>However, there&rsquo;s <a href="http://blog.csdn.net/u011095253/article/details/9158449">another person</a> who wrote much less code while implementing the same solution as mine. I will post his code as a good example to learn.</p>
+
+<p><strong>The brute force solution in this case</strong> does not sound like a bad idea. This is the <strong>most top-rated idea on <a href="https://oj.leetcode.com/discuss/77/restore-ip-addresses">official forum</a></strong> as well.</p>
+
+<blockquote><p> You can get points&#8217; positions by i, j, k. Using these positions, you can divide s into candidate ip-form. Then, you can judge whether the candidate fits ip. To improve the efficiency, you can narrow the scope of i, j, k.</p></blockquote>
+
+<p>So, this BF code is also posted below.</p>
+
+<p>Just one more thing. I tested the <strong>exact same BF code written in C++</strong>. Compared to the <strong>420ms</strong> it took Java to pass OJ test, C++ takes <strong>8ms</strong> only! I was kind of shocked.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, DFS, my code</strong></p>
+
+<p>Note: I could have just insert as string, so that convert() method would not be needed.</p>
+
+<pre><code>public ArrayList&lt;String&gt; restoreIpAddresses(String s) {
+    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    helper(ans, new ArrayList&lt;String&gt;(), s, 0);
+    return ans;
+}
+
+private void helper(ArrayList&lt;String&gt; ans, ArrayList&lt;String&gt; cur, String s, int from) {
+    int len = s.length();
+    if (from &gt;= len) return;
+    if (cur.size() == 3) {
+        String lastStr = s.substring(from);
+        if (isValidIpNumber(lastStr)) {
+            ArrayList&lt;String&gt; oneAns = new ArrayList&lt;String&gt;(cur);
+            oneAns.add(lastStr);
+            ans.add(convert(oneAns));
+        }
+    }
+    else {
+        // cur.size less than 3, so get next num (length = 1, 2 or 3)
+        for (int i = 1; i &lt;= 3 &amp;&amp; from + i &lt;= len; i ++) {
+            String nextStr = s.substring(from, from + i);
+            if (isValidIpNumber(nextStr)) {
+                cur.add(nextStr);
+                helper(ans, cur, s, from + i);
+                cur.remove(cur.size() - 1);
+            }
+        }
+    }
+}
+
+private boolean isValidIpNumber(String str) {
+    if (str.length() == 0 || str.length() &gt; 3) return false;
+    if (str.charAt(0) == '0' &amp;&amp; str.length() != 1) return false;
+    int num = Integer.parseInt(str);
+    return (0 &lt;= num &amp;&amp; num &lt;= 255);
+}
+
+private String convert(ArrayList&lt;String&gt; l) {
+    String ans = "";
+    for (String a: l)
+        ans += "." + a;
+    return ans.substring(1);
+}
+</code></pre>
+
+<p><strong>Second, DFS, shorter version code</strong></p>
+
+<pre><code>public ArrayList&lt;String&gt; restoreIpAddresses(String s) {
+    ArrayList&lt;String&gt; res = new ArrayList&lt;String&gt;();  
+    if (s.length()&lt;4||s.length()&gt;12) return res;  
+    dfs(s,"",res,0);  
+    return res;  
+}  
+
+public void dfs(String s, String tmp, ArrayList&lt;String&gt; res, int count){  
+    if (count == 3 &amp;&amp; isValid(s)) {  
+        res.add(tmp + s);  
+        return;  
+    }  
+    for(int i=1; i&lt;4 &amp;&amp; i&lt;s.length(); i++){  
+        String substr = s.substring(0,i);  
+        if (isValid(substr)){  
+            dfs(s.substring(i), tmp + substr + '.', res, count+1);  
+        }  
+    }  
+}  
+
+public boolean isValid(String s){  
+    if (s.charAt(0)=='0') return s.equals("0");  
+    int num = Integer.parseInt(s);  
+    return num&lt;=255 &amp;&amp; num&gt;0;  
+}  
+</code></pre>
+
+<p><strong>Third, BF code using triple nested loop (Java)</strong></p>
+
+<pre><code>public ArrayList&lt;String&gt; restoreIpAddresses(String s) {
+    ArrayList&lt;String&gt; res = new ArrayList&lt;String&gt;();  
+    if (s.length() &gt; 12 || s.length() &lt; 4) return res;
+    for (int i = 1; i &lt; 4; i ++) {
+        String first = s.substring(0, i);
+        if (! isValid(first)) continue;
+        for (int j = 1; i + j &lt; s.length() &amp;&amp; j &lt; 4; j ++) {
+            String second = s.substring(i, i + j);
+            if (! isValid(second)) continue;
+            for (int k = 1; i + j + k &lt; s.length() &amp;&amp; k &lt; 4; k ++) {
+                String third = s.substring(i + j, i + j + k);
+                String fourth = s.substring(i + j + k);
+                if (isValid(third) &amp;&amp; isValid(fourth)) 
+                    res.add(first + "." + second + "." + third + "." + fourth);
+            }
+        }
+    }
+    return res;
+}  
+
+public boolean isValid(String s) {
+    if (s.length() &gt; 1 &amp;&amp; s.charAt(0) == '0') return false;
+    return 0 &lt;= Integer.parseInt(s) &amp;&amp; Integer.parseInt(s) &lt;= 255;  
+}
+</code></pre>
+
+<p><strong>Fourth, same BF code (C++)</strong></p>
+
+<pre><code>vector&lt;string&gt; restoreIpAddresses(string s) {
+    vector&lt;string&gt; res;
+    if (s.size() &gt; 12 || s.size() &lt; 4) return res;
+    for (int i=1; i&lt;4; i++) {
+        string first = s.substr(0, i);
+        if (!isValid(first)) continue;
+        for (int j=1; i+j &lt; s.size() &amp;&amp; j&lt;4; j++) {
+            string second = s.substr(i, j);
+            if (!isValid(second)) continue;
+            for (int k=1; i+j+k &lt; s.size() &amp;&amp; k&lt;4; k++) {
+                string third = s.substr(i+j, k);
+                string fourth = s.substr(i+j+k);
+                if (isValid(third) &amp;&amp; isValid(fourth)) {
+                    string temp = first+"."+second+"."+third+"."+fourth;
+                    res.push_back(temp);
+                }
+            }
+        }
+    }
+    return res;
+}
+
+bool isValid(string s) {
+    if (s.size() &gt; 1 &amp;&amp; s[0] == '0') return false;
+    if (stoi(s) &lt;= 255 &amp;&amp; stoi(s) &gt;= 0) return true;
+    else return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/24/Maximal-Rectangle/">[LeetCode 85] Maximal Rectangle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/24/Maximal-Rectangle/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/24/Maximal-Rectangle/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/maximal-rectangle/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a 2D binary matrix filled with 0&#8217;s and 1&#8217;s, find the largest rectangle containing all ones and return its area.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a very difficult question</strong>. It is similar and also related to &ldquo;<strong>Largest Rectangle in Histogram</strong>&rdquo;.</p>
+
+<p>Two solutions are available for this question.</p>
+
+<p><strong>First solution is O(n<sup>2</sup>)</strong>. This makes use of solution of &ldquo;<strong>Largest Rectangle in Histogram</strong>&rdquo;, which is to say, we are finding the max rectangle for each row (as base) in the matrix.</p>
+
+<p>This solution is very easy to write once you realize this connection &ndash; I guess not many people would. That&rsquo;s why I have the next solution.</p>
+
+<p><strong>Second solution is a clever Brute Force, time complexity is O(n<sup>3</sup>)</strong>. The fundamental idea is to make a 2-D array storing the number of &lsquo;1&rsquo;s occured before current node (inclusive). After this is done, there&rsquo;re 2 different ways to implement. Read code 2 and code 3.</p>
+
+<h3>Solution</h3>
+
+<p>FIrst code is easy.</p>
+
+<p>Second code is the idea from <a href="http://blog.csdn.net/fightforyourdream/article/details/17711893">this blog</a>. For every node in the 2-D array, checks all possible rectangles ending at this node (which mean check all the way up/left).</p>
+
+<p>Third code from <a href="http://leetcodenotes.wordpress.com/2013/10/19/leetcode-maximal-rectangle-0101%E7%BB%84%E6%88%90%E7%9A%84%E7%9F%A9%E9%98%B5%EF%BC%8C%E6%B1%82%E9%87%8C%E9%9D%A2%E5%85%A8%E6%98%AF1%E7%9A%84%E7%9F%A9%E5%BD%A2%E7%9A%84%E6%9C%80%E5%A4%A7%E9%9D%A2/">this blog</a>. It is similar to second, but it&rsquo;s checking all rectangles that shared same width as current line. So it&rsquo;s checking up then down, both direction. Read the code and it&rsquo;s easy to understand.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, solution making use of &ldquo;Largest rectangle&rdquo;</strong></p>
+
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0 || matrix[0].length == 0) return 0;
+    int[][] m = new int[matrix.length][matrix[0].length];
+    for (int i = 0; i &lt; matrix.length; i ++) {
+        for (int j = 0; j &lt; matrix[i].length; j ++) {
+            if (i == 0 || matrix[i][j] == '0') 
+                m[i][j] = matrix[i][j] - '0';
+            else 
+                m[i][j] = m[i-1][j] + 1;
+        }
+    }
+    int max = 0;
+    for (int i = 0; i &lt; m.length; i ++) {
+        max = Math.max(max, largestRectangleArea(m[i]));
+    }
+    return max;
+}
+
+// the following code is the solution for "Largest Rectangle in Histogram"
+public int largestRectangleArea(int[] height) {
+    int len = height.length;
+    if (len == 0) return 0;
+    int max = Integer.MIN_VALUE;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    for (int i = 0; i &lt; len; i ++) {
+        if (stack.isEmpty() || height[stack.peek()] &lt;= height[i]) stack.push(i);
+        else {
+            int temp = stack.pop();
+            // here I must do a check of stack.isEmpty(), 
+            // And do nto use (i-height[temp]) instead use (i-stack.peek()-1])
+            max = Math.max(max, height[temp] * 
+                (stack.isEmpty() ? i : (i - stack.peek() - 1)));
+            i --;
+        }
+    }
+    while (! stack.isEmpty()) {
+            int temp = stack.pop();
+            max = Math.max(max, height[temp] * 
+                (stack.isEmpty() ? len : (len - stack.peek() - 1)));
+    }
+    return max;
+}
+</code></pre>
+
+<p><strong>Second </strong></p>
+
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    int rows = matrix.length;  
+    if (rows == 0) return 0;  
+    int cols = matrix[0].length;  
+    int [][] hOnes = new int[rows][cols];
+    int max = 0;
+    for (int i=0; i&lt;rows; i++)
+        for(int j=0; j&lt;cols; j++) 
+            if(matrix[i][j] == '1')
+                if(j == 0) hOnes[i][j] = 1;
+                else hOnes[i][j] = hOnes[i][j-1] + 1;
+    for (int i=0; i&lt;rows; i++)
+        for (int j=0; j&lt;cols; j++){  
+            if (hOnes[i][j] != 0){  
+                int minI = i;
+                int minRowWidth = hOnes[i][j];
+                while (minI &gt;= 0){
+                    minRowWidth = Math.min(minRowWidth, hOnes[minI][j]);  
+                    int area = minRowWidth * (i-minI+1);  
+                    max = Math.max(max, area);  
+                    minI--;  
+                }
+            }
+        }
+    return max;  
+}
+</code></pre>
+
+<p><strong>Third</strong></p>
+
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0) return 0;
+    int res = 0;
+    int m = matrix.length, n = matrix[0].length;
+    int[][] d = new int[m][n];
+    for (int i = 0; i &lt; m; i++) {
+        d[i][0] = matrix[i][0] - '0';
+        for (int j = 1; j &lt; n; j++) 
+            d[i][j] = matrix[i][j] == '1' ? d[i][j - 1] + 1 : 0;
+    }
+    for (int i = 0; i &lt; m; i++) 
+        for (int j = 0; j &lt; n; j++) 
+            res = Math.max(res, expand(d, i, j));
+    return res;
+}
+
+private int expand(int[][] d, int I, int J) {
+    int height = 0, width = d[I][J];
+    //go up
+    for (int i = I - 1; i &gt;= 0; i--)
+        if (d[i][J] &gt;= width) height++;
+        else break;
+    //go down
+    for (int i = I; i &lt; d.length; i++) 
+        if (d[i][J] &gt;= width) height++;
+        else break;
+    return width * height;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -848,756 +1757,6 @@ return <code>1-&gt;2-&gt;2-&gt;4-&gt;3-&gt;5</code>.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Merge-Sorted-Array/">[LeetCode 88] Merge Sorted Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/23/Merge-Sorted-Array/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/23/Merge-Sorted-Array/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/merge-sorted-array/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given two sorted integer arrays A and B, merge B into A as one sorted array.</p>
-
-<p>
-<b>Note:</b><br>
-You may assume that A has enough space (size that is greater or equal to <i>m</i> + <i>n</i>) to hold additional elements from B. The number of elements initialized in A and B are <i>m</i> and <i>n</i> respectively.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an easy question.</strong></p>
-
-<h3>Solution</h3>
-
-<p>Just insert from the end to the head.</p>
-
-<h3>Code</h3>
-
-<pre><code>public void merge(int A[], int m, int B[], int n) {
-    int p1 = m - 1, p2 = n - 1;
-    for (int i = m + n - 1; i &gt;= 0; i --){
-        if (p2 == -1) return;
-        if (p1 == -1) {
-            for (int j = 0; j &lt;= p2; j++) A[j] = B[j];
-            return;
-        }
-        if (A[p1] &gt; B[p2]) A[i] = A[p1--];
-        else A[i] = B[p2--];
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Largest-Rectangle-in-Histogram/">[LeetCode 84] Largest Rectangle in Histogram</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/23/Largest-Rectangle-in-Histogram/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/23/Largest-Rectangle-in-Histogram/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/largest-rectangle-in-histogram/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given <i>n</i> non-negative integers representing the histogram&#8217;s bar height where the width of each bar is 1, find the area of largest rectangle in the histogram.
-</p>
-
-<p>
-<img src="http://www.leetcode.com/wp-content/uploads/2012/04/histogram.png"><br>
-</p><p style="font-size: 11px">Above is a histogram where width of each bar is 1, given height = <code>[2,1,5,6,2,3]</code>.</p>
-<p></p>
-
-<p>
-<img src="http://www.leetcode.com/wp-content/uploads/2012/04/histogram_area.png"><br>
-</p><p style="font-size: 11px">The largest rectangle is shown in the shaded area, which has area = <code>10</code> unit.</p>
-<p></p>
-
-<p>
-For example,<br>
-Given height = <code>[2,1,5,6,2,3]</code>,<br>
-return <code>10</code>.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an extremely difficult question</strong>.</p>
-
-<p>The idea of the solution (using stack) seems understandable, but can be very tricky when coding.</p>
-
-<p><strong>The basic idea is, always keep increasing elements in the stack</strong>. When I see a decrease in number, pop stack. And I calculate max area only when poping elements. In the end, a &lsquo;0&rsquo; is inserted to the end, so that all stack item will be popped (and at the same time, max area been calculated).</p>
-
-<p>Sorry if I did not explain well enough. <a href="http://www.geeksforgeeks.org/largest-rectangle-under-histogram/">Here</a> is a better one:</p>
-
-<blockquote cite="http://www.geeksforgeeks.org/largest-rectangle-under-histogram/">
-<p>
-We traverse all bars from left to right, maintain a stack of bars.  Every bar is pushed to stack once.  A bar is popped from stack when a bar of smaller height is seen.  When a bar is popped, we calculate the area with the popped bar as smallest bar. How do we get left and right indexes of the popped bar – the current index tells us the ‘right index’ and index of previous item in stack is the ‘left index’.  Following is the complete algorithm.
-</p>
-<p><strong>1) </strong>Create an empty stack.</p>
-<p><strong>2) </strong>Start from first bar, and do following for every bar ‘hist[i]‘ where ‘i’ varies from 0 to n-1.<br>
-……<strong>a)</strong> If stack is empty or hist[i] is higher than the bar at top of stack, then push ‘i’ to stack.<br>
-……<strong>b)</strong> If this bar is smaller than the top of stack, then keep removing the top of stack while top of the stack is greater. Let the removed bar be hist[tp]. Calculate area  of rectangle with hist[tp] as smallest bar. For hist[tp], the ‘left index’ is previous (previous to tp) item in stack and ‘right index’ is ‘i’ (current index).</p>
-<p><strong>3)</strong> If the stack is not empty, then one by one remove all bars from stack and do step 2.b for every removed bar.</p>
-</blockquote>
-
-
-<p>Time complexity of the stack solution is <strong>O(n)</strong>. (Another algo analysis article <a href="http://tech-queries.blogspot.sg/2011/03/maximum-area-rectangle-in-histogram.html">here</a>)</p>
-
-<h3>Solution</h3>
-
-<p><strong>I wrote the code using idea from <a href="http://jane4532.blogspot.sg/2013/07/longest-rectangle-in-histogramleetcode.html">blog</a></strong>. It works, but there are 2 things that I got wrong.</p>
-
-<p><strong>First, if elements are equal</strong>. I shall also push it. I can not simply skip it, I don&rsquo;t know why!</p>
-
-<blockquote><p>if (stack.isEmpty() || cur >= height[stack.peek()])</p></blockquote>
-
-<p><strong>Second, about how to calculate the width of the rectangle</strong>. I used this before:</p>
-
-<blockquote><p>int width = stack.isEmpty() ? p : p &ndash; h;</p></blockquote>
-
-<p>It&rsquo;s wrong, I must get the value of next element from stack, and then calculate width. Why? there might be element been popped before, which locate between these 2 elements in stack.</p>
-
-<blockquote><p>int width = stack.isEmpty() ? p : p &ndash; stack.peek() &ndash; 1;</p></blockquote>
-
-<p><strong>Updated on July 4th, 2014</strong>: the above 2 points are very valid, especially the second. Keep in mind:</p>
-
-<ol>
-<li><p>The values in stack means the last position that a height can be found. For example, height is (2, 10, 5) then the stack would have (2, removed, 5). When calculating the area for height 5, we should note the removed space is in consideration as well.</p></li>
-<li><p>So, when equal height is found, pop it. Because you won&rsquo;t need it any more. The stack only stores last position this height is found.</p></li>
-<li><p>When stack is empty, the width of rectange should be calculated from 0.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>My code written on July 4th, 2014</strong></p>
-
-<pre><code>public int largestRectangleArea(int[] height) {
-    if (height == null || height.length == 0) {
-        return 0;
-    }
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    stack.add(0);
-    int len = height.length;
-    int area = 0;
-    for (int i = 1; i &lt;= len; i++) {
-        int h = i == len ? 0 : height[i];
-        // pop a element and calculate its max area
-        // pop until the top element is smaller than h, then push h
-        while (!stack.isEmpty() &amp;&amp; h &lt;= height[stack.peek()]) {
-            int pos = stack.pop();
-            int width = stack.isEmpty() ? i : i - stack.peek() - 1;
-            area = Math.max(area, height[pos] * width);
-        }
-        stack.push(i);
-    }
-    return area;
-}
-</code></pre>
-
-<p><strong>My code written on July 18th, 2014</strong></p>
-
-<pre><code>public int largestRectangleArea(int[] height) {
-    if (height == null || height.length == 0) {
-        return 0;
-    }
-    int maxArea = Integer.MIN_VALUE;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    int p = 0;
-    while (p &lt; height.length) {
-        if (stack.isEmpty() || height[stack.peek()] &lt;= height[p]) {
-            stack.push(p);
-            p++;
-        } else {
-            int h = stack.pop();
-            int w = stack.isEmpty() ? p : p - stack.peek() - 1;
-            int area = height[h] * w;
-            maxArea = Math.max(maxArea, area);
-        }
-    }
-    while (!stack.isEmpty()) {
-        int h = stack.pop();
-        int w = stack.isEmpty() ? p : p - stack.peek() -1;
-        int area = height[h] * w;
-        maxArea = Math.max(maxArea, area);
-    }
-    return maxArea;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Gray-Code/">[LeetCode 89] Gray Code</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/23/Gray-Code/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/23/Gray-Code/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/gray-code/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>The gray code is a binary numeral system where two successive values differ in only one bit.</p>
-
-<p>Given a non-negative integer <i>n</i> representing the total number of bits in the code, print the sequence of gray code. A gray code sequence must begin with 0.</p>
-
-<p>For example, given <i>n</i> = 2, return <code>[0,1,3,2]</code>. Its gray code sequence is:</p>
-<pre>00 - 0
-01 - 1
-11 - 3
-10 - 2
-</pre>
-
-<p><b>Note:</b><br>
-For a given <i>n</i>, a gray code sequence is not uniquely defined.
-</p>
-<p>For example, <code>[0,2,3,1]</code> is also a valid gray code sequence according to the above definition.</p>
-
-<p>For now, the judge is able to judge based on one instance of gray code sequence. Sorry about that.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a qure mathematics question.</strong></p>
-
-<p><a href="http://en.wikipedia.org/wiki/Gray_code">Gray Code</a> is a very classic binary system, and we shall keep in mind clearly of its mathematical solution.</p>
-
-<h3>Solution</h3>
-
-<p><strong>My solution is using recursion</strong>. First get the answer of input value = (n-1), then from that list, generate answer for input = n. <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-gray-code.html">A post</a> talked about this.</p>
-
-<p><strong>The math approach to solve this problem is much more simpler</strong>. The (i)th element of Gray Code is calculated by the following method (I learnt from <a href="http://blog.csdn.net/worldwindjp/article/details/21536103">this blog</a>):</p>
-
-<blockquote><p>binaryToGray = (i >> 1) ^ i;</p></blockquote>
-
-<p>For example,</p>
-
-<blockquote><p>00 &ndash;> 00</p>
-
-<p>01 &ndash;> 01</p>
-
-<p>10 &ndash;> 11</p>
-
-<p>11 &ndash;> 10</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>First, my solution</strong></p>
-
-<pre><code>public ArrayList&lt;Integer&gt; grayCode(int n) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    if (n == 0) {
-        ans.add(0);
-        return ans;
-    }
-    ArrayList&lt;Integer&gt; half = grayCode(n-1);
-    ans.addAll(half);
-    for (int i = half.size() - 1; i &gt;= 0; i -- ) 
-        ans.add(half.get(i) + (int)Math.pow(2, n-1));
-    return ans;
-}
-</code></pre>
-
-<p><strong>Second, math solution</strong></p>
-
-<pre><code>public ArrayList&lt;Integer&gt; grayCode(int n) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    for (int i = 0; i &lt; 1 &lt;&lt; n; i ++) 
-        ans.add((i &gt;&gt; 1) ^ i);
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/23/Decode-Ways/">[LeetCode 91] Decode Ways</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-23T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/23/Decode-Ways/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/23/Decode-Ways/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/decode-ways/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-A message containing letters from <code>A-Z</code> is being encoded to numbers using the following mapping:
-</p>
-
-<pre>'A' -&gt; 1
-'B' -&gt; 2
-...
-'Z' -&gt; 26
-</pre>
-
-<p>
-Given an encoded message containing digits, determine the total number of ways to decode it.
-</p>
-
-<p>
-For example,<br>
-Given encoded message <code>"12"</code>,
-it could be decoded as <code>"AB"</code> (1 2) or <code>"L"</code> (12).
-</p>
-
-<p>
-The number of ways decoding <code>"12"</code> is 2.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This question is easy to think, but hard to write.</strong></p>
-
-<p>Why? Because there are a lot of cases that the decode ways = 0. For example, input = &ldquo;02&rdquo; or &ldquo;50&rdquo;. We must handle those cases well. Also, boundary cases can cause some trouble.</p>
-
-<h3>Solution</h3>
-
-<p><strong>DP solution, the transformation function is:</strong></p>
-
-<blockquote><p>Count[i] = Count[i-1]  if only S[i-1] is valid</p>
-
-<p>Count[i] = Count[i-1] + Count[i-2] if S[i-1] and S[i-2] both valid</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>First, my code.</strong></p>
-
-<pre><code>public int numDecodings(String s) {
-    int len = s.length();
-    if (len == 0) return 0;
-    // now len &gt;= 1
-    int[] dp = new int[len];
-    if (s.charAt(0) == '0') dp[0] = 0;
-    else dp[0] = 1;
-    if (len == 1) return dp[0];
-    // now len &gt;= 2
-    for (int i = 1; i &lt; len; i ++) {
-        if (s.charAt(i) != '0') dp[i] += dp[i-1];
-        int doubleDigit = Integer.parseInt(s.substring(i-1, i+1));
-        if (s.charAt(i-1) != '0' &amp;&amp; 1 &lt;= doubleDigit &amp;&amp; doubleDigit &lt;= 26)
-            if (i != 1) dp[i] += dp[i-2];
-            else dp[i] += 1;
-    }
-    return dp[len - 1];
-}
-</code></pre>
-
-<p><strong>Second, code from <a href="http://blog.csdn.net/u011095253/article/details/9248109">this blog</a>.</strong></p>
-
-<p>The only difference is an additional &lsquo;1&rsquo; at position 0 of the dp array. This helps simply the code a lot!</p>
-
-<pre><code>public int numDecodings(String s) {  
-    int n = s.length();  
-    if (n==0) return 0;  
-    int[] dp = new int[n+1];  
-    dp[0] = 1;  
-    if (isValid(s.substring(0,1))) dp[1] = 1;  
-    else dp[1] = 0;  
-    for(int i=2; i&lt;=n;i++){  
-        if (isValid(s.substring(i-1,i)))  
-            dp[i] = dp[i-1];  
-        if (isValid(s.substring(i-2,i)))  
-            dp[i] += dp[i-2];  
-    }  
-    return dp[n];  
-}  
-
-public boolean isValid(String s){  
-    if (s.charAt(0)=='0') return false;  
-    int code = Integer.parseInt(s);  
-    return code&gt;=1 &amp;&amp; code&lt;=26;  
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/22/Subsets-II/">[LeetCode 90] Subsets II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/22/Subsets-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/22/Subsets-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/subsets-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a collection of integers that might contain duplicates, <i>S</i>, return all possible subsets.
-</p>
-<p><b>Note:</b><br>
-</p><ul>
-<li>Elements in a subset must be in non-descending order.</li>
-<li>The solution set must not contain duplicate subsets.</li>
-</ul>
-<p></p>
-<p>
-For example,<br>
-If <b><i>S</i></b> = <code>[1,2,2]</code>, a solution is:
-</p>
-
-<pre>[
-  [2],
-  [1],
-  [1,2,2],
-  [2,2],
-  [1,2],
-  []
-]
-</pre><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a question based on &ldquo;Subsets&rdquo; question</strong>.</p>
-
-<p>Solution is similar, only need to add features to avoid duplication.</p>
-
-<h3>Solution</h3>
-
-<p>Based on the solution of previous question, I only add 1 variable called <strong>nonDupSize</strong>, which is the size that I need to merge new element with. For example, <strong>input = {1, 2, 3, 3}</strong></p>
-
-<blockquote><p>Initialize the subset:  {}</p>
-
-<p>Added element &ldquo;1&rdquo;: {}, <strong>{&ldquo;1&rdquo;}</strong> (1 more elements)</p>
-
-<p>Added element &ldquo;2&rdquo;: {}, {&ldquo;1&rdquo;}, <strong>{&ldquo;2&rdquo;}, {&ldquo;1&rdquo;, &ldquo;2&rdquo;}</strong> (2 more elements)</p>
-
-<p>Added element &ldquo;3&rdquo;: {}, {&ldquo;1&rdquo;}, {&ldquo;2&rdquo;}, {&ldquo;1&rdquo;, &ldquo;2&rdquo;}, <strong>{&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;3&rdquo;}, {&ldquo;2&rdquo;,&ldquo;3&rdquo;}, {&ldquo;1&rdquo;, &ldquo;2&rdquo;,&ldquo;3&rdquo;}</strong> (4 more elements)</p>
-
-<p>Added element &ldquo;3&rdquo;: {}, {&ldquo;1&rdquo;}, {&ldquo;2&rdquo;}, {&ldquo;1&rdquo;, &ldquo;2&rdquo;}, {&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;3&rdquo;}, {&ldquo;2&rdquo;,&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;2&rdquo;,&ldquo;3&rdquo;}, <strong>{&ldquo;3&rdquo;,&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;3&rdquo;,&ldquo;3&rdquo;}, {&ldquo;2&rdquo;,&ldquo;3&rdquo;,&ldquo;3&rdquo;}, {&ldquo;1&rdquo;,&ldquo;2&rdquo;,&ldquo;3&rdquo;,&ldquo;3&rdquo;}</strong> (4 more elements)</p></blockquote>
-
-<p>So instead of getting every list and merge with new element, I only get the lists of pre-calculated size (from bottom), and merge. Someone is having <a href="http://blog.csdn.net/perfect8886/article/details/22922785">similar solution</a> using a start-pointer.</p>
-
-<h3>Code</h3>
-
-<p><strong>my code</strong></p>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; subsetsWithDup(int[] num) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    ans.add(new ArrayList&lt;Integer&gt;());
-    Arrays.sort(num);
-    // In this solution I introduce a new variable: nonDupSize
-    int curSize = 1, nonDupSize = 1;
-    for (int i = 0; i &lt; num.length; i ++) {
-        curSize = ans.size();
-        if (i &gt; 0 &amp;&amp; num[i] != num[i - 1]) nonDupSize = curSize;
-        for (int j = curSize - nonDupSize; j &lt; curSize; j ++) {
-            ArrayList&lt;Integer&gt; cur = new ArrayList&lt;Integer&gt;(ans.get(j));
-            cur.add(num[i]);
-            ans.add(cur);
-        }
-    }
-    return ans;
-}
-</code></pre>
-
-<p><strong>Updated on June 12th</strong> &ndash; solution using the &lsquo;Permutation Model&rsquo;.</p>
-
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; subsetsWithDup(int[] num) {
-    List&lt;List&lt;Integer&gt;&gt; result = new ArrayList&lt;List&lt;Integer&gt;&gt;();
-    if(num == null || num.length == 0) {
-        return result;
-    }
-    Arrays.sort(num);
-    helper(result, new LinkedList&lt;Integer&gt;(), num, 0);
-    return result;
-}
-
-private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num, int position) {
-    ans.add(new LinkedList&lt;Integer&gt;(path));
-    for (int i = position; i &lt; num.length; i ++) {
-        if (i &gt; position &amp;&amp; num[i - 1] == num[i]) {
-            // if duplicate, only append num[position]
-            continue;
-        }
-        path.add(num[i]);
-        helper(ans, path, num, i + 1);
-        path.remove(path.size() - 1);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/39">&larr; Older</a>
@@ -1619,13 +1778,13 @@ private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; pat
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (42)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (43)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (92)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (96)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1645,15 +1804,15 @@ private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; pat
       </li>
     
       <li class="post">
+        <a href="/blog/2015/01/11/longest-repeating-substring/">[Amazon] Longest Repeating Substring</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a>
+        <a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/">[Google] Check if Repeating Subsequence Exists</a>
       </li>
     
   </ul>

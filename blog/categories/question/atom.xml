@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Question | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/question/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-11T19:01:38+08:00</updated>
+  <updated>2015-01-11T22:58:10+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -73,9 +73,9 @@ The solution is DP, with the following equation:
 
     last[i] = last position of character i in the given string.
 
-Equation: 
+__Equation__: 
 
-    __dp[i] = dp[last[i] - 1] + ... + dp[i - 1]__
+    dp[i] = dp[last[i] - 1] + ... + dp[i - 1]
 
 The final result is: 
 
@@ -83,13 +83,13 @@ The final result is:
 
 Example 1: 
 
-    Input   : _ A B C
+    Input   : - A B C
     dp array: 1 1 2 4
     Total = 8
 
 Example 2: 
 
-    Input   : _ A A C
+    Input   : - A A C
     dp array: 1 1 1 3
     Total = 6
 
@@ -103,142 +103,147 @@ This nice idea is from [this post](http://stackoverflow.com/a/5152203). Credit g
 
 ### Code
 
-
+to do
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Amazon] Mininum Range That Includes at Least One]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/10/minimum-range-inclueds-at-least-1/"/>
-    <updated>2015-01-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/10/minimum-range-inclueds-at-least-1</id>
+    <title type="html"><![CDATA[[Amazon] Longest Repeating Substring]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/11/longest-repeating-substring/"/>
+    <updated>2015-01-11T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/11/longest-repeating-substring</id>
     <content type="html"><![CDATA[### Question
 
-[link](http://www.careercup.com/question?id=5103437989543936)
+[link](http://www.careercup.com/question?id=9182781)
 
-> There are many sorted arrays. Find a minimum range, so that in each array there's at least one integer within this range.
+> Finding the longest repeated substring. 
+
+> Example: "banana" ==> "ana"
 
 ### Solution
 
-__Min-heap__. [source](http://www.careercup.com/question?id=16759664)
+There are 2 solutions: Suffix array, and Suffix tree. 
 
-> There are k lists of sorted integers. Make a min heap of size k containing 1 element from each list. Keep track of min and max element and calculate the range. 
+__1. Suffix array__. Simple code, explained [here](http://www.careercup.com/question?id=9182781).
 
-> In min heap, minimum element is at top. Delete the minimum element and another element instead of that from the same list to which minimum element belong. Repeat the process till any one of the k list gets empty. 
+> Bentley's programming pearl book has the simplest implementation (less than 15 lines code) which sort all suffix, and then check common prefix length among adjacent suffix. The time complexity is O(n^2logn) for sorting the suffix (which has avg length of O(n)). 
 
-### Code 
+A detailed step-by-step [explanation](http://nriverwang.blogspot.com/2013/04/longest-repeated-substring.html): 
 
-	public void printMinRange(int[][] input) {
-		Comparator<Pointer> compr = new HeapComparator(input);
-		// Note that we pass in 'input' arrays to the comparator
-		PriorityQueue<Pointer> heap = new PriorityQueue<Pointer>(SIZE, compr);
+    str = banana, its suffixes are:
+    banana
+    anana
+    nana
+    ana
+    na
+    a
 
-		int maxVal = Integer.MIN_VALUE;
-		for (int i = 0; i < SIZE; i++) {
-			heap.add(new Pointer(i, 0));
-			// insert the head of each array into the heap
-			maxVal = Math.max(maxVal, input[i][0]);
-			// keep additional value to keep track of the max value in heap
-		}
+after sort, the suffix array looks like:
 
-		int left = 0;
-		int right = Integer.MAX_VALUE;
-		while (heap.size() == SIZE) {
-			Pointer p = heap.remove();
-			// first, update the range
-			if (maxVal - input[p.index][p.position] < right - left) {
-				right = maxVal;
-				left = input[p.index][p.position];
-			}
-			// then, push the next element after 'p' to the heap
-			// meanwhile, update 'maxVal'
-			if (p.position + 1 < input[p.index].length) {
-				Pointer nextP = new Pointer(p.index, p.position + 1);
-				heap.add(nextP);
-				maxVal = Math.max(maxVal, input[nextP.index][nextP.position]);
-			}
-			// when 'p' is the last element in the row, terminate loop
-		}
-		System.out.println("Left boundary: " + left);
-		System.out.println("Right boundary: " + right);
-	}
+    a
+    ana
+    anana
+    banana
+    na
+    nana
 
-	class HeapComparator implements Comparator<Pointer> {
+Then for each two adjacent suffixes, check the length of the common prefix.
 
-		int[][] arrays = null;
+The answer is "ana" (if overlapping is allowed, otherwise, should be "an"). 
 
-		public HeapComparator(int[][] input) {
-			arrays = input;
-		}
+__2. Suffix tree__. Suggest by [this post](http://qr.ae/6W9yJ). 
 
-		public int compare(Pointer p1, Pointer p2) {
-			return arrays[p1.index][p1.position]
-					- arrays[p2.index][p2.position];
-		}
-	}
+> build a Suffix tree, then find the highest node with at least 2 descendants.
 
-	class Pointer {
-		int index, position;
+Or [this](http://www.careercup.com/question?id=9182781):
 
-		public Pointer(int x, int y) {
-			index = x;
-			position = y;
-		}
-	}
+> a good solution is to create a suffix tree for the given word and then find the deepest internal node in that tree..
+
+### Code
+
+to do
+
+http://stackoverflow.com/a/14422228]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LinkedIn] Find All Repeating Substring With Given Length]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/11/all-repeating-substring-given-length/"/>
+    <updated>2015-01-11T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/11/all-repeating-substring-given-length</id>
+    <content type="html"><![CDATA[### Question
+
+[link](http://www.careercup.com/question?id=6495932900179968)
+
+> Find all the repeating substring of specified length in a large string sequence.
+
+> For e.g. 
+
+    Input String: "ABCACBABC" 
+    repeated sub-string length: 3 
+    Output: ABC 
+
+> eg. 
+
+    Input String: "ABCABCA" 
+    repeated sub-string length: 2 
+    Output: AB, BC, CA
+
+### Solution
+
+Similar to __[Amazon] Longest Repeating Substring__, the best solution is to do __Suffix Tree__, or suffix array. We then need to print nodes on a certain level, who has more than 1 descendant. 
+
+However, since the length of substring is given, we can also do simply iteration: insert all substring with given length into a HashSet, and check repetition. 
+
+### Code
+
+to do
+https://github.com/techpanja/interviewproblems/blob/master/src/strings/repeatingstringsofspecifiedlength/RepeatingStringOfSpecificLength.java
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Question] Most Frequent Word From a Book]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/09/most-frequent-word-from-book/"/>
-    <updated>2015-01-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/09/most-frequent-word-from-book</id>
+    <title type="html"><![CDATA[[LinkedIn] All Distinct Subsequences With Given Length]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/"/>
+    <updated>2015-01-11T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/11/all-distinct-subsequences-given-length - Copy</id>
     <content type="html"><![CDATA[### Question
 
-[link](http://www.careercup.com/question?id=5715664853532672)
+[link](http://11011110.livejournal.com/254164.html)
 
-> Let's say I gave you a long String and I wanted you to tell me the most common word in that String. How would you do that? 
+> Find a polynomial-time algorithm that takes a string of length n, and a number k, output the number of distinct k-character subsequences.
 
-> Follow-up: how about if I gave you the entire works of Alexandre Dumas, one of the most prolific authors in history. How would your solution work? How could you change it to solve this more specific problem? 
+> For instance, input "food" and number k=2, output should be 4. There are four distinct 2-character subsequences of "food": "fo", "fd", "oo", and "od".
 
 ### Solution
 
-There are 2 solutions. Either __HashMap__ or __Trie__. It's easy to think of first, but remember that Trie is designed to do this kind of job. 
+Similar to __[Question] Number of distinct sub-sequence__, we solve this problem with DP. The dp equation is a bit difficult to write. 
 
-> A trie will be more useful in the second situation where you will have millions of words. You can have a counter at every node to see its frequency
+The idea come from comment from [gareth_rees](http://11011110.livejournal.com/254164.html): 
 
-__Now the follow up__. For big data problems, we can always do __divide and conquer__ by hash value. 
+> Let θ(S, k) be the number of distinct k-character subsequences in the string S of length n. 
 
-Alternatively, the comment by [Prince](http://www.careercup.com/question?id=5715664853532672) mentioned how to solve with __Map Reduce__: 
+> Clearly θ(S, k) = 1 if n = k or k = 0 
 
-> Instead of loading it as a string first I would stream data so that I avoid memory spike. Further our map size might increases as new words are added to it. Also, we can use map reduce type job were we create map<word, frequency> of each play in parallel and later join/collapse them this will reduce the time it will take to get result. 
+> and θ(S, k) = 0 if n < k. 
 
-> Common phrase should be no different then above algorithm. However we need to rebuild our index with <phase, frequency>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Match Triplet With Reverse Order]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/09/match-triplet-with-reverse-order/"/>
-    <updated>2015-01-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/09/match-triplet-with-reverse-order</id>
-    <content type="html"><![CDATA[### Question
+> Otherwise, choose 1 unique char from S, and deduct k by 1, then do the DP calculation with the remaining part of S. 
 
-[link](http://www.careercup.com/question?id=11655778)
+Look at this example: 
 
-> Find the substring of length 3 which is present in the reverse order from the string. 
+    θ("food", 2) = θ("ood", 1) + θ("od", 1) + θ("", 1)
+    = (θ("od", 0) + θ("", 0)) + (θ("d", 0) + θ("", 0)) + 0
+    = (1 + 1) + (1 + 1)
+    = 4
 
-> Ex: if the string is abcdcba (cba is the reverse of abc) so we should return cba. 
+__"food" is divided into 3 parts__. First part we choose "f" to be the first char, thus the value is θ("ood", 1). Second part we choose "o", and final part we choose "d". 
 
-### Solution
 
-1. __HashMap (recommended)__. Hash all substrings of length 3. O(n). Look up all reverse substrings of length 3 in this hash set. O(n) time and O(n) space. 
+This is a very difficult DP question, but this explanation really makes the answer easier. Read my implementation below. 
 
-1. __KMP Algo__. Take every substring of length 3. Reverse it and find it in the input using KMP. O(n^2) time and O(1) space. 
+### Code
 
-1. __Build suffix tree__ of height 3. Then in reverse order, check triplets. 
-
-The 3 solutions above all work well. Pick the one you love. 
+to do
 ]]></content>
   </entry>
   
