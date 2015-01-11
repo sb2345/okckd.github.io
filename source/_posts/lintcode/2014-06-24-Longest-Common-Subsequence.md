@@ -6,7 +6,6 @@ category: LintCode
 tags: [  ]
 ---
 
-
 ### Question 
 
 [link](http://lintcode.com/en/problem/longest-common-subsequence/)

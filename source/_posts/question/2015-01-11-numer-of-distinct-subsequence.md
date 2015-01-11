@@ -38,9 +38,9 @@ The solution is DP, with the following equation:
 
     last[i] = last position of character i in the given string.
 
-Equation: 
+__Equation__: 
 
-    __dp[i] = dp[last[i] - 1] + ... + dp[i - 1]__
+    dp[i] = dp[last[i] - 1] + ... + dp[i - 1]
 
 The final result is: 
 
@@ -48,13 +48,13 @@ The final result is:
 
 Example 1: 
 
-    Input   : _ A B C
+    Input   : - A B C
     dp array: 1 1 2 4
     Total = 8
 
 Example 2: 
 
-    Input   : _ A A C
+    Input   : - A A C
     dp array: 1 1 1 3
     Total = 6
 
@@ -68,4 +68,32 @@ This nice idea is from [this post](http://stackoverflow.com/a/5152203). Credit g
 
 ### Code
 
+un-optimized code. calculate dp[0] ... dp[n], then sum to final result. 
 
+	public int countDistinctSubseq(String input) {
+		int len = input.length();
+		int[] dp = new int[len + 1];
+		// dp[i] denotes the number of distinct subseq within first 'i' chars
+		dp[0] = 1;
+		// the first 0 chars is "" - we consider it as 1 subseq
+
+		for (int i = 1; i <= len; i++) {
+			// set dp[i]
+			// dp[i] = dp[i-1] + ... + dp[k] where input{k} == input{i}
+			int p = i - 1;
+			while (p >= 0) {
+				dp[i] += dp[p];
+				if (p > 0 && input.charAt(p - 1) == input.charAt(i - 1)) {
+					// when meeting a same char ahead of position i, stop
+					// adding to dp[i]
+					break;
+				}
+				p--;
+			}
+		}
+		int sum = 0;
+		for (int i : dp) {
+			sum += i;
+		}
+		return sum;
+	}
