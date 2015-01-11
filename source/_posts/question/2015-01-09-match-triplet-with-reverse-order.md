@@ -2,8 +2,10 @@
 layout: post
 title: "[Question] Match triplet with reverse order "
 comments: true
-category: Question
-tags: [ src ]
+categories:
+- Question
+- String search
+tags: [  ]
 ---
 
 ### Question

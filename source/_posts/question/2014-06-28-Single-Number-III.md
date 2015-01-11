@@ -29,7 +29,9 @@ The difficulty and the trick, is how do we divide?
 
 1. We can extract the rightmost set bit of any number n by taking ( n & ~(n-1))
 
-1. We take any set bit of xor and divide the elements of the array in two sets – one set of elements with same bit set and other set with same bit not set. By doing so, we will get x in one set and y in another set
+1. We take any set bit of xor and __divide the elements of the array in two sets__ – one set of elements with same bit set and other set with same bit not set. 
+
+    By doing so, we will get x in one set and y in another set. 
 
 ### Code
 

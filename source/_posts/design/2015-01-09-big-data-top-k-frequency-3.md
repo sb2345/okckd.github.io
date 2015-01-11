@@ -39,7 +39,7 @@ This is a nice trick that improves eficiency a lot.
 
 > However, the table that stores the data would be so huge such that we have to partition the table physically. One partition scheme is __based on ngrams__ of the token. If the token is a single word, it is 1gram. If the token is two-word phrase, it is 2gram. 
 
-Of course we can also divide the data by the hash value. For information on __ngrams__, read __[Terminology] n-gram__. 
+Of course we can also divide the data by the hash value. For information on __ngrams__, read __[Design] Terminology: n-gram__. 
 
 #### 3. Process Incoming Streams
 
