@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Overview Thread pool is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue. A sample thread pool &hellip;">
+  <meta name="description" content="Overview Thread pool is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue. Thread pool is a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -111,108 +111,176 @@
 
 <p><a href="http://programmers.stackexchange.com/a/173580">Thread pool</a> is a collection of managed threads usually organized in a queue, which execute the tasks in the task queue.</p>
 
+<p>Thread pool is a group of pre-instantiated, idle threads which stand ready to be given work.</p>
+
 <p><img class="middle" src="/assets/images/thread-pool.png"></p>
 
 <p><a href="http://en.wikipedia.org/wiki/Thread_pool_pattern">A sample thread pool</a> (green boxes) with waiting tasks (blue) and completed tasks (yellow)</p>
 
 <h3>Why Thread Pool?</h3>
 
-<p><a href="http://www.ibm.com/developerworks/library/j-jtp0730/">Many server applications</a>, such as <strong>Web servers (eg. Tomcat)</strong>, database servers, file servers, or mail servers must process a large number of tasks received from a network protocol. Often, the task is short-lived and the number of requests is large.</p>
-
 <p><strong>Thread Pools are useful when you need to limit the number of threads</strong> running in your application at the same time.</p>
-
-<h3>More details</h3>
-
-<p>A thread pool is a group of pre-instantiated, idle threads which stand ready to be given work. These are preferred over instantiating new threads for each task when there is <strong>a large number of short tasks</strong> to be done <strong>rather than a small number of long ones</strong>.</p>
-
-<p>Instead of starting a new thread for every task to execute concurrently, the <strong>task can be passed to a thread pool</strong>. As soon as the pool has any idle threads the task is assigned to one of them and executed.</p>
 
 <p>Thread pools are often used in multi threaded servers. Each connection <strong>arriving at the server via the network is wrapped as a task</strong> and passed on to a thread pool. The threads in the thread pool will process the requests on the connections concurrently.</p>
 
-<h3>Code</h3>
+<blockquote><p><a href="http://www.ibm.com/developerworks/library/j-jtp0730/">Many server applications</a>, such as <strong>Web servers (eg. Tomcat)</strong>, database servers, file servers, or mail servers must process a large number of tasks received from a network protocol. Often, the task is short-lived and the number of requests is large.</p>
 
-<p><strong>a <a href="http://tutorials.jenkov.com/java-concurrency/thread-pools.html">simple thread pool implementation</a></strong></p>
+<p>Instead of starting a new thread for every task to execute concurrently, the <strong>task can be passed to a thread pool</strong>. As soon as the pool has any idle threads the task is assigned to one of them and executed.</p></blockquote>
+
+<h3>Implementation</h3>
+
+<p>This is a <a href="http://tutorials.jenkov.com/java-concurrency/thread-pools.html">simple thread pool implementation</a>. The pool is implemented using a list of tasks, and a list of threads. Theads will fetch tasks and run it. The list is implemented with a BlockingQueue &ndash; however, it&rsquo;s fine to use just a normal queue.</p>
+
+<p>Main Class:</p>
+
+<pre><code>public class Main {
+
+    public static void main(String[] args) {
+
+        // In this example, we create 3 thread to run 10 tasks
+        // set the BlockingQ size to be 5.
+
+        ThreadPool tp = new ThreadPool(3, 5);
+
+        List&lt;MyTask&gt; todoList = new ArrayList&lt;MyTask&gt;();
+        for (int i = 1; i &lt;= 10; i++) {
+            todoList.add(new MyTask("T" + i));
+        }
+
+        for (MyTask todo : todoList) {
+            tp.execute(todo);
+        }
+
+        while (!tp.noMoreTask()) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        tp.stop();
+    }
+
+}
+</code></pre>
 
 <p>Pool Class:</p>
 
 <pre><code>public class ThreadPool {
 
-  private BlockingQueue taskQueue = null;
-  private List&lt;PoolThread&gt; threads = new ArrayList&lt;PoolThread&gt;();
-  private boolean isStopped = false;
+    // a list of tasks (BlockingQueue)
+    // a list of thread
+    private MyBlockingQueue taskQueue = null;
+    private List&lt;MyThread&gt; threads = new ArrayList&lt;MyThread&gt;();
+    private boolean isStopped = false;
 
-  public ThreadPool(int noOfThreads, int maxNoOfTasks){
-    taskQueue = new BlockingQueue(maxNoOfTasks);
+    public ThreadPool(int numThreads, int maxNumTasks) {
+        taskQueue = new MyBlockingQueue(maxNumTasks);
 
-    for(int i=0; i&lt;noOfThreads; i++){
-      threads.add(new PoolThread(taskQueue));
+        for (int i = 0; i &lt; numThreads; i++) {
+            threads.add(new MyThread(taskQueue));
+        }
+        System.out.println("Thread pool initiated. ");
+        for (MyThread thread : threads) {
+            thread.start();
+        }
     }
-    for(PoolThread thread : threads){
-      thread.start();
+
+    public synchronized void execute(Runnable task) {
+        if (this.isStopped) {
+            throw new IllegalStateException("ThreadPool is stopped");
+        }
+
+        try {
+            this.taskQueue.enqueue(task);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
-  }
 
-  public void synchronized execute(Runnable task){
-    if(this.isStopped) throw
-      new IllegalStateException("ThreadPool is stopped");
-
-    this.taskQueue.enqueue(task);
-  }
-
-  public synchronized void stop(){
-    this.isStopped = true;
-    for(PoolThread thread : threads){
-      thread.stop();
+    public boolean noMoreTask() {
+        return this.taskQueue.isEmpty();
     }
-  }
+
+    public synchronized void stop() {
+        this.isStopped = true;
+        for (MyThread thread : threads) {
+//          thread.stop();
+            thread.interrupt();
+        }
+        System.out.println("Thread pool stopped. ");
+    }
 }
 </code></pre>
 
 <p>Thread Class:</p>
 
-<pre><code>public class PoolThread extends Thread {
+<pre><code>public class MyThread extends Thread {
 
-  private BlockingQueue taskQueue = null;
-  private boolean       isStopped = false;
+    private MyBlockingQueue taskQueue = null;
+    private boolean isStopped = false;
 
-  public PoolThread(BlockingQueue queue){
-    taskQueue = queue;
-  }
-
-  public void run(){
-    while(!isStopped()){
-      try{
-        Runnable runnable = (Runnable) taskQueue.dequeue();
-        runnable.run();
-      } catch(Exception e){
-        //log or otherwise report exception,
-        //but keep pool thread alive.
-      }
+    public MyThread(MyBlockingQueue queue) {
+        taskQueue = queue;
     }
-  }
 
-  public synchronized void stop(){
-    isStopped = true;
-    this.interrupt(); //break pool thread out of dequeue() call.
-  }
+    public void run() {
+        while (!isStopped()) {
+            try {
+                Runnable runnable = (Runnable) taskQueue.dequeue();
+                runnable.run();
+            } catch (Exception e) {
+                // log or otherwise report exception,
+                // but keep pool thread alive.
+            }
+        }
+    }
 
-  public synchronized void isStopped(){
-    return isStopped;
-  }
+    // public synchronized void stop() {
+    // isStopped = true;
+    // this.interrupt(); // break pool thread out of dequeue() call.
+    // }
+
+    public synchronized boolean isStopped() {
+        return isStopped;
+    }
 }
 </code></pre>
 
-<p>An explanation:</p>
+<p>Task Class:</p>
 
-<blockquote><p>The thread pool implementation consists of two parts. A ThreadPool class which is the public interface to the thread pool, and a PoolThread class which implements the threads that execute the tasks.</p>
+<pre><code>public class MyTask implements Runnable {
 
-<p>To execute a task the method ThreadPool.execute(Runnable r) is called with a Runnable implementation as parameter. The Runnable is enqueued in the blocking queue internally, waiting to be dequeued.</p>
+    String message;
 
-<p>The Runnable will be dequeued by an idle PoolThread and executed. You can see this in the PoolThread.run() method. After execution the PoolThread loops and tries to dequeue a task again, until stopped.</p>
+    public MyTask(String s) {
+        message = s;
+    }
 
-<p>To stop the ThreadPool the method ThreadPool.stop() is called. The stop called is noted internally in the isStopped member. Then each thread in the pool is stopped by calling PoolThread.stop(). Notice how the execute() method will throw an IllegalStateException if execute() is called after stop() has been called.</p>
+    @Override
+    public void run() {
+        // do some task here...
+        // finish the task ...
+        System.out.println("Task finished: " + message);
+    }
+}
+</code></pre>
 
-<p>The threads will stop after finishing any task they are currently executing. Notice the this.interrupt() call in PoolThread.stop(). This makes sure that a thread blocked in a wait() call inside the taskQueue.dequeue() call breaks out of the wait() call, and leaves the dequeue() method call with an InterruptedException thrown. This exception is caught in the PoolThread.run() method, reported, and then the isStopped variable is checked. Since isStopped is now true, the PoolThread.run() will exit and the thread dies.</p></blockquote>
+<p>Output:</p>
+
+<pre><code>Thread pool initiated. 
+Task finished: T1
+Task finished: T3
+Task finished: T4
+Task finished: T5
+Task finished: T6
+Task finished: T2
+Task finished: T7
+Task finished: T10
+Task finished: T9
+Task finished: T8
+Thread pool stopped. 
+</code></pre>
 </div>
 
 
@@ -287,7 +355,7 @@
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (43)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (19)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (22)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -304,23 +372,23 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/12/java-blocking-queue-2/">[Java OOP] Java BlockingQueue (2)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/java-blocking-queue-1/">[Java OOP] Java BlockingQueue (1)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/blocking-queue-and-thread-pool/">[Java OOP] BlockingQueue and Thread Pool</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/11/numer-of-occurrence-given-subsequence/">[Question] Number of Occurence of Given Sub-sequence</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/01/11/numer-of-distinct-subsequence/">[Question] Number of Distinct Sub-sequence</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/11/longest-repeating-substring/">[Amazon] Longest Repeating Substring</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/">[Google] Check if Repeating Subsequence Exists</a>
       </li>
     
   </ul>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java Oop | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/java-oop/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-12T03:38:04+08:00</updated>
+  <updated>2015-01-12T23:07:05+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,10 +14,379 @@
 
   
   <entry>
+    <title type="html"><![CDATA[[Java OOP] Java BlockingQueue (2)]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/12/java-blocking-queue-2/"/>
+    <updated>2015-01-12T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/12/java-blocking-queue-2</id>
+    <content type="html"><![CDATA[### Blocking Queue Implementation
+
+{% img middle /assets/images/blocking-queue.png %}
+
+[source](http://tutorials.jenkov.com/java-concurrency/blocking-queues.html)
+
+1. A blocking queue is a queue, so we init a queue with a pre-defined size. 
+
+1. BlockingQueue Class comes with Java 5, in java.util.concurrent.BlockingQueue. This example is only used to help you understand what's happening behind the scene. 
+
+1. Both __enqueue(Object o){}__ and __dequeue(){}__ are __synchronized__ method. 
+
+1. Both methods do __while { wait(); }__ and then __notifyAll()__. 
+
+### Code
+
+    public class MyBlockingQueue {
+
+        private List<Object> queue = new LinkedList<Object>();
+        private int size = 10;
+
+        public MyBlockingQueue(int size) {
+            this.size = size;
+        }
+
+        public synchronized void enqueue(Object item) throws InterruptedException {
+            while (this.queue.size() == this.size) {
+                wait();
+            }
+            if (this.queue.size() == 0) {
+                notifyAll();
+            }
+            this.queue.add(item);
+        }
+
+        public synchronized Object dequeue() throws InterruptedException {
+            while (this.queue.size() == 0) {
+                wait();
+            }
+            if (this.queue.size() == this.size) {
+                notifyAll();
+            }
+
+            return this.queue.remove(0);
+        }
+
+        public boolean isEmpty() {
+            return this.queue.isEmpty();
+        }
+    }
+
+### Another example
+
+This BlockingQueue example makes use MyBlockingQueue that we defined above.  
+
+    public class Main {
+
+        public static void main(String[] args) throws Exception {
+
+            MyBlockingQueue queue = new MyBlockingQueue(1024);
+
+            Producer producer = new Producer(queue);
+            Consumer consumer = new Consumer(queue);
+
+            new Thread(producer).start();
+            new Thread(consumer).start();
+
+            Thread.sleep(4000);
+        }
+    }
+
+Producer
+
+    public class Producer implements Runnable {
+
+        protected MyBlockingQueue queue = null;
+
+        public Producer(MyBlockingQueue queue) {
+            this.queue = queue;
+        }
+
+        public void run() {
+            System.out.println("Producer starting... ");
+            try {
+                for (int i = 1; i <= 5; i++) {
+                    queue.enqueue("" + i);
+                    Thread.sleep(500);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+Consumer
+
+    public class Consumer implements Runnable {
+
+        protected MyBlockingQueue queue = null;
+
+        public Consumer(MyBlockingQueue queue) {
+            this.queue = queue;
+        }
+
+        public void run() {
+            try {
+                for (int i = 1; i <= 5; i++) {
+                    System.out.println(queue.dequeue());
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Consumer finished. ");
+        }
+    }
+
+Output: 
+
+    Producer starting... 
+    1
+    2
+    3
+    4
+    5
+    Consumer finished. 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Java OOP] Java BlockingQueue (1)]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/12/java-blocking-queue-1/"/>
+    <updated>2015-01-12T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/12/java-blocking-queue-1</id>
+    <content type="html"><![CDATA[### Overview
+
+__[A blocking queue](http://tutorials.jenkov.com/java-concurrency/blocking-queues.html)__ is a queue that blocks when you try to __dequeue from a empty queue__, or if you try to __enqueue items into a full queue__. 
+
+{% img middle /assets/images/blocking-queue.png %}
+
+#### Details 
+
+1. BlockingQueue __doesn’t accept null values__. Otherwise throw NullPointerException.
+
+1. BlockingQueue implementations are __thread-safe__. All queuing methods are atomic in nature and use internal locks or other forms of concurrency control.
+
+1. BlockingQueue interface is part of java collections framework and it’s primarily used for implementing __producer consumer problem__. 
+
+Two important methods: 
+
+1. put(E e): This method is used to insert elements to the queue, if the queue is full it waits for the space to be available.
+
+1. E take(): This method retrieves and remove the element from the head of the queue, if queue is empty it waits for the element to be available.
+
+#### Usage
+
+[BlockingQueue is typically used](http://tutorials.jenkov.com/java-util-concurrent/blockingqueue.html) to have one thread produce objects, with another thread consumes (producer consumer problem). Refer to __[Design] Producer Consumer Problem__. 
+
+### Example 1
+
+This example shows __how changing the speed of consuming and producing__ results in different sequence of outputs, using a BlockingQueue. The size of the BlockingQueue is initialized at 5. 
+
+    public class Main {
+
+        // original post from:
+        // http://www.journaldev.com/1034/java-blockingqueue-example-implementing-producer-consumer-problem
+
+        private static final Setting testFullQueue = new Setting(3, 10, 0);
+        private static final Setting testEmptyQueue = new Setting(10, 3, 100);
+
+        public static void main(String[] args) {
+
+            // Creating BlockingQueue of size 5
+            BlockingQueue<Message> queue = new ArrayBlockingQueue<>(5);
+
+            Setting variableSetting = testFullQueue;
+            Producer producer = new Producer(queue, variableSetting.produceSpeed);
+            Consumer consumer = new Consumer(queue, variableSetting.consumeSpeed,
+                    variableSetting.consumerDelay);
+
+            // starting producer to produce messages in queue
+            new Thread(producer).start();
+
+            // starting consumer to consume messages from queue
+            new Thread(consumer).start();
+
+            System.out.println("Producer and Consumer has been started");
+        }
+
+        static class Setting {
+            int produceSpeed;
+            int consumeSpeed;
+            int consumerDelay;
+
+            public Setting(int a, int b, int c) {
+                this.produceSpeed = a;
+                this.consumeSpeed = b;
+                this.consumerDelay = c;
+            }
+        }
+    }
+
+Producer
+
+    public class Producer implements Runnable {
+
+        private BlockingQueue<Message> queue;
+        int produceSpeed;
+
+        public Producer(BlockingQueue<Message> q, int a) {
+            this.queue = q;
+            this.produceSpeed = a;
+        }
+
+        @Override
+        public void run() {
+            // produce messages
+            for (int i = 0; i < 13; i++) {
+                Message msg = new Message("" + i);
+                try {
+                    Thread.sleep(produceSpeed);
+                    queue.put(msg);
+                    System.out.println("Produced " + msg.getMsg() + "           ("
+                            + queue.size() + " items)");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            // adding exit message
+            Message msg = new Message("exit");
+            try {
+                queue.put(msg);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+Consumer
+
+    public class Consumer implements Runnable {
+
+        private BlockingQueue<Message> queue;
+        int consumeSpeed;
+        int consumerDelay;
+
+        public Consumer(BlockingQueue<Message> q, int a, int b) {
+            this.queue = q;
+            this.consumeSpeed = a;
+            this.consumerDelay = b;
+        }
+
+        @Override
+        public void run() {
+            try {
+                // initial delay: used to wait for producer to
+                // fill up the queue
+                Thread.sleep(consumerDelay);
+                Message msg;
+                // consuming messages until exit message is received
+                while ((msg = queue.take()).getMsg() != "exit") {
+				System.out.println("         " + msg.getMsg() + " Consumed"+ "  ("
+						+ queue.size() + " items)");
+                    Thread.sleep(consumeSpeed);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Consumer finished working. Exit. ");
+        }
+    }
+
+Message Class
+
+    public class Message {
+        private String msg;
+
+        public Message(String str){
+            this.msg=str;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+    }
+
+Output (testFullQueue): 
+
+    Producer and Consumer has been started
+    Produced 0           (0 items)
+             0 Consumed  (0 items)
+    Produced 1           (1 items)
+    Produced 2           (2 items)
+             1 Consumed  (1 items)
+    Produced 3           (2 items)
+    Produced 4           (3 items)
+    Produced 5           (4 items)
+             2 Consumed  (3 items)
+    Produced 6           (4 items)
+    Produced 7           (5 items)
+             3 Consumed  (5 items)
+    Produced 8           (5 items)
+             4 Consumed  (4 items)
+    Produced 9           (5 items)
+             5 Consumed  (4 items)
+    Produced 10           (5 items)
+             6 Consumed  (4 items)
+    Produced 11           (5 items)
+             7 Consumed  (4 items)
+    Produced 12           (5 items)
+             8 Consumed  (4 items)
+             9 Consumed  (4 items)
+             10 Consumed  (3 items)
+             11 Consumed  (2 items)
+             12 Consumed  (1 items)
+    Consumer finished working. Exit. 
+
+Output (testEmptyQueue):
+
+    Producer and Consumer has been started
+    Produced 0           (1 items)
+    Produced 1           (2 items)
+    Produced 2           (3 items)
+    Produced 3           (4 items)
+    Produced 4           (5 items)
+    Produced 5           (5 items)
+             0 Consumed  (5 items)
+             1 Consumed  (4 items)
+             2 Consumed  (3 items)
+    Produced 6           (4 items)
+             3 Consumed  (3 items)
+             4 Consumed  (2 items)
+    Produced 7           (3 items)
+             5 Consumed  (2 items)
+             6 Consumed  (1 items)
+             7 Consumed  (0 items)
+    Produced 8           (1 items)
+             8 Consumed  (0 items)
+    Produced 9           (1 items)
+             9 Consumed  (0 items)
+    Produced 10           (1 items)
+             10 Consumed  (0 items)
+    Produced 11           (0 items)
+             11 Consumed  (0 items)
+    Produced 12           (1 items)
+             12 Consumed  (0 items)
+    Consumer finished working. Exit. 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Java OOP] BlockingQueue and Thread Pool]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/12/blocking-queue-and-thread-pool/"/>
+    <updated>2015-01-12T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/12/blocking-queue-and-thread-pool</id>
+    <content type="html"><![CDATA[### Blocking Queue VS. Thread Pool
+
+These are 2 very different things, however it might be a little bit confusing for a layman. I have very little knowledge about Java multi-threading. But after writing some example of thread pool and blockingqueue, I am able to identify some significant differences between the 2 patterns: 
+
+1. Thread pools are often used in multi threaded servers. For example, we create 10 thread only for processing 1,000 tasks. However in BlockingQueue, there're typically only 2 thread: Producer and Consumer. Of course there can be more, but the basic pattern defines only 2 threads. 
+
+1. ]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[[Java OOP] Java Runtime Exception]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/23/Java-runtime-exception/"/>
+    <link href="http://okckd.github.io/blog/2014/12/23/java-runtime-exception/"/>
     <updated>2014-12-23T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/23/Java-runtime-exception</id>
+    <id>http://okckd.github.io/blog/2014/12/23/java-runtime-exception</id>
     <content type="html"><![CDATA[### Exceptions in Java
 
 In Java, there are [3 categories of exceptions](http://www.tutorialspoint.com/java/java_exceptions.htm): 
@@ -96,258 +465,6 @@ output:
 No.
 
 [MAIN is a class method](http://stackoverflow.com/questions/9083876/override-main-method). Hence, it does not makes sense to "override" it (or any static method). The concept of "overriding" is only for instance methods.
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Java OOP] Common Root of Java Classes]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/22/common-root-java-class/"/>
-    <updated>2014-12-22T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/22/common-root-java-class</id>
-    <content type="html"><![CDATA[### Common Root Class
-
-__java.lang.Object__, [link](http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html)
-
-All Java classes are derived from this [common root class](http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html), that defines common behaviors.
-
-Common behaviors include multi-threading and garbage collector etc.
-
-#### Some methods
-
-[ref](http://docs.oracle.com/javase/tutorial/java/IandI/objectclass.html)
-
-protected Object clone() throws CloneNotSupportedException
-> Creates and returns a copy of this object.
-
-public boolean equals(Object obj)
-> Indicates whether some other object is "equal to" this one.
-
-protected void finalize() throws Throwable
-> Called by the garbage collector on an object when garbage collection determines that there are no more references to the object
-
-public final Class getClass()
-> Returns the runtime class of an object.
-
-public int hashCode()
-> Returns a hash code value for the object.
-
-public String toString()
-> Returns a string representation of the object.
-
-### Sync-related methods
-
-The notify, notifyAll, and wait methods of Object all play a part in synchronizing the activities of independently running threads in a program. 
-
-    public final void notify()
-    public final void notifyAll()
-    public final void wait()
-    public final void wait(long timeout)
-    public final void wait(long timeout, int nanos)
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Java OOP] Interface Extend Another Interface]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/22/can-interface-extend-interface/"/>
-    <updated>2014-12-22T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/22/can-interface-extend-interface</id>
-    <content type="html"><![CDATA[### Can an interface extend another interface in Java?
-
-Yes. Just remember that you should implement the methods in [both interfaces](http://www.programmerinterview.com/index.php/java-questions/java-can-an-interface-extend-another-interface/). 
-
-Example in Java source code [link1](http://docs.oracle.com/javase/7/docs/api/java/util/List.html), [link2](http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html): 
-
-    public interface List<E> extends Collection<E> {
-    
-    }
-
-    public interface Collection<E> extends Iterable<E> {
-    
-    }
-
-In conclusion, [ref](http://stackoverflow.com/questions/19546357/can-an-interface-extend-multiple-interfaces-in-java)
-
-An interface can extend multiple interfaces.
-
-A class can implement multiple interfaces.
-
-However, a class can only extend a single class.
-
-#### a special case
-
-    interface A
-    {
-        void test();
-    }
-
-    interface B 
-    {
-        void test();
-    }
-
-    class C implements A, B
-    {
-        @Override
-        public void test() {
-
-        }
-    }
-
-Well, a single implementation works for the both methods. This implementation works no problem. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Java OOP] Discussion of Polymorphism]]></title>
-    <link href="http://okckd.github.io/blog/2014/12/22/Discussion-of-Polymorphism/"/>
-    <updated>2014-12-22T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/12/22/Discussion-of-Polymorphism</id>
-    <content type="html"><![CDATA[### Polymorphism
-
-Polymorphism is to [use common interface](http://javarevisited.blogspot.sg/2011/08/what-is-polymorphism-in-java-example.html) instead of concrete implementation while coding. 
-
-When we program for interface our code is capable of handling any new requirement or enhancement arise in near future due to new implementation of our common interface. If we don't use common interface and rely on concrete implementation, we always need to change and duplicate most of our code to support new implementation. 
-
-The most common use of polymorphism in OOP occurs when a parent class reference is used to refer to a child class object.
-
-### Example 
-
-Example of Bicycle class given on [official oracle website](http://docs.oracle.com/javase/tutorial/java/IandI/polymorphism.html): 
-
-    public class Bicycle{
-        public void printDescription(){
-            System.out.println("\nBike is " + "in gear " + this.gear
-                + " with a cadence of " + this.cadence +
-                " and travelling at a speed of " + this.speed + ". ");
-        }
-    }
-
-    public class MountainBike extends Bicycle {
-        private String suspension;
-
-        public void printDescription() {
-            super.printDescription();
-            System.out.println("The " + "MountainBike has a" +
-                getSuspension() + " suspension.");
-        }
-    }
-
-    public class RoadBike extends Bicycle{
-        private int tireWidth;
-
-        public void printDescription(){
-            super.printDescription();
-            System.out.println("The RoadBike" + " has " + getTireWidth() +
-                " MM tires.");
-        }
-    }
-
-    public class TestBikes {
-        public static void main(String[] args){
-            Bicycle bike01, bike02, bike03;
-
-            bike01 = new Bicycle(20, 10, 1);
-            bike02 = new MountainBike(20, 10, 5, "Dual");
-            bike03 = new RoadBike(40, 20, 8, 23);
-
-            bike01.printDescription();
-            bike02.printDescription();
-            bike03.printDescription();
-        }
-    }
-
-The output: 
-
-    Bike is in gear 1 with a cadence of 20 and travelling at a speed of 10. 
-
-    Bike is in gear 5 with a cadence of 20 and travelling at a speed of 10. 
-    The MountainBike has a Dual suspension.
-
-    Bike is in gear 8 with a cadence of 40 and travelling at a speed of 20. 
-    The RoadBike has 23 MM tires.
-
-Referring to the same page, __JVM calls the appropriate method for the object that is referred to in each variable__. It does not call the method that is defined by the variable's type. 
-
-### Another example
-
-Cylinder is a subclass of Circle. We can say that Cylinder "is-a" Circle.
-
-We can create an instance of Cylinder, and assign it to a Circle reference: 
-
-> Circle c1 = new Cylinder();
-
-You can invoke all the methods defined in the Circle class, but __you cannot invoke methods defined in the Cylinder class__. c1 is a reference to the Circle class, which does not know about the methods defined in the subclass Cylinder.
-
-__The reference c1, however, retains its internal identity__. Since Cylinder overrides getArea() method, calling c1.getArea() will invokes the overridden version defined in subclass Cylinder, instead of in Circle. This is because c1 is holding a Cylinder object internally.
-
-The code is below: 
-
-    public class PolymorphismSubstitutabilityDemo {
-
-        public static void main(String[] args) {
-            Circle c1 = new Cylinder(1, "white", 10);
-            System.out.println(c1.getClass());
-            System.out.println(c1.getRadius());
-            System.out.println(c1.getColor());
-            System.out.println(c1.getArea());
-        }
-    }
-
-    class Circle {
-        int radius;
-        String color;
-
-        public Circle(int a, String b) {
-            this.radius = a;
-            this.color = b;
-        }
-
-        public int getRadius() {
-            return radius;
-        }
-
-        public String getColor() {
-            return color;
-        }
-
-        public double getArea() {
-            return 3.14159 * Math.pow(radius, 2);
-        }
-    }
-
-    class Cylinder extends Circle {
-        int height;
-
-        public Cylinder(int a, String b, int c) {
-            super(a, b);
-            this.height = c;
-        }
-
-        public int getHeight() {
-            return height;
-        }
-
-        public double getArea() {
-            return super.getArea() * height;
-        }
-    }
-
-The output of execution: 
-
-    class Cylinder
-    1
-    white
-    31.4159
-
-### Summary: 
-
-[ref](http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html)
-
-1. A subclass instance can be assigned (substituted) to a superclass' reference.
-
-1. Once substituted, we can invoke methods defined in the superclass; we cannot invoke methods defined in the subclass.
-
-1. However, if the subclass overrides inherited methods from the superclass, the subclass (overridden) versions will be invoked.
 ]]></content>
   </entry>
   
