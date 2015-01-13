@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Excel Decimal Conversion"
+title: "[ItInt5] Excel Decimal Conversion"
 comments: true
 category: Question
 tags: [ ItInt5 ]

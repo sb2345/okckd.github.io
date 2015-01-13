@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] 跳马问题加强版"
+title: "[ItInt5] 跳马问题加强版"
 comments: true
 category: Question
 tags: [ ItInt5 ]
@@ -42,15 +42,19 @@ __not written by me__
 	int gcd(int a, int b){
 	    return b? gcd(b, a%b) : a;
 	}
+    
 	bool canJump(int p, int q, int x, int y, int x2, int y2) {
 	    if(p==0 && q==0) return (x==x2)&&(y==y2);
-	    int x1 = x2 - x, y1 = y2 - y;
+	    int xDist = x2 - x, yDist = y2 - y;
 	    int g1 = gcd(p, q);
-	    if( x1 % g1 || y1 % g1) return false;
+	    if( xDist % g1 || yDist % g1) 
+            return false;
 	    p = p/g1;
 	    q = q/g1;
-	    x1 = x1/g1;
-	    y1 = y1/g1;
-	    if((p-q)%2 ) return true;
-	    else return (x1-y1)%2 == 0;
+	    xDist = xDist/g1;
+	    yDist = yDist/g1;
+	    if((p-q)%2 ) 
+            return true;
+	    else 
+            return (xDist-yDist)%2 == 0;
 	}
