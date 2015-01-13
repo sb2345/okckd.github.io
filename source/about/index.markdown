@@ -7,18 +7,22 @@ sharing: true
 footer: true
 ---
 
-{% img middle /assets/images/7275831.png 300 %}
+Hello guys! My name is __CodeMonkey__. {% img right /assets/images/7275831.png 300 %}
 
-Hello guys! My name is Michael. I'm from Singapore. 
+I'm Chinese. And yes, you already guessed so by the mix of language I use from my blog posts. 
 
-I love Snoopy. Woodstock (the name of this blog) is Snoopy's pet. 
+I love gadgets. I do have a lot of gadgets. Of the only thing I can't live without is __iPad__!
 
-I love to watch NBA, my favorite player is Kevin Durant. 
+I do Java for bread, and I kinda like it.
 
-I love Java and my girfriend >_< (yes, I'm a developer and I have a girlfriend)
+I write about IT, algorithm and interviews tricks.
 
-I love tech gadgets, tech news and startups.
+I talk a lot, although deep down inside, I do prefer __coding__. (Long live all the developers~)
 
-I write about IT, algorithm and interviews tricks. 
+You may wonder what does '__Woodstock__' means? The name of this blog. 
 
-Feel free to leave a comment! 
+Well, It's a small little bird from the Snoopy Comics. 
+
+Woodstock is Snoopy's sidekick, a hilarious little bird. I love it. 
+
+Feel free to leave a comment below! You can write about anything. 
