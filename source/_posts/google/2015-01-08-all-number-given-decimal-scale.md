@@ -28,7 +28,9 @@ We may want to score the substrings in a HashMap/HashSet. __The hashing procedur
 
 > A few hash functions allow a rolling hash to be computed very quickly—the new hash value is rapidly calculated given only the old hash value, the old value removed from the window, and the new value added to the window—similar to the way a moving average function can be computed much more quickly than other low-pass filters.
 
-The people in the origin post - they discuss about "__slide window check__" algorithm. I do not understand what's the benefit of this. If you read this and would like to help me, please leave a comment. Thanks! 
+Rolling Hash is commonly used in __[Rabin-Karp Algorithm](http://www.geeksforgeeks.org/searching-for-patterns-set-3-rabin-karp-algorithm/)__ to speed up strStr() string pattern matching. 
+
+People in the origin post - they discuss about "__slide window check__" algorithm. I do not understand what's the benefit of this. If you read this and would like to help me, please leave a comment. Thanks! 
 
 ### A similar question
 

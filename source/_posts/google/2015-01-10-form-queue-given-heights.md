@@ -46,7 +46,7 @@ Example:
 
 But there is a problm here, since removing item from list requires O(n), we will achieve O(n^2) time. How do we optimize this? 
 
-__The answer is BST__ with each node keeping track of how many nodes is on the left branch, and how many on right branch. 
+__The answer is BST__ with each node keeping track of how many nodes is on the left branch, and how many on right branch. For details of this type of TreeNode, refer to __[CC150v5] 11.8 Get Rank in Stream of Integers__. 
 
 The conclusion: 
 

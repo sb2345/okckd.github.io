@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Number of Valid Trees Given Preorder and Postorder"
+title: "[ItInt5] Number of Valid Trees Given Preorder and Postorder "
 comments: true
 category: Question
 tags: [ ItInt5 ]
@@ -30,10 +30,11 @@ tags: [ ItInt5 ]
 >
 > post-order: **************left, ########right, root
 
-> 所以 pre-order 的第一个元素一定等于 post-order 的最后一个元素. 然后在post-order中由前往后找, 找出等于pre-oder中第二个元素的位置, 也就是 left 的位置. 
+> 所以 pre-order 的第一个元素一定等于 post-order 的最后一个元素. 然后在post-order中由前往后找, 找出等于pre-oder[left]的位置 p. 
 
-> 1. 如果post-order中的这个位置不是倒数第二个, 说明左右子树都非空, 那么对左右子树递归__调用后用乘法原理__.
-> 1. 如果是倒数第二个, 说明有一个子树为空, return的值就是 __2*递归调用非空子树__.
+> 1. 如果 p 位置不是倒数第二个, fine, 对左右子树递归__调用后用乘法原理__.
+
+> 1. 如果 p 是倒数第二个, 说明either left branch or right branch为空, return的值就是 __2 * 递归调用非空子树__.
 
 [ref](http://www.itint5.com/discuss/94/%E8%AF%B7%E5%A4%A7%E5%AE%B6%E6%8F%90%E4%B8%80%E4%BA%9B%E6%94%B9%E8%BF%9B%E6%84%8F%E8%A7%81)
 

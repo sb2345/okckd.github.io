@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Numbers Concatenation to Get Max Value"
+title: "[ItInt5] Numbers Concatenation Max (Largest Number)"
 comments: true
 category: Question
 tags: [ ItInt5 ]

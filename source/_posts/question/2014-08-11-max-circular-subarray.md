@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Maximum circular subarray sum"
+title: "[ItInt5] Maximum circular subarray sum"
 comments: true
 category: Question
 tags: [ ItInt5 ]
