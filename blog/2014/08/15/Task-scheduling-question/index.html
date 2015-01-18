@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[Facebook] Task Scheduling Question (`) - Woodstock Blog</title>
+  <title>[Facebook] Task Scheduling Question - Woodstock Blog</title>
   <meta name="author" content="Charlie Brown">
 
   
@@ -81,7 +81,7 @@
   
   <header>
     
-      <h1 class="entry-title">[Facebook] Task Scheduling Question (`)</h1>
+      <h1 class="entry-title">[Facebook] Task Scheduling Question</h1>
     
     
       <p class="meta">
@@ -125,9 +125,105 @@
 
 <h3>Solution</h3>
 
-<p><a href="http://www.itint5.com/discuss/8/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6java%E7%A8%8B%E5%BA%8F">http://www.itint5.com/discuss/8/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6java%E7%A8%8B%E5%BA%8F</a></p>
+<p><strong>Classic topology sorting</strong>, refer to <a href="http://www.itint5.com/discuss/8/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6java%E7%A8%8B%E5%BA%8F">this nice answer</a>.</p>
 
-<h3>Code</h3>
+<h3>My Code</h3>
+
+<pre><code>public int[] myJobSchedulerWithoutQueue(Map&lt;Integer, List&lt;Integer&gt;&gt; deps,
+        int n) {
+    int[] ans = new int[n];
+
+    int[] depCount = new int[n];
+    // eg. job 1 depends on job 2 and 3, thus depCount[1-1] = 2
+    Map&lt;Integer, List&lt;Integer&gt;&gt; graph = new HashMap&lt;Integer, List&lt;Integer&gt;&gt;();
+    // graph would be reversed version of deps, used for topology sorting
+    // eg. 2 would point to 1, and 3 would points to 1
+    for (int i : deps.keySet()) {
+        depCount[i - 1] = deps.get(i).size();
+        for (int j : deps.get(i)) {
+            // add (j, i) pair into graph
+            if (!graph.containsKey(j)) {
+                graph.put(j, new ArrayList&lt;Integer&gt;());
+            }
+            graph.get(j).add(i);
+        }
+    }
+    // now we got depCount[] and graph ready, let's rock
+    int sorted = 0;
+    while (sorted != n) {
+        // first find a 'p' so that depCount[p] = 0
+        int p = 0;
+        while (p &lt; n &amp;&amp; depCount[p] != 0) {
+            p++;
+        }
+        if (p == n) {
+            // unable to find a new node to sort, sorting failed
+            break;
+        }
+        // remember p is only the index, the value should be +1
+        int val = p + 1;
+        ans[sorted++] = val;
+        depCount[p] = -1;
+        if (graph.containsKey(val)) {
+            for (int i : graph.get(val)) {
+                depCount[i - 1]--;
+            }
+        }
+    }
+    if (sorted == n)
+        return ans; // sort sucess
+    else
+        return null; // sort failed
+}
+</code></pre>
+
+<p>The following is very similar implementation, but using a Queue to store temporary nodes.</p>
+
+<pre><code>public int[] myJobSchedulerWithQueue(Map&lt;Integer, List&lt;Integer&gt;&gt; deps, int n) {
+    int[] ans = new int[n];
+
+    int[] depCount = new int[n];
+    // eg. job 1 depends on job 2 and 3, thus depCount[1-1] = 2
+    Map&lt;Integer, List&lt;Integer&gt;&gt; graph = new HashMap&lt;Integer, List&lt;Integer&gt;&gt;();
+    // graph would be reversed version of deps, used for topology sorting
+    // eg. 2 would point to 1, and 3 would points to 1
+    for (int i : deps.keySet()) {
+        depCount[i - 1] = deps.get(i).size();
+        for (int j : deps.get(i)) {
+            // add (j, i) pair into graph
+            if (!graph.containsKey(j)) {
+                graph.put(j, new ArrayList&lt;Integer&gt;());
+            }
+            graph.get(j).add(i);
+        }
+    }
+    // now we got depCount[] and graph ready, let's rock
+    int sorted = 0;
+    Queue&lt;Integer&gt; queue = new LinkedList&lt;Integer&gt;();
+    while (sorted != n) {
+        for (int i = 0; i &lt; depCount.length; i++) {
+            if (depCount[i] == 0) {
+                queue.offer(i + 1);
+                depCount[i] = -1;
+            }
+        }
+        if (queue.isEmpty()) {
+            break; // sorting failed
+        }
+        int val = queue.poll();
+        ans[sorted++] = val;
+        if (graph.containsKey(val)) {
+            for (int i : graph.get(val)) {
+                depCount[i - 1]--;
+            }
+        }
+    }
+    if (sorted == n)
+        return ans; // sort sucess
+    else
+        return null; // sort failed
+}
+</code></pre>
 </div>
 
 
@@ -197,17 +293,17 @@
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (54)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (57)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (43)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (44)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (22)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (96)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (99)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -219,23 +315,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/12/java-blocking-queue-2/">[Java OOP] Java BlockingQueue (2)</a>
+        <a href="/blog/2015/01/19/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/12/java-blocking-queue-1/">[Java OOP] Java BlockingQueue (1)</a>
+        <a href="/blog/2015/01/19/difference-http-tcp/">[Design] Difference Between HTTP Protocol and TCP Protocol</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/12/blocking-queue-and-thread-pool/">[Java OOP] BlockingQueue and Thread Pool</a>
+        <a href="/blog/2015/01/18/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/11/numer-of-occurrence-given-subsequence/">[Question] Number of Occurence of Given Sub-sequence</a>
+        <a href="/blog/2015/01/18/max-squre-with-all-1/">[Question] Maximum Square Sub-matrix With All 1s</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/11/numer-of-distinct-subsequence/">[Question] Number of Distinct Sub-sequence</a>
+        <a href="/blog/2015/01/18/lexicographic-order-from-dict/">[Google] Lexicographic Order From Dictionary</a>
       </li>
     
   </ul>

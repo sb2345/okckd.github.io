@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Google | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-13T21:17:09+08:00</updated>
+  <updated>2015-01-19T05:21:01+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,120 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Lexicographic Order From Dictionary]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/18/lexicographic-order-from-dict/"/>
+    <updated>2015-01-18T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/18/lexicographic-order-from-dict</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.careercup.com/question?id=13394663)
+
+> Given set of words that are lexicographically sorted, return lexicographic order. E.g:
+
+    abc
+    acd
+    bcc
+    bed
+    bdc
+    dab
+
+> The order of letters for the given example would be
+
+    a->b->c->e->d
+
+### Solution
+
+> Just form a graph(DAG) and do a topological sort. 
+
+Start from the first pair in the dictionary. Compare two strings in this pair __till first mismatch__. 
+
+Eg: __aad & aab__, in this case create an edge __d -> b__. 
+
+More details is available [here](http://codereview.stackexchange.com/questions/48292/return-the-lexicographic-order). 
+
+### Code
+
+	public String lexicoOrder(String[] dict) {
+		String ans = "";
+
+		// for each pair, maintain 2 HashMap
+		HashMap<Character, Integer> incount = new HashMap<Character, Integer>();
+		HashMap<Character, List<Character>> connection = new HashMap<Character, List<Character>>();
+		for (String str : dict) {
+			for (char c : str.toCharArray()) {
+				incount.put(c, 0);
+				connection.put(c, new ArrayList<Character>());
+			}
+		}
+		buildGraph(dict, incount, connection);
+
+		// start topology sorting
+		Queue<Character> temp = new LinkedList<Character>();
+		for (char c : incount.keySet()) {
+			if (incount.get(c) == 0) {
+				temp.offer(c);
+				incount.remove(c);
+				// remove any node whose incount is 0
+			}
+		}
+		while (!temp.isEmpty()) {
+			char top = temp.poll();
+			ans += top;
+			// 'top' is next char in line. remove it and delete connections
+			List<Character> inNodes = connection.get(top);
+			for (char c : inNodes) {
+				// remove incount for all nodes from inNodes
+				incount.put(c, incount.get(c) - 1);
+				if (incount.get(c) == 0) {
+					incount.remove(c);
+					temp.offer(c);
+				}
+			}
+		}
+		if (incount.size() == 0)
+			return ans;
+		else
+			return "unable to find a valid char sequence.";
+	}
+
+	public void buildGraph(String[] dict, HashMap<Character, Integer> incount,
+			HashMap<Character, List<Character>> connection) {
+		// build the graph map
+		// abc
+		// acd
+		// bcc
+		// bed
+		// bdc
+		// dab
+		for (int i = 0; i < dict.length - 1; i++) {
+			// compare dict[i] and dict[i+1]
+			String str1 = dict[i];
+			String str2 = dict[i + 1];
+			int p = 0;
+			while (p < str1.length() && p < str2.length()) {
+				if (str1.charAt(p) == str2.charAt(p)) {
+					p++;
+				} else {
+					break;
+				}
+			}
+			if (p == str1.length()) {
+				// this is special case eg. "ab" & "abc"
+				// this will not give up any information about lexico order
+				continue;
+			}
+			char from = str1.charAt(p);
+			char to = str2.charAt(p);
+			// update incount
+			incount.put(to, incount.get(to) + 1);
+			// update connection
+			connection.get(from).add(to);
+		}
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Crazy Distance Between Strings]]></title>
@@ -258,27 +372,6 @@ We add a new method: __insert at stack bottom__. Then we can solve this question
 		this.insertAtBottom(stack, val);
 		stack.push(temp);
 	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Maximum Count Array in a Queue]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/10/max-count-array-in-queue/"/>
-    <updated>2015-01-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/10/max-count-array-in-queue</id>
-    <content type="html"><![CDATA[### Question 
-
-[link1](http://www.mitbbs.com/article_t1/JobHunting/32856675_0_1.html#top)
-
-> 给一个数组a[n]，令s[i]为a[i+1..n-1]中比a[i]大的数的数量。
-
-> 求最大的s[i]。要求O(nlogn)
-
-### Solution
-
-This is very similar question to __[Google] Form a Queue Given Heights__. The idea is to insert elements into BST and count number of larger elements. 
-
-Naitive solution can be reached with a list. 
 ]]></content>
   </entry>
   

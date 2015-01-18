@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-13T21:17:09+08:00</updated>
+  <updated>2015-01-19T05:21:01+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,198 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Speed Up Webpage for Slow Connection (2)]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/19/speed-up-web-page-2/"/>
+    <updated>2015-01-19T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/19/speed-up-web-page-2</id>
+    <content type="html"><![CDATA[[ref](www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1)
+
+### Question
+
+> Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps internet connection.
+
+> Further he asked for the customer who has 100 mbps internet connection.
+
+### Website KPI
+
+There are [3 interesting phases](https://community.compuwareapm.com/community/display/PUB/Best+Practices+on+Web+Site+Performance+Optimization) of a web site from an end-user performance perspective. 
+
+1. First Impression
+1. OnLoad 
+1. Fully Loaded Time.
+
+### Loading Time
+
+__Question: what percentage of the time a user spends waiting for your page to load is spent after the HTML comes back to their browser__? 
+
+It is typically __[over 90%](http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/)__. 
+
+Most of the time users spend waiting on your website is spent after the HTML page has been retrieved by their browser. 
+
+#### Fetching the HTML is just the beginning
+
+__In a nutshell, browsers parse your page’s HTML, sequentially discovering its assets__ (such as scripts, stylesheets, and images), requesting and then either parsing and executing them or displaying them as appropriate. 
+
+But these assets are not simply fetched all at once. Instead, the __browser opens a limited number of connections to the server(s)__ referenced by the page. There is __overhead involved in establishing TCP and HTTP connections__, and some __unavoidable latency__ in pushing the request and response bytes back and forth across the network.
+
+So, in general, round trips between the browser and server are expensive. The structure of the HTML markup, the number and the ordering of its assets, are absolutely critical factors in its performance.
+
+### What hijacks your load time
+
+#### 1. Too Many HTTP Requests
+
+This is the single biggest contributor to performance problems in most web pages. 
+
+1. Concatenate scripts and stylesheets
+
+1. Combine images with sprites (put common images into a single large image file, then use CSS to position and selectively display the appropriate portion of the sprite image)
+
+1. Use fewer images, more CSS. 
+
+#### 2. Minimal Client-side Processing
+
+1. Validation on client. (eg. form input)
+
+1. Use web standards and MVC separation, making a maintainable, accessible, future-proof and max-performance website. 
+
+    Think of the HTML as the model, the CSS as the view, and the JavaScript as the controller. This separation tends to make code more efficient and maintainable, and makes many optimization techniques much more practical to apply.
+
+1. Push presentation code into the client tier (eg. Charts and graphs — push raw data to the client in JSON format, and use JavaScript and CSS to create pretty graphs.)
+
+1. Leverage Ajax techniques (only requiring small parts of the page to change in response to user actions)
+
+#### 3. Low Number of Parallel Requests
+
+Fetch a script, parse and execute it, then fetch another one... this will use up all the available connections. There are things you can do to your HTML to allow virtually any browser to make many requests at once, which has a huge impact on latency.
+
+1. Use browser-appropriate domain sharding
+
+1. Use intelligent script loading
+
+1. Leverage Keep-Alive (reuse the same TCP connection for multiple HTTP request/response cycles)
+
+#### 4. Failure to leverage browser cache / local storage
+
+1. [HTTP cache overview](http://www.mnot.net/cache_docs/)
+
+1. Leverage local storage
+
+#### 5. Third-party widgets
+
+1. Avoid third-party widgets!
+1. Try to use widgets that provide asynchronous implementations, so their inevitably terrible performance impacts their widget without dragging down your entire UX with it.
+
+#### 7. Failure to Use a Global Network
+
+Amazon S3. 
+
+Ref: http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Difference Between HTTP Protocol and TCP Protocol]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/19/difference-http-tcp/"/>
+    <updated>2015-01-19T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/19/difference-http-tcp</id>
+    <content type="html"><![CDATA[[ref](http://www.quora.com/What-is-the-difference-between-HTTP-protocol-and-TCP-protocol)
+
+### Short Version
+
+TCP is a __transport-layer__ protocol, and HTTP is an __application-layer__ protocol that runs over TCP. 
+
+### The layers
+
+At the very bottom of the network stack is the __physical layer__. This is where electrical signals or light pulses or radio waves actually transmit information from place to place. The physical layer doesn't really have protocols, but instead has standards for voltages, frequencies, and other physical properties. You can transmit information directly this way, but you need a lot of power or a dedicated line, and without higher layers you won't be able to share bandwidth.
+
+The next layer up is the __link layer__. This layer covers communication with devices that share a physical communications medium. Here, protocols like Ethernet, 802.11a/b/g/n, and Token Ring specify how to handle multiple concurrent accesses to the physical medium and how to direct traffic to one device instead of another. In a typical home network, this is how your computer talks to your home "router."
+
+The third layer is the __network layer__. In the majority of cases, this is dominated by Internet Protocol (IP). This is where the magic of the Internet happens, and you get to talk to a computer halfway around the world, without needing to know where it is. Routers handle directing your traffic from your local network to the network where the other computer lives, where its own link layer handles getting the packets to the right computer.
+
+Now we are getting somewhere. We can talk to a computer somewhere around the world, but that computer is running lots of different programs. How should it know which one to deliver your message to? The __transport layer__ takes care of this, usually with __port numbers__. The two most popular transport layer protocols are TCP and UDP. TCP does a lot of interesting things to smooth over the rough spots of network-layer packet-switched communication like reordering packets, retransmitting lost packets, etc. UDP is more unreliable, but has less overhead.
+
+So we've connected your browser to the web server software on the other end, but how does the server know what page you want? How can you post a question or an answer? These are things that __application-layer__ protocols handle. For __web traffic__, this is the HyperText Transfer Protocol (HTTP). There are thousands of application-layer protocols: SMTP, IMAP, and POP3 for email; XMPP, IRC, ICQ for chat; Telnet, SSH, RDP for remote administration; etc.
+
+Ref: http://qr.ae/3pnJK
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Speed Up Webpage for Slow Connection (1)]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/18/speed-up-web-page-1/"/>
+    <updated>2015-01-18T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/18/speed-up-web-page-1</id>
+    <content type="html"><![CDATA[[ref](www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1)
+
+### Question
+
+> Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps internet connection.
+
+> Further he asked for the customer who has 100 mbps internet connection.
+
+### Reading
+
+[This](http://sixrevisions.com/web-development/site-speed-performance/) is a very nice article about website speedup. Below is the full quoted text. 
+
+#### 1. Defer Loading Content When Possible
+
+Ajax allows us to build web pages that can be __asynchronously updated__ at any time. This means that instead of reloading an entire page when a user performs an action, we can simply update parts of that page.
+
+We can use an image gallery as an example. Image files are big and heavy; they can slow down page-loading speeds of web pages. Instead of loading all of the images when a user first visits the web page, we can just display thumbnails of the images and then when the user clicks on them, we can asynchronously request the full-size images from the server and update the page. This way, if a user only wants to see a few pictures, they don’t have to suffer waiting for all of the pictures to download. This development pattern is called __lazy loading__.
+
+__Ajax/web development libraries__ like jQuery, Prototype, and MooTools can make deferred content-loading easier to implement.
+
+#### 2. Use External JS and CSS Files
+
+When the user first loads your web page, the browser will cache external resources like CSS and JavaScript files. Thus, instead of inline JavaScript and CSS files, it’s best to __place them in external files__.
+
+Using inline CSS also increases the rendering time of a web page; having everything defined in your main CSS file lets the browser do less work when rendering the page, since it already knows all the style rules that it needs to apply.
+
+__As a bonus__, using external JavaScript and CSS files makes site maintenance easier because you only need to maintain global files instead of code scattered in multiple web pages.
+
+#### 3. Use Caching Systems
+
+If you find that your site is connecting to your database in order to create the same content, it’s time to start using a __caching system__. By having a caching system in place, your site will only have to create the content once instead of creating the content every time the page is visited by your users. Don’t worry, caching systems periodically refresh their caches depending on how you set it up — so even constantly-changing web pages (like a blog post with comments) can be cached.
+
+__Popular content management systems__ like WordPress and Drupal will have __static caching features__ that convert dynamically generated pages to static HTML files to reduce unnecessary server processing. For WordPress, check out [WP Super Cache](https://wordpress.org/plugins/wp-super-cache/) (one of the six critical WordPress plugins which, claimed by the author, enjoyed a improvement by 259.1% for content-heavy pages). Drupal has a page-caching feature in the core.
+
+There are also __database caching and server-side scripts caching systems__ that you can install on your web server (if you have the ability to do so). For example, PHP has extensions called PHP accelerators that optimize performance through caching and various other methods; one example of a [PHP accelerator](http://en.wikipedia.org/wiki/PHP_accelerator) is APC. [Database caching](http://en.wikipedia.org/wiki/Database_caching) improves performance and scalability of your web applications by reducing the work associated with database read/write/access processes; __[memcached](http://www.memcached.org/)__, for example, caches frequently used database queries. 
+
+#### 8. Load JavaScript at the End of Your Document
+
+It’s best if you have your scripts loading at the end of the page rather than at the beginning. It allows for the browser to render everything before getting started with the JavaScript. This makes your web pages feel more responsive because the way JavaScript works is that it blocks anything below it from rendering until it has finished downloading. If possible, reference JavaScript right before the closing (body) tag of your HTML documents. To learn more, read about deferring the loading of JavaScript.
+
+#### 9. Use a Content Delivery Network (CDN)
+
+Your site’s speed is greatly affected by where the user’s location is, relative to your web server. The farther away they are, the more distance the data being transmitted has to travel. Having your content cached __across multiple, strategically placed geographical locations__ helps take care of this problem. 
+
+A CDN will often make your operating cost a little higher, but you definitely gain a speed bonus. Check out MaxCDN or __Amazon Simple Storage Service (Amazon S3)__.
+
+#### 10. Optimize Web Caching
+
+Along with using caching systems, you should create websites that utilize __web caching__ as much as possible. Web caching is when files are __cached by the web browser__ for later use. Things that browsers can cache include CSS files, JavaScript files, and images.
+
+Aside from the basics, such as putting CSS and JavaScript code that are used in multiple pages in external files, there are many ways to make sure that you are caching your files in the most efficient way possible.
+
+For example, you can set HTTP response headers such as Expires and Last-Modified to reduce the need of re-downloading certain files when the user comes back to your site. To learn more, read about [caching in HTTP](http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html) and [leveraging browser caching](https://developers.google.com/speed/docs/insights/LeverageBrowserCaching?csw=1#LeverageBrowserCaching).
+
+To set up HTTP Expires headers in Apache, read this tutorial on adding future expires headers.
+
+#### Other mentions
+
+4. __Avoid Resizing Images in HTML__ (using HTML’s width and height attributes), for the sake of smaller file size. 
+
+6. __Optimize Image Sizes by Using the Correct File Format__. Eg. JPG format often displays photographic images at smaller file sizes than PNG. 
+
+7. __Optimize the Way You Write Code__. For example, instead of using (h1)(em)Your heading(em)(h1), you can easily use CSS to make your headings italics. 
+
+    Writing code efficiently not only reduces file sizes of your HTML and CSS documents, but also makes it easier to maintain.
+
+Ref: http://sixrevisions.com/web-development/site-speed-performance/
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] Terminology: N-gram]]></title>
@@ -183,268 +375,6 @@ This data processing logic runs as a process under Memory-Manager. The next part
 There is [some more steps](http://stackoverflow.com/a/3262855) afterwards, but they're trivial. I have listed out the basic steps for processing large stream of incoming data (as string), and how to find out the Top K keywords. 
 
 I suggest you read previous __[Design] Big Data - Top k Frequency__ posts before reading this. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Big Data - Real Time Top K]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/09/big-data-real-time-top-k/"/>
-    <updated>2015-01-09T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/09/big-data-real-time-top-k</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://stackoverflow.com/questions/10189685/realtime-tracking-of-top-100-twitter-words-per-min-hour-day)
-
-> Given a continuous twitter feed, design an algorithm to return the 100 most
-frequent words used at this minute, this hour and this day. 
-
-### Analysis
-
-This is a frequent and useful problem for companies like Google and Twitter. 
-
-The first solution below is __an approximation method__ which select keywords that occur more than a certain threshold. 
-
-The second solution is __more accurate__ but RAM-intensive. 
-
-### Lossy Count
-
-__Solution 1 is a modified version of [Lossy Count](http://stackoverflow.com/a/8033083)__. The detailed steps are explained [here](http://stackoverflow.com/a/3260905): 
-
-> Start with an empty map (red-black tree). The keys will be search terms, and the values will be a counter for the term. 
->
-> 1. Look at each item in the stream.
->
-> 1. If the term exists in the map, increment the associated counter.
->
-> 1. Otherwise, if the map has fewer candidates than you're looking for, add it to the map with a count of one.
->
-> 1. However, if the map is "full", decrement the counter in each entry. If any counter reaches zero during this process, remove it from the map.
-
-[This slide show](http://www.cse.ust.hk/vldb2002/VLDB2002-proceedings/slides/S10P03slides.pdf) explains __Lossy Count__, which is to divide input data into chunks. Then count elements and decrease counter by 1 after each chunk. 
-
-__Note that the result is NOT the top frequency items__. Instead, the final results are __order-dependent__, giving heavier weight to the counts processed last. It maybe helpful in some cases, cuz we want to check the latest trend. However, if we want more accurate top keywords for all data, we will __do a second pass over the log data__. 
-
-Now let's discuss the threshold. Use "aaabcd" and map size = 2 as example. 'a' will be inserted into map with occurance = 3. Then 'b' is inserted, and removed. 'c' is inserted, and removed. 'd' is inserted. Since we always decrease 1 at each step, 'a' should only have occurance of 1 at the end. As explained [here](http://stackoverflow.com/a/3260905): 
-
-> If we limit the map to 99 entries, we are guaranteed to find any term that occurs more than 1/(1 + 99) (1%) of the time. 
-
-We change the size of the map to change the threshold. The occurance of in the final result does not matter. 
-
-### Solution 2
-
-The lossy count does not actually produce the hourly, daily and monthly result accurately. Solution 2 will discuss how we deal with retiring old data in an accurate way. 
-
-Suggested by [this answer](http://stackoverflow.com/a/3260768), __we keep a 30-day list for each keyword__, that counts the daily occurance. This list is FIFO. When we remove and insert a new counter value, we update monthly total. 
-
-Alaternatively, [this answer](http://stackoverflow.com/a/10190836) suggests keeping 1440 (24 * 60) HashMaps, each storing the information for one minute. __And another 2 HashMap for the rolling total for the past hour, and past day__. 
-
-> You need an array of 1440 (24*60) word+count hash maps organized the way that you describe; these are your minute-by-minute counts. You need two additional hash maps - for the rolling total of the hour and the day.
-
-> Define two operations on hash maps - add and subtract, with the semantic of merging counts of identical words, and removing words when their count drops to zero.
-
-> Each minute you start a new hash map, and update counts from the feed. At the end of the minute, you place that hash map into the array for the current minute, add it to the rolling total for the hour and for the day, and then subtract the hash map of an hour ago from the hourly running total, and subtract the hash map of 24 hours ago from the daily running total.
-
-This is a very good solution, which I would recommend as the standard solution to this "Real Time Top k" problem. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] P2P Technology]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/07/P2P-technology/"/>
-    <updated>2015-01-07T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/07/P2P-technology</id>
-    <content type="html"><![CDATA[### Overview
-
-__[Peer-to-peer](http://en.wikipedia.org/wiki/Peer-to-peer) (P2P) networking__ is a distributed application architecture that partitions tasks or work loads between peers. 
-
-Peers are __both suppliers and consumers__ of resources, in contrast to the traditional client-server model where communication is usually to and from a central server. A typical example of a file transfer that uses the client-server model is the __File Transfer Protocol__ (FTP) service in which the client and server programs are distinct: the clients initiate the transfer, and the servers satisfy these requests.
-
-This architecture was popularized by the file sharing system Napster, originally released in 1999. 
-
-#### Precedure
-
-1. Alice run P2P client software. 
-    1. connect to Internet and get new IP address for each connection
-    1. register her files in P2P system
-    1. request "Harry Potter"
-    1. find other peers who have the copy
-    1. choose one and copy to her PC.
-    1. meanwhile, Alice is servig her files for other people
-1. Act like a server
-1. Act like a client
-1. User keyword to search content (like google)
-
-### P2P Types
-
-1. Unstructured P2P: __no coupling between nodes and file location__
-    1. Napster
-    1. Gnutella
-    1. KaZaA
-    
-1. Structured P2P: __tight coupling between nodes and file location__
-    1. DHT
-
-#### Napster
-
-Register at Napster server.
-
-Centralized search, and P2P distributing. 
-
-#### Gnutella
-
-__Decentralized__ design for searching:
-
-1. No central directory server
-1. Each node maintain a list of neighbors (overlay network)
-
-__Search by flooding__:
-
-1. BFS traversal. 
-1. Define maximum number of hops
-1. Expanded-ring TTL search means to try 1 hop first, then try 2 hops, then 3...
-
-Join nodes:
-
-1. Use Bootstrap node to get some IP addresses
-1. Join these IP, which becomes neighbors.
-
-Shortcomings:
-
-1. Flooding is __NOT a scalable design__.
-1. Download may not complete. 
-1. Possibility of search failure, even then the resource presents.
-
-#### KaZaA
-
-Combines Napster and Gnutella. 
-
-Each peer is a supernode or assigned to a supernode. Each supernode connects to 30~50 other supernodes. The supernode acts like a mini-Napster hub. 
-
-At registration, a PC connects to a supernode. If a supernode goes down, obtains updated list and elect another one. 
-
-Search within supernode, then in other supernodes. If found many nodes holding the file, do parallel downloading. 
-
-Automatic recovery if 1 server peer goes down. Use __ContentHash__ to search.
-
-#### Structured P2P
-
-For Distributed HashTable services, refer to __[Design] Distributed hash table__. 
-
-### Conclusion
-
-1. Unstructured P2P: 
-    1. __no coupling between nodes and file location__
-    1. Centralized direcotry service (except Gnutella)
-    1. Search by flooding (overhead)
-    1. Hierarchical architecture (non-scalable)
-
-1. Structured P2P: 
-    1. __tight coupling between nodes and file location__
-    1. DHT using consistent hashing (eg. Chord, and many other types)
-    1. A node is assigned to hold particular content
-    1. Search with more efficiency
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Distributed Hash Table]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/06/distributed-hash-table/"/>
-    <updated>2015-01-06T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/06/distributed-hash-table</id>
-    <content type="html"><![CDATA[[ref](http://blog.csdn.net/yfkiss/article/details/6977509)
-
-### Distributed hash table
-
-__A [distributed hash table](http://en.wikipedia.org/wiki/Distributed_hash_table) (DHT) is a class of a decentralized distributed system__ that provides a lookup service similar to a hash table. (key,value) pairs are stored in a DHT, and any participating node can efficiently retrieve the value associated with a given key.
-
-对于一个key/value对，DHT在分布式集群中，提供像HashTable一样的服务，例如简单快捷的存取、查询。
-
-<img class="middle" src="/assets/images/DHT.png">
-
-DHTs form an infrastructure that can be used to build more complex services, such as anycast, cooperative Web caching, distributed file systems, domain name services, instant messaging, multicast, and also __peer-to-peer file sharing__ and content distribution systems. 
-
-#### Properties 
-
-Unlike unstructured P2P, __DHT is tightly coupled between nodes and file locations__. (when request a content, directly go to the content instead of __searching by flooding__) 
-
-DHT has the following properties: 
-
-1. __Autonomy and Decentralization__: the nodes collectively form the system without any central coordination.
-
-1. __Fault tolerance__: the system should be reliable (in some sense) even with nodes continuously joining, leaving, and failing.
-
-1. __Scalability__: the system should function efficiently even with thousands or millions of nodes.
-
-#### Building a DHT
-
-1. Hash function that maps a file to a unique ID. Eg. hash("Harry Potter") -> 3912. 
-2. Distribute __range space__ for all nodes in the network. 
-3. The desinated node stores the location of the file. (this is indirect approach)
-
-<img class="middle" src="/assets/images/range-space.PNG">
-
-#### Search in DHT
-
-1. Search query __routed to the node whose range covers the file__. 
-2. Each node would retains a __routing information__ that is implemented in a fully distributed manner (i.e. no central point, no single point of failure). 
-
-There is different hashing and routing techniques associated with DHT. The most important is __Consistent Hashing__ and __Chord Routing__. 
-
-### Consistent Hashing
-
---[Consistent hashing](http://en.wikipedia.org/wiki/Consistent_hashing)__ is a special kind of hashing such that when a hash table is resized and consistent hashing is used, __only K/n keys need to be remapped__ on average, where K is the number of keys, and n is the number of slots. 
-
-#### Motivation
-
-In most traditional hash tables, a change in the number of array slots causes __nearly all keys__ to be remapped. Specifically, [the 3 cases below](http://blog.csdn.net/sparkliang/article/details/5279393) can end up in a technology crisis: 
-
-1. leaves/failures - 一个 cache 服务器 m down 掉了（在实际应用中必须要考虑这种情况），这样所有映射到 cache m 的对象都会失效，怎么办，需要把 cache m 从 cache 中移除，这时候 cache 是 N-1 台，映射公式变成了 hash(object)%(N-1)；
-
-1. join - 由于访问加重，需要添加 cache ，这时候 cache 是 N+1 台，映射公式变成了 hash(object)%(N+1)
-
-1. scalability - 由于硬件能力越来越强，你可能想让后面添加的节点多做点活，显然上面的 hash 算法也做不到。
-
-#### Technique
-
-Consistent hashing is based on mapping each object to a point on the edge of a circle. The system maps each available machine to pseudo-randomly distributed points on the edge of the same circle.
-
-1. 假定哈希key均匀的分布在一个环上
-1. 所有的节点也都分布在同一环上
-1. 每个节点只负责一部分Key，当节点加入、退出时只影响加入退出的节点和其邻居节点或者其他节点只有少量的Key受影响
-
-For a very detailed steps of consistent hashing, read [this Chinese blog](http://blog.csdn.net/sparkliang/article/details/5279393).
-
-<img class="middle" src="/assets/images/consistent-hashing.PNG">
-
-In this way, 一致性Hash在node加入/离开时，不会导致映射关系的重大变化。
-
-### Routing (searching)
-
-__Simple Routing__ would search successor node, and runtime is linear. These node would keep O(1) __routing information__, and spend O(n) time in __query routing__. 
-
-Otherwise, we make every node store ID and IP of all nodes, thus query routing takes O(1) but routing information is O(n). 
-
-We'll now discuss __Chord Routing__.
-
-#### Chord Routing
-
-Each node stores more info __closely following it__ on the identifier circle than nodes further away. That is, the subsequent nodes at position 1, 2, 4, 8, 16, 32... (each entry is called a __finger__)
-
-<img class="middle" src="/assets/images/chord-routing.PNG">
-
-为网络中每个Node分配一个唯一id（可以通过机器的mac地址做Hash），假设整个网络有N 个节点，我们可以认为这些整数首尾相连形成一个环，称之为Chord环。两个节点间的距离定义为节点间下标差，每个节点会存储一张路由表(Finger表)，表内顺时针按照离本节点2、4、8、16、32.……2i的距离选定log2N个其他节点的ip信息来记录。
-
-__Routing information__ maintained at each node: O(logN). 
-
-__Query routing__ take O(logN) time. 
-
-### Join and leave in Chord
-
-It's very much like insertion and removal in Doubly Linked List. Read it yourself. 
-
-<img class="middle" src="/assets/images/join-in-chord.PNG">
-
-Special thanks to the online resources written by some CSDN bloggers. 
 ]]></content>
   </entry>
   
