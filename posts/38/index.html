@@ -9,8 +9,8 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given n, generate all structurally unique BST&#8217;s (binary search trees) that store values 1&#8230;n. For example,
-Given n = 3, your &hellip;">
+  <meta name="description" content="Question link Given preorder and inorder traversal of a tree, construct the binary tree. Note:
+You may assume that duplicates do not exist in the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +79,383 @@ Given n = 3, your &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Preorder-and-Inorder/">[LeetCode 105] Construct Binary Tree From Preorder and Inorder</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/27/Construct-Binary-Tree-from-Preorder-and-Inorder/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Construct-Binary-Tree-from-Preorder-and-Inorder/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given preorder and inorder traversal of a tree, construct the binary tree.</p>
+
+<p><b>Note:</b><br>
+You may assume that duplicates do not exist in the tree.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is an interesting question</strong>.</p>
+
+<p>The key is, <strong>the tree header is always the first element in the pre-order traversal</strong>. Knowing this is enough to help us divide the lists and solve the question recursively.</p>
+
+<p><strong>About time complexity</strong>. According to the <a href="http://leetcode.com/2011/04/construct-binary-tree-from-inorder-and-preorder-postorder-traversal.html">analysis</a>, it is O(nlgn) if the tree is balance, and O(n<sup>2</sup>) if the tree is totally skewed. This article suggests using HashTable for searching, which achieves O(n) efficiency.</p>
+
+<blockquote><p>We left out some details on how we search the root value’s index in the inorder sequence. How about a simple linear search? If we assume that the constructed binary tree is always balanced, then we can guarantee the run time complexity to be O(N log N), where N is the number of nodes. However, this is not necessarily the case and the constructed binary tree can be skewed to the left/right, which has the worst complexity of O(N2). I quote the entire article below.</p>
+
+<p>A more efficient way is to eliminate the search by using an efficient look-up mechanism such as hash table. By hashing an element’s value to its corresponding index in the inorder sequence, we can do look-ups in constant time. Now, we need only O(N) time to construct the tree, which theoretically is the most efficient way.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>I post my code below. However, a better code is written in <a href="http://edwardliwashu.blogspot.sg/2013/01/construct-binary-tree-from-preorder-and.html">this post</a>.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, my code</strong>, it&rsquo;s 100ms slower than next code.</p>
+
+<pre><code>public TreeNode buildTree(int[] preorder, int[] inorder) {
+    int len = preorder.length;
+    if (len == 0) return null;
+    TreeNode root = new TreeNode(preorder[0]);
+    int leftLen = 0;
+    while (inorder[leftLen] != preorder[0]) leftLen++;
+    int[] leftPreOrder = new int[leftLen];
+    int[] rightPreOrder = new int[len - 1 - leftLen];
+    int[] leftInOrder = new int[leftLen];
+    int[] rightInOrder = new int[len - 1 - leftLen];
+    for (int i = 1; i &lt;= leftLen; i ++) {
+        leftPreOrder[i-1] = preorder[i];
+        leftInOrder[i-1] = inorder[i-1];
+    }
+    for (int i = leftLen + 1; i &lt; len; i ++) {
+        rightPreOrder[i-leftLen-1] = preorder[i];
+        rightInOrder[i-leftLen-1] = inorder[i];
+    }
+    root.left = buildTree(leftPreOrder, leftInOrder);
+    root.right = buildTree(rightPreOrder, rightInOrder);
+    return root;
+}
+</code></pre>
+
+<p><strong>Second, other ppl&rsquo;s code</strong></p>
+
+<pre><code>public TreeNode buildTree(int[] preorder, int[] inorder) {
+    int preLength = preorder.length;
+    int inLength = inorder.length;
+    return buildTree(preorder, 0, preLength - 1, inorder, 0, inLength - 1);
+}
+
+public TreeNode buildTree(int[] pre, int preStart, int preEnd, int[] in,
+        int inStart, int inEnd) {
+    if (inStart &gt; inEnd) return null;
+    int rootVal = pre[preStart];
+    int rootIndex = 0;
+    for (int i = inStart; i &lt;= inEnd; i++) {
+        if (in[i] == rootVal) {
+            rootIndex = i;
+            break;
+        }
+    }
+    int len = rootIndex - inStart;
+    TreeNode root = new TreeNode(rootVal);
+    root.left = buildTree(pre, preStart + 1, preStart + len, in, inStart,
+            rootIndex - 1);
+    root.right = buildTree(pre, preStart + len + 1, preEnd, in,
+            rootIndex + 1, inEnd);
+    return root;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Inorder-and-Postorder/">[LeetCode 106] Construct Binary Tree From Inorder and Postorder</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/27/Construct-Binary-Tree-from-Inorder-and-Postorder/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Construct-Binary-Tree-from-Inorder-and-Postorder/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given inorder and postorder traversal of a tree, construct the binary tree.</p>
+
+<p><b>Note:</b><br>
+You may assume that duplicates do not exist in the tree.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is exactly the same question as</strong> &ldquo;Construct Binary Tree from Preorder and Inorder&rdquo;.</p>
+
+<h3>Solution</h3>
+
+<p>I post the code from <a href="http://www.programcreek.com/2013/01/construct-binary-tree-from-inorder-and-postorder-traversal/">this article</a>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public TreeNode buildTree(int[] inorder, int[] postorder) {
+    int inStart = 0, inEnd = inorder.length-1;
+    int postStart =0, postEnd = postorder.length-1;
+    return buildTree(inorder, inStart, inEnd, postorder, postStart, postEnd);
+}
+
+public TreeNode buildTree(int[] inorder, int inStart, int inEnd, 
+                          int[] postorder, int postStart, int postEnd){
+    if(inStart &gt; inEnd || postStart &gt; postEnd)
+        return null;
+    int rootValue = postorder[postEnd];
+    TreeNode root = new TreeNode(rootValue);
+    int k=0;
+    for(int i=0; i&lt; inorder.length; i++){
+        if(inorder[i]==rootValue){
+            k = i;
+            break;
+        }
+    }
+    root.left = buildTree(inorder, inStart, k-1, 
+        postorder, postStart, postStart+k-(inStart+1));
+    root.right = buildTree(inorder, k+1, inEnd, 
+        postorder, postStart+k-inStart, postEnd-1);
+    return root;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/26/Validate-Binary-Search-Tree/">[LeetCode 98] Validate Binary Search Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/26/Validate-Binary-Search-Tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/26/Validate-Binary-Search-Tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/validate-binary-search-tree/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a binary tree, determine if it is a valid binary search tree (BST).
+</p>
+
+<p>
+Assume a BST is defined as follows:
+</p><ul>
+<li>The left subtree of a node contains only nodes with keys <b>less than</b> the node&#8217;s key.</li>
+<li>The right subtree of a node contains only nodes with keys <b>greater than</b> the node&#8217;s key.</li>
+<li>Both the left and right subtrees must also be binary search trees.</li>
+</ul>
+<p></p>
+<p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a textbook-like example of recursion</strong>.</p>
+
+<p>I solved it using DFS, but there is actually a much more concise solution.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, my code</strong>, it&rsquo;s basically a in-order traversal.</p>
+
+<pre><code>int num = Integer.MIN_VALUE;
+
+public boolean isValidBST(TreeNode root) {
+    if (root == null) return true;
+    if(! isValidBST(root.left)) return false;
+    if (num &gt;= root.val) return false;
+    num = root.val;
+    if(! isValidBST(root.right)) return false;
+    return true;
+}
+</code></pre>
+
+<p><strong>Second, great solution I found from <a href="http://www.programcreek.com/2012/12/leetcode-validate-binary-search-tree-java/">this post</a></strong></p>
+
+<pre><code>public static boolean isValidBST(TreeNode root) {
+    return validate(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
+}
+
+public static boolean validate(TreeNode root, int min, int max) {
+    if (root == null) return true;
+    if (root.val &lt;= min || root.val &gt;= max)
+        return false;
+    return validate(root.left, min, root.val) 
+        &amp;&amp; validate(root.right, root.val, max);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -910,443 +1287,6 @@ Given two binary trees, write a function to check if they are equal or not.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/25/Recover-Binary-Search-Tree/">[LeetCode 99] Recover Binary Search Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/25/Recover-Binary-Search-Tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Recover-Binary-Search-Tree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/recover-binary-search-tree/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Two elements of a binary search tree (BST) are swapped by mistake.</p>
-
-<p>Recover the tree without changing its structure.
-</p>
-
-<b>Note:</b><br>
-A solution using O(<i>n</i>) space is pretty straight forward. Could you devise a constant space solution?
-<p></p>
-
-<p></p>
-</div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is one of the most difficult questions that I have solved</strong>.</p>
-
-<p>The question can be solved using 2 pointers to point to the 2 misplaced nodes, and swap them. I solved the problem with this approach, and I found a good explanation <a href="http://chaoren.is-programmer.com/posts/42931.html">here</a>.</p>
-
-<blockquote><p>Only two variables (first, second) are enough to record nodes to be exchanged.</p>
-
-<p>If there&rsquo;s only one descending order pair (e.g. 20, 10, 30, 40, 50), use first &amp; second to record it.</p>
-
-<p>If there are two descending order pairs (e.g. 10, 40, 30, 20, 50 or 50, 20, 30, 40, 10), use the smaller number in second pair to update variable &lsquo;second&rsquo;.</p>
-
-<p>In the end, swap first and second.</p></blockquote>
-
-<p>This is a popular solution on the Internet, which <strong>uses O(1) space, plus average case O(lgn) stack space</strong> (because recursion always incur stack usage). So this solution is actually not fulfilling the requirements.</p>
-
-<blockquote><p>中序遍历二叉树的空间复杂度是O(logN) on average case</p></blockquote>
-
-<p><strong>So finally I found a solution with constent space, and it&rsquo;s using Treaded Binary Tree again</strong>! Look below for details.</p>
-
-<h3>Solution</h3>
-
-<p><a href="http://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion-and-without-stack/">This</a> is a systematic analysis of <strong>Morris Traversal</strong> based on <strong>Threaded Binary Tree</strong>.</p>
-
-<p><strong>A solution of using Morris Traversal is explained <a href="http://www.cnblogs.com/TenosDoIt/p/3445682.html">here</a></strong>. Don&rsquo;t worry about the tree structure being changed, because it&rsquo;s reverted back after the traversal.</p>
-
-<blockquote><p>算法2：为了满足O(1)空间复杂度，我们就要使用非递归且不使用栈的中序遍历算法，在leetcode另一个题目Binary Tree Inorder Traversal中，我们提到了Morris Traversal中序遍历算法，它既没有递归，也没有使用栈，而是用了线索二叉树的思想，用闲置的右节点指向中序序列中该节点的后缀，遍历后再恢复树的原始指针。其主要算法步骤如下：</p>
-
-<p>重复以下1、2直到当前节点为空。</p></blockquote>
-
-<p><strong><a href="http://fisherlei.blogspot.sg/2012/12/leetcode-recover-binary-search-tree.html">Another person</a></strong> have a very good (maybe better) English version of analysis and code:</p>
-
-<pre><code>1. Initialize current as root 
-2. While current is not NULL
-   If current does not have left child
-      a) Print current’s data
-      b) Go to the right, i.e., current = current-&amp;gt;right
-   Else
-      a) Make current as right child of the rightmost node in current's left subtree
-      b) Go to this left child, i.e., current = current-&amp;gt;left
-</code></pre>
-
-<h3>Code</h3>
-
-<p><strong>First, my code (2 pointer solution)</strong></p>
-
-<pre><code>TreeNode first = null, second = null;
-TreeNode pre = new TreeNode(Integer.MIN_VALUE);
-
-public void recoverTree(TreeNode root) {
-    helper(root);
-    // now first and second are both found
-    int temp = first.val;
-    first.val = second.val;
-    second.val = temp;
-}
-
-private void helper(TreeNode root) {
-    if (root == null) return;
-    helper(root.left);
-    if (pre.val &gt; root.val) {
-        if (first == null) {
-            first = pre;
-            second = root;
-        }
-        else second = root;
-    }
-    pre = root;
-    helper(root.right);
-}
-</code></pre>
-
-<p><strong>Second, real O(1) space solution</strong> using Threaded Binary Tree (i.e. Morris Traversal) in C++. I could not memorize this code.</p>
-
-<pre><code>void recoverTree(TreeNode *root) {
-       TreeNode *f1=NULL, *f2=NULL;
-       TreeNode  *current,*pre, *parent=NULL;
-
-       if(root == NULL)
-             return;
-       bool found = false;
-       current = root;
-       while(current != NULL)
-       {                
-             if(current-&gt;left == NULL)
-             {
-                    if(parent &amp;&amp; parent-&gt;val &gt; current-&gt;val)
-                    {
-                           if(!found)
-                           {
-                                 f1 = parent;
-                                 found = true;
-                           }
-                           f2 = current;
-                    }
-                    parent = current;
-                    current = current-&gt;right;     
-             }   
-             else
-             {
-                    /* Find the inorder predecessor of current */
-                    pre = current-&gt;left;
-                    while(pre-&gt;right != NULL &amp;&amp; pre-&gt;right != current)
-                           pre = pre-&gt;right;
-
-                    /* Make current as right child of its inorder predecessor */
-                    if(pre-&gt;right == NULL)
-                    {
-                           pre-&gt;right = current;
-                           current = current-&gt;left;
-                    }
-
-                    /* Revert the changes made in if part to restore the original
-                    tree i.e., fix the right child of predecssor */  
-                    else
-                    {
-                           pre-&gt;right = NULL;
-                           if(parent-&gt;val &gt; current-&gt;val)
-                           {
-                                 if(!found)
-                                 {
-                                        f1 = parent;       
-                                        found = true;
-                                 }
-                                 f2 = current;
-                           }
-                           parent = current;
-                           current = current-&gt;right;     
-                    } /* End of if condition pre-&gt;right == NULL */
-             } /* End of if condition current-&gt;left == NULL*/
-       } /* End of while */
-
-       if(f1 &amp;&amp; f2)
-             swap(f1-&gt;val, f2-&gt;val);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/25/Minimum-Depth-of-Binary-Tree/">[LeetCode 111] Minimum Depth of Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/25/Minimum-Depth-of-Binary-Tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Minimum-Depth-of-Binary-Tree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/minimum-depth-of-binary-tree/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a binary tree, find its minimum depth.</p>
-
-<p>The minimum depth is the number of nodes along the shortest path from the root node down to the nearest leaf node.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>There are various ways to solve this question.</strong></p>
-
-<p>Eg. DFS, BFS, queue and so on.</p>
-
-<h3>Solution</h3>
-
-<p>I have nothing to say with the code.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int minDepth(TreeNode root) {
-    if (root == null) return 0;
-    return helper(root, Integer.MAX_VALUE, 1);
-}
-
-private int helper(TreeNode node, int min, int level) {
-    if (node == null || level &gt;= min) 
-        return min;
-    if (node.left == null &amp;&amp; node.right == null)
-        return level;
-    min = helper(node.left, min, level + 1);
-    min = helper(node.right, min, level + 1);
-    return min;
-}
-</code></pre>
-
-<p><strong>Updated on June 10th, this question is better solved with the Divide &amp; Conquer template</strong>! <a href="http://answer.ninechapter.com/solutions/minimum-depth-of-binary-tree/">link</a></p>
-
-<pre><code>public int minDepth(TreeNode root) {
-    if (root == null) {
-        return 0;
-    }
-    return checkLeaf(root);
-}
-
-private int checkLeaf(TreeNode node) {
-    if (node == null) {
-        return Integer.MAX_VALUE;
-    }
-    if (node.left == null &amp;&amp; node.right == null) {
-        return 1;
-    }
-    int ll = checkLeaf(node.left);
-    int rr = checkLeaf(node.right);
-    return 1 + Math.min(ll, rr);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/25/Maximum-Depth-of-Binary-Tree/">[LeetCode 104] Maximum Depth of Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-25T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/25/Maximum-Depth-of-Binary-Tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/25/Maximum-Depth-of-Binary-Tree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/maximum-depth-of-binary-tree/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a binary tree, find its maximum depth.</p>
-
-<p>The maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>There are various ways to solve this question.</strong></p>
-
-<p>Eg. DFS, BFS, queue and so on.</p>
-
-<h3>Solution</h3>
-
-<p>I have nothing to say with the code.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int maxDepth(TreeNode root) {
-    return helper(root, 0, 1);
-}
-
-private int helper(TreeNode node, int max, int level) {
-    if (node == null) return max;
-    if (node.left == null &amp;&amp; node.right == null)
-        return Math.max(max, level);
-    max = helper(node.left, max, level + 1);
-    max = helper(node.right, max, level + 1);
-    return max;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/39">&larr; Older</a>
@@ -1374,7 +1314,7 @@ private int helper(TreeNode node, int max, int level) {
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (99)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1386,6 +1326,10 @@ private int helper(TreeNode node, int max, int level) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/19/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -1394,15 +1338,11 @@ private int helper(TreeNode node, int max, int level) {
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/18/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
+        <a href="/blog/2015/01/19/check-if-point-inside-polygon/">[Question] Check if Given Point Inside Polygon</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/18/max-squre-with-all-1/">[Question] Maximum Square Sub-matrix With All 1s</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/18/lexicographic-order-from-dict/">[Google] Lexicographic Order From Dictionary</a>
+        <a href="/blog/2015/01/19/check-if-line-segment-intersect/">[Question] Check if Two Line Segments Intersect</a>
       </li>
     
   </ul>

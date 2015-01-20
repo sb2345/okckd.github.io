@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a collection of candidate numbers (C) and a target number (T), find all unique combinations in C where the candidate numbers sums &hellip;">
+  <meta name="description" content="Question link Given an array of non-negative integers, you are initially positioned at the first index of the array. Each element in the array &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,495 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/Jump-Game-II/">[LeetCode 45] Jump Game II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/14/Jump-Game-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Jump-Game-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/jump-game-ii/">link</a></p>
+
+<div class="question-content">
+<p></p><p>
+Given an array of non-negative integers, you are initially positioned at the first index of the array.
+</p>
+<p>
+Each element in the array represents your maximum jump length at that position. 
+</p>
+<p>
+Your goal is to reach the last index in the minimum number of jumps.
+</p>
+
+<p>
+For example:<br>
+Given array A = <code>[2,3,1,1,4]</code>
+</p>
+<p>
+The minimum number of jumps to reach the last index is <code>2</code>. (Jump <code>1</code> step from index 0 to 1, then <code>3</code> steps to the last index.)
+</p><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p><strong>This is a DP problem</strong>. But we do not have to save all values into a DP array.</p>
+
+<p><strong>A analysis of DP solution</strong> from <a href="http://eric-yuan.me/leetcode-jump-game-ii/">this blog</a> explains it very well:</p>
+
+<blockquote><p>Search forward, and see for each node of array, what is the current maximum place we can reach, and every time we reach a local maximum, we add counter by 1, if we can reach the terminal, just return the counter.</p></blockquote>
+
+<p>It&rsquo;s easy to get &ldquo;time limit exceed&rdquo; if you solve this problem like a traditional DP question.</p>
+
+<p>So <strong>I come up with a solution using 2 pointers</strong>: &lsquo;left&rsquo; and &lsquo;right&rsquo; that denotes the boundary that can be jumps to within a certain number of jumps. What I need to do is updating the 2 pointers and increase the counter for number of jumps.</p>
+
+<h3>My code</h3>
+
+<p>traditional DP</p>
+
+<pre><code>public class Solution {
+    public int jump(int[] A) {
+        int len = A.length;
+        if (len &lt;= 1) return 0;
+        int[] dp = new int[len];
+        if (A[0] == 0) return 0;
+        int cur = 1;
+        for (int i = 0; i &lt; len; i ++) {
+            if (i != 0 &amp;&amp; dp[i] == 0) 
+                return 0;
+            // array dp represent the steps to reach point i
+            for (; cur &lt; len &amp;&amp; cur &lt;= i + A[i]; cur ++) {
+                dp[cur] = dp[i] + 1;
+            }
+            if (dp[len - 1] != 0) 
+                return dp[len - 1];
+        }
+        return 0;
+    }
+}
+</code></pre>
+
+<p>DP without array (recommended)</p>
+
+<pre><code>public class Solution {
+    public int jump(int[] A) {
+        if (A == null || A.length &lt;= 1) {
+            return 0;
+        }
+        int len = A.length;
+        // note that this is a DP question, but considering the required out, 
+        // we do not need dp array (i.e.) 
+        // int[] dp = new int[len];
+
+        int jumps = 0;
+        int left = 0;
+        int right = 0;
+
+        while (right &lt; len) {
+            int reachable = right;
+            jumps++;
+            for (int i = left; i &lt;= right; i++) {
+                reachable = Math.max(reachable, i + A[i]);
+            }
+            if (reachable == right) {
+                // unable to jump forward
+                return -1;
+            }
+            if (reachable &gt;= len - 1) {
+                return jumps;
+            } else {
+                left = right + 1;
+                right = reachable;
+            }
+        }
+        return -1;
+    }
+}
+</code></pre>
+
+<p>non-DP</p>
+
+<pre><code>public class Solution {
+    public int jump(int[] A) {
+        if (A == null || A.length &lt;= 1) {
+            return 0;
+        }
+        int len = A.length;
+        // note that this is a DP question, but considering the required out, 
+        // we do not need dp array (i.e.) 
+        // int[] dp = new int[len];
+
+        int jumps = 0;
+        int left = 0;
+        int right = 0;
+
+        while (right &lt; len) {
+            int reachable = right;
+            jumps++;
+            for (int i = left; i &lt;= right; i++) {
+                reachable = Math.max(reachable, i + A[i]);
+            }
+            if (reachable == right) {
+                // unable to jump forward
+                return -1;
+            }
+            if (reachable &gt;= len - 1) {
+                return jumps;
+            } else {
+                left = right + 1;
+                right = reachable;
+            }
+        }
+        return -1;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/First-Missing-Positive/">[LeetCode 41] First Missing Positive</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/14/First-Missing-Positive/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/First-Missing-Positive/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/first-missing-positive/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given an unsorted integer array, find the first missing positive integer.
+</p>
+
+<p>
+For example,<br>
+Given <code>[1,2,0]</code> return <code>3</code>,<br>
+and <code>[3,4,-1,1]</code> return <code>2</code>.
+</p>
+
+<p>
+Your algorithm should run in <i>O</i>(<i>n</i>) time and uses constant space.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a very difficult question</strong>!</p>
+
+<p>The tricky part of this question is the limit in space/time. If we sort and check, the space is constent, but time is increased.</p>
+
+<p>The key is to <strong>make use of the position index of the array</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Make sure that (i)th item of the array stores value (i+1)</strong>. The image below and the quoted text from <a href="http://tianrunhe.wordpress.com/2012/07/15/finding-the-1st-missing-positive-int-in-an-array-first-missing-positive/">this blog</a> are very good explanations.</p>
+
+<p><img class="middle" src="/assets/images/first_missing_pos.jpg"></p>
+
+<blockquote><p>The idea is simple. What is the most desired array we want to see? Something like [1,2,3] then we know 4 is missing, or [1, 8, 3, 4] then we know 2 is missing. In other word, “all the numbers are in their correct positions”.</p>
+
+<p>What are correct positions? For any i, A[i] = i+1. So our goal is to rearrange those numbers (in place) to their correct positions.</p>
+
+<p>We then need to decide how to arrange them. Let’s take the [3, 4, -1, 1] as an example. The 1st number, 3, we know it should stay in position 2. So we swap A[0] = 3 with A[2]. We then get [-1, 4, 3, 1]. We can’t do anything about -1 so we leave it there. The 2nd number, 4, we know it should sit in A[3]. So we swap A[1] = 4 with A[3]. We then get [-1, 1, 3, 4]. Now 1 should stay in A[0], so we keep swapping and we get [1, -1, 3, 4]. Notice now every positive number is staying in their correct position (A[0]=1, A[2]=3 and A[3]=4). We then need one more scan to find out 2 is missing.</p></blockquote>
+
+<h3>My code</h3>
+
+<pre><code>public class Solution {
+    public int firstMissingPositive(int[] A) {
+        if (A == null || A.length == 0) {
+            return 1;
+        }
+        int len = A.length;
+        int p = 0;
+        while (p &lt; len) {
+            if (A[p] == p + 1) {
+                // the number is in its correct position~
+                p++;
+                continue;
+            } else if (A[p] &lt;= 0 || A[p] &gt; len) {
+                // the number is out of range, leave it alone then.
+                p++;
+                continue;
+            } else if (A[p] == A[A[p] - 1]) {
+                // this is an important case!!! I missed it just now~
+                p++;
+                continue; 
+            }
+            swop(A, p, A[p] - 1);
+        }
+        // now check and find the first number that is not in correct position
+        p = 0;
+        while (p &lt; len) {
+            if (A[p] != p + 1) {
+                return p + 1;
+            }
+            p++;
+        }
+        return p + 1;
+    }
+
+    private void swop(int[] A, int x, int y) {
+        int temp = A[x];
+        A[x] = A[y];
+        A[y] = temp;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/13/Count-And-Say/">[LeetCode 38] Count and Say</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-13T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/13/Count-And-Say/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/13/Count-And-Say/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/count-and-say/">link</a></p>
+
+<div class="question-content">
+<p></p><p>The count-and-say sequence is the sequence of integers beginning as follows:<br>
+<code>1, 11, 21, 1211, 111221, ...</code>
+</p>
+
+<p>
+<code>1</code> is read off as <code>"one 1"</code> or <code>11</code>.<br>
+<code>11</code> is read off as <code>"two 1s"</code> or <code>21</code>.<br>
+<code>21</code> is read off as <code>"one 2</code>, then <code>one 1"</code> or <code>1211</code>.<br>
+</p>
+
+<p>
+Given an integer <i>n</i>, generate the <i>n</i><sup>th</sup> sequence.
+</p>
+
+<p>
+Note: The sequence of integers will be represented as a string.
+</p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p><strong>This is a implementation question, not difficult</strong>.</p>
+
+<h3>My code</h3>
+
+<p>code 1</p>
+
+<pre><code>public class Solution {
+    public String countAndSay(int n) {
+        String num = "1";
+        for (int i = 1; i &lt; n; i++) {
+            num = say(num);
+        }
+        return num;
+    }
+
+    private String say(String input) {
+        // 21 -&gt; 1211
+        int len = input.length();
+        String output = "";
+        int left = 0;
+        int right = 0;
+        while (right &lt; len) {
+            left = right;
+            // forward right until right pointer to a different value
+            // compared to that pointed by left pointer
+            while (right &lt; len &amp;&amp; input.charAt(left) == input.charAt(right)) {
+                right++;
+            }
+            output += String.valueOf(right - left);
+            output += input.charAt(left);
+        }
+        return output;
+    }
+}
+</code></pre>
+
+<p>code 2</p>
+
+<pre><code>public String countAndSay(int n) {
+    String s = "1";
+    for (int i = 2; i &lt;= n; i ++) {
+        char[] nums = s.toCharArray();
+        String newS = "";
+        int len = nums.length, left = 0, right = 0;
+        while (right &lt; len) {
+            while (right &lt; len &amp;&amp; nums[left] == nums[right]) right ++;
+            newS += (right - left) + "" + nums[left];
+            left = right;
+        }
+        s = newS;
+    }
+    return s;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1060,561 +1549,6 @@ Here are some examples. Inputs are in the left-hand column and its corresponding
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/12/Longest-Valid-Parentheses/">[LeetCode 32] Longest Valid Parentheses</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/12/Longest-Valid-Parentheses/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/12/Longest-Valid-Parentheses/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/longest-valid-parentheses/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a string containing just the characters <code>'('</code> and <code>')'</code>, find the length of the longest valid (well-formed) parentheses substring.
-</p>
-<p>
-For <code>"(()"</code>, the longest valid parentheses substring is <code>"()"</code>, which has length = 2.
-</p>
-<p>
-Another example is <code>")()())"</code>, where the longest valid parentheses substring is <code>"()()"</code>, which has length = 4.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<h3>Solution</h3>
-
-<p><strong>There are 2 ways to solve this problem</strong>, stack and DP.</p>
-
-<p><strong>Stack method 1 is more straight-forward</strong> (code shown below). The idea is to keep a stack of &ldquo;(&rdquo; indexes, and another variable called &ldquo;last&rdquo;. <strong>Note that only &ldquo;)&rdquo; can violates a pattern</strong>. So whenever I see a &ldquo;(&rdquo;, just push to stack. When the pattern is violated by a &ldquo;)&rdquo;, I update &ldquo;last&rdquo;. The code explains itself very well. If not, <a href="http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488">look here</a></p>
-
-<p><strong>Stack method 2 is more tricky</strong>. This time I will not only push the index of &ldquo;(&rdquo; to stack, but also the index of &ldquo;)&rdquo; when the pattern got violated. It&rsquo;s hard to explain, and hard to think of at first.</p>
-
-<p><strong>The DP solution is not very difficult</strong>. Basically create an array of same length as string s. dp[i] denotes the length of valid parenthese ending with index i. The idea is similar to <a href="http://blog.csdn.net/abcbc/article/details/8826782">this blog</a>, but he used reverse DP, and I use normal DP.</p>
-
-<p>I will explain DP with an example of input &ldquo;<strong>)()()</strong>&rdquo;. For this string, we have <strong>dp[0] = 0, dp[1] = 0, dp[2] = 2, dp[3] = 0</strong>. For dp[4], I check the 3rd position first, and find that dp[4] = 2. Then I also have to add dp[2] into dp[4] to make it complete. The end result is dp[4] = 2 + 2 = 4.</p>
-
-<h3>My code</h3>
-
-<p>Stack method 1 (recommended)</p>
-
-<pre><code>public class Solution {
-    public int longestValidParentheses(String s) {
-        if (s == null || s.length() == 0) {
-            return 0;
-        }
-        int len = s.length();
-        int longest = 0;
-        Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-        int start = 0;
-        for (int i = 0; i &lt; len; i++) {
-            char ch = s.charAt(i);
-            if (ch == '(') {
-                // well, no matter what, '(' is alway a valid part
-                // push the index to the stack
-                stack.push(i);
-            } else if (ch == ')') {
-                if (stack.isEmpty()) {
-                    // invalid ')', update 'start' variable
-                    start = i + 1;
-                } else {
-                    int pos = stack.pop();
-                    if (stack.isEmpty()) {
-                        // this is why we need 'start' variable
-                        longest = Math.max(longest, i - start + 1);
-                    } else {
-                        // important: must peek stack again.
-                        // eg. (()()  if don't peek again 
-                        longest = Math.max(longest, i - stack.peek());
-                    }
-                }
-            }
-        }
-        return longest;
-    }
-}
-</code></pre>
-
-<p>Stack method 2</p>
-
-<pre><code>public int longestValidParentheses(String s) {
-    int res = 0;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    char[] arr = s.toCharArray();
-    for (int i = 0; i &lt; arr.length; i++) {
-        if (arr[i] == ')' &amp;&amp; !stack.isEmpty() &amp;&amp; arr[stack.peek()] == '(') {
-            stack.pop();
-            if (stack.isEmpty()) res = i + 1;
-            else res = Math.max(res, i - stack.peek());
-        } else stack.push(i);
-    }
-    return res;
-}
-</code></pre>
-
-<p>DP</p>
-
-<pre><code>public int longestValidParentheses(String s) {
-    int len = s.length();
-    if (len &lt;= 1) return 0;
-    int max = Integer.MIN_VALUE;
-    int[] dp = new int[len];
-    for (int i = 1; i &lt; len; i ++) {
-        if (s.charAt(i) == '(') dp[i] = 0;
-        else {
-            int j = i - 1 - dp[i - 1];
-            if (j &gt;= 0 &amp;&amp; s.charAt(j) =='(') {
-                dp[i] = dp[i - 1] + 2;
-                if (j &gt;= 1) dp[i] += dp[j - 1];
-            }
-            else dp[i] = 0;
-        }
-        max = Math.max(max, dp[i]);
-    }
-    return max;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/11/Reverse-Nodes-in-k-Group/">[LeetCode 25] Reverse Nodes in k-Groups</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/11/Reverse-Nodes-in-k-Group/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/11/Reverse-Nodes-in-k-Group/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/reverse-nodes-in-k-group/">link</a></p>
-
-<div class="question-content">
-<p></p><p>
-Given a linked list, reverse the nodes of a linked list <i>k</i> at a time and return its modified list.
-</p>
-
-<p>
-If the number of nodes is not a multiple of <i>k</i> then left-out nodes in the end should remain as it is.</p>
-
-<p>You may not alter the values in the nodes, only nodes itself may be changed.</p>
-
-<p>Only constant memory is allowed.</p>
-
-<p>
-For example,<br>
-Given this linked list: <code>1-&gt;2-&gt;3-&gt;4-&gt;5</code>
-</p>
-
-<p>
-For <i>k</i> = 2, you should return: <code>2-&gt;1-&gt;4-&gt;3-&gt;5</code>
-</p>
-
-<p>
-For <i>k</i> = 3, you should return: <code>3-&gt;2-&gt;1-&gt;4-&gt;5</code>
-</p><p></p>
-</div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>The problem is solved in 2 steps</strong>. First, get the next k-group. If remaining items is less than k, terminate the program. Otherwise, reserve this k-group and keep going.</p>
-
-<p>To solve this question is very tricky. <strong>We need to be clear about this: 4 nodes need to be kept track of</strong>: 2 elements before and after the k-group, and 2 elements within the k-group.</p>
-
-<p><strong>The difficult point is while and after reverse the k-group</strong>, how to maintain the &lsquo;pre&rsquo; node and future &lsquo;pre&rsquo; node correctly.</p>
-
-<h3>Solution</h3>
-
-<p>Use Linkedlist Template from NineChap to solve.</p>
-
-<pre><code>/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) {
- *         val = x;
- *         next = null;
- *     }
- * }
- */
-public class Solution {
-    public ListNode reverseKGroup(ListNode head, int k) {
-        if (k &lt;= 1 || head == null) {
-            return head;
-        }
-        ListNode nextGroup = head;
-        for (int i = 0; i &lt; k; i++) {
-            if (nextGroup == null) {
-                // there isn't k nodes in this list
-                return head;
-            }
-            nextGroup = nextGroup.next;
-        }
-        // now we're sure the list have at least k nodes
-        // reverse this list (by re-connecting the next pointer k times)
-        ListNode newHead = head;
-        ListNode tail = null;
-        for (int i = 0; i &lt; k; i++) {
-            ListNode temp = newHead.next;
-            newHead.next = tail;
-            tail = newHead;
-            newHead = temp;
-        }
-        // now newHead is pointing to the actual new head
-        // temp (which is not accessable here) is same as nextGroup
-        // last step, reconnect everything and call recursion method
-        head.next = reverseKGroup(nextGroup, k);
-        return tail;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/11/Merge-k-Sorted-Lists/">[LeetCode 23] Merge K Sorted Lists</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/11/Merge-k-Sorted-Lists/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/11/Merge-k-Sorted-Lists/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/merge-k-sorted-lists/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Merge <i>k</i> sorted linked lists and return it as one sorted list. Analyze and describe its complexity.
-</p><p></p>
-</div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>There are two ways to solve this problem.</p>
-
-<ul>
-<li>k &ndash; number of lists</li>
-<li>n &ndash; length of each list</li>
-</ul>
-
-
-<p><strong>First approach is merge sort</strong>. Using divide and conquer approach, divide the entire input into halves, and then merge 2 list each time. Instead of merging 1 by 1 which the time complexity is O(nk x (k-1)), the 2 lists to be merged is always similar length, thus time complexity is reduced to O(nk x logk).</p>
-
-<p><strong>You may wonder how I calculate time complexity</strong>. See, each round of sort, nk nodes are read and sorted. This happened O(logk) times, where k is the number of lists. Thus totoal time take is O(nk x logk).</p>
-
-<p><strong>Second approach is heap sort</strong>. The idea of this is to always keep a sorted list of the head of each list. When we retrieve items from the heap, it only take O(logk) time to find the next smallest element.</p>
-
-<p>In case you do not know about heap (or priority queue):</p>
-
-<blockquote><p><strong><a href="http://en.wikipedia.org/wiki/Heap_%28data_structure%29">Heap</a> is a specialized tree-based data structure</strong>. Heap is crucial in Dijkstra&rsquo;s algorithm and heapsort.</p>
-
-<p>We take max heap for example. The keys of parent nodes are always greater than or equal to the children node.</p>
-
-<p><strong>The heap is an implementation of priority queue</strong>. In fact, priority queues are often referred to as &ldquo;heaps&rdquo;, regardless of how they may be implemented.</p>
-
-<p>Note that despite the similarity of the name &ldquo;heap&rdquo; to &ldquo;stack&rdquo; and &ldquo;queue&rdquo;, the latter two are <strong>abstract data types</strong>, while a heap is a <strong>specific data structure</strong>, and &ldquo;priority queue&rdquo; is the proper term for the abstract data type.</p></blockquote>
-
-
-
-<table class="tg">
-  <tr>
-    <th class="tg-s6z2">Heap</th>
-    <th class="tg-s6z2">Time</th>
-  </tr>
-  <tr>
-    <td class="tg-031e">Find max</td>
-    <td class="tg-s6z2">O(1)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Delete</td>
-    <td class="tg-s6z2">O(lgn)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Insert</td>
-    <td class="tg-s6z2">O(lgn)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Merge</td>
-    <td class="tg-s6z2">O(n)</td>
-  </tr>
-</table>
-
-
-<br />
-
-
-<p>Both method are well explained in <a href="http://blog.csdn.net/linhuanmars/article/details/19899259">this csdn blog</a>. Time complexity analysis is given by <a href="http://n00tc0d3r.blogspot.sg/2013/04/merge-k-sorted-lists.html">nootcoder blog</a>.</p>
-
-<h3>Solution</h3>
-
-<p>Divide and conquer code is lengthy but medium difficulty.</p>
-
-<p>Second solution, however, is not as easy. <strong>Especially when we have to write Comparator on our own</strong>.  A priority queue (heap) is implemented and head of each list is inserted into the heap. Then poll elements out from the heap until heap is empty.</p>
-
-<h3>My code</h3>
-
-<p><strong>Merge sort code, written by me</strong></p>
-
-<pre><code>/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) {
- *         val = x;
- *         next = null;
- *     }
- * }
- */
-public class Solution {
-    public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
-        if (lists == null || lists.size() == 0) {
-            return null;
-        }
-        return mergeHelper(lists, 0, lists.size() - 1);
-    }
-
-    private ListNode mergeHelper(List&lt;ListNode&gt; lists, int start, int end) {
-        if (start == end) {
-            return lists.get(start);
-        } 
-        int mid = start + (end - start) / 2;
-        ListNode firstHalf = mergeHelper(lists, start, mid);
-        ListNode secondHalf = mergeHelper(lists, mid + 1, end);
-        return mergeTwo(firstHalf, secondHalf);
-    }
-
-    private ListNode mergeTwo(ListNode head1, ListNode head2) {
-        ListNode dummy = new ListNode(0);
-        ListNode p = dummy;
-        while (head1 != null &amp;&amp; head2 != null) {
-            if (head1.val &lt; head2.val) {
-                p.next = head1;
-                head1 = head1.next;
-                p = p.next;
-            } else {
-                p.next = head2;
-                head2 = head2.next;
-                p = p.next;
-            }
-        }
-        if (head1 == null) {
-            p.next = head2;
-        } else {
-            p.next = head1;
-        }
-        return dummy.next;
-    }
-}
-</code></pre>
-
-<p><strong>Heap sort code, written by me</strong>. <a href="http://answer.ninechapter.com/solutions/merge-k-sorted-lists/">source</a></p>
-
-<pre><code>/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) {
- *         val = x;
- *         next = null;
- *     }
- * }
- */
-public class Solution {
-    public ListNode mergeKLists(List&lt;ListNode&gt; lists) {
-        if (lists == null || lists.size() == 0) {
-            return null;
-        }
-        int size = lists.size();
-        // create a heap with Java priority queue, set the initial size
-        Queue&lt;ListNode&gt; heap = new PriorityQueue(size, new NodeComparator());
-        // add all ListNode into the heap
-        for (ListNode node: lists) {
-            if (node != null) {
-                heap.add(node);
-            }
-        }
-        // start to link nodes from smallest to largest
-        ListNode dummy = new ListNode(0);
-        ListNode p = dummy;
-        while (!heap.isEmpty()) {
-            p.next = heap.remove();
-            p = p.next;
-            if (p.next != null) {
-                heap.add(p.next);
-            }
-        }
-        return dummy.next;
-    }
-
-    class NodeComparator implements Comparator&lt;ListNode&gt; {
-        public int compare(ListNode n1, ListNode n2) {
-            return n1.val - n2.val;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/46">&larr; Older</a>
@@ -1642,7 +1576,7 @@ public class Solution {
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (99)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1654,6 +1588,10 @@ public class Solution {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/19/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -1662,15 +1600,11 @@ public class Solution {
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/18/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
+        <a href="/blog/2015/01/19/check-if-point-inside-polygon/">[Question] Check if Given Point Inside Polygon</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/18/max-squre-with-all-1/">[Question] Maximum Square Sub-matrix With All 1s</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/18/lexicographic-order-from-dict/">[Google] Lexicographic Order From Dictionary</a>
+        <a href="/blog/2015/01/19/check-if-line-segment-intersect/">[Question] Check if Two Line Segments Intersect</a>
       </li>
     
   </ul>
