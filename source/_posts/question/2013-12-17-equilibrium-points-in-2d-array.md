@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Equilibrium Points in 2D Array"
+title: "[Question] Equilibrium Points in 2D Array "
 comments: true
 category: Question
 tags: [  ]
@@ -18,9 +18,9 @@ tags: [  ]
 
 ### Solution
 
-This is __a generalize question of __Equilibrium index__. For now, I got no better idea then checking Equilibrium index for every single node in the matrix. 
+This is a generalize question of __Equilibrium index__.
 
-So this question literally becomes [this](http://www.geeksforgeeks.org/equilibrium-index-of-an-array/): 
+Refer to __Equilibrium index__, read [this](http://www.geeksforgeeks.org/equilibrium-index-of-an-array/). __The idea__ is to get total sum of array first. Then Iterate through the array calculate left sum == sum / 2. 
 
 > Equilibrium index of an array is an index such that the sum of elements at lower indexes is equal to the sum of elements at higher indexes. For example, in an arrya A:
 
@@ -31,7 +31,7 @@ A[0] + A[1] + A[2] = A[4] + A[5] + A[6]
 
 > 6 is also an equilibrium index, because sum of zero elements is zero, i.e., A[0] + A[1] + A[2] + A[3] + A[4] + A[5]=0
 
-__The idea__ is to get total sum of array first. Then Iterate through the array and keep updating the left sum. 
+Well, for Equilibrium Points in 2D Array, should be similar. DIY and leave me a comment! 
 
 ### Code
 
