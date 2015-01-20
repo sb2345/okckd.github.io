@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Google | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-20T10:57:26+08:00</updated>
+  <updated>2015-01-21T00:50:28+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,66 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Top N Values From Sum of 2 Arrays]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/20/top-n-from-sum-2-array/"/>
+    <updated>2015-01-20T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/20/top-n-from-sum-2-array</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://www.careercup.com/question?id=3213705)
+
+> 给定两个数组A，B，长度均为n，求A[0]+B[0],…,A[0]+B[n-1],…,A[n-1]+B[0],…,A[n-1]+B[n]总共n^2个数的最大的n个值。
+
+### Solution
+
+Use a Heap and then iteratively pop 1 and push 2 elements. Until n values has been filled. 
+
+### Code
+
+	public int[] topN(int[] arr1, int[] arr2, int n) {
+		int[] ans = new int[n];
+		int index = n - 1;
+
+		PriorityQueue<Pair> heap = new PriorityQueue<Pair>(n,
+				new SpecialComparator(arr1, arr2));
+		Arrays.sort(arr1);
+		Arrays.sort(arr2);
+
+		Pair maxPair = new Pair(n - 1, n - 1);
+		heap.add(maxPair);
+
+		for (int i = 0; i < n; i++) {
+			Pair next = heap.poll();
+			ans[index--] = arr1[next.x] + arr2[next.y];
+			if (next.y - 1 >= 0) {
+				heap.add(new Pair(next.x, next.y - 1));
+			}
+			if (next.x - 1 >= 0) {
+				heap.add(new Pair(next.x - 1, next.y));
+			}
+		}
+		return ans;
+	}
+
+	class SpecialComparator implements Comparator<Pair> {
+
+		int[] arr1, arr2;
+
+		public SpecialComparator(int[] a1, int[] a2) {
+			arr1 = a1;
+			arr2 = a2;
+		}
+
+		@Override
+		public int compare(Pair p1, Pair p2) {
+			// note that larger value shall go up top of the heap, so -1 * ...
+			return -1 * (arr1[p1.x] + arr2[p1.y] - arr1[p2.x] - arr2[p2.y]);
+		}
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Google] Lexicographic Order From Dictionary]]></title>
@@ -328,50 +388,6 @@ For __[Google] Crazy Distance Between Strings__, there is another special case: 
 ### Code
 
 Refer to __[Google] Crazy Distance Between Strings__ for complete code. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Reverse a Stack Without DS]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/10/reverse-a-stack/"/>
-    <updated>2015-01-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/10/reverse-a-stack</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/)
-
-> Reverse a stack using recursion. You are not allowed to use loops or data structure, and you can only use the following functions:
-
-    isEmpty(S)
-    push(S)
-    pop(S)
-
-### Solution
-
-Well since we are not allowed to use additional DS or loop, we have to use system stack to help us! 
-
-We add a new method: __insert at stack bottom__. Then we can solve this question recursively. Nice question, and tricky answer! 
-
-### Code
-
-	public void reverse(Stack<Integer> stack) {
-		if (stack.isEmpty() || stack.size() == 1) {
-			return;
-		}
-		int top = stack.pop();
-		this.reverse(stack);
-		this.insertAtBottom(stack, top);
-	}
-
-	private void insertAtBottom(Stack<Integer> stack, int val) {
-		if (stack.isEmpty()) {
-			stack.push(val);
-			return;
-		}
-		int temp = stack.pop();
-		this.insertAtBottom(stack, val);
-		stack.push(temp);
-	}
 ]]></content>
   </entry>
   

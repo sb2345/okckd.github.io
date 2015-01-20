@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Blocking Queue Implementation source A blocking queue is a queue, so we init a queue with a pre-defined size.
-BlockingQueue Class comes with Java 5, &hellip;">
+  <meta name="description" content="Question link Given a binary matrix, find out the maximum size square sub-matrix with all 1s. For example, consider the below binary matrix. 0 1 1 0 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +78,382 @@ BlockingQueue Class comes with Java 5, &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/18/max-squre-with-all-1/">[Question] Maximum Square Sub-matrix With All 1s</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/18/max-squre-with-all-1/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/18/max-squre-with-all-1/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/maximum-size-sub-matrix-with-all-1s-in-a-binary-matrix/">link</a></p>
+
+<blockquote><p>Given a binary matrix, find out the maximum size square sub-matrix with all 1s. For example, consider the below binary matrix.</p></blockquote>
+
+<pre><code>   0  1  1  0  1 
+   1  1  0  1  0 
+   0  1  1  1  0
+   1  1  1  1  0
+   1  1  1  1  1
+   0  0  0  0  0
+</code></pre>
+
+<blockquote><p>The maximum square sub-matrix with all set bits is size 9. Note we only find <strong>square</strong>, not rectangles! (this makes it much easier)</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Since <strong>square only</strong>, we can use DP. <a href="http://www.geeksforgeeks.org/maximum-size-sub-matrix-with-all-1s-in-a-binary-matrix/">Quoted answer</a> below:</p>
+
+<blockquote><p>Let the given binary matrix be M[R][C]. The idea of the algorithm is to construct an auxiliary size matrix S[][] in which each entry S[i][j] represents size of the square sub-matrix with all 1s including M[i][j] where M[i][j] is the rightmost and bottommost entry in sub-matrix.</p>
+
+<ol>
+<li><p>Construct a sum matrix S[R][C] for the given M[R][C].</p></li>
+<li><p> Copy first row and first columns as it is from M[][] to S[][]</p></li>
+<li><p> For other entries, use following expressions to construct S[][]</p></li>
+</ol>
+</blockquote>
+
+<pre><code>         If M[i][j] is 1 then
+            S[i][j] = min(S[i][j-1], S[i-1][j], S[i-1][j-1]) + 1
+         Else /*If M[i][j] is 0*/
+            S[i][j] = 0
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/18/lexicographic-order-from-dict/">[Google] Lexicographic Order From Dictionary</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/18/lexicographic-order-from-dict/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/18/lexicographic-order-from-dict/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=13394663">link</a></p>
+
+<blockquote><p>Given set of words that are lexicographically sorted, return lexicographic order. E.g:</p></blockquote>
+
+<pre><code>abc
+acd
+bcc
+bed
+bdc
+dab
+</code></pre>
+
+<blockquote><p>The order of letters for the given example would be</p></blockquote>
+
+<pre><code>a-&gt;b-&gt;c-&gt;e-&gt;d
+</code></pre>
+
+<h3>Solution</h3>
+
+<blockquote><p>Just form a graph(DAG) and do a topological sort.</p></blockquote>
+
+<p>Start from the first pair in the dictionary. Compare two strings in this pair <strong>till first mismatch</strong>.</p>
+
+<p>Eg: <strong>aad &amp; aab</strong>, in this case create an edge <strong>d &ndash;> b</strong>.</p>
+
+<p>More details is available <a href="http://codereview.stackexchange.com/questions/48292/return-the-lexicographic-order">here</a>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public String lexicoOrder(String[] dict) {
+    String ans = "";
+
+    // for each pair, maintain 2 HashMap
+    HashMap&lt;Character, Integer&gt; incount = new HashMap&lt;Character, Integer&gt;();
+    HashMap&lt;Character, List&lt;Character&gt;&gt; connection = new HashMap&lt;Character, List&lt;Character&gt;&gt;();
+    for (String str : dict) {
+        for (char c : str.toCharArray()) {
+            incount.put(c, 0);
+            connection.put(c, new ArrayList&lt;Character&gt;());
+        }
+    }
+    buildGraph(dict, incount, connection);
+
+    // start topology sorting
+    Queue&lt;Character&gt; temp = new LinkedList&lt;Character&gt;();
+    for (char c : incount.keySet()) {
+        if (incount.get(c) == 0) {
+            temp.offer(c);
+            incount.remove(c);
+            // remove any node whose incount is 0
+        }
+    }
+    while (!temp.isEmpty()) {
+        char top = temp.poll();
+        ans += top;
+        // 'top' is next char in line. remove it and delete connections
+        List&lt;Character&gt; inNodes = connection.get(top);
+        for (char c : inNodes) {
+            // remove incount for all nodes from inNodes
+            incount.put(c, incount.get(c) - 1);
+            if (incount.get(c) == 0) {
+                incount.remove(c);
+                temp.offer(c);
+            }
+        }
+    }
+    if (incount.size() == 0)
+        return ans;
+    else
+        return "unable to find a valid char sequence.";
+}
+
+public void buildGraph(String[] dict, HashMap&lt;Character, Integer&gt; incount,
+        HashMap&lt;Character, List&lt;Character&gt;&gt; connection) {
+    // build the graph map
+    // abc
+    // acd
+    // bcc
+    // bed
+    // bdc
+    // dab
+    for (int i = 0; i &lt; dict.length - 1; i++) {
+        // compare dict[i] and dict[i+1]
+        String str1 = dict[i];
+        String str2 = dict[i + 1];
+        int p = 0;
+        while (p &lt; str1.length() &amp;&amp; p &lt; str2.length()) {
+            if (str1.charAt(p) == str2.charAt(p)) {
+                p++;
+            } else {
+                break;
+            }
+        }
+        if (p == str1.length()) {
+            // this is special case eg. "ab" &amp; "abc"
+            // this will not give up any information about lexico order
+            continue;
+        }
+        char from = str1.charAt(p);
+        char to = str2.charAt(p);
+        // update incount
+        incount.put(to, incount.get(to) + 1);
+        // update connection
+        connection.get(from).add(to);
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/18/Lexicographic-rank-of-string/">[Amazon] Lexicographic Rank of a String</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/18/Lexicographic-rank-of-string/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/18/Lexicographic-rank-of-string/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/lexicographic-rank-of-a-string/">link</a></p>
+
+<blockquote><p>Given a string, find its rank among all its permutations sorted lexicographically.</p>
+
+<p>For example, rank of “abc” is 1, rank of “acb” is 2, and rank of “cba” is 6.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Let the given string be “<strong>STRING</strong>”. In the input string, ‘S’ is the first character. There are total 6 characters and <strong>4 of them are smaller than ‘S’</strong>. So there can be <strong>4 * 5!</strong> smaller strings where first character is smaller than ‘S’, like following:</p>
+
+<pre><code>R X X X X X
+I X X X X X
+N X X X X X
+G X X X X X
+</code></pre>
+
+<p>Repeat the same process for T, and we get:</p>
+
+<pre><code>Rank = 4*5! + 4*4! + 3*3! + 1*2! + 1*1! + 0*0! = 597
+</code></pre>
+
+<h3>Code</h3>
+
+<pre><code>public int getRank(String input) {
+    if (input == null || input.length() == 0) {
+        return 0;
+    }
+    input = input.toUpperCase();
+    return helper(input) + 1;
+}
+
+public int helper(String input) {
+    if (input == null || input.length() == 0) {
+        return 0;
+    }
+    char headChar = input.charAt(0);
+    int countSmallerThanHead = 0;
+    for (char ch : input.toCharArray()) {
+        if (ch &lt; headChar) {
+            countSmallerThanHead++;
+        }
+    }
+    return countSmallerThanHead * Common.factorial(input.length() - 1)
+            + helper(input.substring(1));
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/17/find-nodes-distance-k-binary-tree/">[Amazon] Find Nodes of Distance K From Binary Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/17/find-nodes-distance-k-binary-tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/17/find-nodes-distance-k-binary-tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=15069740">link</a></p>
+
+<blockquote><p>Find the nodes at d distance from a certain node in a Binary Tree</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><a href="http://www.geeksforgeeks.org/print-nodes-distance-k-given-node-binary-tree/">There are two types</a> of nodes to be considered:</p>
+
+<ol>
+<li>Nodes in the subtree rooted of the target node.</li>
+<li>Other nodes, may be an ancestor of target, or a node in some other subtree.</li>
+</ol>
+
+
+<p>The details of find these nodes:</p>
+
+<ol>
+<li><p>Find the nodes which can be reached in k hops from the given node.</p></li>
+<li><p>Second part we look at those nodes <strong>on the upper part of the tree</strong>. The parent of the given node is 1 hop away. Hence in the <strong>other child subtree</strong> of the parent, we find nodes with k-1 hops.</p>
+
+<p> Similarly the grand parent of B, we find nodes with k &ndash; 2 distance.</p></li>
+</ol>
+
+
+<p>Implementation:</p>
+
+<ol>
+<li><p>Start from root, <strong>store all nodes in a queue</strong> of maximum size k till you reach the given node.</p></li>
+<li><p>Call FindNodesAtDistance() on the nodes from the queue to get all the nodes <strong>distance k -i</strong> from the node.</p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -868,428 +1243,6 @@ private String longestCommonPrefix(String s1, String s2) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/crazy-distance-string/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/crazy-distance-string/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/15061908/google-interview-find-crazy-distance-between-strings">link</a></p>
-
-<blockquote><p>X and Y are strings formed by 0 or 1. Distance is define as:</p></blockquote>
-
-<pre><code>D(X,Y) = Remove chars common at the start from both X &amp; Y. 
-Then add the remaining lengths from both the strings.
-</code></pre>
-
-<blockquote><p>For e.g.</p></blockquote>
-
-<pre><code>D(1111, 1000) = Only First alphabet is common. So the remaining string is 111 &amp; 000. Therefore the result length("111") &amp; length("000") = 3 + 3 = 6
-</code></pre>
-
-<blockquote><p>For e.g.</p></blockquote>
-
-<pre><code>D(0101, 01100) = Only First two alphabets are common. So the remaining string is 01 &amp; 100. Therefore the result length("01") &amp; length("100") = 2 + 3 = 5
-</code></pre>
-
-<blockquote><p>Now given n input, say like</p></blockquote>
-
-<pre><code>1111
-1000
-101
-1100
-</code></pre>
-
-<blockquote><p>Find out the maximum crazy distance between 2 strings.</p>
-
-<p><strong>n is</strong> the number of input strings. <strong>m is</strong> the max length of any input string.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is the <a href="http://stackoverflow.com/a/15062640">source</a>.</p>
-
-<blockquote><p>Put the strings into a tree, where 0 means go left and 1 means go right. <strong>O(m*n) time</strong>.</p></blockquote>
-
-<p>Example:</p>
-
-<pre><code>            Root
-             1
-          0      1
-         0 1*   0  1
-        0*     0*    1*
-</code></pre>
-
-<blockquote><p>where the * means that an element ends there. Constructing this tree clearly takes O(n m).</p>
-
-<p>Now we have to find <strong>the diameter of the tree</strong> (the longest path between two nodes).</p></blockquote>
-
-<p>How to find out longest path between 2 leaf nodes? Please refer to <strong>[Google] Diameter of a Binary Tree</strong> for explanation.</p>
-
-<p>Total time complexity is <strong>O(m*n) time</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int crazyDist(String[] input) {
-    TreeNode root = this.buildTree(input);
-    return this.findMaxPath(root).path - 1;
-}
-
-private Result findMaxPath(TreeNode node) {
-    if (node == null) {
-        return new Result(Integer.MIN_VALUE, 0);
-    }
-    Result lr = this.findMaxPath(node.left);
-    Result rr = this.findMaxPath(node.right);
-    int path = Math.max(lr.path, rr.path);
-    if (lr.depth != 0 &amp;&amp; rr.depth != 0) {
-        // this check is important, because if any of the child node is
-        // NULL, this root will not be eligible for computing the path
-        path = Math.max(path, lr.depth + rr.depth + 1);
-        // Why? cuz diameter must go from one leaf, thru root, and reach
-        // another leaf. This is different from "Maximum Path Sum" leetcode
-    }
-    return new Result(path, 1 + Math.max(lr.depth, rr.depth));
-}
-
-private TreeNode buildTree(String[] input) {
-    TreeNode root = new TreeNode(123);
-    // share a common root. this root is deducted from the final calculation
-    for (String str : input) {
-        // insert str under the root
-        TreeNode p = root;
-        for (char c : str.toCharArray()) {
-            if (c == '0') {
-                if (p.left == null) {
-                    p.left = new TreeNode(124);
-                    // if 0, go to left; otherwise go to right
-                    // thus value of TreeNodes does not really matter
-                }
-                p = p.left;
-            } else {
-                if (p.right == null) {
-                    p.right = new TreeNode(125);
-                }
-                p = p.right;
-            }
-        }
-    }
-    return root;
-}
-
-class Result {
-    int path;
-    int depth;
-
-    public Result(int a, int b) {
-        path = a;
-        depth = b;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/">[Google] Check if Repeating Subsequence Exists</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/check-if-repeating-subsequence-exist/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5931067269709824">link</a></p>
-
-<blockquote><p>Given a string, find if there is any sub-sequence that repeats itself. Do not reuse any char.</p>
-
-<p>Eg:</p></blockquote>
-
-<pre><code>1. abab &lt;------yes, ab is repeated
-2. abba &lt;---- No, a and b follow different order 
-3. acbdaghfb &lt;-------- yes, a followed by b twice 
-4. abcdacb &lt;----- yes, a followed by b twice 
-</code></pre>
-
-<blockquote><p>Note that no char should be reused. I.e. &ldquo;aab&rdquo; is a false.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This looks like a question without any clue. However, this actually is a modified version of <strong>[LintCode] Longest Common Subsequence</strong>.</p>
-
-<p>Look at that question: there&rsquo;s 2 input string, and they match char-by-char. For this question, we are simply <strong>matching input string with input string itself</strong>. And chars should be match <strong>ONLY</strong> at different positions, that&rsquo;s the key. As pointed out by the <a href="http://www.careercup.com/question?id=5931067269709824">top comment</a>:</p>
-
-<blockquote><p>Now we can modify the longest_common_subsequence(a, a) to find the value of the longest repeated subsequence in a by excluding the cases when i == j</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public boolean checkRepeatSubseq(String input) {
-    int len = input.length();
-    int[][] dp = new int[len + 1][len + 1];
-    // dp[i][j] denotes the length of subseq between 2 strings:
-    // 1. first i chars of input
-    // 2. first j chars of input
-    for (int i = 1; i &lt;= len; i++) {
-        for (int j = i; j &lt;= len; j++) {
-            if (i != j &amp;&amp; input.charAt(i - 1) == input.charAt(j - 1)) {
-                int temp = Math.max(dp[i - 1][j], dp[i][j - 1]);
-                dp[i][j] = Math.max(temp, dp[i - 1][j - 1] + 1);
-            } else {
-                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-    return dp[len][len] &gt;= 2;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/all-repeating-substring-given-length/">[LinkedIn] Find All Repeating Substring With Given Length</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/all-repeating-substring-given-length/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/all-repeating-substring-given-length/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=6495932900179968">link</a></p>
-
-<blockquote><p>Find all the repeating substring of specified length in a large string sequence.</p>
-
-<p>For e.g.</p></blockquote>
-
-<pre><code>Input String: "ABCACBABC" 
-repeated sub-string length: 3 
-Output: ABC 
-</code></pre>
-
-<blockquote><p>eg.</p></blockquote>
-
-<pre><code>Input String: "ABCABCA" 
-repeated sub-string length: 2 
-Output: AB, BC, CA
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Similar to <strong>[Amazon] Longest Repeating Substring</strong>, the best solution is to do <strong>Suffix Tree</strong>, or suffix array. We then need to print nodes on a certain level, who has more than 1 descendant.</p>
-
-<p>However, since the length of substring is given, we can also do simply iteration: insert all substring with given length into a HashSet, and check repetition. <a href="https://github.com/techpanja/interviewproblems/blob/master/src/strings/repeatingstringsofspecifiedlength/RepeatingStringOfSpecificLength.java">ref</a></p>
-
-<h3>Code</h3>
-
-<p>Suffix tree solution: not written.</p>
-
-<p>Hashset code:</p>
-
-<pre><code>public List&lt;String&gt; solve(String input, int k) {
-    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-    HashSet&lt;String&gt; set = new HashSet&lt;String&gt;();
-    for (int i = 0; i &lt;= input.length() - k; i++) {
-        String sub = input.substring(i, i + k);
-        if (set.contains(sub)) {
-            ans.add(sub);
-        }
-        set.add(sub);
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">[Question] All Distinct Subsequences With Given Length</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://11011110.livejournal.com/254164.html">link</a></p>
-
-<blockquote><p>Find a polynomial-time algorithm that takes a string of length n, and a number k, output the number of distinct k-character subsequences.</p>
-
-<p>For instance, input &ldquo;food&rdquo; and number k=2, output should be 4. There are four distinct 2-character subsequences of &ldquo;food&rdquo;: &ldquo;fo&rdquo;, &ldquo;fd&rdquo;, &ldquo;oo&rdquo;, and &ldquo;od&rdquo;.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Similar to <strong>[Question] Number of distinct sub-sequence</strong>, we solve this problem with DP. The dp equation is a bit difficult to write.</p>
-
-<p>The idea come from comment from <a href="http://11011110.livejournal.com/254164.html">gareth_rees</a>:</p>
-
-<blockquote><p>Let θ(S, k) be the number of distinct k-character subsequences in the string S of length n.</p>
-
-<p>Clearly θ(S, k) = 1 if n = k or k = 0</p>
-
-<p>and θ(S, k) = 0 if n &lt; k.</p>
-
-<p>Otherwise, <strong>choose 1 unique char from S</strong>, and deduct k by 1, then do the DP calculation with the remaining part of S.</p></blockquote>
-
-<p>Look at this example:</p>
-
-<pre><code>θ("food", 2) = θ("ood", 1) + θ("od", 1) + θ("", 1)
-= (θ("od", 0) + θ("", 0)) + (θ("d", 0) + θ("", 0)) + 0
-= (1 + 1) + (1 + 1)
-= 4
-</code></pre>
-
-<p><strong>&ldquo;food&rdquo; is divided into 3 parts</strong>. First part we choose &ldquo;f&rdquo; to be the first char, thus the value is θ(&ldquo;ood&rdquo;, 1). Second part we choose &ldquo;o&rdquo;, and final part we choose &ldquo;d&rdquo;.</p>
-
-<p><strong>Note that when we choose a char, it must never have been chosen before</strong>. In case of &ldquo;food&rdquo;, we only choose &lsquo;f&rsquo;, &lsquo;o&rsquo;, &rsquo;d&#8217; once for each.</p>
-
-<p>This is a very difficult DP question, but the explanation really makes the answer easier. Read my implementation below.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int countSubSeq(String input, int k) {
-    // assuming all input chars are small letter
-    return choose(input, 0, k);
-}
-
-private int choose(String input, int start, int numChar) {
-    int charLeft = input.length() - start;
-    if (charLeft == numChar || numChar == 0) {
-        return 1;
-    } else if (charLeft &lt; numChar || numChar &lt; 0) {
-        return 0;
-    }
-    // now numChar is smaller than charLeft, and larger than 0
-    // start to pick a char (which is at first appearance)
-    int total = 0;
-    HashSet&lt;Character&gt; chosen = new HashSet&lt;Character&gt;();
-    while (start &lt; input.length()) {
-        char currentChar = input.charAt(start);
-        if (!chosen.contains(currentChar)) {
-            // pick the char pointer by 'start'
-            total += choose(input, start + 1, numChar - 1);
-            chosen.add(currentChar);
-        }
-        start++;
-    }
-    return total;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1307,12 +1260,12 @@ private int choose(String input, int start, int numChar) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (57)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (44)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (22)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -1329,23 +1282,23 @@ private int choose(String input, int start, int numChar) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/19/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/19/difference-http-tcp/">[Design] Difference Between HTTP Protocol and TCP Protocol</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/19/check-if-point-inside-polygon/">[Question] Check if Given Point Inside Polygon</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/19/check-if-line-segment-intersect/">[Question] Check if Two Line Segments Intersect</a>
       </li>
     
   </ul>
