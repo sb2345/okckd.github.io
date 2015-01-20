@@ -34,9 +34,13 @@ tags: [ src ]
 
 2. Iterate for each vertical line at distance minimum to maximum from root. 
 
+This solution is O(n^2), because getting the width of tree requires O(n) time. (Wait, is it not? Think about a complete tree of 3 level and 7 nodes)
+
+O(n) solution is available using a __[HashMap](www.geeksforgeeks.org/print-binary-tree-vertical-order-set-2/)__. 
+
 ### Code
 
-__written by me__ 
+__written by me__, O(n^2) time.
 
     public List<List<Integer>> printVertically(TreeNode root) {
         List<List<Integer>> ans = new ArrayList<List<Integer>>();
