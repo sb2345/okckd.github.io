@@ -44,7 +44,7 @@ Yes, key negotiation (handshaking) __requires a lot CPU capacity__.
 
 ### Port Number
 
-HTTP uses port 80 or 8080, while HTTPS uses __TCP port 443__. 
+HTTP uses __port 80 or 8080__, while HTTPS uses __TCP port 443__. 
 
 [The reason](http://www.coderanch.com/t/168608/java-Web-Component-SCWCD/certification/Diff) that some applications use 8080 (7080, 9080) instead of 80 is that on UNIX, __port numbers below 1024__ are reserved for __super-user__ processes. 
 
