@@ -24,7 +24,7 @@ This is a very similar question to "Coin Change", because directly using recursi
 
 Using i to denote the items to put into Knapsack, and w denote the total weight, the equation is: 
 
-> K[i][w] = max(val[i-1] + K[i-1][w-wt[i-1]],  K[i-1][w]);
+> K[i][w] = Math.max( val[i-1] + K[i-1][w-wt[i-1]] , K[i-1][w] );
 
 ### Code
 

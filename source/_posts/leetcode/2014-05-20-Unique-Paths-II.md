@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/unique-paths-ii/)
 
 <div class="question-content">
@@ -31,6 +31,7 @@ tags: [  ]
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -52,32 +53,38 @@ tags: [  ]
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-__This is same question as previous one, DP solution__. 
-
 ### Solution
 
-The code need no explanation. 
+__This is similar question as previous one, but DP solution__. 
 
 ### My code
 
-
-    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
-        int m = obstacleGrid.length, n = obstacleGrid[0].length;
-        int[][] dp = new int[m][n];
-        dp[0][0] = 1 - obstacleGrid[0][0];
-        for (int i = 1; i < m + n - 1; i ++) {
-            for (int j = 0; j <= i; j ++) {
-                // dp[j][i-j] within the range of dp[m][n]
-                if (j >= m || i-j >= n) continue;
-                if (obstacleGrid[j][i-j] == 1){ 
-                    dp[j][i-j] = 0;
-                    continue;
-                }
-                if (j - 1 >= 0) dp[j][i-j] += dp[j-1][i-j];
-                if (i-j-1 >= 0) dp[j][i-j] += dp[j][i-j-1];
-            }
-        }
-        return dp[m-1][n-1];
-    }
+	public class Solution {
+	    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+	        int[][] ob = obstacleGrid;
+	        if (ob == null || ob.length == 0) {
+	            return 0;
+	        }
+	        int m = ob.length;
+	        int n = ob[0].length;
+	        int[][] dp = new int[m][n];
+	        for (int i = 0; i < m; i++) {
+	            for (int j = 0; j < n; j++) {
+	                if (i == 0 && j == 0) {
+	                    dp[i][j] = ob[i][j] == 1 ? 0 : 1;
+	                } else if (i == 0) {
+	                    dp[i][j] = dp[i][j - 1] * (ob[i][j] == 1 ? 0 : 1);
+	                } else if (j == 0) {
+	                    dp[i][j] = dp[i - 1][j] * (ob[i][j] == 1 ? 0 : 1);
+	                } else {
+	                    if (ob[i][j] == 1) {
+	                        dp[i][j] = 0;
+	                    } else {
+	                        dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+	                    }
+	                }
+	            }
+	        }
+	        return dp[m - 1][n - 1];
+	    }
+	}

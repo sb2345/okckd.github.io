@@ -38,7 +38,7 @@ return <code>["255.255.11.135", "255.255.111.35"]</code>. (Order does not matter
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">40 minutes</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 

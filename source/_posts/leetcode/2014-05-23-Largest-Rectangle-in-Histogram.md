@@ -47,7 +47,7 @@ return <code>10</code>.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">Can't solve</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 
@@ -78,8 +78,7 @@ Time complexity of the stack solution is __O(n)__. (Another algo analysis articl
 
 ### Solution
 
-__I wrote the code using idea from [blog](http://jane4532.blogspot.sg/2013/07/longest-rectangle-in-histogramleetcode.html)__. It works, but there are 2 things that I got it wrong many time before I finally get the correct solution. 
-
+__I wrote the code using idea from [blog](http://jane4532.blogspot.sg/2013/07/longest-rectangle-in-histogramleetcode.html)__. It works, but there are 2 things that I got wrong. 
 
 __First, if elements are equal__. I shall also push it. I can not simply skip it, I don't know why! 
 

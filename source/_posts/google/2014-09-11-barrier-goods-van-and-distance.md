@@ -6,7 +6,7 @@ category: Google
 tags: [  ]
 ---
 
-### Question 
+### Question
 
 [link](http://www.mitbbs.com/article_t1/JobHunting/32631467_0_1.html)
 

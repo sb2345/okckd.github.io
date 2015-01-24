@@ -2,7 +2,9 @@
 layout: post
 title: "[CC150v4] 14.5 Java Reflection "
 comments: true
-category: CC150v4
+categories:
+- CC150v4
+- Java OOP
 tags: [ src ]
 ---
 

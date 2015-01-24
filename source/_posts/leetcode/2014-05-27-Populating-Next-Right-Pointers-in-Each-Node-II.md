@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](https://oj.leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/)
 
 <div class="question-content">
@@ -66,7 +66,7 @@ __This is a difficult question__.
 
 We can of course do a BFS, but that's too simple, and it's not related to previous question, thus __Queue__ is not the answer we're looking for. 
 
-__There are 2 ways to solve this problem, recursively and iteratively__. The 2 solutions are quite different, I will explain 1 by 1. 
+__There are 2 ways to solve this problem, recursively and iteratively__. The 2 solutions are quite different, I will explain them. 
 
 ### Solution
 
@@ -78,7 +78,7 @@ The coding part is not difficult, __which is not the case for next solution__.
 
 __Second solution is recursive, and it is written in [this blog](http://fisherlei.blogspot.sg/2012/12/leetcode-populating-next-right-pointers_29.html)__. Same as previous solution, we assume that current level have all 'next-links' ready, and we will build these links for next level. 
 
-The way of getting next link for child nodes is a bit different, but I guess that's fine. The difficult part is __during recursive call, I NEED TO CALL THE RECURSION METHOD FOR RIGHT CHILD FIRST, THEN LEFT CHILD__. The reason is, the links from left child to right child is going to be used in the recursion call. If we do left first, we will have problem getting __current.left.next__ (which in this case, will be null). I spent a terribly long time debugging this error, and finally found a great explanation [here](https://oj.leetcode.com/discuss/1942/anyone-helps-to-find-bug-for-my-code). 
+The way of getting next link for child nodes is a bit different, but I guess that's fine. The difficult part is __during recursive call, I NEED TO CALL THE RECURSION METHOD FOR RIGHT CHILD FIRST, THEN LEFT CHILD__. The reason is, the links from left child to right child is going to be used in the recursion call. If we do left first, we will have problem getting __current.left.next__ (which in this case, will be null). I spent a terribly long time debugging this error, until I found a great explanation [here](https://oj.leetcode.com/discuss/1942/anyone-helps-to-find-bug-for-my-code). 
 
 > in your code: connect(root->left); connect(root->right);
 

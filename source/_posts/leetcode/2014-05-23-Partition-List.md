@@ -39,7 +39,7 @@ return <code>1-&gt;2-&gt;2-&gt;4-&gt;3-&gt;5</code>.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">15 minutes</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 

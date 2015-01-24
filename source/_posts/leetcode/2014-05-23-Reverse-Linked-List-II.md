@@ -45,7 +45,7 @@ Given <i>m</i>, <i>n</i> satisfy the following condition:<br>
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="lime">18 minutes</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 

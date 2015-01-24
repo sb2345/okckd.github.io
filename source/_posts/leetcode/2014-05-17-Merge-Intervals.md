@@ -6,8 +6,8 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/merge-intervals/)
 
 <div class="question-content">
@@ -21,6 +21,7 @@ return <code>[1,6],[8,10],[15,18]</code>.
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -36,49 +37,43 @@ return <code>[1,6],[8,10],[15,18]</code>.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">Around 40 min</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-__The idea of the solution is not difficult__. 
-
-First, sort the entire collection list by start time. Secondly, merge it. 
-
-__The real difficult part is how to sort the collection__. I did it in quite differently from most people did. So there are 3 solutions posted below (or I would say 2.5 because last 2 piece of code is almost identical). 
-
 ### Solution
 
-__My solution is basically insertion sort it__. Here I did not used traditional insetion sort, but instead __binary insertion sort__. I thought it's going to have smaller time complexity, until I read [this article](http://www.brpreiss.com/books/opus5/html/page487.html)
+__The idea of the solution is not difficult__. First, sort the entire collection list by start time. Secondly, merge it. 
+
+__The real difficult part is how to sort the collection__. 
+
+__We can of course do insertion sort__, or __binary insertion sort__. However, from [this article](http://www.brpreiss.com/books/opus5/html/page487.html):
 
 > The straight insertion algorithm presented in the preceding section does a linear search to find the position in which to do the insertion. However, since the element is inserted into a sequence that is already sorted, we can use a binary search instead of a linear search. Whereas a linear search requires O(n) comparisons in the worst case, a binary search only requires O(logn) comparisons. Therefore, if the cost of a comparison is significant, the binary search may be preferred.
 
 {% img middle /assets/images/merge_interval_binary_insertion_sort_algo.png %}
 
-__And from__ [wikipedia](http://en.wikipedia.org/wiki/Insertion_sort#Variants)
+__And from__ [wikipedia](http://en.wikipedia.org/wiki/Insertion_sort#Variants):
 
 > If the cost of comparisons exceeds the cost of swaps, as is the case for example with string keys stored by reference or with human interaction (such as choosing one of a pair displayed side-by-side), then using binary insertion sort may yield better performance. Binary insertion sort employs a binary search to determine the correct location to insert new elements, and therefore performs ⌈log2(n)⌉ comparisons in the worst case, which is O(n log n). The algorithm as a whole still has a running time of O(n^2) on average because of the series of swaps required for each insertion.
 
-Any way, I choose a O(n^2) sorting algorithm and implemented it, then the merge part is done easily (it's easier than I thought). 
+So insertion sort algorithm may not be the best choice for us! 
 
-__The most popular solution on Internet is similar, only they're using Collection.sort function__. 
+__A more popular solution is using Collection.sort function__. 
 
+> java.util.Collections
+>
+>public static <T> void sort(List<T> list, Comparator<? super T> c)
+>
+>Parameters: c
+>
+>The comparator to determine the order of the list. A null value indicates that the elements' natural ordering should be used.
 
-java.util.Collections
+A new class that implements the Comparator interface is created, and inside there is compare(Interval, Interval) method. [Here](http://www.cnblogs.com/lautsie/p/3254191.html) is one example of such solution. 
 
-public static <T> void sort(List<T> list, Comparator<? super T> c)
-
-Parameters: c
-The comparator to determine the order of the list. A null value indicates that the elements' natural ordering should be used.
-
-
-A new class that implements the Comparator interface is created, and inside there is compare(Interval, Interval) method. This is most people's solution, and [here](http://www.cnblogs.com/lautsie/p/3254191.html) is one example. 
-
-__The third solution is same as the second, but only different__ in implementing the comparator object. The following code from [this blog](http://rleetcode.blogspot.sg/2014/01/merge-intervals-java.html) is the only thing that differs: 
-
+__The third solution is same as the second, but only different__ in implementing the comparator object. Note the following code from [this blog](http://rleetcode.blogspot.sg/2014/01/merge-intervals-java.html): 
 
 Comparator<Interval> intervalComperator = new Comparator<Interval>(){
         public int compare(Interval i1, Interval i2){
@@ -88,10 +83,11 @@ Comparator<Interval> intervalComperator = new Comparator<Interval>(){
         }
 };
 
+Read 3 pieces of code below. 
+
 ### My code
 
-__My code__, sort the list by hand, then merge
-
+insertion sort, then merge: 
 
     public ArrayList<Interval> merge(ArrayList<Interval> intervals) {
         ArrayList<Interval> ans = new ArrayList<Interval>();
@@ -133,45 +129,45 @@ __My code__, sort the list by hand, then merge
         return ans;
     }
 
+__Recommended solution__. Creating a new Comparator class 
 
-__Standard solution__. Creating a new Comparator class 
-
-
-    public class Solution {
-        public ArrayList<Interval> merge(ArrayList<Interval> intervals) {
-            int len = intervals.size();
-            if (len == 0 || len == 1) return intervals;
-
-            ArrayList<Interval> ans = new ArrayList<Interval>();
-            Collections.sort(intervals, new IntervalComparator());
-
-            Interval tmp = intervals.get(0);
-            for (int i = 1; i < len; i++) {
-                Interval itv = intervals.get(i);
-                if (tmp.end >= itv.start) { // mergeable
-                    int left = Math.min(tmp.start, itv.start);
-                    int right = Math.max(tmp.end, itv.end);
-                    tmp = new Interval(left, right);
-                }
-                else {
-                    ans.add(tmp);
-                    tmp = intervals.get(i);
-                }
-            }
-            ans.add(tmp);
-            return ans;
-        }
-    }
-
-    class IntervalComparator implements Comparator<Interval> {
-        public int compare(Interval a, Interval b) {
-            return a.start - b.start;
-        }
-    }
-
+	/**
+	 * Definition for an interval.
+	 * public class Interval {
+	 *     int start;
+	 *     int end;
+	 *     Interval() { start = 0; end = 0; }
+	 *     Interval(int s, int e) { start = s; end = e; }
+	 * }
+	 */
+	public class Solution {
+	    public List<Interval> merge(List<Interval> intervals) {
+	        if (intervals == null || intervals.size() == 0) {
+	            return intervals;
+	        }
+	        Collections.sort(intervals, new IntervalComparator());
+	        int p = 0;
+	        // if p is the last element of the list, we should stop merging
+	        while (p < intervals.size() - 1) {
+	            // merge p with the next interval, if possible
+	            if (intervals.get(p).end >= intervals.get(p + 1).start) {
+	                intervals.get(p).end = Math.max(intervals.get(p).end, intervals.get(p + 1).end);
+	                intervals.remove(p + 1);
+	            } else {
+	                p++;
+	            }
+	        }
+	        return intervals;
+	    }
+	    
+	    class IntervalComparator implements Comparator<Interval> {
+	        public int compare(Interval a, Interval b) {
+	            return a.start - b.start;
+	        }
+	    }
+	}
 
 __Third solution__, different way of writing Comparator.
-
 
     public ArrayList<Interval> merge(ArrayList<Interval> intervals) {
         if (intervals == null || intervals.size() < 2)
@@ -202,4 +198,3 @@ __Third solution__, different way of writing Comparator.
         result.add(current);
         return result;
     }
-

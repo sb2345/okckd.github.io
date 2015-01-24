@@ -51,7 +51,7 @@ A solution set is: <br>
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="yellow">20 min coding only</td>
+		<td bgcolor="yellow">----------</td>
 	</tr>
 </table>
 
@@ -65,27 +65,34 @@ It can be solved with basic recursion methods. I refered to [this blog](http://b
 
 ### Solution
 
-__Recursively fetch the next element and subtract the value from the target__. In the end, if target happen to be 0, then 1 solution is found. If target result to be less than 0, return. If larger than 0, continue. 
+__Recursively fetch the next element and subtract the value from the target__. In the end, if target happen to be 0, then one solution is found. If target result to be less than 0, return. If larger than 0, continue. 
 
 ### My code 
 
+    public class Solution {
+        public List<List<Integer>> combinationSum(int[] candidates, int target) {
+            List<List<Integer>> ans = new ArrayList<List<Integer>>();
+            if (candidates == null || candidates.length == 0) {
+                return ans;
+            }
+            Arrays.sort(candidates);
+            int len = candidates.length;
+            helper(ans, candidates, new ArrayList<Integer>(), 0, len, target);
+            return ans;
+        }
 
-    public ArrayList<ArrayList<Integer>> combinationSum(int[] candidates, int target) {
-        ArrayList<ArrayList<Integer>> ans = new ArrayList<ArrayList<Integer>>();
-        Arrays.sort(candidates);
-        helper(candidates, ans, 0, new ArrayList<Integer>(), target);
-        return ans;
-    }
-
-    private void helper(int[] cand, ArrayList<ArrayList<Integer>> ans, 
-                        int start, ArrayList<Integer> items, int target) {
-        if (target < cand[start]) return;
-        for (int i = start; i < cand.length; i ++) {
-            if (cand[i] > target) break;
-            items.add(cand[i]);
-            if (cand[i] == target) ans.add(new ArrayList<Integer>(items));
-            else helper(cand, ans, i, items, target - cand[i]);
-            items.remove(items.size() - 1);
+        private void helper(List<List<Integer>> ans, int[] cand, List<Integer> path, int pos, int len, int target) {
+            if (target == 0) {
+                ans.add(new ArrayList<Integer>(path));
+                return;
+            } else if (target < 0) {
+                return;
+            }
+            for (int i = pos; i < len; i++) {
+                // insert cand[i] into path list, and continue search dfs
+                path.add(cand[i]);
+                helper(ans, cand, path, i, len, target - cand[i]);
+                path.remove(path.size() - 1);
+            }
         }
     }
-

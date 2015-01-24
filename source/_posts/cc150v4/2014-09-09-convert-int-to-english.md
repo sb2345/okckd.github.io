@@ -14,9 +14,7 @@ This is also on __CC150v5 Q17.7__.
 
 ### Solution
 
-The solution in book isn't good, so I wrote the code myself. 
-
-Read it below. 
+The solution in book isn't good, so I wrote the code myself. Read it below. 
 
 ### Code
 

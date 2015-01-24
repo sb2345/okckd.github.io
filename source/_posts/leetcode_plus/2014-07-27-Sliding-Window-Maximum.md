@@ -11,7 +11,7 @@ tags: [ unit test needed ]
 [link](http://leetcode.com/2011/01/sliding-window-maximum.html)
 
 > A long array A[] is given to you. There is a sliding window of size w which is moving from the very left of the array to the very right. You can only see the w numbers in the window. Each time the sliding window moves rightwards by one position. Following is an example:
-The array is [1 3 -1 -3 5 3 6 7], and w is 3.
+The array is [1, 3, -1, -3, 5, 3, 6, 7], and w is 3.
 
     Window position                Max
     ---------------               -----
@@ -42,41 +42,31 @@ __We do not need to [keep all numbers](http://n00tc0d3r.blogspot.sg/2013/04/slid
 
 ### Code
 
-Code by N00tc0d3r. 
+written by me
 
-	public int[] windowMax(int[] nums, int window) {
-		int w = (nums.length < window) ? nums.length : window;
-		// A deque allows insertion/deletion on both ends.
-		// Maintain the first as the index of maximal of the window
-		// and elements after it are all smaller and came later than the first.
-		Deque<Integer> que = new ArrayDeque<Integer>();
-
-		// initialize window
-		int i = 0;
-		while (i < w) {
-			while (!que.isEmpty() && nums[que.getLast()] <= nums[i]) {
-				que.removeLast();
+	public int[] slidingWindowMax(int[] array, int w) {
+		int[] ans = new int[array.length - w + 1];
+		List<Integer> q = new LinkedList<Integer>();
+		// Queue stores indices of array, and values are in decreasing order.
+		// In this way, the top element in queue is the max in window
+		for (int i = 0; i < array.length; i++) {
+			// 1. remove element from head until first number within window
+			if (!q.isEmpty() && q.get(0) + w <= i) {
+				// it's OK to change 'while' to 'if' in the line above
+				// cuz we actually remove 1 element at most
+				q.remove(0);
 			}
-			que.addLast(i++);
+			// 2. before inserting i into queue, remove from the tail of the
+			// queue indices with smaller value they array[i]
+			while (!q.isEmpty() && array[q.get(q.size() - 1)] <= array[i]) {
+				q.remove(q.size() - 1);
+			}
+			q.add(i);
+			// 3. set the max value in the window (always the top number in
+			// queue)
+			if (i + 1 >= w) {
+				ans[i + 1 - w] = array[q.get(0)];
+			}
 		}
-
-		// sliding window
-		int[] max = new int[nums.length - w + 1];
-		max[i - w] = que.getFirst();
-		while (i < nums.length) {
-			// add new element
-			while (!que.isEmpty() && nums[que.getLast()] <= nums[i]) {
-				que.removeLast();
-			}
-			que.addLast(i);
-			// remove old element if still in que
-			if (!que.isEmpty() && i - w >= que.getFirst()) {
-				que.removeFirst();
-			}
-			// get maximal
-			++i;
-			max[i - w] = que.getFirst();
-		}
-
-		return max;
+		return ans;
 	}

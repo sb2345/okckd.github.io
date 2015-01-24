@@ -37,7 +37,7 @@ Given <code>1-&gt;1-&gt;1-&gt;2-&gt;3</code>, return <code>2-&gt;3</code>.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="lime">15 minutes</td>
+		<td bgcolor="lime">----------</td>
 	</tr>
 </table>
 

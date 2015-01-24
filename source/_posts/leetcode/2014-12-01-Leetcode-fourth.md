@@ -40,6 +40,7 @@ tags: [  ]
 1. [LeetCode 79] Word Search
 1. [LeetCode 80] Remove Duplicates From Sorted Array II
 1. [LeetCode 94] Binary Tree Inorder Traversal
+1. [LeetCode 142] Linked List Cycle II
 
 ### Difficult
 
@@ -50,17 +51,3 @@ tags: [  ]
 1. [LeetCode 29] Divide Two Integers
 1. [LeetCode 37] Sudoku Solver
 1. [LeetCode 44] Wildcard Matching
-
-skip:
-
-    Minimum Window Substring
-    Largest Rectangle in Histogram
-    
-Posts are updated up to: [LeetCode 20] Valid Parentheses
-	<tr>
-		<td>Time to use</td>
-		<td bgcolor="white">----------</td>
-	</tr>
-</table>
-
-Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
