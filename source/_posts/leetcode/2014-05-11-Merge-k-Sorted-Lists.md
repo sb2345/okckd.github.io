@@ -44,13 +44,15 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 There are two ways to solve this problem. 
 
 * k - number of lists
-* n - String length of each list
+* n - length of each list
 
 __First approach is merge sort__. Using divide and conquer approach, divide the entire input into halves, and then merge 2 list each time. Instead of merging 1 by 1 which the time complexity is O(nk x (k-1)), the 2 lists to be merged is always similar length, thus time complexity is reduced to O(nk x logk). 
 
 __You may wonder how I calculate time complexity__. See, each round of sort, nk nodes are read and sorted. This happened O(logk) times, where k is the number of lists. Thus totoal time take is O(nk x logk). 
 
-__Second approach is heap sort__. The idea of this is to always keep a sorted list of the head of each list. But before the code, what actually is heap/priority queue? 
+__Second approach is heap sort__. The idea of this is to always keep a sorted list of the head of each list. When we retrieve items from the heap, it only take O(logk) time to find the next smallest element. 
+
+In case you do not know about heap (or priority queue): 
 
 > __[Heap](http://en.wikipedia.org/wiki/Heap_%28data_structure%29) is a specialized tree-based data structure__. Heap is crucial in Dijkstra's algorithm and heapsort. 
 >
@@ -94,7 +96,7 @@ Both method are well explained in [this csdn blog](http://blog.csdn.net/linhuanm
 
 ### Solution
 
-First, divide and conquer code is lengthy but medium difficulty. 
+Divide and conquer code is lengthy but medium difficulty. 
 
 Second solution, however, is not as easy. __Especially when we have to write Comparator on our own__.  A priority queue (heap) is implemented and head of each list is inserted into the heap. Then poll elements out from the heap until heap is empty. 
 
@@ -102,75 +104,101 @@ Second solution, however, is not as easy. __Especially when we have to write Com
 
 __Merge sort code, written by me__
 
-    public ListNode mergeKLists(List<ListNode> lists) {
-        if (lists == null || lists.size() == 0) {
-            return null;
+    /**
+     * Definition for singly-linked list.
+     * public class ListNode {
+     *     int val;
+     *     ListNode next;
+     *     ListNode(int x) {
+     *         val = x;
+     *         next = null;
+     *     }
+     * }
+     */
+    public class Solution {
+        public ListNode mergeKLists(List<ListNode> lists) {
+            if (lists == null || lists.size() == 0) {
+                return null;
+            }
+            return mergeHelper(lists, 0, lists.size() - 1);
         }
-        return mergeHelper(lists, 0, lists.size() - 1);
-    }
-    
-    private ListNode mergeHelper(List<ListNode> lists, int start, int end) {
-        if (start == end) {
-            return lists.get(start);
-        } 
-        int mid = start + (end - start) / 2;
-        ListNode firstHalf = mergeHelper(lists, start, mid);
-        ListNode secondHalf = mergeHelper(lists, mid + 1, end);
-        return mergeTwo(firstHalf, secondHalf);
-    }
-    
-    private ListNode mergeTwo(ListNode head1, ListNode head2) {
-    	ListNode dummy = new ListNode(0);
-    	ListNode p = dummy;
-    	while (head1 != null && head2 != null) {
-    		if (head1.val < head2.val) {
-    			p.next = head1;
-    			head1 = head1.next;
-    			p = p.next;
-    		} else {
-    			p.next = head2;
-    			head2 = head2.next;
-    			p = p.next;
-    		}
-    	}
-    	if (head1 == null) {
-    		p.next = head2;
-    	} else {
-    		p.next = head1;
-    	}
-    	return dummy.next;
+
+        private ListNode mergeHelper(List<ListNode> lists, int start, int end) {
+            if (start == end) {
+                return lists.get(start);
+            } 
+            int mid = start + (end - start) / 2;
+            ListNode firstHalf = mergeHelper(lists, start, mid);
+            ListNode secondHalf = mergeHelper(lists, mid + 1, end);
+            return mergeTwo(firstHalf, secondHalf);
+        }
+
+        private ListNode mergeTwo(ListNode head1, ListNode head2) {
+            ListNode dummy = new ListNode(0);
+            ListNode p = dummy;
+            while (head1 != null && head2 != null) {
+                if (head1.val < head2.val) {
+                    p.next = head1;
+                    head1 = head1.next;
+                    p = p.next;
+                } else {
+                    p.next = head2;
+                    head2 = head2.next;
+                    p = p.next;
+                }
+            }
+            if (head1 == null) {
+                p.next = head2;
+            } else {
+                p.next = head1;
+            }
+            return dummy.next;
+        }
     }
 
 __Heap sort code, written by me__. [source](http://answer.ninechapter.com/solutions/merge-k-sorted-lists/)
 
-    public ListNode mergeKLists(List<ListNode> lists) {
-        if (lists == null || lists.size() == 0) {
-            return null;
+    /**
+     * Definition for singly-linked list.
+     * public class ListNode {
+     *     int val;
+     *     ListNode next;
+     *     ListNode(int x) {
+     *         val = x;
+     *         next = null;
+     *     }
+     * }
+     */
+    public class Solution {
+        public ListNode mergeKLists(List<ListNode> lists) {
+            if (lists == null || lists.size() == 0) {
+                return null;
+            }
+            int size = lists.size();
+            // create a heap with Java priority queue, set the initial size
+            Queue<ListNode> heap = new PriorityQueue(size, new NodeComparator());
+            // add all ListNode into the heap
+            for (ListNode node: lists) {
+                if (node != null) {
+                    heap.add(node);
+                }
+            }
+            // start to link nodes from smallest to largest
+            ListNode dummy = new ListNode(0);
+            ListNode p = dummy;
+            while (!heap.isEmpty()) {
+                p.next = heap.remove();
+                p = p.next;
+                if (p.next != null) {
+                    heap.add(p.next);
+                }
+            }
+            return dummy.next;
         }
-		int size = lists.size();
-		NodeComparator comparator = new NodeComparator();
-		Queue<ListNode> queue = new PriorityQueue<ListNode>(size, comparator);
-		for (ListNode node: lists) {
-			if (node == null) {
-				continue;
-			}
-			queue.offer(node);
-		}
-		ListNode dummy = new ListNode(0);
-		ListNode p = dummy;
-		while (!queue.isEmpty()) {
-			p.next = queue.poll();
-			p = p.next;
-			if (p.next != null) {
-				queue.offer(p.next);
-			}
-		}
-		p.next = null;
-		return dummy.next;
+
+        class NodeComparator implements Comparator<ListNode> {
+            public int compare(ListNode n1, ListNode n2) {
+                return n1.val - n2.val;
+            }
+        }
     }
-	
-	class NodeComparator implements Comparator<ListNode> {
-		public int compare(ListNode o1, ListNode o2) {
-			return o1.val - o2.val;
-		}
-	}

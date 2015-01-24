@@ -18,7 +18,7 @@ tags: [  ]
 
 ### Analysis
 
-A lot of different solutions on the internet, [eg](http://www.quora.com/Algorithms/Given-a-set-of-n-axis-aligned-rectangles-in-the-plane-find-how-big-is-the-largest-subset-of-these-rectangles-that-contain-a-common-point-in-O-n-3-and-then-in-order-O-nlogn) and [eg](http://ankitsambyal.blogspot.sg/2013/10/finding-overlapping-rectangles-in-given.html), and some questions asks you to return all overlapping pairs. For now, we just return __any pair__ that overlaps.
+A lot of different solutions on the internet, [example 1](http://www.quora.com/Algorithms/Given-a-set-of-n-axis-aligned-rectangles-in-the-plane-find-how-big-is-the-largest-subset-of-these-rectangles-that-contain-a-common-point-in-O-n-3-and-then-in-order-O-nlogn) and [example 2](http://ankitsambyal.blogspot.sg/2013/10/finding-overlapping-rectangles-in-given.html), and some questions asks you to return all overlapping pairs. For now, we just return __any pair__ that overlaps. 
 
 ### Solution 
 

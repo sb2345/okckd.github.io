@@ -30,6 +30,8 @@ The stack is attached to a thread, so __when the thread exits__ the stack is rec
 
 The heap is typically allocated at application startup by the runtime, and is reclaimed __when the application (technically process) exits__. 
 
+Thread and process - what's the difference? Read __[Design] Process VS. Thread__. 
+
 #### What determines the size of each of them?
 
 The size of the stack is set when a thread is created. 

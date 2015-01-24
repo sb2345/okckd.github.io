@@ -6,8 +6,8 @@ category: Leetcode
 tags: [ unsolvable ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/valid-number/)
 
 <div class="question-content">
@@ -27,6 +27,7 @@ Some examples:<br>
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -42,22 +43,17 @@ Some examples:<br>
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">unsolvable</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
-
-### Analysis
-
-__I tried twice, and each time 1 hour, but still unable to solve this problem__. 
 
 ### Solution
 
 I am unable to solve this problem, but I found a [quite good solution](http://leetcodenotes.wordpress.com/2013/11/23/leetcode-valid-number/). I post the code below. 
 
 ### My code
-
 
     public boolean isNumber(String s) {
         s = s.trim(); 

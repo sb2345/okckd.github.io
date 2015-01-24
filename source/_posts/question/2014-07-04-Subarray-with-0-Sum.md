@@ -18,10 +18,10 @@ tags: [ unit test needed ]
 
 ### Solution
 
-The idea of 前缀和. 
+__General case__, idea of 前缀和: 
 
 > iterate through the array and for every element arr[i], calculate sum of elements form 0 to i (this can simply be done as sum += arr[i]). If the current sum has been seen before, then there is a zero sum array. 
 
 O(n) time. 
 
-__If the input is all positive number__, then this question can be solved using the idea from __Subarray with Particular Sum__, O(n) time. 
+__Special Case__, if the input is all positive number, then this question can be solved using the idea from __Subarray with Particular Sum__, O(n) time. 

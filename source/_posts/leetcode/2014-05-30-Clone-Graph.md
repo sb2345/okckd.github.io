@@ -55,6 +55,7 @@ Visually, the graph looks like the following:
 </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Adjusted Difficulty</td>
@@ -82,15 +83,15 @@ Two solution: __BFS (recommended) and DFS__. [This](http://leetcode.com/2012/05/
 <p>Assume that the starting point of the graph is A. First, you make a copy of node A (A2), and found that A has only one neighbor B. You make a copy of B (B2) and connects A2-&gt;B2 by pushing B2 as A2′s neighbor. Next, you find that B has A as neighbor, which you have already made a copy of. Here, we have to be careful not to make a copy of A again, but to connect B2-&gt;A2 by pushing A2 as B2′s neighbor. But, how do we know if a node has already been copied?</p>
 </blockquote>
 
-__The basic idea is to use HashMap to store the already-copied nodes__. 
+__Basic idea is to use HashMap to store the already-copied nodes__. 
+
+My first attempt is DFS by making use of a 'visited' Set to mark which node I have copied and which is not. This is a nice idea and it solved the problem neatly. 
+
+But after reading [this article](http://www.programcreek.com/2012/12/leetcode-clone-graph-java/), I realize that __'visited' is not needed for BFS solution__! 
+
+__The trick is, whenever I do a 'HashMap.put(curNode, newNode)', I push 'curNode' to queue__. This very well replaces the functionality of the 'visited' set. It also guarantees that when I pop a new element from the queue, __I CAN ALWAYS FIND ITS CORRESPONDING COPY__ from the HashMap - always there. 
 
 ### Code
-
-__My first attempt is DFS__ by making use of a 'visited' Set to mark which node I have copied and which is not. This is a nice idea and it solved the problem neatly. 
-
-But after reading [this article](http://www.programcreek.com/2012/12/leetcode-clone-graph-java/), I realize that __'visited' is not needed for BFS solution__! It's amazing right? So I spent some time to implement it again and finally realize the trick. 
-
-__The trick is, whenever I do a 'HashMap.put(curNode, newNode)', I push 'curNode' to queue__. This very well replaces the functionality of the 'visited' set. It also guarantees that when I pop a new element from the queue, __I CAN ALWAYS FIND ITS CORRESPONDING COPY__ from the HashMap - always there, trust me. Mum shall never worry about me getting exception for 'HashMap.get(curNode)'. 
 
 __First, my DFS code__
 

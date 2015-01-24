@@ -47,51 +47,55 @@ return <code>[3, 4]</code>.
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
+### Solution
 
-__The key to solve this problem is binary search__. Previously my solution is to find the element first, then check left bound and right bound 1 by 1. In worst case, this will take O(n) time. I wrote the code in 20 minutes and passed, but unfortunately, this is not the correct solution. 
-
-There are many possible binary search solutions, and I will list out 2 solutions from the Internet. 
+__The key to solve this problem is binary search__. Previously my solution is to find the element first, then check left bound and right bound respectively. In worst case, this will take O(n) time. This method, though, will pass OJ, but is not an optimized solution. 
 
 __First solution is from [this blog](http://xixiaogualu.blogspot.sg/2013/09/search-for-range.html)__. Using binary search to search twice - once for left bound, and once for right bound. Code is below. 
 
-__Second solution is from [this blog](http://rleetcode.blogspot.sg/2014/02/search-for-range-java.html)__. This idea is still using binary search, but a tricky way. Instead of searching the number, it searches (number - 0.5) and (number + 0.5). 
-
-### Solution
-
-I will not explains the code, since it's easy to understand (but hard to write). It's important that I __practice implementing this code by myself__ some time. 
+__Second solution is from [this blog](http://rleetcode.blogspot.sg/2014/02/search-for-range-java.html)__. This idea is still using binary search, also search twice, but a more tricky manner. Instead of searching the number, it searches (number - 0.5) and (number + 0.5).
 
 ### My code 
 
 Solution 1
 
-
-    public int[] searchRange(int[] A, int target) {
-        int i = 0, j = A.length - 1;
-        int[] result = { -1, -1 };
-        // the idea is to put the lower bound in i
-        while (i < j) {
-            int mid = i + (j - i) / 2;
-            if (target <= A[mid]) j = mid;
-            else i = mid + 1;
+    public class Solution {
+        public int[] searchRange(int[] A, int target) {
+            int[] ans = new int[] {-1, -1};
+            if (A == null || A.length == 0) {
+                return ans;
+            }
+            int len = A.length;
+            int left = 0, right = len - 1;
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+                if (A[mid] >= target) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            }
+            if (A[left] == target) {
+                ans[0] = left;
+            } else {
+                return ans;
+            }
+            left = 0;
+            right = len - 1;
+            while (left < right) {
+                int mid = left + (right - left + 1) / 2;
+                if (A[mid] <= target) {
+                    left = mid;
+                } else {
+                    right = mid - 1;
+                }
+            }
+            ans[1] = right;
+            return ans;
         }
-        if (A[i] == target) result[0] = i;
-        else return result;
-        i = 0; 
-        j = A.length;
-        // the idea is to put the upper bound in j-1
-        while (i < j) {
-            int mid = i + (j - i) / 2;
-            if (target >= A[mid]) i = mid + 1;
-            else j = mid;
-        }
-        result[1] = j - 1;
-        return result;
     }
 
-
 Solution 2
-
 
     public int[] searchRange(int[] A, int target) {
         if (A == null) return null;
@@ -113,4 +117,3 @@ Solution 2
         }
         return low;
     }
-

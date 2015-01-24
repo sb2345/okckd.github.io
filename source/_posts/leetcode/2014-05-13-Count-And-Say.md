@@ -6,12 +6,12 @@ category: Leetcode
 tags: [  ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/count-and-say/)
 
 <div class="question-content">
-            <p></p><p>The count-and-say sequence is the sequence of integers beginning as follows:<br>
+<p></p><p>The count-and-say sequence is the sequence of integers beginning as follows:<br>
 <code>1, 11, 21, 1211, 111221, ...</code>
 </p>
 
@@ -28,10 +28,10 @@ Given an integer <i>n</i>, generate the <i>n</i><sup>th</sup> sequence.
 <p>
 Note: The sequence of integers will be represented as a string.
 </p>
-<p></p>
-          </div>
+</div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -47,22 +47,50 @@ Note: The sequence of integers will be represented as a string.
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="white">15 minutes</td>
+		<td bgcolor="white">----------</td>
 	</tr>
 </table>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-__This is a implementation question, not difficult__. I did it with one go.
-
 ### Solution
 
-The following code is my code. All online solutions are same. 
+__This is a implementation question, not difficult__. 
 
 ### My code
 
+code 1
+
+    public class Solution {
+        public String countAndSay(int n) {
+            String num = "1";
+            for (int i = 1; i < n; i++) {
+                num = say(num);
+            }
+            return num;
+        }
+
+        private String say(String input) {
+            // 21 -> 1211
+            int len = input.length();
+            String output = "";
+            int left = 0;
+            int right = 0;
+            while (right < len) {
+                left = right;
+                // forward right until right pointer to a different value
+                // compared to that pointed by left pointer
+                while (right < len && input.charAt(left) == input.charAt(right)) {
+                    right++;
+                }
+                output += String.valueOf(right - left);
+                output += input.charAt(left);
+            }
+            return output;
+        }
+    }
+
+code 2
 
     public String countAndSay(int n) {
         String s = "1";
@@ -79,4 +107,3 @@ The following code is my code. All online solutions are same.
         }
         return s;
     }
-

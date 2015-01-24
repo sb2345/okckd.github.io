@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Arranging Sequence"
+title: "[Question] Arranging Sequence "
 comments: true
 category: Question
 tags: [ src ]
@@ -38,7 +38,7 @@ __First is like bubble sort (read it somewhere before)__. Always swap in pairs (
 	4th: 1 5 2 6 3 7 4
 	done
 
-__Second solution is to swap in cycles (put current value in its 'successor' position, and continue from there)__. But in order to identify cycles, additional space is used. I wrote the code (which make use of 'visited' array) is listed below. the time complexity is between O(n) and O(n^2). 
+__Second solution is to swap in cycles (put current value in its 'successor' position, and continue from there)__. But in order to identify cycles, additional space is used. I wrote the solution making use of 'visited' array. The time complexity is between O(n) and O(n^2). 
 
 More info on this topic can be found on [wikipedia](http://en.wikipedia.org/wiki/In-place_matrix_transposition). 
 

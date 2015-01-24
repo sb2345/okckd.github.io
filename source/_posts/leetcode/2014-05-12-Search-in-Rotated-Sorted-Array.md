@@ -45,13 +45,9 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-__This question is actually not difficult__. 
+__This question is not very difficult__, yet commonly seen in interviews. 
 
-There are 2 ways to solve using binary search. 
-
-__First solution, find the pivot and then decide on__ which side of the sorted array shall I continue searching. I implmented this code. 
-
-__Second solution is a very clever way to solve this problem__. Without having any knowledge of pivot, directly check the mid-point against left number and right number. The idea is from [this blog](http://leetcode.com/2010/04/searching-element-in-rotated-array.html).
+Without having any knowledge of pivot, we can check the mid-point value against left value and right value. Read [this blog](http://leetcode.com/2010/04/searching-element-in-rotated-array.html) for more.
 
 ### Solution
 
@@ -59,57 +55,41 @@ The code is easy to understand.
 
 ### My code 
 
-Find pivot and then binary search (written by me)
-
-
-    public int search(int[] A, int target) {
-        int len = A.length;
-        if (len == 0) return 0;
-        int left = 0, right = len - 1;
-        while (right - left > 1) {
-            int mid = (left + right) / 2;
-            if (A[mid] > A[left]) left = mid;
-            else right = mid;
-        }
-        // left now points to max value, and right the min value
-        if (target >= A[0]) {
-            right = left;
-            left = 0;
-        } else {
-            left = right;
-            right = len - 1;
-        }
-        // now search for target between left and right
-        while (left <= right) {
-            int mid = (left + right) / 2;
-            if (A[mid] == target) return mid;
-            else if (A[mid] > target) right = mid - 1;
-            else if (A[mid] < target) left = mid + 1;
-        }
-        if (right >= 0 && left < len && A[left] == target) return left;
-        else return -1;
-    }
-
-
-__Without knowledge of pivot__, a great solution.
-
 Pay special attention to different larger/smaller conditions. It's very easy to miss a equal sign or something. 
 
-
-    public int search(int[] A, int target) {
-        int left = 0;
-        int right = A.length - 1;
-        while (left <= right) {
-            int mid = (left + right) / 2;
-            if (target == A[mid]) return mid;
-            if (A[left] <= A[mid]) {
-                if (A[left] <= target && target <= A[mid]) right = mid;
-                else left = mid + 1;
-            } else {
-                if (A[mid] <= target && target <= A[right]) left = mid;
-                else right = mid - 1;
+    public class Solution {
+        public int search(int[] A, int target) {
+            if (A == null || A.length == 0) {
+                return -1;
             }
+            int len = A.length;
+            int left = 0; 
+            int right = len - 1;
+            while (left + 1 < right) {
+                int mid = left + (right - left) / 2;
+                if (A[mid] == target) {
+                    return mid;
+                } else if (A[left] < A[mid]) {
+                // remember to pay attention to (A[left] == target) case
+                    if (A[left] <= target && target < A[mid]) {
+                        right = mid;
+                    } else {
+                        left = mid;
+                    }
+                } else {
+                // remember to pay attention to (A[right] == target) case
+                    if (A[mid] < target && target <= A[right]) {
+                        left = mid;
+                    } else {
+                        right = mid;
+                    }
+                }
+            }
+            if (A[left] == target) {
+                return left;
+            } else if (A[right] == target) {
+                return right;
+            }
+            return -1;
         }
-        return -1;
     }
-

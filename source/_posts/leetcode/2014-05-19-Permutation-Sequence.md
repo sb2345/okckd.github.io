@@ -7,6 +7,7 @@ tags: [  ]
 ---
 
 ### Question 
+
 [link](http://oj.leetcode.com/problems/permutation-sequence/)
 
 <div class="question-content">
@@ -45,7 +46,7 @@ We get the following sequence (ie, for <i>n</i> = 3):
 	</tr>
 	<tr>
 		<td>Time to use</td>
-		<td bgcolor="red">long time</td>
+		<td bgcolor="red">----------</td>
 	</tr>
 </table>
 
@@ -89,39 +90,15 @@ __This is a math problem__. Trying to solve it using __DFS__ like in "Permutatio
 
 ### Solution
 
-__I have written a math recursive solution__ and code is below. It's very straight-forward to read. 
+__I have written a math recursive solution__ and code is below. It's very straight-forward. 
 
-There is also __math direct solution__, which is __very popular in online blogs__. However, how to handle the removal of elements from the unmatched list is a tough problem. __I've seen a lot of people using swap to do it__, but I don't like this idea because of the bad readability of code. 
+There is also __direct math solution__. However, how to handle the removal of elements from the unmatched list is a tough problem. __I saw a lot of people using swap to do it__, but I don't like this idea because of the bad readability of code. 
 
-__Finally I found a readable code from [this blog](http://xiaochongzhang.me/blog/?p=693)__. It's a very good solution. I will post the code below although it's C++. 
-
-(Maybe next time I can realize this solution using Java.)
+__Finally I found a readable code from [this blog](http://xiaochongzhang.me/blog/?p=693)__. It's a very good solution. 
 
 ### My code
 
-__My second code, math recursive solution__. 
-
-    public String getPermutation(int n, int k) {
-        ArrayList<Integer> list = new ArrayList<Integer>();
-        for (int i = 1; i <= n; i ++) list.add(i);
-        return helper(n, k, list);
-    }
-
-    private String helper(int n, int k, ArrayList<Integer> list) {
-        if (n == 1) return list.get(0) + "";
-        int fact = fact(n-1);
-        char head = (char) ('0' + list.remove((k-1) / fact));
-        return head + helper(n-1, (k % fact == 0 ? fact : k % fact), list);
-    }
-
-    private int fact(int n){
-        int sum = 1;
-        for (int i = 2; i <= n; i ++)
-            sum *= i;
-        return sum;
-    }
-
-__updated on Aug 13th, 2014__. OMG it's my birthday, I just realize it! I'm officially 24 years old an hour ago, yeah! 
+__updated on my birthday this year__
 
     public String getPermutation(int n, int k) {
         int index = k - 1;

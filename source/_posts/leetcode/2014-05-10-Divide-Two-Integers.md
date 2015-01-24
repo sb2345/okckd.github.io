@@ -41,119 +41,57 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-__This question is more difficult than you thought__!
+__This question might be more difficult than you thought__. So do not overlook it because of its seemingly simple description. First of all, please refer to __[Fundamental] Java Bit Operation__ for information on bit operators. 
 
-I had little experience with __Java bit operation__, so I was struggling in the beginning. I'm still not good at it now. Below is a quick tutorial on this topic. 
-
-<table border="2">
-  <tr>
-    <th>operator</th>
-    <th>what is means</th>
-  </tr>
-  <tr>
-    <td>~</td>
-    <td>invert every bit</td>
-  </tr>
-  <tr>
-    <td>&lt;&lt;</td>
-    <td>shift left (same as *2)</td>
-  </tr>
-  <tr>
-    <td>&gt;&gt;</td>
-    <td>signed shift right</td>
-  </tr>
-  <tr>
-    <td>&gt;&gt;&gt;</td>
-    <td>unsigned shift right</td>
-  </tr>
-  <tr>
-    <td>^</td>
-    <td>XOR</td>
-  </tr>
-  <tr>
-    <td>|</td>
-    <td>OR</td>
-  </tr>
-</table>
-<br />
-
-Note the unsigned right shift operator ">>>" shifts a __zero into the leftmost position__, while the leftmost position after ">>" __depends on sign extension__.
-
-After the knowledge barriers of big operation is cleared, this problem basically is __a while loop that keeps subtracting (divisor * (2 ^ n)) from dividend__. There is various ways to do it. 
-
-__But remember that overflow always can happen__, especially when you dealing with Integer.MAX_VALUE and Integer.MIN_VALUE. 
+And __remember... overflow can happen__, especially when you dealing with Integer.MAX_VALUE and Integer.MIN_VALUE. 
 
 ### Solution
 
-I will post 2 solutions, __first of which is written by me__ using the idea from [this blog](http://leetcodenotes.wordpress.com/2013/10/19/divide-two-integers/). This is also the most common solution from the net. 
+This solution is __a while loop that keeps subtracting (divisor * (2 ^ n)) from dividend__. You can find a good solution from [this blog](http://leetcodenotes.wordpress.com/2013/10/19/divide-two-integers/). 
 
-__Second solution is from__ [this post](http://discuss.leetcode.com/questions/209/divide-two-integers/385) and I translated the c++ into Java with a bit refactoring work. This code is extremely concise and beautiful. 
+### code 
 
-### My code 
-
-__First code is written by me__. Please take a look at this line: 
-
-> a = 0 - (long) dividend;
-
-Previously I was using the 2 pieces of code below, and both won't work: 
-
-> a = dividend * -1;
-
-> a = 0 - dividend;
-
-Some extra attentions should be taken on this.
-
-
-    public int divide(int dividend, int divisor) {
-        long sign = 1, a = dividend, b = divisor;
-        if (dividend < 0) {
-            sign *= -1;
-            // this is where caused my error for last submission
-            a = 0 - (long) dividend;
-        }
-        if (divisor < 0) {
-            sign *= -1;
-            b = 0 - (long) divisor;
-        }
-        return (int) (sign * helper(a, b));
-    }
-
-    public long helper(long a, long b) {
-        if (a < b) return 0;
-        long remain = a, ans = 0;
-        while (remain != 0) {
-            long count = 1, num = b;
-            if (num > remain) {
-                remain = 0;
-                break;
+    public class Solution {
+        public int divide(int dividend, int divisor) {
+            int sign = 1;
+            long x = dividend;
+            long y = divisor;
+            if (x < 0) {
+                x = x * -1;
+                sign *= -1;
             }
-            while (num + num > 0 && num + num <= remain) {
-                num = num << 1;
-                count = count << 1;
+            if (y < 0) {
+                y = y * -1;
+                sign *= -1;
             }
-            remain -= num;
-            ans += count;
+            return divide(sign, x, y);
         }
-        return ans;
-    }
 
-
-__Second code, translated from c plus plus__.
-
-
-    public int divide(int dividend, int divisor) {
-        long a = dividend >>> 31 == 0 ? dividend : 0 - (long) dividend;
-        long b = divisor >>> 31 == 0 ? divisor : 0 - (long) divisor;
-        long ret = 0;
-        while (a >= b) {
-            long c = b;
-            int i = 0;
-            while (a >= c) {
-                a -= c;
-                ret += 1 << i++;
-                c <<= 1;
+        private int divide(int sign, long x, long y) {
+            // both x and y are positive numbers
+            if (x < y) {
+                return 0;
+            }
+            long quotient = 0;
+            long partialQuotient;
+            long partialSubtract;
+            while (x >= y) {
+                // the idea is to subtract a certain times of x from y
+                // and save the remainder value back to x
+                partialQuotient = 1;
+                partialSubtract = y;
+                while ((partialSubtract << 1) <= x) {
+                    partialQuotient <<= 1; // doubles quotient
+                    partialSubtract <<= 1; // doubles subtraction
+                }
+                x -= partialSubtract;
+                quotient += partialQuotient;
+            }
+            long finalQuo = sign * quotient;
+            if (finalQuo < Integer.MIN_VALUE || finalQuo > Integer.MAX_VALUE) {
+                return Integer.MAX_VALUE;
+            } else {
+                return (int) finalQuo;
             }
         }
-        return (int) ((dividend ^ divisor) >>> 31 == 0 ? ret : 0 - ret);
     }
-

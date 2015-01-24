@@ -6,8 +6,8 @@ category: Leetcode
 tags: [ unsolvable ]
 ---
 
-
 ### Question 
+
 [link](http://oj.leetcode.com/problems/text-justification/)
 
 <div class="question-content">
@@ -60,6 +60,7 @@ In this case, that line should be left-justified.</li>
           </div>
 
 ### Stats
+
 <table border="2">
 	<tr>
 		<td>Frequency</td>
@@ -81,16 +82,13 @@ In this case, that line should be left-justified.</li>
 
 Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
-### Analysis
-
-__This problem is unsolvable for me__. 
-
 ### Solution
+
+I was not able to come up with a solution. 
 
 I found solution in [here](https://github.com/rffffffff007/leetcode/blob/master/Text%20Justification.java), [here](http://blog.csdn.net/linhuanmars/article/details/24063271) and [here](http://gongxuns.blogspot.sg/2012/12/leetcodetext-justification.html). I will post the code from first link. 
 
 ### My code
-
 
     public ArrayList < String > fullJustify(String[] words, int L) {
         int wordsCount = words.length;
@@ -132,4 +130,3 @@ I found solution in [here](https://github.com/rffffffff007/leetcode/blob/master/
         for (int i = 0; i < count; i++)
             sb.append(' ');
     }
-
