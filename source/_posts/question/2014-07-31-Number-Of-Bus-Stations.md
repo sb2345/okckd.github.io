@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Number Of Bus-Stations"
+title: "[Question] Number Of Bus Stations (meeting rooms) "
 comments: true
 category: Question
 tags: [  ]
@@ -21,6 +21,10 @@ tags: [  ]
     BusD        1045 hrs        1145 hrs
 
 > The answer must be 3. 
+
+> This question can also be in other forms: 
+
+> Given a vector of Nodes, each of which contain the start and end time of a meeting, find the maximum number of rooms one would have to book for the day. 
 
 ### Solution
 
