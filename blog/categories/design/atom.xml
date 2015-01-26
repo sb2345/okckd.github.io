@@ -4,7 +4,7 @@
   <title><![CDATA[Category: design | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-24T18:46:38+08:00</updated>
+  <updated>2015-01-26T10:51:32+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,90 +14,249 @@
 
   
   <entry>
+    <title type="html"><![CDATA[[Design] Speed Up Webpage for Slow Connection (2) ]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/26/speed-up-web-page-2/"/>
+    <updated>2015-01-26T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/26/speed-up-web-page-2</id>
+    <content type="html"><![CDATA[[ref](www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1)
+
+### Question
+
+> Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps internet connection.
+
+> Further he asked for the customer who has 100 mbps internet connection.
+
+### Website KPI
+
+There are [3 interesting phases](https://community.compuwareapm.com/community/display/PUB/Best+Practices+on+Web+Site+Performance+Optimization) of a web site from an end-user performance perspective. 
+
+1. First Impression
+1. OnLoad 
+1. Fully Loaded Time.
+
+### Loading Time
+
+__Question: what percentage of the time a user spends waiting for your page to load is spent after the HTML comes back to their browser__? 
+
+It is typically __[over 90%](http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/)__. 
+
+Most of the time users spend waiting on your website is spent after the HTML page has been retrieved by their browser. 
+
+#### Fetching the HTML is just the beginning
+
+__In a nutshell, browsers parse your page’s HTML, sequentially discovering its assets__ (such as scripts, stylesheets, and images), requesting and then either parsing and executing them or displaying them as appropriate. 
+
+But these assets are not simply fetched all at once. Instead, the __browser opens a limited number of connections to the server(s)__ referenced by the page. There is __overhead involved in establishing TCP and HTTP connections__, and some __unavoidable latency__ in pushing the request and response bytes back and forth across the network.
+
+So, in general, round trips between the browser and server are expensive. The structure of the HTML markup, the number and the ordering of its assets, are absolutely critical factors in its performance.
+
+### What hijacks your load time
+
+#### 1. Too Many HTTP Requests
+
+This is the single biggest contributor to performance problems in most web pages. 
+
+1. Concatenate scripts and stylesheets
+
+1. Combine images with sprites (put common images into a single large image file, then use CSS to position and selectively display the appropriate portion of the sprite image)
+
+1. Use fewer images, more CSS. 
+
+#### 2. Minimal Client-side Processing
+
+1. Validation on client. (eg. form input)
+
+1. Use web standards and MVC separation, making a maintainable, accessible, future-proof and max-performance website. 
+
+    Think of the HTML as the model, the CSS as the view, and the JavaScript as the controller. This separation tends to make code more efficient and maintainable, and makes many optimization techniques much more practical to apply.
+
+1. Push presentation code into the client tier (eg. Charts and graphs — push raw data to the client in JSON format, and use JavaScript and CSS to create pretty graphs.)
+
+1. Leverage Ajax techniques (only requiring small parts of the page to change in response to user actions)
+
+#### 3. Low Number of Parallel Requests
+
+Fetch a script, parse and execute it, then fetch another one... this will use up all the available connections. There are things you can do to your HTML to allow virtually any browser to make many requests at once, which has a huge impact on latency.
+
+1. Use browser-appropriate domain sharding
+
+1. Use intelligent script loading
+
+1. Leverage Keep-Alive (reuse the same TCP connection for multiple HTTP request/response cycles)
+
+#### 4. Failure to leverage browser cache / local storage
+
+1. [HTTP cache overview](http://www.mnot.net/cache_docs/)
+
+1. Leverage local storage
+
+#### 5. Third-party widgets
+
+1. Avoid third-party widgets!
+1. Try to use widgets that provide asynchronous implementations, so their inevitably terrible performance impacts their widget without dragging down your entire UX with it.
+
+#### 7. Failure to Use a Global Network
+
+Amazon S3. 
+
+Ref: http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Speed Up Webpage for Slow Connection (1) ]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/26/speed-up-web-page-1/"/>
+    <updated>2015-01-26T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/26/speed-up-web-page-1</id>
+    <content type="html"><![CDATA[[ref](www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1)
+
+### Question
+
+> Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps internet connection.
+
+> Further he asked for the customer who has 100 mbps internet connection.
+
+### Reading
+
+[This](http://sixrevisions.com/web-development/site-speed-performance/) is a very nice article about website speedup. Below is the full quoted text. 
+
+#### 1. Defer Loading Content When Possible
+
+Ajax allows us to build web pages that can be __asynchronously updated__ at any time. This means that instead of reloading an entire page when a user performs an action, we can simply update parts of that page.
+
+We can use an image gallery as an example. Image files are big and heavy; they can slow down page-loading speeds of web pages. Instead of loading all of the images when a user first visits the web page, we can just display thumbnails of the images and then when the user clicks on them, we can asynchronously request the full-size images from the server and update the page. This way, if a user only wants to see a few pictures, they don’t have to suffer waiting for all of the pictures to download. This development pattern is called __lazy loading__.
+
+__Ajax/web development libraries__ like jQuery, Prototype, and MooTools can make deferred content-loading easier to implement.
+
+#### 2. Use External JS and CSS Files
+
+When the user first loads your web page, the browser will cache external resources like CSS and JavaScript files. Thus, instead of inline JavaScript and CSS files, it’s best to __place them in external files__.
+
+Using inline CSS also increases the rendering time of a web page; having everything defined in your main CSS file lets the browser do less work when rendering the page, since it already knows all the style rules that it needs to apply.
+
+__As a bonus__, using external JavaScript and CSS files makes site maintenance easier because you only need to maintain global files instead of code scattered in multiple web pages.
+
+#### 3. Use Caching Systems
+
+If you find that your site is connecting to your database in order to create the same content, it’s time to start using a __caching system__. By having a caching system in place, your site will only have to create the content once instead of creating the content every time the page is visited by your users. Don’t worry, caching systems periodically refresh their caches depending on how you set it up — so even constantly-changing web pages (like a blog post with comments) can be cached.
+
+__Popular content management systems__ like WordPress and Drupal will have __static caching features__ that convert dynamically generated pages to static HTML files to reduce unnecessary server processing. For WordPress, check out [WP Super Cache](https://wordpress.org/plugins/wp-super-cache/) (one of the six critical WordPress plugins which, claimed by the author, enjoyed a improvement by 259.1% for content-heavy pages). Drupal has a page-caching feature in the core.
+
+There are also __database caching and server-side scripts caching systems__ that you can install on your web server (if you have the ability to do so). For example, PHP has extensions called PHP accelerators that optimize performance through caching and various other methods; one example of a [PHP accelerator](http://en.wikipedia.org/wiki/PHP_accelerator) is APC. [Database caching](http://en.wikipedia.org/wiki/Database_caching) improves performance and scalability of your web applications by reducing the work associated with database read/write/access processes; __[memcached](http://www.memcached.org/)__, for example, caches frequently used database queries. 
+
+#### 8. Load JavaScript at the End of Your Document
+
+It’s best if you have your scripts loading at the end of the page rather than at the beginning. It allows for the browser to render everything before getting started with the JavaScript. This makes your web pages feel more responsive because the way JavaScript works is that it blocks anything below it from rendering until it has finished downloading. If possible, reference JavaScript right before the closing (body) tag of your HTML documents. To learn more, read about deferring the loading of JavaScript.
+
+#### 9. Use a Content Delivery Network (CDN)
+
+Your site’s speed is greatly affected by where the user’s location is, relative to your web server. The farther away they are, the more distance the data being transmitted has to travel. Having your content cached __across multiple, strategically placed geographical locations__ helps take care of this problem. 
+
+A CDN will often make your operating cost a little higher, but you definitely gain a speed bonus. Check out MaxCDN or __Amazon Simple Storage Service (Amazon S3)__.
+
+#### 10. Optimize Web Caching
+
+Along with using caching systems, you should create websites that utilize __web caching__ as much as possible. Web caching is when files are __cached by the web browser__ for later use. Things that browsers can cache include CSS files, JavaScript files, and images.
+
+Aside from the basics, such as putting CSS and JavaScript code that are used in multiple pages in external files, there are many ways to make sure that you are caching your files in the most efficient way possible.
+
+For example, you can set HTTP response headers such as Expires and Last-Modified to reduce the need of re-downloading certain files when the user comes back to your site. To learn more, read about [caching in HTTP](http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html) and [leveraging browser caching](https://developers.google.com/speed/docs/insights/LeverageBrowserCaching?csw=1#LeverageBrowserCaching).
+
+To set up HTTP Expires headers in Apache, read this tutorial on adding future expires headers.
+
+#### Other mentions
+
+4. __Avoid Resizing Images in HTML__ (using HTML’s width and height attributes), for the sake of smaller file size. 
+
+6. __Optimize Image Sizes by Using the Correct File Format__. Eg. JPG format often displays photographic images at smaller file sizes than PNG. 
+
+7. __Optimize the Way You Write Code__. For example, instead of using (h1)(em)Your heading(em)(h1), you can easily use CSS to make your headings italics. 
+
+    Writing code efficiently not only reduces file sizes of your HTML and CSS documents, but also makes it easier to maintain.
+
+Ref: http://sixrevisions.com/web-development/site-speed-performance/
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[[Design] Distributed Caching - memcached ]]></title>
     <link href="http://okckd.github.io/blog/2015/01/24/distributed-caching-memcached/"/>
     <updated>2015-01-24T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2015/01/24/distributed-caching-memcached</id>
-    <content type="html"><![CDATA[<h3>What is Memcached?</h3>
+    <content type="html"><![CDATA[### What is Memcached?
 
-<p><a href="http://memcached.org/">Memcached</a> is an <strong>in-memory key-value store for small chunks of arbitrary data</strong> (strings, objects) from results of database calls, API calls, or page rendering.</p>
+[Memcached](http://memcached.org/) is an __in-memory key-value store for small chunks of arbitrary data__ (strings, objects) from results of database calls, API calls, or page rendering.
 
-<ol>
-<li>Free &amp; open source</li>
-<li>high-performance, distributed memory object caching system</li>
-<li>generic in nature</li>
-<li>intended for use in speeding up dynamic web applications by alleviating database load</li>
-</ol>
+1. Free & open source
+1. high-performance, distributed memory object caching system
+1. generic in nature
+1. intended for use in speeding up dynamic web applications by alleviating database load
 
+Definition from [wiki](http://en.wikipedia.org/wiki/Memcached): 
 
-<p>Definition from <a href="http://en.wikipedia.org/wiki/Memcached">wiki</a>:</p>
+> Memcached is a __general-purpose distributed memory caching system__. It is often used to speed up dynamic database-driven websites by __caching data and objects in RAM__ to reduce the number of times an __external data source__ (such as a database or API) must be read.
 
-<blockquote><p>Memcached is a <strong>general-purpose distributed memory caching system</strong>. It is often used to speed up dynamic database-driven websites by <strong>caching data and objects in RAM</strong> to reduce the number of times an <strong>external data source</strong> (such as a database or API) must be read.</p></blockquote>
+### Who uses Memcached?
 
-<h3>Who uses Memcached?</h3>
+1. Facebook
+1. YouTube
+1. Twitter
+1. Amazon
+1. Reddit
+1. Yahoo
+1. Zynga
 
-<ol>
-<li>Facebook</li>
-<li>YouTube</li>
-<li>Twitter</li>
-<li>Amazon</li>
-<li>Reddit</li>
-<li>Yahoo</li>
-<li>Zynga</li>
-</ol>
+### Why Memcached?
 
+Run memcached on one or more hosts and then use the shared cache to store objects. Because each host’s RAM is storing information, the access speed [will be much faster than](http://www.blogs.zeenor.com/category/interview-questions/page/9) having to load the information from disk. This can provide __a significant performance boost in retrieving data__ versus loading the data natively from a database. 
 
-<h3>Why Memcached?</h3>
+Also, because the cache is just a repository for information, you can use the cache to store __any data, including complex structures__ that would normally require a significant amount of effort to create, but in __a ready-to-use format__, helping to reduce the load on your MySQL servers. 
 
-<p>Run memcached on one or more hosts and then use the shared cache to store objects. Because each host’s RAM is storing information, the access speed <a href="http://www.blogs.zeenor.com/category/interview-questions/page/9">will be much faster than</a> having to load the information from disk. This can provide <strong>a significant performance boost in retrieving data</strong> versus loading the data natively from a database.</p>
+### FAQ
 
-<p>Also, because the cache is just a repository for information, you can use the cache to store <strong>any data, including complex structures</strong> that would normally require a significant amount of effort to create, but in <strong>a ready-to-use format</strong>, helping to reduce the load on your MySQL servers.</p>
+__What is Memcached?__
 
-<h3>FAQ</h3>
+[It is component](http://www.web-technology-experts-notes.in/2014/09/memcached-interview-questions-and-answers.html) which stored the data temporary for 1 Hour/ 6 Hour/1 Day etc. When we integrate the Memcached with our application, performance of application increased.
 
-<p><strong>What is Memcached?</strong></p>
+Memcached is open source, high-performance distributed memory object used for caching so that execution can be enhanced at nth level.
 
-<p><a href="http://www.web-technology-experts-notes.in/2014/09/memcached-interview-questions-and-answers.html">It is component</a> which stored the data temporary for 1 Hour/ 6 Hour/1 Day etc. When we integrate the Memcached with our application, performance of application increased.</p>
+__Where Memcached can be used?__
 
-<p>Memcached is open source, high-performance distributed memory object used for caching so that execution can be enhanced at nth level.</p>
+•  Social Networking -> Profile Caching
+•  Content Aggregation -> HTML/ Page Caching
+•  Ad targeting -> Cookie/profile tracking
+•  Relationship -> Session caching
+•  E-commerce -> Session and HTML caching
+•  Location-based services -> Data-base query scaling
+•  Gaming and entertainment -> Session caching
 
-<p><strong>Where Memcached can be used?</strong></p>
+__Why use Memcached?__
 
-<p>•  Social Networking &ndash;> Profile Caching
-•  Content Aggregation &ndash;> HTML/ Page Caching
-•  Ad targeting &ndash;> Cookie/profile tracking
-•  Relationship &ndash;> Session caching
-•  E-commerce &ndash;> Session and HTML caching
-•  Location-based services &ndash;> Data-base query scaling
-•  Gaming and entertainment &ndash;> Session caching</p>
-
-<p><strong>Why use Memcached?</strong></p>
-
-<p>•  Speed up application processes
+•  Speed up application processes
 •  It determines what to store and what not to
 •  Reduce the number of retrieval requests to the database
-•  Cuts down the I/O ( Input/Output) access (hard disk)</p>
+•  Cuts down the I/O ( Input/Output) access (hard disk)
 
-<p><strong>In what condition does retrieving cache fail?</strong></p>
+__In what condition does retrieving cache fail?__
 
-<p>•  Memory allocated for the cache is exhausted
+•  Memory allocated for the cache is exhausted
 •  Item from cache is deleted
-•  Individual item in the cache is expired</p>
+•  Individual item in the cache is expired
 
-<p><strong>What is the drawback of Memcached?</strong></p>
-
-<p>•  It is not a persistent data store
+__What is the drawback of Memcached?__
+ 
+•  It is not a persistent data store
 •  Not a database
 •  It is not an application specific
-•  It cannot cache large object</p>
+•  It cannot cache large object
 
-<p><strong>Give more details about memcached failures</strong></p>
+__Give more details about memcached failures__
 
-<p><a href="http://programmers.stackexchange.com/a/187101">Memcached servers</a> are indeed independent of each other. Memcached server is just an efficient key-value store implemented as in-memory hash table.</p>
+[Memcached servers](http://programmers.stackexchange.com/a/187101) are indeed independent of each other. Memcached server is just an efficient key-value store implemented as in-memory hash table. 
 
-<p><strong>What makes memcached distributed is the client</strong>, which in most implementations can connect to a pool of servers. Typical implementations use consistent hashing, which means that when you add or remove server to/from a pool of N servers, you only have to remap 1/N keys.</p>
+__What makes memcached distributed is the client__, which in most implementations can connect to a pool of servers. Typical implementations use consistent hashing, which means that when you add or remove server to/from a pool of N servers, you only have to remap 1/N keys. 
 
-<p>Typically keys are <strong>not duplicated</strong> on various hosts, as memcached is <strong>not meant to be persistent store</strong> and gives no guarantees that your value will persist (for example when running out of assigned memory, memcached server drops least recently used (LRU) elements). Thus it&rsquo;s assumed that your application should handle missing keys.</p>
+Typically keys are __not duplicated__ on various hosts, as memcached is __not meant to be persistent store__ and gives no guarantees that your value will persist (for example when running out of assigned memory, memcached server drops least recently used (LRU) elements). Thus it's assumed that your application should handle missing keys.
 ]]></content>
   </entry>
   
@@ -106,25 +265,22 @@
     <link href="http://okckd.github.io/blog/2015/01/24/design-google-suggest-autocomplete/"/>
     <updated>2015-01-24T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2015/01/24/design-google-suggest-autocomplete</id>
-    <content type="html"><![CDATA[<h3>Overview</h3>
+    <content type="html"><![CDATA[### Overview 
 
-<p><strong>Google Suggest</strong> was <a href="http://googleblog.blogspot.sg/2004/12/ive-got-suggestion.html">launched in 2004</a> as a 20% time project from Google engineer Kevin Gibbs. He developed the idea on a <a href="http://www.theatlantic.com/technology/archive/2013/08/how-googles-autocomplete-was-created-invented-born/278991/">Google shuttle bus</a>.</p>
+__Google Suggest__ was [launched in 2004](http://googleblog.blogspot.sg/2004/12/ive-got-suggestion.html) as a 20% time project from Google engineer Kevin Gibbs. He developed the idea on a [Google shuttle bus](http://www.theatlantic.com/technology/archive/2013/08/how-googles-autocomplete-was-created-invented-born/278991/).
 
-<h3>Design</h3>
+### Design
 
-<ol>
-<li>Use trie.</li>
-<li>Use cache (distributed cache)</li>
-</ol>
+1. Use trie. 
+1. Use cache (distributed cache)
 
+#### Trie
 
-<h4>Trie</h4>
+http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete
 
-<p><a href="http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete">http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete</a></p>
+#### Memcached
 
-<h4>Memcached</h4>
-
-<p>Distributed caching + LRU replacement algorithm. Refer to <strong>[Design] Distributed Caching &ndash; memcached</strong> for more.</p>
+Distributed caching + LRU replacement algorithm. Refer to __[Design] Distributed Caching - memcached__ for more. 
 ]]></content>
   </entry>
   
@@ -133,179 +289,49 @@
     <link href="http://okckd.github.io/blog/2015/01/20/difference-http-https/"/>
     <updated>2015-01-20T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2015/01/20/difference-http-https</id>
-    <content type="html"><![CDATA[<p><a href="http://stackoverflow.com/a/8375247">ref</a></p>
+    <content type="html"><![CDATA[[ref](http://stackoverflow.com/a/8375247)
 
-<h4>1: What are benefits of using HTTPS over HTTP?</h4>
+#### 1: What are benefits of using HTTPS over HTTP?
 
-<p>HTTPS means that you <strong>tunnel the HTTP protocol over TLS/SSL</strong> which encrypts the HTTP payload.</p>
+HTTPS means that you __tunnel the HTTP protocol over TLS/SSL__ which encrypts the HTTP payload. 
 
-<p>So the benefit is that HTTP requests and responses are transmitted securely over the wire, e.g. your Internet Service Provider does not know what you&rsquo;re doing.</p>
+So the benefit is that HTTP requests and responses are transmitted securely over the wire, e.g. your Internet Service Provider does not know what you're doing.
 
-<p><a href="http://stackoverflow.com/a/548042">When Google switched Gmail to use HTTPS</a>, no additional resources were required; no network hardware, no new hosts. It only increased CPU load by about 1%.</p>
+[When Google switched Gmail to use HTTPS](http://stackoverflow.com/a/548042), no additional resources were required; no network hardware, no new hosts. It only increased CPU load by about 1%.
 
-<h4>2: How to use HTTPS?</h4>
+#### 2: How to use HTTPS?
 
-<p>Enable it at your endpoint, in general <strong>a web server in front of your application server</strong>. Most web servers (e.g. IIS, Apache) support this by configuration. Depending on your confidentiality requirements this may not be enough.</p>
+Enable it at your endpoint, in general __a web server in front of your application server__. Most web servers (e.g. IIS, Apache) support this by configuration. Depending on your confidentiality requirements this may not be enough.
 
-<h4>3: Can we use HTTPS for only login purpose and then onwords HTTP?</h4>
+#### 3: Can we use HTTPS for only login purpose and then onwords HTTP?
 
-<p>Technically this is possible, but it introduces some security risks. Example: After a secured login you transmit session IDs identifying the user. If you transmit those session IDs unsecurely (no SSL), session hijacking becomes a risk (&lsquo;man-in-the-middle&rsquo;)</p>
+Technically this is possible, but it introduces some security risks. Example: After a secured login you transmit session IDs identifying the user. If you transmit those session IDs unsecurely (no SSL), session hijacking becomes a risk ('man-in-the-middle')
 
-<h4>4: What settings needs to be done for making website HTTPS?</h4>
+#### 4: What settings needs to be done for making website HTTPS?
 
-<p>See #2. In public internet scenarios you should request (buy) a certificate from a certain Certificate Authority (CA), so that end user clients can verify whether they should trust your certificate.</p>
+See #2. In public internet scenarios you should request (buy) a certificate from a certain Certificate Authority (CA), so that end user clients can verify whether they should trust your certificate.
 
-<h4>5: Is there any threat present in HTTPS?</h4>
+#### 5: Is there any threat present in HTTPS?
 
-<p>In the protocol itself there is a slight risk of <strong>man-in-the-middle attacks</strong>. E.g. a proxy between the client and server could pretend to be the server itself (this requires a successful attack to network infrastructure, e.g. DNS). There are several other &lsquo;more obscure&rsquo; risks that do not relate to the protocol itself, e.g.:</p>
+In the protocol itself there is a slight risk of __man-in-the-middle attacks__. E.g. a proxy between the client and server could pretend to be the server itself (this requires a successful attack to network infrastructure, e.g. DNS). There are several other 'more obscure' risks that do not relate to the protocol itself, e.g.:
 
-<ol>
-<li>usage of an outdated encryption key length (e.g. 256 bit)</li>
-<li>loss of private keys or unappropriate key management procedures (e.g. send via unencrypted email)</li>
-<li>certificate authority failure</li>
-</ol>
+1. usage of an outdated encryption key length (e.g. 256 bit)
+1. loss of private keys or unappropriate key management procedures (e.g. send via unencrypted email)
+1. certificate authority failure
 
+#### 6: Is processing time required for HTTPS is greater than HTTP?
 
-<h4>6: Is processing time required for HTTPS is greater than HTTP?</h4>
+Yes, key negotiation (handshaking) __requires a lot CPU capacity__.
 
-<p>Yes, key negotiation (handshaking) <strong>requires a lot CPU capacity</strong>.</p>
+<img class="middle" src="/assets/images/http-vs-https.png">
 
-<p>{% img middle /assets/images/http-vs-https.png %}</p>
+### Port Number
 
-<h3>Port Number</h3>
+HTTP uses __port 80 or 8080__, while HTTPS uses __TCP port 443__. 
 
-<p>HTTP uses <strong>port 80 or 8080</strong>, while HTTPS uses <strong>TCP port 443</strong>.</p>
+[The reason](http://www.coderanch.com/t/168608/java-Web-Component-SCWCD/certification/Diff) that some applications use 8080 (7080, 9080) instead of 80 is that on UNIX, __port numbers below 1024__ are reserved for __super-user__ processes. 
 
-<p><a href="http://www.coderanch.com/t/168608/java-Web-Component-SCWCD/certification/Diff">The reason</a> that some applications use 8080 (7080, 9080) instead of 80 is that on UNIX, <strong>port numbers below 1024</strong> are reserved for <strong>super-user</strong> processes.</p>
-
-<p>That&rsquo;s why for OS compatibility reasons, some servers use other ports (greater than 1024). But they still have &ldquo;80&rdquo; inside the numner, eg. 7080, 8080, 9080.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Speed Up Webpage for Slow Connection (2) ]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/19/speed-up-web-page-2/"/>
-    <updated>2015-01-19T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/19/speed-up-web-page-2</id>
-    <content type="html"><![CDATA[<p><a href="www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1">ref</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps internet connection.</p>
-
-<p>Further he asked for the customer who has 100 mbps internet connection.</p></blockquote>
-
-<h3>Website KPI</h3>
-
-<p>There are <a href="https://community.compuwareapm.com/community/display/PUB/Best+Practices+on+Web+Site+Performance+Optimization">3 interesting phases</a> of a web site from an end-user performance perspective.</p>
-
-<ol>
-<li>First Impression</li>
-<li>OnLoad</li>
-<li>Fully Loaded Time.</li>
-</ol>
-
-
-<h3>Loading Time</h3>
-
-<p><strong>Question: what percentage of the time a user spends waiting for your page to load is spent after the HTML comes back to their browser</strong>?</p>
-
-<p>It is typically <strong><a href="http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/">over 90%</a></strong>.</p>
-
-<p>Most of the time users spend waiting on your website is spent after the HTML page has been retrieved by their browser.</p>
-
-<h4>Fetching the HTML is just the beginning</h4>
-
-<p><strong>In a nutshell, browsers parse your page’s HTML, sequentially discovering its assets</strong> (such as scripts, stylesheets, and images), requesting and then either parsing and executing them or displaying them as appropriate.</p>
-
-<p>But these assets are not simply fetched all at once. Instead, the <strong>browser opens a limited number of connections to the server(s)</strong> referenced by the page. There is <strong>overhead involved in establishing TCP and HTTP connections</strong>, and some <strong>unavoidable latency</strong> in pushing the request and response bytes back and forth across the network.</p>
-
-<p>So, in general, round trips between the browser and server are expensive. The structure of the HTML markup, the number and the ordering of its assets, are absolutely critical factors in its performance.</p>
-
-<h3>What hijacks your load time</h3>
-
-<h4>1. Too Many HTTP Requests</h4>
-
-<p>This is the single biggest contributor to performance problems in most web pages.</p>
-
-<ol>
-<li><p>Concatenate scripts and stylesheets</p></li>
-<li><p>Combine images with sprites (put common images into a single large image file, then use CSS to position and selectively display the appropriate portion of the sprite image)</p></li>
-<li><p>Use fewer images, more CSS.</p></li>
-</ol>
-
-
-<h4>2. Minimal Client-side Processing</h4>
-
-<ol>
-<li><p>Validation on client. (eg. form input)</p></li>
-<li><p>Use web standards and MVC separation, making a maintainable, accessible, future-proof and max-performance website.</p>
-
-<p> Think of the HTML as the model, the CSS as the view, and the JavaScript as the controller. This separation tends to make code more efficient and maintainable, and makes many optimization techniques much more practical to apply.</p></li>
-<li><p>Push presentation code into the client tier (eg. Charts and graphs — push raw data to the client in JSON format, and use JavaScript and CSS to create pretty graphs.)</p></li>
-<li><p>Leverage Ajax techniques (only requiring small parts of the page to change in response to user actions)</p></li>
-</ol>
-
-
-<h4>3. Low Number of Parallel Requests</h4>
-
-<p>Fetch a script, parse and execute it, then fetch another one&hellip; this will use up all the available connections. There are things you can do to your HTML to allow virtually any browser to make many requests at once, which has a huge impact on latency.</p>
-
-<ol>
-<li><p>Use browser-appropriate domain sharding</p></li>
-<li><p>Use intelligent script loading</p></li>
-<li><p>Leverage Keep-Alive (reuse the same TCP connection for multiple HTTP request/response cycles)</p></li>
-</ol>
-
-
-<h4>4. Failure to leverage browser cache / local storage</h4>
-
-<ol>
-<li><p><a href="http://www.mnot.net/cache_docs/">HTTP cache overview</a></p></li>
-<li><p>Leverage local storage</p></li>
-</ol>
-
-
-<h4>5. Third-party widgets</h4>
-
-<ol>
-<li>Avoid third-party widgets!</li>
-<li>Try to use widgets that provide asynchronous implementations, so their inevitably terrible performance impacts their widget without dragging down your entire UX with it.</li>
-</ol>
-
-
-<h4>7. Failure to Use a Global Network</h4>
-
-<p>Amazon S3.</p>
-
-<p>Ref: <a href="http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/">http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Difference between HTTP protocol and TCP protocol ]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/19/difference-http-tcp/"/>
-    <updated>2015-01-19T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/19/difference-http-tcp</id>
-    <content type="html"><![CDATA[<p><a href="http://www.quora.com/What-is-the-difference-between-HTTP-protocol-and-TCP-protocol">ref</a></p>
-
-<h3>Short Version</h3>
-
-<p>TCP is a <strong>transport-layer</strong> protocol, and HTTP is an <strong>application-layer</strong> protocol that runs over TCP.</p>
-
-<h3>The layers</h3>
-
-<p>At the very bottom of the network stack is the <strong>physical layer</strong>. This is where electrical signals or light pulses or radio waves actually transmit information from place to place. The physical layer doesn&rsquo;t really have protocols, but instead has standards for voltages, frequencies, and other physical properties. You can transmit information directly this way, but you need a lot of power or a dedicated line, and without higher layers you won&rsquo;t be able to share bandwidth.</p>
-
-<p>The next layer up is the <strong>link layer</strong>. This layer covers communication with devices that share a physical communications medium. Here, protocols like Ethernet, 802.11a/b/g/n, and Token Ring specify how to handle multiple concurrent accesses to the physical medium and how to direct traffic to one device instead of another. In a typical home network, this is how your computer talks to your home &ldquo;router.&rdquo;</p>
-
-<p>The third layer is the <strong>network layer</strong>. In the majority of cases, this is dominated by Internet Protocol (IP). This is where the magic of the Internet happens, and you get to talk to a computer halfway around the world, without needing to know where it is. Routers handle directing your traffic from your local network to the network where the other computer lives, where its own link layer handles getting the packets to the right computer.</p>
-
-<p>Now we are getting somewhere. We can talk to a computer somewhere around the world, but that computer is running lots of different programs. How should it know which one to deliver your message to? The <strong>transport layer</strong> takes care of this, usually with <strong>port numbers</strong>. The two most popular transport layer protocols are TCP and UDP. TCP does a lot of interesting things to smooth over the rough spots of network-layer packet-switched communication like reordering packets, retransmitting lost packets, etc. UDP is more unreliable, but has less overhead.</p>
-
-<p>So we&rsquo;ve connected your browser to the web server software on the other end, but how does the server know what page you want? How can you post a question or an answer? These are things that <strong>application-layer</strong> protocols handle. For <strong>web traffic</strong>, this is the HyperText Transfer Protocol (HTTP). There are thousands of application-layer protocols: SMTP, IMAP, and POP3 for email; XMPP, IRC, ICQ for chat; Telnet, SSH, RDP for remote administration; etc.</p>
-
-<p>Ref: <a href="http://qr.ae/3pnJK">http://qr.ae/3pnJK</a></p>
+That's why for OS compatibility reasons, some servers use other ports (greater than 1024). But they still have "80" inside the numner, eg. 7080, 8080, 9080. 
 ]]></content>
   </entry>
   
