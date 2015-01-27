@@ -2,7 +2,9 @@
 layout: post
 title: "[Question] Longest Common Substring "
 comments: true
-category: Question
+categories:
+- Question
+- String search
 tags: [ src ]
 ---
 
@@ -19,6 +21,14 @@ tags: [ src ]
 This question is to be distinguished from __[LintCode] Longest Common Subsequence__. 
 
 The solution is DP, too. Even the code is similar. Read my code below. 
+
+__Updated on Jan 26th, 2015__: there is another approach using __Suffix Array__, suggested by [this post](http://www.geeksforgeeks.org/suffix-tree-application-5-longest-common-substring-2/) - but wait! Do not try to read that article, because you won't easily understand its explanations. I will summarize it in simple English: 
+
+1. Concatenate String X with a "#" sign, and String Y with a "$" sign. 
+1. Build a suffix tree using both strings
+1. find out node with __both "$" and "#" as child__. 
+
+In the case of (X = xabxa, and Y = babxba), the branch "abx" would be the deepest node that qualifies. Thus the result. Code is not written. 
 
 ### Code
 

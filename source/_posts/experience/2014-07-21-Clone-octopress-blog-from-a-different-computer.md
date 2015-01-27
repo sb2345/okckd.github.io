@@ -56,15 +56,17 @@ Follow [this instruction](http://www.techelex.org/setup-octopress-windows7/) and
     rbenv rehash    # optional, unless you are using rbenv
     bundle install
 
-If you see endless dependency errors here, please refer to my other post: __[Ruby] Endless error with gem dependencies__. 
+If you see endless dependency errors here, please refer to my other post: __[[Ruby] Endless error with gem dependencies]({% post_url /experience/2014-12-23-Endless-error-gem-dependencies %})__. 
 
-If you are confused with some concepts in Ruby, read __[Ruby] RubyGems, gem, Gemfile and Bundler__. 
+If you are confused with some concepts in Ruby, read __[[Ruby] RubyGems, gem, Gemfile and Bundler]({% post_url /experience/2014-12-22-RubyGems-gem-other %})__. 
 
 ### Now, start octopress
 
 You can use either of the commands below to start octopress. I can't remember clearly but you can simply follow [this guide](http://octopress.org/docs/setup/).
 
 > rake setup_github_pages
+>
+> when prompted, enter this url: git@github.com:okckd/okckd.github.io.git
 >
 > rake install
 
