@@ -2,7 +2,9 @@
 layout: post
 title: "[Google] Crazy Distance Between Strings "
 comments: true
-category: Google
+categories:
+- Google
+- String search
 tags: [ src ]
 ---
 

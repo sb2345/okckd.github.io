@@ -2,7 +2,9 @@
 layout: post
 title: "[Question] Number of occurence of given sub-sequence "
 comments: true
-category: Question
+categories:
+- Question
+- String search
 tags: [  ]
 ---
 

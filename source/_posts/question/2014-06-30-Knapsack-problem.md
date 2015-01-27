@@ -22,29 +22,48 @@ This is a very similar question to "Coin Change", because directly using recursi
 
 ### Solution
 
-Using i to denote the items to put into Knapsack, and w denote the total weight, the equation is: 
+Using 'n' to denote the items to put into Knapsack. 'c' is the value and 'w' is the total weight, the equation is: 
 
-> K[i][w] = Math.max( val[i-1] + K[i-1][w-wt[i-1]] , K[i-1][w] );
+> Knapsack(n,W) = max(cn + Knapsack(n-1, W-wn), Knapsack(n-1, W))
+
+Refer to page 11 to 12 of [this pdf](http://www.cs.rit.edu/~zjb/courses/800/lec7.pdf).
 
 ### Code
 
-    int knapSack(int W, int wt[], int val[], int n) {
-       int i, w;
-       int K[n+1][W+1];
+Look at the code, we checked dp[i-1][j]. Now the question is: 
 
-       // Build table K[][] in bottom up manner
-       for (i = 0; i <= n; i++)
-       {
-           for (w = 0; w <= W; w++)
-           {
-               if (i==0 || w==0)
-                   K[i][w] = 0;
-               else if (wt[i-1] <= w)
-                     K[i][w] = max(val[i-1] + K[i-1][w-wt[i-1]],  K[i-1][w]);
-               else
-                     K[i][w] = K[i-1][w];
-           }
-       }
+> Do we need to check dp[i][j-1] ? (In case that total weight is not fully used up)
 
-       return K[n][W];
-    }
+The answer is NO. We don't. Look at example: weights = {1, 2} and values = {3, 5}, and knapsack weight = 4. DP array would be: 
+
+    [
+     [0, 0, 0, 0, 0],
+     [0, 3, 3, 3, 3],
+     [0, 3, 5, 8, 8]
+    ]
+
+See that? The way that we keep DP array size int[items + 1][totalWeight + 1], the DP value is always 0 at 1st column and row. 
+
+So, in the example when i == 1, total value is ALWAYS 3. 
+
+	public int maxValNoDup(int totalWeight, int[] value, int[] weight) {
+		int items = value.length;
+		Arrays.sort(value);
+		Arrays.sort(weight);
+
+		int[][] dp = new int[items + 1][totalWeight + 1];
+		for (int i = 1; i <= items; i++) {
+			for (int j = 1; j <= totalWeight; j++) {
+				// we'll try to take i'th item, to fit in weight j
+				if (j < weight[i - 1]) {
+					// not able to put in
+					dp[i][j] = dp[i - 1][j];
+				} else {
+					// we are able to take i'th item into knapsack
+					dp[i][j] = Math.max(dp[i - 1][j], value[i - 1]
+							+ dp[i - 1][j - weight[i - 1]]);
+				}
+			}
+		}
+		return dp[items][totalWeight];
+	}
