@@ -14,7 +14,7 @@ tags: [  ]
 
 __The best solution is to print inorder and preorder traversal__ of both trees. Find whether the 2 traversal string of T2 __is substring of the traversal of T1__. This is a very good idea of checking subtree of a Binary Tree. 
 
-__Updated on Sep 15th, 2014__: we must use sentinals for this purpose. Otherwise, if a node have a child, we cannot tell whether it's the left or right child. 
+__Updated on Jan 26th, 2015__: do we have to use sentinals for this purpose? Well, the answer is NO, cuz a preorder and a inorder can uniquely define a binary tree. 
 
 However, this solution is very __memory intensive__. 
 

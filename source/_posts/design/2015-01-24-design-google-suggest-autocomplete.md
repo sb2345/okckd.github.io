@@ -21,4 +21,4 @@ http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-compl
 
 #### Memcached
 
-LRU replacement algorithm. 
+Distributed caching + LRU replacement algorithm. Refer to __[Design] Distributed Caching - memcached__ for more. 
