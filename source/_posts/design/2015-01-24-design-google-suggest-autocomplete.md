@@ -17,7 +17,9 @@ __Google Suggest__ was [launched in 2004](http://googleblog.blogspot.sg/2004/12/
 
 #### Trie
 
-http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete
+Just make use of all keywords (including space) and build a trie out of it. Then you are good to go just search in Trie. 
+
+A comparison of speed between DB, Set and Trie can be found [here](http://sujitpal.blogspot.sg/2007/02/three-autocomplete-implementations.html). A lot of implementation code can be found [here](http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete). 
 
 #### Memcached
 
