@@ -2,7 +2,9 @@
 layout: post
 title: "[Amazon] Longest Repeating Substring "
 comments: true
-category: Question
+categories:
+- Question
+- String search
 tags: [ src ]
 ---
 

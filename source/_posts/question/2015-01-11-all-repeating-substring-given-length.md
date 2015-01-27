@@ -2,7 +2,9 @@
 layout: post
 title: "[LinkedIn] Find all repeating substring with given length "
 comments: true
-category: Question
+categories:
+- Question
+- String search
 tags: [ src ]
 ---
 
