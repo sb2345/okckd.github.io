@@ -26,7 +26,7 @@ Generating unique IDs is easy. All modern OS'es have that functionality built in
 
 __Detail__: UUIDs may be generated from a combination of __system time stamp, CPU/system ID__, NIC MAC addresses, HBA WWNs, server id etc. 
 
-#### Other clarification
+#### Clarifications
 
 Let's assume the following: 
 
@@ -48,21 +48,24 @@ Let's assume the following:
 
     1 ms 
 
-### Solution? 
+#### Solution
 
 It's a classical consumer-producer problem. 
-In this case we have many consumers of UUIDs and one producer. 
-All common server OS'es have API's to create UUIDs. For embedded/mobile systems one may have to build the functions. Let's assume the OS provides an API to generate UUIDs and the max. running time of the API is 1ms. 
-First Pre-allocate 2 Mio UUIDs into an array / stack/ heap (depending on implementation) structure. 
-2 Mio UUIDs ensures system can handle burst rate. 
-(If no overhead 2 Mio UUIDs would take ~ 32MB of RAM) 
-Again, not a problem on today's server system with many GB of RAM, but may be a problem on an embedded system.) 
-The solution needs to ensure that its pool of UUIDs doesn't run out as consumers request them and they are replenished.
+
+In this case we have many consumers of UUIDs and one producer. Let's assume the OS provides an API to generate UUIDs and the max. running time of the API is 1ms. 
+
+1. Pre-allocate 2 Mio UUIDs into an array / stack/ heap (depending on implementation) structure. 
+
+1. If no overhead 2 Mio UUIDs would take ~ 32MB of RAM. Not a problem on today's server system with many GB of RAM, but may be a problem on an embedded system.
+
+1. 2 Mio UUIDs ensures system can handle burst rate. 
+ 
+1. The solution needs to ensure that its pool of UUIDs doesn't run out as consumers request them and they are replenished.
 
 ### Idea 2
 
 This question is quite open-ended. 
 
-For starter, how about appending random(N) to the timestamp? N can be large enough to make collisions unlikely. If each server has an ID we can also include it to further reduce collisions. 
+For starter, how about __appending random(N) to the timestamp__? N can be large enough to make collisions unlikely. If each server has an ID we can also include it to further reduce collisions. 
 
-If IDs must be unique, then I suppose you can design a counter that will return an ID and increment it at the same time. You will then need mutex to access this counter.
+If IDs must be unique, then I suppose you can __design a counter__ that will return an ID and increment it at the same time. You will then __need mutex to access this counter__. 
