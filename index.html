@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="ref Question Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps &hellip;">
+  <meta name="description" content="Question link 给定n种物品和一背包。物品i的重量是wi，体积是bi，其价值为vi，背包的容量为C，容积为D。问应如何选择装入背包中的物品，使得装入背包中物品的总价值最大？ 在选择装入背包的物品时，对每种物品i只有两种选择，即装入背包或者不装入背包。不能将物品i装入背包多次， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,118 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/28/two-dimensional-knapsack-problem/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.sina.com.cn/s/blog_8a24b3a3010190ak.html">link</a></p>
+
+<blockquote><p>给定n种物品和一背包。物品i的重量是wi，体积是bi，其价值为vi，背包的容量为C，容积为D。问应如何选择装入背包中的物品，使得装入背包中物品的总价值最大？</p>
+
+<p>在选择装入背包的物品时，对每种物品i只有两种选择，即装入背包或者不装入背包。不能将物品i装入背包多次，也不能只装入部分的物品i。试设计一个解此问题的动态规划算法，并分析算法的计算复杂性。</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>This is a extended question from <strong>[Question] 0-1 Knapsack Problem</strong>.</p>
+
+<p>Same solution, just use 3D-array for DP.</p>
+
+<h3>Solution</h3>
+
+<p>First of all, define a 2D array, Knapsack(n,W) denotes getting &lsquo;n&#8217;th item, with weight &#8216;W&rsquo;. When n == 0 or W = 0, dp value is 0.</p>
+
+<blockquote><p>int[][][] dp = new int[n + 1][W + 1][B + 1];</p></blockquote>
+
+<p>Now if item &lsquo;n&rsquo; is able to fit in:</p>
+
+<blockquote><p>dp[i][j][k] = max(dp[i-1][j][k] , dp[i-1][j-w[i]][k-b[i]] + v[i]);</p></blockquote>
+
+<p>If not able to fit in:</p>
+
+<blockquote><p>dp[i][j][k] = dp[i-1][j][k];</p></blockquote>
+
+<h3>Code</h3>
+
+<p>Code from <a href="http://blog.sina.com.cn/s/blog_8a24b3a3010190ak.html">绝对快乐一生</a>:</p>
+
+<pre><code>int main()
+{
+   int i,j,k;
+   int n,c,d;
+   int w[MAX] = {0};   //重量
+   int b[MAX] = {0};   //体积
+   int v[MAX] = {0};   //价值
+   cout&lt;&lt;"请输入物品个数:";
+   cin&gt;&gt;n;
+   cout&lt;&lt;"请输入背包的容量及容积:";
+   cin&gt;&gt;c&gt;&gt;d;
+   cout&lt;&lt;"请依次输入各个物品的重量,体积,价值:(共"&lt;&lt;n&lt;&lt;"个)"&lt;&lt;endl;
+   for(i =1;i&lt;n+1;i++)
+   {
+       cin&gt;&gt;w[i]&gt;&gt;b[i]&gt;&gt;v[i];
+   }
+
+   int dp[50][50][50]={0}; 
+   //dp[i][j][k] i代表着第1到第i个物品，j代表的是重量，k代表的是容积，dp为最优价值
+
+   for(i=1;i&lt;n+1;i++)
+       for(j =1;j &lt;=c;j++)
+           for(k = 1 ;k &lt;= d ; k++)
+           {
+               if(w[i]&lt;=j&amp;&amp;b[i]&lt;=k)  
+               //当前物品重量小于当前容量，且体积小于容积时 ，才可以考虑装入物品的问题
+                   dp[i][j][k] = max(dp[i-1][j][k] , dp[i-1][j-w[i]][k-b[i]] + v[i]);
+               else dp[i][j][k] = dp[i-1][j][k];
+           }
+   cout&lt;&lt;"背包能放物品的最大价值为:"&lt;&lt;dp[n][c][d]&lt;&lt;endl;
+  int x[MAX] ={0};   //记录是否被选中
+  for(i =n;i&gt;1;i--)
+       if(dp[i][c][d]==dp[i-1][c][d])x[i] =0;
+      else {x[i]=1;c -= w[i];d -= b[i];}
+   x[1]=(dp[1][c][d])?1:0;
+   cout&lt;&lt;"被选入背包的物品的编号,质量和体积,价值分别是:"&lt;&lt;endl;
+   for(i=1;i&lt;&lt;/span&gt;n+1;i++)
+       if(x[i]==1)
+           cout&lt;&lt;"第"&lt;&lt;i&lt;&lt;"个物品: "&lt;&lt;w[i]&lt;&lt;"  "&lt;&lt;b[i]&lt;&lt;"  "&lt;&lt;v[i]&lt;&lt;endl;
+
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -308,6 +420,133 @@
 
 
 <p>Ref: <a href="http://sixrevisions.com/web-development/site-speed-performance/">http://sixrevisions.com/web-development/site-speed-performance/</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/28/implement-trie-suffix-tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/28/implement-trie-suffix-tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Trie Node</h3>
+
+<pre><code>public class TrieNode {
+    boolean isLeaf;
+    TrieNode[] child;
+
+    public TrieNode(boolean isLeaf) {
+        this.isLeaf = isLeaf;
+        this.child = new TrieNode[26];
+    }
+
+    public void insert(String str) {
+        if (str == null || str.length() == 0) {
+            this.isLeaf = true;
+            return;
+        }
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            child[cur - 'a'] = new TrieNode(str.length() == 1);
+        }
+        child[cur - 'a'].insert(str.substring(1));
+    }
+
+    public boolean trieSearch(String str) {
+        // have to consider leaf node
+        if (str == null || str.length() == 0) {
+            return isLeaf;
+        }
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            return false;
+        }
+        return child[cur - 'a'].trieSearch(str.substring(1));
+    }
+
+    public boolean suffixTreeSearch(String str) {
+        // suffixTreeSearch don't consider leaf node
+        // cuz we search for prefix of suffixes
+        if (str == null || str.length() == 0) {
+            return true;
+        }
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            return false;
+        }
+        return child[cur - 'a'].suffixTreeSearch(str.substring(1));
+    }
+}
+</code></pre>
+
+<h3>Trie</h3>
+
+<pre><code>public class Trie {
+    TrieNode root;
+
+    public Trie(String[] input) {
+        root = new TrieNode(false);
+
+        for (String str : input) {
+            root.insert(str);
+        }
+    }
+
+    public boolean search(String query) {
+        return root.trieSearch(query);
+    }
+}
+</code></pre>
+
+<h4>Suffix Tree</h4>
+
+<p>Suffix tree might also consider the <strong>List of indexes</strong> thing, which I do not take into consideration in my code.</p>
+
+<pre><code>public class SuffixTree {
+    TrieNode root;
+
+    public SuffixTree(String input) {
+        root = new TrieNode(false);
+
+        for (int i = 0; i &lt; input.length(); i++) {
+            root.insert(input.substring(i));
+        }
+    }
+
+    public boolean search(String query) {
+        return root.suffixTreeSearch(query);
+    }
+}
+</code></pre>
 </div>
   
   
@@ -599,6 +838,106 @@ a\0
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/01/27/generate-request-id/">[Google] Generate Request ID</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/27/generate-request-id/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/generate-request-id/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5169800024162304">link</a></p>
+
+<blockquote><p>Design a system to <strong>return an unique ID for each request</strong>.</p>
+
+<p>(For most of requests, the ID value should increase as time goes, the system should handle 1000 requests per second at least. )</p>
+
+<p>Note: <strong>Timestamps</strong> alone is not valid since there might be multiple requests with same timestamps.</p></blockquote>
+
+<h3>Idea 1</h3>
+
+<h4>Generating UUID</h4>
+
+<p><strong>A universally unique identifier (UUID)</strong> is an identifier standard used in software construction. A UUID is simply a 128-bit value.</p>
+
+<p>Generating unique IDs is easy. All modern OS&#8217;es have that functionality built in.</p>
+
+<p><strong>Detail</strong>: UUIDs may be generated from a combination of <strong>system time stamp, CPU/system ID</strong>, NIC MAC addresses, HBA WWNs, server id etc.</p>
+
+<h4>Clarifications</h4>
+
+<p>Let&rsquo;s assume the following:</p>
+
+<ol>
+<li><p>What&rsquo;s the length of the ID?</p>
+
+<p> &lt;= 128 bits. In that case I&rsquo;ll choose the standard 128 bit UUID format.</p></li>
+<li><p>The requirement states the system should handle 1000 request/s at least.</p></li>
+<li><p>What&rsquo;s the average request rate?</p>
+
+<p> 1000 &lt; avg req. rate &lt; 10,000</p></li>
+<li><p>What&rsquo;s the max. burst rate the system must handle?</p>
+
+<p> &lt; 1,000,000</p></li>
+<li><p>What&rsquo;s the max. latency (wait time) for a request?</p>
+
+<p> 1 ms</p></li>
+</ol>
+
+
+<h4>Solution</h4>
+
+<p>It&rsquo;s a classical consumer-producer problem.</p>
+
+<p>In this case we have many consumers of UUIDs and one producer. Let&rsquo;s assume the OS provides an API to generate UUIDs and the max. running time of the API is 1ms.</p>
+
+<ol>
+<li><p>Pre-allocate 2 Mio UUIDs into an array / stack/ heap (depending on implementation) structure.</p></li>
+<li><p>If no overhead 2 Mio UUIDs would take ~ 32MB of RAM. Not a problem on today&rsquo;s server system with many GB of RAM, but may be a problem on an embedded system.</p></li>
+<li><p>2 Mio UUIDs ensures system can handle burst rate.</p></li>
+<li><p>The solution needs to ensure that its pool of UUIDs doesn&rsquo;t run out as consumers request them and they are replenished.</p></li>
+</ol>
+
+
+<h3>Idea 2</h3>
+
+<p>This question is quite open-ended.</p>
+
+<p>For starter, how about <strong>appending random(N) to the timestamp</strong>? N can be large enough to make collisions unlikely. If each server has an ID we can also include it to further reduce collisions.</p>
+
+<p>If IDs must be unique, then I suppose you can <strong>design a counter</strong> that will return an ID and increment it at the same time. You will then <strong>need mutex to access this counter</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/01/26/make-java-method-thread-safe/">[Google] Make a Java Method Thread-safe</a></h1>
     
     
@@ -693,275 +1032,6 @@ a\0
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/26/Push-and-Pop-Sequences-Stacks/">[Question] Push and Pop Sequences of Stacks</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/26/Push-and-Pop-Sequences-Stacks/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/26/Push-and-Pop-Sequences-Stacks/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://codercareer.blogspot.sg/2011/11/no-21-push-and-pop-sequences-of-stacks.html">link</a></p>
-
-<blockquote><p>Given two integer sequences, one of which is the push sequence of a stack, please check whether the other sequence is a corresponding pop sequence or not.</p>
-
-<p>For example, if 1, 2, 3, 4, 5 is a push sequence, 4, 5, 3, 2, 1 is a corresponding pop sequence, but the sequence 4, 3, 5, 1, 2 is not.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Refer to <a href="http://stackoverflow.com/a/17828345">this answer</a>:</p>
-
-<blockquote><p>Construct the stack:</p>
-
-<p>For each number X in the pop order:</p></blockquote>
-
-<pre><code>If this number is not the same as the top of the stack (or the stack is empty), 
-push numbers from the push order until you pushed X. 
-
-If you pushed all numbers and didn't find X, there's no way to get the pop order.
-
-Pop X
-</code></pre>
-
-<h3>Code</h3>
-
-<pre><code>public boolean validSequence(int[] input, int[] sequenc) {
-    // keep a pointer p in the input[] array
-    int len = input.length;
-    int p = 0;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-
-    int i = 0;
-    while (i &lt; len) {
-        if (stack.isEmpty()) {
-            // just push an element to stack
-            stack.push(input[p++]);
-        } else {
-            // stack got elements, then check top one
-            if (stack.peek() == sequenc[i]) {
-                // seq found, proceed to next number in seq
-                stack.pop();
-                i++;
-            } else {
-                // did not find seq, keep pushing to stack until done
-                if (p == len) {
-                    return false;
-                } else {
-                    stack.push(input[p++]);
-                }
-            }
-        }
-    }
-    return i == len; // or just return true;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/24/distributed-caching-memcached/">[Design] Distributed Caching - Memcached</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/24/distributed-caching-memcached/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/24/distributed-caching-memcached/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>What is Memcached?</h3>
-
-<p><a href="http://memcached.org/">Memcached</a> is an <strong>in-memory key-value store for small chunks of arbitrary data</strong> (strings, objects) from results of database calls, API calls, or page rendering.</p>
-
-<ol>
-<li>Free &amp; open source</li>
-<li>high-performance, distributed memory object caching system</li>
-<li>generic in nature</li>
-<li>intended for use in speeding up dynamic web applications by alleviating database load</li>
-</ol>
-
-
-<p>Definition from <a href="http://en.wikipedia.org/wiki/Memcached">wiki</a>:</p>
-
-<blockquote><p>Memcached is a <strong>general-purpose distributed memory caching system</strong>. It is often used to speed up dynamic database-driven websites by <strong>caching data and objects in RAM</strong> to reduce the number of times an <strong>external data source</strong> (such as a database or API) must be read.</p></blockquote>
-
-<h3>Who uses Memcached?</h3>
-
-<ol>
-<li>Facebook</li>
-<li>YouTube</li>
-<li>Twitter</li>
-<li>Amazon</li>
-<li>Reddit</li>
-<li>Yahoo</li>
-<li>Zynga</li>
-</ol>
-
-
-<h3>Why Memcached?</h3>
-
-<p>Run memcached on one or more hosts and then use the shared cache to store objects. Because each host’s RAM is storing information, the access speed <a href="http://www.blogs.zeenor.com/category/interview-questions/page/9">will be much faster than</a> having to load the information from disk. This can provide <strong>a significant performance boost in retrieving data</strong> versus loading the data natively from a database.</p>
-
-<p>Also, because the cache is just a repository for information, you can use the cache to store <strong>any data, including complex structures</strong> that would normally require a significant amount of effort to create, but in <strong>a ready-to-use format</strong>, helping to reduce the load on your MySQL servers.</p>
-
-<h3>FAQ</h3>
-
-<p><strong>What is Memcached?</strong></p>
-
-<p><a href="http://www.web-technology-experts-notes.in/2014/09/memcached-interview-questions-and-answers.html">It is component</a> which stored the data temporary for 1 Hour/ 6 Hour/1 Day etc. When we integrate the Memcached with our application, performance of application increased.</p>
-
-<p>Memcached is open source, high-performance distributed memory object used for caching so that execution can be enhanced at nth level.</p>
-
-<p><strong>Where Memcached can be used?</strong></p>
-
-<p>•  Social Networking &ndash;> Profile Caching
-•  Content Aggregation &ndash;> HTML/ Page Caching
-•  Ad targeting &ndash;> Cookie/profile tracking
-•  Relationship &ndash;> Session caching
-•  E-commerce &ndash;> Session and HTML caching
-•  Location-based services &ndash;> Data-base query scaling
-•  Gaming and entertainment &ndash;> Session caching</p>
-
-<p><strong>Why use Memcached?</strong></p>
-
-<p>•  Speed up application processes
-•  It determines what to store and what not to
-•  Reduce the number of retrieval requests to the database
-•  Cuts down the I/O ( Input/Output) access (hard disk)</p>
-
-<p><strong>In what condition does retrieving cache fail?</strong></p>
-
-<p>•  Memory allocated for the cache is exhausted
-•  Item from cache is deleted
-•  Individual item in the cache is expired</p>
-
-<p><strong>What is the drawback of Memcached?</strong></p>
-
-<p>•  It is not a persistent data store
-•  Not a database
-•  It is not an application specific
-•  It cannot cache large object</p>
-
-<p><strong>Give more details about memcached failures</strong></p>
-
-<p><a href="http://programmers.stackexchange.com/a/187101">Memcached servers</a> are indeed independent of each other. Memcached server is just an efficient key-value store implemented as in-memory hash table.</p>
-
-<p><strong>What makes memcached distributed is the client</strong>, which in most implementations can connect to a pool of servers. Typical implementations use consistent hashing, which means that when you add or remove server to/from a pool of N servers, you only have to remap 1/N keys.</p>
-
-<p>Typically keys are <strong>not duplicated</strong> on various hosts, as memcached is <strong>not meant to be persistent store</strong> and gives no guarantees that your value will persist (for example when running out of assigned memory, memcached server drops least recently used (LRU) elements). Thus it&rsquo;s assumed that your application should handle missing keys.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/24/design-google-suggest-autocomplete/">[Design] Design Google Suggest (Autocomplete)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/24/design-google-suggest-autocomplete/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/24/design-google-suggest-autocomplete/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p><strong>Google Suggest</strong> was <a href="http://googleblog.blogspot.sg/2004/12/ive-got-suggestion.html">launched in 2004</a> as a 20% time project from Google engineer Kevin Gibbs. He developed the idea on a <a href="http://www.theatlantic.com/technology/archive/2013/08/how-googles-autocomplete-was-created-invented-born/278991/">Google shuttle bus</a>.</p>
-
-<h3>Design</h3>
-
-<ol>
-<li>Use trie.</li>
-<li>Use cache (distributed cache)</li>
-</ol>
-
-
-<h4>Trie</h4>
-
-<p><a href="http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete">http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete</a></p>
-
-<h4>Memcached</h4>
-
-<p>Distributed caching + LRU replacement algorithm. Refer to <strong>[Design] Distributed Caching &ndash; memcached</strong> for more.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -980,15 +1050,15 @@ Pop X
 <li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (9)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (46)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (10)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (103)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (16)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (104)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -999,6 +1069,10 @@ Pop X
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/28/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -1007,15 +1081,11 @@ Pop X
       </li>
     
       <li class="post">
+        <a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/27/suffix-tree/">[Fundamental] Suffix Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/27/suffix-array/">[Fundamental] Suffix Array</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/27/prefix-tree/">[Fundamental] Prefix Tree</a>
       </li>
     
   </ul>

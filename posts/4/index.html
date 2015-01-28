@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Find all the repeating substring of specified length in a large string sequence. For e.g. Input String: "ABCACBABC" repeated sub-string &hellip;">
+  <meta name="description" content="Question link Finding the longest repeated substring. Example: &ldquo;banana&rdquo; ==> &ldquo;ana&rdquo; Solution There are 2 solutions: Suffix &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,360 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/longest-repeating-substring/">[Amazon] Longest Repeating Substring</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/11/longest-repeating-substring/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/longest-repeating-substring/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=9182781">link</a></p>
+
+<blockquote><p>Finding the longest repeated substring.</p>
+
+<p>Example: &ldquo;banana&rdquo; ==> &ldquo;ana&rdquo;</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are 2 solutions: Suffix array, and Suffix tree.</p>
+
+<p><strong>1. Suffix array</strong>. Simple code, explained <a href="http://www.careercup.com/question?id=9182781">here</a>.</p>
+
+<blockquote><p>Bentley&rsquo;s programming pearl book has the simplest implementation (less than 15 lines code) which sort all suffix, and then check common prefix length among adjacent suffix. The time complexity is O(n<sup>2logn</sup>) for sorting the suffix (which has avg length of O(n)).</p></blockquote>
+
+<p>A detailed step-by-step <a href="http://nriverwang.blogspot.com/2013/04/longest-repeated-substring.html">explanation</a>:</p>
+
+<pre><code>str = banana, its suffixes are:
+banana
+anana
+nana
+ana
+na
+a
+</code></pre>
+
+<p>after sort, the suffix array looks like:</p>
+
+<pre><code>a
+ana
+anana
+banana
+na
+nana
+</code></pre>
+
+<p>Then for each two adjacent suffixes, check the length of the common prefix.</p>
+
+<p>The answer is &ldquo;ana&rdquo; (if overlapping is allowed, otherwise, should be &ldquo;an&rdquo;).</p>
+
+<p><strong>2. Suffix tree</strong>. Suggest by <a href="http://qr.ae/6W9yJ">this post</a>, Or <a href="http://www.careercup.com/question?id=9182781">this</a>:</p>
+
+<blockquote><p>a good solution is to create a suffix tree for the given word and then find the deepest internal node in that tree (node with at least 2 descendants under it)&hellip;</p></blockquote>
+
+<p>For a nice PPT presentation about suffix tree, look <a href="https://www.cs.cmu.edu/~ckingsf/bioinfo-lectures/suffixtrees.pdf">here</a>.</p>
+
+<h3>Code</h3>
+
+<p>Suffix array approach.</p>
+
+<pre><code>public String longestRepeat(String input) {
+    int len = input.length();
+    String[] suffixArray = new String[len];
+    for (int i = 0; i &lt; len; i++) {
+        suffixArray[i] = input.substring(i);
+    }
+    // now sort the suffix array
+    Arrays.sort(suffixArray);
+    String longest = "";
+    // start to compare neighborhood suffixes, and check LCP
+    for (int i = 0; i &lt; suffixArray.length - 1; i++) {
+        String lcp = longestCommonPrefix(suffixArray[i], suffixArray[i + 1]);
+        if (lcp.length() &gt; longest.length()) {
+            longest = lcp;
+        }
+    }
+    return longest;
+}
+
+private String longestCommonPrefix(String s1, String s2) {
+    int p = 0;
+    while (p &lt; s1.length() &amp;&amp; p &lt; s2.length()) {
+        if (s1.charAt(p) != s2.charAt(p)) {
+            break;
+        }
+        p++;
+    }
+    return s1.substring(0, p);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/11/crazy-distance-string/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/crazy-distance-string/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/15061908/google-interview-find-crazy-distance-between-strings">link</a></p>
+
+<blockquote><p>X and Y are strings formed by 0 or 1. Distance is define as:</p></blockquote>
+
+<pre><code>D(X,Y) = Remove chars common at the start from both X &amp; Y. 
+Then add the remaining lengths from both the strings.
+</code></pre>
+
+<blockquote><p>For e.g.</p></blockquote>
+
+<pre><code>D(1111, 1000) = Only First alphabet is common. So the remaining string is 111 &amp; 000. Therefore the result length("111") &amp; length("000") = 3 + 3 = 6
+</code></pre>
+
+<blockquote><p>For e.g.</p></blockquote>
+
+<pre><code>D(0101, 01100) = Only First two alphabets are common. So the remaining string is 01 &amp; 100. Therefore the result length("01") &amp; length("100") = 2 + 3 = 5
+</code></pre>
+
+<blockquote><p>Now given n input, say like</p></blockquote>
+
+<pre><code>1111
+1000
+101
+1100
+</code></pre>
+
+<blockquote><p>Find out the maximum crazy distance between 2 strings.</p>
+
+<p><strong>n is</strong> the number of input strings. <strong>m is</strong> the max length of any input string.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is the <a href="http://stackoverflow.com/a/15062640">source</a>.</p>
+
+<blockquote><p>Put the strings into a tree, where 0 means go left and 1 means go right. <strong>O(m*n) time</strong>.</p></blockquote>
+
+<p>Example:</p>
+
+<pre><code>            Root
+             1
+          0      1
+         0 1*   0  1
+        0*     0*    1*
+</code></pre>
+
+<blockquote><p>where the * means that an element ends there. Constructing this tree clearly takes O(n m).</p>
+
+<p>Now we have to find <strong>the diameter of the tree</strong> (the longest path between two nodes).</p></blockquote>
+
+<p>How to find out longest path between 2 leaf nodes? Please refer to <strong>[Google] Diameter of a Binary Tree</strong> for explanation.</p>
+
+<p>Total time complexity is <strong>O(m*n) time</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int crazyDist(String[] input) {
+    TreeNode root = this.buildTree(input);
+    return this.findMaxPath(root).path - 1;
+}
+
+private Result findMaxPath(TreeNode node) {
+    if (node == null) {
+        return new Result(Integer.MIN_VALUE, 0);
+    }
+    Result lr = this.findMaxPath(node.left);
+    Result rr = this.findMaxPath(node.right);
+    int path = Math.max(lr.path, rr.path);
+    if (lr.depth != 0 &amp;&amp; rr.depth != 0) {
+        // this check is important, because if any of the child node is
+        // NULL, this root will not be eligible for computing the path
+        path = Math.max(path, lr.depth + rr.depth + 1);
+        // Why? cuz diameter must go from one leaf, thru root, and reach
+        // another leaf. This is different from "Maximum Path Sum" leetcode
+    }
+    return new Result(path, 1 + Math.max(lr.depth, rr.depth));
+}
+
+private TreeNode buildTree(String[] input) {
+    TreeNode root = new TreeNode(123);
+    // share a common root. this root is deducted from the final calculation
+    for (String str : input) {
+        // insert str under the root
+        TreeNode p = root;
+        for (char c : str.toCharArray()) {
+            if (c == '0') {
+                if (p.left == null) {
+                    p.left = new TreeNode(124);
+                    // if 0, go to left; otherwise go to right
+                    // thus value of TreeNodes does not really matter
+                }
+                p = p.left;
+            } else {
+                if (p.right == null) {
+                    p.right = new TreeNode(125);
+                }
+                p = p.right;
+            }
+        }
+    }
+    return root;
+}
+
+class Result {
+    int path;
+    int depth;
+
+    public Result(int a, int b) {
+        path = a;
+        depth = b;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/">[Google] Check if Repeating Subsequence Exists</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/check-if-repeating-subsequence-exist/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5931067269709824">link</a></p>
+
+<blockquote><p>Given a string, find if there is any sub-sequence that repeats itself. Do not reuse any char.</p>
+
+<p>Eg:</p></blockquote>
+
+<pre><code>1. abab &lt;------yes, ab is repeated
+2. abba &lt;---- No, a and b follow different order 
+3. acbdaghfb &lt;-------- yes, a followed by b twice 
+4. abcdacb &lt;----- yes, a followed by b twice 
+</code></pre>
+
+<blockquote><p>Note that no char should be reused. I.e. &ldquo;aab&rdquo; is a false.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This looks like a question without any clue. However, this actually is a modified version of <strong>[LintCode] Longest Common Subsequence</strong>.</p>
+
+<p>Look at that question: there&rsquo;s 2 input string, and they match char-by-char. For this question, we are simply <strong>matching input string with input string itself</strong>. And chars should be match <strong>ONLY</strong> at different positions, that&rsquo;s the key. As pointed out by the <a href="http://www.careercup.com/question?id=5931067269709824">top comment</a>:</p>
+
+<blockquote><p>Now we can modify the longest_common_subsequence(a, a) to find the value of the longest repeated subsequence in a by excluding the cases when i == j</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public boolean checkRepeatSubseq(String input) {
+    int len = input.length();
+    int[][] dp = new int[len + 1][len + 1];
+    // dp[i][j] denotes the length of subseq between 2 strings:
+    // 1. first i chars of input
+    // 2. first j chars of input
+    for (int i = 1; i &lt;= len; i++) {
+        for (int j = i; j &lt;= len; j++) {
+            if (i != j &amp;&amp; input.charAt(i - 1) == input.charAt(j - 1)) {
+                int temp = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                dp[i][j] = Math.max(temp, dp[i - 1][j - 1] + 1);
+            } else {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    return dp[len][len] &gt;= 2;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -686,274 +1040,6 @@ i C[0,0,2,0]   N[4, 3, 2, 1]
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/09/terminology-ngram/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/terminology-ngram/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>n-gram</h3>
-
-<p>In the fields of computational linguistics and probability, an <strong><a href="http://en.wikipedia.org/wiki/N-gram">n-gram</a></strong> is a contiguous sequence of n items from a given sequence of text or speech.</p>
-
-<p>The items can be phonemes, syllables, letters, words or base pairs according to the application. The n-grams typically are collected from a text or speech corpus.</p>
-
-<h4>Example</h4>
-
-<table border="1" width="100%" id="table5" cellpadding="3" style="border-collapse: collapse" bordercolor="#89B0D8" cellspacing="0">
-                <tbody><tr>
-                    <td bgcolor="#D9ECFF">
-                    <p align="center">frequency</p></td>
-                    <td bgcolor="#D9ECFF">
-                    <p align="center">word1</p></td>
-                    <td bgcolor="#D9ECFF">
-                    <p align="center">word2</p></td>
-                    <td bgcolor="#D9ECFF">
-                    <p align="center">word3</p></td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">1419</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">the</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">same</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">461</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">likely</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">432</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">better</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">than</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">266</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">difficult</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">235</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">of</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">the</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">226</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">than</p>
-                    </td>
-                </tr>
-</tbody></table>
-
-
-<h4>Downloadable n-grams sets for English</h4>
-
-<ol>
-<li><strong><a href="https://catalog.ldc.upenn.edu/LDC2006T13">Google n-grams</a></strong>, based on the web as of 2006.</li>
-<li><strong><a href="http://www.ngrams.info/intro.asp">COCA n-grams</a></strong>, based on Corpus of Contemporary American English [COCA]. 450 million words from 1990 to 2012.</li>
-</ol>
-
-
-<p>With n-grams data (2, 3, 4, 5-word sequences, with their frequency), we can carry out powerful queries offline.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/09/most-frequent-word-from-book/">[Question] Most Frequent Word From a Book</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/09/most-frequent-word-from-book/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/most-frequent-word-from-book/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5715664853532672">link</a></p>
-
-<blockquote><p>Let&rsquo;s say I gave you a long String and I wanted you to tell me the most common word in that String. How would you do that?</p>
-
-<p>Follow-up: how about if I gave you the entire works of Alexandre Dumas, one of the most prolific authors in history. How would your solution work? How could you change it to solve this more specific problem?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are 2 solutions. Either <strong>HashMap</strong> or <strong>Trie</strong>. It&rsquo;s easy to think of first, but remember that Trie is designed to do this kind of job.</p>
-
-<blockquote><p>A trie will be more useful in the second situation where you will have millions of words. You can have a counter at every node to see its frequency</p></blockquote>
-
-<p><strong>Now the follow up</strong>. For big data problems, we can always do <strong>divide and conquer</strong> by hash value.</p>
-
-<p>Alternatively, the comment by <a href="http://www.careercup.com/question?id=5715664853532672">Prince</a> mentioned how to solve with <strong>Map Reduce</strong>:</p>
-
-<blockquote><p>Instead of loading it as a string first I would stream data so that I avoid memory spike. Further our map size might increases as new words are added to it. Also, we can use map reduce type job were we create map&lt;word, frequency> of each play in parallel and later join/collapse them this will reduce the time it will take to get result.</p>
-
-<p>Common phrase should be no different then above algorithm. However we need to rebuild our index with &lt;phase, frequency></p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/09/match-triplet-with-reverse-order/">[Question] Match Triplet With Reverse Order</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/09/match-triplet-with-reverse-order/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/match-triplet-with-reverse-order/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=11655778">link</a></p>
-
-<blockquote><p>Find the substring of length 3 which is present in the reverse order from the string.</p>
-
-<p>Ex: if the string is abcdcba (cba is the reverse of abc) so we should return cba.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p><strong>HashMap (recommended)</strong>. Hash all substrings of length 3. O(n). Look up all reverse substrings of length 3 in this hash set. O(n) time and O(n) space.</p></li>
-<li><p><strong>KMP Algo</strong>. Take every substring of length 3. Reverse it and find it in the input using KMP. O(n<sup>2</sup>) time and O(1) space.</p></li>
-<li><p><strong>Build suffix tree</strong> of height 3. Then in reverse order, check triplets.</p></li>
-</ol>
-
-
-<p>The 3 solutions above all work well. Pick the one you love.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -974,15 +1060,15 @@ i C[0,0,2,0]   N[4, 3, 2, 1]
 <li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (9)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (46)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (10)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (103)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (16)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (104)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -993,6 +1079,10 @@ i C[0,0,2,0]   N[4, 3, 2, 1]
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/28/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -1001,15 +1091,11 @@ i C[0,0,2,0]   N[4, 3, 2, 1]
       </li>
     
       <li class="post">
+        <a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/27/suffix-tree/">[Fundamental] Suffix Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/27/suffix-array/">[Fundamental] Suffix Array</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/27/prefix-tree/">[Fundamental] Prefix Tree</a>
       </li>
     
   </ul>

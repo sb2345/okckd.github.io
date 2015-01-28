@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Fundamental | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/fundamental/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-28T08:13:24+08:00</updated>
+  <updated>2015-01-28T20:30:18+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,100 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Fundamental] Implement Trie and Suffix Tree]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/28/implement-trie-suffix-tree/"/>
+    <updated>2015-01-28T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/28/implement-trie-suffix-tree</id>
+    <content type="html"><![CDATA[### Trie Node
+
+    public class TrieNode {
+        boolean isLeaf;
+        TrieNode[] child;
+
+        public TrieNode(boolean isLeaf) {
+            this.isLeaf = isLeaf;
+            this.child = new TrieNode[26];
+        }
+
+        public void insert(String str) {
+            if (str == null || str.length() == 0) {
+                this.isLeaf = true;
+                return;
+            }
+            char cur = str.charAt(0);
+            if (child[cur - 'a'] == null) {
+                child[cur - 'a'] = new TrieNode(str.length() == 1);
+            }
+            child[cur - 'a'].insert(str.substring(1));
+        }
+
+        public boolean trieSearch(String str) {
+            // have to consider leaf node
+            if (str == null || str.length() == 0) {
+                return isLeaf;
+            }
+            char cur = str.charAt(0);
+            if (child[cur - 'a'] == null) {
+                return false;
+            }
+            return child[cur - 'a'].trieSearch(str.substring(1));
+        }
+
+        public boolean suffixTreeSearch(String str) {
+            // suffixTreeSearch don't consider leaf node
+            // cuz we search for prefix of suffixes
+            if (str == null || str.length() == 0) {
+                return true;
+            }
+            char cur = str.charAt(0);
+            if (child[cur - 'a'] == null) {
+                return false;
+            }
+            return child[cur - 'a'].suffixTreeSearch(str.substring(1));
+        }
+    }
+
+### Trie
+
+    public class Trie {
+        TrieNode root;
+
+        public Trie(String[] input) {
+            root = new TrieNode(false);
+
+            for (String str : input) {
+                root.insert(str);
+            }
+        }
+
+        public boolean search(String query) {
+            return root.trieSearch(query);
+        }
+    }
+
+#### Suffix Tree
+
+Suffix tree might also consider the __List of indexes__ thing, which I do not take into consideration in my code. 
+
+    public class SuffixTree {
+        TrieNode root;
+
+        public SuffixTree(String input) {
+            root = new TrieNode(false);
+
+            for (int i = 0; i < input.length(); i++) {
+                root.insert(input.substring(i));
+            }
+        }
+
+        public boolean search(String query) {
+            return root.suffixTreeSearch(query);
+        }
+    }
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Fundamental] Suffix Tree]]></title>
@@ -159,52 +253,6 @@ strStr() is a classic question in CS. There are various ways to solve (which we 
 1. Suffix tree
 
     Will discuss in details. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Fundamental] Travelling Salesman Problem]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/30/Travelling-salesman-problem/"/>
-    <updated>2014-08-30T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/30/Travelling-salesman-problem</id>
-    <content type="html"><![CDATA[### TSP problem
-
-[Given a list of cities](http://en.wikipedia.org/wiki/Travelling_salesman_problem) and the distances between each pair of cities, what is the shortest possible route that visits each city exactly once and returns to the origin city? 
-
-It is an NP-hard problem in combinatorial optimization. We will discuss 2 category of solutions: 
-
-1. Exact algorithms
-1. Heuristic and approximation algorithms
-
-### Exact algorithms
-
-1. __Brute force search__, which the run time is O(n!), which is impossible for 20 cities. 
-
-1. __DP__ Held–Karp algorithm. O(n^2 x 2^n). 
-
-1. __Branch-and-bound__ algorithm. This can process 40-60 cities. 
-
-### Heuristic and approximation algorithms
-
-1. __Greedy__, or Nearest Neighbour algorithm. (an improved version is called Nearest Fragment algorithm, which connect NN in groups)
-
-1. __Minimum Spanning Tree (MST)__, build the [MST](http://en.m.wikipedia.org/wiki/Minimum_spanning_tree) using [Kruskal's algorithm](http://en.wikipedia.org/wiki/Kruskal's_algorithm) and then do a __Depth-first Tree Tour__. [link](http://www.youtube.com/watch?v=HWHZAtQl1vI) to video. 
-
-	1. Sort all edges from small to large, then add edges into MST as long as no cycle is created. In the end, a MST is achieved. 
-	
-	1. Do Depth-first Tree Tour(DFTT)
-	
-	1. Length of DFTT is 2 x weight of MST.
-	
-	1. Skip some nodes that's only visited once. 
-
-	1. We get an legitimate solution. 
-
-### Iterative improvement
-
-Now these are the solutions. However we can improve it by doing __2-opt Swap__. 
-
-It means selecting 2 edges at random. If swapping results in an improvement, then keep it. Keep doing this. [link](http://www.youtube.com/watch?v=SC5CX8drAtU) to video. 
 ]]></content>
   </entry>
   
