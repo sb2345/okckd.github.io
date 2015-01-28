@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Facebook] Large String Find Query (HashMap, prefix array) "
+title: "[Facebook] Query Search (HashMap, suffix array) "
 comments: true
 categories:
 - Facebook
@@ -18,7 +18,7 @@ tags: [  ]
 
 ### Solution
 
-__Basic idea of the solution is to use Prefix Tree (Trie)__ and similar alternatives. 
+__Best idea of the solution is to use Suffix Tree__ and similar alternatives. 
 
 __Solution 1__ is [an nice idea using HashMap](http://www.itint5.com/discuss/27/%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E9%A2%84%E5%A4%84%E7%90%86). 
 
@@ -26,7 +26,7 @@ __Solution 1__ is [an nice idea using HashMap](http://www.itint5.com/discuss/27/
 
 > 至于哈希函数的选取，随便选一个应该都不会超时。
 
-__Solution 2__ is using so-called '__prefix array__'. The most important point of this idea is to only make a substring instance __for every 10 characters__. 
+__Solution 2__ is using '__suffix array__'. The most important point of this idea is to only make a substring instance __for every 10 characters__. 
 
 > 只用=10的子串。然后二分查找
 
@@ -36,7 +36,7 @@ Which is to say, using substring length == 10, we comsume __less time for pre-pr
 
 ### Code
 
-__read it from [here](http://www.itint5.com/discuss/203/%E8%B6%85%E7%AE%80%E5%8D%95%E7%9A%84prefix-array-java-code)__, note written by me
+__Suffix tree solution from [here](http://www.itint5.com/discuss/203/%E8%B6%85%E7%AE%80%E5%8D%95%E7%9A%84prefix-array-java-code)__, note written by me
 
     private List<String> prefixList;
     
