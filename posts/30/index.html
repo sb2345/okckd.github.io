@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link You are given a function foo() that represents a biased coin. When foo() is called, it returns 0 with 60% probability, and 1 with 40% &hellip;">
+  <meta name="description" content="Question Implement a HashMap Hint: An instance of HashMap has two parameters that affect its performance: initial capacity and load factor. The &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,366 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/01/Implement-Hashmap/">[Question] Implement a HashMap</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/07/01/Implement-Hashmap/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/07/01/Implement-Hashmap/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p>Implement a HashMap</p>
+
+<p><strong>Hint</strong>:</p>
+
+<blockquote><p>An instance of HashMap has two parameters that affect its performance: initial capacity and load factor. The capacity is the number of buckets in the hash table, and the initial capacity is simply the capacity at the time the hash table is created. The load factor is a measure of how full the hash table is allowed to get before its capacity is automatically increased. When the number of entries in the hash table exceeds the product of the load factor and the current capacity, the hash table is rehashed (that is, internal data structures are rebuilt) so that the hash table has approximately twice the number of buckets. <a href="http://stackoverflow.com/a/10901821">source</a></p>
+
+<p>Load factor = n/k where n is the number of entries and k is the number of buckets.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Some points to take note:</p>
+
+<ol>
+<li><p>So first of all, we would need 2 important parameters in a Hashmap: <strong>initial capacity and load factor</strong>. In Java, it&rsquo;s default 0.75.</p>
+
+<p> For example the product of capacity and load factor = 16 * 0.75 = 12. This represents that after storing the 12th key – value pair into the HashMap , its capacity will become 32.</p></li>
+<li><p>Then we would need an Entry&lt;Obj, Obj> Class to store <strong>key-value pairs</strong>. Important to note the Entry would have a &lsquo;next&rsquo; pointer, in order to mimic a LinkedList.</p></li>
+<li><p>Except key, value and next pointer, Entry class <strong>also need to store the &lsquo;hash&rsquo; value</strong>, because it will be used during comparison.</p></li>
+<li><p>The main bucket is an array of Entry objects. It should resize when it has to, and this is <strong>done in the addEntry() method</strong>. I skipped this part of code.</p></li>
+<li><p>The code for put() and get() method are similar, because it&rsquo;s bascially <strong>calculate hash</strong>, then <strong>get array index</strong>, using that index to <strong>locate the head Entry object</strong>, and then do a linear search for key. If found, put() will replace it, and get() will return it. Note than after replaced, the old value is returned (Java designed in this way, I personally wouldn&rsquo;t do this).</p></li>
+<li><p>Last important thing is the <strong>indexFor() method</strong>. It looks useless to me at first, then I realize that this method is mapping my hash value into the index in the array. Fine, but this bit operation still looks odd. Look at next section for more.</p></li>
+</ol>
+
+
+<h3>The Niubility Operation: h &amp; (length &ndash; 1)</h3>
+
+<p>This actually equals to the value of (h % length). It converts the hash value into array index.</p>
+
+<blockquote><p>这个方法非常巧妙，它通过 h &amp; (length &ndash; 1) 来得到该对象的保存位，而HashMap底层数组的长度总是 2 的 n 次方，这是HashMap在速度上的优化。</p>
+
+<p>当length总是 2 的n次方时，h &amp; (length &ndash; 1)运算等价于对length取模，也就是h % length，但是 &amp; 比 % 具有更高的效率。<a href="http://www.cnblogs.com/-clq/archive/2012/01/11/2318870.html">source</a></p></blockquote>
+
+<p>That&rsquo;s all about implementing a HashMap. It&rsquo;s difficult, but having a general idea definitely helps.</p>
+
+<p>What&rsquo;s more, know the mod operation &ldquo;h &amp; (length &ndash; 1)&rdquo; would definitely help you grab some attentions!</p>
+
+<h3>Code</h3>
+
+<pre><code>public class MyHashMap {
+
+    Pair[] table;
+    float loadFactor;
+    int size;
+
+    public MyHashMap(int initialCapacity, float loadFactor) {
+        if (initialCapacity &lt; 0 || loadFactor &lt;= 0) {
+            return;
+        }
+        table = new Pair[initialCapacity];
+        this.size = 0;
+        this.loadFactor = loadFactor;
+    }
+
+    public String get(int key) {
+        int hash = hash(key);
+        int i = indexFor(hash, table.length);
+        Pair e = table[i];
+        for (; e != null; e = e.next) {
+            if (e.hash == hash &amp;&amp; key == e.key) {
+                return e.value;
+            }
+        }
+        return null;
+    }
+
+    public String put(int key, String value) {
+        int hash = hash(key);
+        int i = indexFor(hash, table.length);
+        Pair e = table[i];
+        for (; e != null; e = e.next) {
+            if (e.hash == hash &amp;&amp; key == e.key) {
+                String oldValue = e.value;
+                e.value = value;
+                return oldValue;
+            }
+        }
+        addEntry(hash, key, value, i);
+        return null;
+    }
+
+    void addEntry(int hash, int key, String value, int i) {
+        // in charge of resizing here (check the load factor)
+        // resizing code is not written here
+        Pair e = table[i];
+        table[i] = new Pair(hash, key, value, e);
+    }
+
+    int indexFor(int h, int length) {
+        return h &amp; (length - 1);
+    }
+
+    final int hash(int code) {
+        // this is the hash function from java 6 source code
+        code ^= (code &gt;&gt;&gt; 20) ^ (code &gt;&gt;&gt; 12);
+        return code ^ (code &gt;&gt;&gt; 7) ^ (code &gt;&gt;&gt; 4);
+    }
+
+    public static void main(String[] args) {
+        MyHashMap map = new MyHashMap(16, 0.5f);
+        map.put(1, "a");
+        map.put(2, "b");
+        map.put(3, "c");
+        System.out.println(map.get(1));
+        System.out.println(map.get(2));
+        System.out.println(map.get(3));
+        map.put(1, "Spider Man");
+        map.put(4, "d");
+        map.put(3, "Peter Parker");
+        System.out.println(map.get(1));
+        System.out.println(map.get(2));
+        System.out.println(map.get(3));
+        System.out.println(map.get(4));
+        System.out.println(map.get(5));
+    }
+
+    class Pair {
+        int hash;
+        int key;
+        String value;
+        Pair next;
+
+        Pair(int h, int k, String v, Pair n) {
+            hash = h;
+            key = k;
+            value = v;
+            next = n;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/01/Hashmap-Hashtable-Hashset/">[Design] HashMap vs Hashtable vs HashSet</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/07/01/Hashmap-Hashtable-Hashset/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/07/01/Hashmap-Hashtable-Hashset/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Overview</h2>
+
+<h3>HashTable</h3>
+
+<ol>
+<li>HashTable is thread safe synchronized. Only 1 thread can access at a time (compromise speed).</li>
+<li>HashTable does not allow null for key and value.</li>
+</ol>
+
+
+<h3>HashMap &amp; HashSet</h3>
+
+<ol>
+<li>HashMap is not sync, but better performance.</li>
+<li>HashMap allows null key or null value.</li>
+<li>HashSet is same as HashMap, just interface difference.</li>
+</ol>
+
+
+<h2>Conclusion</h2>
+
+<ol>
+<li>HashMap is roughly equivalent to Hashtable, except that it is unsynchronized and permits nulls.</li>
+<li>HashSet is same as HashMap. It&rsquo;s not thread safe.</li>
+</ol>
+
+
+<h3>Implementation</h3>
+
+<ol>
+<li>C++ Map is rbtree</li>
+<li>Java HashMap is buckets + entries (using Array + LinkedList)</li>
+<li>HashTable in Java is basically HashMap + lock</li>
+</ol>
+
+
+<h3>One more thing</h3>
+
+<p>HashMap is locked-out during rehashing, so it&rsquo;s better to avoid rehashing (by setting initial size bigger).</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/30/Knapsack-problem/">[Question] 0-1 Knapsack Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/30/Knapsack-problem/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/30/Knapsack-problem/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/dynamic-programming-set-10-0-1-knapsack-problem/">link</a></p>
+
+<blockquote><p>Given weights and values of n items, put these items in a knapsack of capacity W to get the maximum total value.</p>
+
+<p>In other words, given two integer arrays val[0..n-1] and wt[0..n-1] which represent values and weights. Also given an integer W which represents knapsack capacity, find out the maximum possible value.</p>
+
+<p>You cannot break an item, either pick it or don’t pick it (0-1 property).</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>This is a very similar question to &ldquo;Coin Change&rdquo;, because directly using recursion to solve will result in a lot of re-calculations. It&rsquo;s a DP question.</p>
+
+<h3>Solution</h3>
+
+<p>First of all, define a 2D array, Knapsack(n,W) denotes getting &lsquo;n&#8217;th item, with weight &#8216;W&rsquo;. When n == 0 or W = 0, dp value is 0.</p>
+
+<blockquote><p>int[][] Knapsack = new int[n + 1][W + 1];</p></blockquote>
+
+<p>Using &lsquo;n&rsquo; to denote the items to put into Knapsack. &lsquo;v&rsquo; is the value and &lsquo;w&rsquo; is the total weight.</p>
+
+<p>Now if item &lsquo;n&rsquo; is able to fit in:</p>
+
+<blockquote><p>Knapsack(n,W) = max(vn + Knapsack(n-1, W-wn), Knapsack(n-1, W))</p></blockquote>
+
+<p>If not able to fit in:</p>
+
+<blockquote><p>Knapsack(n,W) = Knapsack(n-1, W)</p></blockquote>
+
+<p>Refer to page 11 to 12 of <a href="http://www.cs.rit.edu/~zjb/courses/800/lec7.pdf">this pdf</a>.</p>
+
+<h3>Follow up</h3>
+
+<p>Look at the code, we checked dp[i-1][j]. Now the question is:</p>
+
+<blockquote><p>Do we need to check dp[i][j-1] ? (In case that total weight is not fully used up)</p></blockquote>
+
+<p>The answer is NO. We don&rsquo;t. Look at example: weights = {1, 2} and values = {3, 5}, and knapsack weight = 4. DP array would be:</p>
+
+<pre><code>[
+ [0, 0, 0, 0, 0],
+ [0, 3, 3, 3, 3],
+ [0, 3, 5, 8, 8]
+]
+</code></pre>
+
+<p>See that? The way that we keep DP array size int[items + 1][totalWeight + 1], the DP value is always 0 at 1st column and row.</p>
+
+<p>So, in the example when i == 1, total value is ALWAYS 3.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int maxValNoDup(int totalWeight, int[] value, int[] weight) {
+    int items = value.length;
+    Arrays.sort(value);
+    Arrays.sort(weight);
+
+    int[][] dp = new int[items + 1][totalWeight + 1];
+    for (int i = 1; i &lt;= items; i++) {
+        for (int j = 1; j &lt;= totalWeight; j++) {
+            // we'll try to take i'th item, to fit in weight j
+            if (j &lt; weight[i - 1]) {
+                // not able to put in
+                dp[i][j] = dp[i - 1][j];
+            } else {
+                // we are able to take i'th item into knapsack
+                dp[i][j] = Math.max(dp[i - 1][j], value[i - 1]
+                        + dp[i - 1][j - weight[i - 1]]);
+            }
+        }
+    }
+    return dp[items][totalWeight];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1302,227 +1662,6 @@ Remove:
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Minimum-subarray/">[LintCode] Minimum Subarray</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/28/Minimum-subarray/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/28/Minimum-subarray/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/minimum-subarray/">link</a></p>
-
-<blockquote><p>Given an array of integers, find the subarray with smallest sum. Return the sum of the subarray.</p>
-
-<p>Note The subarray should contain at least one integer.</p>
-
-<p>Example For [1, -1, -2, 1], return -3</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Same as &ldquo;Max subarray&rdquo;.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int minSubArray(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    if (nums == null || nums.size() == 0) {
-        return 0;
-    }
-    int min = nums.get(0);
-    int pre = Math.min(0, nums.get(0));
-    for (int i = 1; i &lt; nums.size(); i++) {
-        pre += nums.get(i);
-        min = Math.min(min, pre);
-        pre = Math.min(0, pre);
-    }
-    return min;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Maximum-subarray-II/">[LintCode] Maximum Subarray II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/28/Maximum-subarray-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/28/Maximum-subarray-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/maximum-subarray-ii/">link</a></p>
-
-<blockquote><p>Given an array of integers, find two non-overlapping subarrays which have the largest sum. The number in each subarray should be contiguous. Return the largest sum.</p>
-
-<p>Note The subarray should contain at least one number</p>
-
-<p>Example For given [1, 3, -1, 2, -1, 2], the two subarrays are [1, 3] and [2, -1, -2] or [1, 3, -1, 2] and [2], they both have the largest sum 7.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>This is not an easy question</strong>. I thought I have to use DP 2 times:</p>
-
-<ol>
-<li>first time, calculate max sum ending at each point.</li>
-<li>second time, calculate max sum to the left/right of a point (inclusive but not necessarily ending at current point).</li>
-</ol>
-
-
-<p>After a second thought, <strong>the first DP path can be denoted with a single variable</strong>. So there comes the solution below.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int maxTwoSubArrays(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    int len = nums.size();
-    int[] dp1 = new int[len];
-    int[] dp2 = new int[len];
-    // dp1[k] denotes the max sum to the left of k (inclusive)
-    // dp2[k] denotes the max sum to the right of k (inclusive)
-    dp1[0] = nums.get(0);
-    int sumSoFar = Math.max(0, nums.get(0));
-    for (int i = 1; i &lt; len; i++) {
-        sumSoFar += nums.get(i);
-        dp1[i] = Math.max(dp1[i - 1], sumSoFar);
-        sumSoFar = Math.max(0, sumSoFar);
-    }
-    dp2[len - 1] = nums.get(len - 1);
-    sumSoFar = Math.max(0, nums.get(len - 1));
-    for (int i = len - 2; i &gt;= 0; i--) {
-        sumSoFar += nums.get(i);
-        dp2[i] = Math.max(dp2[i + 1], sumSoFar);
-        sumSoFar = Math.max(0, sumSoFar);
-    }
-    // now for every node, calculate leftMaxSum + rightMaxSum
-    int maxSum = Integer.MIN_VALUE;
-    for (int i = 0; i &lt; len - 1; i++) {
-        maxSum = Math.max(maxSum, dp1[i] + dp2[i + 1]);
-    }
-    return maxSum;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Majority-Number-III/">[LintCode] Majority Number III</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/28/Majority-Number-III/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/28/Majority-Number-III/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/majority-number-iii/">link</a></p>
-
-<blockquote><p>Given an array of integers and a number k, the majority number is the number that occurs more than 1/k of the size of the array. Find it.</p>
-
-<p>Note: There is only one majority number in the array</p>
-
-<p>Example: For [3,1,2,3,2,3,3,4,4,4] and k = 3, return 3</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Similar to &lsquo;Majority Number II&rsquo;, but a little more difficult.</p>
-
-<p>_Instead of keeping 2 value for checking, now keep k values__. Since values are constantly checked for existance, using a HashMap looks like a great idea.</p>
-
-<p><strong>Another idea suggest by <a href="http://www.geeksforgeeks.org/given-an-array-of-of-size-n-finds-all-the-elements-that-appear-more-than-nk-times/">G4G</a> is a mechanism similar to the famous Tetris Game</strong>. The size of the buffer is k. The buffer is full, we remove all items by counter of 1. When counter reach 0, remove that item. In this way, the elements left in the buffer are the majority numbers.</p>
-
-<p>This method is also used in counting highly-frequent string keywrods. For example, another post <strong>[Design] Big Data &ndash; Real Time Top K</strong> discusses about it.</p>
-
-<h3>Code</h3>
-
-<p>I did not write code for this question. Shouldn&rsquo;t be difficult.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/31">&larr; Older</a>
@@ -1543,14 +1682,14 @@ Remove:
 <li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (10)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (104)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (107)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1562,23 +1701,23 @@ Remove:
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/29/calculate-area/">[Apple] Calculate Area</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/01/28/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/27/suffix-tree/">[Fundamental] Suffix Tree</a>
       </li>
     
   </ul>

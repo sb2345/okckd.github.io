@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given two integer sequences, one of which is the push sequence of a stack, please check whether the other sequence is a corresponding &hellip;">
+  <meta name="description" content="ref Overview strStr() is a classic question in CS. There are various ways to solve (which we have discussed before), this is a summarization: naive & &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,263 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/27/pattern-searching-algorithms/">[Fundamental] Pattern Searching Algorithms</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/27/pattern-searching-algorithms/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/pattern-searching-algorithms/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/tag/pattern-searching/page/2/">ref</a></p>
+
+<h3>Overview</h3>
+
+<p>strStr() is a classic question in CS. There are various ways to solve (which we have discussed before), this is a summarization:</p>
+
+<ol>
+<li><p>naive &ndash; O(m * n)</p></li>
+<li><p><a href="http://www.geeksforgeeks.org/searching-for-patterns-set-2-kmp-algorithm/">KMP</a> &ndash; O(n) in worst case</p></li>
+<li><p><a href="http://www.geeksforgeeks.org/searching-for-patterns-set-3-rabin-karp-algorithm/">Rabin-Karp</a>, rolling hash &ndash; between O(m * n) and O(m + n)</p>
+
+<p> Matches the hash value of the pattern with the hash value of pattern. If the hash values match, then only it starts matching individual characters.</p></li>
+<li><p><a href="http://www.geeksforgeeks.org/pattern-searching-set-4-a-naive-string-matching-algo-question/">Modified naive algo</a>, only work if pattern contains no duplicate characters.</p>
+
+<p> Only match the first char. This case is quite boring, can skip.</p></li>
+<li><p>Suffix tree</p>
+
+<p> Will discuss in details.</p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/27/generate-request-id/">[Google] Generate Request ID</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/27/generate-request-id/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/generate-request-id/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5169800024162304">link</a></p>
+
+<blockquote><p>Design a system to <strong>return an unique ID for each request</strong>.</p>
+
+<p>(For most of requests, the ID value should increase as time goes, the system should handle 1000 requests per second at least. )</p>
+
+<p>Note: <strong>Timestamps</strong> alone is not valid since there might be multiple requests with same timestamps.</p></blockquote>
+
+<h3>Idea 1</h3>
+
+<h4>Generating UUID</h4>
+
+<p><strong>A universally unique identifier (UUID)</strong> is an identifier standard used in software construction. A UUID is simply a 128-bit value.</p>
+
+<p>Generating unique IDs is easy. All modern OS&#8217;es have that functionality built in.</p>
+
+<p><strong>Detail</strong>: UUIDs may be generated from a combination of <strong>system time stamp, CPU/system ID</strong>, NIC MAC addresses, HBA WWNs, server id etc.</p>
+
+<h4>Clarifications</h4>
+
+<p>Let&rsquo;s assume the following:</p>
+
+<ol>
+<li><p>What&rsquo;s the length of the ID?</p>
+
+<p> &lt;= 128 bits. In that case I&rsquo;ll choose the standard 128 bit UUID format.</p></li>
+<li><p>The requirement states the system should handle 1000 request/s at least.</p></li>
+<li><p>What&rsquo;s the average request rate?</p>
+
+<p> 1000 &lt; avg req. rate &lt; 10,000</p></li>
+<li><p>What&rsquo;s the max. burst rate the system must handle?</p>
+
+<p> &lt; 1,000,000</p></li>
+<li><p>What&rsquo;s the max. latency (wait time) for a request?</p>
+
+<p> 1 ms</p></li>
+</ol>
+
+
+<h4>Solution</h4>
+
+<p>It&rsquo;s a classical consumer-producer problem.</p>
+
+<p>In this case we have many consumers of UUIDs and one producer. Let&rsquo;s assume the OS provides an API to generate UUIDs and the max. running time of the API is 1ms.</p>
+
+<ol>
+<li><p>Pre-allocate 2 Mio UUIDs into an array / stack/ heap (depending on implementation) structure.</p></li>
+<li><p>If no overhead 2 Mio UUIDs would take ~ 32MB of RAM. Not a problem on today&rsquo;s server system with many GB of RAM, but may be a problem on an embedded system.</p></li>
+<li><p>2 Mio UUIDs ensures system can handle burst rate.</p></li>
+<li><p>The solution needs to ensure that its pool of UUIDs doesn&rsquo;t run out as consumers request them and they are replenished.</p></li>
+</ol>
+
+
+<h3>Idea 2</h3>
+
+<p>This question is quite open-ended.</p>
+
+<p>For starter, how about <strong>appending random(N) to the timestamp</strong>? N can be large enough to make collisions unlikely. If each server has an ID we can also include it to further reduce collisions.</p>
+
+<p>If IDs must be unique, then I suppose you can <strong>design a counter</strong> that will return an ID and increment it at the same time. You will then <strong>need mutex to access this counter</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/26/make-java-method-thread-safe/">[Google] Make a Java Method Thread-safe</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/26/make-java-method-thread-safe/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/26/make-java-method-thread-safe/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.programcreek.com/2014/02/how-to-make-a-method-thread-safe-in-java/">link</a></p>
+
+<blockquote><p>Consider the following class:</p></blockquote>
+
+<pre><code>class MyCounter {
+    private static int counter = 0;
+
+    public static int getCount() {
+        return counter++;
+    }
+}
+</code></pre>
+
+<blockquote><p>Is the method thread-safe? How to make it thread-safe?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>No</strong>, it&rsquo;s not.</p>
+
+<blockquote><p>The method is not thread-safe, because the <strong>counter++ operation is not atomic</strong>, which means it consists more than one atomic operations. In this case, one is accessing value and the other is increasing the value by one.</p>
+
+<p>When Thread 1 accesses the method at t1, Thread 2 may not be done with the method. So the value returned to Thread 1 is the value that has not been increased.</p></blockquote>
+
+<h3>Approach 1</h3>
+
+<p>Adding <strong>synchronized</strong> to this method. This will synchronize the instance of the static class.</p>
+
+<pre><code>class MyCounter {
+    private static int counter = 0;
+
+    public static synchronized int getCount() {
+        return counter++;
+    }
+}
+</code></pre>
+
+<h3>Approach 2</h3>
+
+<p>We actually can make <strong>count++</strong> atomic by using AtomicInteger from the package &ldquo;java.util.concurrent.atomic&rdquo;.</p>
+
+<p>import java.util.concurrent.atomic.AtomicInteger;</p>
+
+<pre><code>public class MyCounter {
+    private static AtomicInteger counter = new AtomicInteger(0);
+
+    public static int getCount() {
+        return counter.getAndIncrement();
+    }
+}
+</code></pre>
+
+<h3>Follow-up on thread stack</h3>
+
+<ol>
+<li>Each thread has its own stack (never share stack).</li>
+<li>All local variables defined in a method will be allocated memory in stack.</li>
+<li>When execution completed by a thread, stack frame will be removed.</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -681,451 +938,6 @@ class SpecialComparator implements Comparator&lt;Pair&gt; {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-20T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/20/basin-size-in-matrix/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/20/basin-size-in-matrix/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=15380670">link</a></p>
-
-<p>A group of farmers has some elevation data, and we’re going to help them understand how rainfall flows over their farmland.</p>
-
-<p>We’ll represent the land as a two-dimensional array of altitudes and use the following model, based on the idea that water flows downhill:</p>
-
-<p>If a cell’s neighboring cells all have higher altitudes, we call this cell a sink; water collects in sinks. Two cells are neighbors if the rows and columns each differ by at most one. Hence an interior cell will have eight neighbors, a cell on the edge will have five neighbors, and a cell in a corner will have three neighbors.</p>
-
-<p>Otherwise, water will flow to the neighboring cell with the lowest altitude. If a cell is not a sink, you may assume it has a unique lowest neighbor and that this neighbor will be lower than the cell.
-Cells that drain into the same sink – directly or indirectly – are said to be part of the same basin.</p>
-
-<p>Your challenge is to partition the map into basins. In particular, given a map of elevations, your code should partition the map into basins and output the sizes of the basins, in descending order.</p>
-
-<p>Assume the elevation maps are square. Input will begin with a line with one integer, S, the height (and width) of the map. The next S lines will each contain a row of the map, each with S integers – the elevations of the S cells in the row.  Some farmers have small land plots such as the examples below, while some have larger plots.  However, in no case will the total size of the farmland exceed 1000x1000.</p>
-
-<p>Note: The input uses unix line endings (\n). If you try to view the sample inputs on a windows machine with a program that does not convert line endings (like Notepad), you will see the input appear all on a single line.</p>
-
-<p>Your code should output a space-separated list of the basin sizes, in descending order. (Trailing spaces are ignored.)</p>
-
-<p>While correctness and performance are the most important parts of this problem, a human will be reading your solution, so please make an effort to submit clean, readable code. In particular, do not write code as if you were solving a problem for a competition.</p>
-
-<p>A few examples are below.</p>
-
-<p>Input:</p>
-
-<pre><code>       3
-       1 5 2
-       2 4 7
-       3 6 9
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>            7 2
-</code></pre>
-
-<p>The basins, labeled with A’s and B’s, are:</p>
-
-<pre><code>       A A B
-       A A B
-       A A A
-</code></pre>
-
-<p>Input:</p>
-
-<pre><code>       1
-       10
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>       1
-</code></pre>
-
-<p>There is only one basin in this case.</p>
-
-<p>Input:</p>
-
-<pre><code>       5
-       1 0 2 5 8
-       2 3 4 7 9
-       3 5 7 9 9
-       1 2 5 5 3
-       3 3 5 1 0
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>       10 8 7
-</code></pre>
-
-<p>The basins, labeled with A’s, B’s, and C’s, are:</p>
-
-<pre><code>       A A A A A
-       A A A A A
-       B B B C C
-       B B C C C
-       B B C C C
-</code></pre>
-
-<p>Input:</p>
-
-<pre><code>       4
-       0 3 2 3
-       3 2 1 4
-       3 4 3 3
-       5 5 2 0
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>       6 5 5
-</code></pre>
-
-<p>The basins, labeled with A’s, B’s, and C’s, are:</p>
-
-<pre><code>       A A B B
-       A A B B
-       A B C C
-       A C C C
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>I did not find a &lsquo;best&rsquo; solution online, but there&rsquo;s a good enough explanation available <a href="http://stackoverflow.com/questions/24336686/find-the-largest-basin-size-in-a-given-matrix">here</a>:</p>
-
-<ol>
-<li><p>First store index according to their heights.</p></li>
-<li><p>Then iterate from smallest height to largest height.</p></li>
-<li><p>If current index is not visited, make it Basin surface (where water can collect), and make all higher neighbours as Non-Basin surface.</p></li>
-<li><p>Repeat step 3 till all indexes are visited.</p></li>
-<li><p>DFS find each basin</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p>I post my solution written in 2013.</p>
-
-<pre><code>public class MeSolution2013 {
-
-    public static void main(String args[]) {
-
-        String inputFile;
-        int testCaseNumber = 1;
-
-        while (true) {
-            inputFile = "input" + testCaseNumber + ".txt";
-            BufferedReader in;
-            try {
-                URI uri = MeSolution2013.class.getResource(inputFile).toURI();
-                in = new BufferedReader(new FileReader(new File(uri)));
-            } catch (Exception e) {
-                // there is not more test cases
-                break;
-            }
-
-            Scanner sc = new Scanner(in);
-            int length = sc.nextInt();
-            int[][] elevation = new int[length][length];
-            for (int i = 0; i &lt; length; i++) {
-                for (int j = 0; j &lt; length; j++) {
-                    elevation[i][j] = sc.nextInt();
-                }
-            }
-
-            List&lt;Pair&gt; sinkList = new ArrayList&lt;Pair&gt;();
-
-            // first find out all sink nodes
-            for (int i = 0; i &lt; length; i++) {
-                for (int j = 0; j &lt; length; j++) {
-                    if (elevation[i][j] &lt; lowestNeighbor(i, j, elevation)) {
-                        // (i,j) is a sink point
-                        sinkList.add(new Pair(i, j));
-                    }
-                }
-            }
-
-            // then for each sink node, return the count
-            int[] basinSize = new int[sinkList.size()];
-            for (int i = 0; i &lt; sinkList.size(); i++) {
-                basinSize[i] = count(sinkList.get(i).X, sinkList.get(i).Y,
-                        elevation);
-            }
-            Arrays.sort(basinSize);
-
-            for (int i = sinkList.size() - 1; i &gt;= 0; i--) {
-                System.out.print(basinSize[i]);
-                if (i != 0)
-                    System.out.print(" ");
-            }
-            System.out.println();
-            testCaseNumber++;
-        }
-    }
-
-    static int count(int x, int y, int[][] ele) {
-
-        int num = 1;
-
-        // if the neighbour is higher than current, add count to current count
-        // if all neighbours are lower than current, return 1
-
-        // diagonal neighbors
-        if (withinBound(x - 1, y, ele) &amp;&amp; rainFlowFrom(x, y, x - 1, y, ele)) { // upper
-                                                                                // elment
-            num += count(x - 1, y, ele);
-        }
-        if (withinBound(x + 1, y, ele) &amp;&amp; rainFlowFrom(x, y, x + 1, y, ele)) { // lower
-                                                                                // element
-            num += count(x + 1, y, ele);
-        }
-        if (withinBound(x, y - 1, ele) &amp;&amp; rainFlowFrom(x, y, x, y - 1, ele)) { // left
-                                                                                // hand
-                                                                                // side
-            num += count(x, y - 1, ele);
-        }
-        if (withinBound(x, y + 1, ele) &amp;&amp; rainFlowFrom(x, y, x, y + 1, ele)) { // right
-                                                                                // hand
-                                                                                // side
-            num += count(x, y + 1, ele);
-        }
-
-        // diagonal neighbors
-        if (withinBound(x - 1, y - 1, ele)
-                &amp;&amp; rainFlowFrom(x, y, x - 1, y - 1, ele)) { // upper elment
-            num += count(x - 1, y - 1, ele);
-        }
-        if (withinBound(x + 1, y + 1, ele)
-                &amp;&amp; rainFlowFrom(x, y, x + 1, y + 1, ele)) { // lower element
-            num += count(x + 1, y + 1, ele);
-        }
-        if (withinBound(x + 1, y - 1, ele)
-                &amp;&amp; rainFlowFrom(x, y, x + 1, y - 1, ele)) { // left hand side
-            num += count(x + 1, y - 1, ele);
-        }
-        if (withinBound(x - 1, y + 1, ele)
-                &amp;&amp; rainFlowFrom(x, y, x - 1, y + 1, ele)) { // right hand side
-            num += count(x - 1, y + 1, ele);
-        }
-
-        return num;
-    }
-
-    static Boolean withinBound(int x, int y, int[][] ele) {
-        int bound = ele.length;
-        return (x &gt;= 0 &amp;&amp; x &lt; bound &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; bound);
-    }
-
-    static Boolean rainFlowFrom(int a, int b, int c, int d, int[][] ele) {
-        // rain in (c,d) flows into (a,b).
-        if (ele[a][b] &gt;= ele[c][d])
-            // if (a,b) is higher than (c,d), impossible to flow this way
-            return false;
-
-        int lowest = lowestNeighbor(c, d, ele);
-
-        return (ele[a][b] == lowest);
-        // the question states "you may assume it has a unique lowest neighbor"
-        // so if flow to (a,b), then that is the unique lowest height.
-    }
-
-    static int lowestNeighbor(int a, int b, int[][] ele) {
-        int height = 9999999;
-
-        // adjacent neighbor
-        if (withinBound(a - 1, b, ele) &amp;&amp; ele[a - 1][b] &lt; height) {
-            height = ele[a - 1][b];
-        }
-        if (withinBound(a + 1, b, ele) &amp;&amp; ele[a + 1][b] &lt; height) {
-            height = ele[a + 1][b];
-        }
-        if (withinBound(a, b - 1, ele) &amp;&amp; ele[a][b - 1] &lt; height) {
-            height = ele[a][b - 1];
-        }
-        if (withinBound(a, b + 1, ele) &amp;&amp; ele[a][b + 1] &lt; height) {
-            height = ele[a][b + 1];
-        }
-
-        // diagonal neighbor
-        if (withinBound(a - 1, b - 1, ele) &amp;&amp; ele[a - 1][b - 1] &lt; height) {
-            height = ele[a - 1][b - 1];
-        }
-        if (withinBound(a + 1, b - 1, ele) &amp;&amp; ele[a + 1][b - 1] &lt; height) {
-            height = ele[a + 1][b - 1];
-        }
-        if (withinBound(a - 1, b + 1, ele) &amp;&amp; ele[a - 1][b + 1] &lt; height) {
-            height = ele[a - 1][b + 1];
-        }
-        if (withinBound(a + 1, b + 1, ele) &amp;&amp; ele[a + 1][b + 1] &lt; height) {
-            height = ele[a + 1][b + 1];
-        }
-        return height;
-    }
-}
-
-class Pair {
-
-    public int X;
-    public int Y;
-
-    public Pair(int _x, int _y) {
-        X = _x;
-        Y = _y;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/19/difference-http-tcp/">[Design] Difference Between HTTP Protocol and TCP Protocol</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/19/difference-http-tcp/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/19/difference-http-tcp/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.quora.com/What-is-the-difference-between-HTTP-protocol-and-TCP-protocol">ref</a></p>
-
-<h3>Short Version</h3>
-
-<p>TCP is a <strong>transport-layer</strong> protocol, and HTTP is an <strong>application-layer</strong> protocol that runs over TCP.</p>
-
-<h3>The layers</h3>
-
-<p>At the very bottom of the network stack is the <strong>physical layer</strong>. This is where electrical signals or light pulses or radio waves actually transmit information from place to place. The physical layer doesn&rsquo;t really have protocols, but instead has standards for voltages, frequencies, and other physical properties. You can transmit information directly this way, but you need a lot of power or a dedicated line, and without higher layers you won&rsquo;t be able to share bandwidth.</p>
-
-<p>The next layer up is the <strong>link layer</strong>. This layer covers communication with devices that share a physical communications medium. Here, protocols like Ethernet, 802.11a/b/g/n, and Token Ring specify how to handle multiple concurrent accesses to the physical medium and how to direct traffic to one device instead of another. In a typical home network, this is how your computer talks to your home &ldquo;router.&rdquo;</p>
-
-<p>The third layer is the <strong>network layer</strong>. In the majority of cases, this is dominated by Internet Protocol (IP). This is where the magic of the Internet happens, and you get to talk to a computer halfway around the world, without needing to know where it is. Routers handle directing your traffic from your local network to the network where the other computer lives, where its own link layer handles getting the packets to the right computer.</p>
-
-<p>Now we are getting somewhere. We can talk to a computer somewhere around the world, but that computer is running lots of different programs. How should it know which one to deliver your message to? The <strong>transport layer</strong> takes care of this, usually with <strong>port numbers</strong>. The two most popular transport layer protocols are TCP and UDP. TCP does a lot of interesting things to smooth over the rough spots of network-layer packet-switched communication like reordering packets, retransmitting lost packets, etc. UDP is more unreliable, but has less overhead.</p>
-
-<p>So we&rsquo;ve connected your browser to the web server software on the other end, but how does the server know what page you want? How can you post a question or an answer? These are things that <strong>application-layer</strong> protocols handle. For <strong>web traffic</strong>, this is the HyperText Transfer Protocol (HTTP). There are thousands of application-layer protocols: SMTP, IMAP, and POP3 for email; XMPP, IRC, ICQ for chat; Telnet, SSH, RDP for remote administration; etc.</p>
-
-<p>Ref: <a href="http://qr.ae/3pnJK">http://qr.ae/3pnJK</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/19/check-if-point-inside-polygon/">[Question] Check if Given Point Inside Polygon</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/19/check-if-point-inside-polygon/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/19/check-if-point-inside-polygon/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/">link</a></p>
-
-<blockquote><p>Given a polygon and a point ‘p’, find if ‘p’ lies inside the polygon or not. The points lying on the border are considered inside.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/point-in-polygon.png"></p>
-
-<h3>Solution</h3>
-
-<p>Prerequisite reading: <strong>[Question] Check if two line segments intersect</strong>.</p>
-
-<p>Suggested by G4G, this is a simple idea to check:</p>
-
-<p><img class="middle" src="/assets/images/polygon31-300x169.png"></p>
-
-<ol>
-<li><p>Draw a horizontal line to the right of each point and extend it to infinity</p></li>
-<li><p>Count the number of times the line intersects with polygon edges.</p></li>
-<li><p>A point is inside the polygon if either count of intersections is odd or point lies on an edge of polygon.</p></li>
-<li><p>Note the special case of point &lsquo;g&rsquo;.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1146,14 +958,14 @@ class Pair {
 <li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (10)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (104)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (107)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1165,23 +977,23 @@ class Pair {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/29/calculate-area/">[Apple] Calculate Area</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/01/28/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/27/suffix-tree/">[Fundamental] Suffix Tree</a>
       </li>
     
   </ul>

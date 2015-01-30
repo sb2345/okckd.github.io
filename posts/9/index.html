@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Implement the &ldquo;paint fill&rdquo; function that one might see on many image editing programs. That is, given a screen (represented by a &hellip;">
+  <meta name="description" content="Question Imagine you have a 20 GB file with one string per line. Explain how you would sort the file. Solution Use External Sort. First divide the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,273 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/24/sort-20GB-file/">[CC150v5] 11.4 Sort 20GB File</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/24/sort-20GB-file/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/24/sort-20GB-file/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Imagine you have a 20 GB file with one string per line.</p>
+
+<p>Explain how you would sort the file.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Use <strong>External Sort</strong>.</p>
+
+<ol>
+<li><p>First divide the file into chunks which are x megabytes each, where x is the amount of memory we have available.</p></li>
+<li><p>Each chunk is sorted separately and then saved back to the file system.</p></li>
+<li><p>Once all the chunks are sorted, we then merge the chunks, one by one.</p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/17/stack-up-boxes/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/17/stack-up-boxes/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You have a stack of n boxes, with widths w., heights h, and depths d. The boxes can only be stacked on top of one another if each box is strictly larger than the box above it in width, height, and depth.</p>
+
+<p>Implement a method to build the tallest stack possible, where the height of a stack is the sum of the heights of each box.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is appearantly a DP question. I did it in the normal way, and the solution turns out to be very good:</p>
+
+<pre><code>DP solution is        2638ms
+Recursive solution is 1322ms
+My solution is         370ms
+</code></pre>
+
+<p>I could not understand the 2 solutions given in the book. Sorry.</p>
+
+<p>The coding is a bit lengthy, and we keeps 2 DP arrays. <strong>Not an easy question of course</strong>, but the solution is actually standard.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static ArrayList&lt;Box&gt; createStack(Box[] boxes) {
+    ArrayList&lt;Box&gt; ans = new ArrayList&lt;Box&gt;();
+    int len = boxes.length;
+    int[] heights = new int[len];
+    int[] preMap = new int[len];
+    int maxIndex = 0;
+
+    // start DP
+    for (int i = 0; i &lt; len; i++) {
+        heights[i] = boxes[i].height;
+        preMap[i] = -1;
+        for (int j = 0; j &lt; i; j++) {
+            if (boxes[j].canBeAbove(boxes[i])) {
+                int newHeight = heights[j] + boxes[i].height;
+                if (newHeight &gt; heights[i]) {
+                    heights[i] = newHeight;
+                    preMap[i] = j;
+                }
+            }
+        }
+        // now updated maxIndex
+        if (heights[i] &gt; heights[maxIndex]) {
+            maxIndex = i;
+        }
+    }
+
+    // print from maxIndex all the way backwards
+    while (maxIndex != -1) {
+        ans.add(boxes[maxIndex]);
+        // the print order is reversed, so...
+        maxIndex = preMap[maxIndex];
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/17/parenthesize-expression/">[CC150v5] 9.11 Parenthesize the Expression</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/17/parenthesize-expression/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/17/parenthesize-expression/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given a boolean expression consisting of the symbols 0, 1, &lsquo;&amp;&rsquo;, &lsquo;|&rsquo;, and &lsquo;^&rsquo;, and a desired boolean result value &lsquo;result&rsquo;.</p>
+
+<p>Now implement a function to count the number of ways of <strong>parenthesizing the expression</strong> such that it evaluates to &lsquo;result&rsquo;.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult question</strong>.</p>
+
+<blockquote><p>Each parenthesized expression must have an outermost pair of
+parentheses.</p>
+
+<p>That is, we can iterate through the expression, treating each operator as the first operator to be parenthesized.</p></blockquote>
+
+<p>Nice idea suggested in the book! So <strong>for each operator, we consider is as first operator (to evaluate)</strong>, and then we shall if the total possible count.</p>
+
+<p>(Note that while coding, we DO NOT WRITE {if-else if-else&hellip;} but instead use {if&hellip; if&hellip; if&hellip;} in order to get the total count. )</p>
+
+<p>DP is more time-efficient.</p>
+
+<p><strong>Like CC150v5 Q9.10, the code given in the book is very hard to read</strong>. I have my own code posted below.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int countMyAnswer(String exp, boolean result) {
+    if (exp.length() == 1) {
+        return convertIntToBool(exp.charAt(0)) == result ? 1 : 0;
+    }
+    // eg. 1^0|0|1
+    // result: true
+    int totalCount = 0;
+    for (int i = 1; i &lt; exp.length(); i += 2) {
+
+        char op = exp.charAt(i);
+        String firstHalf = exp.substring(0, i);
+        String secondHalf = exp.substring(i + 1);
+
+        int firstHalfTrue = countMyAnswer(firstHalf, true);
+        int firstHalfFalse = countMyAnswer(firstHalf, false);
+        int secondHalfTrue = countMyAnswer(secondHalf, true);
+        int secondHalfFalse = countMyAnswer(secondHalf, false);
+
+        if (evaluate('0', op, '0') == result) {
+            totalCount += firstHalfFalse * secondHalfFalse;
+        }
+        if (evaluate('0', op, '1') == result) {
+            totalCount += firstHalfFalse * secondHalfTrue;
+        }
+        if (evaluate('1', op, '0') == result) {
+            totalCount += firstHalfTrue * secondHalfFalse;
+        }
+        if (evaluate('1', op, '1') == result) {
+            totalCount += firstHalfTrue * secondHalfTrue;
+        }
+    }
+    return totalCount;
+}
+
+private static boolean convertIntToBool(char num) {
+    if (num == '1') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+private static boolean evaluate(char num1, char op, char num2) {
+    boolean b1 = convertIntToBool(num1);
+    boolean b2 = convertIntToBool(num2);
+    if (op == '&amp;') {
+        return b1 &amp; b2;
+    } else if (op == '|') {
+        return b1 | b2;
+    } else if (op == '^') {
+        return b1 ^ b2;
+    }
+    System.out.println("Did not found operator " + op);
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -668,388 +935,6 @@ public static int helper(int[] array, int left, int right) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-of-animals/">[CC150v5] 3.7 Stack of Animals</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/15/stack-of-animals/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/stack-of-animals/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would prefer a dog or a cat (and will receive the oldest animal of that type). They cannot select which specific animal they would like.</p>
-
-<p>Create the data structures to maintain this system and implement operations such as enqueue, dequeueAny, dequeueDog and dequeueCat. You may use the built-in LinkedList data structure.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are 2 solutions.</p>
-
-<p><strong>First one is using a single queue</strong>. This makes &lsquo;dequeueAny&rsquo; easy, but &lsquo;dequeueCat&rsquo; and &lsquo;dequeueDog&rsquo; difficult.</p>
-
-<p><strong>Second approach would be using 2 queues for dogs and cats</strong>. We need something like timestamp to be stored (more space usage).</p>
-
-<p>When we return, we peek both queues are choose the older one. <strong>This is recommended solution in the book</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>from the book</strong></p>
-
-<p>Animal.java</p>
-
-<pre><code>public abstract class Animal {
-    int order;
-    String name;
-
-    public Animal(String n) {
-        name = n;
-    }
-
-    public abstract String name();
-
-    public boolean isOlderThan(Animal a) {
-        return this.order &lt; a.order;
-    }
-}
-
-class Cat extends Animal {
-    public Cat(String n) {
-        super(n);
-    }
-
-    public String name() {
-        return "Cat: " + name;
-    }
-}
-
-class Dog extends Animal {
-    public Dog(String n) {
-        super(n);
-    }
-
-    public String name() {
-        return "Dog: " + name;
-    }
-}
-</code></pre>
-
-<p>AnimalQueue.java</p>
-
-<pre><code>public class AnimalQueue {
-    LinkedList&lt;Dog&gt; dogs = new LinkedList&lt;Dog&gt;();
-    LinkedList&lt;Cat&gt; cats = new LinkedList&lt;Cat&gt;();
-    private int order = 0;
-
-    public void enqueue(Animal a) {
-        a.order = order;
-        order++;
-        if (a instanceof Dog) {
-            dogs.addLast((Dog) a);
-        } else if (a instanceof Cat) {
-            cats.addLast((Cat) a);
-        }
-    }
-
-    public Animal dequeueAny() {
-        if (dogs.size() == 0) {
-            return dequeueCats();
-        } else if (cats.size() == 0) {
-            return dequeueDogs();
-        }
-        Dog dog = dogs.peek();
-        Cat cat = cats.peek();
-        if (dog.isOlderThan(cat)) {
-            return dogs.poll();
-        } else {
-            return cats.poll();
-        }
-    }
-
-    public Animal peek() {
-        if (dogs.size() == 0) {
-            return cats.peek();
-        } else if (cats.size() == 0) {
-            return dogs.peek();
-        }
-        Dog dog = dogs.peek();
-        Cat cat = cats.peek();
-        if (dog.isOlderThan(cat)) {
-            return dog;
-        } else {
-            return cat;
-        }
-    }
-
-    public int size() {
-        return dogs.size() + cats.size();
-    }
-
-    public Dog dequeueDogs() {
-        return dogs.poll();
-    }
-
-    public Dog peekDogs() {
-        return dogs.peek();
-    }
-
-    public Cat dequeueCats() {
-        return cats.poll();
-    }
-
-    public Cat peekCats() {
-        return cats.peek();
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/15/stack-get-min-value/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/stack-get-min-value/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element?</p>
-
-<p>Push, pop and min should all operate in 0(1) time.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is <strong>a very tricky question</strong>.</p>
-
-<p>The key is how to use the minimum space to achieve O(1) query min operation. The trick is to count how many times the same min-value occur. Eg.</p>
-
-<blockquote><p>input: 5,3,3,1,1,2,2,2,2,2,2,2.</p>
-
-<p>stack: 5,3,3,1,1.</p></blockquote>
-
-<p>So we can pop &lsquo;1&rsquo; twice, pop &lsquo;3&rsquo; twice, and pop &lsquo;5&rsquo; once. Read the code!</p>
-
-<h3>Code</h3>
-
-<pre><code>public class StackMyAnswer extends Stack&lt;Integer&gt; {
-
-    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
-
-    public void push(int value) {
-        if (min.isEmpty() || value &lt;= min.peek()) {
-            min.push(value);
-        }
-        super.push(value);
-    }
-
-    public Integer pop() {
-        int val = super.pop();
-        if (!min.isEmpty() &amp;&amp; val == min.peek()) {
-            min.pop();
-        }
-        return val;
-    }
-
-    public int min() {
-        if (min.isEmpty()) {
-            return Integer.MAX_VALUE;
-        }
-        return min.peek();
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/15/linked-list-palindrome/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/linked-list-palindrome/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement a function to check if a linked list is a palindrome.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are multiple solutions for this question.</p>
-
-<p><strong>First, maybe the simplest solution of all</strong>, is to compare the list with the reversed list (compare first half would be enough). This is a very nice idea.</p>
-
-<p><strong>Second solution is iterative approach</strong>. My code below is to first get the total length, then <strong>use a Stack</strong>. Alternatively, we can also use <strong>fast/slow pointer</strong> to find the mid point. This solution is easiest to write.</p>
-
-<p><strong>Third solution is recursive</strong>. We basically uses a public pointer to:</p>
-
-<ol>
-<li>get starting value</li>
-<li>check middle parts</li>
-<li>get ending value</li>
-<li>if starting == ending and middle part is valid, then true.</li>
-</ol>
-
-
-<p>This code is not easy to write, and hard to think.</p>
-
-<p>It&rsquo;s best to know both iterative and recursive solution.</p>
-
-<h3>Code</h3>
-
-<p>Iterative</p>
-
-<pre><code>public static boolean isPalindrome1(LinkedListNode head) {
-    int len = getListLength(head);
-    int half = len / 2;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    for (int i = 0; i &lt; half; i++) {
-        stack.push(head.data);
-        head = head.next;
-    }
-    if (len % 2 == 1) {
-        head = head.next;
-    }
-    for (int i = 0; i &lt; half; i++) {
-        if (head.data != stack.pop()) {
-            return false;
-        }
-        head = head.next;
-    }
-    return true;
-}
-</code></pre>
-
-<p>Recursive</p>
-
-<pre><code>private static LinkedListNode p;
-
-public static boolean isPalindrome2(LinkedListNode head) {
-    p = head;
-    int len = getListLength(head);
-    return helper2(0, len - 1);
-}
-
-public static boolean helper2(int from, int to) {
-    if (from &gt; to) {
-        return true;
-    } else if (from == to) {
-        p = p.next;
-        return true;
-    } else {
-        // first get fromVal, then check middlep part, last, get toVal
-        int fromVal = p.data;
-        p = p.next;
-        if (!helper2(from + 1, to - 1)) {
-            return false;
-        }
-        int toVal = p.data;
-        p = p.next;
-        if (fromVal != toVal) {
-            return false;
-        }
-    }
-    return true;
-}
-</code></pre>
-
-<p>Shared method:</p>
-
-<pre><code>private static int getListLength(LinkedListNode node) {
-    int count = 0;
-    while (node != null) {
-        count++;
-        node = node.next;
-    }
-    return count;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/10">&larr; Older</a>
@@ -1070,14 +955,14 @@ public static boolean helper2(int from, int to) {
 <li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (10)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (104)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (107)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1089,23 +974,23 @@ public static boolean helper2(int from, int to) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/29/calculate-area/">[Apple] Calculate Area</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/01/28/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/27/suffix-tree/">[Fundamental] Suffix Tree</a>
       </li>
     
   </ul>
