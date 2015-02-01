@@ -52,45 +52,7 @@ __You may wonder how I calculate time complexity__. See, each round of sort, nk 
 
 __Second approach is heap sort__. The idea of this is to always keep a sorted list of the head of each list. When we retrieve items from the heap, it only take O(logk) time to find the next smallest element. 
 
-In case you do not know about heap (or priority queue): 
-
-> __[Heap](http://en.wikipedia.org/wiki/Heap_%28data_structure%29) is a specialized tree-based data structure__. Heap is crucial in Dijkstra's algorithm and heapsort. 
->
-> We take max heap for example. The keys of parent nodes are always greater than or equal to the children node. 
->
-> __The heap is an implementation of priority queue__. In fact, priority queues are often referred to as "heaps", regardless of how they may be implemented. 
->
-> Note that despite the similarity of the name "heap" to "stack" and "queue", the latter two are __abstract data types__, while a heap is a __specific data structure__, and "priority queue" is the proper term for the abstract data type. 
-
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-.tg .tg-s6z2{text-align:center}
-</style>
-<table class="tg">
-  <tr>
-    <th class="tg-s6z2">Heap</th>
-    <th class="tg-s6z2">Time</th>
-  </tr>
-  <tr>
-    <td class="tg-031e">Find max</td>
-    <td class="tg-s6z2">O(1)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Delete</td>
-    <td class="tg-s6z2">O(lgn)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Insert</td>
-    <td class="tg-s6z2">O(lgn)</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Merge</td>
-    <td class="tg-s6z2">O(n)</td>
-  </tr>
-</table>
-<br />
+Not sure what is a heap? Read __[Fundamental] Heap (data structure)__ before you proceed. 
 
 Both method are well explained in [this csdn blog](http://blog.csdn.net/linhuanmars/article/details/19899259). Time complexity analysis is given by [nootcoder blog](http://n00tc0d3r.blogspot.sg/2013/04/merge-k-sorted-lists.html). 
 

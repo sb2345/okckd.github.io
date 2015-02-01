@@ -3,7 +3,7 @@ layout: post
 title: "[Question] 0-1 Knapsack Problem"
 comments: true
 category: Question
-tags: [ unit test needed ]
+tags: [  ]
 ---
 
 ### Question 
@@ -22,13 +22,23 @@ This is a very similar question to "Coin Change", because directly using recursi
 
 ### Solution
 
-Using 'n' to denote the items to put into Knapsack. 'c' is the value and 'w' is the total weight, the equation is: 
+First of all, define a 2D array, Knapsack(n,W) denotes getting 'n'th item, with weight 'W'. When n == 0 or W = 0, dp value is 0. 
 
-> Knapsack(n,W) = max(cn + Knapsack(n-1, W-wn), Knapsack(n-1, W))
+> int[][] Knapsack = new int[n + 1][W + 1];
+
+Using 'n' to denote the items to put into Knapsack. 'v' is the value and 'w' is the total weight. 
+
+Now if item 'n' is able to fit in:
+
+> Knapsack(n,W) = max(vn + Knapsack(n-1, W-wn), Knapsack(n-1, W))
+
+If not able to fit in: 
+
+> Knapsack(n,W) = Knapsack(n-1, W)
 
 Refer to page 11 to 12 of [this pdf](http://www.cs.rit.edu/~zjb/courses/800/lec7.pdf).
 
-### Code
+### Follow up
 
 Look at the code, we checked dp[i-1][j]. Now the question is: 
 
@@ -45,6 +55,8 @@ The answer is NO. We don't. Look at example: weights = {1, 2} and values = {3, 5
 See that? The way that we keep DP array size int[items + 1][totalWeight + 1], the DP value is always 0 at 1st column and row. 
 
 So, in the example when i == 1, total value is ALWAYS 3. 
+
+### Code
 
 	public int maxValNoDup(int totalWeight, int[] value, int[] weight) {
 		int items = value.length;
