@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[LeetCode Plus] Convert BST to Doubly-Linked List"
+title: "[LeetCode Plus] Convert BST to Circular DLL "
 comments: true
 category: leetcode_plus
 tags: [ src ]
@@ -56,34 +56,32 @@ The good and intuitive solution is to do D&C and __solve left and right recursiv
 
 The Java code is posted below. [source](http://cslibrary.stanford.edu/109/TreeListRecursion.html)
 
-	public static TreeNode treeToList(TreeNode root) {
+	public static TreeNode convertBstToDLL(TreeNode root) {
+		// convert bst to circular dll 
 		if (root == null)
 			return (null);
 
 		// Recursively do the subtrees (leap of faith!)
-		TreeNode aList = treeToList(root.left);
-		TreeNode bList = treeToList(root.right);
+		TreeNode lln = convertBstToDLL(root.left);
+		TreeNode rrn = convertBstToDLL(root.right);
 
 		// Make root a circular DLL
 		root.left = root;
 		root.right = root;
 
 		// At this point we have three lists, merge them
-		aList = append(aList, root);
-		aList = append(aList, bList);
+		lln = appendDLL(lln, root);
+		lln = appendDLL(lln, rrn);
 
-		return (aList);
+		return lln;
 	}
 
-	/*
-	 * given two circular doubly linked lists, append them and return the new
-	 * list.
-	 */
-	public static TreeNode append(TreeNode a, TreeNode b) {
+	public static TreeNode appendDLL(TreeNode a, TreeNode b) {
+		// append 2 circular DLL
 		if (a == null)
-			return (b);
+			return b;
 		if (b == null)
-			return (a);
+			return a;
 
 		TreeNode aLast = a.left;
 		TreeNode bLast = b.left;
@@ -93,5 +91,5 @@ The Java code is posted below. [source](http://cslibrary.stanford.edu/109/TreeLi
 		bLast.right = a;
 		a.left = bLast;
 
-		return (a);
+		return a;
 	}

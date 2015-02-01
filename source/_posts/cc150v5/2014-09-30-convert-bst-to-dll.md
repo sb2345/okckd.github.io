@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[CC150v5] 17.13 Convert BST to Doubly-Linked List"
+title: "[CC150v5] 17.13 Convert BST to DLL "
 comments: true
 category: CC150v5
 tags: [ src ]
@@ -19,7 +19,7 @@ tags: [ src ]
 
 ### Solution
 
-At another post __[LeetCode Plus] Convert BST to Doubly-Linked List__, we already discussed 2 approaches: 
+At another post __[LeetCode Plus] Convert BST to Circular DLL__, we already discussed 2 approaches: 
 
 1. in-order traversal approach
 1. divide and conquer approach
@@ -32,13 +32,50 @@ __The key of the solution is how we return both HEAD and TAIL__. The book sugges
 1. __Just return head__, and retrieve tail by traversing thru - bad time complexity O(n^2)
 1. __Use circular linked-list__! Time O(n). 
 
-I wrote the code for 2nd suggestion. 
+I wrote the code for 1st and 2nd approach. And 3rd is already covered in previous post. 
 
-__The circular list is a great idea__. It's already covered in previous post. Do keep in mind __why we need the list to be circular__! 
+* You need to understand why we need the list to be circular. 
 
 ### Code
 
-__Just return head approach__
+__Approach 1__
+
+	public static BiNode convert(BiNode root) {
+		BiNodePair res = helper(root);
+		return res.leftMost;
+	}
+
+	private static BiNodePair helper(BiNode node) {
+		if (node == null) {
+			return null;
+		}
+		BiNodePair res = new BiNodePair(node, node);
+		if (node.node1 != null) {
+			BiNodePair leftRes = helper(node.node1);
+			res.leftMost = leftRes.leftMost;
+			leftRes.rightMost.node2 = node;
+			node.node1 = leftRes.rightMost;
+		}
+		if (node.node2 != null) {
+			BiNodePair rightRes = helper(node.node2);
+			res.rightMost = rightRes.rightMost;
+			rightRes.leftMost.node1 = node;
+			node.node2 = rightRes.leftMost;
+		}
+		return res;
+	}
+
+	static class BiNodePair {
+		BiNode leftMost;
+		BiNode rightMost;
+
+		public BiNodePair(BiNode node1, BiNode node2) {
+			leftMost = node1;
+			rightMost = node2;
+		}
+	}
+
+__Approach 2__
 
 	public static BiNode convert(BiNode root) {
 		if (root == null) {

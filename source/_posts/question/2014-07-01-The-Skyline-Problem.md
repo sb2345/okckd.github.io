@@ -8,7 +8,7 @@ tags: [ unit test needed ]
 
 ### Question 
 
-[link]()
+[link](http://www.algorithmist.com/index.php/UVa_105)
 
 > Given n buildings, each building is an rectangle located on 
 x-axis, and indicated by (x1, x2, height). Calculate the 
@@ -20,7 +20,7 @@ __Solution 1 is keeping a heightmap (Brute force)__. Keep an array of a certain 
 
 __Solution 2 is using Sweeping line algorithm__. Sweep from left to right, always try to find the largest height of the rectangle. 
 
-First make sure the rectangles are sorted. While sweeping, if sees an building-start, insert the height to the heap. If a building-end, remove from the heap. Then the current maximum height is the max point in the heap. 
+First make sure the rectangles are sorted. While sweeping, if sees an building-start, insert the height to the heap. If a building-end, remove from the heap. Then the current maximum height is the max point in the heap. A visualized explanation can be found [here](https://briangordon.github.io/2014/08/the-skyline-problem.html). 
 
 Total cost is O(nlogn), [source](http://qr.ae/Yt74m). 
 
