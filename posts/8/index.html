@@ -9,10 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Days: 01/12/2014 - now
-Submission: Pass: Submit/day: Pass/day: Pass/submit: Easy [LeetCode 1] Two Sum
-[LeetCode 5] Longest Palindromic Substring
-[ &hellip;">
+  <meta name="description" content="Question link Given a binary tree, print it vertically. The following example illustrates vertical order traversal. 1 / \ 2 3 / \ / \ 4 5 6 7 \ \ 8 9 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +78,192 @@ Submission: Pass: Submit/day: Pass/day: Pass/submit: Easy [LeetCode 1] Two Sum
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
+
+<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
+
+<pre><code>           1
+        /    \
+       2      3
+      / \    / \
+     4   5  6   7
+             \   \
+              8   9 
+
+The output of print this tree vertically will be:
+4
+2
+1 5 6
+3 8
+7
+9 
+</code></pre>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
+<li><p>Iterate for each vertical line at distance minimum to maximum from root.</p></li>
+</ol>
+
+
+<p>This solution is O(n<sup>2</sup>), because getting the width of tree requires O(n) time. (Wait, is it not? Think about a complete tree of 3 level and 7 nodes)</p>
+
+<p>O(n) solution is available using a <strong><a href="www.geeksforgeeks.org/print-binary-tree-vertical-order-set-2/">HashMap</a></strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong>, O(n<sup>2</sup>) time.</p>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+
+    // 1. find the range of left bound and right bound
+    int[] range = new int[2];
+    findRange(root, range, 0);
+
+    // 2. calculate number of columns in the result
+    int rootIndex = 0 - range[0];
+    int columns = range[1] - range[0] + 1;
+    for (int i = 0; i &lt; columns; i++) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+    }
+
+    // 3. fill in vertically in a recursive manner
+    fillNode(ans, root, rootIndex);
+
+    return ans;
+}
+
+private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
+    if (node == null) {
+        return;
+    }
+    ans.get(index).add(node.val);
+    fillNode(ans, node.left, index - 1);
+    fillNode(ans, node.right, index + 1);
+}
+
+private void findRange(TreeNode node, int[] range, int position) {
+    if (node == null) {
+        return;
+    }
+    if (position &lt; range[0]) {
+        range[0] = position;
+    }
+    if (position &gt; range[1]) {
+        range[1] = position;
+    }
+    findRange(node.left, range, position - 1);
+    findRange(node.right, range, position + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/08/patient-disease-data-structure/">[Epic] Patient Disease Data Structure</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/08/patient-disease-data-structure/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32844253.html">link</a></p>
+
+<blockquote><p>Suppose N patients and M diseases. N is sufficiently large number and M is
+relatively small, say 30-ish. Each patient can have possible 0 to M kinds of
+diseases.</p>
+
+<p>Given one patient’s name, show me a list of similar patients sharing same
+deseases within 2-3 seconds.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Use 1 bit to represent a disease</strong>. So every patient&rsquo;s conditin can be put into an integer of 32 bits.</p>
+
+<p>How do we calculate the similarity of 2 patients?</p>
+
+<p>Refer to <strong>[CC150v5] 5.5 Calculate Bits Conversion Required</strong> for a special bit operation (remove last &lsquo;1&rsquo; from bit):</p>
+
+<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
+
+<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
+
+<p>For each patient, we simply calculate the XOR and count &lsquo;1&rsquo;s.</p>
+
+<h3>Code</h3>
+
+<p>no code.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -973,249 +1156,6 @@ private static BiNode getListTail(BiNode head) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/26/implement-circular-array-java/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/26/implement-circular-array-java/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement a <strong>CircularArray</strong> class that supports an array-like data structure which can be efficiently rotated.</p>
-
-<p>The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>First part of the question is solved by using an array and a pointer</strong>. The solution simplifies the question by fixing the array size (not a dynamic-resizing array).</p>
-
-<p><strong>The difficult part is how to write iterator</strong>.</p>
-
-<p>Note that we should support <strong>Java Generics</strong>:</p>
-
-<pre><code>class MyCircularArray&lt;T&gt;
-</code></pre>
-
-<p>Implement <strong>Iterable Interface</strong>:</p>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-}
-</code></pre>
-
-<p>Override <strong>iterator() method</strong>:</p>
-
-<pre><code>@Override
-public Iterator&lt;T&gt; iterator() {
-    return new MyIterator&lt;T&gt;(this);
-}
-</code></pre>
-
-<p>Write our own <strong>Iterator Class</strong>:</p>
-
-<pre><code>class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-}
-</code></pre>
-
-<p>Finish it up</p>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-
-    @Override
-    public Iterator&lt;T&gt; iterator() {
-        return new MyIterator&lt;T&gt;(this);
-    }
-
-    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-        @Override
-        public boolean hasNext() {
-        }
-
-        @Override
-        public T next() {
-        }
-
-        @Override
-        public void remove() {
-        }
-    }
-}
-</code></pre>
-
-<p>It might be confusing when implementing <strong>Iterable</strong> and <strong>Iterator</strong> Class.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
-
-    T[] items;
-
-    int head;
-    int cur;
-
-    public MyCircularArray(int size) {
-        // this is really important (casting the type)
-        items = (T[]) new Object[size];
-
-        head = 0;
-        cur = 0;
-    }
-
-    public void put(T item) {
-        items[cur++] = item;
-        cur = cur % items.length;
-    }
-
-    public T get(int i) {
-        int newIndex = (i + head) % items.length;
-        return items[newIndex];
-    }
-
-    public void rotate(int shiftRight) {
-        head += shiftRight;
-        head = head % items.length;
-    }
-
-    @Override
-    public Iterator&lt;T&gt; iterator() {
-        return new MyIterator&lt;T&gt;(this);
-    }
-
-    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
-
-        T[] items;
-        int head;
-        int count;
-
-        public MyIterator(MyCircularArray&lt;T&gt; array) {
-            this.items = array.items;
-            this.head = array.head;
-            this.count = 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.count != items.length;
-        }
-
-        @Override
-        public T next() {
-            if (hasNext()) {
-                return items[(head + count++) % items.length];
-            }
-            return null;
-        }
-
-        @Override
-        public void remove() {
-        }
-    }
-
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] 12.0 Example - Troubleshoot Google Chrome</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/24/troubleshoot-google-chrome/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/24/troubleshoot-google-chrome/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You&#8217;reworking on the Google Chrome team when you receivea bug report: Chrome crashes on launch. What would you do?</p></blockquote>
-
-<h3>Step 1: Understand the Scenario</h3>
-
-<ol>
-<li>How long has user seen this issue?</li>
-<li>version of browser and OS?</li>
-<li>Does this happen consistently? How often, and when?</li>
-</ol>
-
-
-<h3>Step 2: Break Down the Problem</h3>
-
-<p>Flow of situation:</p>
-
-<ol>
-<li>start menu</li>
-<li>click chrome</li>
-<li>browser starts</li>
-<li>browser load settings</li>
-<li>browser issues HTTP response</li>
-<li>browser get HTTP response</li>
-<li>browser parses webpage</li>
-<li>browser displays content</li>
-</ol>
-
-
-<p><strong>At some points in this process, something fails</strong>. A good tester would iterate thru the elements of this scenario and diagnose the problem.</p>
-
-<h3>Step 3: Create Specific, Manageable Tests</h3>
-
-<p>Come up with realistic instructions.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/9">&larr; Older</a>
@@ -1243,7 +1183,7 @@ public Iterator&lt;T&gt; iterator() {
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (107)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (108)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1255,6 +1195,14 @@ public Iterator&lt;T&gt; iterator() {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/01/stock-span-problem/">[Question] Stock Span Problem</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
       </li>
     
@@ -1264,14 +1212,6 @@ public Iterator&lt;T&gt; iterator() {
     
       <li class="post">
         <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
   </ul>

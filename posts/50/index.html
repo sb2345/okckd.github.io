@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a roman numeral, convert it to an integer. Input is guaranteed to be within the range from 1 to 3999. Stats Frequency 4 &hellip;">
+  <meta name="description" content="Question link Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0? Find all unique triplets in the array which &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,279 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/02/3Sum/">[LeetCode 15] 3Sum</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/02/3Sum/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/02/3Sum/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/3sum/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given an array <i>S</i> of <i>n</i> integers, are there elements <i>a</i>, <i>b</i>, <i>c</i> in <i>S</i> such that <i>a</i> + <i>b</i> + <i>c</i> = 0? Find all unique triplets in the array which gives the sum of zero.</p>
+
+<p><b>Note:</b><br>
+</p><ul>
+<li>Elements in a triplet (<i>a</i>,<i>b</i>,<i>c</i>) must be in non-descending order. (ie, <i>a</i> ≤ <i>b</i> ≤ <i>c</i>)</li>
+<li>The solution set must not contain duplicate triplets.</li>
+</ul>
+<p></p>
+
+<pre>    For example, given array S = {-1 0 1 2 -1 -4},
+
+    A solution set is:
+    (-1, 0, 1)
+    (-1, -1, 2)
+</pre><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>First of all, the array must be sorted first.</p>
+
+<p><strong>This question is solved with O(n<sup>2</sup>) time</strong>. The idea is, for every integer, try to find a 2-integer pair so that the 3 numbers sum to 0. The method to use is <strong>2-pointer scan</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Very important point of this question</strong>: there might be duplications in the result.</p>
+
+<p>Eg. array = {-5, 2, 2, 3, 3}. When a = -5, we can choose 2, 3 and move pointers both by 1 position. Then we can choose 2, 3 again!</p>
+
+<p>Solution is to increase the pointer to where the value is different. Pay special attention in writing the code. Because there are 3 parts that need duplication avoidance:</p>
+
+<ol>
+<li><p><strong>The pivot number that we select, must be distinct each time</strong>. Why? because this is the smallest of the triplet. It must not be same.</p></li>
+<li><p>The left pointer and right pointer. They should point to a new value each time.</p></li>
+<li><p>Note that when sum is too large, move left pointer, and vice versa. <strong>However when sum is == 0, we move both left and right pointer</strong>.</p></li>
+</ol>
+
+
+<p>Point 3 is the reason why we have 2 conditions in seperate if-block:</p>
+
+<pre><code>if (sum &gt;= 0) {...}
+
+if (sum &lt;= 0) {...}
+</code></pre>
+
+<h3>My code</h3>
+
+<pre><code>public class Solution {
+    public List&lt;List&lt;Integer&gt;&gt; threeSum(int[] num) {
+        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+        if (num == null || num.length &lt; 3) {
+            return ans;
+        }
+        Arrays.sort(num);
+        int len = num.length;
+        int left, right;
+        for (int i = 0; i &lt; len; i++) {
+            // duplication avoidance 1
+            if (i != 0 &amp;&amp; num[i] == num[i - 1]) {
+                continue;
+            }
+            left = i + 1;
+            right = len - 1;
+            while (left &lt; right) {
+                int sum = num[i] + num[left] + num[right];
+                if (sum == 0) {
+                    // now one triplet is found, add it to ans list
+                    List&lt;Integer&gt; triplet = new ArrayList&lt;Integer&gt;();
+                    triplet.add(num[i]);
+                    triplet.add(num[left]);
+                    triplet.add(num[right]);
+                    ans.add(triplet);
+                }
+                // shrink the range between left and right pointer
+                // (until the 2 pointers met)
+                if (sum &gt;= 0) {
+                    // move right pointer to the left
+                    right--;
+                    // duplication avoidance 2
+                    while (right &gt;= 0 &amp;&amp; num[right] == num[right + 1]) {
+                        right--;
+                    }
+                }
+                if (sum &lt;= 0) {
+                    // move left pointer to the right
+                    left++;
+                    // duplication avoidance 3
+                    while (left &lt; len &amp;&amp; num[left] == num[left - 1]) {
+                        left++;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/01/Longest-Common-Prefix/">[LeetCode 14] Longest Common Prefix</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/01/Longest-Common-Prefix/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/01/Longest-Common-Prefix/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/longest-common-prefix/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Write a function to find the longest common prefix string amongst an array of strings.
+</p><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>Straight-forward solution.</strong> Will not go into details.</p>
+
+<p>However, there&rsquo;s another more generalized <a href="http://en.wikipedia.org/wiki/LCP_array"><strong>LCP array</strong></a> which is solved by use of <a href="http://en.wikipedia.org/wiki/Trie">Trie</a>.</p>
+
+<h3>Solution</h3>
+
+<p>The code explains itself.</p>
+
+<h3>My code</h3>
+
+<pre><code>public class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) {
+            return "";
+        }
+        int p;
+        for (p = 0; p &lt; strs[0].length(); p++) {
+            char c = strs[0].charAt(p);
+            // check all strings in array strs
+            for (int i = 0; i &lt; strs.length; i++) {
+                if (p == strs[i].length()) {
+                    return strs[i];
+                } else if (c != strs[i].charAt(p)) {
+                    return strs[i].substring(0, p);
+                }
+            }
+            // if all strings have the same prefix
+            // continue checking it
+        }
+        // first string in array strs is the shortest common prefix
+        return strs[0];
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1495,333 +1768,6 @@ note that max integer is 2,147,483,647
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/28/longest-palindrome-substr/">[LeetCode 5] Longest Palindromic Substring</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/04/28/longest-palindrome-substr/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/04/28/longest-palindrome-substr/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/longest-palindromic-substring/">link</a></p>
-
-<div class="question-content">
-<p></p><p>Given a string <i>S</i>, find the longest palindromic substring in <i>S</i>. You may assume that the maximum length of <i>S</i> is 1000, and there exists one unique longest palindromic substring.</p><p></p>
-</div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>There are 2 solutions. One is <strong>DP</strong> which is O(N<sup>2</sup>) time and O(N<sup>2</sup>) space. Another is &ldquo;Search around corner&rdquo;, which uses less space.</p>
-
-<h3>Solution</h3>
-
-<p><strong>DP solution is straight-forward</strong>. Use 2D array to check palindrome intervals and make it as either true or false. Meanwhile, update longest.</p>
-
-<p>O(N<sup>2</sup>) time and O(N<sup>2</sup>) space</p>
-
-<p><strong>Search around corner</strong> is basically iterate through the entire string and assume each char (or char pair) as center of the palindrome. The code isn&rsquo;t difficult once you come up with the idea.</p>
-
-<p>For more, read <a href="http://leetcode.com/2011/11/longest-palindromic-substring-part-i.html">this post</a></p>
-
-<p>O(N<sup>2</sup>) time and O(1) space</p>
-
-<h3>My code</h3>
-
-<p>DP solution</p>
-
-<pre><code>public class Solution {
-    public String longestPalindrome(String s) {
-        if (s == null || s.length() == 0) {
-            return "";
-        }
-        String longest = "";
-        int len = s.length();
-        // dp[i][j] means substring of s from i to j is palindrome 
-        boolean[][] dp = new boolean[len][len];
-        // why i decrease from (len-1) to 0, but j increase from i to (len-1)?
-        // think about it! 
-        for (int i = len - 1; i &gt;= 0; i--) {
-            for (int j = i; j &lt; len; j++) {
-                if (i == j) {
-                    dp[i][j] = true;
-                } else if (i + 1 == j) {
-                    dp[i][j] = s.charAt(i) == s.charAt(j);
-                } else {
-                    // important to note: dp[i+1][j-1]
-                    // i depends on (i+1), so i from large to small
-                    // j is just the opposite, small to large
-                    dp[i][j] = s.charAt(i) == s.charAt(j) &amp;&amp; dp[i+1][j-1];
-                }
-                if (dp[i][j] &amp;&amp; j + 1 - i &gt; longest.length()) {
-                    longest = s.substring(i, j + 1);
-                }
-            }
-        }
-        return longest;
-    }
-}
-</code></pre>
-
-<p>Search around corner</p>
-
-<pre><code>public class Solution {
-    public String longestPalindrome(String s) {
-        if (s.length() &lt;= 1)
-            return s;
-        String largest = s.substring(0, 1);
-        for (int i = 0; i &lt; s.length(); i++) {
-            String first = this.searchAroundCenter(s, i, i);
-            String second = this.searchAroundCenter(s, i, i + 1);
-            if (first.length() &lt; second.length())
-                first = second;
-            if (largest.length() &lt; first.length())
-                largest = first;
-        }
-        return largest;
-    }
-
-    private String searchAroundCenter(String s, int a, int b) {
-        if (a &lt; 0 || b &gt; s.length() - 1)
-            return "";
-        while (s.charAt(a) == s.charAt(b)) {
-            a--;
-            b++;
-            if (a &lt; 0 || b &gt; s.length() - 1)
-                return s.substring(a + 1, b);
-        }
-        return s.substring(a + 1, b);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/27/longest-substring-without-repeating/">[LeetCode 3] Longest Substring Without Repeating Characters</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/04/27/longest-substring-without-repeating/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/04/27/longest-substring-without-repeating/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/longest-substring-without-repeating-characters/">link</a></p>
-
-<div class="question-content">
-<p></p><p>Given a string, find the length of the longest substring without repeating characters. For example, the longest substring without repeating letters for &#8220;abcabcbb&#8221; is &#8220;abc&#8221;, which the length is 3. For &#8220;bbbbb&#8221; the longest substring is &#8220;b&#8221;, with the length of 1.</p>
-<p></p></div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>This question looks easy (well, isn&rsquo;t it?), but it <strong>really is not easy</strong>!.</p>
-
-<p><strong>The main idea is</strong>: an array of int(128) is used to keep track of the last occurance position of each character. So we iterate thru the characters while constently checking the last occurrence of the letter. Meanwhile, keep updating the longest distance.</p>
-
-<p><strong>There is 1 place where it&rsquo;s extremely easy to make mistake</strong>, that is the condition of update left points:</p>
-
-<pre><code>if (previousPos != -1&amp;&amp; previousPos &gt;= left) {
-    left = previousPos + 1;
-}
-</code></pre>
-
-<p>If you have an idea of using array int(128) to <strong>store last occurrence</strong>, and you got the above <strong>if condition</strong> correct, then you nailed it!</p>
-
-<p>Again, this is a tough question. There&rsquo;s a seemingly more intuitive solution using the sliding window method. It&rsquo;s very similar to [LeetCode 76] Minimum Window Substring.</p>
-
-<h3>Solution</h3>
-
-<p>Note what happens when a repeating char is found (2 different conditions).</p>
-
-<p><img class="middle" src="/assets/images/20130901224716625.png"></p>
-
-<h3>My code</h3>
-
-<p>The proper way:</p>
-
-<pre><code>public class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        if (s == null || s.length() == 0) {
-            return 0;
-        }
-
-        int[] flag = new int[128];
-        for (int i = 0; i &lt; flag.length; i++) {
-            flag[i] = -1;
-        }
-        // left and right pointer defines the valid range
-        int left = 0;
-        int right = 0;
-        int longest = 0;
-        int len = s.length();
-
-        while (right &lt; len) {
-            char letter = s.charAt(right);
-            int previousPos = flag[letter];
-            if (previousPos != -1&amp;&amp; previousPos &gt;= left) {
-                // if right pointer points to an old letter, and is within current range
-                // then we need to update our left pointer: 
-                // to bypass the previous occurrence of that letter
-                left = previousPos + 1;
-            }
-            flag[letter] = right;
-            // advance right pointer to the next letter, and calculate longest distance
-            right++;
-            longest = Math.max(longest, right - left);
-        }
-        return longest;
-    }
-}
-</code></pre>
-
-<p>The sliding window way:</p>
-
-<pre><code>public class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        if (s == null || s.length() == 0) {
-            return 0;
-        }
-        int len = s.length();
-        int left = 0;
-        int right = 1;
-        HashSet&lt;Character&gt; set = new HashSet&lt;Character&gt;();
-        set.add(s.charAt(0));
-        int longest = 1;
-        while (right &lt; len) {
-            // right pointer proceeds until boundary or duplicate char found
-            while (right &lt; len &amp;&amp; !set.contains(s.charAt(right))) {
-                set.add(s.charAt(right));
-                right++;
-                longest = Math.max(longest, right - left);
-            }
-            if (right == len) {
-                return longest;
-            } else {
-                // right pointer has reached a duplicate char.
-                // now move left pointer until that dup char is found
-                while (s.charAt(left) != s.charAt(right)) {
-                    set.remove(s.charAt(left));
-                    left++;
-                }
-                // left pointer advance by one to bypass the dup char
-                left++;
-                // right pointer advance by one to include the dup char
-                right++;
-            }
-        }
-        return Math.max(longest, right - left);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/51">&larr; Older</a>
@@ -1849,7 +1795,7 @@ note that max integer is 2,147,483,647
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (107)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (108)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1861,6 +1807,14 @@ note that max integer is 2,147,483,647
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/01/stock-span-problem/">[Question] Stock Span Problem</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
       </li>
     
@@ -1870,14 +1824,6 @@ note that max integer is 2,147,483,647
     
       <li class="post">
         <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/28/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
   </ul>
