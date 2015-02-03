@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the &hellip;">
+  <meta name="description" content="Question Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price. Definition of &lsquo;span& &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -109,28 +109,109 @@
 
 <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://en.wikipedia.org/wiki/Bin_packing_problem">link</a></p>
+<blockquote><p>Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price.</p></blockquote>
 
-<blockquote><p>Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.</p></blockquote>
+<p>Definition of &lsquo;span&rsquo; have got 2 variant:</p>
 
-<p><img class="middle" src="/assets/images/bin-packing.png"></p>
+<h3>Variant 1</h3>
+
+<p><a href="http://www.geeksforgeeks.org/the-stock-span-problem/">link</a></p>
+
+<blockquote><p>Span is the number of consecutive days right before that day, which have less or equal stock value.</p>
+
+<p>(Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>Explanation from <a href="http://stackoverflow.com/a/8765049">here</a>:</p>
+<p><img class="middle" src="/assets/images/StockSpanProblem1.png"></p>
 
-<ol>
-<li>Build a binary tree. Each branch in the tree contains a sprite.</li>
-<li>Each <strong>leaf node represents available space</strong>.</li>
-<li>Initially the tree has just the root node, which represents all available space.</li>
-<li>To add a sprite to the tree, search the tree for an unoccupied (leaf) node <strong>big enough</strong> to hold the sprite.</li>
-<li>Turn that node from a leaf into a branch by setting the sprite as the node&rsquo;s occupant and giving the node two children.</li>
-<li>One child represents the remaining space to the right of the sprite;</li>
-<li>the other represents the remaining space below the sprite and the first child.</li>
-</ol>
+<p>Use stack.</p>
 
+<h3>Variant 2</h3>
 
-<p>For detailed implementation and code, refer to <a href="http://codeincomplete.com/posts/2011/5/7/bin_packing/">this</a> comprehensite guide. BTW, it&rsquo;s used for <strong>auto generating CSS Sprites</strong> which puts images into a large graph.</p>
+<p><a href="http://www.careercup.com/question?id=4825417139617792">link</a></p>
+
+<blockquote><p>Span is the amount of days before the given day where the stock price is less than that of given day.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The top answer in <a href="http://www.careercup.com/question?id=4825417139617792">here</a> is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3.</p>
+
+<p>Instead, the <strong>BST (AVL tree) solution is correct</strong>. It&rsquo;s commented by user zahidbuet106.</p>
+
+<blockquote><p>insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the <strong>size of left subtree</strong> at the node being inserted. This will give us our desired smaller element count.</p>
+
+<p>We also need to handle balancing the tree while insert.</p></blockquote>
+
+<p><strong>The key of this question is the special BST, where each node stores an additional counting number</strong>.</p>
+
+<p>This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it&rsquo;s ranking within the past history.</p>
+
+<p>Read another very interesting post: <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>class TreeNodePlus extends TreeNode {
+    int leftCount;
+    int dupCount;
+
+    public TreeNodePlus(int v, int leftC) {
+        super(v);
+        this.leftCount = leftC;
+        this.dupCount = 1;
+    }
+
+    public int findRank(TreeNodePlus node) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (this == node) {
+            return 0;
+        } else if (node.val &lt; this.val) {
+            if (this.left == null) {
+                return 0;
+            } else {
+                return leftBranch.findRank(node);
+            }
+        } else {
+            if (this.right == null) {
+                return this.leftCount + this.dupCount;
+            } else {
+                return this.leftCount + this.dupCount
+                        + rightBranch.findRank(node);
+            }
+        }
+    }
+
+    public TreeNodePlus insertNum(int num) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (num == this.val) {
+            this.dupCount++;
+            return this;
+        } else if (num &lt; this.val) {
+            // insert num to the left branch
+            this.leftCount++;
+            if (this.left == null) {
+                this.left = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.left;
+            } else {
+                return leftBranch.insertNum(num);
+            }
+        } else {
+            // insert num to the right branch
+            // this.leftCount does not change
+            if (this.right == null) {
+                this.right = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.right;
+            } else {
+                return rightBranch.insertNum(num);
+            }
+        }
+    }
+}
+</code></pre>
 </div>
 
 
@@ -176,7 +257,7 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/01/30/2d-bin-packing/" title="Previous Post: [Question] 2D Bin Packing ">&laquo; [Question] 2D Bin Packing </a>
+        <a class="basic-alignment left" href="/blog/2015/02/01/limit-request-per-second/" title="Previous Post: [Design] Limit the Request per Second ">&laquo; [Design] Limit the Request per Second </a>
       
       
     </p>
@@ -198,7 +279,7 @@
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (61)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
@@ -208,7 +289,7 @@
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (108)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (110)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -224,19 +305,19 @@
       </li>
     
       <li class="post">
+        <a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/01/each-employee-two-events/">[Question] Each Employee 2 Events</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/01/Activity-Selection-Problem/">[Question] Activity Selection Problem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/calculate-area/">[Apple] Calculate Area</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
       </li>
     
   </ul>

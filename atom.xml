@@ -4,7 +4,7 @@
   <title><![CDATA[Woodstock Blog]]></title>
   <link href="http://okckd.github.io/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-02-01T15:05:07+08:00</updated>
+  <updated>2015-02-03T10:17:58+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -20,28 +20,277 @@
     <id>http://okckd.github.io/blog/2015/02/01/stock-span-problem</id>
     <content type="html"><![CDATA[<h3>Question</h3>
 
-<p><a href="http://en.wikipedia.org/wiki/Bin_packing_problem">link</a></p>
+<blockquote><p>Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price.</p></blockquote>
 
-<blockquote><p>Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.</p></blockquote>
+<p>Definition of &lsquo;span&rsquo; have got 2 variant:</p>
 
-<p><img class="middle" src="http://okckd.github.io/assets/images/bin-packing.png"></p>
+<h3>Variant 1</h3>
+
+<p><a href="http://www.geeksforgeeks.org/the-stock-span-problem/">link</a></p>
+
+<blockquote><p>Span is the number of consecutive days right before that day, which have less or equal stock value.</p>
+
+<p>(Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>Explanation from <a href="http://stackoverflow.com/a/8765049">here</a>:</p>
+<p><img class="middle" src="http://okckd.github.io/assets/images/StockSpanProblem1.png"></p>
+
+<p>Use stack.</p>
+
+<h3>Variant 2</h3>
+
+<p><a href="http://www.careercup.com/question?id=4825417139617792">link</a></p>
+
+<blockquote><p>Span is the amount of days before the given day where the stock price is less than that of given day.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The top answer in <a href="http://www.careercup.com/question?id=4825417139617792">here</a> is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3.</p>
+
+<p>Instead, the <strong>BST (AVL tree) solution is correct</strong>. It&rsquo;s commented by user zahidbuet106.</p>
+
+<blockquote><p>insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the <strong>size of left subtree</strong> at the node being inserted. This will give us our desired smaller element count.</p>
+
+<p>We also need to handle balancing the tree while insert.</p></blockquote>
+
+<p><strong>The key of this question is the special BST, where each node stores an additional counting number</strong>.</p>
+
+<p>This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it&rsquo;s ranking within the past history.</p>
+
+<p>Read another very interesting post: <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>class TreeNodePlus extends TreeNode {
+    int leftCount;
+    int dupCount;
+
+    public TreeNodePlus(int v, int leftC) {
+        super(v);
+        this.leftCount = leftC;
+        this.dupCount = 1;
+    }
+
+    public int findRank(TreeNodePlus node) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (this == node) {
+            return 0;
+        } else if (node.val &lt; this.val) {
+            if (this.left == null) {
+                return 0;
+            } else {
+                return leftBranch.findRank(node);
+            }
+        } else {
+            if (this.right == null) {
+                return this.leftCount + this.dupCount;
+            } else {
+                return this.leftCount + this.dupCount
+                        + rightBranch.findRank(node);
+            }
+        }
+    }
+
+    public TreeNodePlus insertNum(int num) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (num == this.val) {
+            this.dupCount++;
+            return this;
+        } else if (num &lt; this.val) {
+            // insert num to the left branch
+            this.leftCount++;
+            if (this.left == null) {
+                this.left = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.left;
+            } else {
+                return leftBranch.insertNum(num);
+            }
+        } else {
+            // insert num to the right branch
+            // this.leftCount does not change
+            if (this.right == null) {
+                this.right = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.right;
+            } else {
+                return rightBranch.insertNum(num);
+            }
+        }
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Limit the Request Per Second]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/01/limit-request-per-second/"/>
+    <updated>2015-02-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/01/limit-request-per-second</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">link</a></p>
+
+<blockquote><p>有一个接口叫 void setRPS(int num);</p>
+
+<p>接下来不断有request过来，如何实现下面的接口，返回accept或者deny，</p></blockquote>
+
+<pre><code>bool process(int timestamp){
+
+}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Suggested by level 5 of <a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">this post</a>:</p>
 
 <ol>
-<li>Build a binary tree. Each branch in the tree contains a sprite.</li>
-<li>Each <strong>leaf node represents available space</strong>.</li>
-<li>Initially the tree has just the root node, which represents all available space.</li>
-<li>To add a sprite to the tree, search the tree for an unoccupied (leaf) node <strong>big enough</strong> to hold the sprite.</li>
-<li>Turn that node from a leaf into a branch by setting the sprite as the node&rsquo;s occupant and giving the node two children.</li>
-<li>One child represents the remaining space to the right of the sprite;</li>
-<li>the other represents the remaining space below the sprite and the first child.</li>
+<li>maintain a variable for the number of request processed/rejected.
+
+<ol>
+<li>This variable must be atomic, thus a <strong>AtomicInteger</strong>.</li>
+<li>the variable is called &lsquo;count&rsquo;</li>
+</ol>
+</li>
+<li>have a method to process request
+
+<ol>
+<li>if count &lt; limit, do it</li>
+<li>otherwise, reject</li>
+</ol>
+</li>
+<li><strong>This is the most important</strong>: clear the count every 1 seconds!
+
+<ol>
+<li>eg. LIMIT = 5r/s, so:</li>
+<li>the <strong>first 5 number of requests in every second</strong> are getting fulfilled</li>
+<li>from 6th request onward, the request all rejected, until the next second.</li>
+</ol>
+</li>
 </ol>
 
 
-<p>For detailed implementation and code, refer to <a href="http://codeincomplete.com/posts/2011/5/7/bin_packing/">this</a> comprehensite guide. BTW, it&rsquo;s used for <strong>auto generating CSS Sprites</strong> which puts images into a large graph.</p>
+<h3>Code</h3>
+
+<pre><code>public class SetRps {
+
+    AtomicInteger count = new AtomicInteger(0);
+    int limit = -1;
+    int printIndex = 1;
+    long startTimestamp = -1;
+
+    void setRPS(int num) {
+        limit = num;
+    }
+
+    boolean process(long timestamp) {
+        // suppose timestamp is ms
+        synchronized (this) {
+            if (count.get() &lt; limit) {
+                // can process
+                count.incrementAndGet();
+                System.out.println(printIndex++ + ". processing request "
+                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
+                return true;
+            }
+            if (timestamp - startTimestamp &gt;= 1000) {
+                // every 1 seconds, reset
+                count.set(0);
+                startTimestamp = timestamp;
+                System.out.println("clear!");
+                return true;
+            }
+        }
+        return false;
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Each Employee 2 Events]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/01/each-employee-two-events/"/>
+    <updated>2015-02-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/01/each-employee-two-events</id>
+    <content type="html"><![CDATA[<p><a href="http://www.careercup.com/question?id=7894677">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>You are given N ranges of date offsets when N employees are present in an organization. Something like</p></blockquote>
+
+<pre><code>    1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
+    2-6 
+    8-9 
+    .. 
+    1-14 
+</code></pre>
+
+<blockquote><p>Organize an event on minimum number of days such that each employee can attend the event at least twice.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to the <a href="http://www.careercup.com/question?id=7894677">top answer</a>:</p>
+
+<ol>
+<li><p>First, sort all ranges based on ENDING date in increasing order (bucket or counting sort).</p></li>
+<li><p>For each range, select last two days (because they produce maximum possibility to overlap next range)</p></li>
+<li><p>Skip following ranges that also contains those two days, until:</p>
+
+<ol>
+<li>a range that either covers only one day (we then select last day of this range) or</li>
+<li>does not cover any of the two (we then select last two days of this range).</li>
+</ol>
+</li>
+<li><p>Then continue.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Activity Selection Problem]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem/"/>
+    <updated>2015-02-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem</id>
+    <content type="html"><![CDATA[<p><a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>Given n activities with their start and finish times.</p>
+
+<p>Select maximum number of activities that can be performed in one run.</p>
+
+<p>Example:</p></blockquote>
+
+<pre><code>     start[]  =  {1, 3, 0, 5, 8, 5};
+     finish[] =  {2, 4, 6, 7, 9, 9};
+
+     output[] = {0, 1, 3, 4}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to <a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">gfg</a>:</p>
+
+<ol>
+<li><p>Sort the activities according to their finishing time</p></li>
+<li><p>Select the first activity from the sorted array and print it.</p></li>
+<li><p>For the rest, if start time is greater than previous finish time, then select this activity.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written.</p>
 ]]></content>
   </entry>
   
@@ -78,7 +327,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Question] a Product Array Puzzle]]></title>
+    <title type="html"><![CDATA[[Question] Product Array Puzzle]]></title>
     <link href="http://okckd.github.io/blog/2015/01/29/product-array-puzzle/"/>
     <updated>2015-01-29T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2015/01/29/product-array-puzzle</id>
@@ -1023,131 +1272,6 @@ Pop X
 <p><strong>What makes memcached distributed is the client</strong>, which in most implementations can connect to a pool of servers. Typical implementations use consistent hashing, which means that when you add or remove server to/from a pool of N servers, you only have to remap 1/N keys.</p>
 
 <p>Typically keys are <strong>not duplicated</strong> on various hosts, as memcached is <strong>not meant to be persistent store</strong> and gives no guarantees that your value will persist (for example when running out of assigned memory, memcached server drops least recently used (LRU) elements). Thus it&rsquo;s assumed that your application should handle missing keys.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Design Google Suggest (Autocomplete)]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/24/design-google-suggest-autocomplete/"/>
-    <updated>2015-01-24T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/24/design-google-suggest-autocomplete</id>
-    <content type="html"><![CDATA[<h3>Overview</h3>
-
-<p><strong>Google Suggest</strong> was <a href="http://googleblog.blogspot.sg/2004/12/ive-got-suggestion.html">launched in 2004</a> as a 20% time project from Google engineer Kevin Gibbs. He developed the idea on a <a href="http://www.theatlantic.com/technology/archive/2013/08/how-googles-autocomplete-was-created-invented-born/278991/">Google shuttle bus</a>.</p>
-
-<h3>Design</h3>
-
-<ol>
-<li>Use trie.</li>
-<li>Use cache (distributed cache)</li>
-</ol>
-
-
-<h4>Trie</h4>
-
-<p>Just make use of all keywords (including space) and build a trie out of it. Then you are good to go just search in Trie.</p>
-
-<p>A comparison of speed between DB, Set and Trie can be found <a href="http://sujitpal.blogspot.sg/2007/02/three-autocomplete-implementations.html">here</a>. A lot of implementation code can be found <a href="http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete">here</a>.</p>
-
-<h4>Memcached</h4>
-
-<p>Distributed caching + LRU replacement algorithm. Refer to <strong>[Design] Distributed Caching &ndash; memcached</strong> for more.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Top N Values From Sum of 2 Arrays]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/20/top-n-from-sum-2-array/"/>
-    <updated>2015-01-20T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/20/top-n-from-sum-2-array</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=3213705">link</a></p>
-
-<blockquote><p>给定两个数组A，B，长度均为n，求A[0]+B[0],…,A[0]+B[n-1],…,A[n-1]+B[0],…,A[n-1]+B[n]总共n<sup>2</sup>个数的最大的n个值。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Use a Heap and then iteratively pop 1 and push 2 elements. Until n values has been filled.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int[] topN(int[] arr1, int[] arr2, int n) {
-    int[] ans = new int[n];
-    int index = n - 1;
-
-    PriorityQueue&lt;Pair&gt; heap = new PriorityQueue&lt;Pair&gt;(n,
-            new SpecialComparator(arr1, arr2));
-    Arrays.sort(arr1);
-    Arrays.sort(arr2);
-
-    Pair maxPair = new Pair(n - 1, n - 1);
-    heap.add(maxPair);
-
-    for (int i = 0; i &lt; n; i++) {
-        Pair next = heap.poll();
-        ans[index--] = arr1[next.x] + arr2[next.y];
-        if (next.y - 1 &gt;= 0) {
-            heap.add(new Pair(next.x, next.y - 1));
-        }
-        if (next.x - 1 &gt;= 0) {
-            heap.add(new Pair(next.x - 1, next.y));
-        }
-    }
-    return ans;
-}
-
-class SpecialComparator implements Comparator&lt;Pair&gt; {
-
-    int[] arr1, arr2;
-
-    public SpecialComparator(int[] a1, int[] a2) {
-        arr1 = a1;
-        arr2 = a2;
-    }
-
-    @Override
-    public int compare(Pair p1, Pair p2) {
-        // note that larger value shall go up top of the heap, so -1 * ...
-        return -1 * (arr1[p1.x] + arr2[p1.y] - arr1[p2.x] - arr2[p2.y]);
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Java OOP] Java Vector and ArrayList]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/20/java-vector-arraylist/"/>
-    <updated>2015-01-20T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/20/java-vector-arraylist</id>
-    <content type="html"><![CDATA[<h3>Difference</h3>
-
-<ol>
-<li><p>Vectors are synchronized, ArrayLists are not.</p></li>
-<li><p>Data Growth Methods</p>
-
-<p> <a href="http://stackoverflow.com/a/2986307">A Vector defaults to</a> doubling the size of its array, while the ArrayList increases its array size by 50 percent.</p></li>
-</ol>
-
-
-<h3>Similarities</h3>
-
-<ol>
-<li><p>Both Vector and ArrayList use <strong>growable array</strong> data structure.</p></li>
-<li><p>They both are <strong>ordered collection classes</strong> as they maintain the elements insertion order.</p></li>
-<li><p>Vector &amp; ArrayList both allows duplicate and null values.</p></li>
-<li><p>They both grows and shrinks automatically when overflow and deletion happens.</p></li>
-</ol>
-
-
-<p><a href="http://beginnersbook.com/2013/12/difference-between-arraylist-and-vector-in-java/">source</a></p>
-
-<h3>History</h3>
-
-<p>The vector was not the part of collection framework &ndash; it has been included in collections later. It can be considered as <strong>Legacy code</strong>.</p>
-
-<p><strong>There is nothing about Vector which List collection cannot do</strong>. Therefore Vector should be avoided. If there is a need of thread-safe operation, make ArrayList synchronized.</p>
 ]]></content>
   </entry>
   

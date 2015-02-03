@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question 1 link How would you store 1 million phone numbers? Solution BitMap. The key here is that 1 million phone numbers will be within some range &hellip;">
+  <meta name="description" content="Question link Add two numbers (integers) without using + or plus arithmetic operator. Solution Bit operations. We could not do this in 1 pass, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,237 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/08/Add-integer-without-plus-sign/">[Question] Add Integers Without +/++</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/08/Add-integer-without-plus-sign/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/08/Add-integer-without-plus-sign/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2013/06/how-to-add-two-integer-numbers-without-plus-arithmetic-operator-java-example.html">link</a></p>
+
+<blockquote><p>Add two numbers (integers) without using + or plus arithmetic operator.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Bit operations</strong>.</p>
+
+<p>We could not do this in 1 pass, because multiple rounding issues.</p>
+
+<p>So we do it in while-loop then! 2 solutions available: <strong>iteratively and recursively</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int add(int x, int y) {
+    // add y into x (and y results to 0)
+    while (y != 0) {
+        int carry = x &amp; y;
+        int sum = x ^ y;
+        x = sum;
+        y = carry &lt;&lt; 1;
+    }
+    return x;
+}
+</code></pre>
+
+<p><strong>recursive</strong></p>
+
+<pre><code>public int add2(int x, int y) {
+    if (y == 0) {
+        return x;
+    }
+    int carry = (x &amp; y) &lt;&lt; 1;
+    return add2(x ^ y, carry);
+}
+</code></pre>
+
+<p><strong>updated on Sep 10th, 2014</strong>: this question appears on cc150v4 20.1. I wrote the following code:</p>
+
+<pre><code>public static int add_no_arithm(int a, int b) {
+    if (b == 0)
+        return a;
+    int addition = a ^ b;
+    int carry = (a &amp; b) &lt;&lt; 1;
+    return add_no_arithm(addition, carry);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/07/sort-large-files/">[CC150v4] 9.4 Sort Large Files</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/07/sort-large-files/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/sort-large-files/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>If you have a 2 GB file with one string per line, which sorting algorithm would you use to sort the file and why?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>External Sorting</strong> and N-way merge.</p>
+
+<ol>
+<li>Divide the file into K chunks, where X * K = 2 GB Bring each chunk into memory and sort the lines as usual using any O(n log n) algorithm Save the lines back to the file</li>
+<li>Now bring the next chunk into memory and sort</li>
+<li>Once we’re done, merge them one by one</li>
+</ol>
+
+
+<h3>Details</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/External_sorting#External_merge_sort">Wiki example</a> of sorting 900 megabytes of data using only 100 megabytes of RAM:</p>
+
+<ol>
+<li><strong>Read 100 MB of the data in main memory and sort</strong> by some conventional method, like quicksort.</li>
+<li>Write the sorted data to disk.</li>
+<li>Repeat steps 1 and 2 until all of the data is in sorted 100 MB chunks (there are 900MB / 100MB = 9 chunks), which now need to be merged into one single output file.</li>
+<li><strong>Read the first 10 MB (= 100MB / (9 chunks + 1)) of each sorted chunk</strong> into input buffers in main memory and allocate the remaining 10 MB for an output buffer. (In practice, it might provide better performance to make the output buffer larger and the input buffers slightly smaller.)</li>
+<li><strong>Perform a 9-way merge</strong> and store the result in the output buffer. Whenever the output buffer fills, write it to the final sorted file and empty it. Whenever any of the 9 input buffers empties, fill it with the next 10 MB of its associated 100 MB sorted chunk until no more data from the chunk is available. <strong>This is the key step that makes external merge sort work externally</strong> &mdash; because the merge algorithm only makes one pass sequentially through each of the chunks, each chunk does not have to be loaded completely; rather, sequential parts of the chunk can be loaded as needed.</li>
+</ol>
+
+
+<h3>Similar Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/Sort-a-million-32-bit-integers-using-only-2MB-of-RAM-QTN_120936.htm">link</a></p>
+
+<blockquote><p>[Google] Sort a million 32 bit integers using only 2MB of RAM.</p></blockquote>
+
+<p>1 million integers = 4MB which is > 2MB RAM.</p>
+
+<p>Solution: external sort &ndash; divide and conquer</p>
+
+<ol>
+<li>read half the list into 2MB ram and sort using quicksort (quicksort uses logn space &ndash; however 0.5m integers is less than 2MB (2000kb v 2048kb) so this should be okay).</li>
+<li>write sorted data to disk</li>
+<li>repeat for next chunk</li>
+<li>merging results: we need an output buffer. lets say this is 1MB. then we read 512KB from each of your chunks into input buffers. we then perform a 2-way merge of the data. when an input buffer becomes empty we can pull in the remainder of the chunk.</li>
+<li>when the output buffer is full we write this to disk.</li>
+<li>when the process completes we are left with 2x 1MB files sorted in the correct order.</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/07/Random-error-debugging-1/">[Testing] Random Error Debugging 1</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/07/Random-error-debugging-1/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/Random-error-debugging-1/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/4531742/debugging-a-program-that-crashes-10-times-in-different-places">link</a></p>
+
+<blockquote><p>You are given the source to an application which is crashing during run time. After running it 10 times in a debugger, you find it never crashes in the same place.</p>
+
+<p>What programming errors could be causing this crash? How would you test each one?</p></blockquote>
+
+<h3>Analysis</h3>
+
+<ol>
+<li><p>code depends on <strong>system time or RNG</strong></p></li>
+<li><p>disk full, i.e. other processes may delete a different file causing more space to be available</p></li>
+<li><p>memory issue, i.e. other processes allocate and/or free memory</p></li>
+<li><p>a pointer points to a random location in memory that is changed by another process causing some values be &ldquo;valid&rdquo; (very rare though)</p></li>
+</ol>
+
+
+<p><a href="http://stackoverflow.com/a/4531769">In general</a> a situation <strong>with other process</strong> is likely.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -656,231 +887,6 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/05/Write-a-RNG/">[Google] Write a Random Number Generator</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/05/Write-a-RNG/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/05/Write-a-RNG/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5173972006076416">link</a></p>
-
-<h3>Solution</h3>
-
-<p>Basically, the formula is as follows:</p>
-
-<blockquote><p>number = (previous_number * constant + other_constant) mod third_constant</p></blockquote>
-
-<p>The three constants are carefully selected, and a typical choice is:</p>
-
-<blockquote><p>number = (previous_number * 214013 + 2531011) mod 2<sup>15</sup></p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/05/Web-server-application-server/">[Design] Application Server vs. Web Server</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/05/Web-server-application-server/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/05/Web-server-application-server/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Overview</h2>
-
-<p>A Web server <strong>exclusively handles HTTP requests</strong>, whereas an application server <strong>serves business logic</strong> to application programs through any number of protocols.</p>
-
-<h3>Web server</h3>
-
-<p>A <a href="http://www.javaworld.com/article/2077354/learn-java/app-server-web-server-what-s-the-difference.html">Web server</a> <strong>handles the HTTP protocol</strong>. When the Web server receives an HTTP request, it responds with an HTTP response, such as sending back an HTML page.</p>
-
-<p>To process a request, a Web server may <strong>respond with a static HTML page</strong>, or delegate the <strong>dynamic response</strong> such as CGI scripts, JSPs (JavaServer Pages), servlets, ASPs (Active Server Pages), server-side JavaScripts, or some other server-side technology.</p>
-
-<h3>Application server</h3>
-
-<p>An <a href="http://www.javaworld.com/article/2077354/learn-java/app-server-web-server-what-s-the-difference.html">Application server</a> <strong>exposes business logic to client applications</strong> through various protocols, possibly including HTTP. The clients can include GUIs (graphical user interface) running on a PC, a Web server, or even other application servers.</p>
-
-<p>In most cases, the server exposes this business logic through a component API, such as <strong>the EJB (Enterprise JavaBean) component model</strong> found on J2EE (Java 2 Platform, Enterprise Edition) application servers.</p>
-
-<p>Moreover, the application server manages its own resources. Such gate-keeping duties include security, transaction processing, resource pooling, and messaging.</p>
-
-<p>There&rsquo;s <a href="http://www.javaworld.com/article/2077354/learn-java/app-server-web-server-what-s-the-difference.html">a nice example</a> as well.</p>
-
-<h3>Another explanation</h3>
-
-<p>Web server on the left.</p>
-
-<table>
-    <tbody><tr id="row1" title="Application Server vs Web Server comparison - What is it?"><td class="acol bg-color bg-img font-color">What is it?</td>                <td id="valtd1_1" class="vcol bg-color bg-img font-color">A server that exposes business logic to client applications through various protocols including HTTP.</td>
-                <td id="valtd1_2" class="vcol bg-color bg-img font-color">A server that handles HTTP protocol.</td>
-                </tr><tr id="row2" title="Application Server vs Web Server comparison - Job"><td class="acol bg-color bg-img font-color">Job</td>                <td id="valtd2_1" class="vcol bg-color bg-img font-color">Application server is used to serve web based applications and enterprise based applications(i.e servlets, jsps and ejbs&#8230;). Application servers may contain a web server internally.</td>
-                <td id="valtd2_2" class="vcol bg-color bg-img font-color">Web server is used to serve web based applications.(i.e servlets and jsps)</td>
-                </tr><tr id="row3" title="Application Server vs Web Server comparison - Functions"><td class="acol bg-color bg-img font-color">Functions</td>                <td id="valtd3_1" class="vcol bg-color bg-img font-color">To deliver various applications to another device, it allows everyone in the network to run software off of the same machine.</td>
-                <td id="valtd3_2" class="vcol bg-color bg-img font-color">Keeping HTML, PHP, ASP etc  files available for the web browsers to view when a user accesses the site on the web, handles HTTP requests from clients.</td>
-                </tr><tr id="row4" title="Application Server vs Web Server comparison - Supports"><td class="acol bg-color bg-img font-color">Supports</td>                <td id="valtd4_1" class="vcol bg-color bg-img font-color">distributed transaction and EJB&#8217;s</td>
-                <td id="valtd4_2" class="vcol bg-color bg-img font-color">Servlets and JSP</td>
-                </tr><tr class="comparisonRow diff lastRow" id="row5" title="Application Server vs Web Server comparison - Resource utilization"><td class="acol bg-color bg-img font-color">Resource utilization</td>                <td id="valtd5_1" class="vcol bg-color bg-img font-color">High</td>
-    <td id="valtd5_2" class="vcol bg-color bg-img font-color">Low</td>
-</tr></tbody></table>
-
-
-<br />
-
-
-<h4>Miscellaneous</h4>
-
-<p>For <a href="http://www.geekinterview.com/question_details/17043">J2EE</a>, Web server is used only for <strong>Jsp and Servlets</strong> and static functionality. It doesn&rsquo;t support <strong>EJB and JMS and JAAS</strong>.</p>
-
-<p>Application server is basically:</p>
-
-<blockquote><p>AppServer = WebServer + EJB container.</p></blockquote>
-
-<p><strong>Tomcat is web container</strong> where as Apache is web server.</p>
-
-<p>An Application Server may include a Web Server inside it.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/05/Upcasting-and-Object-Slicing/">[Java OOP] Upcasting, Downcasting and Object Slicing</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/05/Upcasting-and-Object-Slicing/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/05/Upcasting-and-Object-Slicing/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Upcasting and Downcasting</h3>
-
-<p>Java permits an object of a <strong>subclass type to be treated as an object of any superclass type</strong>. This is <a href="http://forum.codecall.net/topic/50451-upcasting-downcasting/">called upcasting</a>. Upcasting is done automatically, while downcasting must be manually done.</p>
-
-<p><a href="http://forum.codecall.net/topic/50451-upcasting-downcasting/">Example</a>:</p>
-
-<p><img class="middle" src="/assets/images/java-upcasting-downcasting.jpg"></p>
-
-<pre><code>Cat c1 = new Cat();
-Animal a = c1; //automatic upcasting to Animal
-Cat c2 = (Cat) a; //manual downcasting back to a Cat
-</code></pre>
-
-<p>Upcasting is always typesafe but can cause the so called <a href="http://forums.codeguru.com/showthread.php?321676-What-are-upcasting-and-downcasting-dangers">&ldquo;slicing&rdquo; problem</a>.</p>
-
-<h3>Object Slicing</h3>
-
-<p><a href="https://www.java.net/also-in-java/object-slicing-and-component-design-java">Object slicing</a> is defined as the conversion of an object into something with less information (typically a superclass)</p>
-
-<h3>More detail</h3>
-
-<p>If you upcast an object, it will <strong>lose all it&rsquo;s properties</strong>, which were inherited. For example, if you cast a Cat to an Animal, it will lose properties inherited from Mammal and Cat. Note, that <strong>data will not be lost, you just can&rsquo;t use it</strong>, until you downcast the object to the right level.</p>
-
-<h3>Example</h3>
-
-<pre><code>class Base {
-    void doSomething() {
-        System.out.println("Base");
-    }
-}
-
-class Derived extends Base {
-    void doSomething() {
-        System.out.println("Derived");
-    }
-}
-
-public class JavaUpcasting {
-    public static void main(String[] args) {
-        Base instance = new Derived();
-        instance.doSomething();
-    }
-}
-</code></pre>
-
-<p>This will output &ldquo;Derived&rdquo;.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/23">&larr; Older</a>
@@ -898,7 +904,7 @@ public class JavaUpcasting {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (61)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
@@ -908,7 +914,7 @@ public class JavaUpcasting {
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (108)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (110)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -924,19 +930,19 @@ public class JavaUpcasting {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/01/each-employee-two-events/">[Question] Each Employee 2 Events</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/01/Activity-Selection-Problem/">[Question] Activity Selection Problem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/calculate-area/">[Apple] Calculate Area</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
       </li>
     
   </ul>

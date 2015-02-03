@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the &hellip;">
+  <meta name="description" content="Question Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price. Definition of &lsquo;span& &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -112,28 +112,367 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://en.wikipedia.org/wiki/Bin_packing_problem">link</a></p>
+<blockquote><p>Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price.</p></blockquote>
 
-<blockquote><p>Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.</p></blockquote>
+<p>Definition of &lsquo;span&rsquo; have got 2 variant:</p>
 
-<p><img class="middle" src="/assets/images/bin-packing.png"></p>
+<h3>Variant 1</h3>
+
+<p><a href="http://www.geeksforgeeks.org/the-stock-span-problem/">link</a></p>
+
+<blockquote><p>Span is the number of consecutive days right before that day, which have less or equal stock value.</p>
+
+<p>(Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>Explanation from <a href="http://stackoverflow.com/a/8765049">here</a>:</p>
+<p><img class="middle" src="/assets/images/StockSpanProblem1.png"></p>
+
+<p>Use stack.</p>
+
+<h3>Variant 2</h3>
+
+<p><a href="http://www.careercup.com/question?id=4825417139617792">link</a></p>
+
+<blockquote><p>Span is the amount of days before the given day where the stock price is less than that of given day.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The top answer in <a href="http://www.careercup.com/question?id=4825417139617792">here</a> is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3.</p>
+
+<p>Instead, the <strong>BST (AVL tree) solution is correct</strong>. It&rsquo;s commented by user zahidbuet106.</p>
+
+<blockquote><p>insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the <strong>size of left subtree</strong> at the node being inserted. This will give us our desired smaller element count.</p>
+
+<p>We also need to handle balancing the tree while insert.</p></blockquote>
+
+<p><strong>The key of this question is the special BST, where each node stores an additional counting number</strong>.</p>
+
+<p>This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it&rsquo;s ranking within the past history.</p>
+
+<p>Read another very interesting post: <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>class TreeNodePlus extends TreeNode {
+    int leftCount;
+    int dupCount;
+
+    public TreeNodePlus(int v, int leftC) {
+        super(v);
+        this.leftCount = leftC;
+        this.dupCount = 1;
+    }
+
+    public int findRank(TreeNodePlus node) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (this == node) {
+            return 0;
+        } else if (node.val &lt; this.val) {
+            if (this.left == null) {
+                return 0;
+            } else {
+                return leftBranch.findRank(node);
+            }
+        } else {
+            if (this.right == null) {
+                return this.leftCount + this.dupCount;
+            } else {
+                return this.leftCount + this.dupCount
+                        + rightBranch.findRank(node);
+            }
+        }
+    }
+
+    public TreeNodePlus insertNum(int num) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (num == this.val) {
+            this.dupCount++;
+            return this;
+        } else if (num &lt; this.val) {
+            // insert num to the left branch
+            this.leftCount++;
+            if (this.left == null) {
+                this.left = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.left;
+            } else {
+                return leftBranch.insertNum(num);
+            }
+        } else {
+            // insert num to the right branch
+            // this.leftCount does not change
+            if (this.right == null) {
+                this.right = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.right;
+            } else {
+                return rightBranch.insertNum(num);
+            }
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/limit-request-per-second/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/limit-request-per-second/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">link</a></p>
+
+<blockquote><p>有一个接口叫 void setRPS(int num);</p>
+
+<p>接下来不断有request过来，如何实现下面的接口，返回accept或者deny，</p></blockquote>
+
+<pre><code>bool process(int timestamp){
+
+}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Suggested by level 5 of <a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">this post</a>:</p>
 
 <ol>
-<li>Build a binary tree. Each branch in the tree contains a sprite.</li>
-<li>Each <strong>leaf node represents available space</strong>.</li>
-<li>Initially the tree has just the root node, which represents all available space.</li>
-<li>To add a sprite to the tree, search the tree for an unoccupied (leaf) node <strong>big enough</strong> to hold the sprite.</li>
-<li>Turn that node from a leaf into a branch by setting the sprite as the node&rsquo;s occupant and giving the node two children.</li>
-<li>One child represents the remaining space to the right of the sprite;</li>
-<li>the other represents the remaining space below the sprite and the first child.</li>
+<li>maintain a variable for the number of request processed/rejected.
+
+<ol>
+<li>This variable must be atomic, thus a <strong>AtomicInteger</strong>.</li>
+<li>the variable is called &lsquo;count&rsquo;</li>
+</ol>
+</li>
+<li>have a method to process request
+
+<ol>
+<li>if count &lt; limit, do it</li>
+<li>otherwise, reject</li>
+</ol>
+</li>
+<li><strong>This is the most important</strong>: clear the count every 1 seconds!
+
+<ol>
+<li>eg. LIMIT = 5r/s, so:</li>
+<li>the <strong>first 5 number of requests in every second</strong> are getting fulfilled</li>
+<li>from 6th request onward, the request all rejected, until the next second.</li>
+</ol>
+</li>
 </ol>
 
 
-<p>For detailed implementation and code, refer to <a href="http://codeincomplete.com/posts/2011/5/7/bin_packing/">this</a> comprehensite guide. BTW, it&rsquo;s used for <strong>auto generating CSS Sprites</strong> which puts images into a large graph.</p>
+<h3>Code</h3>
+
+<pre><code>public class SetRps {
+
+    AtomicInteger count = new AtomicInteger(0);
+    int limit = -1;
+    int printIndex = 1;
+    long startTimestamp = -1;
+
+    void setRPS(int num) {
+        limit = num;
+    }
+
+    boolean process(long timestamp) {
+        // suppose timestamp is ms
+        synchronized (this) {
+            if (count.get() &lt; limit) {
+                // can process
+                count.incrementAndGet();
+                System.out.println(printIndex++ + ". processing request "
+                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
+                return true;
+            }
+            if (timestamp - startTimestamp &gt;= 1000) {
+                // every 1 seconds, reset
+                count.set(0);
+                startTimestamp = timestamp;
+                System.out.println("clear!");
+                return true;
+            }
+        }
+        return false;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/each-employee-two-events/">[Question] Each Employee 2 Events</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/each-employee-two-events/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/each-employee-two-events/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.careercup.com/question?id=7894677">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>You are given N ranges of date offsets when N employees are present in an organization. Something like</p></blockquote>
+
+<pre><code>    1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
+    2-6 
+    8-9 
+    .. 
+    1-14 
+</code></pre>
+
+<blockquote><p>Organize an event on minimum number of days such that each employee can attend the event at least twice.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to the <a href="http://www.careercup.com/question?id=7894677">top answer</a>:</p>
+
+<ol>
+<li><p>First, sort all ranges based on ENDING date in increasing order (bucket or counting sort).</p></li>
+<li><p>For each range, select last two days (because they produce maximum possibility to overlap next range)</p></li>
+<li><p>Skip following ranges that also contains those two days, until:</p>
+
+<ol>
+<li>a range that either covers only one day (we then select last day of this range) or</li>
+<li>does not cover any of the two (we then select last two days of this range).</li>
+</ol>
+</li>
+<li><p>Then continue.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/Activity-Selection-Problem/">[Question] Activity Selection Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/Activity-Selection-Problem/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>Given n activities with their start and finish times.</p>
+
+<p>Select maximum number of activities that can be performed in one run.</p>
+
+<p>Example:</p></blockquote>
+
+<pre><code>     start[]  =  {1, 3, 0, 5, 8, 5};
+     finish[] =  {2, 4, 6, 7, 9, 9};
+
+     output[] = {0, 1, 3, 4}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to <a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">gfg</a>:</p>
+
+<ol>
+<li><p>Sort the activities according to their finishing time</p></li>
+<li><p>Select the first activity from the sorted array and print it.</p></li>
+<li><p>For the rest, if start time is greater than previous finish time, then select this activity.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written.</p>
 </div>
   
   
@@ -208,7 +547,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/29/product-array-puzzle/">[Question] Product Array Puzzle</a></h1>
     
     
       <p class="meta">
@@ -679,323 +1018,6 @@ The approximation ratio of Sleator&#8217;s algorithm is 2.5 which is tight.</p><
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/28/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/28/speed-up-web-page-1/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/28/speed-up-web-page-1/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1">ref</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps internet connection.</p>
-
-<p>Further he asked for the customer who has 100 mbps internet connection.</p></blockquote>
-
-<h3>Reading</h3>
-
-<p><a href="http://sixrevisions.com/web-development/site-speed-performance/">This</a> is a very nice article about website speedup. Below is the full quoted text.</p>
-
-<h4>1. Defer Loading Content When Possible</h4>
-
-<p>Ajax allows us to build web pages that can be <strong>asynchronously updated</strong> at any time. This means that instead of reloading an entire page when a user performs an action, we can simply update parts of that page.</p>
-
-<p>We can use an image gallery as an example. Image files are big and heavy; they can slow down page-loading speeds of web pages. Instead of loading all of the images when a user first visits the web page, we can just display thumbnails of the images and then when the user clicks on them, we can asynchronously request the full-size images from the server and update the page. This way, if a user only wants to see a few pictures, they don’t have to suffer waiting for all of the pictures to download. This development pattern is called <strong>lazy loading</strong>.</p>
-
-<p><strong>Ajax/web development libraries</strong> like jQuery, Prototype, and MooTools can make deferred content-loading easier to implement.</p>
-
-<h4>2. Use External JS and CSS Files</h4>
-
-<p>When the user first loads your web page, the browser will cache external resources like CSS and JavaScript files. Thus, instead of inline JavaScript and CSS files, it’s best to <strong>place them in external files</strong>.</p>
-
-<p>Using inline CSS also increases the rendering time of a web page; having everything defined in your main CSS file lets the browser do less work when rendering the page, since it already knows all the style rules that it needs to apply.</p>
-
-<p><strong>As a bonus</strong>, using external JavaScript and CSS files makes site maintenance easier because you only need to maintain global files instead of code scattered in multiple web pages.</p>
-
-<h4>3. Use Caching Systems</h4>
-
-<p>If you find that your site is connecting to your database in order to create the same content, it’s time to start using a <strong>caching system</strong>. By having a caching system in place, your site will only have to create the content once instead of creating the content every time the page is visited by your users. Don’t worry, caching systems periodically refresh their caches depending on how you set it up — so even constantly-changing web pages (like a blog post with comments) can be cached.</p>
-
-<p><strong>Popular content management systems</strong> like WordPress and Drupal will have <strong>static caching features</strong> that convert dynamically generated pages to static HTML files to reduce unnecessary server processing. For WordPress, check out <a href="https://wordpress.org/plugins/wp-super-cache/">WP Super Cache</a> (one of the six critical WordPress plugins which, claimed by the author, enjoyed a improvement by 259.1% for content-heavy pages). Drupal has a page-caching feature in the core.</p>
-
-<p>There are also <strong>database caching and server-side scripts caching systems</strong> that you can install on your web server (if you have the ability to do so). For example, PHP has extensions called PHP accelerators that optimize performance through caching and various other methods; one example of a <a href="http://en.wikipedia.org/wiki/PHP_accelerator">PHP accelerator</a> is APC. <a href="http://en.wikipedia.org/wiki/Database_caching">Database caching</a> improves performance and scalability of your web applications by reducing the work associated with database read/write/access processes; <strong><a href="http://www.memcached.org/">memcached</a></strong>, for example, caches frequently used database queries.</p>
-
-<h4>8. Load JavaScript at the End of Your Document</h4>
-
-<p>It’s best if you have your scripts loading at the end of the page rather than at the beginning. It allows for the browser to render everything before getting started with the JavaScript. This makes your web pages feel more responsive because the way JavaScript works is that it blocks anything below it from rendering until it has finished downloading. If possible, reference JavaScript right before the closing (body) tag of your HTML documents. To learn more, read about deferring the loading of JavaScript.</p>
-
-<h4>9. Use a Content Delivery Network (CDN)</h4>
-
-<p>Your site’s speed is greatly affected by where the user’s location is, relative to your web server. The farther away they are, the more distance the data being transmitted has to travel. Having your content cached <strong>across multiple, strategically placed geographical locations</strong> helps take care of this problem.</p>
-
-<p>A CDN will often make your operating cost a little higher, but you definitely gain a speed bonus. Check out MaxCDN or <strong>Amazon Simple Storage Service (Amazon S3)</strong>.</p>
-
-<h4>10. Optimize Web Caching</h4>
-
-<p>Along with using caching systems, you should create websites that utilize <strong>web caching</strong> as much as possible. Web caching is when files are <strong>cached by the web browser</strong> for later use. Things that browsers can cache include CSS files, JavaScript files, and images.</p>
-
-<p>Aside from the basics, such as putting CSS and JavaScript code that are used in multiple pages in external files, there are many ways to make sure that you are caching your files in the most efficient way possible.</p>
-
-<p>For example, you can set HTTP response headers such as Expires and Last-Modified to reduce the need of re-downloading certain files when the user comes back to your site. To learn more, read about <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html">caching in HTTP</a> and <a href="https://developers.google.com/speed/docs/insights/LeverageBrowserCaching?csw=1#LeverageBrowserCaching">leveraging browser caching</a>.</p>
-
-<p>To set up HTTP Expires headers in Apache, read this tutorial on adding future expires headers.</p>
-
-<h4>Other mentions</h4>
-
-<ol>
-<li><p><strong>Avoid Resizing Images in HTML</strong> (using HTML’s width and height attributes), for the sake of smaller file size.</p></li>
-<li><p><strong>Optimize Image Sizes by Using the Correct File Format</strong>. Eg. JPG format often displays photographic images at smaller file sizes than PNG.</p></li>
-<li><p><strong>Optimize the Way You Write Code</strong>. For example, instead of using (h1)(em)Your heading(em)(h1), you can easily use CSS to make your headings italics.</p>
-
-<p> Writing code efficiently not only reduces file sizes of your HTML and CSS documents, but also makes it easier to maintain.</p></li>
-</ol>
-
-
-<p>Ref: <a href="http://sixrevisions.com/web-development/site-speed-performance/">http://sixrevisions.com/web-development/site-speed-performance/</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/28/implement-trie-suffix-tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/28/implement-trie-suffix-tree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Trie Node</h3>
-
-<pre><code>public class TrieNode {
-    boolean isLeaf;
-    TrieNode[] child;
-
-    public TrieNode(boolean isLeaf) {
-        this.isLeaf = isLeaf;
-        this.child = new TrieNode[26];
-    }
-
-    public void insert(String str) {
-        if (str == null || str.length() == 0) {
-            this.isLeaf = true;
-            return;
-        }
-        char cur = str.charAt(0);
-        if (child[cur - 'a'] == null) {
-            child[cur - 'a'] = new TrieNode(str.length() == 1);
-        }
-        child[cur - 'a'].insert(str.substring(1));
-    }
-
-    public boolean trieSearch(String str) {
-        // have to consider leaf node
-        if (str == null || str.length() == 0) {
-            return isLeaf;
-        }
-        char cur = str.charAt(0);
-        if (child[cur - 'a'] == null) {
-            return false;
-        }
-        return child[cur - 'a'].trieSearch(str.substring(1));
-    }
-
-    public boolean suffixTreeSearch(String str) {
-        // suffixTreeSearch don't consider leaf node
-        // cuz we search for prefix of suffixes
-        if (str == null || str.length() == 0) {
-            return true;
-        }
-        char cur = str.charAt(0);
-        if (child[cur - 'a'] == null) {
-            return false;
-        }
-        return child[cur - 'a'].suffixTreeSearch(str.substring(1));
-    }
-}
-</code></pre>
-
-<h3>Trie</h3>
-
-<pre><code>public class Trie {
-    TrieNode root;
-
-    public Trie(String[] input) {
-        root = new TrieNode(false);
-
-        for (String str : input) {
-            root.insert(str);
-        }
-    }
-
-    public boolean search(String query) {
-        return root.trieSearch(query);
-    }
-}
-</code></pre>
-
-<h4>Suffix Tree</h4>
-
-<p>Suffix tree might also consider the <strong>List of indexes</strong> thing, which I do not take into consideration in my code.</p>
-
-<pre><code>public class SuffixTree {
-    TrieNode root;
-
-    public SuffixTree(String input) {
-        root = new TrieNode(false);
-
-        for (int i = 0; i &lt; input.length(); i++) {
-            root.insert(input.substring(i));
-        }
-    }
-
-    public boolean search(String query) {
-        return root.suffixTreeSearch(query);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/27/suffix-tree/">[Fundamental] Suffix Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/27/suffix-tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/suffix-tree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/pattern-searching-set-8-suffix-tree-introduction/">ref</a></p>
-
-<h3>Suffix tree</h3>
-
-<p>Both KMP Algorithm and Rabin Karp Algorithm <strong>pre-process the pattern</strong> to make the pattern searching faster. The best time complexity that we could get by preprocessing pattern is <strong>O(n), where n is length of the text</strong>.</p>
-
-<p>Now we will discuss an approach that <strong>pre-processes the text</strong>. A suffix tree is built of the text. After preprocessing text (building suffix tree of text), we can <strong>search any pattern in O(m) time</strong> where m is length of the pattern.</p>
-
-<p>Though search is very fast &ndash; just proportional to length of the pattern, it may become costly if <strong>the text changes frequently</strong>. It is good for fixed text or less frequently changing text though.</p>
-
-<h4>Suffix Tree VS. Trie</h4>
-
-<p><strong>A Suffix Tree is a compressed trie of all suffixes of the given text</strong>.</p>
-
-<h4>Compressed Trie</h4>
-
-<p><strong>A Compressed Trie</strong> is obtained from standard trie by joining chains of single nodes.</p>
-
-<p>Example, a standard trie:</p>
-
-<p><img class="middle" src="/assets/images/standardtrieNew.png"></p>
-
-<p>A Compressed Trie:</p>
-
-<p><img class="middle" src="/assets/images/CompressedTrieNew.png"></p>
-
-<h4>build a Suffix Tree</h4>
-
-<ol>
-<li>Generate all suffixes of given text.</li>
-<li>Consider all suffixes as individual words and build a compressed trie.</li>
-</ol>
-
-
-<p>Eg.</p>
-
-<pre><code>banana\0
-anana\0
-nana\0
-ana\0
-na\0
-a\0
-\0
-</code></pre>
-
-<p>Example question: <strong>[CC150v4] 20.8 Full Text Search (Suffix Tree)</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1011,7 +1033,7 @@ a\0
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (61)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
@@ -1021,7 +1043,7 @@ a\0
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (108)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (110)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1037,19 +1059,19 @@ a\0
       </li>
     
       <li class="post">
+        <a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/01/each-employee-two-events/">[Question] Each Employee 2 Events</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/01/Activity-Selection-Problem/">[Question] Activity Selection Problem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/calculate-area/">[Apple] Calculate Area</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
       </li>
     
   </ul>

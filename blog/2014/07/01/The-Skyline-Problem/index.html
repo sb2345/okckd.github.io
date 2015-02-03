@@ -135,9 +135,20 @@ outline of all buildings. Output them in order.</p></blockquote>
 </ol>
 
 
+<p><strong>Updated on Feb 1st, 2015</strong>: using floor 26 of <a href="http://www.mitbbs.com/article_t1/JobHunting/32569901_0_2.html">this post</a>, we can do insertion and deletion in max-heap, then peek the largest element in the heap.</p>
+
+<blockquote><p>把所有的turning points 放在一起，根据coordination从小到大sort 。</p>
+
+<p>再用max-heap, 把所有的turning points扫一遍，遇到start turning point, 把
+volume放入max-heap. 遇到end turning point，把对应的volume从max-heap中取出。</p>
+
+<p>max-heap的max 值就是对应区间的最大volume</p></blockquote>
+
+<p>Code presented below.</p>
+
 <h3>Code</h3>
 
-<p>Brate force <a href="http://www.cs.ucf.edu/~dmarino/ucf/java/Skyline.java">code</a>:</p>
+<p>Brate force code from <a href="http://www.cs.ucf.edu/~dmarino/ucf/java/Skyline.java">ucf</a>:</p>
 
 <pre><code>public static void main(String[] args) throws IOException {
 
@@ -194,7 +205,67 @@ outline of all buildings. Output them in order.</p></blockquote>
 }
 </code></pre>
 
-<p>The heap solution is much too complex. It can be found <a href="http://courses.oreillyschool.com/data-structures-algorithms/overviewAlgorithms.html">here</a>.</p>
+<p>The heap solution:</p>
+
+<pre><code>public int[] skyline(List&lt;Building&gt; bds, int min, int max) {
+    int[] output = new int[max - min];
+
+    List&lt;Edge&gt;[] edges = new List[max - min];
+    for (int i = 0; i &lt; edges.length; i++) {
+        edges[i] = new ArrayList&lt;Edge&gt;();
+    }
+    for (Building b : bds) {
+        // put all edges into an array of edges
+        edges[b.from].add(new Edge(b, true));
+        edges[b.to].add(new Edge(b, false));
+    }
+
+    Queue&lt;Building&gt; heap = new PriorityQueue&lt;Building&gt;(100,
+            new Comparator&lt;Building&gt;() {
+                public int compare(Building b1, Building b2) {
+                    return b2.height - b1.height;
+                }
+            });
+    for (int i = 0; i &lt; edges.length; i++) {
+        // insert or remove each building at position i into max heap
+        for (Edge e : edges[i]) {
+            if (e.isEnter) {
+                heap.add(e.building);
+            } else {
+                heap.remove(e.building);
+            }
+        }
+        // then culculate the current hight, which is top of the heap
+        if (!heap.isEmpty()) {
+            output[i] = heap.peek().height;
+        }
+    }
+
+    return output;
+}
+
+static class Edge {
+    Building building;
+    boolean isEnter;
+
+    public Edge(Building bld, boolean enter) {
+        building = bld;
+        isEnter = enter;
+    }
+}
+
+static class Building {
+    int from;
+    int to;
+    int height;
+
+    public Building(int a, int b, int c) {
+        from = a;
+        to = b;
+        height = c;
+    }
+}
+</code></pre>
 </div>
 
 
@@ -264,7 +335,7 @@ outline of all buildings. Output them in order.</p></blockquote>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (60)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (61)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
@@ -274,7 +345,7 @@ outline of all buildings. Output them in order.</p></blockquote>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (108)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (110)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -290,19 +361,19 @@ outline of all buildings. Output them in order.</p></blockquote>
       </li>
     
       <li class="post">
+        <a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/01/each-employee-two-events/">[Question] Each Employee 2 Events</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/01/Activity-Selection-Problem/">[Question] Activity Selection Problem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/product-array-puzzle/">[Question] a Product Array Puzzle</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/calculate-area/">[Apple] Calculate Area</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a>
       </li>
     
   </ul>

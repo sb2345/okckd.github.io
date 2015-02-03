@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Question | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/question/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-02-01T15:05:07+08:00</updated>
+  <updated>2015-02-03T10:17:58+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -20,25 +20,184 @@
     <id>http://okckd.github.io/blog/2015/02/01/stock-span-problem</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://en.wikipedia.org/wiki/Bin_packing_problem)
+> Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price. 
 
-> Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.
+Definition of 'span' have got 2 variant: 
 
-<img class="middle" src="/assets/images/bin-packing.png">
+### Variant 1
+
+[link](http://www.geeksforgeeks.org/the-stock-span-problem/)
+
+> Span is the number of consecutive days right before that day, which have less or equal stock value. 
+
+> (Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.
 
 ### Solution
 
-Explanation from [here](http://stackoverflow.com/a/8765049): 
+<img class="middle" src="/assets/images/StockSpanProblem1.png">
 
-1. Build a binary tree. Each branch in the tree contains a sprite. 
-1. Each __leaf node represents available space__. 
-1. Initially the tree has just the root node, which represents all available space. 
-1. To add a sprite to the tree, search the tree for an unoccupied (leaf) node __big enough__ to hold the sprite. 
-1. Turn that node from a leaf into a branch by setting the sprite as the node's occupant and giving the node two children. 
-1. One child represents the remaining space to the right of the sprite; 
-1. the other represents the remaining space below the sprite and the first child.
+Use stack. 
 
-For detailed implementation and code, refer to [this](http://codeincomplete.com/posts/2011/5/7/bin_packing/) comprehensite guide. BTW, it's used for __auto generating CSS Sprites__ which puts images into a large graph. 
+### Variant 2
+
+[link](http://www.careercup.com/question?id=4825417139617792)
+
+> Span is the amount of days before the given day where the stock price is less than that of given day. 
+
+### Solution
+
+The top answer in [here](http://www.careercup.com/question?id=4825417139617792) is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3. 
+
+Instead, the __BST (AVL tree) solution is correct__. It's commented by user zahidbuet106. 
+
+> insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the __size of left subtree__ at the node being inserted. This will give us our desired smaller element count. 
+
+> We also need to handle balancing the tree while insert. 
+
+__The key of this question is the special BST, where each node stores an additional counting number__. 
+
+This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it's ranking within the past history. 
+
+Read another very interesting post: __[CC150v5] 11.8 Get Rank in Stream of Integers__.
+
+### Code
+
+	class TreeNodePlus extends TreeNode {
+		int leftCount;
+		int dupCount;
+
+		public TreeNodePlus(int v, int leftC) {
+			super(v);
+			this.leftCount = leftC;
+			this.dupCount = 1;
+		}
+
+		public int findRank(TreeNodePlus node) {
+			TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+			TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+			if (this == node) {
+				return 0;
+			} else if (node.val < this.val) {
+				if (this.left == null) {
+					return 0;
+				} else {
+					return leftBranch.findRank(node);
+				}
+			} else {
+				if (this.right == null) {
+					return this.leftCount + this.dupCount;
+				} else {
+					return this.leftCount + this.dupCount
+							+ rightBranch.findRank(node);
+				}
+			}
+		}
+
+		public TreeNodePlus insertNum(int num) {
+			TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+			TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+			if (num == this.val) {
+				this.dupCount++;
+				return this;
+			} else if (num < this.val) {
+				// insert num to the left branch
+				this.leftCount++;
+				if (this.left == null) {
+					this.left = new TreeNodePlus(num, 0);
+					return (TreeNodePlus) this.left;
+				} else {
+					return leftBranch.insertNum(num);
+				}
+			} else {
+				// insert num to the right branch
+				// this.leftCount does not change
+				if (this.right == null) {
+					this.right = new TreeNodePlus(num, 0);
+					return (TreeNodePlus) this.right;
+				} else {
+					return rightBranch.insertNum(num);
+				}
+			}
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Each Employee 2 Events]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/01/each-employee-two-events/"/>
+    <updated>2015-02-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/01/each-employee-two-events</id>
+    <content type="html"><![CDATA[[link](http://www.careercup.com/question?id=7894677)
+
+### Question 
+
+> You are given N ranges of date offsets when N employees are present in an organization. Something like 
+
+        1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
+        2-6 
+        8-9 
+        .. 
+        1-14 
+
+> Organize an event on minimum number of days such that each employee can attend the event at least twice.
+
+### Solution
+
+__Greedy algorithm__, according to the [top answer](http://www.careercup.com/question?id=7894677): 
+
+1. First, sort all ranges based on ENDING date in increasing order (bucket or counting sort). 
+
+1. For each range, select last two days (because they produce maximum possibility to overlap next range) 
+
+1. Skip following ranges that also contains those two days, until:
+
+    1. a range that either covers only one day (we then select last day of this range) or 
+    1. does not cover any of the two (we then select last two days of this range). 
+
+1. Then continue.
+
+### Code
+
+not written
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Activity Selection Problem]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem/"/>
+    <updated>2015-02-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem</id>
+    <content type="html"><![CDATA[[link](http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/)
+
+### Question 
+
+> Given n activities with their start and finish times. 
+
+> Select maximum number of activities that can be performed in one run. 
+
+> Example:
+
+         start[]  =  {1, 3, 0, 5, 8, 5};
+         finish[] =  {2, 4, 6, 7, 9, 9};
+
+         output[] = {0, 1, 3, 4}
+
+### Solution
+
+__Greedy algorithm__, according to [gfg](http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/): 
+
+1. Sort the activities according to their finishing time
+
+1. Select the first activity from the sorted array and print it.
+
+1. For the rest, if start time is greater than previous finish time, then select this activity.
+
+### Code
+
+not written.
 ]]></content>
   </entry>
   
@@ -72,7 +231,7 @@ For detailed implementation and code, refer to [this](http://codeincomplete.com/
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Question] a Product Array Puzzle]]></title>
+    <title type="html"><![CDATA[[Question] Product Array Puzzle]]></title>
     <link href="http://okckd.github.io/blog/2015/01/29/product-array-puzzle/"/>
     <updated>2015-01-29T00:00:00+08:00</updated>
     <id>http://okckd.github.io/blog/2015/01/29/product-array-puzzle</id>
@@ -96,115 +255,6 @@ For eg : L[]= {1 , 1 , 2 , 6 }
 and R[] = { 24 , 12 , 4 , 1} 
 
 The multiply R[i] and L[i] to get the resultant array.
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Apple] Calculate Area]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/29/calculate-area/"/>
-    <updated>2015-01-29T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/29/calculate-area</id>
-    <content type="html"><![CDATA[### Question 
-
-> Calculate area: 
-
-<img class="middle" src="/assets/images/calculate-area.jpg">
-
-### Analysis
-
-We are only able to come up with 2 equations using the obvious relationship between semicircle and square. But we have x, y and z variables. 
-
-<img class="middle" src="/assets/images/calculate-area-xyz.jpg">
-
-How do we proceed? 
-
-### Solution
-
-Thanks to my girlfriend, who came up with the solution: 
-
-<img class="middle" src="/assets/images/calculate-area-solution.jpg">
-
-The tiny small shaded area can be calculated by substracting the __isosceles triangle (等腰三角形)__ from a 1/12 circle. 
-
-And the tiny small shaded area is simply a part of the larger shaded area. 
-
-Do you own math. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Packing Rectangles]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/29/Packing-Rectangles/"/>
-    <updated>2015-01-29T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/29/Packing-Rectangles</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://olympiads.win.tue.nl/ioi95/task/pack.html)
-
-> Four rectangles are given. Find the smallest enclosing (new) rectangle into which these four may be fitted without overlapping. By smallest rectangle we mean the one with the smallest area.
-
-<img class="middle" src="/assets/images/packing-rect.gif">
-
-### Greedy 
-
-[Greedy](http://stackoverflow.com/a/1213571) placement from __large (area) to small__.
-
-1. Put the largest rectangle remaining into your packed area. 
-1. If it can't fit anywhere, place it in a place that extends the pack region as little as possible. 
-1. Repeat until you finish with the smallest rectangle.
-
-### Optimal Solution
-
-[There is a trade-off](http://stackoverflow.com/a/4264497) between implementation complexity/time and optimality, but there is a wide range of algorithms to choose from.
-
-Below is quoted: 
-
-<blockquote>
-    <div class="post-text" itemprop="text">
-<ol>
-<li><p>First-Fit Decreasing Height (FFDH) algorithm<br>
-FFDH packs the next item R (in non-increasing height) on the first level where R fits. If no level can accommodate R, a new level is created.<br>
-Time complexity of FFDH: O(n·log n).<br>
-Approximation ratio: FFDH(I)&lt;=(17/10)·OPT(I)+1; the asymptotic bound of 17/10 is tight.</p></li>
-<li><p>Next-Fit Decreasing Height (NFDH) algorithm<br>
-NFDH packs the next item R (in non-increasing height) on the current level if R fits. Otherwise, the current level is "closed" and a new level is created.<br>
-Time complexity: O(n·log n).<br>
-Approximation ratio: NFDH(I) &lt;= 2·OPT(I)+1; the asymptotic bound of 2 is tight.</p></li>
-<li><p>Best-Fit Decreasing Height (BFDH) algorithm<br>
-BFDH packs the next item R (in non-increasing height) on the level, among those that can accommodate R, for which the residual horizontal space is the minimum. If no level can accommodate R, a new level is created. </p></li>
-<li><p>Bottom-Left (BL) Algorithm<br>
-BL first order items by non-increasing width. BL packs the next item as near to the bottom as it will fit and then as close to the left as it can go without overlapping with any packed item. Note that BL is not a level-oriented packing algorithm.<br>
-Time complexity: O(n^2).<br>
-Approximation ratio: BL(I) &lt;= 3·OPT(I).  </p></li>
-<li><p>Baker's Up-Down (UD) algorithm<br>
-UD uses a combination of BL and a generalization of NFDH. The width of the strip and the items are normalized so that the strip is of unit width. UD orders the items in non-increasing width and then divides the items into five groups, each with width in the range (1/2, 1], (1/3,1/2], (1/4,1/3], (1/5,1/4], (0,1/5]. The strip is also divided into five regions R1, ··· , R5. Basically, some items of width in the range (1/i+1, 1/i], for 1 &lt;= i &lt;= 4, are packed to region Ri by BL. Since BL leaves a space of increasing width from top to bottom at the right side of the strip, UD takes this advantage by first packing the item to Rj for j = 1, ··· , 4 (in order) from top to bottom. If there is no such space, the item is packed to Ri by BL. Finally, items of size at most 1/5 are packed to the spaces in R1, ··· , R4 by the (generalized) NFDH algorithm. Again if there is no space in these regions, the item is packed to R5 using NFDH.<br>
-Approximation ratio: UD(I) &lt;= (5/4) · OPT(I)+(53/8)H, where H is the maximum height of the items; the asymptotic bound of 5/4 is tight.</p></li>
-<li><p>Reverse-fit (RF) algorithm<br>
-RF also normalizes the width of the strip and the items so that the strip is of unit width. RF first stacks all items of width greater than 1/2. Remaining items are sorted in non-increasing height and will be packed above the height H0 reached by those greater than 1/2. Then RF repeats the following process. Roughly speaking, RF packs items from left to right with their bottom along the line of height H0 until there is no more room. Then packs items from right to left and from top to bottom (called reverse-level) until the total width is at least 1/2. Then the reverse-level is dropped down until (at least) one of them touches some item below. The drop down is somehow repeated.<br>
-Approximation ratio: RF(I) &lt;= 2·OPT(I).</p></li>
-<li><p>Steinberg's algorithm<br>
-Steinberg's algorithm, denoted as M in the paper, estimates an upper bound of the height H required to pack all the items such that it is proved that the input items can be packed into a rectangle of width W and height H. They then define seven procedures (with seven conditions), each to divide a problem into two smaller ones and solve them recursively. It has been showed that any tractable problem satisfies one of the seven conditions.<br>
-Approximation ratio: M(I) &lt;= 2·OPT(I).</p></li>
-<li><p>Split-Fit algorithm (SF)
-SF divides items into two groups, L1 with width greater than 1/2 and L2 at most 1/2. All items of L1 are first packed by FFDH. Then they are arranged so that all items with width more than 2/3 are below those with width at most 2/3. This creates a rectangle R of space with width 1/3. Remaining items in L2 are then packed to R and the space above those packed with L1 using FFDH. The levels created in R are considered to be below those created above the packing of L1.<br>
-Approximation ratio: SF(I) &lt;= (3/2) ·OPT(I) + 2; the asymptotic bound of 3/2 is tight.</p></li>
-<li><p>Sleator's algorithm<br>
-Sleater's algorithm consists of four steps:</p>
-
-<ol>
-<li><p>All items of width greater than 1/2 are packed on top of one another in the bottom of the strip. Suppose h0 is the height of the resulting packing All subsequent packing will occur above h0.</p></li>
-<li><p>Remaining items are ordered by non-increasing height. A level of items are packed (in non-increasing height order) from left to right along the line of height h0. </p></li>
-<li><p>A vertical line is then drawn in the middle to cut the strip into two equal halves (note this line may cut an item that is packed partially in the right half). Draw two horizontal line segments of length one half, one across the left half (called the left baseline) and one across the right half (called the right baseline) as low as possible such that the two lines do not cross any item.</p></li>
-<li><p>Choose the left or right baseline which is of a lower height and pack a level of items into the corresponding half of the strip until the next item is too wide.</p></li>
-</ol>
-
-<p>A new baseline is formed and Step (4) is repeated on the lower baseline until all items are packed.<br>
-Time complexity: O(n ·log n).<br>
-The approximation ratio of Sleator's algorithm is 2.5 which is tight.</p></li>
-</ol>
-    </div>
-</blockquote>
-
 ]]></content>
   </entry>
   
