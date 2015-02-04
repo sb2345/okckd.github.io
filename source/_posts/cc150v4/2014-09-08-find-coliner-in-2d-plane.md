@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 10.6 Find Collinear in 2D Plane"
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

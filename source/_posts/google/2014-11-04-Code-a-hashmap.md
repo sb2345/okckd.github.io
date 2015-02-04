@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Code a HashMap "
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

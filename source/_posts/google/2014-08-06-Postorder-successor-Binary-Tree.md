@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Postorder successor in Binary Tree"
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

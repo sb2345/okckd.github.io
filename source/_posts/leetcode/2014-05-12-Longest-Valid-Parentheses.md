@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 32] Longest Valid Parentheses "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

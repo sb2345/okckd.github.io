@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Listener / Observer pattern "
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Observer pattern

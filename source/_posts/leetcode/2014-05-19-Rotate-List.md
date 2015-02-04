@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 61] Rotate List"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

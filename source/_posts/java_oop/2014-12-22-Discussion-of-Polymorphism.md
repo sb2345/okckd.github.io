@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Discussion of Polymorphism "
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Polymorphism

@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Application Server vs. Web Server"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ## Overview

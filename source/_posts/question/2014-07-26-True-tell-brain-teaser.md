@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Truth tell brain teaser"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Connect Graph Nodes and Avoid Intersect"
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

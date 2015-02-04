@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 86] Partition List"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 

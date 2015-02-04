@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Merits of BST over HashTables"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Question 

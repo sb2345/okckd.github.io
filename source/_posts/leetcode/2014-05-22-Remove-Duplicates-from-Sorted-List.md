@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 83] Remove Duplicates from Sorted List"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 

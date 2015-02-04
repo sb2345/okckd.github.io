@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Big Data Storage "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 [ref](http://www.mitbbs.com/article/JobHunting/32580869_0.html)

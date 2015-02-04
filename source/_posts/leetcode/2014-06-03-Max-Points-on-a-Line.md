@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 149] Max Points on a Line"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

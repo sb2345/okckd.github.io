@@ -3,7 +3,7 @@ layout: post
 title: "[Design] TCP 3-Way Handshake"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Handshaking

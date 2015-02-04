@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "[Question] A Product Array Puzzle "
+title: "[Question] Product Array Puzzle "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

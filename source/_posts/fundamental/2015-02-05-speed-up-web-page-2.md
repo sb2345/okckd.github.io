@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Speed Up Webpage for Slow Connection (2) "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 [ref](www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1)

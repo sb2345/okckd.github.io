@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Diameter of a Binary Tree "
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

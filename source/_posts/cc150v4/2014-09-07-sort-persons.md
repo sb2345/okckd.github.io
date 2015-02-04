@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 9.0 Example - Sort Persons "
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

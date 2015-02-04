@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 144] Binary Tree Preorder Traversal"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 

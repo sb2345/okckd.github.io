@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Big Data - Remove Duplicate Numbers"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Question 

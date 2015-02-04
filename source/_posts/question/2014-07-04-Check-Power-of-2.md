@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Check Power of 2"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

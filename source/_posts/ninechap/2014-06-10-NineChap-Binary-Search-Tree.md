@@ -3,7 +3,7 @@ layout: post
 title: "[NineChap 3.3] Binary Search Tree"
 comments: true
 category: NineChap
-tags: [  ]
+
 ---
 
 

@@ -3,7 +3,7 @@ layout: post
 title: "[Question] 2D Bin Packing "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

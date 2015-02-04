@@ -3,7 +3,7 @@ layout: post
 title: "[Apple] Calculate Area "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

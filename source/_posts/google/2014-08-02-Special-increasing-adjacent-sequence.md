@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Special increasing adjacent sequence"
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

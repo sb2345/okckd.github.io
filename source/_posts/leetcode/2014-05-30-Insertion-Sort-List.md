@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 147] Insertion Sort List"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 

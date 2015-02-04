@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Nth Fibonacci Number In O(LogN)"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

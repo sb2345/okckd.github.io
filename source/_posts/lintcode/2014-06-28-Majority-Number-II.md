@@ -3,7 +3,7 @@ layout: post
 title: "[LintCode] Majority Number II"
 description: ""
 category: LintCode
-tags: [  ]
+
 ---
 
 ### Question 

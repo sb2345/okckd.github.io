@@ -5,7 +5,7 @@ comments: true
 categories:
 - Fundamental
 - String search
-tags: [  ]
+
 ---
 
 [ref](http://www.geeksforgeeks.org/pattern-searching-set-8-suffix-tree-introduction/)

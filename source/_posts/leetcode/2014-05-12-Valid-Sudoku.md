@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 36] Valid Sudoku"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

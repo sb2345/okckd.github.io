@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Big Endian and Little Endian"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Difference

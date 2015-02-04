@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Java Global Variable"
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Global variable?

@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Interface and Abstract classes "
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Overview

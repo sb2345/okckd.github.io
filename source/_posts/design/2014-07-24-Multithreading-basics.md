@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Multithreading Basics"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ## Terminologies

@@ -3,7 +3,7 @@ layout: post
 title: "[LintCode] Previous Permutation"
 description: ""
 category: LintCode
-tags: [  ]
+
 ---
 
 ### Question 

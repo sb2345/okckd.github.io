@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Equilibrium Points in 2D Array "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question

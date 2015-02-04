@@ -3,27 +3,110 @@ layout: post
 title: "[Question] Stock Span Problem "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 
 
-[link](http://en.wikipedia.org/wiki/Bin_packing_problem)
+> Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price. 
 
-> Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.
+Definition of 'span' have got 2 variant: 
 
-{% img middle /assets/images/bin-packing.png %}
+### Variant 1
+
+[link](http://www.geeksforgeeks.org/the-stock-span-problem/)
+
+> Span is the number of consecutive days right before that day, which have less or equal stock value. 
+
+> (Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.
 
 ### Solution
 
-Explanation from [here](http://stackoverflow.com/a/8765049): 
+{% img middle /assets/images/StockSpanProblem1.png %}
 
-1. Build a binary tree. Each branch in the tree contains a sprite. 
-1. Each __leaf node represents available space__. 
-1. Initially the tree has just the root node, which represents all available space. 
-1. To add a sprite to the tree, search the tree for an unoccupied (leaf) node __big enough__ to hold the sprite. 
-1. Turn that node from a leaf into a branch by setting the sprite as the node's occupant and giving the node two children. 
-1. One child represents the remaining space to the right of the sprite; 
-1. the other represents the remaining space below the sprite and the first child.
+Use stack. 
 
-For detailed implementation and code, refer to [this](http://codeincomplete.com/posts/2011/5/7/bin_packing/) comprehensite guide. BTW, it's used for __auto generating CSS Sprites__ which puts images into a large graph. 
+### Variant 2
+
+[link](http://www.careercup.com/question?id=4825417139617792)
+
+> Span is the amount of days before the given day where the stock price is less than that of given day. 
+
+### Solution
+
+The top answer in [here](http://www.careercup.com/question?id=4825417139617792) is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3. 
+
+Instead, the __BST (AVL tree) solution is correct__. It's commented by user zahidbuet106. 
+
+> insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the __size of left subtree__ at the node being inserted. This will give us our desired smaller element count. 
+
+> We also need to handle balancing the tree while insert. 
+
+__The key of this question is the special BST, where each node stores an additional counting number__. 
+
+This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it's ranking within the past history. 
+
+Read another very interesting post: __[CC150v5] 11.8 Get Rank in Stream of Integers__.
+
+### Code
+
+	class TreeNodePlus extends TreeNode {
+		int leftCount;
+		int dupCount;
+
+		public TreeNodePlus(int v, int leftC) {
+			super(v);
+			this.leftCount = leftC;
+			this.dupCount = 1;
+		}
+
+		public int findRank(TreeNodePlus node) {
+			TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+			TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+			if (this == node) {
+				return 0;
+			} else if (node.val < this.val) {
+				if (this.left == null) {
+					return 0;
+				} else {
+					return leftBranch.findRank(node);
+				}
+			} else {
+				if (this.right == null) {
+					return this.leftCount + this.dupCount;
+				} else {
+					return this.leftCount + this.dupCount
+							+ rightBranch.findRank(node);
+				}
+			}
+		}
+
+		public TreeNodePlus insertNum(int num) {
+			TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+			TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+			if (num == this.val) {
+				this.dupCount++;
+				return this;
+			} else if (num < this.val) {
+				// insert num to the left branch
+				this.leftCount++;
+				if (this.left == null) {
+					this.left = new TreeNodePlus(num, 0);
+					return (TreeNodePlus) this.left;
+				} else {
+					return leftBranch.insertNum(num);
+				}
+			} else {
+				// insert num to the right branch
+				// this.leftCount does not change
+				if (this.right == null) {
+					this.right = new TreeNodePlus(num, 0);
+					return (TreeNodePlus) this.right;
+				} else {
+					return rightBranch.insertNum(num);
+				}
+			}
+		}
+	}

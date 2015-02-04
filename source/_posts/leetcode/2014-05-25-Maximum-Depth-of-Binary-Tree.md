@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 104] Maximum Depth of Binary Tree"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 

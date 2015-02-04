@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 87] Scramble String"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

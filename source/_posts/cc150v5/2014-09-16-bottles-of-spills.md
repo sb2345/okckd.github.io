@@ -3,7 +3,7 @@ layout: post
 title: "[Brain teaser] 6.1 Bottles of Pills "
 comments: true
 category: CC150v5
-tags: [  ]
+
 ---
 
 ### Question

@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v5] 2.2 Kth last element (recursive) "
 comments: true
 category: CC150v5
-tags: [  ]
+
 ---
 
 ### Question

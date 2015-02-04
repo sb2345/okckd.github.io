@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 5.2 Convert Integer to Binary Form "
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

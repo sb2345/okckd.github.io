@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Factory Pattern "
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Factory Method Pattern

@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Median of array in Distributed Computers"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Question

@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Distributed hash table "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 [ref](http://blog.csdn.net/yfkiss/article/details/6977509)

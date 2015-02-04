@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Make a fair coin from a biased coin"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 

@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 42] Trapping Rain Water "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 24] Swap Nodes in Pairs "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

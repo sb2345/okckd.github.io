@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Square Count of Matchstick Graph"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

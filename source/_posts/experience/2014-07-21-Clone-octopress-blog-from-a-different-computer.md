@@ -3,7 +3,7 @@ layout: post
 title: "[Octopress] Clone Octopress Blog From A Different Computer "
 comments: true
 category: experience
-tags: [  ]
+
 ---
 
 __Ruby/gem/bundler setup (on a new machine) has always been a hassle to me__. Not only that, I've had some confusions about developing Octopress blog on 2 different computers. 

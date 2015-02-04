@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Google API read4096 (read4K)"
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

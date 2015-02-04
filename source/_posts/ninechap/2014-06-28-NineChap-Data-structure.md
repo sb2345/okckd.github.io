@@ -3,7 +3,7 @@ layout: post
 title: "[NineChap 7] Data Structure"
 comments: true
 category: NineChap
-tags: [  ]
+
 ---
 
 ## Data Structure

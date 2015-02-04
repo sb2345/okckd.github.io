@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Packing Rectangles "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

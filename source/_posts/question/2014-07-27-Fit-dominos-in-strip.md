@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Fit 1*2 Dominos In 2*N Strip"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

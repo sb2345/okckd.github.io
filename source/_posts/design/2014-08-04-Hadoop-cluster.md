@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Hadoop cluster"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 [link](http://searchbusinessanalytics.techtarget.com/definition/Hadoop-cluster)

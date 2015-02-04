@@ -3,7 +3,7 @@ layout: post
 title: "[Palantir] Largest basin size in matrix"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

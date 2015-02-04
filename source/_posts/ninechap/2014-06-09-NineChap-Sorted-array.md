@@ -3,7 +3,7 @@ layout: post
 title: "[NineChap 2.2] Sorted Array"
 comments: true
 category: NineChap
-tags: [  ]
+
 ---
 
 ## Sorted Array 

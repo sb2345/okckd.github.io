@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 22] Generate Parentheses "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

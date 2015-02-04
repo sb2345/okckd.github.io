@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 10.7 Ugly Numbers (Hamming numbers) "
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

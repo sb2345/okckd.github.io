@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 43] Multiply Strings "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question

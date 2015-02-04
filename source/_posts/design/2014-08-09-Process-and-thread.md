@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Process VS. Thread "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### First difference

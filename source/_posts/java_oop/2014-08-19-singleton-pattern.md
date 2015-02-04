@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Singleton Pattern "
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Singleton Pattern

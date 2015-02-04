@@ -3,7 +3,7 @@ layout: post
 title: "[NineChap 8] High Frequency Questions"
 comments: true
 category: NineChap
-tags: [  ]
+
 ---
 
 ## Number & Bit questions

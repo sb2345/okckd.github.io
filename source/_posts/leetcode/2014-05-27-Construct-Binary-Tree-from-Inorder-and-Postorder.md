@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 106] Construct Binary Tree from Inorder and Postorder"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 

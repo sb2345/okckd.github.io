@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 60] Permutation Sequence"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 20] Valid Parentheses"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

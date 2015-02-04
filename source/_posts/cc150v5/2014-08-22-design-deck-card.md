@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v5] 8.1 Design a Generic Deck of Cards"
 comments: true
 category: CC150v5
-tags: [  ]
+
 ---
 
 ### Question 

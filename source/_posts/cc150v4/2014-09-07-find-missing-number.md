@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 5.7 Find Missing Number "
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

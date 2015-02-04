@@ -3,7 +3,7 @@ layout: post
 title: "[Design] OOD Design of Elevator"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Question 

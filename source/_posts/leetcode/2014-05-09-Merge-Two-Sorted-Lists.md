@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 21] Merge Two Sorted Lists "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Random Number Generate Question"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

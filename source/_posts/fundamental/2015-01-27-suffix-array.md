@@ -5,7 +5,7 @@ comments: true
 categories:
 - Fundamental
 - String search
-tags: [  ]
+
 ---
 
 [ref](http://www.geeksforgeeks.org/suffix-array-set-1-introduction/)

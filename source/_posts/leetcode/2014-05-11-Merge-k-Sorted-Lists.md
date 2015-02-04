@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 23] Merge k Sorted Lists "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Push and Pop Sequences of Stacks"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

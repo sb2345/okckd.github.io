@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 52] N-Queens II"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 14] Longest Common Prefix "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

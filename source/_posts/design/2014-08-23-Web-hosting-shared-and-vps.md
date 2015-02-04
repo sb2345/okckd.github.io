@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Shared Hosting vs. VPS Hosting "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Shared hosting

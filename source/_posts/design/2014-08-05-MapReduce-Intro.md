@@ -3,7 +3,7 @@ layout: post
 title: "[Design] MapReduce Intro"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### An Overview
