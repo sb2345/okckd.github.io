@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-02-03T10:17:58+08:00</updated>
+  <updated>2015-02-04T13:11:53+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,78 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Monitor Rps for Past Sec/min/hr]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/03/monitor-request-per-second/"/>
+    <updated>2015-02-03T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/03/monitor-request-per-second</id>
+    <content type="html"><![CDATA[### Question
+
+[link](http://www.careercup.com/question?id=6005446611566592)
+
+> Given a server that has requests coming in. 
+
+> Design a data structure such that you can fetch the count of the number requests in the last second, minute and hour.
+
+### Solution 1
+
+__Keep a record of all request timestamps__, suggested by the top answer by [whatevva](http://www.careercup.com/question?id=6005446611566592): 
+
+1. Use a queue implemented as a resizable array to store the timestamps of all new requests 
+
+1. maintain head/tail pointers as usual 
+
+1. Also maintain three pointers, for past sec, past min and past hr. 
+
+Whenever a request comes in, update 3 pointers. Then in the for-loop of the thread, remove old entries and also update 3 pointers. 
+
+Print Rps in real time. I posted my code below (the code is without thread-safety consideration).
+
+### Solution 2
+
+This solution does not store all timestamps, and it does not generate real-time Rps data. But it's good enough because result is only updated every 1 second, so its performance is better. 
+
+Keep an array of int of size 60 * 60. Each second, use the __number of request in the past second__ to update the array values __in a rolling way__. 
+
+### Code 
+
+Solution 1. this is my code so please correct me! 
+
+    public class SetRps {
+
+        AtomicInteger count = new AtomicInteger(0);
+        int limit = -1;
+        int printIndex = 1;
+        long startTimestamp = -1;
+
+        void setRPS(int num) {
+            limit = num;
+        }
+
+        boolean process(long timestamp) {
+            // suppose timestamp is ms
+            synchronized (this) {
+                if (count.get() < limit) {
+                    // can process
+                    count.incrementAndGet();
+                    System.out.println(printIndex++ + ". processing request "
+                            + timestamp % 100000 / 1000 + "," + timestamp % 1000);
+                    return true;
+                }
+                if (timestamp - startTimestamp >= 1000) {
+                    // every 1 seconds, reset
+                    count.set(0);
+                    startTimestamp = timestamp;
+                    System.out.println("clear!");
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] Limit the Request Per Second]]></title>
@@ -326,32 +398,6 @@ __Give more details about memcached failures__
 __What makes memcached distributed is the client__, which in most implementations can connect to a pool of servers. Typical implementations use consistent hashing, which means that when you add or remove server to/from a pool of N servers, you only have to remap 1/N keys. 
 
 Typically keys are __not duplicated__ on various hosts, as memcached is __not meant to be persistent store__ and gives no guarantees that your value will persist (for example when running out of assigned memory, memcached server drops least recently used (LRU) elements). Thus it's assumed that your application should handle missing keys.
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Design Google Suggest (Autocomplete)]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/24/design-google-suggest-autocomplete/"/>
-    <updated>2015-01-24T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/24/design-google-suggest-autocomplete</id>
-    <content type="html"><![CDATA[### Overview 
-
-__Google Suggest__ was [launched in 2004](http://googleblog.blogspot.sg/2004/12/ive-got-suggestion.html) as a 20% time project from Google engineer Kevin Gibbs. He developed the idea on a [Google shuttle bus](http://www.theatlantic.com/technology/archive/2013/08/how-googles-autocomplete-was-created-invented-born/278991/).
-
-### Design
-
-1. Use trie. 
-1. Use cache (distributed cache)
-
-#### Trie
-
-Just make use of all keywords (including space) and build a trie out of it. Then you are good to go just search in Trie. 
-
-A comparison of speed between DB, Set and Trie can be found [here](http://sujitpal.blogspot.sg/2007/02/three-autocomplete-implementations.html). A lot of implementation code can be found [here](http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete). 
-
-#### Memcached
-
-Distributed caching + LRU replacement algorithm. Refer to __[Design] Distributed Caching - memcached__ for more. 
 ]]></content>
   </entry>
   

@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price. Definition of &lsquo;span& &hellip;">
+  <meta name="description" content="Question link Given a server that has requests coming in. Design a data structure such that you can fetch the count of the number requests in the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,110 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/03/monitor-request-per-second/">[Design] Monitor Rps for Past Sec/min/hr</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/03/monitor-request-per-second/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/03/monitor-request-per-second/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=6005446611566592">link</a></p>
+
+<blockquote><p>Given a server that has requests coming in.</p>
+
+<p>Design a data structure such that you can fetch the count of the number requests in the last second, minute and hour.</p></blockquote>
+
+<h3>Solution 1</h3>
+
+<p><strong>Keep a record of all request timestamps</strong>, suggested by the top answer by <a href="http://www.careercup.com/question?id=6005446611566592">whatevva</a>:</p>
+
+<ol>
+<li><p>Use a queue implemented as a resizable array to store the timestamps of all new requests</p></li>
+<li><p>maintain head/tail pointers as usual</p></li>
+<li><p>Also maintain three pointers, for past sec, past min and past hr.</p></li>
+</ol>
+
+
+<p>Whenever a request comes in, update 3 pointers. Then in the for-loop of the thread, remove old entries and also update 3 pointers.</p>
+
+<p>Print Rps in real time. I posted my code below (the code is without thread-safety consideration).</p>
+
+<h3>Solution 2</h3>
+
+<p>This solution does not store all timestamps, and it does not generate real-time Rps data. But it&rsquo;s good enough because result is only updated every 1 second, so its performance is better.</p>
+
+<p>Keep an array of int of size 60 * 60. Each second, use the <strong>number of request in the past second</strong> to update the array values <strong>in a rolling way</strong>.</p>
+
+<h3>Code</h3>
+
+<p>Solution 1. this is my code so please correct me!</p>
+
+<pre><code>public class SetRps {
+
+    AtomicInteger count = new AtomicInteger(0);
+    int limit = -1;
+    int printIndex = 1;
+    long startTimestamp = -1;
+
+    void setRPS(int num) {
+        limit = num;
+    }
+
+    boolean process(long timestamp) {
+        // suppose timestamp is ms
+        synchronized (this) {
+            if (count.get() &lt; limit) {
+                // can process
+                count.incrementAndGet();
+                System.out.println(printIndex++ + ". processing request "
+                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
+                return true;
+            }
+            if (timestamp - startTimestamp &gt;= 1000) {
+                // every 1 seconds, reset
+                count.set(0);
+                startTimestamp = timestamp;
+                System.out.println("clear!");
+                return true;
+            }
+        }
+        return false;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -888,136 +992,6 @@ The approximation ratio of Sleator&#8217;s algorithm is 2.5 which is tight.</p><
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/28/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/28/speed-up-web-page-2/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/28/speed-up-web-page-2/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1">ref</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps internet connection.</p>
-
-<p>Further he asked for the customer who has 100 mbps internet connection.</p></blockquote>
-
-<h3>Website KPI</h3>
-
-<p>There are <a href="https://community.compuwareapm.com/community/display/PUB/Best+Practices+on+Web+Site+Performance+Optimization">3 interesting phases</a> of a web site from an end-user performance perspective.</p>
-
-<ol>
-<li>First Impression</li>
-<li>OnLoad</li>
-<li>Fully Loaded Time.</li>
-</ol>
-
-
-<h3>Loading Time</h3>
-
-<p><strong>Question: what percentage of the time a user spends waiting for your page to load is spent after the HTML comes back to their browser</strong>?</p>
-
-<p>It is typically <strong><a href="http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/">over 90%</a></strong>.</p>
-
-<p>Most of the time users spend waiting on your website is spent after the HTML page has been retrieved by their browser.</p>
-
-<h4>Fetching the HTML is just the beginning</h4>
-
-<p><strong>In a nutshell, browsers parse your page’s HTML, sequentially discovering its assets</strong> (such as scripts, stylesheets, and images), requesting and then either parsing and executing them or displaying them as appropriate.</p>
-
-<p>But these assets are not simply fetched all at once. Instead, the <strong>browser opens a limited number of connections to the server(s)</strong> referenced by the page. There is <strong>overhead involved in establishing TCP and HTTP connections</strong>, and some <strong>unavoidable latency</strong> in pushing the request and response bytes back and forth across the network.</p>
-
-<p>So, in general, round trips between the browser and server are expensive. The structure of the HTML markup, the number and the ordering of its assets, are absolutely critical factors in its performance.</p>
-
-<h3>What hijacks your load time</h3>
-
-<h4>1. Too Many HTTP Requests</h4>
-
-<p>This is the single biggest contributor to performance problems in most web pages.</p>
-
-<ol>
-<li><p>Concatenate scripts and stylesheets</p></li>
-<li><p>Combine images with sprites (put common images into a single large image file, then use CSS to position and selectively display the appropriate portion of the sprite image)</p></li>
-<li><p>Use fewer images, more CSS.</p></li>
-</ol>
-
-
-<h4>2. Minimal Client-side Processing</h4>
-
-<ol>
-<li><p>Validation on client. (eg. form input)</p></li>
-<li><p>Use web standards and MVC separation, making a maintainable, accessible, future-proof and max-performance website.</p>
-
-<p> Think of the HTML as the model, the CSS as the view, and the JavaScript as the controller. This separation tends to make code more efficient and maintainable, and makes many optimization techniques much more practical to apply.</p></li>
-<li><p>Push presentation code into the client tier (eg. Charts and graphs — push raw data to the client in JSON format, and use JavaScript and CSS to create pretty graphs.)</p></li>
-<li><p>Leverage Ajax techniques (only requiring small parts of the page to change in response to user actions)</p></li>
-</ol>
-
-
-<h4>3. Low Number of Parallel Requests</h4>
-
-<p>Fetch a script, parse and execute it, then fetch another one&hellip; this will use up all the available connections. There are things you can do to your HTML to allow virtually any browser to make many requests at once, which has a huge impact on latency.</p>
-
-<ol>
-<li><p>Use browser-appropriate domain sharding</p></li>
-<li><p>Use intelligent script loading</p></li>
-<li><p>Leverage Keep-Alive (reuse the same TCP connection for multiple HTTP request/response cycles)</p></li>
-</ol>
-
-
-<h4>4. Failure to leverage browser cache / local storage</h4>
-
-<ol>
-<li><p><a href="http://www.mnot.net/cache_docs/">HTTP cache overview</a></p></li>
-<li><p>Leverage local storage</p></li>
-</ol>
-
-
-<h4>5. Third-party widgets</h4>
-
-<ol>
-<li>Avoid third-party widgets!</li>
-<li>Try to use widgets that provide asynchronous implementations, so their inevitably terrible performance impacts their widget without dragging down your entire UX with it.</li>
-</ol>
-
-
-<h4>7. Failure to Use a Global Network</h4>
-
-<p>Amazon S3.</p>
-
-<p>Ref: <a href="http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/">http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1033,7 +1007,7 @@ The approximation ratio of Sleator&#8217;s algorithm is 2.5 which is tight.</p><
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (61)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (62)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
@@ -1055,6 +1029,10 @@ The approximation ratio of Sleator&#8217;s algorithm is 2.5 which is tight.</p><
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/03/monitor-request-per-second/">[Design] Monitor Rps for Past Sec/min/hr</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/01/stock-span-problem/">[Question] Stock Span Problem</a>
       </li>
     
@@ -1068,10 +1046,6 @@ The approximation ratio of Sleator&#8217;s algorithm is 2.5 which is tight.</p><
     
       <li class="post">
         <a href="/blog/2015/02/01/Activity-Selection-Problem/">[Question] Activity Selection Problem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a>
       </li>
     
   </ul>
