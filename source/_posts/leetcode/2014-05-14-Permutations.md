@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 46] Permutations"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

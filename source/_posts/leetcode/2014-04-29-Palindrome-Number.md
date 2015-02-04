@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 9] Palindrome Number "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

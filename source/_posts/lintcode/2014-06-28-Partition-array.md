@@ -3,7 +3,7 @@ layout: post
 title: "[LintCode] Partition Array"
 comments: true
 category: LintCode
-tags: [  ]
+
 ---
 
 ### Question 

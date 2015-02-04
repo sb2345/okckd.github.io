@@ -3,7 +3,7 @@ layout: post
 title: "[Ruby] Endless error with gem dependencies "
 comments: true
 category: experience
-tags: [  ]
+
 ---
 
 ### The problem

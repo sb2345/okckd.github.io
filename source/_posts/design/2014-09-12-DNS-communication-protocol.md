@@ -3,7 +3,7 @@ layout: post
 title: "[Design] DNS Communication Protocol "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Question 

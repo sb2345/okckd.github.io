@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Split an integer or coin"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question

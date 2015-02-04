@@ -3,7 +3,7 @@ layout: post
 title: "[Testing] Test hashCode() function"
 comments: true
 category: Testing
-tags: [  ]
+
 ---
 
 

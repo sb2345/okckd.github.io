@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Designing Scalable Systems (`)"
 comments: true
 category: Design
-tags: [  ]
+
 published: false
 ---
 

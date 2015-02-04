@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Make a Java method thread-safe "
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

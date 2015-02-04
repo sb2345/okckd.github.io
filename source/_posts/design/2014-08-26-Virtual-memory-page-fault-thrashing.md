@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Virtual Memory, Page Fault and Thrashing"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Terminologies

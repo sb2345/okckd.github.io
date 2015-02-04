@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Barrier, Goods Van and Distance "
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question

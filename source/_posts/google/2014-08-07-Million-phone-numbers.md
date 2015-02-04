@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Million Phone Numbers"
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 1

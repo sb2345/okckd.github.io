@@ -3,7 +3,7 @@ layout: post
 title: "[Brain teaser] 2 Eggs 100 Floors Puzzle "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 

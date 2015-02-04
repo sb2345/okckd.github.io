@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Common Root of Java Classes "
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Common Root Class

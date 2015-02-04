@@ -5,7 +5,7 @@ comments: true
 categories:
 - CC150v4
 - String search
-tags: [  ]
+
 ---
 
 ### Question

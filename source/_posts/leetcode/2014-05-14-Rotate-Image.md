@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 48] Rotate Image"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

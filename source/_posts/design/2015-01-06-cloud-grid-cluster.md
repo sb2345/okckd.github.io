@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Cloud, Grid and Cluster "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 [ref](http://stackoverflow.com/questions/9723040/what-is-the-difference-between-cloud-grid-and-cluster)

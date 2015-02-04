@@ -3,7 +3,7 @@ layout: post
 title: "[NineChap 2.1] Binary Search"
 comments: true
 category: NineChap
-tags: [  ]
+
 ---
 
 

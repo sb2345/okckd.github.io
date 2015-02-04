@@ -3,7 +3,7 @@ layout: post
 title: "[Fundamental] Java Bit Operation "
 comments: true
 category: Fundamental
-tags: [  ]
+
 ---
 
 ### Bit operators

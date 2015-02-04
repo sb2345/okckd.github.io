@@ -3,7 +3,7 @@ layout: post
 title: "[Design] HTTP Headers"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ## Overview

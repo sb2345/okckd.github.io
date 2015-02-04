@@ -3,7 +3,7 @@ layout: post
 title: "[LintCode] Trailing Zeros of Factorial"
 description: ""
 category: LintCode
-tags: [  ]
+
 ---
 
 

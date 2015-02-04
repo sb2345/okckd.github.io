@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Number of distinct substrings "
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

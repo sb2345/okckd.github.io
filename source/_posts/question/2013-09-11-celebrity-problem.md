@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Celebrity Problem "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question

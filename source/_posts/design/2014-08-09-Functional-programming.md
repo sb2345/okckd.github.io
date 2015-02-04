@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Functional programming"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Overview

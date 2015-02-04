@@ -3,7 +3,7 @@ layout: post
 title: "[Design] HTTP cookie"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### First Word

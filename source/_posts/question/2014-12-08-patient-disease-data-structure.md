@@ -3,7 +3,7 @@ layout: post
 title: "[Epic] Patient Disease Data Structure "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 31] Next Permutation"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

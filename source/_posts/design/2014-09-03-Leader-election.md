@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Leader Election"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Question 

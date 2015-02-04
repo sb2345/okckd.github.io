@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 128] Longest Consecutive Sequence"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

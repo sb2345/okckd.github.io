@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Producer Consumer Problem"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Overview

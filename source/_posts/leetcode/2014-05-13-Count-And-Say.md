@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 38] Count and Say"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

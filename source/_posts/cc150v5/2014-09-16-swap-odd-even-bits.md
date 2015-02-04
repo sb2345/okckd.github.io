@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v5] 5.6 Swap Odd and Even Bits "
 comments: true
 category: CC150v5
-tags: [  ]
+
 ---
 
 ### Question

@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Cryptographic Hash Function "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Overview

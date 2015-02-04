@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Cache and Page Replacement Algorithms"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Cache Algorithms

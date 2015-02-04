@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Axis Aligned Rectangles "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question

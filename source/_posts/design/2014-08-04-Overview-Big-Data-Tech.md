@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Overview of Big Data Technology"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 [link](https://datajobs.com/what-is-hadoop-and-nosql)

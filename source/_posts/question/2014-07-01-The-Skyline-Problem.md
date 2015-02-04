@@ -3,7 +3,7 @@ layout: post
 title: "[Question] The Skyline Problem"
 comments: true
 category: Question
-tags: [ unit test needed ]
+
 ---
 
 ### Question 
@@ -30,9 +30,20 @@ __Two solutions compared__:
 
 1. Sweep Line algorithm will work if the input is not discrete, whereas the heightmap approach requires integer coordinates.
 
+__Updated on Feb 1st, 2015__: using floor 26 of [this post](http://www.mitbbs.com/article_t1/JobHunting/32569901_0_2.html), we can do insertion and deletion in max-heap, then peek the largest element in the heap. 
+
+> 把所有的turning points 放在一起，根据coordination从小到大sort 。
+
+> 再用max-heap, 把所有的turning points扫一遍，遇到start turning point, 把 
+volume放入max-heap. 遇到end turning point，把对应的volume从max-heap中取出。 
+
+> max-heap的max 值就是对应区间的最大volume
+
+Code presented below. 
+
 ### Code
 
-Brate force [code](http://www.cs.ucf.edu/~dmarino/ucf/java/Skyline.java): 
+Brate force code from [ucf](http://www.cs.ucf.edu/~dmarino/ucf/java/Skyline.java): 
 
 	public static void main(String[] args) throws IOException {
 
@@ -88,4 +99,63 @@ Brate force [code](http://www.cs.ucf.edu/~dmarino/ucf/java/Skyline.java):
 		fin.close();
 	}
 
-The heap solution is much too complex. It can be found [here](http://courses.oreillyschool.com/data-structures-algorithms/overviewAlgorithms.html). 
+The heap solution:
+
+	public int[] skyline(List<Building> bds, int min, int max) {
+		int[] output = new int[max - min];
+
+		List<Edge>[] edges = new List[max - min];
+		for (int i = 0; i < edges.length; i++) {
+			edges[i] = new ArrayList<Edge>();
+		}
+		for (Building b : bds) {
+			// put all edges into an array of edges
+			edges[b.from].add(new Edge(b, true));
+			edges[b.to].add(new Edge(b, false));
+		}
+
+		Queue<Building> heap = new PriorityQueue<Building>(100,
+				new Comparator<Building>() {
+					public int compare(Building b1, Building b2) {
+						return b2.height - b1.height;
+					}
+				});
+		for (int i = 0; i < edges.length; i++) {
+			// insert or remove each building at position i into max heap
+			for (Edge e : edges[i]) {
+				if (e.isEnter) {
+					heap.add(e.building);
+				} else {
+					heap.remove(e.building);
+				}
+			}
+			// then culculate the current hight, which is top of the heap
+			if (!heap.isEmpty()) {
+				output[i] = heap.peek().height;
+			}
+		}
+
+		return output;
+	}
+
+	static class Edge {
+		Building building;
+		boolean isEnter;
+
+		public Edge(Building bld, boolean enter) {
+			building = bld;
+			isEnter = enter;
+		}
+	}
+
+	static class Building {
+		int from;
+		int to;
+		int height;
+
+		public Building(int a, int b, int c) {
+			from = a;
+			to = b;
+			height = c;
+		}
+	}

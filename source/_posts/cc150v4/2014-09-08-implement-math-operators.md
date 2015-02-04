@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 10.4 Implement Mathematical Operators"
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question
@@ -12,7 +12,7 @@ tags: [  ]
 
 ### Solution
 
-__First it's important to write a 'negate' operator__. This is used in all other operations. 
+__First it's important to write a 'negate' operator__. The code given in the book: 
 
 	public static int FnNegate(int a) {
 		int neg = 0;
@@ -22,81 +22,44 @@ __First it's important to write a 'negate' operator__. This is used in all other
 			a += d;
 		}
 		return neg;
+	}
+
+__Updated on Feb 1st, 2015__, the negate method: 
+
+	public static int negate(int a) {
+		// plus -1, then do XOR with 111111111
+		// eg. 1 -> 0000000 -> 11111111 = -1
+		// eg. -1 -> 11111110 -> 00000001 = 1
+		return (a + -1) ^ -1;
+	}
+
+And the check sign method: 
+
+	public static boolean sameSign(int a, int b) {
+		// if first bit is same, then xor = 00000000
+		// if first bit is not same, xor = 10000000
+		int xor = (a ^ b) & Integer.MIN_VALUE;
+		return xor == 0;
 	}
 
 Although we can only use +, the author also used > and < comparison operators. 
 
-This is a borning question, I did not write code myself. 
-
 ### Code
 
-__not written by me__
-
-	/* Flip a positive sign to negative, or a negative sign to pos */
-	public static int FnNegate(int a) {
-		int neg = 0;
-		int d = a < 0 ? 1 : -1;
-		while (a != 0) {
-			neg += d;
-			a += d;
-		}
-		return neg;
+	public static int negate(int a) {
+		// plus -1, then do XOR with 111111111
+		// eg. 1 -> 0000000 -> 11111111 = -1
+		// eg. -1 -> 11111110 -> 00000001 = 1
+		return (a + -1) ^ -1;
 	}
 
-	/* Subtract two numbers by negating b and adding them */
-	public static int FnMinus(int a, int b) {
-		return a + FnNegate(b);
+	public static int minus(int a, int b) {
+		return a + negate(b);
 	}
 
-	/* Check if a and b are different signs */
-	public static boolean DifferentSigns(int a, int b) {
-		return ((a < 0 && b > 0) || (a > 0 && b < 0)) ? true : false;
-	}
-
-	/* Return absolute value */
-	public static int abs(int a) {
-		if (a < 0)
-			return FnNegate(a);
-		else
-			return a;
-	}
-
-	/* Multiply a by b by adding a to itself b times */
-	public static int FnTimes(int a, int b) {
-		if (a < b)
-			return FnTimes(b, a); // algo is faster if b < a
-		int sum = 0;
-		for (int iter = abs(b); iter > 0; --iter)
-			sum += a;
-		if (b < 0)
-			sum = FnNegate(sum);
-		return sum;
-	}
-
-	// returns 1, if a/b >= 0.5, and 0 otherwise
-	public static int DefineAndRoundFraction(int a, int b) {
-		if (FnTimes(abs(a), 2) >= abs(b))
-			return 1;
-		else
-			return 0;
-	}
-
-	/*
-	 * Divide a by b by literally counting how many times does b go into a. That
-	 * is, count how many times you can subtract b from a until you hit 0.
-	 */
-	public static int FnDivide(int a, int b)
-			throws java.lang.ArithmeticException {
-		if (b == 0) {
-			throw new java.lang.ArithmeticException("ERROR: Divide by zero.");
-		}
-		int quotient = 0;
-		int divisor = FnNegate(abs(b));
-		int divend; /* dividend */
-		for (divend = abs(a); divend >= abs(divisor); divend += divisor) {
-			++quotient;
-		}
-		if (DifferentSigns(a, b))
-			quotient = FnNegate(quotient);
-		return quotient;
+	public static boolean sameSign(int a, int b) {
+		// if first bit is same, then xor = 00000000
+		// if first bit is not same, xor = 10000000
+		int xor = (a ^ b) & Integer.MIN_VALUE;
+		return xor == 0;
 	}

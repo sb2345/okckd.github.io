@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v5] 8.8 Design Othello Game "
 comments: true
 category: CC150v5
-tags: [  ]
+
 ---
 
 ### Question

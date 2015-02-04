@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Points On Globe Puzzle"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

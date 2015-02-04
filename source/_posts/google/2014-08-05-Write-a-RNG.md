@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Write a Random Number Generator"
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

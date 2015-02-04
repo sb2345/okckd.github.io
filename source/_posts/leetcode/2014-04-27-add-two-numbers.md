@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 2] Add Two Numbers"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

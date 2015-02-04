@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] About Singleton"
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Implement Singlton

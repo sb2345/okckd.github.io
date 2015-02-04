@@ -3,7 +3,7 @@ layout: post
 title: "[Design] How we've scaled Dropbox (`)"
 comments: true
 category: Design
-tags: [  ]
+
 published: false
 ---
 

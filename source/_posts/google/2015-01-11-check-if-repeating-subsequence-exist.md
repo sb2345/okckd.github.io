@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Check if repeating subsequence exists "
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

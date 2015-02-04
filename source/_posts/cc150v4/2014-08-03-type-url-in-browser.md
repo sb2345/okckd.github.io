@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 17.1 Type a URL in Browser and Hit Enter "
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[Brain teaser] Khan Academy 8 brain teasers"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 

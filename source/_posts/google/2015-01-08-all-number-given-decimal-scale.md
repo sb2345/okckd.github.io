@@ -3,7 +3,7 @@ layout: post
 title: "[Google] Check all numbers given the decimal scale "
 comments: true
 category: Google
-tags: [  ]
+
 ---
 
 ### Question 

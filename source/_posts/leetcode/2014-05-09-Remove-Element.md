@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 27] Remove Element"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

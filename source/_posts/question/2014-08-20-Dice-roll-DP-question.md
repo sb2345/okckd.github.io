@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Ways of Dice Throw"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

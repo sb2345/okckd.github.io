@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 9.5 Search Array Containing Empty String "
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

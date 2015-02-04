@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Big Data - Find Existence of a Number"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Question 

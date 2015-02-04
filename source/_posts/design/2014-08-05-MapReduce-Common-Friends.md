@@ -3,7 +3,7 @@ layout: post
 title: "[Design] MapReduce Common Friends Example"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Question

@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Java Runtime Exception "
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Exceptions in Java

@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Remove chars in Pairs"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

@@ -3,7 +3,7 @@ layout: post
 title: "[Fundamental] Min-Max Algorithm "
 comments: true
 category: Fundamental
-tags: [  ]
+
 ---
 
 ### Definition

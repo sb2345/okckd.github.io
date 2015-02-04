@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v5] 8.9 Design a in-memory File System"
 comments: true
 category: CC150v5
-tags: [  ]
+
 ---
 
 ### Question

@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Peripheral Of A Complete Tree"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

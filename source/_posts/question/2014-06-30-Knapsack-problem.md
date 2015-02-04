@@ -3,7 +3,7 @@ layout: post
 title: "[Question] 0-1 Knapsack Problem"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

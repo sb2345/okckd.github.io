@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Difference between HTTP protocol and TCP protocol "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 [ref](http://www.quora.com/What-is-the-difference-between-HTTP-protocol-and-TCP-protocol)

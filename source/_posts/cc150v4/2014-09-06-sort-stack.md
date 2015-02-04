@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 3.6 Sort Stack"
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 28] Implement strStr"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

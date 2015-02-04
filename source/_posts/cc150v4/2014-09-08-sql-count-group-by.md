@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 15.1 SQL count and group by statement "
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

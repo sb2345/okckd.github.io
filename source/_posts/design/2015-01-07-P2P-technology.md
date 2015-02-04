@@ -3,7 +3,7 @@ layout: post
 title: "[Design] P2P Technology "
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Overview

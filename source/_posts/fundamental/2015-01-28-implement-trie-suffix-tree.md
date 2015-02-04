@@ -5,7 +5,7 @@ comments: true
 categories:
 - Fundamental
 - String search
-tags: [  ]
+
 ---
 
 ### Trie Node

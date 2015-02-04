@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Distributed Network Bottleneck"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ## Question

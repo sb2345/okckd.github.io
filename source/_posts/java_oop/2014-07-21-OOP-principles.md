@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] OOP - 4 major principles"
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### 4 Principles 

@@ -3,7 +3,7 @@ layout: post
 title: "[CC150v4] 15.2 SQL Types of Join "
 comments: true
 category: CC150v4
-tags: [  ]
+
 ---
 
 ### Question

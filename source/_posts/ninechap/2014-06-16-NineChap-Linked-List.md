@@ -3,7 +3,7 @@ layout: post
 title: "[NineChap 4.1] Linked List"
 comments: true
 category: NineChap
-tags: [  ]
+
 ---
 
 

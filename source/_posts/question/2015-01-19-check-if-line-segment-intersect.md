@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Check if two line segments intersect "
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question

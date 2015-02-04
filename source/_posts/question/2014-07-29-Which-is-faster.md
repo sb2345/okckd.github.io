@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Which loop is faster"
 comments: true
 category: Question
-tags: [  ]
+
 ---
 
 ### Question 

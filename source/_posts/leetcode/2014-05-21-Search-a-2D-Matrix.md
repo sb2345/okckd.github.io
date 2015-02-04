@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 74] Search a 2D Matrix"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

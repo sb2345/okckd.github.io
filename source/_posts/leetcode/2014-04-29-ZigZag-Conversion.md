@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 6] ZigZag Conversion "
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

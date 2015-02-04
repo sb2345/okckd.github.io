@@ -5,7 +5,7 @@ comments: true
 categories:
 - CC150v4
 - Java OOP
-tags: [  ]
+
 ---
 
 ### Question

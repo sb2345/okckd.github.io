@@ -3,7 +3,7 @@ layout: post
 title: "[Fundamental] Recap on Java HashMap "
 comments: true
 category: Fundamental
-tags: [  ]
+
 ---
 
 #### The HashMap

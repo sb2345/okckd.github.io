@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Semaphore Mutex Toilet Example"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ## Mutex vs. Semaphore

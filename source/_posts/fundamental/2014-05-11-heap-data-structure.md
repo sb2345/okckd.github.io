@@ -3,7 +3,7 @@ layout: post
 title: "[Fundamental] Heap (data structure) "
 comments: true
 category: Fundamental
-tags: [  ]
+
 ---
 
 ### Definition
@@ -76,6 +76,6 @@ The number of operations required is dependent on the __number of levels__ the n
 
 It's [O(n)](http://en.wikipedia.org/wiki/Binary_heap#Building_a_heap). 
 
-Why? You may ask - "why not O(n lgn) like we do successive insert for n time"?
+Why? You may ask - "why not O(nlgn) like we do successive insert for n time"?
 
 Read answers from [stackoverflow](http://stackoverflow.com/questions/9755721/build-heap-complexity). 

@@ -3,7 +3,7 @@ layout: post
 title: "[Java OOP] Override/overload Java main method "
 comments: true
 category: Java OOP
-tags: [  ]
+
 ---
 
 ### Can we overload main method in Java?

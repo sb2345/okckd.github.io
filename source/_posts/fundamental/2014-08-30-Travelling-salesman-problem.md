@@ -3,7 +3,7 @@ layout: post
 title: "[Fundamental] Travelling salesman problem "
 comments: true
 category: Fundamental
-tags: [  ]
+
 ---
 
 ### TSP problem

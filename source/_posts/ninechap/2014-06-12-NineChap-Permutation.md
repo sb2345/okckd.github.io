@@ -3,7 +3,7 @@ layout: post
 title: "[NineChap 1.2] Permutation"
 comments: true
 category: NineChap
-tags: [  ]
+
 ---
 
 

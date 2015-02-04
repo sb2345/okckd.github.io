@@ -3,7 +3,7 @@ layout: post
 title: "[LeetCode 71] Simplify Path"
 comments: true
 category: Leetcode
-tags: [  ]
+
 ---
 
 ### Question 

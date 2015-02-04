@@ -3,7 +3,7 @@ layout: post
 title: "[Design] Two's complement"
 comments: true
 category: Design
-tags: [  ]
+
 ---
 
 ### Overview
