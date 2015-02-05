@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Snakes and ladders "
+title: "[Google] Snakes and ladders "
 comments: true
-category: Question
+category: Google
 
 ---
 
@@ -11,8 +11,6 @@ category: Question
 [link](http://www.careercup.com/question?id=14955106)
 
 > Given a board of snakes and ladders game, provide an algorithm to find the minimum number of dice rolls required to reach 100 from 1.
-
-{% img middle /assets/images/ %}
 
 ### Solution 1
 

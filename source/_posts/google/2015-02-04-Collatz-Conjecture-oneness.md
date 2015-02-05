@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Collatz Conjecture (Oneness property) "
+title: "[Google] Collatz Conjecture (Oneness property) "
 comments: true
-category: Question
+category: Google
 
 ---
 

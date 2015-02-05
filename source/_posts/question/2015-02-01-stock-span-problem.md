@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Stock Span Problem "
+title: "[Question] Stock Span Problem (couting BST) "
 comments: true
 category: Question
 

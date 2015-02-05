@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Google] Lexicographic order from dictionary "
+title: "[Google] Lexicographic order (letter replacement) of dictionary "
 comments: true
 category: Google
 tags: [ src ]
@@ -32,6 +32,27 @@ Start from the first pair in the dictionary. Compare two strings in this pair __
 Eg: __aad & aab__, in this case create an edge __d -> b__. 
 
 More details is available [here](http://codereview.stackexchange.com/questions/48292/return-the-lexicographic-order). 
+
+#### Variant, and a different solution
+
+Another way of asking this question, is:
+
+> 有一个字典因为某种原因每个字符都被替换成一个别的字符了（但还是一一对应)，
+但是单词的顺序没有改变，比如
+
+    cat
+    coffee
+    common
+
+    --> 
+
+    dkc
+    dbhhzz
+    dbllbq
+
+> 让找出的这个替换的规则（guaranteed to have a unique one)
+
+__Alternative solution__ is to check according to frequencies.
 
 ### Code
 
