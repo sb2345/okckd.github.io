@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Grep command interview question "
+title: "[Amazon] Grep command interview question "
 comments: true
 category: Question
 

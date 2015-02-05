@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "[Question] Number of subtrees with even nodes "
+title: "[Google] Number of subtrees with even nodes "
 comments: true
-category: Question
+category: Google
 
 ---
 
@@ -12,8 +12,6 @@ category: Question
 
 > an arbitrary tree. split it into as many subtrees as you can. the 
 number of nodes of the subtree must be even.
-
-{% img middle /assets/images/ %}
 
 ### Solution
 
