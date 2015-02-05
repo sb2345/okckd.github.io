@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Given a sorted array of strings which is interspersed with empty strings, write a method to find the location of a given string. Example: &hellip;">
+  <meta name="description" content="Question Write a method to implement *, &ndash; , / operations You should use only the + operator. Solution First it&rsquo;s important to write a & &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,291 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/08/implement-math-operators/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/08/implement-math-operators/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a method to implement *, &ndash; , / operations You should use only the + operator.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>First it&rsquo;s important to write a &lsquo;negate&rsquo; operator</strong>. The code given in the book:</p>
+
+<pre><code>public static int FnNegate(int a) {
+    int neg = 0;
+    int d = a &lt; 0 ? 1 : -1;
+    while (a != 0) {
+        neg += d;
+        a += d;
+    }
+    return neg;
+}
+</code></pre>
+
+<p><strong>Updated on Feb 1st, 2015</strong>, the negate method:</p>
+
+<pre><code>public static int negate(int a) {
+    // plus -1, then do XOR with 111111111
+    // eg. 1 -&gt; 0000000 -&gt; 11111111 = -1
+    // eg. -1 -&gt; 11111110 -&gt; 00000001 = 1
+    return (a + -1) ^ -1;
+}
+</code></pre>
+
+<p>And the check sign method:</p>
+
+<pre><code>public static boolean sameSign(int a, int b) {
+    // if first bit is same, then xor = 00000000
+    // if first bit is not same, xor = 10000000
+    int xor = (a ^ b) &amp; Integer.MIN_VALUE;
+    return xor == 0;
+}
+</code></pre>
+
+<p>Although we can only use +, the author also used > and &lt; comparison operators.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int negate(int a) {
+    // plus -1, then do XOR with 111111111
+    // eg. 1 -&gt; 0000000 -&gt; 11111111 = -1
+    // eg. -1 -&gt; 11111110 -&gt; 00000001 = 1
+    return (a + -1) ^ -1;
+}
+
+public static int minus(int a, int b) {
+    return a + negate(b);
+}
+
+public static boolean sameSign(int a, int b) {
+    // if first bit is same, then xor = 00000000
+    // if first bit is not same, xor = 10000000
+    int xor = (a ^ b) &amp; Integer.MIN_VALUE;
+    return xor == 0;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/08/find-coliner-in-2d-plane/">[CC150v4] 10.6 Find Collinear in 2D Plane</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/08/find-coliner-in-2d-plane/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/08/find-coliner-in-2d-plane/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given a two dimensional graph with points on it, find a line which passes the most number of points.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>For this question, we used to use HashMap(Double, Integer) to do. However, the answer suggested in the book define its own Line Class, and uses HashMap(Line, Intger).</p>
+
+<p>This is a much better solution, however, I failed to write it, don&rsquo;t know why.</p>
+
+<p><strong>The key is to override the 2 methods</strong>:</p>
+
+<pre><code>@override
+public int hashCode() {}
+
+@override
+public boolean equals(Object o) {}
+</code></pre>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<p>Line.java</p>
+
+<pre><code>public class Line {
+
+    private static double epsilon = .0001;
+
+    public double slope;
+    public double intercept;
+    private boolean infinite_slope = false;
+
+    public Line(GraphPoint p, GraphPoint q) {
+        if (Math.abs(p.x - q.x) &gt; epsilon) { // if x痴 are different
+            slope = (p.y - q.y) / (p.x - q.x); // compute slope
+            intercept = p.y - slope * p.x; // y intercept from y=mx+b
+        } else {
+            infinite_slope = true;
+            intercept = p.x; // x-intercept, since slope is infinite
+        }
+    }
+
+    public boolean isEqual(double a, double b) {
+        return (Math.abs(a - b) &lt; epsilon);
+    }
+
+    public void Print() {
+        System.out.println("slope = " + slope + "\nintercept = " + intercept);
+    }
+
+    @Override
+    public int hashCode() {
+        int sl = (int) (slope * 1000);
+        int in = (int) (intercept * 1000);
+        return sl | in;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Line l = (Line) o;
+        if (isEqual(l.slope, slope) &amp;&amp; isEqual(l.intercept, intercept)
+                &amp;&amp; (infinite_slope == l.infinite_slope)) {
+            return true;
+        }
+        return false;
+    }
+}
+</code></pre>
+
+<p>Main method:</p>
+
+<pre><code>public static Line findBestLine(GraphPoint[] points) {
+
+    Line bestLine = null;
+    HashMap&lt;Line, Integer&gt; line_count = new HashMap&lt;Line, Integer&gt;();
+
+    for (int i = 0; i &lt; points.length; i++) {
+        for (int j = i + 1; j &lt; points.length; j++) {
+            Line line = new Line(points[i], points[j]);
+            if (!line_count.containsKey(line)) {
+                line_count.put(line, 0);
+            }
+            line_count.put(line, line_count.get(line) + 1);
+            if (bestLine == null
+                    || line_count.get(line) &gt; line_count.get(bestLine)) {
+                bestLine = line;
+                System.out.println("bestLine upodated! count = "
+                        + line_count.get(line));
+            }
+        }
+    }
+    return bestLine;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/sort-persons/">[CC150v4] 9.0 Example - Sort Persons</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/07/sort-persons/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/07/sort-persons/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You have a very large array of ‘Person’ objects. Sort the people in increasing order of age.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>First we look at the nature of this question:</p>
+
+<ol>
+<li>large input array</li>
+<li>sort based on age (<strong>which is between 1 and 100</strong>, this is important)</li>
+</ol>
+
+
+<p><strong>This exactly matches the charasteristics of Bucket Sort</strong>. Time complexity in average case is O(n + k) where k is the number of buckets.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -641,293 +926,6 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/06/hanoi-tower/">[CC150v4] 3.4 Towers of Hanoi</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/06/hanoi-tower/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/06/hanoi-tower/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>In the classic problem of the Towers of Hanoi, you have 3 rods and N disks of di!erent sizes which can slide onto any tower. The puzzle starts with disks sorted in ascending order of size from top to bottom (e.g., each disk sits on top of an even larger one). You have the following constraints:</p></blockquote>
-
-<ol>
-<li>Only one disk can be moved at a time.</li>
-<li>A disk is slid o! the top of one rod onto the next rod.</li>
-<li>A disk can only be placed on top of a larger disk.</li>
-</ol>
-
-
-<blockquote><p>Write a program to move the disks from the &ldquo;rst rod to the last using Stacks.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a <strong>classic recursive question</strong>. The solution code is supposed to be very concise.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong>, slightly different from the answer in the book, but good.</p>
-
-<p>Main class:</p>
-
-<pre><code>public class HanoiMyAnswer {
-
-    private static Rod r0, r1, r2;
-    private static final int NUM_DISKS = 5;
-
-    public static void main(String[] args) {
-        // Hanoi Tower always have 3 rods
-        r0 = new Rod(0);
-        r1 = new Rod(1);
-        r2 = new Rod(2);
-
-        // Put some disks on the 1st rod, leaving 2nd and 3rd rod empty
-        r0.setDisks(NUM_DISKS);
-
-        // start main algorithm
-        System.out.println("My answer: ");
-        moveDisks(NUM_DISKS, r0, r2, r1);
-    }
-
-    private static void moveDisks(int number, Rod from, Rod to, Rod buffer) {
-        if (number == 1) {
-            int topValue = from.disks.pop();
-            to.disks.push(topValue);
-            displayMessage(topValue, from.name, to.name);
-        } else {
-            moveDisks(number - 1, from, buffer, to);
-            int bottomValue = from.disks.pop();
-            to.disks.push(bottomValue);
-            displayMessage(bottomValue, from.name, to.name);
-            moveDisks(number - 1, buffer, to, from);
-        }
-    }
-
-    private static void displayMessage(int disk, int from, int to) {
-        System.out.println("Disk[" + disk + "]: Rod" + from + "--&gt;" + to);
-    }
-}
-</code></pre>
-
-<p>Rod.java</p>
-
-<pre><code>class Rod {
-
-    int name;
-    Stack&lt;Integer&gt; disks = new Stack&lt;Integer&gt;();
-
-    public Rod(int rodIndex) {
-        this.name = rodIndex;
-    }
-
-    public void setDisks(int n) {
-        // this method will insert n disks on this Rod
-        // the bottom disk is indexed as (n-1) and top one is 0
-        disks.clear();
-        for (int i = n - 1; i &gt;= 0; i--) {
-            disks.push(i);
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/06/find-next-node-bst/">[CC150v4] 4.5 Find Next Node in BST</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/06/find-next-node-bst/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/06/find-next-node-bst/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write an algorithm to find the ‘next’ node (i.e., in-order successor) of a given node in a binary search tree where each node has a link to its parent.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p><strong>If current node have a right child</strong>, return the leftmost leaf of right child.</p></li>
-<li><p><strong>If current node have no right child</strong>:</p>
-
-<ol>
-<li><p>If current is parent&rsquo;s left child, then return parent node.</p></li>
-<li><p>If current is parent&rsquo;s right child, look all the way up until find a right-turning parent.</p></li>
-<li><p>If all parent is not right-turning. Return null.</p></li>
-</ol>
-</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static TreeNode inorderSucc(TreeNode e) {
-    if (e == null)
-        return null;
-    if (e.right != null) {
-        TreeNode p = e.right;
-        while (p.left != null) {
-            p = p.left;
-        }
-        return p;
-    } else {
-        TreeNode p = e.parent;
-        while (p != null &amp;&amp; p.right == e) {
-            e = p;
-            p = e.parent;
-        }
-        return p;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/06/check-subtree/">[CC150v4] 4.7 Check Subtree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/06/check-subtree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/06/check-subtree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You have two very large binary trees: T1, with millions of nodes, and T2, with hundreds of nodes. Create an algorithm to decide if T2 is a subtree of T1.</p></blockquote>
-
-<h3>Solution 1</h3>
-
-<p><strong>The best solution is to print inorder and preorder traversal</strong> of both trees. Find whether the 2 traversal string of T2 <strong>is substring of the traversal of T1</strong>. This is a very good idea of checking subtree of a Binary Tree.</p>
-
-<p><strong>Updated on Jan 26th, 2015</strong>: do we have to use sentinals for this purpose? Well, the answer is NO, cuz a preorder and a inorder can uniquely define a binary tree.</p>
-
-<p>However, this solution is very <strong>memory intensive</strong>.</p>
-
-<h3>Solution 2</h3>
-
-<p><strong>The alternative solution</strong> simply checks the tree similarity for each and every node.</p>
-
-<p>Time complexity:</p>
-
-<p>If k is the number of occurrences of T2’s root in T1, the worst case runtime can be characterized as O(n + k * m).</p>
-
-<p><strong>However, there can be a lot of pruning for this solution</strong>, so it&rsquo;s NOT necessarily slower than Solution 1. There can be a lot of discussions on this (<strong>refer to CC150v5 Q4.8 for more</strong>).</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static boolean containsTree(TreeNode t1, TreeNode t2) {
-    if (t1 == null) {
-        return false;
-    } else if (matchTree(t1, t2)) {
-        return true;
-    } else {
-        return containsTree(t1.left, t2) || containsTree(t1.right, t2);
-    }
-}
-
-private static boolean matchTree(TreeNode t1, TreeNode t2) {
-    if (t2 == null) {
-        return true;
-    } else if (t1 == null) {
-        return false;
-    } else if (t1.data != t2.data) {
-        return false;
-    } else {
-        return matchTree(t1.left, t2.left) &amp;&amp; matchTree(t1.right, t2.right);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/15">&larr; Older</a>
@@ -945,17 +943,17 @@ private static boolean matchTree(TreeNode t1, TreeNode t2) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (62)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (114)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -967,6 +965,10 @@ private static boolean matchTree(TreeNode t1, TreeNode t2) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -975,15 +977,11 @@ private static boolean matchTree(TreeNode t1, TreeNode t2) {
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Question] Snakes and Ladders</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/">[Question] Number of Subtrees With Even Nodes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/04/grep-command-interview-question/">[Question] Grep Command Interview Question</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

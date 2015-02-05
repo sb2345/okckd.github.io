@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="The problem In setting up the octopress environment, we need to install dependencies like this: gem install bundler
-bundle install First line simply &hellip;">
+  <meta name="description" content="Question link A frog wants to cross the river n meters wide. There&rsquo;re some stones, but not complete from 1 to n. The frog has a peculiar &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +78,285 @@ bundle install First line simply &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/02/frog-crossing-dp/">[Question] Frog Crossing (Dynamic Programming)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/02/frog-crossing-dp/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/02/frog-crossing-dp/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://tkramesh.wordpress.com/2011/02/15/frog-crossing-more-on-dynamic-programming-3/">link</a></p>
+
+<blockquote><p>A frog wants to cross the river n meters wide. There&rsquo;re some stones, but not complete from 1 to n.</p>
+
+<p>The frog has a peculiar jumping rule. If it jumps x meters on one jump, the next jump has to lie in the range {x-1, x, x+1}. Further, the 1st jump that the frog makes is of exactly 1 meter.</p>
+
+<p>Given whether stones are removed or not as array of 0 and 1, check if it is possible to reach the other end.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult DP question</strong>. It can be solved in O(n<sup>2</sup>) time.</p>
+
+<p>The main equation is:</p>
+
+<blockquote><p>can_reach [s, d] =</p>
+
+<p>Stone[d] AND Stone[s] AND [ can_reach [(d-s)-1, s] OR can_reach[d-s, s] OR can_reach[d-s)+1, s] ].</p>
+
+<p>where &rsquo;s&#8217; is starting point, and &rsquo;d&#8217; is destination.</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public boolean canCross(int[] stones) {
+    if (stones.length &lt; 2 || (stones[0] != 1 || stones[1] != 1)) {
+        // invalid input data
+        return false;
+    }
+    int n = stones.length;
+    boolean[][] dp = new boolean[n][n];
+    // dp[i][j] denotes that frog can jump from index i to j
+
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = i + 1; j &lt; n; j++) {
+            if (stones[i] == 0 || stones[j] == 0) {
+                // if either stones i or stone j is removed, skip
+                continue;
+            }
+            // note that j start from (i+1) because we make sure dp[i][i]
+            // false. Otherwise, dp[i][i+1] will always be true
+
+            if (i == 0) {
+                // if jump from position 0, can only reach 1
+                dp[i][j] = j == 1;
+            } else {
+                // if jump from other positions, need to check previous
+                // distance, within range or not.
+                int dis = j - i;
+                for (int pre = i - dis - 1; pre &lt;= i - dis + 1; pre++) {
+                    // pre is the previous position where frog jumps to i
+                    if (pre &lt; 0) {
+                        continue;
+                    } else if (dp[pre][i]) {
+                        // frog jumps from pre to i, then frog is able to
+                        // jump from i to j
+                        dp[i][j] = true;
+                        break;
+                    }
+                }
+            }
+            // finish calculating dp[i][j], now check termination
+            if (j == n - 1 &amp;&amp; dp[i][j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/27/database-indexing/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/27/database-indexing/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://stackoverflow.com/a/1130">ref 1</a> <a href="http://www.interspire.com/content/2006/02/15/introduction-to-database-indexes/">ref 2</a></p>
+
+<h3>Why Indexing?</h3>
+
+<p>In database disks (we&rsquo;re talking about disk-based storage devices), data is stored as blocks. These blocks are accessed atomically. It&rsquo;s like a linked list with pointers to the blocks.</p>
+
+<p>Because of this, searching in database is linear time. That&rsquo;s why we need indexing.</p>
+
+<p><strong>Indexing is a way of sorting a number of records on multiple fields</strong>. Creating an index on a field in a table creates another data structure which holds the field value, and pointer to the record it relates to. This index structure is then sorted, allowing Binary Searches to be performed on it.</p>
+
+<p>In other words, indexing speed up search.</p>
+
+<h3>Downside</h3>
+
+<p>First disadvantage is <strong>the additional space usage</strong>. For example, in MyISAM engine, indexes are stored together with the data in one table. So the indexing files can quickly reach the size limits if many fields are indexed.</p>
+
+<p>Second disadvantage is that <strong>using too many indexes can actually slow your database down</strong>. Each time a page or database row is updated or removed, the reference or index also has to be updated.</p>
+
+<p>So indexes speed up finding data, but slow down inserting, updating or deleting data.</p>
+
+<h3>Primary keys</h3>
+
+<p><strong>Some fields are automatically indexed</strong>.</p>
+
+<p>A primary key or a field marked as ‘unique’ – for example an email address, a userid or a social security number – are <strong>automatically indexed</strong> so the database can quickly check to make sure that you’re not going to introduce bad data.</p>
+
+<h3>When to use</h3>
+
+<p>Since indexes are <strong>only</strong> used to speed up the searching, it&rsquo;s not wise to have indexing used only for output.</p>
+
+<p><strong>The general rule</strong> is, anything that is used to limit the number of results you’re trying to find. For more details, read <a href="http://www.interspire.com/content/2006/02/15/introduction-to-database-indexes/">ref 2</a>.</p>
+
+<h3>How to create index</h3>
+
+<p><a href="http://stackoverflow.com/a/1157">The following</a> is SQL92 standard that&rsquo;s supported by major RDMBSs:</p>
+
+<pre><code>CREATE INDEX [index name] ON [table name] ( [column name] )
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/23/Java-runtime-exception/">[Java OOP] Java Runtime Exception</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/12/23/Java-runtime-exception/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/12/23/Java-runtime-exception/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Exceptions in Java</h3>
+
+<p>In Java, there are <a href="http://www.tutorialspoint.com/java/java_exceptions.htm">3 categories of exceptions</a>:</p>
+
+<ol>
+<li><p>checked exceptions</p>
+
+<ol>
+<li>Typically a user error</li>
+<li>eg. if a file cannot be found.</li>
+<li>These exceptions cannot simply be ignored at the time of compilation.</li>
+</ol>
+</li>
+<li><p>runtime exceptions (also called un-checked exceptions)</p>
+
+<ol>
+<li>exception that could have been avoided by the programmer</li>
+<li>eg. NullPointerException</li>
+<li>ignored at the time of compilation</li>
+</ol>
+</li>
+<li><p>error</p>
+
+<ol>
+<li>These are not exceptions at all</li>
+<li>eg. stack overflow occurs</li>
+<li>also ignored at the time of compilation</li>
+</ol>
+</li>
+</ol>
+
+
+<h4>1. checked exception</h4>
+
+<p><a href="http://stackoverflow.com/a/2190175">A checked exception</a> <strong>must be handled explicitly</strong> by the code (by either putting a try/catch block around the code, or adding a &ldquo;throws&rdquo; clause to the method).</p>
+
+<p>The <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html">class Exception</a> and any subclasses that are not also subclasses of RuntimeException are <strong>checked exceptions</strong>. Example:</p>
+
+<ol>
+<li>FileNotFoundException</li>
+<li>HttpRetryException</li>
+<li>SocketException</li>
+<li>IOException</li>
+</ol>
+
+
+<p>Note: <strong>java.lang.RuntimeException</strong> is a subclass of <strong>java.lang.Exception</strong>.</p>
+
+<h4>2. un-checked exceptions (RuntimeException)</h4>
+
+<p>A un-checked exception <strong>does not need</strong> to be explicitly handled.</p>
+
+<p><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/RuntimeException.html">RuntimeException</a> and its subclasses are <strong>unchecked exceptions</strong>.</p>
+
+<p><a href="http://stackoverflow.com/a/2190177">Generally</a> RuntimeExceptions <strong>can be prevented</strong> programmatically. E.g NullPointerException, ArrayIndexOutOfBoundException. If you check for null before calling any method, NullPointerException would never occur. Similarly ArrayIndexOutOfBoundException would never occur if you check the index first. RuntimeException are not checked by the compiler, so it is clean code.</p>
+
+<p>The runtime exception classes <strong><a href="http://stackoverflow.com/a/2190659">are exempted</a> from compile-time checking</strong>, since the compiler cannot establish that run-time exceptions cannot occur.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -901,306 +1179,6 @@ white
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum (Undone)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-18T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
-
-<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
-
-<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
-
-<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
-
-<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
-
-<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
-
-<h3>Code</h3>
-
-<p><strong>DLL way, written by me</strong></p>
-
-<pre><code>public void findTriplet(TreeNode root, int target) {
-    TreeNode[] dll = convertToDll(root);
-    TreeNode head = dll[0];
-    TreeNode tail = dll[1];
-    // note that the bst inorder dll should already in sorted by value
-    TreeNode first = head;
-    while (first.right != null) {
-        TreeNode left = first.right;
-        TreeNode right = tail;
-        while (left.val &lt; right.val) {
-            int diff = first.val + left.val + right.val - target;
-            if (diff == 0) {
-                System.out.println("Found triplet: " + first.val + " "
-                        + left.val + " " + right.val + " for sum of "
-                        + target);
-            }
-            if (diff &lt;= 0) {
-                left = left.right;
-            }
-            if (diff &gt;= 0) {
-                right = right.left;
-            }
-        }
-        first = first.right;
-    }
-}
-
-private TreeNode[] convertToDll(TreeNode node) {
-    TreeNode[] ans = new TreeNode[2];
-    // do the left side of node
-    if (node.left == null) {
-        ans[0] = node;
-    } else {
-        TreeNode[] preAns = convertToDll(node.left);
-        ans[0] = preAns[0];
-        node.left = preAns[1];
-        preAns[1].right = node;
-    }
-    // do the right side of node
-    if (node.right == null) {
-        ans[1] = node;
-    } else {
-        TreeNode[] postAns = convertToDll(node.right);
-        ans[1] = postAns[1];
-        node.right = postAns[0];
-        postAns[0].left = node;
-    }
-    return ans;
-}
-</code></pre>
-
-<p><strong>inorder way</strong></p>
-
-<p>undone</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-17T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
-
-<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
-
-<pre><code>           1
-        /    \
-       2      3
-      / \    / \
-     4   5  6   7
-             \   \
-              8   9 
-
-The output of print this tree vertically will be:
-4
-2
-1 5 6
-3 8
-7
-9 
-</code></pre>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
-<li><p>Iterate for each vertical line at distance minimum to maximum from root.</p></li>
-</ol>
-
-
-<p>This solution is O(n<sup>2</sup>), because getting the width of tree requires O(n) time. (Wait, is it not? Think about a complete tree of 3 level and 7 nodes)</p>
-
-<p>O(n) solution is available using a <strong><a href="www.geeksforgeeks.org/print-binary-tree-vertical-order-set-2/">HashMap</a></strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong>, O(n<sup>2</sup>) time.</p>
-
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
-    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
-
-    // 1. find the range of left bound and right bound
-    int[] range = new int[2];
-    findRange(root, range, 0);
-
-    // 2. calculate number of columns in the result
-    int rootIndex = 0 - range[0];
-    int columns = range[1] - range[0] + 1;
-    for (int i = 0; i &lt; columns; i++) {
-        ans.add(new ArrayList&lt;Integer&gt;());
-    }
-
-    // 3. fill in vertically in a recursive manner
-    fillNode(ans, root, rootIndex);
-
-    return ans;
-}
-
-private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
-    if (node == null) {
-        return;
-    }
-    ans.get(index).add(node.val);
-    fillNode(ans, node.left, index - 1);
-    fillNode(ans, node.right, index + 1);
-}
-
-private void findRange(TreeNode node, int[] range, int position) {
-    if (node == null) {
-        return;
-    }
-    if (position &lt; range[0]) {
-        range[0] = position;
-    }
-    if (position &gt; range[1]) {
-        range[1] = position;
-    }
-    findRange(node.left, range, position - 1);
-    findRange(node.right, range, position + 1);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/08/patient-disease-data-structure/">[Epic] Patient Disease Data Structure</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/08/patient-disease-data-structure/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32844253.html">link</a></p>
-
-<blockquote><p>Suppose N patients and M diseases. N is sufficiently large number and M is
-relatively small, say 30-ish. Each patient can have possible 0 to M kinds of
-diseases.</p>
-
-<p>Given one patient’s name, show me a list of similar patients sharing same
-deseases within 2-3 seconds.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Use 1 bit to represent a disease</strong>. So every patient&rsquo;s conditin can be put into an integer of 32 bits.</p>
-
-<p>How do we calculate the similarity of 2 patients?</p>
-
-<p>Refer to <strong>[CC150v5] 5.5 Calculate Bits Conversion Required</strong> for a special bit operation (remove last &lsquo;1&rsquo; from bit):</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<p>For each patient, we simply calculate the XOR and count &lsquo;1&rsquo;s.</p>
-
-<h3>Code</h3>
-
-<p>no code.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/9">&larr; Older</a>
@@ -1218,17 +1196,17 @@ deseases within 2-3 seconds.</p></blockquote>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (62)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (114)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1240,6 +1218,10 @@ deseases within 2-3 seconds.</p></blockquote>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -1248,15 +1230,11 @@ deseases within 2-3 seconds.</p></blockquote>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Question] Snakes and Ladders</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/">[Question] Number of Subtrees With Even Nodes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/04/grep-command-interview-question/">[Question] Grep Command Interview Question</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

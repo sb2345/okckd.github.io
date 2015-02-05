@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="ref Question Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps &hellip;">
+  <meta name="description" content="Question We have a history of match result of pingpong games, assume each match is &lt;player1, player2, result, timestamp>, player1 and player2 are &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,85 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/05/winning-game-rank-pagerank/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/05/winning-game-rank-pagerank/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>We have a history of match result of pingpong games, assume each match is &lt;player1, player2, result, timestamp>, player1 and player2 are long type, result is a bit value (1 means player1 win).</p>
+
+<p>design a algorithm to sort the players by their possibility to win future games.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>For each play,</p>
+
+<blockquote><p>winning score = score_diff * {delay factor<sup>current time &ndash; winning time</sup>};</p></blockquote>
+
+<h3>Pagerank</h3>
+
+<p><a href="http://google.about.com/od/searchengineoptimization/a/pagerankexplain.htm">PageRank</a> is what Google uses to <strong>determine the importance of a web page</strong>.</p>
+
+<p>It determines which pages appear in search results.</p>
+
+<p>Named after Larry Page.</p>
+
+<h4>Details</h4>
+
+<ol>
+<li><p>PageRank thinks of links as votes to another page.</p></li>
+<li><p>It also looks at the importance of the page that contains the link.</p>
+
+<ol>
+<li><p>Pages with <strong>higher PageRank</strong> have more weight in &ldquo;voting&rdquo;.</p></li>
+<li><p>Pages with <strong>smaller total number of links</strong> on the page have more weight.</p></li>
+</ol>
+</li>
+</ol>
+
+
+<h4>Increase your PageRank?</h4>
+
+<p>If you&rsquo;d like to increase your PageRank, you need to have &ldquo;back-links,&rdquo; or other people linking to your website. You can <strong>trade links</strong> with other people, but make sure you only trade relevant links, and make sure you&rsquo;re not trading links with a <strong>link farm</strong>.</p>
+
+<p>You can register your website with directories, such as the <strong>Open Directory Project</strong>, but use directories with high PageRank whenever possible.</p>
+
+<p>You can create some of <strong>your own back-links</strong> by linking to relevant pages <strong>within</strong> your own website. However, remember that the number of links you create counts into the equation. Don&rsquo;t overdo it.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -320,7 +399,115 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/02/04/snakes-and-ladders/">[Question] Snakes and Ladders</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/05/implement-blocking-q/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/05/implement-blocking-q/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14622668">link</a></p>
+
+<blockquote><p>Implement a Blocking queue.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>First thing first, the most important characteristic of a BlockingQueue is:</p>
+
+<blockquote><p><strong>thread-safe</strong> BlockingQueue</p></blockquote>
+
+<p>Second, we need to make sure to handle the following 2 methods:</p>
+
+<blockquote><p><strong>notifyAll();</strong></p>
+
+<p><strong>wait();</strong></p></blockquote>
+
+<p>Last, remember that <strong>wait()</strong> has got a <strong>checked exception</strong>(InterruptedException). We end up with the code:</p>
+
+<pre><code>public synchronized void enqueue(Object item) throws InterruptedException {
+    while (this.queue.size() == this.size) {
+        wait();
+    }
+    if (this.queue.size() == 0) {
+        notifyAll();
+    }
+    this.queue.add(item);
+}
+</code></pre>
+
+<h3>Code</h3>
+
+<p>The entire class, refer to <strong>[Java OOP] Java BlockingQueue (2)</strong>:</p>
+
+<pre><code>public class MyBlockingQueue {
+
+    private List&lt;Object&gt; queue = new LinkedList&lt;Object&gt;();
+    private int size = 10;
+
+    public MyBlockingQueue(int size) {
+        this.size = size;
+    }
+
+    public synchronized void enqueue(Object item) throws InterruptedException {
+        while (this.queue.size() == this.size) {
+            wait();
+        }
+        if (this.queue.size() == 0) {
+            notifyAll();
+        }
+        this.queue.add(item);
+    }
+
+    public synchronized Object dequeue() throws InterruptedException {
+        while (this.queue.size() == 0) {
+            wait();
+        }
+        if (this.queue.size() == this.size) {
+            notifyAll();
+        }
+
+        return this.queue.remove(0);
+    }
+
+    public boolean isEmpty() {
+        return this.queue.isEmpty();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a></h1>
     
     
       <p class="meta">
@@ -351,8 +538,6 @@
 <p><a href="http://www.careercup.com/question?id=14955106">link</a></p>
 
 <blockquote><p>Given a board of snakes and ladders game, provide an algorithm to find the minimum number of dice rolls required to reach 100 from 1.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/"></p>
 
 <h3>Solution 1</h3>
 
@@ -398,7 +583,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/">[Question] Number of Subtrees With Even Nodes</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/">[Google] Number of Subtrees With Even Nodes</a></h1>
     
     
       <p class="meta">
@@ -430,8 +615,6 @@
 
 <blockquote><p>an arbitrary tree. split it into as many subtrees as you can. the
 number of nodes of the subtree must be even.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/"></p>
 
 <h3>Solution</h3>
 
@@ -596,7 +779,7 @@ Total time = 0.006
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/02/04/grep-command-interview-question/">[Question] Grep Command Interview Question</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/02/04/grep-command-interview-question/">[Amazon] Grep Command Interview Question</a></h1>
     
     
       <p class="meta">
@@ -652,7 +835,103 @@ Total time = 0.006
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/02/04/Collatz-Conjecture-oneness/">[Question] Collatz Conjecture (Oneness Property)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/02/04/ds-insert-remove-getrandom/">[Google] Data Structure of Insert, Remove, GetRandom</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/04/ds-insert-remove-getrandom/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/04/ds-insert-remove-getrandom/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=11353907">link</a></p>
+
+<blockquote><p>Design a data structure where the following 3 functions at O(1):</p></blockquote>
+
+<pre><code>1. Insert(n) 
+2. GetRandomElement() 
+3. Remove(n) 
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Array is best for:</p>
+
+<ol>
+<li>random access</li>
+</ol>
+
+
+<p>HashMap is best for:</p>
+
+<ol>
+<li>Searching
+
+<ol>
+<li>insert</li>
+<li>remove</li>
+</ol>
+</li>
+</ol>
+
+
+<p><a href="http://stackoverflow.com/a/22083895">So the answer is</a> <strong>array + hashmap</strong>:</p>
+
+<ol>
+<li><p>Insertion can be done by appending to the array and adding to the hash-map.</p></li>
+<li><p>Deletion can be done by first looking up and removing the array index in the hash-map, then <strong>swapping the last element with that element in the array</strong>.</p></li>
+<li><p>Get random can be done by returning a random index from the array.</p></li>
+<li><p>All operations take O(1).</p></li>
+</ol>
+
+
+<p>Note <a href="http://stackoverflow.com/a/5684892">how hashmap is used</a>:</p>
+
+<blockquote><p>insert(value): append the value to array and let i be it&rsquo;s index in A. Set H[value]=i.</p></blockquote>
+
+<p>Hashmap stores value&rsquo;s index in the array &ndash; that is to say: <strong>this DS does not support inserting duplicating values</strong>.</p>
+
+<p>Finally, when we delete, we swap the last element to replace the gap. This is an nice idea!</p>
+
+<h4>follow-up</h4>
+
+<blockquote><p>what if we want to get the top x% number?</p></blockquote>
+
+<p>Well, heap of course. And note that <strong>Heap size is <a href="http://stackoverflow.com/a/9115884">auto-increasing</a></strong>:</p>
+
+<blockquote><p>PriorityQueue is unbounded, it can grow as big as your memory allows, and it will grow automatically when needed. The initialCapacity parameter is just a hint to reserve room for that many elements initially.</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/Collatz-Conjecture-oneness/">[Google] Collatz Conjecture (Oneness Property)</a></h1>
     
     
       <p class="meta">
@@ -855,339 +1134,6 @@ You ultimately end up with 1.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/stock-span-problem/">[Question] Stock Span Problem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/02/01/stock-span-problem/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/stock-span-problem/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price.</p></blockquote>
-
-<p>Definition of &lsquo;span&rsquo; have got 2 variant:</p>
-
-<h3>Variant 1</h3>
-
-<p><a href="http://www.geeksforgeeks.org/the-stock-span-problem/">link</a></p>
-
-<blockquote><p>Span is the number of consecutive days right before that day, which have less or equal stock value.</p>
-
-<p>(Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><img class="middle" src="/assets/images/StockSpanProblem1.png"></p>
-
-<p>Use stack.</p>
-
-<h3>Variant 2</h3>
-
-<p><a href="http://www.careercup.com/question?id=4825417139617792">link</a></p>
-
-<blockquote><p>Span is the amount of days before the given day where the stock price is less than that of given day.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The top answer in <a href="http://www.careercup.com/question?id=4825417139617792">here</a> is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3.</p>
-
-<p>Instead, the <strong>BST (AVL tree) solution is correct</strong>. It&rsquo;s commented by user zahidbuet106.</p>
-
-<blockquote><p>insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the <strong>size of left subtree</strong> at the node being inserted. This will give us our desired smaller element count.</p>
-
-<p>We also need to handle balancing the tree while insert.</p></blockquote>
-
-<p><strong>The key of this question is the special BST, where each node stores an additional counting number</strong>.</p>
-
-<p>This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it&rsquo;s ranking within the past history.</p>
-
-<p>Read another very interesting post: <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>class TreeNodePlus extends TreeNode {
-    int leftCount;
-    int dupCount;
-
-    public TreeNodePlus(int v, int leftC) {
-        super(v);
-        this.leftCount = leftC;
-        this.dupCount = 1;
-    }
-
-    public int findRank(TreeNodePlus node) {
-        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
-        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
-
-        if (this == node) {
-            return 0;
-        } else if (node.val &lt; this.val) {
-            if (this.left == null) {
-                return 0;
-            } else {
-                return leftBranch.findRank(node);
-            }
-        } else {
-            if (this.right == null) {
-                return this.leftCount + this.dupCount;
-            } else {
-                return this.leftCount + this.dupCount
-                        + rightBranch.findRank(node);
-            }
-        }
-    }
-
-    public TreeNodePlus insertNum(int num) {
-        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
-        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
-
-        if (num == this.val) {
-            this.dupCount++;
-            return this;
-        } else if (num &lt; this.val) {
-            // insert num to the left branch
-            this.leftCount++;
-            if (this.left == null) {
-                this.left = new TreeNodePlus(num, 0);
-                return (TreeNodePlus) this.left;
-            } else {
-                return leftBranch.insertNum(num);
-            }
-        } else {
-            // insert num to the right branch
-            // this.leftCount does not change
-            if (this.right == null) {
-                this.right = new TreeNodePlus(num, 0);
-                return (TreeNodePlus) this.right;
-            } else {
-                return rightBranch.insertNum(num);
-            }
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/02/01/limit-request-per-second/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/limit-request-per-second/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">link</a></p>
-
-<blockquote><p>有一个接口叫 void setRPS(int num);</p>
-
-<p>接下来不断有request过来，如何实现下面的接口，返回accept或者deny，</p></blockquote>
-
-<pre><code>bool process(int timestamp){
-
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Suggested by level 5 of <a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">this post</a>:</p>
-
-<ol>
-<li>maintain a variable for the number of request processed/rejected.
-
-<ol>
-<li>This variable must be atomic, thus a <strong>AtomicInteger</strong>.</li>
-<li>the variable is called &lsquo;count&rsquo;</li>
-</ol>
-</li>
-<li>have a method to process request
-
-<ol>
-<li>if count &lt; limit, do it</li>
-<li>otherwise, reject</li>
-</ol>
-</li>
-<li><strong>This is the most important</strong>: clear the count every 1 seconds!
-
-<ol>
-<li>eg. LIMIT = 5r/s, so:</li>
-<li>the <strong>first 5 number of requests in every second</strong> are getting fulfilled</li>
-<li>from 6th request onward, the request all rejected, until the next second.</li>
-</ol>
-</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>public class SetRps {
-
-    AtomicInteger count = new AtomicInteger(0);
-    int limit = -1;
-    int printIndex = 1;
-    long startTimestamp = -1;
-
-    void setRPS(int num) {
-        limit = num;
-    }
-
-    boolean process(long timestamp) {
-        // suppose timestamp is ms
-        synchronized (this) {
-            if (count.get() &lt; limit) {
-                // can process
-                count.incrementAndGet();
-                System.out.println(printIndex++ + ". processing request "
-                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
-                return true;
-            }
-            if (timestamp - startTimestamp &gt;= 1000) {
-                // every 1 seconds, reset
-                count.set(0);
-                startTimestamp = timestamp;
-                System.out.println("clear!");
-                return true;
-            }
-        }
-        return false;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/each-employee-two-events/">[Greedy] Each Employee 2 Events</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/02/01/each-employee-two-events/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/each-employee-two-events/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.careercup.com/question?id=7894677">link</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>You are given N ranges of date offsets when N employees are present in an organization. Something like</p></blockquote>
-
-<pre><code>    1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
-    2-6 
-    8-9 
-    .. 
-    1-14 
-</code></pre>
-
-<blockquote><p>Organize an event on minimum number of days such that each employee can attend the event at least twice.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Greedy algorithm</strong>, according to the <a href="http://www.careercup.com/question?id=7894677">top answer</a>:</p>
-
-<ol>
-<li><p>First, sort all ranges based on ENDING date in increasing order (bucket or counting sort).</p></li>
-<li><p>For each range, select last two days (because they produce maximum possibility to overlap next range)</p></li>
-<li><p>Skip following ranges that also contains those two days, until:</p>
-
-<ol>
-<li>a range that either covers only one day (we then select last day of this range) or</li>
-<li>does not cover any of the two (we then select last two days of this range).</li>
-</ol>
-</li>
-<li><p>Then continue.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p>not written</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1203,17 +1149,17 @@ You ultimately end up with 1.
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (62)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (114)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1225,6 +1171,10 @@ You ultimately end up with 1.
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -1233,15 +1183,11 @@ You ultimately end up with 1.
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Question] Snakes and Ladders</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/">[Question] Number of Subtrees With Even Nodes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/04/grep-command-interview-question/">[Question] Grep Command Interview Question</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

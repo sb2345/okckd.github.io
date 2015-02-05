@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question Imagine you have a 20 GB file with one string per line. Explain how you would sort the file. Solution Use External Sort. First divide the &hellip;">
+  <meta name="description" content="Question Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,368 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/27/Order-array-by-sorting-middle/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/27/Order-array-by-sorting-middle/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
+
+<blockquote><ol>
+<li><p>找到heading的最长递增序列.</p></li>
+<li><p>找到tailing的最长的递增序列.</p></li>
+</ol>
+</blockquote>
+
+<p>After that:</p>
+
+<blockquote><ol>
+<li><p>用中间部分的min去shrink左边.</p></li>
+<li><p>用中间部分的max去shrink右边.</p></li>
+</ol>
+</blockquote>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static void findUnsortedSequence(int[] array, int[] ans) {
+    int len = array.length;
+    ans[0] = 0;
+    ans[1] = 0;
+
+    // find increasing sequence on left and on right
+    int leftPeak = 0;
+    while (leftPeak &lt; len - 1) {
+        if (array[leftPeak] &lt; array[leftPeak + 1]) {
+            leftPeak++;
+        } else {
+            break;
+        }
+    }
+    if (leftPeak == len - 1) {
+        return;
+    }
+    int rightBottom = len - 1;
+    while (rightBottom &gt; 0) {
+        if (array[rightBottom] &gt; array[rightBottom - 1]) {
+            rightBottom--;
+        } else {
+            break;
+        }
+    }
+
+    // leftPeak and rightBottom are found, now read mid part
+    int midMin = Integer.MAX_VALUE;
+    int midMax = Integer.MIN_VALUE;
+    for (int i = leftPeak; i &lt;= rightBottom; i++) {
+        midMin = Math.min(midMin, array[i]);
+        midMax = Math.max(midMax, array[i]);
+    }
+
+    // find left boudary and right boundary
+    int leftBound = leftPeak;
+    while (leftBound &gt;= 0) {
+        if (array[leftBound] &lt; midMin) {
+            break;
+        }
+        leftBound--;
+    }
+    int rightBound = rightBottom;
+    while (rightBound &lt; len) {
+        if (array[rightBound] &gt; midMax) {
+            break;
+        }
+        rightBound++;
+    }
+
+    // finish it up
+    ans[0] = leftBound + 1;
+    ans[1] = rightBound - 1;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/26/implement-circular-array-java/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/26/implement-circular-array-java/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement a <strong>CircularArray</strong> class that supports an array-like data structure which can be efficiently rotated.</p>
+
+<p>The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>First part of the question is solved by using an array and a pointer</strong>. The solution simplifies the question by fixing the array size (not a dynamic-resizing array).</p>
+
+<p><strong>The difficult part is how to write iterator</strong>.</p>
+
+<p>Note that we should support <strong>Java Generics</strong>:</p>
+
+<pre><code>class MyCircularArray&lt;T&gt;
+</code></pre>
+
+<p>Implement <strong>Iterable Interface</strong>:</p>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+}
+</code></pre>
+
+<p>Override <strong>iterator() method</strong>:</p>
+
+<pre><code>@Override
+public Iterator&lt;T&gt; iterator() {
+    return new MyIterator&lt;T&gt;(this);
+}
+</code></pre>
+
+<p>Write our own <strong>Iterator Class</strong>:</p>
+
+<pre><code>class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+}
+</code></pre>
+
+<p>Finish it up</p>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+        return new MyIterator&lt;T&gt;(this);
+    }
+
+    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+        @Override
+        public boolean hasNext() {
+        }
+
+        @Override
+        public T next() {
+        }
+
+        @Override
+        public void remove() {
+        }
+    }
+}
+</code></pre>
+
+<p>It might be confusing when implementing <strong>Iterable</strong> and <strong>Iterator</strong> Class.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+
+    T[] items;
+
+    int head;
+    int cur;
+
+    public MyCircularArray(int size) {
+        // this is really important (casting the type)
+        items = (T[]) new Object[size];
+
+        head = 0;
+        cur = 0;
+    }
+
+    public void put(T item) {
+        items[cur++] = item;
+        cur = cur % items.length;
+    }
+
+    public T get(int i) {
+        int newIndex = (i + head) % items.length;
+        return items[newIndex];
+    }
+
+    public void rotate(int shiftRight) {
+        head += shiftRight;
+        head = head % items.length;
+    }
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+        return new MyIterator&lt;T&gt;(this);
+    }
+
+    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+
+        T[] items;
+        int head;
+        int count;
+
+        public MyIterator(MyCircularArray&lt;T&gt; array) {
+            this.items = array.items;
+            this.head = array.head;
+            this.count = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.count != items.length;
+        }
+
+        @Override
+        public T next() {
+            if (hasNext()) {
+                return items[(head + count++) % items.length];
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+        }
+    }
+
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/24/troubleshoot-google-chrome/">[CC150v5] 12.0 Example - Troubleshoot Google Chrome</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/24/troubleshoot-google-chrome/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/24/troubleshoot-google-chrome/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You&#8217;reworking on the Google Chrome team when you receivea bug report: Chrome crashes on launch. What would you do?</p></blockquote>
+
+<h3>Step 1: Understand the Scenario</h3>
+
+<ol>
+<li>How long has user seen this issue?</li>
+<li>version of browser and OS?</li>
+<li>Does this happen consistently? How often, and when?</li>
+</ol>
+
+
+<h3>Step 2: Break Down the Problem</h3>
+
+<p>Flow of situation:</p>
+
+<ol>
+<li>start menu</li>
+<li>click chrome</li>
+<li>browser starts</li>
+<li>browser load settings</li>
+<li>browser issues HTTP response</li>
+<li>browser get HTTP response</li>
+<li>browser parses webpage</li>
+<li>browser displays content</li>
+</ol>
+
+
+<p><strong>At some points in this process, something fails</strong>. A good tester would iterate thru the elements of this scenario and diagnose the problem.</p>
+
+<h3>Step 3: Create Specific, Manageable Tests</h3>
+
+<p>Come up with realistic instructions.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -730,211 +1092,6 @@ public static int helper(int[] array, int left, int right) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/16/calculate-bits-convertions/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/calculate-bits-convertions/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a function to determine the number of bits (change) required to convert integer A to integer B.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Using XOR operation, we can find out number of bits that are different.</p>
-
-<p>The next important thing is to know <strong>how to count the number of &lsquo;1&rsquo;s in a integer</strong>. It&rsquo;s like this:</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>code 1</strong></p>
-
-<pre><code>public static int calcBitsSwapMe1(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        count += num &amp; 1;
-        num = num &gt;&gt;&gt; 1;
-    }
-    return count;
-}
-</code></pre>
-
-<p><strong>code 2</strong></p>
-
-<pre><code>public static int calcBitsSwapMe2(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        num = num &amp; (num - 1);
-        count++;
-    }
-    return count;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/16/bottles-of-spills/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/bottles-of-spills/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You have 20 bottles of pills. 19 bottles have 1.0 gram pills, but one has pills of weight 1.1 grams.</p>
-
-<p>Given a scale, how to find the heavy bottle <strong>only scaling ONCE</strong>?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Take 1 pill from Bottle 1, 2 pills from Bottle 2, and so on. We&rsquo;ll expect (1 + 2 + &hellip; + 20) = 210 gram of pills.</p>
-
-<p>The answer would be {(weight &ndash; 210 grams) / 0.1}.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/binary-merge-two-numbers/">[CC150v5] 5.1 Binary Merge 2 Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/16/binary-merge-two-numbers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/binary-merge-two-numbers/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You are given two 32-bit numbers, N andM, and two bit positions, i and j. Write a method to insert M into Nsuch that M starts at bit j and ends at bit i. You can assume that the bits j through i have enough space to fit all ofM. That is, ifM= 10011, you can assume that there are at least 5 bits between j and i. You would not, for example, have j-3 and i=2, because M could not fully fit between bit 3 and bit 2.</p>
-
-<p>EXAMPLE:</p>
-
-<p>Input: N = 16000000000, M = 10011, i = 2, j = 6</p>
-
-<p>Output: N = 10001001100</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a basic bit manipulation question</strong>. The key is to use binary maks. Two things to note:</p>
-
-<ol>
-<li><p>The &lsquo;~&rsquo; means negate. So (~0) is a sequence of 1 (the value equals to -1).</p></li>
-<li><p>When shifting bits, <strong>DO NOT USE &lsquo;>>&rsquo; because it&rsquo;s signed shift</strong>. Instead, <strong>use &lsquo;>>>&rsquo; (unsigned right shift operator)</strong>.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public static int myAnswer(int n, int m, int i, int j) {
-    int rr = (~0 &gt;&gt;&gt; (31 - j));
-    int ll = (~0 &lt;&lt; i);
-    // printBinary(rr);
-    // printBinary(ll);
-
-    int middleMask = ll &amp; rr;
-    int twoEndMask = ll ^ rr;
-
-    n = n &amp; twoEndMask;
-    m = (m &lt;&lt; i) &amp; middleMask;
-
-    return n | m;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/11">&larr; Older</a>
@@ -952,17 +1109,17 @@ public static int helper(int[] array, int left, int right) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (62)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (114)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -974,6 +1131,10 @@ public static int helper(int[] array, int left, int right) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -982,15 +1143,11 @@ public static int helper(int[] array, int left, int right) {
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Question] Snakes and Ladders</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/">[Question] Number of Subtrees With Even Nodes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/04/grep-command-interview-question/">[Question] Grep Command Interview Question</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

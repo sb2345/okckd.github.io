@@ -9,9 +9,9 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given an unsorted integer array, find the first missing positive integer. For example,
-Given [1,2,0] return 3,
-and [3,4,-1,1] return 2 &hellip;">
+  <meta name="description" content="Question link Given a collection of numbers, return all possible permutations. For example,
+[1,2,3] have the following permutations:
+[1,2,3], [1,3,2 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,532 @@ and [3,4,-1,1] return 2 &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/Permutations/">[LeetCode 46] Permutations</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/14/Permutations/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Permutations/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/permutations/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a collection of numbers, return all possible permutations.
+</p>
+
+<p>
+For example,<br>
+<code>[1,2,3]</code> have the following permutations:<br>
+<code>[1,2,3]</code>, <code>[1,3,2]</code>, <code>[2,1,3]</code>, <code>[2,3,1]</code>, <code>[3,1,2]</code>, and <code>[3,2,1]</code>.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p><strong>This is a very classic question</strong>.</p>
+
+<p><strong>One solution</strong> is to recursively push elements into a list, until all elements are pushed. Make use of a &lsquo;visited&rsquo; array.</p>
+
+<p><strong>Another solution</strong> is using 2 nested for-loops to keep adding next elements. Read <a href="http://www.programcreek.com/2013/02/leetcode-permutations-java/">this post</a>:</p>
+
+<blockquote><p>Loop through the array, in each iteration, a new number is added to different locations of results of previous iteration. Start from an empty List.</p></blockquote>
+
+<p>Keep in mind: this type of permutation questions always requires insert/delete before/after a recursion.</p>
+
+<p>In case you are interested, there is a <strong>third solution, swap element method</strong>. It is also explained in <a href="http://www.programcreek.com/2013/02/leetcode-permutations-java/">the same post</a>:</p>
+
+<blockquote><p>Swap each element with each element after it.</p></blockquote>
+
+<h3>My code</h3>
+
+<p><strong>Adding elements one by one</strong> (recommended)</p>
+
+<pre><code>public class Solution {
+    public List&lt;List&lt;Integer&gt;&gt; permute(int[] num) {
+        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+        if (num == null || num.length == 0) {
+            return ans;
+        }
+        int len = num.length;
+        Arrays.sort(num);
+        helper(ans, new ArrayList&lt;Integer&gt;(), num, len, new boolean[len]);
+        return ans;
+    }
+
+    private void helper(List&lt;List&lt;Integer&gt;&gt; ans, List&lt;Integer&gt; path, int[] num, int len, boolean[] visited) {
+        if (path.size() == len) {
+            ans.add(new ArrayList&lt;Integer&gt;(path));
+            return;
+        }
+        for (int i = 0; i &lt; len; i++) {
+            if (!visited[i]) {
+                path.add(num[i]);
+                visited[i] = true;
+                helper(ans, path, num, len, visited);
+                path.remove(path.size() - 1);
+                visited[i] = false;
+            }
+        }
+    }
+}
+</code></pre>
+
+<p><strong>The double nested for-loop method</strong></p>
+
+<pre><code>public class Solution {
+    public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; permute(int[] num) {
+        ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+
+        //start from an empty list
+        result.add(new ArrayList&lt;Integer&gt;());
+
+        for (int i = 0; i &lt; num.length; i++) {
+            //list of list in current iteration of the array num
+            ArrayList&lt;ArrayList&lt;Integer&gt;&gt; current = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+
+            for (ArrayList&lt;Integer&gt; l : result) {
+                // # of locations to insert is largest index + 1
+                for (int j = 0; j &lt; l.size()+1; j++) {
+                    // + add num[i] to different locations
+                    l.add(j, num[i]);
+                    ArrayList&lt;Integer&gt; temp = new ArrayList&lt;Integer&gt;(l);
+                    current.add(temp);
+                    l.remove(j);
+                }
+            }
+            result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;(current);
+        }
+        return result;
+    }
+}
+</code></pre>
+
+<p><strong>The swap element method</strong></p>
+
+<pre><code>public class Solution {
+    public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; permute(int[] num) {
+        ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
+        permute(num, 0, result);
+        return result;
+    }
+
+    void permute(int[] num, int start, ArrayList&lt;ArrayList&lt;Integer&gt;&gt; result) {
+
+        if (start &gt;= num.length) {
+            ArrayList&lt;Integer&gt; item = convertArrayToList(num);
+            result.add(item);
+        }
+
+        for (int j = start; j &lt;= num.length - 1; j++) {
+            swap(num, start, j);
+            permute(num, start + 1, result);
+            swap(num, start, j);
+        }
+    }
+
+    private ArrayList&lt;Integer&gt; convertArrayToList(int[] num) {
+        ArrayList&lt;Integer&gt; item = new ArrayList&lt;Integer&gt;();
+        for (int h = 0; h &lt; num.length; h++) {
+            item.add(num[h]);
+        }
+        return item;
+    }
+
+    private void swap(int[] a, int i, int j) {
+        int temp = a[i];
+        a[i] = a[j];
+        a[j] = temp;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/Multiply-Strings/">[LeetCode 43] Multiply Strings</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/14/Multiply-Strings/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Multiply-Strings/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/multiply-strings/">link</a></p>
+
+<div class="question-content">
+<p></p><p>Given two numbers represented as strings, return multiplication of the numbers as a string.</p>
+
+<p>Note: The numbers can be arbitrarily large and are non-negative.</p><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p>The basic idea is to <strong>multiple numbers 1 by 1, and do decimal carry later</strong>. Note the max length of result is (m+n) assuming 2 input are length m and n respectively.</p>
+
+<p>The code seems easy, but be careful when <strong>converting result array into string</strong>. That is, we should omit preceding &lsquo;0&rsquo;s.</p>
+
+<p>Read <a href="http://blog.csdn.net/fightforyourdream/article/details/17370495">this blog</a> for more.</p>
+
+<h3>My code</h3>
+
+<pre><code>public class Solution {
+    public String multiply(String num1, String num2) {
+        if (num1 == null || num1.length() == 0) {
+            return "0";
+        } else if (num2 == null || num2.length() == 0) {
+            return "0";
+        }
+        int len1 = num1.length();
+        int len2 = num2.length();
+        int len = len1 + len2;
+        // eg. 99 * 999 = 98901
+        int[] digits = new int[len];
+
+        for (int i = 1; i &lt;= len1; i++) {
+            for (int j = 1; j &lt;= len2; j++) {
+                // multiply the (i)th number from the end of num1
+                // with the (j)th number from the end of num2
+                int product = (num1.charAt(len1 - i) - '0') * (num2.charAt(len2 - j) - '0');
+                // this produce saves to the (i+j-1)th position in array
+                int ansPos = len + 1 - i - j;
+                digits[ansPos] += product;
+            }
+        }
+        // answer is got and saved in digits array, but we
+        // need to handle the carry numbers
+        for (int i = len - 1; i &gt; 0; i--) {
+            digits[i - 1] += digits[i] / 10;
+            digits[i] %= 10;
+        }
+        // last step is the print the answer, but mind the prefix 0s
+        int p = 0;
+        while (p &lt; len &amp;&amp; digits[p] == 0) {
+            p++;
+        }
+        if (p == len) {
+            return "0";
+        } else {
+            StringBuilder sb = new StringBuilder();
+            while (p &lt; len) {
+                sb.append(String.valueOf(digits[p++]));
+            }
+            return sb.toString();
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/14/Jump-Game-II/">[LeetCode 45] Jump Game II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/14/Jump-Game-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/14/Jump-Game-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/jump-game-ii/">link</a></p>
+
+<div class="question-content">
+<p></p><p>
+Given an array of non-negative integers, you are initially positioned at the first index of the array.
+</p>
+<p>
+Each element in the array represents your maximum jump length at that position. 
+</p>
+<p>
+Your goal is to reach the last index in the minimum number of jumps.
+</p>
+
+<p>
+For example:<br>
+Given array A = <code>[2,3,1,1,4]</code>
+</p>
+<p>
+The minimum number of jumps to reach the last index is <code>2</code>. (Jump <code>1</code> step from index 0 to 1, then <code>3</code> steps to the last index.)
+</p><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p><strong>This is a DP problem</strong>. But we do not have to save all values into a DP array.</p>
+
+<p><strong>A analysis of DP solution</strong> from <a href="http://eric-yuan.me/leetcode-jump-game-ii/">this blog</a> explains it very well:</p>
+
+<blockquote><p>Search forward, and see for each node of array, what is the current maximum place we can reach, and every time we reach a local maximum, we add counter by 1, if we can reach the terminal, just return the counter.</p></blockquote>
+
+<p>It&rsquo;s easy to get &ldquo;time limit exceed&rdquo; if you solve this problem like a traditional DP question.</p>
+
+<p>So <strong>I come up with a solution using 2 pointers</strong>: &lsquo;left&rsquo; and &lsquo;right&rsquo; that denotes the boundary that can be jumps to within a certain number of jumps. What I need to do is updating the 2 pointers and increase the counter for number of jumps.</p>
+
+<h3>My code</h3>
+
+<p>traditional DP</p>
+
+<pre><code>public class Solution {
+    public int jump(int[] A) {
+        int len = A.length;
+        if (len &lt;= 1) return 0;
+        int[] dp = new int[len];
+        if (A[0] == 0) return 0;
+        int cur = 1;
+        for (int i = 0; i &lt; len; i ++) {
+            if (i != 0 &amp;&amp; dp[i] == 0) 
+                return 0;
+            // array dp represent the steps to reach point i
+            for (; cur &lt; len &amp;&amp; cur &lt;= i + A[i]; cur ++) {
+                dp[cur] = dp[i] + 1;
+            }
+            if (dp[len - 1] != 0) 
+                return dp[len - 1];
+        }
+        return 0;
+    }
+}
+</code></pre>
+
+<p>DP without array (recommended)</p>
+
+<pre><code>public class Solution {
+    public int jump(int[] A) {
+        if (A == null || A.length &lt;= 1) {
+            return 0;
+        }
+        int len = A.length;
+        // note that this is a DP question, but considering the required out, 
+        // we do not need dp array (i.e.) 
+        // int[] dp = new int[len];
+
+        int jumps = 0;
+        int left = 0;
+        int right = 0;
+
+        while (right &lt; len) {
+            int reachable = right;
+            jumps++;
+            for (int i = left; i &lt;= right; i++) {
+                reachable = Math.max(reachable, i + A[i]);
+            }
+            if (reachable == right) {
+                // unable to jump forward
+                return -1;
+            }
+            if (reachable &gt;= len - 1) {
+                return jumps;
+            } else {
+                left = right + 1;
+                right = reachable;
+            }
+        }
+        return -1;
+    }
+}
+</code></pre>
+
+<p>non-DP</p>
+
+<pre><code>public class Solution {
+    public int jump(int[] A) {
+        if (A == null || A.length &lt;= 1) {
+            return 0;
+        }
+        int len = A.length;
+        // note that this is a DP question, but considering the required out, 
+        // we do not need dp array (i.e.) 
+        // int[] dp = new int[len];
+
+        int jumps = 0;
+        int left = 0;
+        int right = 0;
+
+        while (right &lt; len) {
+            int reachable = right;
+            jumps++;
+            for (int i = left; i &lt;= right; i++) {
+                reachable = Math.max(reachable, i + A[i]);
+            }
+            if (reachable == right) {
+                // unable to jump forward
+                return -1;
+            }
+            if (reachable &gt;= len - 1) {
+                return jumps;
+            } else {
+                left = right + 1;
+                right = reachable;
+            }
+        }
+        return -1;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1094,431 +1620,6 @@ public int binarySearch(int[] A, double t) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/12/Search-Insert-Position/">[LeetCode 35] Search Insert Position</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/12/Search-Insert-Position/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/12/Search-Insert-Position/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/search-insert-position/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
-
-<p>You may assume no duplicates in the array.</p>
-
-<p>
-Here are few examples.<br>
-<code>[1,3,5,6]</code>, 5 → 2<br>
-<code>[1,3,5,6]</code>, 2 → 1<br>
-<code>[1,3,5,6]</code>, 7 → 4<br>
-<code>[1,3,5,6]</code>, 0 → 0
-</p><p></p>
-</div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a very basic, yet very difficult question</strong>. It is not easy to get it correct at first attempt.</p>
-
-<p>Read <a href="http://blog.csdn.net/fightforyourdream/article/details/14216321">this blog</a> for more.</p>
-
-<h3>My code</h3>
-
-<pre><code>public class Solution {
-    public int searchInsert(int[] A, int target) {
-        if (A == null || A.length == 0) {
-            return 0;
-        }
-        int len = A.length;
-        int left = 0;
-        int right = len - 1;
-        while (left + 1 &lt; right) {
-            int mid = left + (right - left) / 2;
-            if (A[mid] &gt;= target) {
-                right = mid;
-            } else {
-                left = mid;
-            }
-        }
-        // now are have a adjacent range [left, right]
-        if (target &lt;= A[left]) {
-            return left;
-        } else if (target &lt;= A[right]) {
-            // remember not to miss the == case
-            return right;
-        } else {
-            return right + 1;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/12/Next-Permutation/">[LeetCode 31] Next Permutation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/12/Next-Permutation/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/12/Next-Permutation/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/next-permutation/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Implement next permutation, which rearranges numbers into the lexicographically next greater permutation of numbers.
-</p>
-<p>
-If such arrangement is not possible, it must rearrange it as the lowest possible order (ie, sorted in ascending order).
-</p>
-<p>
-The replacement must be in-place, do not allocate extra memory.
-</p>
-<p>
-Here are some examples. Inputs are in the left-hand column and its corresponding outputs are in the right-hand column.<br>
-<code>1,2,3</code> → <code>1,3,2</code><br>
-<code>3,2,1</code> → <code>1,2,3</code><br>
-<code>1,1,5</code> → <code>1,5,1</code><br>
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<h3>Analysis</h3>
-
-<p>The image below explains the solution very well (for the input number &ldquo;687432&rdquo;).</p>
-
-<p><img class="middle" src="/assets/images/next_permutation.png"></p>
-
-<h3>Solution</h3>
-
-<p>Read <a href="http://blog.csdn.net/havenoidea/article/details/12176737">this blog</a> for a very nice piece of code.</p>
-
-<p>The following code is written by me.</p>
-
-<h3>My code</h3>
-
-<pre><code>public class Solution {
-    public void nextPermutation(int[] num) {
-        if (num == null || num.length &lt;= 1) {
-            return;
-        }
-        int len = num.length;
-        int p = len - 2;
-        // note that when values are equals, proceed the pointer! 
-        // same for line 22
-        while (p &gt;= 0 &amp;&amp; num[p] &gt;= num[p + 1]) {
-            // move p to left as long as its value is larger than next num
-            // we want to find the end of increasing sequence (from end to start)
-            p--;
-        }
-        if (p == -1) {
-            // the input is a strictly decreasing sequence
-            Arrays.sort(num);
-            return;
-        }
-        // replace number at p with an larger value found in the right of p
-        int w = len - 1;
-        while (num[w] &lt;= num[p]) {
-            w--;
-        }
-        // ok, now swap number at p and w
-        swop(num, p, w);
-        // reverse all numbers to the right of p
-        reverse(num, p + 1, len - 1);
-    }
-
-    private void swop(int[] num, int a, int b) {
-        int temp = num[a];
-        num[a] = num[b];
-        num[b] = temp;
-    }
-
-    private void reverse(int[] num, int a, int b) {
-        while (a &lt; b) {
-            swop(num, a++, b--);
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/12/Longest-Valid-Parentheses/">[LeetCode 32] Longest Valid Parentheses</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/12/Longest-Valid-Parentheses/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/12/Longest-Valid-Parentheses/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/longest-valid-parentheses/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a string containing just the characters <code>'('</code> and <code>')'</code>, find the length of the longest valid (well-formed) parentheses substring.
-</p>
-<p>
-For <code>"(()"</code>, the longest valid parentheses substring is <code>"()"</code>, which has length = 2.
-</p>
-<p>
-Another example is <code>")()())"</code>, where the longest valid parentheses substring is <code>"()()"</code>, which has length = 4.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<h3>Solution</h3>
-
-<p><strong>There are 2 ways to solve this problem</strong>, stack and DP.</p>
-
-<p><strong>Stack method 1 is more straight-forward</strong> (code shown below). The idea is to keep a stack of &ldquo;(&rdquo; indexes, and another variable called &ldquo;last&rdquo;. <strong>Note that only &ldquo;)&rdquo; can violates a pattern</strong>. So whenever I see a &ldquo;(&rdquo;, just push to stack. When the pattern is violated by a &ldquo;)&rdquo;, I update &ldquo;last&rdquo;. The code explains itself very well. If not, <a href="http://discuss.leetcode.com/questions/212/longest-valid-parentheses/1488">look here</a></p>
-
-<p><strong>Stack method 2 is more tricky</strong>. This time I will not only push the index of &ldquo;(&rdquo; to stack, but also the index of &ldquo;)&rdquo; when the pattern got violated. It&rsquo;s hard to explain, and hard to think of at first.</p>
-
-<p><strong>The DP solution is not very difficult</strong>. Basically create an array of same length as string s. dp[i] denotes the length of valid parenthese ending with index i. The idea is similar to <a href="http://blog.csdn.net/abcbc/article/details/8826782">this blog</a>, but he used reverse DP, and I use normal DP.</p>
-
-<p>I will explain DP with an example of input &ldquo;<strong>)()()</strong>&rdquo;. For this string, we have <strong>dp[0] = 0, dp[1] = 0, dp[2] = 2, dp[3] = 0</strong>. For dp[4], I check the 3rd position first, and find that dp[4] = 2. Then I also have to add dp[2] into dp[4] to make it complete. The end result is dp[4] = 2 + 2 = 4.</p>
-
-<h3>My code</h3>
-
-<p>Stack method 1 (recommended)</p>
-
-<pre><code>public class Solution {
-    public int longestValidParentheses(String s) {
-        if (s == null || s.length() == 0) {
-            return 0;
-        }
-        int len = s.length();
-        int longest = 0;
-        Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-        int start = 0;
-        for (int i = 0; i &lt; len; i++) {
-            char ch = s.charAt(i);
-            if (ch == '(') {
-                // well, no matter what, '(' is alway a valid part
-                // push the index to the stack
-                stack.push(i);
-            } else if (ch == ')') {
-                if (stack.isEmpty()) {
-                    // invalid ')', update 'start' variable
-                    start = i + 1;
-                } else {
-                    int pos = stack.pop();
-                    if (stack.isEmpty()) {
-                        // this is why we need 'start' variable
-                        longest = Math.max(longest, i - start + 1);
-                    } else {
-                        // important: must peek stack again.
-                        // eg. (()()  if don't peek again 
-                        longest = Math.max(longest, i - stack.peek());
-                    }
-                }
-            }
-        }
-        return longest;
-    }
-}
-</code></pre>
-
-<p>Stack method 2</p>
-
-<pre><code>public int longestValidParentheses(String s) {
-    int res = 0;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    char[] arr = s.toCharArray();
-    for (int i = 0; i &lt; arr.length; i++) {
-        if (arr[i] == ')' &amp;&amp; !stack.isEmpty() &amp;&amp; arr[stack.peek()] == '(') {
-            stack.pop();
-            if (stack.isEmpty()) res = i + 1;
-            else res = Math.max(res, i - stack.peek());
-        } else stack.push(i);
-    }
-    return res;
-}
-</code></pre>
-
-<p>DP</p>
-
-<pre><code>public int longestValidParentheses(String s) {
-    int len = s.length();
-    if (len &lt;= 1) return 0;
-    int max = Integer.MIN_VALUE;
-    int[] dp = new int[len];
-    for (int i = 1; i &lt; len; i ++) {
-        if (s.charAt(i) == '(') dp[i] = 0;
-        else {
-            int j = i - 1 - dp[i - 1];
-            if (j &gt;= 0 &amp;&amp; s.charAt(j) =='(') {
-                dp[i] = dp[i - 1] + 2;
-                if (j &gt;= 1) dp[i] += dp[j - 1];
-            }
-            else dp[i] = 0;
-        }
-        max = Math.max(max, dp[i]);
-    }
-    return max;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/49">&larr; Older</a>
@@ -1536,17 +1637,17 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (62)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (47)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (114)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1558,6 +1659,10 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
@@ -1566,15 +1671,11 @@ Another example is <code>")()())"</code>, where the longest valid parentheses su
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Question] Snakes and Ladders</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/">[Question] Number of Subtrees With Even Nodes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/04/grep-command-interview-question/">[Question] Grep Command Interview Question</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

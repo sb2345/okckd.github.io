@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Google | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/google/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-02-04T22:43:41+08:00</updated>
+  <updated>2015-02-05T10:42:53+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,426 +14,408 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[Google] Generate Request ID]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/27/generate-request-id/"/>
-    <updated>2015-01-27T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/27/generate-request-id</id>
+    <title type="html"><![CDATA[[Google] Implement a Blocking Queue]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/05/implement-blocking-q/"/>
+    <updated>2015-02-05T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/05/implement-blocking-q</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.careercup.com/question?id=5169800024162304)
+[link](http://www.careercup.com/question?id=14622668)
 
-> Design a system to __return an unique ID for each request__.
-
-> (For most of requests, the ID value should increase as time goes, the system should handle 1000 requests per second at least. )
-
-> Note: __Timestamps__ alone is not valid since there might be multiple requests with same timestamps.
-
-### Idea 1
-
-#### Generating UUID
-
-__A universally unique identifier (UUID)__ is an identifier standard used in software construction. A UUID is simply a 128-bit value. 
-
-Generating unique IDs is easy. All modern OS'es have that functionality built in. 
-
-__Detail__: UUIDs may be generated from a combination of __system time stamp, CPU/system ID__, NIC MAC addresses, HBA WWNs, server id etc. 
-
-#### Clarifications
-
-Let's assume the following: 
-
-1. What's the length of the ID? 
-
-    <= 128 bits. In that case I'll choose the standard 128 bit UUID format. 
-
-1. The requirement states the system should handle 1000 request/s at least. 
-
-1. What's the average request rate? 
-
-    1000 < avg req. rate < 10,000 
-
-1. What's the max. burst rate the system must handle? 
-
-    < 1,000,000 
-
-1. What's the max. latency (wait time) for a request? 
-
-    1 ms 
-
-#### Solution
-
-It's a classical consumer-producer problem. 
-
-In this case we have many consumers of UUIDs and one producer. Let's assume the OS provides an API to generate UUIDs and the max. running time of the API is 1ms. 
-
-1. Pre-allocate 2 Mio UUIDs into an array / stack/ heap (depending on implementation) structure. 
-
-1. If no overhead 2 Mio UUIDs would take ~ 32MB of RAM. Not a problem on today's server system with many GB of RAM, but may be a problem on an embedded system.
-
-1. 2 Mio UUIDs ensures system can handle burst rate. 
- 
-1. The solution needs to ensure that its pool of UUIDs doesn't run out as consumers request them and they are replenished.
-
-### Idea 2
-
-This question is quite open-ended. 
-
-For starter, how about __appending random(N) to the timestamp__? N can be large enough to make collisions unlikely. If each server has an ID we can also include it to further reduce collisions. 
-
-If IDs must be unique, then I suppose you can __design a counter__ that will return an ID and increment it at the same time. You will then __need mutex to access this counter__. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Make a Java Method Thread-safe]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/26/make-java-method-thread-safe/"/>
-    <updated>2015-01-26T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/26/make-java-method-thread-safe</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.programcreek.com/2014/02/how-to-make-a-method-thread-safe-in-java/)
-
-> Consider the following class: 
-
-    class MyCounter {
-        private static int counter = 0;
-
-        public static int getCount() {
-            return counter++;
-        }
-    }
-
-> Is the method thread-safe? How to make it thread-safe?
+> Implement a Blocking queue. 
 
 ### Solution 
 
-__No__, it's not. 
+First thing first, the most important characteristic of a BlockingQueue is:
 
-> The method is not thread-safe, because the __counter++ operation is not atomic__, which means it consists more than one atomic operations. In this case, one is accessing value and the other is increasing the value by one.
+> __thread-safe__ BlockingQueue
 
-> When Thread 1 accesses the method at t1, Thread 2 may not be done with the method. So the value returned to Thread 1 is the value that has not been increased.
+Second, we need to make sure to handle the following 2 methods: 
 
-### Approach 1
+> __notifyAll();__
+>
+> __wait();__
 
-Adding __synchronized__ to this method. This will synchronize the instance of the static class. 
+Last, remember that __wait()__ has got a __checked exception__(InterruptedException). We end up with the code: 
 
-    class MyCounter {
-        private static int counter = 0;
+	public synchronized void enqueue(Object item) throws InterruptedException {
+		while (this.queue.size() == this.size) {
+			wait();
+		}
+		if (this.queue.size() == 0) {
+			notifyAll();
+		}
+		this.queue.add(item);
+	}
 
-        public static synchronized int getCount() {
-            return counter++;
+### Code
+
+The entire class, refer to __[Java OOP] Java BlockingQueue (2)__: 
+
+    public class MyBlockingQueue {
+
+        private List<Object> queue = new LinkedList<Object>();
+        private int size = 10;
+
+        public MyBlockingQueue(int size) {
+            this.size = size;
+        }
+
+        public synchronized void enqueue(Object item) throws InterruptedException {
+            while (this.queue.size() == this.size) {
+                wait();
+            }
+            if (this.queue.size() == 0) {
+                notifyAll();
+            }
+            this.queue.add(item);
+        }
+
+        public synchronized Object dequeue() throws InterruptedException {
+            while (this.queue.size() == 0) {
+                wait();
+            }
+            if (this.queue.size() == this.size) {
+                notifyAll();
+            }
+
+            return this.queue.remove(0);
+        }
+
+        public boolean isEmpty() {
+            return this.queue.isEmpty();
         }
     }
-
-### Approach 2
-
-We actually can make __count++__ atomic by using AtomicInteger from the package "java.util.concurrent.atomic". 
-
-import java.util.concurrent.atomic.AtomicInteger;
- 
-    public class MyCounter {
-        private static AtomicInteger counter = new AtomicInteger(0);
-
-        public static int getCount() {
-            return counter.getAndIncrement();
-        }
-    }
-
-### Follow-up on thread stack
-
-1. Each thread has its own stack (never share stack). 
-1. All local variables defined in a method will be allocated memory in stack. 
-1. When execution completed by a thread, stack frame will be removed.
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Google] Top N Values From Sum of 2 Arrays]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/20/top-n-from-sum-2-array/"/>
-    <updated>2015-01-20T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/20/top-n-from-sum-2-array</id>
+    <title type="html"><![CDATA[[Google] Snakes and Ladders]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/04/snakes-and-ladders/"/>
+    <updated>2015-02-04T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/04/snakes-and-ladders</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.careercup.com/question?id=3213705)
+[link](http://www.careercup.com/question?id=14955106)
 
-> 给定两个数组A，B，长度均为n，求A[0]+B[0],…,A[0]+B[n-1],…,A[n-1]+B[0],…,A[n-1]+B[n]总共n^2个数的最大的n个值。
+> Given a board of snakes and ladders game, provide an algorithm to find the minimum number of dice rolls required to reach 100 from 1.
 
-### Solution
+### Solution 1
 
-Use a Heap and then iteratively pop 1 and push 2 elements. Until n values has been filled. 
+Recommended: __Graph (shortest path)__. [ref](http://www.careercup.com/question?id=14955106): 
+
+1. k is linked to k + 1 k + 2, k + 3, k + 4, k + 5, k +6. 
+
+2. If has a ladder, connect it too. 
+
+3. Find shortest path.
+
+Solution 2 is __DP__. 
+
+### Variant
+
+If the question asks: find the way to climb as many ladder as possible. Then this question would be solved differently.
+
+Any ideas? 
+
+Solution below. 
+
+...
+
+...
+
+...
+
+Read __[Greedy] Activity Selection Problem__. 
 
 ### Code
 
-	public int[] topN(int[] arr1, int[] arr2, int n) {
-		int[] ans = new int[n];
-		int index = n - 1;
+not written
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Google] Number of Subtrees With Even Nodes]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/04/number-of-subtree-with-even-nodes/"/>
+    <updated>2015-02-04T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/04/number-of-subtree-with-even-nodes</id>
+    <content type="html"><![CDATA[### Question 
 
-		PriorityQueue<Pair> heap = new PriorityQueue<Pair>(n,
-				new SpecialComparator(arr1, arr2));
-		Arrays.sort(arr1);
-		Arrays.sort(arr2);
+[link](http://www.mitbbs.com/article_t0/JobHunting/32348573.html)
 
-		Pair maxPair = new Pair(n - 1, n - 1);
-		heap.add(maxPair);
+> an arbitrary tree. split it into as many subtrees as you can. the 
+number of nodes of the subtree must be even.
 
-		for (int i = 0; i < n; i++) {
-			Pair next = heap.poll();
-			ans[index--] = arr1[next.x] + arr2[next.y];
-			if (next.y - 1 >= 0) {
-				heap.add(new Pair(next.x, next.y - 1));
+### Solution
+
+__This is a difficult question__. The idea is recursive solution, but be cautious deadling with NULL. 
+
+__NULL can be regarded as a child branch of even node (0)__, but NULL could not be seen as a subtreee. 
+
+1. traverse each and every node in the tree
+1. for each node, take it as root, and find left and right branch with total sum of odd count of nodes. 
+1. we do above step recursively
+1. include NULL as a subtree of EVEN number of nodes. 
+
+The code below is my code and I haven't seen any reference to this question. If you read this, please comment and discuss with me! 
+
+### Code
+
+	public void traverseAndFindEvenSubstrees(List<TreeNode> ans, TreeNode node) {
+		if (node == null) {
+			return;
+		}
+		List<TreeNode> evenSubtrees = this.getSubtrees(node, true);
+		evenSubtrees.remove(null);
+		ans.addAll(evenSubtrees);
+
+		traverseAndFindEvenSubstrees(ans, node.left);
+		traverseAndFindEvenSubstrees(ans, node.right);
+	}
+
+	private List<TreeNode> getSubtrees(TreeNode root, boolean isEven) {
+		List<TreeNode> ans = new ArrayList<TreeNode>();
+		if (root == null) {
+			if (isEven) {
+				// NULL is considered as a subtree with even number (0) of nodes
+				ans.add(null);
 			}
-			if (next.x - 1 >= 0) {
-				heap.add(new Pair(next.x - 1, next.y));
+			return ans;
+		}
+		if (isEven) {
+			// we need 2 subtrees to have a combined nodes of odd numbers
+			for (int i = 0; i <= 1; i++) {
+				List<TreeNode> leftGroup = getSubtrees(root.left, i == 0);
+				List<TreeNode> rightGroup = getSubtrees(root.right, i != 0);
+				// what we do here, is to make leftGroup and rightGroup have
+				// different boolean parameter, thus a total of odd count
+				for (TreeNode ln : leftGroup) {
+					for (TreeNode rn : rightGroup) {
+						// note that NULL is included in either leftGroup or
+						// rightGroup. we'll use that
+						TreeNode newSubtree = new TreeNode(root.val);
+						newSubtree.left = ln;
+						newSubtree.right = rn;
+						ans.add(newSubtree);
+					}
+				}
 			}
+			// now we've added all subtrees into ans, whose head is the root
+			// this means we does not inlcude NULL
+		} else {
+			for (int i = 0; i <= 1; i++) {
+				List<TreeNode> leftGroup = getSubtrees(root.left, i == 0);
+				List<TreeNode> rightGroup = getSubtrees(root.right, i == 0);
+				for (TreeNode ln : leftGroup) {
+					for (TreeNode rn : rightGroup) {
+						TreeNode newSubtree = new TreeNode(root.val);
+						newSubtree.left = ln;
+						newSubtree.right = rn;
+						ans.add(newSubtree);
+					}
+				}
+			}
+		}
+		// now last step, add NULL (important)
+		if (isEven) {
+			ans.add(null);
 		}
 		return ans;
 	}
 
-	class SpecialComparator implements Comparator<Pair> {
+Test data:
 
-		int[] arr1, arr2;
+    Test start
+    Input is a BST with this structure: 
+    4 
+    2 6 
+    1 3 5 7 
 
-		public SpecialComparator(int[] a1, int[] a2) {
-			arr1 = a1;
-			arr2 = a2;
-		}
-
-		@Override
-		public int compare(Pair p1, Pair p2) {
-			// note that larger value shall go up top of the heap, so -1 * ...
-			return -1 * (arr1[p1.x] + arr2[p1.y] - arr1[p2.x] - arr2[p2.y]);
-		}
-	}
+    Total subtree count = 16
+    They are: 
+    Tree 1:
+    4 
+    2 6 
+    3 
+    Tree 2:
+    4 
+    2 6 
+    3 5 7 
+    Tree 3:
+    4 
+    2 6 
+    1 
+    Tree 4:
+    4 
+    2 6 
+    1 5 7 
+    Tree 5:
+    4 
+    6 
+    Tree 6:
+    4 
+    6 
+    5 7 
+    Tree 7:
+    4 
+    2 6 
+    7 
+    Tree 8:
+    4 
+    2 6 
+    5 
+    Tree 9:
+    4 
+    2 
+    Tree 10:
+    4 
+    2 6 
+    1 3 7 
+    Tree 11:
+    4 
+    2 6 
+    1 3 5 
+    Tree 12:
+    4 
+    2 
+    1 3 
+    Tree 13:
+    2 
+    3 
+    Tree 14:
+    2 
+    1 
+    Tree 15:
+    6 
+    7 
+    Tree 16:
+    6 
+    5 
+    Total time = 0.006
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Google] Lexicographic Order From Dictionary]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/18/lexicographic-order-from-dict/"/>
-    <updated>2015-01-18T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/18/lexicographic-order-from-dict</id>
+    <title type="html"><![CDATA[[Google] Data Structure of Insert, Remove, GetRandom]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/04/ds-insert-remove-getrandom/"/>
+    <updated>2015-02-04T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/04/ds-insert-remove-getrandom</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.careercup.com/question?id=13394663)
+[link](http://www.careercup.com/question?id=11353907)
 
-> Given set of words that are lexicographically sorted, return lexicographic order. E.g:
+> Design a data structure where the following 3 functions at O(1): 
 
-    abc
-    acd
-    bcc
-    bed
-    bdc
-    dab
-
-> The order of letters for the given example would be
-
-    a->b->c->e->d
+    1. Insert(n) 
+    2. GetRandomElement() 
+    3. Remove(n) 
 
 ### Solution
 
-> Just form a graph(DAG) and do a topological sort. 
+Array is best for: 
 
-Start from the first pair in the dictionary. Compare two strings in this pair __till first mismatch__. 
+1. random access
 
-Eg: __aad & aab__, in this case create an edge __d -> b__. 
+HashMap is best for: 
 
-More details is available [here](http://codereview.stackexchange.com/questions/48292/return-the-lexicographic-order). 
+1. Searching
+    1. insert
+    1. remove
 
-### Code
+[So the answer is](http://stackoverflow.com/a/22083895) __array + hashmap__: 
 
-	public String lexicoOrder(String[] dict) {
-		String ans = "";
+1. Insertion can be done by appending to the array and adding to the hash-map.
 
-		// for each pair, maintain 2 HashMap
-		HashMap<Character, Integer> incount = new HashMap<Character, Integer>();
-		HashMap<Character, List<Character>> connection = new HashMap<Character, List<Character>>();
-		for (String str : dict) {
-			for (char c : str.toCharArray()) {
-				incount.put(c, 0);
-				connection.put(c, new ArrayList<Character>());
-			}
-		}
-		buildGraph(dict, incount, connection);
+1. Deletion can be done by first looking up and removing the array index in the hash-map, then __swapping the last element with that element in the array__. 
 
-		// start topology sorting
-		Queue<Character> temp = new LinkedList<Character>();
-		for (char c : incount.keySet()) {
-			if (incount.get(c) == 0) {
-				temp.offer(c);
-				incount.remove(c);
-				// remove any node whose incount is 0
-			}
-		}
-		while (!temp.isEmpty()) {
-			char top = temp.poll();
-			ans += top;
-			// 'top' is next char in line. remove it and delete connections
-			List<Character> inNodes = connection.get(top);
-			for (char c : inNodes) {
-				// remove incount for all nodes from inNodes
-				incount.put(c, incount.get(c) - 1);
-				if (incount.get(c) == 0) {
-					incount.remove(c);
-					temp.offer(c);
-				}
-			}
-		}
-		if (incount.size() == 0)
-			return ans;
-		else
-			return "unable to find a valid char sequence.";
-	}
+1. Get random can be done by returning a random index from the array.
 
-	public void buildGraph(String[] dict, HashMap<Character, Integer> incount,
-			HashMap<Character, List<Character>> connection) {
-		// build the graph map
-		// abc
-		// acd
-		// bcc
-		// bed
-		// bdc
-		// dab
-		for (int i = 0; i < dict.length - 1; i++) {
-			// compare dict[i] and dict[i+1]
-			String str1 = dict[i];
-			String str2 = dict[i + 1];
-			int p = 0;
-			while (p < str1.length() && p < str2.length()) {
-				if (str1.charAt(p) == str2.charAt(p)) {
-					p++;
-				} else {
-					break;
-				}
-			}
-			if (p == str1.length()) {
-				// this is special case eg. "ab" & "abc"
-				// this will not give up any information about lexico order
-				continue;
-			}
-			char from = str1.charAt(p);
-			char to = str2.charAt(p);
-			// update incount
-			incount.put(to, incount.get(to) + 1);
-			// update connection
-			connection.get(from).add(to);
-		}
-	}
+1. All operations take O(1).
+
+Note [how hashmap is used](http://stackoverflow.com/a/5684892):
+
+> insert(value): append the value to array and let i be it's index in A. Set H[value]=i.
+
+Hashmap stores value's index in the array - that is to say: __this DS does not support inserting duplicating values__. 
+
+Finally, when we delete, we swap the last element to replace the gap. This is an nice idea! 
+
+#### follow-up
+
+> what if we want to get the top x% number?
+
+Well, heap of course. And note that __Heap size is [auto-increasing](http://stackoverflow.com/a/9115884)__: 
+
+> PriorityQueue is unbounded, it can grow as big as your memory allows, and it will grow automatically when needed. The initialCapacity parameter is just a hint to reserve room for that many elements initially.
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Google] Crazy Distance Between Strings]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/11/crazy-distance-string/"/>
-    <updated>2015-01-11T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/11/crazy-distance-string</id>
-    <content type="html"><![CDATA[### Question 
+    <title type="html"><![CDATA[[Google] Collatz Conjecture (Oneness Property)]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/04/Collatz-Conjecture-oneness/"/>
+    <updated>2015-02-04T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/04/Collatz-Conjecture-oneness</id>
+    <content type="html"><![CDATA[### Collatz Conjecture
 
-[link](http://stackoverflow.com/questions/15061908/google-interview-find-crazy-distance-between-strings)
+The [Collatz conjecture](http://en.wikipedia.org/wiki/Collatz_conjecture) is a conjecture in mathematics known as the 3n + 1 conjecture. 
 
-> X and Y are strings formed by 0 or 1. Distance is define as: 
+Take any natural number n. 
 
-    D(X,Y) = Remove chars common at the start from both X & Y. 
-    Then add the remaining lengths from both the strings.
+1. If n is even, divide it by 2 to get n / 2. 
+1. If n is odd, multiply it by 3 and add 1 to obtain 3n + 1. 
 
-> For e.g.
+Repeat the process (which has been called "Half Or Triple Plus One", or HOTPO) indefinitely. The conjecture is that no matter what number you start with, __you will always eventually reach 1__. 
 
-    D(1111, 1000) = Only First alphabet is common. So the remaining string is 111 & 000. Therefore the result length("111") & length("000") = 3 + 3 = 6
+The property has also been called __oneness__. 
 
-> For e.g.
+### Question 
 
-    D(0101, 01100) = Only First two alphabets are common. So the remaining string is 01 & 100. Therefore the result length("01") & length("100") = 2 + 3 = 5
+[link](http://stackoverflow.com/questions/5437445/collatz-conjecture-related-interview)
 
-> Now given n input, say like
+> Collatz conjecture says that if you do the following
 
-    1111
-    1000
-    101
-    1100
+    If n is even, replace n by n/2.
+    If n is odd, replace n by 3n+1.
+    You ultimately end up with 1.
 
-> Find out the maximum crazy distance between 2 strings.
+> For instance, 5 -> 16 -> 8 -> 4 -> 2 -> 1
 
-> __n is__ the number of input strings. __m is__ the max length of any input string. 
+> Chain length is the number of steps required to get to 1. (The chain length of 1 is 0).
+
+> Now, the problem is given natural numbers n and k, find all numbers between 1 and n, such that the chain length is <= k. 
 
 ### Solution
 
-This is the [source](http://stackoverflow.com/a/15062640). 
+Generate all numbers in backwards fashion, suggest by [templatetypedef](http://stackoverflow.com/a/5437672): 
 
-> Put the strings into a tree, where 0 means go left and 1 means go right. __O(m*n) time__. 
+                      1
+                      |
+                      2
+                      |
+                      4
+                      |
+                      8
+                      |
+                      16
+                      | \
+                      32 \
+                      |   5
+                      64  |
+                     /|   10
+                    / 128 | \
+                   21     20 3
 
-Example: 
+__Implementation__: using a queue and keep appending numbers. 
 
-                Root
-                 1
-              0      1
-             0 1*   0  1
-            0*     0*    1*
+__Duplication handling__? 
 
-> where the * means that an element ends there. Constructing this tree clearly takes O(n m).
+> Assuming that the Collatz conjecture holds true, we'll never get any duplicates this way.
 
-> Now we have to find __the diameter of the tree__ (the longest path between two nodes). 
-
-How to find out longest path between 2 leaf nodes? Please refer to __[Google] Diameter of a Binary Tree__ for explanation.  
-
-Total time complexity is __O(m*n) time__.
+__Time complexity__ is O(S) time, where S is the number of numbers we need to output.
 
 ### Code
 
-	public int crazyDist(String[] input) {
-		TreeNode root = this.buildTree(input);
-		return this.findMaxPath(root).path - 1;
-	}
-
-	private Result findMaxPath(TreeNode node) {
-		if (node == null) {
-			return new Result(Integer.MIN_VALUE, 0);
-		}
-		Result lr = this.findMaxPath(node.left);
-		Result rr = this.findMaxPath(node.right);
-		int path = Math.max(lr.path, rr.path);
-		if (lr.depth != 0 && rr.depth != 0) {
-			// this check is important, because if any of the child node is
-			// NULL, this root will not be eligible for computing the path
-			path = Math.max(path, lr.depth + rr.depth + 1);
-			// Why? cuz diameter must go from one leaf, thru root, and reach
-			// another leaf. This is different from "Maximum Path Sum" leetcode
-		}
-		return new Result(path, 1 + Math.max(lr.depth, rr.depth));
-	}
-
-	private TreeNode buildTree(String[] input) {
-		TreeNode root = new TreeNode(123);
-		// share a common root. this root is deducted from the final calculation
-		for (String str : input) {
-			// insert str under the root
-			TreeNode p = root;
-			for (char c : str.toCharArray()) {
-				if (c == '0') {
-					if (p.left == null) {
-						p.left = new TreeNode(124);
-						// if 0, go to left; otherwise go to right
-						// thus value of TreeNodes does not really matter
-					}
-					p = p.left;
-				} else {
-					if (p.right == null) {
-						p.right = new TreeNode(125);
-					}
-					p = p.right;
-				}
-			}
-		}
-		return root;
-	}
-
-	class Result {
-		int path;
-		int depth;
-
-		public Result(int a, int b) {
-			path = a;
-			depth = b;
-		}
-	}
+not written
 ]]></content>
   </entry>
   
