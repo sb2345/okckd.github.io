@@ -9,8 +9,8 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a string, determine if it is a palindrome, considering only alphanumeric characters and ignoring cases. For example,
-"A man, a &hellip;">
+  <meta name="description" content="Question link Given a singly linked list L: L0→L1→…→Ln-1→Ln,
+reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→… You must do this in-place without altering the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,7 +85,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Valid-Palindrome/">[LeetCode 125] Valid Palindrome</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Reorder-List/">[LeetCode 143] Reorder List</a></h1>
     
     
       <p class="meta">
@@ -101,10 +101,10 @@
   
 
 
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/28/Valid-Palindrome/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Valid-Palindrome/">Comments</a>
+           | <a href="/blog/2014/06/03/Reorder-List/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Reorder-List/">Comments</a>
         
       </p>
     
@@ -113,25 +113,20 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/valid-palindrome/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/reorder-list/">link</a></p>
 
-<div class="question-content">
-            <p></p><p>
-Given a string, determine if it is a palindrome, considering only alphanumeric characters and ignoring cases.
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">
+Given a singly linked list <i>L</i>: <i>L</i><sub>0</sub>→<i>L</i><sub>1</sub>→…→<i>L</i><sub><i>n</i>-1</sub>→<i>L</i><sub>n</sub>,<br>
+reorder it to: <i>L</i><sub>0</sub>→<i>L</i><sub><i>n</i></sub>→<i>L</i><sub>1</sub>→<i>L</i><sub><i>n</i>-1</sub>→<i>L</i><sub>2</sub>→<i>L</i><sub><i>n</i>-2</sub>→…
 </p>
 
-<p>
+<p class="font-color">You must do this in-place without altering the nodes&#8217; values.</p>
+
+<p class="font-color">
 For example,<br>
-<code>"A man, a plan, a canal: Panama"</code> is a palindrome.<br>
-<code>"race a car"</code> is <i>not</i> a palindrome.
-</p>
-
-<p>
-<b>Note:</b><br>
-Have you consider that the string might be empty? This is a good question to ask during an interview.</p>
-<p>
-For the purpose of this problem, we define empty string as valid palindrome.
-</p><p></p>
+Given <code>{1,2,3,4}</code>, reorder it to <code>{1,4,2,3}</code>.
+</p><p class="font-color"></p>
           </div>
 
 
@@ -139,152 +134,179 @@ For the purpose of this problem, we define empty string as valid palindrome.
 
 <table border="2">
     <tr>
-        <td>Frequency</td>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a difficult question to think</strong>.</p>
+
+<p>I first solved it with an stack which stores the second half nodes. It works. However, IT IS NOT A IN-PLACE SOLUTION, thus it&rsquo;s wrong.</p>
+
+<p>Eventually I did not solve it.</p>
+
+<p><strong>There is only one standard solution from the Internet</strong>. <a href="http://www.programcreek.com/2013/12/in-place-reorder-a-singly-linked-list-in-java/">This blog</a> explains it.</p>
+
+<blockquote><ol>
+<li>Break list in the middle to two lists (use fast &amp; slow pointers)</li>
+<li>Reverse the order of the second list</li>
+<li>Merge two list back together</li>
+</ol>
+</blockquote>
+
+<p>Simple, right? <strong>Because of the nature of linked list, a lot of things can be done in-place</strong>, so we need not use any other data strucutres.</p>
+
+<h3>Solution</h3>
+
+<p>The code is a bit lengthy and difficult to write. It took me a while, but passed in 1 go.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, code written by me</strong></p>
+
+<pre><code>public void reorderList(ListNode head) {
+    if (head == null || head.next == null) {
+        return;
+    }
+    ListNode slow = head, fast = head;
+    while (fast != null) {
+        if (fast.next != null &amp;&amp; fast.next.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        else {
+            fast = null;
+        }
+    }
+    // if length = 2, slow point to 1st
+    // if length = 3, slow point to 2nd
+    // if length = 4, slow point to 2nd
+    ListNode secondHalf = slow.next;
+    slow.next = null;
+    // now reverse secondHalf
+    ListNode p = secondHalf;
+    while (p.next != null) {
+        ListNode tail = p.next.next;
+        p.next.next = secondHalf;
+        secondHalf = p.next;
+        p.next = tail;
+    }
+    // now merge 2 list: head and secondHalf
+    ListNode a = head, b = secondHalf;
+    while (a != null &amp;&amp; b != null) {
+        ListNode temp1 = a.next;
+        ListNode temp2 = b.next;
+        a.next = b;
+        b.next = temp1;
+        a = temp1;
+        b = temp2;
+    }
+}
+</code></pre>
+
+<p><strong>Second, code written by <a href="https://oj.leetcode.com/discuss/236/does-this-problem-solution-time-complexity-space-comlexity">someone</a></strong></p>
+
+<pre><code>public void reorderList(ListNode head) {
+    // IMPORTANT: Please reset any member data you declared, as
+    // the same Solution instance will be reused for each test case.
+    if (head == null || head.next == null) return;
+    ListNode fast = head;
+    ListNode slow = head;
+    while(fast != null &amp;&amp; fast.next != null) {
+        fast = fast.next.next;
+        slow = slow.next;
+    }
+    ListNode reverseHead = slow.next;           // find the second half of list
+    slow.next = null;                           // make first half end point to null
+    reverseHead = reverse(reverseHead);         // reverse second half     
+    ListNode cur = head;        
+    while(reverseHead != null) {                // link together
+        ListNode tmp = reverseHead.next;
+        reverseHead.next = cur.next;
+        cur.next = reverseHead;
+        cur = cur.next.next;
+        reverseHead = tmp;
+    }
+}
+private ListNode reverse(ListNode head) {
+    if (head == null || head.next == null) return head;
+    ListNode prev = new ListNode(0);
+    prev.next = head;
+    head = prev;
+    ListNode cur = prev.next;
+    while(cur.next != null) {
+        ListNode tmp = cur.next;
+        cur.next = tmp.next;
+        tmp.next = prev.next;
+        prev.next = tmp;
+    }
+    return prev.next;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Max-Points-on-a-Line/">[LeetCode 149] Max Points on a Line</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/03/Max-Points-on-a-Line/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Max-Points-on-a-Line/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/max-points-on-a-line/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">Given <i>n</i> points on a 2D plane, find the maximum number of points that lie on the same straight line.</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
         <td bgcolor="red">5</td>
     </tr>
     <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>Wow, it&rsquo;s frequency 5!</p>
-
-<p><strong>This is a very classic and easy question</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public boolean isPalindrome(String s) {
-    int len = s.length();
-    s = s.toLowerCase();
-    int left = 0, right = len - 1;
-    while (left &lt; right) {
-        while (left &lt; len &amp;&amp; !isAlphanumeric(s.charAt(left)))
-            left ++;
-        while (right &gt;= 0 &amp;&amp; ! isAlphanumeric(s.charAt(right)))
-            right --;
-        if (left == len &amp;&amp; right == -1) return true;
-        if (left == len || right == -1) return false;
-        if (s.charAt(left) != s.charAt(right)) 
-            return false;
-        left ++;
-        right --;
-    }
-    return true;
-}
-
-private boolean isAlphanumeric(char c) {
-    return ('a' &lt;= c &amp;&amp; c &lt;= 'z') 
-        || ('0' &lt;= c &amp;&amp; c &lt;= '9');
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Flatten-Binary-Tree-to-Linked-List/">[LeetCode 114] Flatten Binary Tree to Linked List</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/28/Flatten-Binary-Tree-to-Linked-List/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Flatten-Binary-Tree-to-Linked-List/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/flatten-binary-tree-to-linked-list/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a binary tree, flatten it to a linked list in-place.
-</p>
-
-<p>
-For example,<br>
-Given
-</p><pre>         1
-        / \
-       2   5
-      / \   \
-     3   4   6
-</pre>
-<p></p>
-
-The flattened tree should look like:<br>
-<pre>   1
-    \
-     2
-      \
-       3
-        \
-         4
-          \
-           5
-            \
-             6
-</pre>
-
-<div class="spoilers" ><b>Hints:</b>
-<p>If you notice carefully in the flattened tree, each node&#8217;s right child points to the next node of a pre-order traversal.</p>
-</div><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
         <td>Time to use</td>
         <td bgcolor="red">&#8212;&#8212;&#8211;</td>
     </tr>
@@ -295,323 +317,97 @@ The flattened tree should look like:<br>
 
 <h3>Analysis</h3>
 
-<p><strong>This is a very difficult question</strong>, and there are many solutions.</p>
+<p><strong>This is a difficult coding question</strong>.</p>
+
+<p>The idea is simple. For n points, there are n * (n-1) lines. Check slopes and then count total, we would get the answer.</p>
+
+<p>However, coding of this idea is very difficult.</p>
 
 <h3>Solution</h3>
 
-<p><strong>Analysis of all solutions (except first one) is found in <a href="http://n00tc0d3r.blogspot.sg/2013/03/flatten-binary-tree-to-linked-list-in.html">this great article</a></strong>.</p>
+<p><strong>Firstly, there are 2 special cases when calculating the slope</strong>. The 2 points may locate in same position. And when point1.x = point2.x, slope = infinity. It&rsquo;s easy to omit these 2 cases and result in mistake.</p>
 
-<p><strong>Solution 1 is my code</strong>, I am make use of a &lsquo;pre&rsquo; pointer in this recursive method. This idea is actually quite good, but is never seen in any other people&rsquo;s blogs.</p>
+<p>Secondly, when we count, we declare 2 variables: samePointNumber and maxPointCountWithSameSlope. <strong>It&rsquo;s very important to initialize both values to 1 instead of 0</strong>! Why? Because these values just can&rsquo;t be 0. I failed my 2nd version code when input = {(0,0), (0,0)}, the program shows result of 0, instead of 2.</p>
 
-<p><strong>Solution 2 is the most standard recursive solution</strong>. It passes in a node, flatten it and return the last node after it&rsquo;s flattened. So we can flatten root node&rsquo;s left and right node respectively, and then connect it.</p>
+<p><strong>Thirdly, about what data structure to use for counting</strong>. There is a discussion about this at <a href="https://oj.leetcode.com/discuss/2573/better-way-to-use-hashmap-for-this-question">here</a></p>
 
-<blockquote cite="http://n00tc0d3r.blogspot.sg/2013/03/flatten-binary-tree-to-linked-list-in.html">
-To flatten a binary tree, according to the given example, is to recursively insert the left subtree to the right subtree and append the original right subtree to the end of the left subtree, i.e.<br>
-<pre>     root                        root
-     /  \            -&gt;            \
-  left  right                      left
-                                     \
-                                    right
-</pre>
-Since we need to append the original right-tree to the end of the left subtree, we let the recursion function return the last node after flatten.
+<blockquote><ol>
+<li>storing the vertical slopes as Double.NaN. That allows Double to represent every slope uniquely as (y/x).</li>
+<li>It is unsafe using floating points to make a hash, and -0.0 != 0.0</li>
+</ol>
 </blockquote>
 
+<p>It&rsquo;s great that using <strong>Double.NaN</strong>, it saves us time and effort to count vertical points. Second point is very valid, but it turns out that using HashMap&lt;Double, Integer> can AC.</p>
 
-<p>I missed &ldquo;root.left = null&rdquo; while coding, and it resulted in long long time debugging. I think this is a very silly mistake.</p>
+<p>P.S. It is always not a good practise to use Double as hash key. See <a href="http://stackoverflow.com/questions/1074781/double-in-hashmap">here</a>.</p>
 
-<p><strong>Solution 3 is making use of a stack</strong>. I have to say, although I can figure how it works, I am still blur about the thinking process of this entire idea. Which is to say, I can&rsquo;t keep it in mind even after learning it.</p>
+<p><strong>Fourthly, I made a mistake here</strong>:</p>
 
-<p>I shall try write this code in the future.</p>
+<blockquote><p>double slope = (p.y &ndash; q.y) / (p.x &ndash; q.x);</p></blockquote>
 
-<blockquote>
-We can also solve the problem without recursion.<br>
-<br>
-To do that, we can use a stack to store all right subtrees when we prune them temporarily, and append each of them back after we go through the corresponding left subtree.<br>
-<br>
-Basically, given a non-empty tree,<br>
-<ul>
-<li>if it has left subtree, store the right subtree (if not null) to stack, move the left subtree to right;</li>
-<li>if not, append back a subtree from stack to the current node&#8217;s right;</li>
-<li>continue to the right node until finish.</li>
-</ul>
-</blockquote>
+<p>And it&rsquo;s wrong. Why? Note that <strong>Point.x and Point.y are both integers</strong>. Integer division will return integer. We must cast it.</p>
 
+<blockquote><p>double slope = (double) (p.y &ndash; q.y) / (p.x &ndash; q.x);</p></blockquote>
 
-<p><strong>Solution 4 is what I believe the best solution</strong>. It simple uses while loop to put all nodes in the correct position, without recursion or stack.</p>
+<p><strong>Last, OMG I wish this is last, but not least, we can reduce execution time to half</strong> by checking only the points with larger index than the anchor point (that&rsquo;s the name for &lsquo;current point&rsquo;). Good idea, right?</p>
 
-<blockquote><p>Each time when we prune a right subtree, we use while-loop to find the right-most leaf of the current left subtree, and append the subtree there.</p></blockquote>
+<p>One more thing, <strong>how to iterate thru the HashMap</strong> (value only)? There is an easy way:</p>
 
-<p><strong>Analysis of all solutions (except first one) is found in <a href="http://n00tc0d3r.blogspot.sg/2013/03/flatten-binary-tree-to-linked-list-in.html">this great article</a></strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my solution</strong>, a kind of recursive solution</p>
-
-<pre><code>public void flatten(TreeNode root) {
-    helper(new TreeNode(1234), root);
-}
-
-private TreeNode helper(TreeNode pre, TreeNode node) { 
-    // pre cannot be null, this function return the last node of the flatten list
-    if (node == null) return pre;
-    pre.left = null;
-    pre.right = node;
-    TreeNode a = node.left;
-    TreeNode b = node.right;
-    TreeNode temp = helper(node, a);
-    return helper(temp, b);
+<pre><code>for (Integer a : map.values()) {
+    a;
 }
 </code></pre>
 
-<p><strong>Second, standard recursive solution</strong></p>
+<p>That&rsquo;s all I&rsquo;ve found for now.</p>
 
-<pre><code>public void flatten(TreeNode root) {
-    helper(root);
-}
+<p><strong>Updated on Aug 12th, 2014</strong></p>
 
-private TreeNode helper(TreeNode root) {
-    if (root == null) return null;
-    TreeNode oldRight = root.right;
-    if (root.left != null) {
-        root.right = root.left;
-        // I missed this line of code: 
-        root.left = null;
-        root = helper(root.right);
-    }
-    if (oldRight != null) {
-        root.right = oldRight;
-        root = helper(root.right);
-    }
-    // return value is the last element of the flatten tree
-    return root;
-}
-</code></pre>
+<p>Based on the solution given in CC150 v4 Q10.6 on Page 199, it&rsquo;s a <strong>proper way to solve with HashMap&lt;Line, Integer></strong> instead of using HashMap&lt;Double, Integer>.</p>
 
-<p><strong>Third, stack non-recursive solution</strong></p>
+<p>The reason is mentioned, it&rsquo;s &lsquo;<strong>unsafe using floating points to make a hash</strong>&rsquo;.</p>
 
-<pre><code>public void flatten(TreeNode root) {
-    TreeNode cur = root;
-    Stack&lt;TreeNode&gt; rtrees = new Stack&lt;TreeNode&gt;();
-    while (cur != null) {
-        while (cur.left != null) {
-            if (cur.right != null)
-                rtrees.push(cur.right);
-            cur.right = cur.left;
-            cur.left = null;
-            cur = cur.right;
-        }
-        if (cur != null &amp;&amp; cur.right == null &amp;&amp; !rtrees.isEmpty()) {
-            cur.right = rtrees.pop();
-        }
-        cur = cur.right;
-    }
-}
-</code></pre>
-
-<p><strong>Fourth, non-stack non-recursive solution</strong></p>
-
-<pre><code>public void flatten(TreeNode root) {
-    TreeNode cur = root;
-    while (cur != null) {
-        if (cur.left != null) {
-            if (cur.right != null) { // if we need to prune a right subtree
-                TreeNode next = cur.left;
-                while (next.right != null)
-                    next = next.right;
-                next.right = cur.right;
-            }
-            cur.right = cur.left;
-            cur.left = null;
-        }
-        cur = cur.right;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/">[LeetCode 124] Binary Tree Maximum Path Sum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/binary-tree-maximum-path-sum/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a binary tree, find the maximum path sum.
-</p>
-
-<p>
-The path may start and end at any node in the tree.
-</p>
-
-<p>
-For example:<br>
-Given the below binary tree,
-</p><pre>       1
-      / \
-     2   3
-</pre>
-<p></p>
-<p>
-Return <code>6</code>.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a difficult DFS question</strong>.</p>
-
-<p>The basic idea is:</p>
-
-<blockquote><p>When we are in a root node, how we decided to include current node in the maximum path sum? We need to calculate the depth in both subtree. In the meantime, we need to set a variable &ldquo;max&rdquo; to store the max path sum we found during the recursion.</p>
-
-<p>Pay attention that when a subtree sum to negative value, we discard this subtree.</p>
-
-<p>Otherwise, max path sum including current node is <strong>leftSum + cur.val + rightSum</strong></p>
-
-<p>Max depth of current node is <strong>(maximum value of leftSum and rightSum) + cur.val</strong></p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are 2 points that may incur problems during coding, they are:</p>
+<p>Note that if we were to write our own &lsquo;Line&rsquo; class, <strong>we must override the 2 methods</strong>:</p>
 
 <ol>
-<li><p>The recursive solution is calculating the &lsquo;max height&rsquo; while checking &lsquo;its own max path sum&rsquo;. It&rsquo;s a bit hard to explain. Basic idea is doing 2 things at same time, while traversing (are one result is returned, another is stored in a public variable, at least for code 1 below).</p></li>
-<li><p>Note that &lsquo;max height&rsquo; of a child branch can be nagative. In this case, WE MUST SET IT TO 0.</p></li>
+<li>public int hashCode() {}</li>
+<li>public boolean equals(Object o) {}</li>
 </ol>
 
 
-<p>The first point is a concept seen in previous questions, but I forgot which. The second point is important, because I missed this and got failed a few times without any clue.</p>
-
 <h3>Code</h3>
 
-<p><strong>First, recursive solution</strong></p>
+<p><strong>written by me, Version3 using HashMap</strong></p>
 
-<pre><code>int max = Integer.MIN_VALUE;
-
-public int maxPathSum(TreeNode root) {
-    maxHeight(root);
-    return max;
-}
-
-private int maxHeight(TreeNode node) {
-    if (node == null) return 0;
-    int l = Math.max(0, maxHeight(node.left));
-    int r = Math.max(0, maxHeight(node.right));
-    max = Math.max(max, l + r + node.val);
-    return node.val + Math.max(l, r);
-}
-</code></pre>
-
-<p><strong>Second, previous code refactored</strong>.</p>
-
-<p>I removed the global variable, and instead pass an array as reference in the recursion. In this way the &lsquo;shared&rsquo; array achieve same functionality as a global variable.</p>
-
-<pre><code>public int maxPathSum(TreeNode root) {
-    int[] shared = {Integer.MIN_VALUE};
-    maxHeight(root, shared);
-    return shared[0];
-}
-
-private int maxHeight(TreeNode node, int[] shared) {
-    if (node == null) return 0;
-    int l = Math.max(0, maxHeight(node.left, shared));
-    int r = Math.max(0, maxHeight(node.right, shared));
-    shared[0] = Math.max(shared[0], l + r + node.val);
-    return node.val + Math.max(l, r);
-}
-</code></pre>
-
-<p><strong>Updated on June 10th, it&rsquo;s a terrible practise to use global variable</strong>. The <a href="http://answer.ninechapter.com/solutions/binary-tree-maximum-path-sum/">new solution</a> suggested by Mr. Huang uses a new ResultType Class to solve the problem.</p>
-
-<pre><code>private class ResultType {
-    int singlePath, maxPath;
-    ResultType(int singlePath, int maxPath) {
-        this.singlePath = singlePath;
-        this.maxPath = maxPath;
+<pre><code>public int maxPoints(Point[] points) {
+    if (points.length &lt;= 1)
+        return points.length;
+    HashMap&lt;Double, Integer&gt; map = null;
+    int totalMax = 0;
+    for (Point p : points) {
+        int samePoint = 1;
+        map = new HashMap&lt;Double, Integer&gt;();
+        for (Point q : points) {
+            if (q == p || p.x &gt; q.x) {
+            } else if (p.x == q.x &amp;&amp; p.y == q.y) {
+                samePoint++;
+            } else {
+                double slope = Double.NaN;
+                if (p.x != q.x) {
+                    slope = (double) (p.y - q.y) / (p.x - q.x);
+                }
+                if (!map.containsKey(slope)) {
+                    map.put(slope, 1);
+                }
+                map.put(slope, map.get(slope) + 1);
+            }
+        }
+        int pointMax = 1;
+        for (Integer a : map.values()) {
+            pointMax = Math.max(pointMax, a);
+        }
+        totalMax = Math.max(totalMax, pointMax + samePoint - 1);
     }
-}
-
-public int maxPathSum(TreeNode root) {
-    ResultType result = helper(root);
-    return result.maxPath;
-}
-
-private ResultType helper(TreeNode node) {
-    // null case
-    if (node == null) {
-        return new ResultType(0, Integer.MIN_VALUE);
-    }
-    // divide
-    ResultType ll = helper(node.left);
-    ResultType rr = helper(node.right);
-    // conquer
-    int curSinglePath = Math.max(0, node.val + 
-            Math.max(ll.singlePath, rr.singlePath));
-    int childMaxPath = Math.max(ll.maxPath, rr.maxPath);
-    int curMaxPath = Math.max(childMaxPath, node.val + 
-            ll.singlePath + rr.singlePath);
-    // done
-    return new ResultType(curSinglePath, curMaxPath);
+    return totalMax;
 }
 </code></pre>
 </div>
@@ -626,7 +422,7 @@ private ResultType helper(TreeNode node) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-III/">[LeetCode 123] Best Time to Buy and Sell Stock III</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/03/LRU-Cache/">[LeetCode 146] LRU Cache</a></h1>
     
     
       <p class="meta">
@@ -642,10 +438,10 @@ private ResultType helper(TreeNode node) {
   
 
 
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-III/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-III/">Comments</a>
+           | <a href="/blog/2014/06/03/LRU-Cache/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/LRU-Cache/">Comments</a>
         
       </p>
     
@@ -654,15 +450,17 @@ private ResultType helper(TreeNode node) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/lru-cache/">link</a></p>
 
-<div class="question-content">
-            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">
+Design and implement a data structure for Least Recently Used (LRU) cache. It should support the following operations: <code>get</code> and <code>set</code>.
+</p>
 
-<p>Design an algorithm to find the maximum profit. You may complete at most <i>two</i> transactions.</p>
-
-<p><b>Note:</b><br>
-You may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p><p></p>
+<p class="font-color">
+<code>get(key)</code> - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1.<br>
+<code>set(key, value)</code> - Set or insert the value if the key is not already present. When the cache reached its capacity, it should invalidate the least recently used item before inserting a new item.
+</p><p class="font-color"></p>
           </div>
 
 
@@ -670,16 +468,663 @@ You may not engage in multiple transactions at the same time (ie, you must sell 
 
 <table border="2">
     <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
+        <td>Adjusted Difficulty</td>
         <td bgcolor="red">4</td>
     </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">Very difficult</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a difficult question</strong>, I can&rsquo;t write the solution easily even after a month.</p>
+
+<h3>Solution</h3>
+
+<p>The solution is to use a Doubly-linked-list and a HashMap. Doing this allows O(1) search, remove and insert. A very nice and sophisticated data structure example, and very high frequency in interviews.</p>
+
+<p><strong>2 important things to note while coding</strong>:</p>
+
+<ol>
+<li><p>We need 2 helper methods: removeNode() and setNodeAsHead().</p>
+
+<p> Because we reuse both methods for get() and set() methods.</p></li>
+<li><p>Initialization of LRU</p>
+
+<p> We need 5 variables: capacity, current size(optional but good to have), hashmap, head, tail.</p></li>
+<li><p>Initialization of DoubleLinkedListNode</p>
+
+<p> This is easy, but <strong>do not forget about both key and value variable</strong>. We must use DoubleLinkedListNode.key when we want to delete tail.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>Updated on July 1st, 2014</strong>.</p>
+
+<p>This question tests your ability to write some DS by yourself, eg. DoubleLinkedList.</p>
+
+<pre><code>public class LRUCache {
+
+    int size;
+    int capacity;
+
+    DoubleLinkedList head;
+    DoubleLinkedList tail;
+    HashMap&lt;Integer, DoubleLinkedList&gt; map;
+
+    public LRUCache(int capacity) {
+        this.size = 0;
+        this.capacity = capacity;
+        head = null;
+        tail = null;
+        map = new HashMap&lt;Integer, DoubleLinkedList&gt;();
+    }
+
+    public void remove(DoubleLinkedList node) {
+        if (node == head &amp;&amp; node == tail) {
+            head = null;
+            tail = null;
+        } else if (node == head) {
+            head.next.prev = null;
+            head = head.next;
+        } else if (node == tail) {
+            tail.prev.next = null;
+            tail = tail.prev;
+        } else {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+        }
+        node.prev = null;
+        node.next = null;
+    }
+
+    public void setHead(DoubleLinkedList node) {
+        node.next = head;
+        node.prev = null;
+        if (head != null) {
+            head.prev = node;
+        }
+
+        head = node;
+        if (tail == null) {
+            tail = node;
+        }
+    }
+
+    public int get(int key) {
+        if (!map.containsKey(key)) {
+            // if key is not found
+            return -1;
+        } else {
+            // if key is found
+            DoubleLinkedList target = map.get(key);
+            remove(target);
+            setHead(target);
+            return head.val;
+        }
+    }
+
+    public void set(int key, int value) {
+        if (this.get(key) != -1) {
+            // key exist before, just replace the old value
+            DoubleLinkedList old = map.get(key);
+            old.val = value;
+        } else {
+            // this is a new key-value pair, insert it
+            DoubleLinkedList newHead = new DoubleLinkedList(key, value);
+            map.put(key, newHead);
+            setHead(newHead);
+            if (size == capacity) {
+                // delete tail
+                map.remove(tail.key);
+                remove(tail);
+            } else {
+                size++;
+            }
+        }
+    }
+
+    class DoubleLinkedList {
+        int key;
+        int val;
+        DoubleLinkedList prev;
+        DoubleLinkedList next;
+        public DoubleLinkedList(int k, int v) {
+            this.key = k;
+            this.val = v;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Implement-DFS-using-stack/">[Design] Implemention of DFS Using a Stack</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/03/Implement-DFS-using-stack/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Implement-DFS-using-stack/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>First Word</h3>
+
+<p>This post talks about how to implement DFS without recursion.</p>
+
+<p>We have studied 2 kinds of DFS in the post <strong>DFS, BFS and space efficiency</strong>. We will skip &ldquo;true DFS&rdquo; here, and only talk about &ldquo;pseudo-DFS&rdquo; implementation.</p>
+
+<p>Remember, <strong>space usage of psudo-DFS is O(depth x branching factor)</strong>.</p>
+
+<h3>Analysis</h3>
+
+<p>A DFS without recursion is basically the same as BFS &ndash; but use a stack instead of a queue as the data structure.</p>
+
+<p>More details are discussed in <a href="http://stackoverflow.com/questions/21508765/how-to-implement-depth-first-search-for-graph-with-non-recursive-aprroach">this thread</a>.</p>
+
+<h3>Implementation</h3>
+
+<p>The following code come from <a href="http://stackoverflow.com/a/21508819">this post</a>.</p>
+
+<pre><code>DFS(source):
+  s &lt;- new stack
+  visited &lt;- {} //empty set
+  s.push(source)
+  while (s.empty() == false):
+    current &lt;- s.pop()
+    if (current is in visited):
+        continue
+    visited.add(current)
+    //do something with current
+    for each node v such that (source,v) is an edge:
+        s.push(v)
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Evaluate-Reverse-Polish-Notation/">[LeetCode 150] Evaluate Reverse Polish Notation</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/03/Evaluate-Reverse-Polish-Notation/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Evaluate-Reverse-Polish-Notation/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/evaluate-reverse-polish-notation/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">
+Evaluate the value of an arithmetic expression in <a href="http://en.wikipedia.org/wiki/Reverse_Polish_notation" class="font-color">Reverse Polish Notation</a>.
+</p>
+
+<p class="font-color">
+Valid operators are <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>. Each operand may be an integer or another expression.
+</p>
+
+<p class="font-color">
+Some examples:<br>
+</p><pre>  ["2", "1", "+", "3", "*"] -&gt; ((2 + 1) * 3) -&gt; 9
+  ["4", "13", "5", "/", "+"] -&gt; (4 + (13 / 5)) -&gt; 6
+</pre>
+<p class="font-color"></p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a classic question</strong>. It&rsquo;s easy.</p>
+
+<h3>Code</h3>
+
+<p><strong>my code</strong></p>
+
+<pre><code>public int evalRPN(String[] tokens) {
+    if (tokens == null || tokens.length == 0)
+        return 0;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    for (int p = 0; p &lt; tokens.length; p ++) {
+        char cur = tokens[p].charAt(0);
+        if (cur &gt;= '0' &amp;&amp; cur &lt;= '9' 
+                || tokens[p].length() &gt; 1)
+            stack.push(Integer.parseInt(tokens[p]));
+        else if (cur == '+') {
+            int num1 = stack.pop();
+            int num2 = stack.pop();
+            stack.push(num1 + num2);
+        }
+        else if (cur == '-') {
+            int num1 = stack.pop();
+            int num2 = stack.pop();
+            stack.push(num2 - num1);
+        }
+        else if (cur == '*') {
+            int num1 = stack.pop();
+            int num2 = stack.pop();
+            stack.push(num1 * num2);
+        }
+        else if (cur == '/') {
+            int num1 = stack.pop();
+            int num2 = stack.pop();
+            stack.push(num2 / num1);
+        }
+    }
+    return stack.pop();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">[LeetCode 145] Binary Tree Postorder Traversal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/binary-tree-postorder-traversal/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">Given a binary tree, return the <i>postorder</i> traversal of its nodes&#8217; values.</p>
+
+<p class="font-color">
+For example:<br>
+Given binary tree <code>{1,#,2,3}</code>,<br>
+</p><pre>   1
+    \
+     2
+    /
+   3
+</pre>
+<p class="font-color"></p>
+<p class="font-color">
+return <code>[3,2,1]</code>.
+</p>
+
+<p class="font-color"><b>Note:</b> Recursive solution is trivial, could you do it iteratively?</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
     <tr>
         <td>Adjusted Difficulty</td>
         <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>Unlike pre-order traversal, <strong>this is a very difficult question</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>First, I wrote the solution using a HashSet, and it works</strong>. However, this solution is not good because it uses some space.
+For more generalized way to write DFS code, read another post <strong>Implement DFS using a Stack</strong>.</p>
+
+<p><strong>The best and most popular solution is proposed by <a href="http://leetcode.com/2010/10/binary-tree-post-order-traversal.html">1337c0d3r</a></strong>. It basically uses 1 more pointer to track the current status (whether I&rsquo;m traversing down, or up, and in which direction etc.). The extra pointer is called &lsquo;prev&rsquo;.</p>
+
+<blockquote><p>We use a prev variable to keep track of the previously-traversed node. Let’s assume curr is the current node that’s on top of the stack. When prev is curr‘s parent, we are traversing down the tree. In this case, we try to traverse to curr‘s left child if available (ie, push left child to the stack). If it is not available, we look at curr‘s right child. If both left and right child do not exist (ie, curr is a leaf node), we print curr‘s value and pop it off the stack.</p>
+
+<p>If prev is curr‘s left child, we are traversing up the tree from the left. We look at curr‘s right child. If it is available, then traverse down the right child (ie, push right child to the stack), otherwise print curr‘s value and pop it off the stack.</p>
+
+<p>If prev is curr‘s right child, we are traversing up the tree from the right. In this case, we print curr‘s value and pop it off the stack.</p></blockquote>
+
+<p>Referring to his code, I wrote the 2nd piece of code below and it works.</p>
+
+<p><strong>Amazingly, that code can be simplified, which becomes the 3rd code</strong> (I thought it won&rsquo;t pass at first). The way that code got simplified is by keeping current pointer steady, so that the 2 pointers can meet. Altough program logic is exactly same, this interesting code is worth reading.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, my solution using HashSet</strong></p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    if (root != null) stack.push(root);
+    HashSet&lt;TreeNode&gt; visited = new HashSet&lt;TreeNode&gt;();
+    while (!stack.isEmpty()) {
+        TreeNode cur = stack.pop();
+        if (visited.contains(cur))
+            ans.add(cur.val);
+        else {
+            stack.push(cur);
+            visited.add(cur);
+            if (cur.right != null) stack.push(cur.right);
+            if (cur.left != null) stack.push(cur.left);
+        }
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Second, using 2 pointers</strong></p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
+    if (root == null) {
+        return ans;
+    }
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    stack.push(root);
+    TreeNode pre = null, cur = null;
+    while (!stack.isEmpty()) {
+        cur = stack.peek();
+        if (pre == null || pre.left == cur || pre.right == cur) {
+            if (cur.left == null &amp;&amp; cur.right == null) {
+                ans.add(stack.pop().val);
+            }
+            else if (cur.left != null) {
+                stack.push(cur.left);
+            }
+            else if (cur.right != null) {
+                stack.push(cur.right);
+            }
+        }
+        else if (cur.left == pre) {
+            if (cur.right != null) {
+                stack.push(cur.right);
+            }
+            else {
+                ans.add(stack.pop().val);
+            }
+        }
+        else if (cur.right == pre) {
+            ans.add(stack.pop().val);
+        }
+        pre = cur;
+    }
+    return ans;
+}
+</code></pre>
+
+<p><strong>Third, simplified version of 2nd code</strong></p>
+
+<p><strong>Commented on June 10th</strong>: Note that &lsquo;pre&rsquo; and &lsquo;cur&rsquo; are never going to be apart for more then 1 edge (they can overlap)</p>
+
+<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
+    List&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+    TreeNode prev = null; // previously traversed node
+    TreeNode curr = root;
+    if (root == null) {
+        return result;
+    }
+    stack.push(root);
+    while (!stack.empty()) {
+        curr = stack.peek();
+        if (prev == null || prev.left == curr || prev.right == curr) {
+        // traverse down the tree
+            if (curr.left != null) {
+                stack.push(curr.left);
+            } else if (curr.right != null) {
+                stack.push(curr.right);
+            }
+        } else if (curr.left == prev) {
+        // traverse up the tree from the left
+            if (curr.right != null) {
+                stack.push(curr.right);
+            }
+        } else if (curr.right == prev || curr == prev){
+        // traverse up the tree from the right
+        // or at a leaf point
+            result.add(curr.val);
+            stack.pop();
+        }
+        prev = curr;
+    }
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Big-endian-little-endian/">[Design] Big Endian and Little Endian</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/03/Big-endian-little-endian/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Big-endian-little-endian/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Difference</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Endianness">Big-endian</a> systems store the most significant byte of a word in the smallest address</strong> and the least significant byte is stored in the largest address.</p>
+
+<p><strong>Little-endian systems, in contrast, store the least significant byte in the smallest address</strong>.</p>
+
+<p>Both forms of endianness are in widespread use in computing and networking.</p>
+
+<h3>Example</h3>
+
+<p><img class="middle" src="/assets/images/big-endian.png"></p>
+
+<p>The data word &ldquo;0A 0B 0C 0D&rdquo; (a set of 4 bytes written out using left-to-right positional, hexadecimal notation) and the four memory locations with addresses a, a+1, a+2 and a+3.</p>
+
+<p>In Big-endian systems, byte 0A is stored in a, 0B in a+1, 0C in a+2 and 0D in a+3. In Little-endian systems, the order is reversed with 0D stored in memory address a, 0C in a+1, 0B in a+2, and 0A in a+3.</p>
+
+<h3>Why ?</h3>
+
+<p>IBMs and Intel x86 are little endian, while Motorolas and Sun are big endian.</p>
+
+<p><strong>Big-endian</strong> is the most common convention in data <strong>networking (including IPv6)</strong>, and <strong>little-endian</strong> is popular among <strong>microprocessors</strong> in part due to Intel.</p>
+
+<p>Why is endianness so important? Suppose you are storing int values to a file, then you send the file to a machine which uses the opposite endianness and read in the value. You&rsquo;ll run into problems because of endianness. You&rsquo;ll read in reversed values that won&rsquo;t make sense.</p>
+
+<p>Endianness is also a big issue when sending numbers over the network. Again, if you send a value from a machine of one endianness to a machine of the opposite endianness, you&rsquo;ll have problems. This is even worse over the network, because you might not be able to determine the endianness of the machine that sent you the data.</p>
+
+<p>The solution is to send 4 byte quantities using <a href="http://www.tutorialspoint.com/unix_sockets/network_byte_orders.htm">network byte order</a> which is arbitrarily picked to be one of the endianness (not sure if it&rsquo;s big or little, but it&rsquo;s one of them). If your machine has the same endianness as network byte order, then great, no change is needed. If not, then you must reverse the bytes.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/02/Word-Break-II/">[LeetCode 140] Word Break II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/02/Word-Break-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Word-Break-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/word-break-ii/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">
+Given a string <i>s</i> and a dictionary of words <i>dict</i>, add spaces in <i>s</i> to construct a sentence where each word is a valid dictionary word.
+</p>
+
+<p class="font-color">
+Return all such possible sentences.
+</p>
+
+<p class="font-color">
+For example, given<br>
+<i>s</i> = <code>"catsanddog"</code>,<br>
+<i>dict</i> = <code>["cat", "cats", "and", "sand", "dog"]</code>.
+</p>
+
+<p class="font-color">
+A solution is <code>["cats and dog", "cat sand dog"]</code>.
+</p>
+<p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
     </tr>
     <tr>
         <td>Time to use</td>
@@ -692,352 +1137,62 @@ You may not engage in multiple transactions at the same time (ie, you must sell 
 
 <h3>Analysis</h3>
 
-<p><strong>This is much harder to solve then previous 2 question combined</strong>.</p>
+<p><strong>This is a tough question</strong>. Standard DFS search would work, but we need to check &lsquo;breakable&rsquo; first. Otherwise, I got TLE.</p>
+
+<p><strong>Check breakable is a easy DP</strong>, and we do not need to remove any elements from the dictionary. (Word ladder needs remove elements from dictionary, don&rsquo;t confuse them).</p>
 
 <h3>Solution</h3>
 
-<p>The best solution is explained in <a href="http://rleetcode.blogspot.sg/2014/02/best-time-to-buy-and-sell-stock-iii-java.html">this blog</a>.</p>
-
-<blockquote><p>we can just dived the whole prices array at every point, try to calculate max profit from left and from right respectively&hellip;</p>
-
-<p>However, there are many repeat calculations. So we can apply DP to record max profits for each left side and right side. then add them together at each point.</p></blockquote>
-
-<p>A detailed illustration with examples can be found <a href="http://yucoding.blogspot.sg/2012/12/leetcode-question-10-best-time-to-buy.html">here</a>.</p>
-
-<p>However, the coding part is slightly difficult at least for me. <strong>I made a terrible mistake with the variable &lsquo;leftMin&rsquo; and &lsquo;rightMax&rsquo;</strong>. I declared it as <strong>&lsquo;rightMin&rsquo;</strong> instead, and then the program logic is wrong. We should avoid this kind of mistakes.</p>
+<p><strong>Updated on July 4th, 2014</strong>. The DFS code actually standard, but keep in mind to check breakable first (using DP).</p>
 
 <h3>Code</h3>
 
-<pre><code>public int maxProfit(int[] prices) {
-    int len = prices.length;
-    if (len == 0) return 0;
-    int leftMin = Integer.MAX_VALUE, rightMax = Integer.MIN_VALUE;
-    int leftPro[] = new int[len], rightPro[] = new int[len];
-    for (int j = 0; j &lt;= len - 1; j ++) {
-        leftMin = Math.min(leftMin, prices[j]);
-        if (j == 0) leftPro[0] = 0;
-        else leftPro[j] = Math.max(leftPro[j-1], prices[j] - leftMin);
+<p><strong>DFS with pruning and DP breakable check</strong>, with the again-updated code on Sep 12th, 2014.</p>
+
+<pre><code>public List&lt;String&gt; wordBreak(String s, Set&lt;String&gt; dict) {
+    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    if (s == null || s.length() == 0 || dict == null) {
+        return ans;
+    } else if (!canBreak(s, dict)) {
+        return ans;
     }
-    for (int k = len - 1; k &gt;= 0; k --) {
-        rightMax = Math.max(rightMax, prices[k]);
-        if (k == len - 1) rightPro[len-1] = 0;
-        else rightPro[k] = Math.max(rightPro[k+1], rightMax - prices[k]);
-    }
-    int totalPro = 0;
-    for (int i = 0; i &lt; len; i ++) {
-        totalPro = Math.max(totalPro, leftPro[i] + rightPro[i]);
-    }
-    return totalPro;
+    helper(ans, "", s, 0, dict);
+    return ans;
 }
-</code></pre>
-</div>
-  
-  
 
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-II/">[LeetCode 122] Best Time to Buy and Sell Stock II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
-
-<p>Design an algorithm to find the maximum profit. You may complete as many transactions as you like (ie, buy one and sell one share of the stock multiple times). However, you may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Solution</h3>
-
-<p><strong>This solution is best explained <a href="http://jane4532.blogspot.sg/2013/07/best-time-to-buy-and-sell-stock.html">here</a></strong>.</p>
-
-<blockquote><p>就从左到右轮一遍，遇到递增的都给加起来呗。</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public int maxProfit(int[] prices) {
-    int len = prices.length;
-    if (len &lt;= 1) return 0;
-    int profit = 0;
-    for (int i = 1; i &lt; len; i ++) 
-        profit += Math.max(0, prices[i] - prices[i-1]);
-    return profit;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock/">[LeetCode 121] Best Time to Buy and Sell Stock</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
-
-<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a question from a MIT course</strong>, <a href="http://courses.csail.mit.edu/iap/interview/materials.php">Hacking a Google Interview</a>.</p>
-
-<p>I did not solve it, but it&rsquo;s actually very simple to do.</p>
-
-<h3>Solution</h3>
-
-<p>The solution is explained <a href="http://leetcode.com/2010/11/best-time-to-buy-and-sell-stock.html">here</a>:</p>
-
-<blockquote><p>To solve this problem efficiently, you would need to track the minimum value’s index. As you traverse, update the minimum value’s index when a new minimum is met. Then, compare the difference of the current element with the minimum value. Save the buy and sell time when the difference exceeds our maximum difference (also update the maximum difference).</p>
-
-<p>Time is O(N)</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public int maxProfit(int[] prices) {
-    int len = prices.length;
-    if (len &lt;= 1) return 0;
-    int min = prices[0];
-    int max = Integer.MIN_VALUE;
-    for (int i = 1; i &lt; len; i ++) {
-        max = Math.max(max, prices[i] - min);
-        min = Math.min(min, prices[i]);
+private void helper(List&lt;String&gt; ans, String str, String s, int pos, Set&lt;String&gt; dict) {
+    int len = s.length();
+    if (pos == len) {
+        ans.add(str.substring(1));
+        return;
     }
-    return Math.max(max, 0);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Triangle/">[LeetCode 120] Triangle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/27/Triangle/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Triangle/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/triangle/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.</p>
-
-<p>
-For example, given the following triangle<br>
-</p><pre>[
-     [<font color="red">2</font>],
-    [<font color="red">3</font>,4],
-   [6,<font color="red">5</font>,7],
-  [4,<font color="red">1</font>,8,3]
-]
-</pre>
-<p></p>
-<p>
-The minimum path sum from top to bottom is <code>11</code> (i.e., <font color="red">2</font> + <font color="red">3</font> + <font color="red">5</font> + <font color="red">1</font> = 11).
-</p>
-
-<p>
-<b>Note:</b><br>
-Bonus point if you are able to do this using only <i>O</i>(<i>n</i>) extra space, where <i>n</i> is the total number of rows in the triangle.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a math question</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>It&rsquo;s an easy question. Instead of normal DP transition function, this one is <strong>so-called bottom-up approach</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int minimumTotal(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; triangle) {
-    int len = triangle.size();
-    if (len == 0) return 0;
-    int[] m = new int[len];
-    m[0] = triangle.get(0).get(0);
-    for (int i = 1; i &lt; len; i ++) {
-        ArrayList&lt;Integer&gt; cur = triangle.get(i);
-        for (int j = i; j &gt;= 0; j --) {
-            if (j == i) m[j] = m[j-1] + cur.get(j);
-            else if (j == 0) m[j] = m[0] + cur.get(0);
-            else m[j] = Math.min(m[j-1], m[j]) + cur.get(j);
+    for (int i = pos; i &lt; len; i++) {
+        String sub = s.substring(pos, i + 1);
+        if (dict.contains(sub)) {
+            helper(ans, str + " " + sub, s, i + 1, dict);
         }
     }
-    int min = Integer.MAX_VALUE;
-    for (Integer k: m)
-        min = Math.min(min, k);
-    return min;
+}
+
+public boolean canBreak(String s, Set&lt;String&gt; dict) {
+    if (s == null || s.length() == 0) {
+        return true;
+    }
+    int len = s.length();
+    boolean[] dp = new boolean[len + 1];
+    dp[0] = true;
+    for (int i = 1; i &lt;= len; i++) {
+        for (int j = 0; j &lt; i; j++) {
+            if (!dp[j]) {
+                continue;
+            }
+            if (dict.contains(s.substring(j, i))) {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp[len];
 }
 </code></pre>
 </div>
@@ -1052,7 +1207,7 @@ Bonus point if you are able to do this using only <i>O</i>(<i>n</i>) extra space
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node-II/">[LeetCode 117] Populating Next Right Pointers in Each Node II</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/02/Word-Break/">[LeetCode 139] Word Break</a></h1>
     
     
       <p class="meta">
@@ -1068,10 +1223,10 @@ Bonus point if you are able to do this using only <i>O</i>(<i>n</i>) extra space
   
 
 
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node-II/">Comments</a>
+           | <a href="/blog/2014/06/02/Word-Break/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Word-Break/">Comments</a>
         
       </p>
     
@@ -1080,34 +1235,21 @@ Bonus point if you are able to do this using only <i>O</i>(<i>n</i>) extra space
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/word-break/">link</a></p>
 
-<div class="question-content">
-            <p></p><p>Follow up for problem &#8221;<i>Populating Next Right Pointers in Each Node</i>&#8221;.</p>
-<p>What if the given tree could be any binary tree? Would your previous solution still work?</p>
-<p>
-<b>Note:</b>
-</p><ul><li>You may only use constant extra space.</li></ul>
-<p></p>
-<p>
-For example,<br>
-Given the following binary tree,<br>
-</p><pre>         1
-       /  \
-      2    3
-     / \    \
-    4   5    7
-</pre>
-<p></p>
-<p>
-After calling your function, the tree should look like:<br>
-</p><pre>         1 -&gt; NULL
-       /  \
-      2 -&gt; 3 -&gt; NULL
-     / \    \
-    4-&gt; 5 -&gt; 7 -&gt; NULL
-</pre>
-<p></p><p></p>
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">
+Given a string <i>s</i> and a dictionary of words <i>dict</i>, determine if <i>s</i> can be segmented into a space-separated sequence of one or more dictionary words.
+</p>
+
+<p class="font-color">For example, given<br>
+<i>s</i> = <code>"leetcode"</code>,<br>
+<i>dict</i> = <code>["leet", "code"]</code>.
+</p>
+
+<p class="font-color">
+Return true because <code>"leetcode"</code> can be segmented as <code>"leet code"</code>.
+</p><p class="font-color"></p>
           </div>
 
 
@@ -1115,13 +1257,102 @@ After calling your function, the tree should look like:<br>
 
 <table border="2">
     <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
+        <td>Adjusted Difficulty</td>
         <td bgcolor="red">4</td>
     </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a standard DP question</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>I see a lot of people solve this DP problem with 2D array. It actually requires only 1D aray.</p>
+
+<p>Declare an boolean array of (input string length) + 1, and dp[i] mean whether or not subtring(0,i) is work-breakable. Then the problem is clear and easy.</p>
+
+<p>Pay attention to index while coding.</p>
+
+<h3>Code</h3>
+
+<p><strong>my code</strong></p>
+
+<pre><code>public boolean wordBreak(String s, Set&lt;String&gt; dict) {
+    int len = s.length();
+    if (len == 0 || dict.isEmpty())  {
+        return false;
+    }
+    boolean[] dp = new boolean[len + 1];
+    dp[0] = true;
+    for (int i = 1; i &lt;= len; i ++)  {
+        for (int j = 0; j &lt; i; j ++)  {
+            if (dp[j] &amp;&amp; dict.contains(s.substring(j, i)))  {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp[len];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/02/Sort-List/">[LeetCode 148] Sort List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/02/Sort-List/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Sort-List/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/sort-list/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">Sort a linked list in <i>O</i>(<i>n</i> log <i>n</i>) time using constant space complexity.</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
     <tr>
         <td>Adjusted Difficulty</td>
         <td bgcolor="red">4</td>
@@ -1139,384 +1370,52 @@ After calling your function, the tree should look like:<br>
 
 <p><strong>This is a difficult question</strong>.</p>
 
-<p>We can of course do a BFS, but that&rsquo;s too simple, and it&rsquo;s not related to previous question, thus <strong>Queue</strong> is not the answer we&rsquo;re looking for.</p>
-
-<p><strong>There are 2 ways to solve this problem, recursively and iteratively</strong>. The 2 solutions are quite different, I will explain them.</p>
+<p>To sort with O(nlgn) time, we must use either quick sort or <strong>merge sort</strong>.</p>
 
 <h3>Solution</h3>
 
-<p><strong>First solution is non-recursion, which is from <a href="http://rleetcode.blogspot.sg/2014/03/follow-up-for-problem-populating-next.html">this blog</a></strong>. First we declare a pointer &lsquo;cur&rsquo; that points to a node. We assume the &lsquo;next-links&rsquo; are already built in current level, and our job is to generate the &lsquo;next-links&rsquo; for the next level.</p>
+<p>This is a standard merge sort algorithm. The details can be found <a href="http://www.programcreek.com/2012/11/leetcode-solution-merge-sort-linkedlist-in-java/">here</a>.</p>
 
-<p>In order to do that, we need another 2 pointers in the next level (one head and one tail) to keep track of the position till where we have finished building the links. So &lsquo;cur&rsquo; keep traversing thru current level, until it reaches the end. Then, we move &lsquo;cur&rsquo; to the head of next level, and continue the process.</p>
-
-<p>The coding part is not difficult, <strong>which is not the case for next solution</strong>.</p>
-
-<p><strong>Second solution is recursive, and it is written in <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-populating-next-right-pointers_29.html">this blog</a></strong>. Same as previous solution, we assume that current level have all &lsquo;next-links&rsquo; ready, and we will build these links for next level.</p>
-
-<p>The way of getting next link for child nodes is a bit different, but I guess that&rsquo;s fine. The difficult part is <strong>during recursive call, I NEED TO CALL THE RECURSION METHOD FOR RIGHT CHILD FIRST, THEN LEFT CHILD</strong>. The reason is, the links from left child to right child is going to be used in the recursion call. If we do left first, we will have problem getting <strong>current.left.next</strong> (which in this case, will be null). I spent a terribly long time debugging this error, until I found a great explanation <a href="https://oj.leetcode.com/discuss/1942/anyone-helps-to-find-bug-for-my-code">here</a>.</p>
-
-<blockquote><p>in your code: connect(root->left); connect(root->right);</p>
-
-<p>which means you first recurs left sub-tree, then right subtree. The problem is the right subtree&rsquo;s next pointers are not processed. So in your example, 9->next should be 1, however, when you traverse the left sub tree, 9&rsquo;s next pointer is still NULL. Your code will think 9 is the end of the third level, so the fourth level&rsquo;s 0 will have its next to be NULL.</p></blockquote>
+<p>I am being lazy here, I reused the code from &ldquo;Merge Two Sorted Lists&rdquo;. Surprisingly it worked! Just remember, we must set the last node of first half to point to null.</p>
 
 <h3>Code</h3>
 
-<p><strong>First, my initial solution making use of queue</strong>. It is around 50ms slower than the other solutions.</p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    if (root == null) return;
-    LinkedList&lt;TreeLinkNode&gt; list = new LinkedList&lt;TreeLinkNode&gt;();
-    list.add(root);
-    while (! list.isEmpty()) {
-        LinkedList&lt;TreeLinkNode&gt; newList = new LinkedList&lt;TreeLinkNode&gt;();
-        while (! list.isEmpty()) {
-            TreeLinkNode node = list.remove();
-            if (! list.isEmpty()) node.next = list.get(0);
-            if (node.left != null) newList.add(node.left);
-            if (node.right != null) newList.add(node.right);
-        }
-        list = newList;
+<pre><code>public ListNode sortList(ListNode head) {
+    if (head == null || head.next == null) 
+        return head;
+    int len = 0;
+    ListNode temp = head;
+    while (temp != null) {
+        temp = temp.next;
+        len ++;
     }
+    temp = head;
+    for (int i = 1; i &lt; len / 2; i ++)
+        temp = temp.next;
+    ListNode firstHalf = head, secondHalf = temp.next;
+    temp.next = null;
+    return mergeTwoLists(sortList(firstHalf), 
+                         sortList(secondHalf));
 }
-</code></pre>
 
-<p><strong>Second, non-recursion solution</strong></p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    TreeLinkNode nextLevelHead = null;
-    TreeLinkNode nextLevelTail = null;
-    TreeLinkNode cur = root;
-    while (cur != null) {
-        if (cur.left != null) {
-            if (nextLevelHead == null) {
-                nextLevelHead = cur.left;
-                nextLevelTail = cur.left;
-            }
-            else {
-                nextLevelTail.next = cur.left;
-                nextLevelTail = cur.left;
-            }
-        }
-        if (cur.right != null) {
-            if (nextLevelHead == null) {
-                nextLevelHead = cur.right;
-                nextLevelTail = cur.right;
-            }
-            else {
-                nextLevelTail.next = cur.right;
-                nextLevelTail = cur.right;
-            }
+// The following code is copied from
+// Question - Merge Two Sorted Lists
+public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+    ListNode pre = new ListNode(Integer.MIN_VALUE);
+    ListNode cur = pre;
+    while (l1 != null &amp;&amp; l2 != null) {
+        if (l1.val &lt; l2.val) {
+            cur.next = l1;
+            l1 = l1.next;
+        } else {
+            cur.next = l2;
+            l2 = l2.next;
         }
         cur = cur.next;
-        if (cur == null) {
-            cur = nextLevelHead;
-            nextLevelHead = null;
-            nextLevelTail = null;
-        }
     }
-}
-</code></pre>
-
-<p><strong>Third, recursive solution</strong></p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    if (root == null) return;
-    // now find root.next's valid child
-    TreeLinkNode n = root.next, nextLevelNext = null;
-    while (n != null &amp;&amp; nextLevelNext == null) {
-        if (n.left != null) {
-            nextLevelNext = n.left;
-            break;
-        }
-        if (n.right != null) {
-            nextLevelNext = n.right;
-            break;
-        }
-        n = n.next;
-    }
-    // now nextLevelNext is fetched
-    if (root.right != null) 
-        root.right.next = nextLevelNext;
-    if (root.left != null) 
-        root.left.next = root.right == null ? nextLevelNext : root.right;
-    // recursion call
-    connect(root.right);
-    connect(root.left);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node/">[LeetCode 116] Populating Next Right Pointers in Each Node</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/populating-next-right-pointers-in-each-node/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a binary tree
-</p><pre>    struct TreeLinkNode {
-      TreeLinkNode *left;
-      TreeLinkNode *right;
-      TreeLinkNode *next;
-    }
-</pre>
-<p></p>
-
-<p>Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to <code>NULL</code>.</p>
-
-<p>Initially, all next pointers are set to <code>NULL</code>.</p>
-
-<p>
-<b>Note:</b>
-</p><ul>
-<li>You may only use constant extra space.</li>
-<li>You may assume that it is a perfect binary tree (ie, all leaves are at the same level, and every parent has two children).</li>
-</ul>
-<p></p>
-
-<p>
-For example,<br>
-Given the following perfect binary tree,<br>
-</p><pre>         1
-       /  \
-      2    3
-     / \  / \
-    4  5  6  7
-</pre>
-<p></p>
-<p>
-After calling your function, the tree should look like:<br>
-</p><pre>         1 -&gt; NULL
-       /  \
-      2 -&gt; 3 -&gt; NULL
-     / \  / \
-    4-&gt;5-&gt;6-&gt;7 -&gt; NULL
-</pre>
-<p></p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>Although this question is not hard, it needs a bit thinking</strong>.</p>
-
-<p>The important point is, how to effectively make use of the &lsquo;next link&rsquo; generated before, to help us solve this problem.</p>
-
-<h3>Solution</h3>
-
-<p><strong>My solution is actually very good</strong>. It pass current node and next node into a method, and then generate links for current node&rsquo;s children.</p>
-
-<p><strong>There is a even <a href="http://leetcode.com/2010/03/first-on-site-technical-interview.html">better solution</a></strong>, which directly make use of the &lsquo;next link&rsquo; generated already. In fact, it&rsquo;s same as my solution, except it uses one less variable. Great idea it is!</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my solution</strong></p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    link(root, null);
-}
-
-private void link(TreeLinkNode node, TreeLinkNode rr){
-    if (node == null || node.left == null) return;
-    node.left.next = node.right;
-    if (rr == null) node.right.next = null;
-    else node.right.next = rr.left;
-
-    link(node.left, node.left.next);
-    link(node.right, node.right.next);
-}
-</code></pre>
-
-<p><strong>Second, better solution</strong></p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    if (root == null || root.left == null || root.right == null) 
-        return;
-    root.left.next = root.right;
-    root.right.next = root.next == null ? null : root.next.left;
-    connect(root.left);
-    connect(root.right);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Path-Sum-II/">[LeetCode 113] Path Sum II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/27/Path-Sum-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Path-Sum-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/path-sum-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given a binary tree and a sum, find all root-to-leaf paths where each path&#8217;s sum equals the given sum.
-</p>
-
-For example:<br>
-Given the below binary tree and <code>sum = 22</code>,
-<pre>              5
-             / \
-            4   8
-           /   / \
-          11  13  4
-         /  \    / \
-        7    2  5   1
-</pre>
-
-<p>
-return<br>
-</p><pre>[
-   [5,4,11,2],
-   [5,8,4,5]
-]
-</pre>
-<p></p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a standard question</strong></p>
-
-<h3>Solution</h3>
-
-<p>My code is simple DFS. However, the coding part is not easy. Note that value can be negative, and think about when to add result into list.</p>
-
-<p>Just write it by hand and get an idea of it.</p>
-
-<h3>Code</h3>
-
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; pathSum(TreeNode root, int sum) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    helper(root, sum, new ArrayList&lt;Integer&gt;(), ans);
-    return ans;
-}
-
-private void helper(TreeNode node, int total, ArrayList&lt;Integer&gt; list, 
-                    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans) {
-    if (node == null) return;
-    list.add(node.val);
-    if (node.val == total &amp;&amp; node.left == null &amp;&amp; node.right == null)
-        ans.add(new ArrayList(list));
-    helper(node.left, total - node.val, list, ans);
-    helper(node.right, total - node.val, list, ans);
-    list.remove(list.size() - 1);
+    if (l1 == null) cur.next = l2;
+    else cur.next = l1;
+    return pre.next;
 }
 </code></pre>
 </div>
@@ -1543,18 +1442,18 @@ private void helper(TreeNode node, int total, ArrayList&lt;Integer&gt; list,
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -1565,23 +1464,23 @@ private void helper(TreeNode node, int total, ArrayList&lt;Integer&gt; list,
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

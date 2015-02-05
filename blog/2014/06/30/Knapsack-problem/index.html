@@ -123,31 +123,63 @@
 
 <h3>Solution</h3>
 
-<p>Using i to denote the items to put into Knapsack, and w denote the total weight, the equation is:</p>
+<p>First of all, define a 2D array, Knapsack(n,W) denotes getting &lsquo;n&#8217;th item, with weight &#8216;W&rsquo;. When n == 0 or W = 0, dp value is 0.</p>
 
-<blockquote><p>K[i][w] = Math.max( val[i-1] + K[i-1][w-wt[i-1]] , K[i-1][w] );</p></blockquote>
+<blockquote><p>int[][] Knapsack = new int[n + 1][W + 1];</p></blockquote>
+
+<p>Using &lsquo;n&rsquo; to denote the items to put into Knapsack. &lsquo;v&rsquo; is the value and &lsquo;w&rsquo; is the total weight.</p>
+
+<p>Now if item &lsquo;n&rsquo; is able to fit in:</p>
+
+<blockquote><p>Knapsack(n,W) = max(vn + Knapsack(n-1, W-wn), Knapsack(n-1, W))</p></blockquote>
+
+<p>If not able to fit in:</p>
+
+<blockquote><p>Knapsack(n,W) = Knapsack(n-1, W)</p></blockquote>
+
+<p>Refer to page 11 to 12 of <a href="http://www.cs.rit.edu/~zjb/courses/800/lec7.pdf">this pdf</a>.</p>
+
+<h3>Follow up</h3>
+
+<p>Look at the code, we checked dp[i-1][j]. Now the question is:</p>
+
+<blockquote><p>Do we need to check dp[i][j-1] ? (In case that total weight is not fully used up)</p></blockquote>
+
+<p>The answer is NO. We don&rsquo;t. Look at example: weights = {1, 2} and values = {3, 5}, and knapsack weight = 4. DP array would be:</p>
+
+<pre><code>[
+ [0, 0, 0, 0, 0],
+ [0, 3, 3, 3, 3],
+ [0, 3, 5, 8, 8]
+]
+</code></pre>
+
+<p>See that? The way that we keep DP array size int[items + 1][totalWeight + 1], the DP value is always 0 at 1st column and row.</p>
+
+<p>So, in the example when i == 1, total value is ALWAYS 3.</p>
 
 <h3>Code</h3>
 
-<pre><code>int knapSack(int W, int wt[], int val[], int n) {
-   int i, w;
-   int K[n+1][W+1];
+<pre><code>public int maxValNoDup(int totalWeight, int[] value, int[] weight) {
+    int items = value.length;
+    Arrays.sort(value);
+    Arrays.sort(weight);
 
-   // Build table K[][] in bottom up manner
-   for (i = 0; i &lt;= n; i++)
-   {
-       for (w = 0; w &lt;= W; w++)
-       {
-           if (i==0 || w==0)
-               K[i][w] = 0;
-           else if (wt[i-1] &lt;= w)
-                 K[i][w] = max(val[i-1] + K[i-1][w-wt[i-1]],  K[i-1][w]);
-           else
-                 K[i][w] = K[i-1][w];
-       }
-   }
-
-   return K[n][W];
+    int[][] dp = new int[items + 1][totalWeight + 1];
+    for (int i = 1; i &lt;= items; i++) {
+        for (int j = 1; j &lt;= totalWeight; j++) {
+            // we'll try to take i'th item, to fit in weight j
+            if (j &lt; weight[i - 1]) {
+                // not able to put in
+                dp[i][j] = dp[i - 1][j];
+            } else {
+                // we are able to take i'th item into knapsack
+                dp[i][j] = Math.max(dp[i - 1][j], value[i - 1]
+                        + dp[i - 1][j - weight[i - 1]]);
+            }
+        }
+    }
+    return dp[items][totalWeight];
 }
 </code></pre>
 </div>
@@ -219,18 +251,18 @@
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -241,23 +273,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

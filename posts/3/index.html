@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link X and Y are strings formed by 0 or 1. Distance is define as: D(X,Y) = Remove chars common at the start from both X &amp; Y. Then add &hellip;">
+  <meta name="description" content="ref Suffix tree Both KMP Algorithm and Rabin Karp Algorithm pre-process the pattern to make the pattern searching faster. The best time complexity &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/27/suffix-tree/">[Fundamental] Suffix Tree</a></h1>
     
     
       <p class="meta">
@@ -100,973 +100,818 @@
   
 
 
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2015/01/11/crazy-distance-string/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/crazy-distance-string/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/15061908/google-interview-find-crazy-distance-between-strings">link</a></p>
-
-<blockquote><p>X and Y are strings formed by 0 or 1. Distance is define as:</p></blockquote>
-
-<pre><code>D(X,Y) = Remove chars common at the start from both X &amp; Y. 
-Then add the remaining lengths from both the strings.
-</code></pre>
-
-<blockquote><p>For e.g.</p></blockquote>
-
-<pre><code>D(1111, 1000) = Only First alphabet is common. So the remaining string is 111 &amp; 000. Therefore the result length("111") &amp; length("000") = 3 + 3 = 6
-</code></pre>
-
-<blockquote><p>For e.g.</p></blockquote>
-
-<pre><code>D(0101, 01100) = Only First two alphabets are common. So the remaining string is 01 &amp; 100. Therefore the result length("01") &amp; length("100") = 2 + 3 = 5
-</code></pre>
-
-<blockquote><p>Now given n input, say like</p></blockquote>
-
-<pre><code>1111
-1000
-101
-1100
-</code></pre>
-
-<blockquote><p>Find out the maximum crazy distance between 2 strings.</p>
-
-<p><strong>n is</strong> the number of input strings. <strong>m is</strong> the max length of any input string.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is the <a href="http://stackoverflow.com/a/15062640">source</a>.</p>
-
-<blockquote><p>Put the strings into a tree, where 0 means go left and 1 means go right. <strong>O(m*n) time</strong>.</p></blockquote>
-
-<p>Example:</p>
-
-<pre><code>            Root
-             1
-          0      1
-         0 1*   0  1
-        0*     0*    1*
-</code></pre>
-
-<blockquote><p>where the * means that an element ends there. Constructing this tree clearly takes O(n m).</p>
-
-<p>Now we have to find <strong>the diameter of the tree</strong> (the longest path between two nodes).</p></blockquote>
-
-<p>How to find out longest path between 2 leaf nodes? Please refer to <strong>[Google] Diameter of a Binary Tree</strong> for explanation.</p>
-
-<p>Total time complexity is <strong>O(m*n) time</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int crazyDist(String[] input) {
-    TreeNode root = this.buildTree(input);
-    return this.findMaxPath(root).path - 1;
-}
-
-private Result findMaxPath(TreeNode node) {
-    if (node == null) {
-        return new Result(Integer.MIN_VALUE, 0);
-    }
-    Result lr = this.findMaxPath(node.left);
-    Result rr = this.findMaxPath(node.right);
-    int path = Math.max(lr.path, rr.path);
-    if (lr.depth != 0 &amp;&amp; rr.depth != 0) {
-        // this check is important, because if any of the child node is
-        // NULL, this root will not be eligible for computing the path
-        path = Math.max(path, lr.depth + rr.depth + 1);
-        // Why? cuz diameter must go from one leaf, thru root, and reach
-        // another leaf. This is different from "Maximum Path Sum" leetcode
-    }
-    return new Result(path, 1 + Math.max(lr.depth, rr.depth));
-}
-
-private TreeNode buildTree(String[] input) {
-    TreeNode root = new TreeNode(123);
-    // share a common root. this root is deducted from the final calculation
-    for (String str : input) {
-        // insert str under the root
-        TreeNode p = root;
-        for (char c : str.toCharArray()) {
-            if (c == '0') {
-                if (p.left == null) {
-                    p.left = new TreeNode(124);
-                    // if 0, go to left; otherwise go to right
-                    // thus value of TreeNodes does not really matter
-                }
-                p = p.left;
-            } else {
-                if (p.right == null) {
-                    p.right = new TreeNode(125);
-                }
-                p = p.right;
-            }
-        }
-    }
-    return root;
-}
-
-class Result {
-    int path;
-    int depth;
-
-    public Result(int a, int b) {
-        path = a;
-        depth = b;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/">[Google] Check if Repeating Subsequence Exists</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/check-if-repeating-subsequence-exist/">Comments</a>
+           | <a href="/blog/2015/01/27/suffix-tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/suffix-tree/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/pattern-searching-set-8-suffix-tree-introduction/">ref</a></p>
 
-<p><a href="http://www.careercup.com/question?id=5931067269709824">link</a></p>
+<h3>Suffix tree</h3>
 
-<blockquote><p>Given a string, find if there is any sub-sequence that repeats itself. Do not reuse any char.</p>
+<p>Both KMP Algorithm and Rabin Karp Algorithm <strong>pre-process the pattern</strong> to make the pattern searching faster. The best time complexity that we could get by preprocessing pattern is <strong>O(n), where n is length of the text</strong>.</p>
 
-<p>Eg:</p></blockquote>
+<p>Now we will discuss an approach that <strong>pre-processes the text</strong>. A suffix tree is built of the text. After preprocessing text (building suffix tree of text), we can <strong>search any pattern in O(m) time</strong> where m is length of the pattern.</p>
 
-<pre><code>1. abab &lt;------yes, ab is repeated
-2. abba &lt;---- No, a and b follow different order 
-3. acbdaghfb &lt;-------- yes, a followed by b twice 
-4. abcdacb &lt;----- yes, a followed by b twice 
-</code></pre>
+<p>Though search is very fast &ndash; just proportional to length of the pattern, it may become costly if <strong>the text changes frequently</strong>. It is good for fixed text or less frequently changing text though.</p>
 
-<blockquote><p>Note that no char should be reused. I.e. &ldquo;aab&rdquo; is a false.</p></blockquote>
+<h4>Suffix Tree VS. Trie</h4>
 
-<h3>Solution</h3>
+<p><strong>A Suffix Tree is a compressed trie of all suffixes of the given text</strong>.</p>
 
-<p>This looks like a question without any clue. However, this actually is a modified version of <strong>[LintCode] Longest Common Subsequence</strong>.</p>
+<h4>Compressed Trie</h4>
 
-<p>Look at that question: there&rsquo;s 2 input string, and they match char-by-char. For this question, we are simply <strong>matching input string with input string itself</strong>. And chars should be match <strong>ONLY</strong> at different positions, that&rsquo;s the key. As pointed out by the <a href="http://www.careercup.com/question?id=5931067269709824">top comment</a>:</p>
+<p><strong>A Compressed Trie</strong> is obtained from standard trie by joining chains of single nodes.</p>
 
-<blockquote><p>Now we can modify the longest_common_subsequence(a, a) to find the value of the longest repeated subsequence in a by excluding the cases when i == j</p></blockquote>
+<p>Example, a standard trie:</p>
 
-<h3>Code</h3>
+<p><img class="middle" src="/assets/images/standardtrieNew.png"></p>
 
-<pre><code>public boolean checkRepeatSubseq(String input) {
-    int len = input.length();
-    int[][] dp = new int[len + 1][len + 1];
-    // dp[i][j] denotes the length of subseq between 2 strings:
-    // 1. first i chars of input
-    // 2. first j chars of input
-    for (int i = 1; i &lt;= len; i++) {
-        for (int j = i; j &lt;= len; j++) {
-            if (i != j &amp;&amp; input.charAt(i - 1) == input.charAt(j - 1)) {
-                int temp = Math.max(dp[i - 1][j], dp[i][j - 1]);
-                dp[i][j] = Math.max(temp, dp[i - 1][j - 1] + 1);
-            } else {
-                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-    return dp[len][len] &gt;= 2;
-}
-</code></pre>
-</div>
-  
-  
+<p>A Compressed Trie:</p>
 
+<p><img class="middle" src="/assets/images/CompressedTrieNew.png"></p>
 
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/all-repeating-substring-given-length/">[LinkedIn] Find All Repeating Substring With Given Length</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/all-repeating-substring-given-length/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/all-repeating-substring-given-length/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=6495932900179968">link</a></p>
-
-<blockquote><p>Find all the repeating substring of specified length in a large string sequence.</p>
-
-<p>For e.g.</p></blockquote>
-
-<pre><code>Input String: "ABCACBABC" 
-repeated sub-string length: 3 
-Output: ABC 
-</code></pre>
-
-<blockquote><p>eg.</p></blockquote>
-
-<pre><code>Input String: "ABCABCA" 
-repeated sub-string length: 2 
-Output: AB, BC, CA
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Similar to <strong>[Amazon] Longest Repeating Substring</strong>, the best solution is to do <strong>Suffix Tree</strong>, or suffix array. We then need to print nodes on a certain level, who has more than 1 descendant.</p>
-
-<p>However, since the length of substring is given, we can also do simply iteration: insert all substring with given length into a HashSet, and check repetition. <a href="https://github.com/techpanja/interviewproblems/blob/master/src/strings/repeatingstringsofspecifiedlength/RepeatingStringOfSpecificLength.java">ref</a></p>
-
-<h3>Code</h3>
-
-<p>Suffix tree solution: not written.</p>
-
-<p>Hashset code:</p>
-
-<pre><code>public List&lt;String&gt; solve(String input, int k) {
-    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-    HashSet&lt;String&gt; set = new HashSet&lt;String&gt;();
-    for (int i = 0; i &lt;= input.length() - k; i++) {
-        String sub = input.substring(i, i + k);
-        if (set.contains(sub)) {
-            ans.add(sub);
-        }
-        set.add(sub);
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">[Question] All Distinct Subsequences With Given Length</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://11011110.livejournal.com/254164.html">link</a></p>
-
-<blockquote><p>Find a polynomial-time algorithm that takes a string of length n, and a number k, output the number of distinct k-character subsequences.</p>
-
-<p>For instance, input &ldquo;food&rdquo; and number k=2, output should be 4. There are four distinct 2-character subsequences of &ldquo;food&rdquo;: &ldquo;fo&rdquo;, &ldquo;fd&rdquo;, &ldquo;oo&rdquo;, and &ldquo;od&rdquo;.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Similar to <strong>[Question] Number of distinct sub-sequence</strong>, we solve this problem with DP. The dp equation is a bit difficult to write.</p>
-
-<p>The idea come from comment from <a href="http://11011110.livejournal.com/254164.html">gareth_rees</a>:</p>
-
-<blockquote><p>Let θ(S, k) be the number of distinct k-character subsequences in the string S of length n.</p>
-
-<p>Clearly θ(S, k) = 1 if n = k or k = 0</p>
-
-<p>and θ(S, k) = 0 if n &lt; k.</p>
-
-<p>Otherwise, <strong>choose 1 unique char from S</strong>, and deduct k by 1, then do the DP calculation with the remaining part of S.</p></blockquote>
-
-<p>Look at this example:</p>
-
-<pre><code>θ("food", 2) = θ("ood", 1) + θ("od", 1) + θ("", 1)
-= (θ("od", 0) + θ("", 0)) + (θ("d", 0) + θ("", 0)) + 0
-= (1 + 1) + (1 + 1)
-= 4
-</code></pre>
-
-<p><strong>&ldquo;food&rdquo; is divided into 3 parts</strong>. First part we choose &ldquo;f&rdquo; to be the first char, thus the value is θ(&ldquo;ood&rdquo;, 1). Second part we choose &ldquo;o&rdquo;, and final part we choose &ldquo;d&rdquo;.</p>
-
-<p><strong>Note that when we choose a char, it must never have been chosen before</strong>. In case of &ldquo;food&rdquo;, we only choose &lsquo;f&rsquo;, &lsquo;o&rsquo;, &rsquo;d&#8217; once for each.</p>
-
-<p>This is a very difficult DP question, but the explanation really makes the answer easier. Read my implementation below.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int countSubSeq(String input, int k) {
-    // assuming all input chars are small letter
-    return choose(input, 0, k);
-}
-
-private int choose(String input, int start, int numChar) {
-    int charLeft = input.length() - start;
-    if (charLeft == numChar || numChar == 0) {
-        return 1;
-    } else if (charLeft &lt; numChar || numChar &lt; 0) {
-        return 0;
-    }
-    // now numChar is smaller than charLeft, and larger than 0
-    // start to pick a char (which is at first appearance)
-    int total = 0;
-    HashSet&lt;Character&gt; chosen = new HashSet&lt;Character&gt;();
-    while (start &lt; input.length()) {
-        char currentChar = input.charAt(start);
-        if (!chosen.contains(currentChar)) {
-            // pick the char pointer by 'start'
-            total += choose(input, start + 1, numChar - 1);
-            chosen.add(currentChar);
-        }
-        start++;
-    }
-    return total;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/Diameter-of-Binary-Tree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/diameter-of-a-binary-tree/">link</a></p>
-
-<blockquote><p>The diameter of a tree (sometimes called the width) is the number of nodes on the longest path between two leaves in the tree.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/tree-diameter-1.gif"></p>
-
-<h3>Solution</h3>
-
-<p>This is a similar question to <strong>[LeetCode 124] Binary Tree Maximum Path Sum</strong>. <strong>However there&rsquo;s a significant difference</strong> which might be overlooked while coding.</p>
-
-<p>Look at this example:</p>
-
-<pre><code>     0
-       1
-        1
-       0  1
-           1
-</code></pre>
-
-<p>If we only want to find the max path, that would return result of 5, which is root-to-rightmost-leaf. However, the diameter should be 4, which is the distance between 2 leaf nodes.</p>
-
-<p>A solution is available for reading <a href="http://stackoverflow.com/a/3124575">here</a>.</p>
-
-<p>For <strong>[Google] Crazy Distance Between Strings</strong>, there is another special case: {&ldquo;1&rdquo;, &ldquo;11&rdquo;, &ldquo;10&rdquo;}. The program will not output correct result (1), because this is not really the diameter of a tree, but instead, a max path from a non-leaf to a leaf. I leave this part for you to finish.</p>
-
-<h3>Code</h3>
-
-<p>Refer to <strong>[Google] Crazy Distance Between Strings</strong> for complete code.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/10/reverse-a-stack/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/reverse-a-stack/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/">link</a></p>
-
-<blockquote><p>Reverse a stack using recursion. You are not allowed to use loops or data structure, and you can only use the following functions:</p></blockquote>
-
-<pre><code>isEmpty(S)
-push(S)
-pop(S)
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Well since we are not allowed to use additional DS or loop, we have to use system stack to help us!</p>
-
-<p>We add a new method: <strong>insert at stack bottom</strong>. Then we can solve this question recursively. Nice question, and tricky answer!</p>
-
-<h3>Code</h3>
-
-<pre><code>public void reverse(Stack&lt;Integer&gt; stack) {
-    if (stack.isEmpty() || stack.size() == 1) {
-        return;
-    }
-    int top = stack.pop();
-    this.reverse(stack);
-    this.insertAtBottom(stack, top);
-}
-
-private void insertAtBottom(Stack&lt;Integer&gt; stack, int val) {
-    if (stack.isEmpty()) {
-        stack.push(val);
-        return;
-    }
-    int temp = stack.pop();
-    this.insertAtBottom(stack, val);
-    stack.push(temp);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/minimum-range-inclueds-at-least-1/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5103437989543936">link</a></p>
-
-<blockquote><p>There are many sorted arrays. Find a minimum range, so that in each array there&rsquo;s at least one integer within this range.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Min-heap</strong>. <a href="http://www.careercup.com/question?id=16759664">source</a></p>
-
-<blockquote><p>There are k lists of sorted integers. Make a min heap of size k containing 1 element from each list. Keep track of min and max element and calculate the range.</p>
-
-<p>In min heap, minimum element is at top. Delete the minimum element and another element instead of that from the same list to which minimum element belong. Repeat the process till any one of the k list gets empty.</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public void printMinRange(int[][] input) {
-    Comparator&lt;Pointer&gt; compr = new HeapComparator(input);
-    // Note that we pass in 'input' arrays to the comparator
-    PriorityQueue&lt;Pointer&gt; heap = new PriorityQueue&lt;Pointer&gt;(SIZE, compr);
-
-    int maxVal = Integer.MIN_VALUE;
-    for (int i = 0; i &lt; SIZE; i++) {
-        heap.add(new Pointer(i, 0));
-        // insert the head of each array into the heap
-        maxVal = Math.max(maxVal, input[i][0]);
-        // keep additional value to keep track of the max value in heap
-    }
-
-    int left = 0;
-    int right = Integer.MAX_VALUE;
-    while (heap.size() == SIZE) {
-        Pointer p = heap.remove();
-        // first, update the range
-        if (maxVal - input[p.index][p.position] &lt; right - left) {
-            right = maxVal;
-            left = input[p.index][p.position];
-        }
-        // then, push the next element after 'p' to the heap
-        // meanwhile, update 'maxVal'
-        if (p.position + 1 &lt; input[p.index].length) {
-            Pointer nextP = new Pointer(p.index, p.position + 1);
-            heap.add(nextP);
-            maxVal = Math.max(maxVal, input[nextP.index][nextP.position]);
-        }
-        // when 'p' is the last element in the row, terminate loop
-    }
-    System.out.println("Left boundary: " + left);
-    System.out.println("Right boundary: " + right);
-}
-
-class HeapComparator implements Comparator&lt;Pointer&gt; {
-
-    int[][] arrays = null;
-
-    public HeapComparator(int[][] input) {
-        arrays = input;
-    }
-
-    public int compare(Pointer p1, Pointer p2) {
-        return arrays[p1.index][p1.position]
-                - arrays[p2.index][p2.position];
-    }
-}
-
-class Pointer {
-    int index, position;
-
-    public Pointer(int x, int y) {
-        index = x;
-        position = y;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/10/max-count-array-in-queue/">[Google] Maximum Count Array in a Queue</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/10/max-count-array-in-queue/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/max-count-array-in-queue/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32856675_0_1.html#top">link1</a></p>
-
-<blockquote><p>给一个数组a[n]，令s[i]为a[i+1..n-1]中比a[i]大的数的数量。</p>
-
-<p>求最大的s[i]。要求O(nlogn)</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is very similar question to <strong>[Google] Form a Queue Given Heights</strong>. The idea is to insert elements into BST and count number of larger elements.</p>
-
-<p>Naitive solution can be reached with a list.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/10/form-queue-given-heights/">[Google] Form a Queue Given Heights</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/10/form-queue-given-heights/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/form-queue-given-heights/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/">link1</a>, <a href="http://www.weiming.info/zhuti/JobHunting/31903469/">link2</a>, <a href="http://www.mitbbs.com/article_t1/JobHunting/32856675_0_1.html#top">link3</a>.</p>
-
-<blockquote><p>There is an array of integers which represent heights of persons.</p>
-
-<p>Given another array&hellip; Let&rsquo;s call it count-array. It contain how many persons in front of him are greater than him in height.</p>
-
-<p>求原数组。(原数组中元素是从1到n。)</p>
-
-<p>Example:</p></blockquote>
-
-<pre><code>Input(Count array): 0, 0, 2, 0
-Output(原数组): 2, 3, 1, 4
-</code></pre>
-
-<blockquote><p>求nlogn的算法。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is naive solution from floor 29 of <a href="http://www.weiming.info/zhuti/JobHunting/31903469/">this thread</a>:</p>
-
-<blockquote><p>总结一下，用一个List存放1&hellip;n。</p>
-
-<p>从头到尾扫描给定的数组，每得到一个值，从List里删掉。</p>
-
-<p>因为List里数据是有序的，因此remove操作可以使用二分法，复杂度为O(logn).</p>
-
-<p>这样本算法复杂度为O(nlogn).</p></blockquote>
-
-<p>Example:</p>
-
-<pre><code>count array 
-i C[0,0,2,0]   N[4, 3, 2, 1]
-3 C[3] = 0     在N里面删除N[0]=4, N=[3, 2, 1],   Ans=[4]
-2 C[2] = 2     在N里面删除N[2]=1, N=[3, 2],   Ans=[1, 4]
-1 C[1] = 0     在N里面删除N[0]=3, N=[2],   Ans=[3, 1, 4]
-0 C[0] = 0     在N里面删除N[0]=2, N=[], Ans=[2, 3, 1, 4]
-</code></pre>
-
-<p>But there is a problm here, since removing item from list requires O(n), we will achieve O(n<sup>2</sup>) time. How do we optimize this?</p>
-
-<p><strong>The answer is BST</strong> with each node keeping track of how many nodes is on the left branch, and how many on right branch. For details of this type of TreeNode, refer to <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
-
-<p>The conclusion:</p>
-
-<blockquote><p>可以化归为这样一道题：</p>
-
-<p>设计一个有序的数据结构，最初里头有自然数1到n这n个元素，</p>
-
-<p>随后这些元素可以被删除，但剩下元素仍然保持有序。</p>
-
-<p>要求实现方法GetKthElement(int k)和RemoveKthElemenet(int k)，</p>
-
-<p>使得它们在任意时刻都不超过O(lgN), N为当前的元素个数</p>
-
-<p>感觉要结合BST之类</p></blockquote>
-
-<h3>Code</h3>
-
-<p>Naive approach, O(n<sup>2</sup>):</p>
-
-<pre><code>public int[] form(int peopleCount, int[] countArray) {
-    int len = peopleCount;
-    int[] heightQueue = new int[len];
-    List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();
-    for (int i = peopleCount; i &gt; 0; i--) {
-        list.add(i);
-    }
-    for (int i = len - 1; i &gt;= 0; i--) {
-        heightQueue[i] = list.remove(countArray[i]);
-    }
-    return heightQueue;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/09/terminology-ngram/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/terminology-ngram/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>n-gram</h3>
-
-<p>In the fields of computational linguistics and probability, an <strong><a href="http://en.wikipedia.org/wiki/N-gram">n-gram</a></strong> is a contiguous sequence of n items from a given sequence of text or speech.</p>
-
-<p>The items can be phonemes, syllables, letters, words or base pairs according to the application. The n-grams typically are collected from a text or speech corpus.</p>
-
-<h4>Example</h4>
-
-<table border="1" width="100%" id="table5" cellpadding="3" style="border-collapse: collapse" bordercolor="#89B0D8" cellspacing="0">
-                <tbody><tr>
-                    <td bgcolor="#D9ECFF">
-                    <p align="center">frequency</p></td>
-                    <td bgcolor="#D9ECFF">
-                    <p align="center">word1</p></td>
-                    <td bgcolor="#D9ECFF">
-                    <p align="center">word2</p></td>
-                    <td bgcolor="#D9ECFF">
-                    <p align="center">word3</p></td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">1419</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">the</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">same</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">461</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">likely</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">432</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">better</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">than</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">266</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">difficult</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">235</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">of</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">the</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">226</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
-                    </td>
-                    <td bgcolor="#F5F9FC">
-                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">than</p>
-                    </td>
-                </tr>
-</tbody></table>
-
-
-<h4>Downloadable n-grams sets for English</h4>
+<h4>build a Suffix Tree</h4>
 
 <ol>
-<li><strong><a href="https://catalog.ldc.upenn.edu/LDC2006T13">Google n-grams</a></strong>, based on the web as of 2006.</li>
-<li><strong><a href="http://www.ngrams.info/intro.asp">COCA n-grams</a></strong>, based on Corpus of Contemporary American English [COCA]. 450 million words from 1990 to 2012.</li>
+<li>Generate all suffixes of given text.</li>
+<li>Consider all suffixes as individual words and build a compressed trie.</li>
 </ol>
 
 
-<p>With n-grams data (2, 3, 4, 5-word sequences, with their frequency), we can carry out powerful queries offline.</p>
+<p>Eg.</p>
+
+<pre><code>banana\0
+anana\0
+nana\0
+ana\0
+na\0
+a\0
+\0
+</code></pre>
+
+<p>Example question: <strong>[CC150v4] 20.8 Full Text Search (Suffix Tree)</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/27/suffix-array/">[Fundamental] Suffix Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/27/suffix-array/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/suffix-array/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/suffix-array-set-1-introduction/">ref</a></p>
+
+<h3>Suffix Array</h3>
+
+<p>A suffix array is a sorted array of all suffixes of a given string.</p>
+
+<p><strong>Any suffix tree based algorithm</strong> can be replaced with an algorithm <strong>that uses a suffix array</strong> enhanced with additional information and solves the same problem in the same time complexity.</p>
+
+<p><strong>Naive algorithm</strong> for construction of suffix array is to consider all suffixes, sort them using a O(nLogn) sorting algorithm and while sorting, maintain original indexes. Time complexity is _O(n<sup>2</sup> * Logn)__.</p>
+
+<p>There is an advanced <strong>nLogn Algorithm</strong> algorithm available to read <a href="http://www.geeksforgeeks.org/suffix-array-set-2-a-nlognlogn-algorithm/">here</a>. Basic idea is to &ldquo;Sort according to first two characters&rdquo; and then &ldquo;according to first four character&rdquo;.</p>
+
+<p>Example question: <strong>[Facebook] Query Search (HashMap, suffix array)</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/27/prefix-tree/">[Fundamental] Prefix Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/27/prefix-tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/prefix-tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/trie-insert-and-search/">ref</a></p>
+
+<h3>Prefix tree</h3>
+
+<ol>
+<li>Building a well balanced BST needs time proportional to M * log N, where M is maximum string length and N is number of keys in tree.</li>
+<li>Using trie, search in O(M) time.</li>
+<li>The penalty is on trie storage requirements.</li>
+</ol>
+
+
+<h3>Implementation</h3>
+
+<ol>
+<li>Every node of trie consists of multiple branches.</li>
+<li>Each branch represents a possible character of keys.</li>
+<li><p>Mark the last node of every key as leaf node.</p>
+
+<p> struct trie_node
+ {
+     int value; /<em> Used to mark leaf nodes </em>/
+     trie_node_t *children[ALPHABET_SIZE];
+ };</p></li>
+</ol>
+
+
+<p>Note that a <strong>non-terminating node can also be marked as leaf</strong>. Eg.</p>
+
+<pre><code>                   root
+                /   \    \
+                t  'a'    b
+                |   |     |
+                h   n    'y'
+                |   |  \    \
+               'e'  s  'y'  'e'
+             /  |   |
+            i   r   w
+           /    |   |
+         'r'   'e'  e
+                    |
+                   'r'
+</code></pre>
+
+<p>The leaf nodes are quoted in &lsquo;&rsquo;.</p>
+
+<p>Insert and search costs <strong>O(key_length)</strong>, however the memory requirements of trie is <strong>O(ALPHABET_SIZE * key_length * N)</strong> where N is number of keys in trie.</p>
+
+<p><strong>Compressed trie</strong>, ternary search tree, etc. can be used to minimize memory requirements of trie.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/27/pattern-searching-algorithms/">[Fundamental] Pattern Searching Algorithms</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/27/pattern-searching-algorithms/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/pattern-searching-algorithms/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/tag/pattern-searching/page/2/">ref</a></p>
+
+<h3>Overview</h3>
+
+<p>strStr() is a classic question in CS. There are various ways to solve (which we have discussed before), this is a summarization:</p>
+
+<ol>
+<li><p>naive &ndash; O(m * n)</p></li>
+<li><p><a href="http://www.geeksforgeeks.org/searching-for-patterns-set-2-kmp-algorithm/">KMP</a> &ndash; O(n) in worst case</p></li>
+<li><p><a href="http://www.geeksforgeeks.org/searching-for-patterns-set-3-rabin-karp-algorithm/">Rabin-Karp</a>, rolling hash &ndash; between O(m * n) and O(m + n)</p>
+
+<p> Matches the hash value of the pattern with the hash value of pattern. If the hash values match, then only it starts matching individual characters.</p></li>
+<li><p><a href="http://www.geeksforgeeks.org/pattern-searching-set-4-a-naive-string-matching-algo-question/">Modified naive algo</a>, only work if pattern contains no duplicate characters.</p>
+
+<p> Only match the first char. This case is quite boring, can skip.</p></li>
+<li><p>Suffix tree</p>
+
+<p> Will discuss in details.</p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/27/generate-request-id/">[Google] Generate Request ID</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/27/generate-request-id/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/generate-request-id/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5169800024162304">link</a></p>
+
+<blockquote><p>Design a system to <strong>return an unique ID for each request</strong>.</p>
+
+<p>(For most of requests, the ID value should increase as time goes, the system should handle 1000 requests per second at least. )</p>
+
+<p>Note: <strong>Timestamps</strong> alone is not valid since there might be multiple requests with same timestamps.</p></blockquote>
+
+<h3>Idea 1</h3>
+
+<h4>Generating UUID</h4>
+
+<p><strong>A universally unique identifier (UUID)</strong> is an identifier standard used in software construction. A UUID is simply a 128-bit value.</p>
+
+<p>Generating unique IDs is easy. All modern OS&#8217;es have that functionality built in.</p>
+
+<p><strong>Detail</strong>: UUIDs may be generated from a combination of <strong>system time stamp, CPU/system ID</strong>, NIC MAC addresses, HBA WWNs, server id etc.</p>
+
+<h4>Clarifications</h4>
+
+<p>Let&rsquo;s assume the following:</p>
+
+<ol>
+<li><p>What&rsquo;s the length of the ID?</p>
+
+<p> &lt;= 128 bits. In that case I&rsquo;ll choose the standard 128 bit UUID format.</p></li>
+<li><p>The requirement states the system should handle 1000 request/s at least.</p></li>
+<li><p>What&rsquo;s the average request rate?</p>
+
+<p> 1000 &lt; avg req. rate &lt; 10,000</p></li>
+<li><p>What&rsquo;s the max. burst rate the system must handle?</p>
+
+<p> &lt; 1,000,000</p></li>
+<li><p>What&rsquo;s the max. latency (wait time) for a request?</p>
+
+<p> 1 ms</p></li>
+</ol>
+
+
+<h4>Solution</h4>
+
+<p>It&rsquo;s a classical consumer-producer problem.</p>
+
+<p>In this case we have many consumers of UUIDs and one producer. Let&rsquo;s assume the OS provides an API to generate UUIDs and the max. running time of the API is 1ms.</p>
+
+<ol>
+<li><p>Pre-allocate 2 Mio UUIDs into an array / stack/ heap (depending on implementation) structure.</p></li>
+<li><p>If no overhead 2 Mio UUIDs would take ~ 32MB of RAM. Not a problem on today&rsquo;s server system with many GB of RAM, but may be a problem on an embedded system.</p></li>
+<li><p>2 Mio UUIDs ensures system can handle burst rate.</p></li>
+<li><p>The solution needs to ensure that its pool of UUIDs doesn&rsquo;t run out as consumers request them and they are replenished.</p></li>
+</ol>
+
+
+<h3>Idea 2</h3>
+
+<p>This question is quite open-ended.</p>
+
+<p>For starter, how about <strong>appending random(N) to the timestamp</strong>? N can be large enough to make collisions unlikely. If each server has an ID we can also include it to further reduce collisions.</p>
+
+<p>If IDs must be unique, then I suppose you can <strong>design a counter</strong> that will return an ID and increment it at the same time. You will then <strong>need mutex to access this counter</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/26/make-java-method-thread-safe/">[Google] Make a Java Method Thread-safe</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/26/make-java-method-thread-safe/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/26/make-java-method-thread-safe/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.programcreek.com/2014/02/how-to-make-a-method-thread-safe-in-java/">link</a></p>
+
+<blockquote><p>Consider the following class:</p></blockquote>
+
+<pre><code>class MyCounter {
+    private static int counter = 0;
+
+    public static int getCount() {
+        return counter++;
+    }
+}
+</code></pre>
+
+<blockquote><p>Is the method thread-safe? How to make it thread-safe?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>No</strong>, it&rsquo;s not.</p>
+
+<blockquote><p>The method is not thread-safe, because the <strong>counter++ operation is not atomic</strong>, which means it consists more than one atomic operations. In this case, one is accessing value and the other is increasing the value by one.</p>
+
+<p>When Thread 1 accesses the method at t1, Thread 2 may not be done with the method. So the value returned to Thread 1 is the value that has not been increased.</p></blockquote>
+
+<h3>Approach 1</h3>
+
+<p>Adding <strong>synchronized</strong> to this method. This will synchronize the instance of the static class.</p>
+
+<pre><code>class MyCounter {
+    private static int counter = 0;
+
+    public static synchronized int getCount() {
+        return counter++;
+    }
+}
+</code></pre>
+
+<h3>Approach 2</h3>
+
+<p>We actually can make <strong>count++</strong> atomic by using AtomicInteger from the package &ldquo;java.util.concurrent.atomic&rdquo;.</p>
+
+<p>import java.util.concurrent.atomic.AtomicInteger;</p>
+
+<pre><code>public class MyCounter {
+    private static AtomicInteger counter = new AtomicInteger(0);
+
+    public static int getCount() {
+        return counter.getAndIncrement();
+    }
+}
+</code></pre>
+
+<h3>Follow-up on thread stack</h3>
+
+<ol>
+<li>Each thread has its own stack (never share stack).</li>
+<li>All local variables defined in a method will be allocated memory in stack.</li>
+<li>When execution completed by a thread, stack frame will be removed.</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/26/Push-and-Pop-Sequences-Stacks/">[Question] Push and Pop Sequences of Stacks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/26/Push-and-Pop-Sequences-Stacks/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/26/Push-and-Pop-Sequences-Stacks/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://codercareer.blogspot.sg/2011/11/no-21-push-and-pop-sequences-of-stacks.html">link</a></p>
+
+<blockquote><p>Given two integer sequences, one of which is the push sequence of a stack, please check whether the other sequence is a corresponding pop sequence or not.</p>
+
+<p>For example, if 1, 2, 3, 4, 5 is a push sequence, 4, 5, 3, 2, 1 is a corresponding pop sequence, but the sequence 4, 3, 5, 1, 2 is not.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Refer to <a href="http://stackoverflow.com/a/17828345">this answer</a>:</p>
+
+<blockquote><p>Construct the stack:</p>
+
+<p>For each number X in the pop order:</p></blockquote>
+
+<pre><code>If this number is not the same as the top of the stack (or the stack is empty), 
+push numbers from the push order until you pushed X. 
+
+If you pushed all numbers and didn't find X, there's no way to get the pop order.
+
+Pop X
+</code></pre>
+
+<h3>Code</h3>
+
+<pre><code>public boolean validSequence(int[] input, int[] sequenc) {
+    // keep a pointer p in the input[] array
+    int len = input.length;
+    int p = 0;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+
+    int i = 0;
+    while (i &lt; len) {
+        if (stack.isEmpty()) {
+            // just push an element to stack
+            stack.push(input[p++]);
+        } else {
+            // stack got elements, then check top one
+            if (stack.peek() == sequenc[i]) {
+                // seq found, proceed to next number in seq
+                stack.pop();
+                i++;
+            } else {
+                // did not find seq, keep pushing to stack until done
+                if (p == len) {
+                    return false;
+                } else {
+                    stack.push(input[p++]);
+                }
+            }
+        }
+    }
+    return i == len; // or just return true;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/24/distributed-caching-memcached/">[Design] Distributed Caching - Memcached</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/24/distributed-caching-memcached/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/24/distributed-caching-memcached/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>What is Memcached?</h3>
+
+<p><a href="http://memcached.org/">Memcached</a> is an <strong>in-memory key-value store for small chunks of arbitrary data</strong> (strings, objects) from results of database calls, API calls, or page rendering.</p>
+
+<ol>
+<li>Free &amp; open source</li>
+<li>high-performance, distributed memory object caching system</li>
+<li>generic in nature</li>
+<li>intended for use in speeding up dynamic web applications by alleviating database load</li>
+</ol>
+
+
+<p>Definition from <a href="http://en.wikipedia.org/wiki/Memcached">wiki</a>:</p>
+
+<blockquote><p>Memcached is a <strong>general-purpose distributed memory caching system</strong>. It is often used to speed up dynamic database-driven websites by <strong>caching data and objects in RAM</strong> to reduce the number of times an <strong>external data source</strong> (such as a database or API) must be read.</p></blockquote>
+
+<h3>Who uses Memcached?</h3>
+
+<ol>
+<li>Facebook</li>
+<li>YouTube</li>
+<li>Twitter</li>
+<li>Amazon</li>
+<li>Reddit</li>
+<li>Yahoo</li>
+<li>Zynga</li>
+</ol>
+
+
+<h3>Why Memcached?</h3>
+
+<p>Run memcached on one or more hosts and then use the shared cache to store objects. Because each host’s RAM is storing information, the access speed <a href="http://www.blogs.zeenor.com/category/interview-questions/page/9">will be much faster than</a> having to load the information from disk. This can provide <strong>a significant performance boost in retrieving data</strong> versus loading the data natively from a database.</p>
+
+<p>Also, because the cache is just a repository for information, you can use the cache to store <strong>any data, including complex structures</strong> that would normally require a significant amount of effort to create, but in <strong>a ready-to-use format</strong>, helping to reduce the load on your MySQL servers.</p>
+
+<h3>FAQ</h3>
+
+<p><strong>What is Memcached?</strong></p>
+
+<p><a href="http://www.web-technology-experts-notes.in/2014/09/memcached-interview-questions-and-answers.html">It is component</a> which stored the data temporary for 1 Hour/ 6 Hour/1 Day etc. When we integrate the Memcached with our application, performance of application increased.</p>
+
+<p>Memcached is open source, high-performance distributed memory object used for caching so that execution can be enhanced at nth level.</p>
+
+<p><strong>Where Memcached can be used?</strong></p>
+
+<p>•  Social Networking &ndash;> Profile Caching
+•  Content Aggregation &ndash;> HTML/ Page Caching
+•  Ad targeting &ndash;> Cookie/profile tracking
+•  Relationship &ndash;> Session caching
+•  E-commerce &ndash;> Session and HTML caching
+•  Location-based services &ndash;> Data-base query scaling
+•  Gaming and entertainment &ndash;> Session caching</p>
+
+<p><strong>Why use Memcached?</strong></p>
+
+<p>•  Speed up application processes
+•  It determines what to store and what not to
+•  Reduce the number of retrieval requests to the database
+•  Cuts down the I/O ( Input/Output) access (hard disk)</p>
+
+<p><strong>In what condition does retrieving cache fail?</strong></p>
+
+<p>•  Memory allocated for the cache is exhausted
+•  Item from cache is deleted
+•  Individual item in the cache is expired</p>
+
+<p><strong>What is the drawback of Memcached?</strong></p>
+
+<p>•  It is not a persistent data store
+•  Not a database
+•  It is not an application specific
+•  It cannot cache large object</p>
+
+<p><strong>Give more details about memcached failures</strong></p>
+
+<p><a href="http://programmers.stackexchange.com/a/187101">Memcached servers</a> are indeed independent of each other. Memcached server is just an efficient key-value store implemented as in-memory hash table.</p>
+
+<p><strong>What makes memcached distributed is the client</strong>, which in most implementations can connect to a pool of servers. Typical implementations use consistent hashing, which means that when you add or remove server to/from a pool of N servers, you only have to remap 1/N keys.</p>
+
+<p>Typically keys are <strong>not duplicated</strong> on various hosts, as memcached is <strong>not meant to be persistent store</strong> and gives no guarantees that your value will persist (for example when running out of assigned memory, memcached server drops least recently used (LRU) elements). Thus it&rsquo;s assumed that your application should handle missing keys.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/24/design-google-suggest-autocomplete/">[Design] Design Google Suggest (Autocomplete)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/24/design-google-suggest-autocomplete/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/24/design-google-suggest-autocomplete/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Overview</h3>
+
+<p><strong>Google Suggest</strong> was <a href="http://googleblog.blogspot.sg/2004/12/ive-got-suggestion.html">launched in 2004</a> as a 20% time project from Google engineer Kevin Gibbs. He developed the idea on a <a href="http://www.theatlantic.com/technology/archive/2013/08/how-googles-autocomplete-was-created-invented-born/278991/">Google shuttle bus</a>.</p>
+
+<h3>Design</h3>
+
+<ol>
+<li>Use trie.</li>
+<li>Use cache (distributed cache)</li>
+</ol>
+
+
+<h4>Trie</h4>
+
+<p>Just make use of all keywords (including space) and build a trie out of it. Then you are good to go just search in Trie.</p>
+
+<p>A comparison of speed between DB, Set and Trie can be found <a href="http://sujitpal.blogspot.sg/2007/02/three-autocomplete-implementations.html">here</a>. A lot of implementation code can be found <a href="http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete">here</a>.</p>
+
+<h4>Memcached</h4>
+
+<p>Distributed caching + LRU replacement algorithm. Refer to <strong>[Design] Distributed Caching &ndash; memcached</strong> for more.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-20T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/20/top-n-from-sum-2-array/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/20/top-n-from-sum-2-array/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=3213705">link</a></p>
+
+<blockquote><p>给定两个数组A，B，长度均为n，求A[0]+B[0],…,A[0]+B[n-1],…,A[n-1]+B[0],…,A[n-1]+B[n]总共n<sup>2</sup>个数的最大的n个值。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Use a Heap and then iteratively pop 1 and push 2 elements. Until n values has been filled.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int[] topN(int[] arr1, int[] arr2, int n) {
+    int[] ans = new int[n];
+    int index = n - 1;
+
+    PriorityQueue&lt;Pair&gt; heap = new PriorityQueue&lt;Pair&gt;(n,
+            new SpecialComparator(arr1, arr2));
+    Arrays.sort(arr1);
+    Arrays.sort(arr2);
+
+    Pair maxPair = new Pair(n - 1, n - 1);
+    heap.add(maxPair);
+
+    for (int i = 0; i &lt; n; i++) {
+        Pair next = heap.poll();
+        ans[index--] = arr1[next.x] + arr2[next.y];
+        if (next.y - 1 &gt;= 0) {
+            heap.add(new Pair(next.x, next.y - 1));
+        }
+        if (next.x - 1 &gt;= 0) {
+            heap.add(new Pair(next.x - 1, next.y));
+        }
+    }
+    return ans;
+}
+
+class SpecialComparator implements Comparator&lt;Pair&gt; {
+
+    int[] arr1, arr2;
+
+    public SpecialComparator(int[] a1, int[] a2) {
+        arr1 = a1;
+        arr2 = a2;
+    }
+
+    @Override
+    public int compare(Pair p1, Pair p2) {
+        // note that larger value shall go up top of the heap, so -1 * ...
+        return -1 * (arr1[p1.x] + arr2[p1.y] - arr1[p2.x] - arr2[p2.y]);
+    }
+}
+</code></pre>
 </div>
   
   
@@ -1091,18 +936,18 @@ i C[0,0,2,0]   N[4, 3, 2, 1]
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -1113,23 +958,23 @@ i C[0,0,2,0]   N[4, 3, 2, 1]
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

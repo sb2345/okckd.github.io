@@ -9,7 +9,9 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Client/Server link Client have direct and full access to the physical database based on their login string. This is the major weakness of the Client/ &hellip;">
+  <meta name="description" content="Question Design a Parking Lot. Solution Class hierarchy: A parking lot has multiple Levels.
+A Level has multiple Parking Spot.
+A Spot can park &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,7 +86,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/12/From-ClientServer-to-Multi-Tier/">[Design] From Client/Server to Multi-Tier</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/25/design-parking-lot/">[CC150v5] 8.4 Design a Parking Lot</a></h1>
     
     
       <p class="meta">
@@ -100,37 +102,180 @@
   
 
 
-<time datetime="2014-08-12T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/12/From-ClientServer-to-Multi-Tier/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/12/From-ClientServer-to-Multi-Tier/">Comments</a>
+           | <a href="/blog/2014/08/25/design-parking-lot/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/25/design-parking-lot/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Client/Server</h3>
+  <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://wiki.remobjects.com/wiki/From_Client/Server_to_Multi-Tier">link</a></p>
+<blockquote><p>Design a Parking Lot.</p></blockquote>
 
-<p>Client have <strong>direct and full access to the physical database</strong> based on their login string. This is the major weakness of the Client/Server paradigm. The system is vulnerable to attacks.</p>
+<h3>Solution</h3>
 
-<p>Because all business logic was <strong>implemented on the client application</strong>, changes to business logic means redeploying new client software to all users again.</p>
+<p>Class hierarchy:</p>
 
-<p>Another drawback is that the network interface provided by most back-end database systems has been designed for access over the local network, using fast connections and no firewalls. Nowadays, many clients’ software needs to run from employee&rsquo;s home offices or from airport lounges. In many cases such connections <strong>will be unreliable or inefficient</strong> to work on.</p>
+<ol>
+<li>A parking lot has multiple Levels.</li>
+<li>A Level has multiple Parking Spot.</li>
+<li>A Spot can park motorcycle, car or bus, which all belongs to Vehicle.</li>
+</ol>
 
-<h3>Multi-Tier</h3>
 
-<p>The communication between clients and middle-tier server is <strong>no longer tied to a protocol dictated by the database</strong> (no database drivers or connection string on the client). Client applications can authenticate with <strong>a username and password (compare to login string)</strong>.</p>
+<p>Implement methods:</p>
 
-<p>Communication can be done via HTTP or HTTPS, alternatively or additionally, open standards such as <strong>SOAP, OData and JSON can be used to expose a middle tier</strong> to different clients using protocols that are widely understood.</p>
+<ol>
+<li>Vehicle.parkInSpot(Spot s)</li>
+<li>Vehicle.leaveSpot(Spot s)</li>
+<li>Vehicle.canFitIn(Spot s)</li>
+<li>ParkingLot.parkVehicle(Vehicle v)</li>
+<li>Level.parkVehicle(Vehicle v)</li>
+<li>Level.parkVehicleAtSpot(Vehicle v, Spot s)</li>
+<li>Level.findAvailableSpot(VehicleType vt)</li>
+</ol>
 
-<p>Biggest advantage is that <strong>all the business logic is transferred from client application into the middle tier</strong>. And the middle tier holds the final control over what data goes in or out.</p>
 
-<p>Still, there&rsquo;re still some business logic on the client tier as well. But it only <strong>complement the rules</strong> that are enforced on the server. Eg. Twitter enforce the 140 character limit locally, and stop you from sending a tweet that is too long (by graying out the Send button).</p>
+<p><strong>ParkingLot Class is just a wrapper class of Levels</strong>. By doing this, we seperated out parking logic from other broader actions (like Spot management).</p>
 
-<p>That means, client side checks are for convenience, and for convenience only; the middle tier server is and must be authoritative for what is allowed and what is not.</p>
+<p>The code below is from CC150v5. <strong>Its design is a bit strange</strong> (a car can occupy multiple spots), so just use this code as a guide but not a reference.</p>
+
+<h3>Code</h3>
+
+<p>ParkingLot.java</p>
+
+<pre><code>public class ParkingLot {
+    private Level[] levels;
+    private final int NUM_LEVELS = 5;
+
+    public ParkingLot() {
+        levels = new Level[NUM_LEVELS];
+        for (int i = 0; i &lt; NUM_LEVELS; i++) {
+            levels[i] = new Level(i, 30);
+        }
+    }
+
+    /* Park the vehicle in a spot (or multiple spots). Return false if failed. */
+    public boolean parkVehicle(Vehicle vehicle) {
+        for (int i = 0; i &lt; levels.length; i++) {
+            if (levels[i].parkVehicle(vehicle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void print() {
+        for (int i = 0; i &lt; levels.length; i++) {
+            System.out.print("Level" + i + ": ");
+            levels[i].print();
+            System.out.println("");
+        }
+        System.out.println("");
+    }
+}
+</code></pre>
+
+<p>Level.java</p>
+
+<pre><code>/* Represents a level in a parking garage */
+public class Level {
+    private int floor;
+    private ParkingSpot[] spots;
+    private int availableSpots = 0; // number of free spots
+    private static final int SPOTS_PER_ROW = 10;
+
+    public Level(int flr, int numberSpots) {
+        floor = flr;
+        spots = new ParkingSpot[numberSpots];
+        int largeSpots = numberSpots / 4;
+        int bikeSpots = numberSpots / 4;
+        int compactSpots = numberSpots - largeSpots - bikeSpots;
+        for (int i = 0; i &lt; numberSpots; i++) {
+            VehicleSize sz = VehicleSize.Motorcycle;
+            if (i &lt; largeSpots) {
+                sz = VehicleSize.Large;
+            } else if (i &lt; largeSpots + compactSpots) {
+                sz = VehicleSize.Compact;
+            }
+            int row = i / SPOTS_PER_ROW;
+            spots[i] = new ParkingSpot(this, row, i, sz);
+        }
+        availableSpots = numberSpots;
+    }
+
+    public int availableSpots() {
+        return availableSpots;
+    }
+
+    /* Try to find a place to park this vehicle. Return false if failed. */
+    public boolean parkVehicle(Vehicle vehicle) {
+        if (availableSpots() &lt; vehicle.getSpotsNeeded()) {
+            return false;
+        }
+        int spotNumber = findAvailableSpots(vehicle);
+        if (spotNumber &lt; 0) {
+            return false;
+        }
+        return parkStartingAtSpot(spotNumber, vehicle);
+    }
+
+    /* Park a vehicle starting at the spot spotNumber, and continuing until vehicle.spotsNeeded. */
+    private boolean parkStartingAtSpot(int spotNumber, Vehicle vehicle) {
+        vehicle.clearSpots();
+        boolean success = true;
+        for (int i = spotNumber; i &lt; spotNumber + vehicle.spotsNeeded; i++) {
+             success &amp;= spots[i].park(vehicle);
+        }
+        availableSpots -= vehicle.spotsNeeded;
+        return success;
+    }
+
+    /* find a spot to park this vehicle. Return index of spot, or -1 on failure. */
+    private int findAvailableSpots(Vehicle vehicle) {
+        int spotsNeeded = vehicle.getSpotsNeeded();
+        int lastRow = -1;
+        int spotsFound = 0;
+        for (int i = 0; i &lt; spots.length; i++) {
+            ParkingSpot spot = spots[i];
+            if (lastRow != spot.getRow()) {
+                spotsFound = 0;
+                lastRow = spot.getRow();
+            }
+            if (spot.canFitVehicle(vehicle)) {
+                spotsFound++;
+            } else {
+                spotsFound = 0;
+            }
+            if (spotsFound == spotsNeeded) {
+                return i - (spotsNeeded - 1);
+            }
+        }
+        return -1;
+    }
+
+    public void print() {
+        int lastRow = -1;
+        for (int i = 0; i &lt; spots.length; i++) {
+            ParkingSpot spot = spots[i];
+            if (spot.getRow() != lastRow) {
+                System.out.print("  ");
+                lastRow = spot.getRow();
+            }
+            spot.print();
+        }
+    }
+
+    /* When a car was removed from the spot, increment availableSpots */
+    public void spotFreed() {
+        availableSpots++;
+    }
+}
+</code></pre>
 </div>
   
   
@@ -143,7 +288,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/11/max-circular-subarray/">[ItInt5] Maximum Circular Subarray Sum</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/25/design-in-memory-file-system/">[CC150v5] 8.9 Design a In-memory File System</a></h1>
     
     
       <p class="meta">
@@ -159,10 +304,10 @@
   
 
 
-<time datetime="2014-08-11T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/11/max-circular-subarray/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/11/max-circular-subarray/">Comments</a>
+           | <a href="/blog/2014/08/25/design-in-memory-file-system/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/25/design-in-memory-file-system/">Comments</a>
         
       </p>
     
@@ -171,44 +316,314 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.itint5.com/oj/#9">link</a></p>
-
-<blockquote><p>Given n numbers (both +ve and -ve), arranged in a circle, fnd the maximum sum of consecutive number</p></blockquote>
+<blockquote><p>Explain the data structures and algorithms that you would use to design an in-memory file system. Illustrate with an example in code where possible.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>First pass: find max subarray sum.</p>
+<p><strong>A file system consists of Files and Directories</strong>. Each Directory contains a set of Files and Directories.</p>
 
-<p>Second pass: find min subarray sum, and subtract it from total sum.</p>
+<p>Since Files and Directories share so many characteristics, we&rsquo;ve implemented them such that they <strong>inherit from the same class</strong> &mdash; Entry.</p>
 
-<p>Suggested on <a href="http://www.geeksforgeeks.org/maximum-contiguous-circular-sum/">G4G</a></p>
+<h3>Code</h3>
+
+<p>Entry.java</p>
+
+<pre><code>public abstract class Entry {
+    protected Directory parent;
+    protected long created;
+    protected long lastUpdated;
+    protected long lastAccessed;
+    protected String name;
+
+    public Entry(String n, Directory p) {
+        name = n;
+        parent = p;
+        created = System.currentTimeMillis();
+    }
+
+    public boolean delete() {
+        if (parent == null) {
+            return false;
+        }
+        return parent.deleteEntry(this);
+    }
+
+    public abstract int size();
+
+    public String getFullPath() {
+        if (parent == null) {
+            return name;
+        } else {
+            return parent.getFullPath() + "/" + name;
+        }
+    }
+
+    public long getCreationTime() {
+        return created;
+    }
+
+    public long getLastUpdatedTime() {
+        return lastUpdated;
+    }
+
+    public long getLastAccessedTime() {
+        return lastAccessed;
+    }
+
+    public void changeName(String n) {
+        name = n;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+</code></pre>
+
+<p>Directory.java</p>
+
+<pre><code>public class Directory extends Entry {
+    protected ArrayList&lt;Entry&gt; contents;
+
+    public Directory(String n, Directory p) {
+        super(n, p);
+        contents = new ArrayList&lt;Entry&gt;();
+    }
+
+    protected ArrayList&lt;Entry&gt; getContents() {
+        return contents;
+    }
+
+    public int size() {
+        int size = 0;
+        for (Entry e : contents) {
+            size += e.size();
+        }
+        return size;
+    }
+
+    public int numberOfFiles() {
+        int count = 0;
+        for (Entry e : contents) {
+            if (e instanceof Directory) {
+                count++; // Directory counts as a file
+                Directory d = (Directory) e;
+                count += d.numberOfFiles();
+            } else if (e instanceof File) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public boolean deleteEntry(Entry entry) {
+        return contents.remove(entry);
+    }
+
+    public void addEntry(Entry entry) {
+        contents.add(entry);
+    }
+}
+</code></pre>
+
+<p>File.java</p>
+
+<pre><code>public class File extends Entry {
+    private String content;
+    private int size;
+
+    public File(String n, Directory p, int sz) {
+        super(n, p);
+        size = sz;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public String getContents() {
+        return content;
+    }
+
+    public void setContents(String c) {
+        content = c;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/25/Implement-HashMap/">[CC150v5] 8.10 Implement a Hashmap</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/25/Implement-HashMap/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/25/Implement-HashMap/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Design and implement a hash table which uses chaining (linked lists) to handle collisions.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>I wrote this topic before (using Java source code as a reference). This time, I would like to take another (easier) approach.</p>
+
+<p>The main part of this is to use an array of list structure like this:</p>
+
+<pre><code>LinkedList&lt;Cell&lt;K, V&gt;&gt;[] items;
+</code></pre>
+
+<p>And the Cell Class looks like this:</p>
+
+<pre><code>public class Cell&lt;K, V&gt; {
+    private K key;
+    private V value;
+
+    public Cell(K k, V v) {
+        key = k;
+        value = v;
+    }
+
+    public boolean equivalent(Cell&lt;K, V&gt; c) {
+        return equivalent(c.getKey());
+    }
+
+    public boolean equivalent(K k) {
+        return key.equals(k);
+    }
+
+    public K getKey() {
+        return key;
+    }
+
+    public V getValue() {
+        return value;
+    }
+}
+</code></pre>
 
 <h3>Code</h3>
 
 <p><strong>written by me</strong></p>
 
-<pre><code>public int maxConsSum2(int[] arr) {
-    if (arr == null || arr.length == 0) {
-        return 0;
+<pre><code>public class HashMapCC150&lt;K, V&gt; {
+
+    int size;
+    LinkedList&lt;Cell&lt;K, V&gt;&gt;[] items;
+
+    public HashMapCC150(int num) {
+        this.size = num;
+        items = (LinkedList&lt;Cell&lt;K, V&gt;&gt;[]) new LinkedList[10];
     }
-    int soFar = 0;
-    int max = 0;
-    int totalSum = 0;
-    for (Integer i: arr) {
-        totalSum += i;
-        // totalSum is used in next step
-        soFar += i;
-        soFar = Math.max(soFar, 0);
-        max = Math.max(max, soFar);
+
+    public V get(K k) {
+        int hashValue = this.calculateHashCode(k);
+        if (items[hashValue] == null) {
+            items[hashValue] = new LinkedList&lt;Cell&lt;K, V&gt;&gt;();
+            return null;
+        }
+        for (Cell&lt;K, V&gt; cell : items[hashValue]) {
+            if (k.equals(cell.getKey())) {
+                return cell.getValue();
+            }
+        }
+        return null;
     }
-    int min = 0;
-    // calculate the min subarray
-    for (Integer i: arr) {
-        soFar += i;
-        soFar = Math.min(soFar, 0);
-        min = Math.min(min, soFar);
+
+    public V put(K k, V v) {
+        int hashValue = this.calculateHashCode(k);
+        if (items[hashValue] == null) {
+            items[hashValue] = new LinkedList&lt;Cell&lt;K, V&gt;&gt;();
+        }
+        for (Cell&lt;K, V&gt; cell : items[hashValue]) {
+            if (k.equals(cell.getKey())) {
+                items[hashValue].remove(cell);
+                break;
+            }
+        }
+        Cell&lt;K, V&gt; newItem = new Cell&lt;K, V&gt;(k, v);
+        items[hashValue].add(newItem);
+        return null;
     }
-    return Math.max(max, totalSum - min);
+
+    public V remove(K k) {
+        // not written
+        return null;
+    }
+
+    private int calculateHashCode(K k) {
+        return k.toString().length() % size;
+    }
+
+    public static void main(String[] args) {
+        HashMapCC150&lt;String, String&gt; map = new HashMapCC150&lt;String, String&gt;(10);
+        map.put("kevin", "durant");
+        map.put("steven", "curry");
+        map.put("al", "jefferson");
+        System.out.println(map.get("kevin"));
+        System.out.println(map.get("steven"));
+        System.out.println(map.get("al"));
+        map.put("kevin", "martin");
+        map.put("steven", "nash");
+        map.put("kevin", "braynt");
+        System.out.println(map.get("kevin"));
+        System.out.println(map.get("steven"));
+        System.out.println(map.get("al"));
+    }
+}
+
+class Cell&lt;K, V&gt; {
+    private K key;
+    private V value;
+
+    public Cell(K k, V v) {
+        key = k;
+        value = v;
+    }
+
+    public boolean equivalent(Cell&lt;K, V&gt; c) {
+        return equivalent(c.getKey());
+    }
+
+    public boolean equivalent(K k) {
+        return key.equals(k);
+    }
+
+    public K getKey() {
+        return key;
+    }
+
+    public V getValue() {
+        return value;
+    }
 }
 </code></pre>
 </div>
@@ -223,7 +638,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/11/Tcp-3way-handshake/">[Design] TCP 3-Way Handshake</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/24/design-othello-game/">[CC150v5] 8.8 Design Othello Game</a></h1>
     
     
       <p class="meta">
@@ -239,91 +654,10 @@
   
 
 
-<time datetime="2014-08-11T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-24T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/11/Tcp-3way-handshake/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/11/Tcp-3way-handshake/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Handshaking</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Handshaking">Handshaking</a> is an automated process of negotiation</strong> that dynamically sets parameters of a communications channel established between two entities before normal communication over the channel begins.</p>
-
-<p>It is usually a process that takes place when a computer is about to communicate with a foreign device to establish rules for communication.</p>
-
-<h3>TCP three-way handshake</h3>
-
-<p><strong><a href="http://www.inetdaemon.com/tutorials/internet/tcp/3-way_handshake.shtml">TCP three-way handshake</a></strong> is the method used by TCP set up a TCP/IP connection over an Internet Protocol based network.</p>
-
-<p>It&rsquo;s commonly referred to as &ldquo;<strong>SYN-SYN-ACK</strong>&rdquo;.</p>
-
-<p><img class="middle" src="/assets/images/3way-Tcp-handshake.png"></p>
-
-<h3>Process</h3>
-
-<ol>
-<li>Host A sends a TCP <strong>SYN</strong>chronize packet to Host B</li>
-<li>Host B receives A&rsquo;s SYN</li>
-<li>Host B sends a <strong>SYN</strong>chronize-<strong>ACK</strong>nowledgement</li>
-<li>Host A receives B&rsquo;s SYN-ACK</li>
-<li>Host A sends <strong>ACK</strong>nowledge</li>
-<li>Host B receives ACK.</li>
-<li>TCP socket connection is ESTABLISHED.</li>
-</ol>
-
-
-<p>Alternatively, there&rsquo;s a good illustration on <a href="http://en.wikipedia.org/wiki/Handshaking">wiki</a>:</p>
-
-<blockquote><p>Establishing a normal TCP connection requires three separate steps:</p>
-
-<ol>
-<li><p>The first host (Alice) sends the second host (Bob) a &ldquo;synchronize&rdquo; (SYN) message with its own sequence number x, which Bob receives.</p></li>
-<li><p>Bob replies with a synchronize-acknowledgment (SYN-ACK) message with its own sequence number y and acknowledgement number x + 1, which Alice receives.</p></li>
-<li><p>Alice replies with an acknowledgment message with acknowledgement number y + 1, which Bob receives and to which he doesn&rsquo;t need to reply.</p></li>
-</ol>
-</blockquote>
-
-<h3>Two more thing</h3>
-
-<p>Note that <strong>FTP, Telnet, HTTP, HTTPS, SMTP, POP3, IMAP, SSH</strong> and any other protocol that rides over TCP <strong>also has a three way handshake</strong> performed as connection is opened.</p>
-
-<p>TCP &lsquo;rides&rsquo; on top of Internet Protocol (IP) in the protocol stack. IP handles <strong>IP addressing and routing</strong> and gets the packets from one place to another, but TCP manages the <strong>actual communication sockets</strong> between endpoints.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/11/Count-complete-binary-tree/">[Google] Count Complete Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/11/Count-complete-binary-tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/11/Count-complete-binary-tree/">Comments</a>
+           | <a href="/blog/2014/08/24/design-othello-game/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/24/design-othello-game/">Comments</a>
         
       </p>
     
@@ -332,46 +666,258 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.itint5.com/oj/#4">link</a></p>
+<blockquote><p>Othello is played as follows: Each Othello piece is white on one side and black on the other. When a piece is surrounded by its opponents on both the left and right sides, or both the top and bottom, it is said to be captured and its color is flipped.</p>
 
-<blockquote><p>给定一棵<a href="http://baike.baidu.com/view/427107.htm">完全二叉树</a>（complete binary tree）的根结点，统计该树的结点总数。</p>
+<p>The win is assigned to the person with the most pieces. Implement the object-oriented design for Othello.</p></blockquote>
 
-<p>提示：使用O(n)的递归算法统计二叉树的结点数是一种显而易见的方法，此题中请利用完全二叉树的性质，想出效率更高的算法。</p></blockquote>
+<h3>Class</h3>
 
-<h3>Solution</h3>
+<ol>
+<li>Game
 
-<p>Similar to binary search, O(lgn) complexity.</p>
+<ol>
+<li>Two Player objects</li>
+<li>a board object</li>
+<li>singleton class (unless otherwise specified, this needs to be discussed)</li>
+</ol>
+</li>
+<li>Board
 
-<p>The idea is, sum up 1 branch of nodes at a time. Do it recursively. The following code is refactored and written by me.</p>
+<ol>
+<li>Keep the score (black/white count). Of course we can put score in Game Class as well, it seems logically related to the board a bit more.</li>
+<li>Array of Piece objects</li>
+<li>getScore() method</li>
+</ol>
+</li>
+<li>Piece
+
+<ol>
+<li>stores color info</li>
+<li>flip() function</li>
+</ol>
+</li>
+<li>Player
+
+<ol>
+<li>stores color info</li>
+<li>playPiece() method</li>
+</ol>
+</li>
+<li>Color Enum</li>
+<li>Direction Enum</li>
+</ol>
+
+
+<h3>Functions</h3>
+
+<ol>
+<li>placePiece() by the Player (which triggers the following 2 methods)</li>
+<li>private flipSection(Position fromWhere, Color c, Direction up/down/left/right) by the board</li>
+<li>private updateScore() by the board</li>
+<li>getScore() by the board</li>
+</ol>
+
+
+<h4>Follow up: Do we need separate Board and Game classes?</h4>
+
+<p>Strictly speaking, no. The drawback is adding an extra layers. A function that calls Game class is immediately calling Board class.</p>
+
+<p>But keeping the objects separate allows us to have a logical separation between the board (which contains just logic involving placing pieces) and the game (which involves times, game flow, etc.).</p>
+
+<h3>Conclusion</h3>
+
+<p>This is an easy, and very standard OOD question. Keep the logic clear, design the layers and object hierarchy, and the rest of things will come naturally.</p>
 
 <h3>Code</h3>
 
-<p><strong>read it from <a href="http://www.itint5.com/discuss/125/%E5%A4%A7%E7%89%9B%E8%AF%B7%E6%8C%87%E7%82%B9%EF%BC%8C%E6%95%B0%E6%8D%AE37%E8%BF%90%E8%A1%8C%E8%B6%85%E6%97%B6%EF%BC%88%E9%99%84%E4%BB%A3%E7%A0%81%EF%BC%89">here</a></strong></p>
+<p>Game.java</p>
 
-<pre><code>//使用TreeNodeUtil.getLeftChildNode(TreeNode)获得左儿子结点
-//使用TreeNodeUtil.getRightChildNode(TreeNode)获得右儿子结点
-//使用TreeNodeUtil.isNullNode(TreeNode)判断结点是否为空
-public class CountCompleteBinayTreeNodes {
-    public int countNodes(TreeNode root) {
-        if (TreeNodeUtil.isNullNode(root)) {
+<pre><code>public class Game {
+    private Player[] players;
+    private static Game instance;
+    private Board board;
+    private final int ROWS = 10;
+    private final int COLUMNS = 10;
+
+    private Game() {
+        board = new Board(ROWS, COLUMNS);
+        players = new Player[2];
+        players[0] = new Player(Color.Black);
+        players[1] = new Player(Color.White);
+        Automator.getInstance().initialize(players); // used for testing
+    }
+
+    public static Game getInstance() {
+        if (instance == null) {
+            instance = new Game();
+        }
+        return instance;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+}
+</code></pre>
+
+<p>Board.java</p>
+
+<pre><code>public class Board {
+    private int blackCount = 0;
+    private int whiteCount = 0;
+    private Piece[][] board;
+
+    public Board(int rows, int columns) {
+        board = new Piece[rows][columns];
+    }
+
+    public void initialize() {
+        /* initial board has a grid like the following in the center:
+         *     WB
+         *     BW
+         */
+        int middleRow = board.length / 2;
+        int middleColumn = board[middleRow].length / 2;
+        board[middleRow][middleColumn] = new Piece(Color.White);
+        board[middleRow + 1][middleColumn] = new Piece(Color.Black);
+        board[middleRow + 1][middleColumn + 1] = new Piece(Color.White);
+        board[middleRow][middleColumn + 1] = new Piece(Color.Black);
+        blackCount = 2;
+        whiteCount = 2;
+    }
+
+    public boolean placeColor(int row, int column, Color color) {
+        if (board[row][column] != null) {
+            return false;
+        }
+
+        /* attempt to flip each of the four directions */
+        int[] results = new int[4];
+        results[0] = flipSection(row - 1, column, color, Direction.up);
+        results[1] = flipSection(row + 1, column, color, Direction.down);
+        results[2] = flipSection(row, column + 1, color, Direction.right);
+        results[3] = flipSection(row, column - 1, color, Direction.left);
+
+        /* compute how many pieces were flipped */
+        int flipped = 0;
+        for (int result : results) {
+            if (result &gt; 0) {
+                flipped += result;
+            }
+        }
+
+        /* if nothing was flipped, then it's an invalid move */
+        if (flipped &lt; 0) {
+            return false;
+        }
+
+        /* flip the piece, and update the score */
+        board[row][column] = new Piece(color);
+        updateScore(color, flipped + 1);
+        return true;
+    }
+
+    private int flipSection(int row, int column, Color color, Direction d) {
+        /* Compute the delta for the row and the column. At all times, only the row or the column
+         * will have a delta, since we're only moving in one direction at a time.
+         */
+        int r = 0;
+        int c = 0;
+        switch (d) {
+        case up:
+            r = -1;
+            break;
+        case down:
+            r = 1;
+            break;
+        case left:
+            c = -1;
+            break;
+        case right:
+            c = 1;
+            break;
+        }
+
+        /* If out of bounds, or nothing to flip, return an error (-1) */
+        if (row &lt; 0 || row &gt;= board.length || column &lt; 0 || column &gt;= board[row].length || board[row][column] == null) {
+            return -1;
+        }
+
+        /* Found same color - return nothing flipped */
+        if (board[row][column].getColor() == color) {
             return 0;
         }
-        int hl = height(TreeNodeUtil.getLeftChildNode(root));
-        int hr = height(TreeNodeUtil.getRightChildNode(root));
-        if (hl == hr) {
-            return (int) Math.pow(2, hl) + countNodes(TreeNodeUtil.getRightChildNode(root));
+
+        /* Recursively flip the remainder of the row. If -1 is returned, then we know we hit the boundary
+         * of the row (or a null piece) before we found our own color, so there's nothing to flip. Return
+         * the error code.
+         */
+        int flipped = flipSection(row + r, column + c, color, d);
+        if (flipped &lt; 0) {
+            return -1;
+        }
+
+        /* flip our own color */
+        board[row][column].flip();
+        return flipped + 1;
+    }
+
+    public int getScoreForColor(Color c) {
+        if (c == Color.Black) {
+            return blackCount;
         } else {
-            return (int) Math.pow(2, hr) + countNodes(TreeNodeUtil.getLeftChildNode(root));
+            return whiteCount;
         }
     }
 
-    private int height(TreeNode root) {
-        int count = 0;
-        while (!TreeNodeUtil.isNullNode(root)) {
-            root = TreeNodeUtil.getLeftChildNode(root);
-            count++;
+    private void updateScore(Color newColor, int newPieces) {
+        /* If we added x pieces of a color, then we actually removed x - 1 pieces of the other
+         * color. The -1 is because one of the new pieces was the just-placed one.
+         */
+        if (newColor == Color.Black) {
+            whiteCount -= newPieces - 1;
+            blackCount += newPieces;
+        } else {
+            blackCount -= newPieces - 1;            
+            whiteCount += newPieces;
         }
-        return count;
+    }
+
+    public void printBoard() {
+        for (int r = 0; r &lt; board.length; r++) {
+            for (int c = 0; c &lt; board[r].length; c++) {
+                if (board[r][c] == null) {
+                    System.out.print("_");
+                } else if (board[r][c].getColor() == Color.White) {
+                    System.out.print("W");
+                } else {
+                    System.out.print("B");
+                }
+            }
+            System.out.println();
+        }
+    }
+}
+</code></pre>
+
+<p>Player.java</p>
+
+<pre><code>public class Player {
+    private Color color;
+    public Player(Color c) {
+        color = c;
+    }
+
+    public int getScore() {
+        return Game.getInstance().getBoard().getScoreForColor(color);
+    }
+
+    public boolean playPiece(int row, int column) {
+        return Game.getInstance().getBoard().placeColor(row, column, color);
+    }
+
+    public Color getColor() {
+        return color;
     }
 }
 </code></pre>
@@ -387,7 +933,7 @@ public class CountCompleteBinayTreeNodes {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-top-k-questions-summarize/">[Design] Big Data - Top K Questions (Summarize)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/24/design-online-chat-server-2/">[CC150v5] 8.7 Design Online Chat Server (2)</a></h1>
     
     
       <p class="meta">
@@ -403,78 +949,55 @@ public class CountCompleteBinayTreeNodes {
   
 
 
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-24T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/10/big-data-top-k-questions-summarize/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/10/big-data-top-k-questions-summarize/">Comments</a>
+           | <a href="/blog/2014/08/24/design-online-chat-server-2/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-2/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><p>&hellip; Continued from previous post.</p>
 
-<p><a href="http://dongxicheng.org/big-data/select-ten-from-billions/">link</a></p>
+<h3>Overall view</h3>
 
-<blockquote><p>在海量数据中找出出现频率最高的前K个数，或者从海量数据中找出最大的前K个数，这类问题通常称为“top K”问题，</p>
+<p>The system consists of a database, a set of clients, and a set of servers. This is not about OOD, but we need to know.</p>
 
 <ol>
-<li>top K value</li>
-<li>top K frequency</li>
+<li><p>DB stores user list, chat archive. An SQL DB would be good, <strong>unless we want BigTable for scalability purpose</strong>.</p></li>
+<li><p><strong>We use XML for server-client communication</strong>. Because it&rsquo;s debugging friendly.</p></li>
+<li><p><strong>A set of servers</strong>.</p>
+
+<ol>
+<li>Data will be <strong>divided up across machines</strong>, requiring us to potentially hop from machine to machine.</li>
+<li>When possible, we will try to <strong>replicate some data</strong> across machines to minimize the lookups.</li>
+<li>One major design constraint here is to <strong>prevent having a single point of failure</strong>. For instance, if one machine controlled all the user sign-ins, then we&rsquo;d cut off millions of users potentially if a single machine lost network connectivity.</li>
 </ol>
-</blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>Standard solution</strong> is 【分治+trie树/hash+小顶堆】, which I covered in another post <a href="/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>. Briefly it is 3 steps:</p>
-
-<ol>
-<li>先将数据集按照hash方法分解成多个小数据集，</li>
-<li>使用trie树或者hash统计每个小数据集中的query词频，</li>
-<li>用小顶堆求出每个数据集中出频率最高的前K个数</li>
+</li>
 </ol>
 
 
-<p>But, there&rsquo;re other senarios where different solutions may apply. Consider:</p>
+<h3>Hardest problems</h3>
 
-<ol>
-<li><p>Single core vs. multiple core</p></li>
-<li><p>Single PC vs. multiple PC</p></li>
-<li><p>Large RAM vs. limited RAM</p></li>
-<li><p>Distributed system</p></li>
-</ol>
+<p>Or the most interesting questions.</p>
 
+<h4>Q1: How do we know if someone is online?</h4>
 
-<h3>1. 单机+单核+足够大内存</h3>
+<p>While we would like users to tell us when they sign off, we can&rsquo;t know for sure. A user&rsquo;s connection might have died, for example. To make sure that we know when a user has signed off, we might try regularly pinging the client to make sure it&rsquo;s still there.</p>
 
-<p>设每个查询词平均占8Byte，则10亿个查询词所需的内存大约是10<sup>9</sup>*8=8G内存。如果你有这么大的内存，直接在内存中对查询词进行排序，顺序遍历找出10个出现频率最大的10个即可。这种方法简单快速，更加实用。当然，也可以先用HashMap求出每个词出现的频率，然后求出出现频率最大的10个词。</p>
+<h4>Q2: How do we deal with conflicting information?</h4>
 
-<h3>2. 单机+单核+受限内存</h3>
+<p>We have some information stored in the computer&rsquo;s memory and some in the database. What happens if they get out of sync? Which one is &ldquo;right&rdquo;?</p>
 
-<p>这种情况下，需要将原数据文件切割成一个一个小文件，如，采用hash(x)%M，将原文件中的数据切割成M小文件，如果小文件仍大于内存大小，继续采用hash的方法对数据文件进行切割，直到每个小文件小于内存大小，这样，每个文件可放到内存中处理。采用3.1节的方法依次处理每个小文件。</p>
+<h4>Q3: How do we make our server scale?</h4>
 
-<h3>3. 单机+多核+足够大内存</h3>
+<p>While we designed out chat server without worrying—too much- about scalability, in real life this would be a concern. We&rsquo;d need to split our data across many servers, which would increase our concern about out-of-sync data.</p>
 
-<p>这时可以直接在内存中实用hash方法将数据划分成n个partition，每个partition交给一个线程处理，线程的处理逻辑是同[1]节类似，最后一个线程将结果归并。</p>
+<h4>Q4: How we do prevent denial of service attacks?</h4>
 
-<p>该方法存在一个瓶颈会明显影响效率，即数据倾斜，每个线程的处理速度可能不同，快的线程需要等待慢的线程，最终的处理速度取决于慢的线程。解决方法是，<strong>将数据划分成 (c x n)个partition（c>1），每个线程处理完当前partition后主动取下一个partition继续处理</strong>，直到所有数据处理完毕，最后由一个线程进行归并。</p>
-
-<h3>4. 多机+受限内存</h3>
-
-<p>这种情况下，为了合理利用多台机器的资源，可将数据分发到多台机器上，每台机器采用[3]节中的策略解决本地的数据。可采用<strong>hash + socket</strong>方法进行数据分发。</p>
-
-<h3>5. Distributed</h3>
-
-<p>Top k问题很适合采用<strong>MapReduce框架</strong>解决，用户只需编写一个map函数和两个reduce 函数，然后提交到Hadoop（采用mapchain和reducechain）上即可解决该问题。</p>
-
-<p>A map function. 对于map函数，采用hash算法，将hash值相同的数据交给同一个reduce task.</p>
-
-<p>2 reduce functions. 对于<strong>第一个reduce函数</strong>，采用HashMap统计出每个词出现的频率，对于<strong>第二个reduce函数</strong>，统计所有reduce task输出数据中的top k即可。</p>
-
-<h3>6. Other</h3>
-
-<p>公司一般不会自己写个程序进行计算，而是提交到自己核心的数据处理平台上计算，该平台的计算效率可能不如直接写程序高，但它具有<strong>良好的扩展性和容错性</strong>，而这才是企业最看重的。</p>
+<p>Clients can push data to us —- what if they try to DOS (denial of service) us? How do we prevent that?</p>
 </div>
   
   
@@ -487,7 +1010,7 @@ public class CountCompleteBinayTreeNodes {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-top-k-frequency-2/">[Design] Big Data - Top K Frequency 2</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/24/design-online-chat-server-1/">[CC150v5] 8.7 Design Online Chat Server (1)</a></h1>
     
     
       <p class="meta">
@@ -503,65 +1026,10 @@ public class CountCompleteBinayTreeNodes {
   
 
 
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-24T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/10/big-data-top-k-frequency-2/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/10/big-data-top-k-frequency-2/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
-
-<blockquote><p>一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>The basic solution for &lsquo;Top K&rsquo; questions</strong> is 【分治+trie树/hash+小顶堆】.</p>
-
-<p>In the previous post <a href="/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>, we used HashMap for calculating query frequency. Now we <strong>use Trie to do it</strong>.</p>
-
-<blockquote><p>这题是考虑时间效率。用trie树统计每个词出现的次数，时间复杂度是O(n x le)（le表示单词的平准长度）。然后是找出出现最频繁的前10个词，可以用堆来实现，前面的题中已经讲到了，时间复杂度是O(n x lg10)。所以总的时间复杂度，是O(n x le)与O(n x lg10)中较大的哪一个。</p></blockquote>
-
-<h4>How to use Trie to calculate word frequency?</h4>
-
-<p>在Trie的node节点中<a href="http://blog.csdn.net/ohmygirl/article/details/7953814">添加count域后</a>，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-fuzzy-search-url/">[Design] Big Data - Fuzzy Search Url</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/10/big-data-fuzzy-search-url/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/10/big-data-fuzzy-search-url/">Comments</a>
+           | <a href="/blog/2014/08/24/design-online-chat-server-1/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/24/design-online-chat-server-1/">Comments</a>
         
       </p>
     
@@ -570,40 +1038,243 @@ public class CountCompleteBinayTreeNodes {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+<blockquote><p>Explain how you would design a chat server. In particular, provide details about the various back end components, classes, and methods.</p>
 
-<blockquote><p>给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？</p></blockquote>
-
-<h3>Bloom Filter</h3>
-
-<p>自从Burton Bloom在70年代提出<a href="http://blog.csdn.net/v_july_v/article/details/6685894">Bloom Filter</a>之后，Bloom Filter就被广泛用于<strong>拼写检查和数据库系统中</strong>。</p>
-
-<h4>基本原理及要点</h4>
-
-<p>An empty Bloom filter is <strong>a bit array of m bits</strong>, all set to 0. There must also be <strong>k different hash functions</strong> defined, each of which maps or hashes some set element to one of the m array positions with a uniform random distribution.</p>
-
-<p>很明显这个过程并不保证查找的结果是100%正确的。同时也不支持删除一个已经插入的关键字，因为该关键字对应的位会牵动到其他的关键字。</p>
-
-<p>所以一个简单的改进就是 counting Bloom filter，用一个counter数组代替位数组，就可以支持删除了。</p>
-
-<h3>Error rate</h3>
-
-<pre><code>m: length of BF array (in bits)
-n: number of input elements
-k: number of hash functions
-</code></pre>
-
-<p>A Bloom filter <a href="http://en.wikipedia.org/wiki/Bloom_filter#Space_and_time_advantages">with 1% error</a> and an optimal value of k, in contrast, requires only about 9.6 bits per element (means m = 9.6 x n).</p>
-
-<h4>Usage</h4>
-
-<p>Bloom Filter可以用来实现数据字典，进行数据的判重，或者集合求交集.</p>
+<p>What would be the hardest problems to solve?</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>Of course we can always use <strong>【分治+trie树/hash+小顶堆】</strong> standard solution, but for <strong>Fuzzy search, BF is the best</strong>.</p>
+<p>First, decide the objects and methods. Here we&rsquo;ll focus on the core user management and conversation aspects.</p>
 
-<p>4G = 2<sup>32</sup> 大概是40亿 x 8大概是340亿bit，n = 50亿，如果按出错率0.01算需要的大概是480亿个bit。现在可用的是340亿，相差并不多，这样可能会使出错率上升些。</p>
+<h4>Class</h4>
+
+<ol>
+<li>UserMgmt (business logic)</li>
+<li>User (includes basic info, UserStatus, a map of conversation, a map of requests)</li>
+<li>UserStatus (on/offline, status message)</li>
+<li>Conversation Abstract Class (a list of user and a list of messages)
+
+<ol>
+<li>PrivateChat (private conversation)</li>
+<li>GroupChat</li>
+</ol>
+</li>
+<li>Message (a string and a date/time)</li>
+<li>Request (add request and delete request, involves 2 Users)</li>
+</ol>
+
+
+<h4>Functions</h4>
+
+<ol>
+<li>Sign in and log off (update availability)</li>
+<li>update status message</li>
+<li>add/delete request</li>
+<li>send/accept/reject a request</li>
+<li>create a conversation (group or private)</li>
+<li>add a new message (group or private)</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>The most important classes is User and UserMgmt. The others are simply data containers.</p>
+
+<p>UserManager.java</p>
+
+<pre><code>public class UserManager {
+    private static UserManager instance;
+    private HashMap&lt;Integer, User&gt; usersById = new HashMap&lt;Integer, User&gt;();
+    private HashMap&lt;String, User&gt; usersByAccountName = new HashMap&lt;String, User&gt;();
+    private HashMap&lt;Integer, User&gt; onlineUsers = new HashMap&lt;Integer, User&gt;();
+
+    public static UserManager getInstance() {
+        if (instance == null) {
+            instance = new UserManager();
+        }
+        return instance;
+    }
+
+    public void addUser(User fromUser, String toAccountName) {
+        User toUser = usersByAccountName.get(toAccountName);
+        AddRequest req = new AddRequest(fromUser, toUser, new Date());
+        toUser.receivedAddRequest(req);
+        fromUser.sentAddRequest(req);
+    }
+
+    public void approveAddRequest(AddRequest req) {
+        req.status = RequestStatus.Accepted;
+        User from = req.getFromUser();
+        User to = req.getToUser();
+        from.addContact(to);
+        to.addContact(from);
+    }
+
+    public void rejectAddRequest(AddRequest req) {
+        req.status = RequestStatus.Rejected;
+        User from = req.getFromUser();
+        User to = req.getToUser();
+        from.removeAddRequest(req);
+        to.removeAddRequest(req);       
+    }
+
+    public void userSignedOn(String accountName) {
+        User user = usersByAccountName.get(accountName);
+        if (user != null) {
+            user.setStatus(new UserStatus(UserStatusType.Available, ""));           
+            onlineUsers.put(user.getId(), user);
+        }
+    }
+
+    public void userSignedOff(String accountName) {
+        User user = usersByAccountName.get(accountName);
+        if (user != null) {
+            user.setStatus(new UserStatus(UserStatusType.Offline, ""));
+            onlineUsers.remove(user.getId());
+        }
+    }   
+}
+</code></pre>
+
+<p>User.java</p>
+
+<p>Property:</p>
+
+<ol>
+<li>id and name</li>
+<li>a map of conversations</li>
+<li>a map of sent request</li>
+<li>a map of received request</li>
+<li>a map of friends list</li>
+</ol>
+
+
+<p>Methods:</p>
+
+<ol>
+<li>sendMessageToUser(User)</li>
+<li>addContact(User)</li>
+<li>receivedAddRequest(Request)</li>
+<li>sentAddRequest(Request)</li>
+<li>removeAddRequest(Request)</li>
+<li>addConversation(Conversation)</li>
+</ol>
+
+
+<p>Note that all user actions are controlled by the UserManager Class. For example, when adding a friend:</p>
+
+<ol>
+<li>User A clicks &ldquo;add user&rdquo; on the client.</li>
+<li>User A calls requestAddUser (User B).</li>
+<li>This method calls UserManager.addUser(User a, userBid).</li>
+<li>UserManager calls both User A.sentAddRequest() and User B.receivedAddRequest().</li>
+</ol>
+
+
+<p>Code:</p>
+
+<pre><code>public class User {
+    private int id;
+    private UserStatus status = null;
+    private HashMap&lt;Integer, PrivateChat&gt; privateChats = new HashMap&lt;Integer, PrivateChat&gt;();
+    private ArrayList&lt;GroupChat&gt; groupChats = new ArrayList&lt;GroupChat&gt;();
+    private HashMap&lt;Integer, AddRequest&gt; receivedAddRequests = new HashMap&lt;Integer, AddRequest&gt;();
+    private HashMap&lt;Integer, AddRequest&gt; sentAddRequests = new HashMap&lt;Integer, AddRequest&gt;();
+
+    private HashMap&lt;Integer, User&gt; contacts = new HashMap&lt;Integer, User&gt;();
+    private String accountName;
+    private String fullName;
+
+    public User(int id, String accountName, String fullName) {
+        this.accountName = accountName;
+        this.fullName = fullName;
+        this.id = id;
+    }
+
+    public boolean sendMessageToUser(User toUser, String content) {
+        PrivateChat chat = privateChats.get(toUser.getId());
+        if (chat == null) {
+            chat = new PrivateChat(this, toUser);
+            privateChats.put(toUser.getId(), chat);
+        }
+        Message message = new Message(content, new Date());
+        return chat.addMessage(message);
+    }
+
+    public boolean sendMessageToGroupChat(int groupId, String content) {
+        GroupChat chat = groupChats.get(groupId);
+        if (chat != null) {
+            Message message = new Message(content, new Date());
+            return chat.addMessage(message);
+        }
+        return false;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public boolean addContact(User user) {
+        if (contacts.containsKey(user.getId())) {
+            return false;
+        } else {
+            contacts.put(user.getId(), user);
+            return true;
+        }
+    }
+
+    public void receivedAddRequest(AddRequest req) {
+        int senderId = req.getFromUser().getId();
+        if (!receivedAddRequests.containsKey(senderId)) {
+            receivedAddRequests.put(senderId, req);
+        }       
+    }
+
+    public void sentAddRequest(AddRequest req) {
+        int receiverId = req.getFromUser().getId();
+        if (!sentAddRequests.containsKey(receiverId)) {
+            sentAddRequests.put(receiverId, req);
+        }       
+    }
+
+    public void removeAddRequest(AddRequest req) {
+        if (req.getToUser() == this) {
+            receivedAddRequests.remove(req);
+        } else if (req.getFromUser() == this) {
+            sentAddRequests.remove(req);
+        }
+    }
+
+    public void requestAddUser(String accountName) {
+        UserManager.getInstance().addUser(this, accountName);
+    }
+
+    public void addConversation(PrivateChat conversation) {
+        User otherUser = conversation.getOtherParticipant(this);
+        privateChats.put(otherUser.getId(), conversation);
+    }
+
+    public void addConversation(GroupChat conversation) {
+        groupChats.add(conversation);
+    }   
+
+    public int getId() {
+        return id;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+}
+</code></pre>
 </div>
   
   
@@ -616,7 +1287,7 @@ k: number of hash functions
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-median/">[Design] Big Data - Find Median Numbers</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/23/stack-and-heap/">[Design] Stack and Heap</a></h1>
     
     
       <p class="meta">
@@ -632,35 +1303,57 @@ k: number of hash functions
   
 
 
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-23T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/10/big-data-find-median/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/10/big-data-find-median/">Comments</a>
+           | <a href="/blog/2014/08/23/stack-and-heap/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/23/stack-and-heap/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><h3>Overview</h3>
 
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+<p>Value types are created on the stack, and reference types are created on the heap.</p>
 
-<blockquote><p>5亿个int找它们的中位数.</p></blockquote>
+<p><strong>Both are stored in computer RAM</strong>.</p>
 
-<h3>Analysis</h3>
+<p><strong>Each thread gets a stack</strong>, while there&rsquo;s typically only one heap for the application.</p>
 
-<p>Categorized under <strong>双层桶划分</strong>.</p>
+<h4>Stack</h4>
 
-<p>Idea: 首先我们将int划分为2<sup>16</sup>个区域，然后读取数据统计落到各个区域里的数的个数，之后我们根据统计结果就可以判断中位数落到那个区域，同时知道这个区域中的第几大数刚好是中位数。然后第二次扫描我们只统计落在这个区域中的那些数就可以了。</p>
+<p><a href="http://stackoverflow.com/a/80113">When a function</a> is called, a block is reserved <strong>on the top of the stack</strong> for local variables and some bookkeeping data in a LIFO order. Freeing a block from the stack is nothing more than adjusting one pointer.</p>
 
-<h3>Details</h3>
+<h4>Heap</h4>
 
-<p>开一个大小为65536的Int数组，第一遍读取，统计Int32的高16位的情况(就相当于用该数除以65536)。每读取一个数，数组中对应的计数+1。第一遍统计之后，遍历数组，逐个累加统计，看中位数处于哪个区间。</p>
+<p>Unlike the stack, there&rsquo;s no enforced pattern to the allocation and deallocation of blocks from the heap; you can allocate a block at any time and free it at any time. This makes it much more complex to keep track of which parts of the heap are allocated or free at any given time; there are many custom heap allocators available to tune heap performance for different usage patterns.</p>
 
-<p>第二遍统计同上面的方法类似，但这次只统计处于区间k的情况，这次计数之后，再统计一下，看中位数所处的区间，最后将高位和低位组合一下就是结果了。</p>
+<h3>Q &amp; A</h3>
 
-<p>And this can be done more than 2 times, depending on the input size (eg. if input is int64, then do 24/20/20 bits).</p>
+<h4>What is their scope?</h4>
+
+<p>The stack is attached to a thread, so <strong>when the thread exits</strong> the stack is reclaimed.</p>
+
+<p>The heap is typically allocated at application startup by the runtime, and is reclaimed <strong>when the application (technically process) exits</strong>.</p>
+
+<p>Thread and process &ndash; what&rsquo;s the difference? Read <strong>[Design] Process VS. Thread</strong>.</p>
+
+<h4>What determines the size of each of them?</h4>
+
+<p>The size of the stack is set when a thread is created.</p>
+
+<p>The size of the heap is set on application startup, but can grow as space is needed (the allocator requests more memory from the operating system).</p>
+
+<h4>What makes one faster?</h4>
+
+<p><strong>The stack is faster</strong> because the access pattern makes it trivial to allocate and deallocate memory from it, while the heap has much more complex bookkeeping involved in an allocation or free.</p>
+
+<p>Each byte in the stack tends to be reused very frequently which means it tends to be mapped to the processor&rsquo;s cache, making it very fast.</p>
+
+<p>Another performance hit for the heap is that the heap, being mostly a global resource, typically has to be multi-threading safe, i.e. each allocation and deallocation needs to be (typically) synchronized.</p>
+
+<p><img class="middle" src="/assets/images/stack-and-heap.png"></p>
 </div>
   
   
@@ -673,7 +1366,7 @@ k: number of hash functions
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-find-existence-of-number/">[Design] Big Data - Find Existence of a Number</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/23/Web-hosting-shared-and-vps/">[Design] Shared Hosting vs. VPS Hosting</a></h1>
     
     
       <p class="meta">
@@ -689,29 +1382,43 @@ k: number of hash functions
   
 
 
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-23T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/10/big-data-find-existence-of-number/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/10/big-data-find-existence-of-number/">Comments</a>
+           | <a href="/blog/2014/08/23/Web-hosting-shared-and-vps/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/23/Web-hosting-shared-and-vps/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><h3>Shared hosting</h3>
 
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+<p><a href="https://kb.greengeeks.com/3072/shared-hosting-vs-vps-hosting/">Shared hosting</a> is like living in an apartment where you share a common space with your neighbors. You cannot customize anything but you share maintenance cost and responsibility with your neighbors.</p>
 
-<blockquote><p>给40亿个不重复的unsigned int的整数，没排过序的，然后再给一个数，如何快速判断这个数是否在那40亿个数当中？</p></blockquote>
+<ol>
+<li>Economical</li>
+<li>Technical maintenance of the server is not required</li>
+<li>Limited number of resources</li>
+<li>Your website performance may be affected by other websites hosted on the shared server</li>
+<li>Possible long term problems with scalability and backup</li>
+<li>Possible security issues for sharing a common server</li>
+</ol>
 
-<h3>Analysis</h3>
 
-<p>Categorized under <strong>BitMap</strong>.</p>
+<h3>Virtual Private Server</h3>
 
-<p>There&rsquo;re 4.3 billion unsigned integers in Java. This is a perfect question to use BitMap.</p>
+<p>Virtual Private Server (VPS) Hosting is like living in a simplex or half-plex where you can customize everything to your own tastes. However, you still need to maintain your own area. Companies that deal with resource-heavy applications and secured data most often use VPS.</p>
 
-<p>申请512M的内存，一个bit位代表一个unsigned int值。读入40亿个数，设置相应的bit位，读入要查询的数，查看相应bit位是否为1，为1表示存在，为0表示不存在。</p>
+<ol>
+<li>Larger space and bandwidth</li>
+<li>Can configure anything</li>
+<li>Run your own batch files to create multiple services inside the server using shell access</li>
+<li>Easy scalability and backup</li>
+<li>You need a dedicated system administrator</li>
+<li>Costly</li>
+</ol>
+
 </div>
   
   
@@ -724,7 +1431,7 @@ k: number of hash functions
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/">[Design] Big Data - Remove Duplicate Numbers</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/23/BST-over-hashmap/">[Design] Merits of BST Over HashTables</a></h1>
     
     
       <p class="meta">
@@ -740,10 +1447,10 @@ k: number of hash functions
   
 
 
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-23T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/">Comments</a>
+           | <a href="/blog/2014/08/23/BST-over-hashmap/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/23/BST-over-hashmap/">Comments</a>
         
       </p>
     
@@ -752,17 +1459,133 @@ k: number of hash functions
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://blog.csdn.net/v_JULY_v/article/details/6279498">link</a></p>
+<p><a href="http://stackoverflow.com/questions/4128546/advantages-of-binary-search-trees-over-hash-tables">What are the advantages</a> of binary search trees over hash tables?</p>
 
-<blockquote><p>2.5亿个整数中找出不重复的整数的个数，内存空间不足以容纳这2.5亿个整数。</p></blockquote>
+<h3>Answer</h3>
 
-<h3>Analysis</h3>
+<ol>
+<li><p><strong>More memory-efficient</strong>. (They do not reserve more memory than they need to)</p>
 
-<p>Categorized under <strong>双层桶划分</strong> or <strong>BitMap</strong>.</p>
+<p> For instance, if a hash function has a range R(h) = 0&hellip;100, then you need to allocate an array of 100 (pointers-to) elements, even if you are just hashing 20 elements.</p></li>
+<li><p><a href="http://stackoverflow.com/a/4128585">Inorder traverse</a>.</p></li>
+<li><p>Collision might hamper HashMap&rsquo;s performance.</p></li>
+<li><p><a href="http://stackoverflow.com/a/4129272">Resizing issue</a></p>
 
-<p>整数个数为2<sup>32</sup>,也就是，我们可以将这2<sup>32</sup>个数，划分为2<sup>8</sup>个区域(比如用单个文件代表一个区域)，然后将数据分离到不同的区域，然后不同的区域在利用bitmap就可以直接解决了。</p>
+<p> When the hash table pressure grows too much, you often tend to enlargen and reallocate the hash table. The BST has simpler behavior here and does not tend to suddenly allocate a lot of data and do a rehashing operation.</p></li>
+<li><p>Binary search tree do range searches efficiently.</p></li>
+</ol>
 
-<p><strong>But how exactly to use BitMap</strong>? 将bit-map扩展一下，用2bit表示一个数即可，0表示未出现，1表示出现一次，2表示出现2次及以上。</p>
+
+<h3>One more thing</h3>
+
+<p><strong>Trees tend to be the <a href="http://stackoverflow.com/a/19896875">ultimate average data structure</a></strong>. They can act as lists, can easily be split for parallel operation, have fast removal, insertion and lookup on the order of O(lgn). They do nothing particularly well, but they don&rsquo;t have any excessively bad behavior either.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/22/design-deck-card/">[CC150v5] 8.1 Design a Generic Deck of Cards</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-22T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/22/design-deck-card/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/22/design-deck-card/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Design a Generic Deck of Cards</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>A simple design:</p>
+
+<pre><code>enum Suit {
+    HEART, DIAMOND, SPADES, CLUBS;
+}
+
+class Deck {
+    List&lt;Card&gt; deck;
+}
+
+class Card {
+    Suit suit;
+    int num;
+}
+</code></pre>
+
+<p>A more complex design:</p>
+
+<pre><code>enum Suit {
+    HEART, DIAMOND, SPADES, CLUBS;
+}
+
+class Deck&lt;T extends Card&gt; {
+    List&lt;Card&gt; deck;
+
+    public void shuffle() {
+    };
+}
+
+abstract class Card {
+    boolean available;
+    Suit suit;
+    int num;
+
+    public boolean isAvailable() {
+        return available;
+    };
+}
+
+class Hand&lt;T extends Card&gt; {
+    List&lt;Card&gt; cards;
+
+    public int score() {
+        int score = 0;
+        for (Card c : cards) {
+            score += c.num;
+        }
+        return score;
+    }
+
+    public void addCard(T card) {
+        cards.add(card);
+    }
+}
+
+// Now use the above generic Data Structure to make a
+// Blackjack Game
+class Blackjack extends Hand&lt;BlackJackCard&gt; {
+}
+
+class BlackJackCard extends Card {
+}
+</code></pre>
 </div>
   
   
@@ -787,18 +1610,18 @@ k: number of hash functions
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -809,23 +1632,23 @@ k: number of hash functions
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

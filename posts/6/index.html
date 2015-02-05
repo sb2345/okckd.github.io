@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given an array of positive numbers, find the maximum sum of a subsequence that no 2 numbers should be adjacent. Eg. (3, 2, 7, 10) &hellip;">
+  <meta name="description" content="Question link Find a polynomial-time algorithm that takes a string of length n, and a number k, output the number of distinct k-character &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/12/22/Maximum-sum-no-adjacent/">[Facebook] Maximum Sum Such That No Two Elements Are Adjacent</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">[Question] All Distinct Subsequences With Given Length</a></h1>
     
     
       <p class="meta">
@@ -100,10 +100,10 @@
   
 
 
-<time datetime="2014-12-22T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/12/22/Maximum-sum-no-adjacent/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/22/Maximum-sum-no-adjacent/">Comments</a>
+           | <a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">Comments</a>
         
       </p>
     
@@ -112,356 +112,70 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.geeksforgeeks.org/maximum-sum-such-that-no-two-elements-are-adjacent/">link</a></p>
+<p><a href="http://11011110.livejournal.com/254164.html">link</a></p>
 
-<blockquote><p>Given an array of positive numbers, find the maximum sum of a subsequence that no 2 numbers should be adjacent.</p>
+<blockquote><p>Find a polynomial-time algorithm that takes a string of length n, and a number k, output the number of distinct k-character subsequences.</p>
 
-<p>Eg. (3, 2, 7, 10) should return 13 (3+10)</p>
-
-<p>Eg. (3, 2, 5, 10, 7) should return 15 (3+5+7).</p></blockquote>
+<p>For instance, input &ldquo;food&rdquo; and number k=2, output should be 4. There are four distinct 2-character subsequences of &ldquo;food&rdquo;: &ldquo;fo&rdquo;, &ldquo;fd&rdquo;, &ldquo;oo&rdquo;, and &ldquo;od&rdquo;.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>It is an modified version of &ldquo;max sum subsequence&rdquo;. Answer given on <a href="http://www.geeksforgeeks.org/maximum-sum-such-that-no-two-elements-are-adjacent/">gfg</a> is:</p>
+<p>Similar to <strong>[Question] Number of distinct sub-sequence</strong>, we solve this problem with DP. The dp equation is a bit difficult to write.</p>
 
-<blockquote><p>Loop for all elements in arr[] and maintain two sums &lsquo;incl&rsquo; and &lsquo;excl&rsquo; where:</p>
+<p>The idea come from comment from <a href="http://11011110.livejournal.com/254164.html">gareth_rees</a>:</p>
 
-<p>incl = Max sum including the previous element</p>
+<blockquote><p>Let θ(S, k) be the number of distinct k-character subsequences in the string S of length n.</p>
 
-<p>excl = Max sum excluding the previous element</p></blockquote>
+<p>Clearly θ(S, k) = 1 if n = k or k = 0</p>
+
+<p>and θ(S, k) = 0 if n &lt; k.</p>
+
+<p>Otherwise, <strong>choose 1 unique char from S</strong>, and deduct k by 1, then do the DP calculation with the remaining part of S.</p></blockquote>
+
+<p>Look at this example:</p>
+
+<pre><code>θ("food", 2) = θ("ood", 1) + θ("od", 1) + θ("", 1)
+= (θ("od", 0) + θ("", 0)) + (θ("d", 0) + θ("", 0)) + 0
+= (1 + 1) + (1 + 1)
+= 4
+</code></pre>
+
+<p><strong>&ldquo;food&rdquo; is divided into 3 parts</strong>. First part we choose &ldquo;f&rdquo; to be the first char, thus the value is θ(&ldquo;ood&rdquo;, 1). Second part we choose &ldquo;o&rdquo;, and final part we choose &ldquo;d&rdquo;.</p>
+
+<p><strong>Note that when we choose a char, it must never have been chosen before</strong>. In case of &ldquo;food&rdquo;, we only choose &lsquo;f&rsquo;, &lsquo;o&rsquo;, &rsquo;d&#8217; once for each.</p>
+
+<p>This is a very difficult DP question, but the explanation really makes the answer easier. Read my implementation below.</p>
 
 <h3>Code</h3>
 
-<p><strong>written by me</strong></p>
+<pre><code>public int countSubSeq(String input, int k) {
+    // assuming all input chars are small letter
+    return choose(input, 0, k);
+}
 
-<pre><code>public int solve(int[] A) {
-    if (A == null || A.length == 0) {
+private int choose(String input, int start, int numChar) {
+    int charLeft = input.length() - start;
+    if (charLeft == numChar || numChar == 0) {
+        return 1;
+    } else if (charLeft &lt; numChar || numChar &lt; 0) {
         return 0;
-    } else if (A.length == 1) {
-        return A[0];
-    } else if (A.length == 2) {
-        return Math.max(A[0], A[1]);
     }
-
-    // prePreMax is the max non-adjacency sequence ending 2 position ahead
-    // preMax is the max non-adjacency sequence ending 1 position ahead
-    int prePreMax = A[0];
-    int preMax = A[1];
-    int ans = 0;
-
-    for (int i = 2; i &lt; A.length; i++) {
-        ans = Math.max(ans, prePreMax + A[i]);
-        // set the 2 variables: prePreMax, preMax
-        int temp = preMax;
-        preMax = Math.max(0, prePreMax + A[i]);
-        prePreMax = Math.max(prePreMax, temp);
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/22/Discussion-of-Polymorphism/">[Java OOP] Discussion of Polymorphism</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-22T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/22/Discussion-of-Polymorphism/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/22/Discussion-of-Polymorphism/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Polymorphism</h3>
-
-<p>Polymorphism is to <a href="http://javarevisited.blogspot.sg/2011/08/what-is-polymorphism-in-java-example.html">use common interface</a> instead of concrete implementation while coding.</p>
-
-<p>When we program for interface our code is capable of handling any new requirement or enhancement arise in near future due to new implementation of our common interface. If we don&rsquo;t use common interface and rely on concrete implementation, we always need to change and duplicate most of our code to support new implementation.</p>
-
-<p>The most common use of polymorphism in OOP occurs when a parent class reference is used to refer to a child class object.</p>
-
-<h3>Example</h3>
-
-<p>Example of Bicycle class given on <a href="http://docs.oracle.com/javase/tutorial/java/IandI/polymorphism.html">official oracle website</a>:</p>
-
-<pre><code>public class Bicycle{
-    public void printDescription(){
-        System.out.println("\nBike is " + "in gear " + this.gear
-            + " with a cadence of " + this.cadence +
-            " and travelling at a speed of " + this.speed + ". ");
-    }
-}
-
-public class MountainBike extends Bicycle {
-    private String suspension;
-
-    public void printDescription() {
-        super.printDescription();
-        System.out.println("The " + "MountainBike has a" +
-            getSuspension() + " suspension.");
-    }
-}
-
-public class RoadBike extends Bicycle{
-    private int tireWidth;
-
-    public void printDescription(){
-        super.printDescription();
-        System.out.println("The RoadBike" + " has " + getTireWidth() +
-            " MM tires.");
-    }
-}
-
-public class TestBikes {
-    public static void main(String[] args){
-        Bicycle bike01, bike02, bike03;
-
-        bike01 = new Bicycle(20, 10, 1);
-        bike02 = new MountainBike(20, 10, 5, "Dual");
-        bike03 = new RoadBike(40, 20, 8, 23);
-
-        bike01.printDescription();
-        bike02.printDescription();
-        bike03.printDescription();
-    }
-}
-</code></pre>
-
-<p>The output:</p>
-
-<pre><code>Bike is in gear 1 with a cadence of 20 and travelling at a speed of 10. 
-
-Bike is in gear 5 with a cadence of 20 and travelling at a speed of 10. 
-The MountainBike has a Dual suspension.
-
-Bike is in gear 8 with a cadence of 40 and travelling at a speed of 20. 
-The RoadBike has 23 MM tires.
-</code></pre>
-
-<p>Referring to the same page, <strong>JVM calls the appropriate method for the object that is referred to in each variable</strong>. It does not call the method that is defined by the variable&rsquo;s type.</p>
-
-<h3>Another example</h3>
-
-<p>Cylinder is a subclass of Circle. We can say that Cylinder &ldquo;is-a&rdquo; Circle.</p>
-
-<p>We can create an instance of Cylinder, and assign it to a Circle reference:</p>
-
-<blockquote><p>Circle c1 = new Cylinder();</p></blockquote>
-
-<p>You can invoke all the methods defined in the Circle class, but <strong>you cannot invoke methods defined in the Cylinder class</strong>. c1 is a reference to the Circle class, which does not know about the methods defined in the subclass Cylinder.</p>
-
-<p><strong>The reference c1, however, retains its internal identity</strong>. Since Cylinder overrides getArea() method, calling c1.getArea() will invokes the overridden version defined in subclass Cylinder, instead of in Circle. This is because c1 is holding a Cylinder object internally.</p>
-
-<p>The code is below:</p>
-
-<pre><code>public class PolymorphismSubstitutabilityDemo {
-
-    public static void main(String[] args) {
-        Circle c1 = new Cylinder(1, "white", 10);
-        System.out.println(c1.getClass());
-        System.out.println(c1.getRadius());
-        System.out.println(c1.getColor());
-        System.out.println(c1.getArea());
-    }
-}
-
-class Circle {
-    int radius;
-    String color;
-
-    public Circle(int a, String b) {
-        this.radius = a;
-        this.color = b;
-    }
-
-    public int getRadius() {
-        return radius;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public double getArea() {
-        return 3.14159 * Math.pow(radius, 2);
-    }
-}
-
-class Cylinder extends Circle {
-    int height;
-
-    public Cylinder(int a, String b, int c) {
-        super(a, b);
-        this.height = c;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public double getArea() {
-        return super.getArea() * height;
-    }
-}
-</code></pre>
-
-<p>The output of execution:</p>
-
-<pre><code>class Cylinder
-1
-white
-31.4159
-</code></pre>
-
-<h3>Summary:</h3>
-
-<p><a href="http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html">ref</a></p>
-
-<ol>
-<li><p>A subclass instance can be assigned (substituted) to a superclass&#8217; reference.</p></li>
-<li><p>Once substituted, we can invoke methods defined in the superclass; we cannot invoke methods defined in the subclass.</p></li>
-<li><p>However, if the subclass overrides inherited methods from the superclass, the subclass (overridden) versions will be invoked.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum (Undone)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-18T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/18/Binary-Search-Tree-3Sum/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
-
-<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
-
-<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
-
-<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
-
-<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
-
-<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
-
-<h3>Code</h3>
-
-<p><strong>DLL way, written by me</strong></p>
-
-<pre><code>public void findTriplet(TreeNode root, int target) {
-    TreeNode[] dll = convertToDll(root);
-    TreeNode head = dll[0];
-    TreeNode tail = dll[1];
-    // note that the bst inorder dll should already in sorted by value
-    TreeNode first = head;
-    while (first.right != null) {
-        TreeNode left = first.right;
-        TreeNode right = tail;
-        while (left.val &lt; right.val) {
-            int diff = first.val + left.val + right.val - target;
-            if (diff == 0) {
-                System.out.println("Found triplet: " + first.val + " "
-                        + left.val + " " + right.val + " for sum of "
-                        + target);
-            }
-            if (diff &lt;= 0) {
-                left = left.right;
-            }
-            if (diff &gt;= 0) {
-                right = right.left;
-            }
+    // now numChar is smaller than charLeft, and larger than 0
+    // start to pick a char (which is at first appearance)
+    int total = 0;
+    HashSet&lt;Character&gt; chosen = new HashSet&lt;Character&gt;();
+    while (start &lt; input.length()) {
+        char currentChar = input.charAt(start);
+        if (!chosen.contains(currentChar)) {
+            // pick the char pointer by 'start'
+            total += choose(input, start + 1, numChar - 1);
+            chosen.add(currentChar);
         }
-        first = first.right;
+        start++;
     }
-}
-
-private TreeNode[] convertToDll(TreeNode node) {
-    TreeNode[] ans = new TreeNode[2];
-    // do the left side of node
-    if (node.left == null) {
-        ans[0] = node;
-    } else {
-        TreeNode[] preAns = convertToDll(node.left);
-        ans[0] = preAns[0];
-        node.left = preAns[1];
-        preAns[1].right = node;
-    }
-    // do the right side of node
-    if (node.right == null) {
-        ans[1] = node;
-    } else {
-        TreeNode[] postAns = convertToDll(node.right);
-        ans[1] = postAns[1];
-        node.right = postAns[0];
-        postAns[0].left = node;
-    }
-    return ans;
+    return total;
 }
 </code></pre>
-
-<p><strong>inorder way</strong></p>
-
-<p>undone</p>
 </div>
   
   
@@ -474,7 +188,7 @@ private TreeNode[] convertToDll(TreeNode node) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a></h1>
     
     
       <p class="meta">
@@ -490,10 +204,10 @@ private TreeNode[] convertToDll(TreeNode node) {
   
 
 
-<time datetime="2014-12-17T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/17/Print-Binary-Tree-Vertically/">Comments</a>
+           | <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/Diameter-of-Binary-Tree/">Comments</a>
         
       </p>
     
@@ -502,84 +216,108 @@ private TreeNode[] convertToDll(TreeNode node) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
+<p><a href="http://www.geeksforgeeks.org/diameter-of-a-binary-tree/">link</a></p>
 
-<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
+<blockquote><p>The diameter of a tree (sometimes called the width) is the number of nodes on the longest path between two leaves in the tree.</p></blockquote>
 
-<pre><code>           1
-        /    \
-       2      3
-      / \    / \
-     4   5  6   7
-             \   \
-              8   9 
+<p><img class="middle" src="/assets/images/tree-diameter-1.gif"></p>
 
-The output of print this tree vertically will be:
-4
-2
-1 5 6
-3 8
-7
-9 
+<h3>Solution</h3>
+
+<p>This is a similar question to <strong>[LeetCode 124] Binary Tree Maximum Path Sum</strong>. <strong>However there&rsquo;s a significant difference</strong> which might be overlooked while coding.</p>
+
+<p>Look at this example:</p>
+
+<pre><code>     0
+       1
+        1
+       0  1
+           1
+</code></pre>
+
+<p>If we only want to find the max path, that would return result of 5, which is root-to-rightmost-leaf. However, the diameter should be 4, which is the distance between 2 leaf nodes.</p>
+
+<p>A solution is available for reading <a href="http://stackoverflow.com/a/3124575">here</a>.</p>
+
+<p>For <strong>[Google] Crazy Distance Between Strings</strong>, there is another special case: {&ldquo;1&rdquo;, &ldquo;11&rdquo;, &ldquo;10&rdquo;}. The program will not output correct result (1), because this is not really the diameter of a tree, but instead, a max path from a non-leaf to a leaf. I leave this part for you to finish.</p>
+
+<h3>Code</h3>
+
+<p>Refer to <strong>[Google] Crazy Distance Between Strings</strong> for complete code.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/10/reverse-a-stack/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/reverse-a-stack/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/">link</a></p>
+
+<blockquote><p>Reverse a stack using recursion. You are not allowed to use loops or data structure, and you can only use the following functions:</p></blockquote>
+
+<pre><code>isEmpty(S)
+push(S)
+pop(S)
 </code></pre>
 
 <h3>Solution</h3>
 
-<ol>
-<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
-<li><p>Iterate for each vertical line at distance minimum to maximum from root.</p></li>
-</ol>
+<p>Well since we are not allowed to use additional DS or loop, we have to use system stack to help us!</p>
 
-
-<p>This solution is O(n<sup>2</sup>), because getting the width of tree requires O(n) time. (Wait, is it not? Think about a complete tree of 3 level and 7 nodes)</p>
-
-<p>O(n) solution is available using a <strong><a href="www.geeksforgeeks.org/print-binary-tree-vertical-order-set-2/">HashMap</a></strong>.</p>
+<p>We add a new method: <strong>insert at stack bottom</strong>. Then we can solve this question recursively. Nice question, and tricky answer!</p>
 
 <h3>Code</h3>
 
-<p><strong>written by me</strong>, O(n<sup>2</sup>) time.</p>
-
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
-    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
-
-    // 1. find the range of left bound and right bound
-    int[] range = new int[2];
-    findRange(root, range, 0);
-
-    // 2. calculate number of columns in the result
-    int rootIndex = 0 - range[0];
-    int columns = range[1] - range[0] + 1;
-    for (int i = 0; i &lt; columns; i++) {
-        ans.add(new ArrayList&lt;Integer&gt;());
-    }
-
-    // 3. fill in vertically in a recursive manner
-    fillNode(ans, root, rootIndex);
-
-    return ans;
-}
-
-private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
-    if (node == null) {
+<pre><code>public void reverse(Stack&lt;Integer&gt; stack) {
+    if (stack.isEmpty() || stack.size() == 1) {
         return;
     }
-    ans.get(index).add(node.val);
-    fillNode(ans, node.left, index - 1);
-    fillNode(ans, node.right, index + 1);
+    int top = stack.pop();
+    this.reverse(stack);
+    this.insertAtBottom(stack, top);
 }
 
-private void findRange(TreeNode node, int[] range, int position) {
-    if (node == null) {
+private void insertAtBottom(Stack&lt;Integer&gt; stack, int val) {
+    if (stack.isEmpty()) {
+        stack.push(val);
         return;
     }
-    if (position &lt; range[0]) {
-        range[0] = position;
-    }
-    if (position &gt; range[1]) {
-        range[1] = position;
-    }
-    findRange(node.left, range, position - 1);
-    findRange(node.right, range, position + 1);
+    int temp = stack.pop();
+    this.insertAtBottom(stack, val);
+    stack.push(temp);
 }
 </code></pre>
 </div>
@@ -594,7 +332,7 @@ private void findRange(TreeNode node, int[] range, int position) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/12/08/patient-disease-data-structure/">[Epic] Patient Disease Data Structure</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a></h1>
     
     
       <p class="meta">
@@ -610,10 +348,10 @@ private void findRange(TreeNode node, int[] range, int position) {
   
 
 
-<time datetime="2014-12-08T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/12/08/patient-disease-data-structure/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/08/patient-disease-data-structure/">Comments</a>
+           | <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/minimum-range-inclueds-at-least-1/">Comments</a>
         
       </p>
     
@@ -622,32 +360,78 @@ private void findRange(TreeNode node, int[] range, int position) {
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32844253.html">link</a></p>
+<p><a href="http://www.careercup.com/question?id=5103437989543936">link</a></p>
 
-<blockquote><p>Suppose N patients and M diseases. N is sufficiently large number and M is
-relatively small, say 30-ish. Each patient can have possible 0 to M kinds of
-diseases.</p>
-
-<p>Given one patient’s name, show me a list of similar patients sharing same
-deseases within 2-3 seconds.</p></blockquote>
+<blockquote><p>There are many sorted arrays. Find a minimum range, so that in each array there&rsquo;s at least one integer within this range.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>Use 1 bit to represent a disease</strong>. So every patient&rsquo;s conditin can be put into an integer of 32 bits.</p>
+<p><strong>Min-heap</strong>. <a href="http://www.careercup.com/question?id=16759664">source</a></p>
 
-<p>How do we calculate the similarity of 2 patients?</p>
+<blockquote><p>There are k lists of sorted integers. Make a min heap of size k containing 1 element from each list. Keep track of min and max element and calculate the range.</p>
 
-<p>Refer to <strong>[CC150v5] 5.5 Calculate Bits Conversion Required</strong> for a special bit operation (remove last &lsquo;1&rsquo; from bit):</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<p>For each patient, we simply calculate the XOR and count &lsquo;1&rsquo;s.</p>
+<p>In min heap, minimum element is at top. Delete the minimum element and another element instead of that from the same list to which minimum element belong. Repeat the process till any one of the k list gets empty.</p></blockquote>
 
 <h3>Code</h3>
 
-<p>no code.</p>
+<pre><code>public void printMinRange(int[][] input) {
+    Comparator&lt;Pointer&gt; compr = new HeapComparator(input);
+    // Note that we pass in 'input' arrays to the comparator
+    PriorityQueue&lt;Pointer&gt; heap = new PriorityQueue&lt;Pointer&gt;(SIZE, compr);
+
+    int maxVal = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; SIZE; i++) {
+        heap.add(new Pointer(i, 0));
+        // insert the head of each array into the heap
+        maxVal = Math.max(maxVal, input[i][0]);
+        // keep additional value to keep track of the max value in heap
+    }
+
+    int left = 0;
+    int right = Integer.MAX_VALUE;
+    while (heap.size() == SIZE) {
+        Pointer p = heap.remove();
+        // first, update the range
+        if (maxVal - input[p.index][p.position] &lt; right - left) {
+            right = maxVal;
+            left = input[p.index][p.position];
+        }
+        // then, push the next element after 'p' to the heap
+        // meanwhile, update 'maxVal'
+        if (p.position + 1 &lt; input[p.index].length) {
+            Pointer nextP = new Pointer(p.index, p.position + 1);
+            heap.add(nextP);
+            maxVal = Math.max(maxVal, input[nextP.index][nextP.position]);
+        }
+        // when 'p' is the last element in the row, terminate loop
+    }
+    System.out.println("Left boundary: " + left);
+    System.out.println("Right boundary: " + right);
+}
+
+class HeapComparator implements Comparator&lt;Pointer&gt; {
+
+    int[][] arrays = null;
+
+    public HeapComparator(int[][] input) {
+        arrays = input;
+    }
+
+    public int compare(Pointer p1, Pointer p2) {
+        return arrays[p1.index][p1.position]
+                - arrays[p2.index][p2.position];
+    }
+}
+
+class Pointer {
+    int index, position;
+
+    public Pointer(int x, int y) {
+        index = x;
+        position = y;
+    }
+}
+</code></pre>
 </div>
   
   
@@ -660,7 +444,7 @@ deseases within 2-3 seconds.</p></blockquote>
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/12/01/Leetcode-fourth/">[Leetcode] Leetcode Fourth Round</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/10/max-count-array-in-queue/">[Google] Maximum Count Array in a Queue</a></h1>
     
     
       <p class="meta">
@@ -676,267 +460,140 @@ deseases within 2-3 seconds.</p></blockquote>
   
 
 
-<time datetime="2014-12-01T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/12/01/Leetcode-fourth/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/12/01/Leetcode-fourth/">Comments</a>
+           | <a href="/blog/2015/01/10/max-count-array-in-queue/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/max-count-array-in-queue/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><pre><code>Days:        01/12/2014 - now
-Submission:  
-Pass:        
+  <div class="entry-content"><h3>Question</h3>
 
-Submit/day:  
-Pass/day:    
+<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32856675_0_1.html#top">link1</a></p>
 
-Pass/submit: 
+<blockquote><p>给一个数组a[n]，令s[i]为a[i+1..n-1]中比a[i]大的数的数量。</p>
+
+<p>求最大的s[i]。要求O(nlogn)</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is very similar question to <strong>[Google] Form a Queue Given Heights</strong>. The idea is to insert elements into BST and count number of larger elements.</p>
+
+<p>Naitive solution can be reached with a list.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/10/form-queue-given-heights/">[Google] Form a Queue Given Heights</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/10/form-queue-given-heights/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/form-queue-given-heights/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/">link1</a>, <a href="http://www.weiming.info/zhuti/JobHunting/31903469/">link2</a>, <a href="http://www.mitbbs.com/article_t1/JobHunting/32856675_0_1.html#top">link3</a>.</p>
+
+<blockquote><p>There is an array of integers which represent heights of persons.</p>
+
+<p>Given another array&hellip; Let&rsquo;s call it count-array. It contain how many persons in front of him are greater than him in height.</p>
+
+<p>求原数组。(原数组中元素是从1到n。)</p>
+
+<p>Example:</p></blockquote>
+
+<pre><code>Input(Count array): 0, 0, 2, 0
+Output(原数组): 2, 3, 1, 4
 </code></pre>
 
-<h3>Easy</h3>
-
-<ol>
-<li>[LeetCode 1] Two Sum</li>
-<li>[LeetCode 5] Longest Palindromic Substring</li>
-<li>[LeetCode 6] ZigZag Conversion</li>
-<li>[LeetCode 7] Reverse Integer</li>
-<li>[LeetCode 12] Integer to Roman</li>
-<li>[LeetCode 16] 3Sum Closest</li>
-<li>[LeetCode 18] 4Sum</li>
-<li>[LeetCode 19] Remove Nth Node From End of List</li>
-<li>[LeetCode 23] Merge K Sorted Lists</li>
-<li>[LeetCode 25] Reverse Nodes in k-Groups</li>
-<li>[LeetCode 27] Remove Element</li>
-<li>[LeetCode 30] Substring With Concatenation of All Words</li>
-<li>[LeetCode 32] Longest Valid Parentheses</li>
-<li>[LeetCode 36] Valid Sudoku</li>
-<li>[LeetCode 41] First Missing Positive</li>
-<li>[LeetCode 42] Trapping Rain Water</li>
-<li>[LeetCode 45] Jump Game II</li>
-<li>[LeetCode 50] Pow(x, N)</li>
-<li>[LeetCode 55] Jump Game</li>
-<li>[LeetCode 72] Edit Distance</li>
-<li>[LeetCode 79] Word Search</li>
-<li>[LeetCode 80] Remove Duplicates From Sorted Array II</li>
-<li>[LeetCode 94] Binary Tree Inorder Traversal</li>
-<li>[LeetCode 142] Linked List Cycle II</li>
-</ol>
-
-
-<h3>Difficult</h3>
-
-<ol>
-<li>[LeetCode 3] Longest Substring Without Repeating Characters</li>
-<li>[LeetCode 4] Median of Two Sorted Arrays</li>
-<li>[LeetCode 10] Regular Expression Matching</li>
-<li>[LeetCode 15] 3Sum</li>
-<li>[LeetCode 29] Divide Two Integers</li>
-<li>[LeetCode 37] Sudoku Solver</li>
-<li>[LeetCode 44] Wildcard Matching</li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/11/04/Code-a-hashmap/">[Google] Code a HashMap</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-04T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/11/04/Code-a-hashmap/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/11/04/Code-a-hashmap/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
-
-<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
+<blockquote><p>求nlogn的算法。</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>We already write 2 post before:</p>
+<p>This is naive solution from floor 29 of <a href="http://www.weiming.info/zhuti/JobHunting/31903469/">this thread</a>:</p>
 
-<ol>
-<li><p><strong>[Question] Implement a HashMap</strong></p></li>
-<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
-</ol>
+<blockquote><p>总结一下，用一个List存放1&hellip;n。</p>
 
+<p>从头到尾扫描给定的数组，每得到一个值，从List里删掉。</p>
 
-<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
+<p>因为List里数据是有序的，因此remove操作可以使用二分法，复杂度为O(logn).</p>
 
-<ol>
-<li>The basic structure is an array. It can be:
+<p>这样本算法复杂度为O(nlogn).</p></blockquote>
 
-<ol>
-<li>An array of linked nodes (with a next pointer).</li>
-<li>An array of linked list.</li>
-</ol>
-</li>
-<li>There should be a hash function.</li>
-<li>There should be a function to convert the hash value to corresponding array index.</li>
-<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
-<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
-</ol>
+<p>Example:</p>
 
-</div>
-  
-  
+<pre><code>count array 
+i C[0,0,2,0]   N[4, 3, 2, 1]
+3 C[3] = 0     在N里面删除N[0]=4, N=[3, 2, 1],   Ans=[4]
+2 C[2] = 2     在N里面删除N[2]=1, N=[3, 2],   Ans=[1, 4]
+1 C[1] = 0     在N里面删除N[0]=3, N=[2],   Ans=[3, 1, 4]
+0 C[0] = 0     在N里面删除N[0]=2, N=[], Ans=[2, 3, 1, 4]
+</code></pre>
 
+<p>But there is a problm here, since removing item from list requires O(n), we will achieve O(n<sup>2</sup>) time. How do we optimize this?</p>
 
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/10/08/interleave-positive-negative/">[Question] Interleave Positive and Negative Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
+<p><strong>The answer is BST</strong> with each node keeping track of how many nodes is on the left branch, and how many on right branch. For details of this type of TreeNode, refer to <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
 
+<p>The conclusion:</p>
 
+<blockquote><p>可以化归为这样一道题：</p>
 
+<p>设计一个有序的数据结构，最初里头有自然数1到n这n个元素，</p>
 
+<p>随后这些元素可以被删除，但剩下元素仍然保持有序。</p>
 
+<p>要求实现方法GetKthElement(int k)和RemoveKthElemenet(int k)，</p>
 
+<p>使得它们在任意时刻都不超过O(lgN), N为当前的元素个数</p>
 
-
-  
-
-
-<time datetime="2014-10-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/10/08/interleave-positive-negative/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/10/08/interleave-positive-negative/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://mp.weixin.qq.com/s?__biz=MzA5MzE4MjgyMw==&amp;mid=200355650&amp;idx=1&amp;sn=f94e87cb391fb12af9531cedb452dba1&amp;key=d232b50733c41de56b96f855d9cdea5824f24c712e158651b45d7fe139a94610a7561da1fab0104e968592b01f2439d4&amp;ascene=7&amp;uin=MzM2NjQyNQ%3D%3D&amp;pass_ticket=i7pJQweQbuRdnUFUt5cdOmapPc%2FDW6Xk40U7%2Bcg%2F0o8%3D">link</a></p>
-
-<blockquote><p>给一个包含正负整数的数组，要求对这个数组中的数进行重新排列，使得其正负交替出现。首先出现负数，然后是正数，然后是负数。有多余的数的一方，就放在末尾。</p>
-
-<p>如 [1, 2, 3, -4]&ndash;>[-4, 1, 2, 3]，[1,-3,2,-4,-5]&ndash;>[-3,1,-4,2,-5]. 要求使用O(1)的额外空间。</p>
-
-<p>如果需要保持正数序列和负数序列各自原来的顺序，如何做？</p>
-
-<p>如果不需要保持正数序列和负数序列各自原来的顺序，如何做？</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>I only solve this question if we <strong>do not have to keep the original ordering</strong>.</p>
-
-<p>Basically, 2 pointers search from beginning to end. If there&rsquo;re more + than &ndash;, move the extra positive values to the back of the array. Vice versa.</p>
+<p>感觉要结合BST之类</p></blockquote>
 
 <h3>Code</h3>
 
-<p><strong>written by me</strong></p>
+<p>Naive approach, O(n<sup>2</sup>):</p>
 
-<pre><code>public void solve(int[] A) {
-    int len = A.length;
-    int neg = 0;
-    int pos = 1;
-    while (neg &lt; len || pos &lt; len) {
-
-        while (neg &lt; len &amp;&amp; A[neg] &lt; 0) {
-            neg += 2;
-        }
-        while (pos &lt; len &amp;&amp; A[pos] &gt; 0) {
-            pos += 2;
-        }
-        // neg points to a positive value
-        // pos points to a negative value
-        // swap them (if they're valid position)
-        if (neg &gt;= len &amp;&amp; pos &gt;= len) {
-            return;
-        } else if (neg &gt;= len) {
-            // neg is done, there's more - then +
-            // put all negative values pointed by pos to the back
-            int right = len - 1;
-            if (right % 2 == 0) {
-                right--;
-            }
-            while (pos &lt; right) {
-                while (pos &lt; len &amp;&amp; A[pos] &gt; 0) {
-                    pos += 2;
-                }
-                while (right &gt;= 0 &amp;&amp; A[right] &lt; 0) {
-                    right -= 2;
-                }
-                // pos point to a negative value, right to positive value
-                if (pos &gt; right) {
-                    break;
-                } else {
-                    swap(A, pos, right);
-                }
-            }
-            return;
-        } else if (pos &gt;= len) {
-            // pos is done, there's more + then -
-            int right = len - 1;
-            if (right % 2 == 1) {
-                right--;
-            }
-            while (neg &lt; right) {
-                while (neg &lt; len &amp;&amp; A[neg] &lt; 0) {
-                    neg += 2;
-                }
-                while (right &gt;= 0 &amp;&amp; A[right] &gt; 0) {
-                    right -= 2;
-                }
-                if (neg &gt; right) {
-                    break;
-                } else {
-                    swap(A, neg, right);
-                }
-            }
-            return;
-        } else {
-            swap(A, neg, pos);
-        }
+<pre><code>public int[] form(int peopleCount, int[] countArray) {
+    int len = peopleCount;
+    int[] heightQueue = new int[len];
+    List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();
+    for (int i = peopleCount; i &gt; 0; i--) {
+        list.add(i);
     }
-}
-
-private void swap(int[] array, int a, int b) {
-    int temp = array[a];
-    array[a] = array[b];
-    array[b] = temp;
+    for (int i = len - 1; i &gt;= 0; i--) {
+        heightQueue[i] = list.remove(countArray[i]);
+    }
+    return heightQueue;
 }
 </code></pre>
 </div>
@@ -951,7 +608,7 @@ private void swap(int[] array, int a, int b) {
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a></h1>
     
     
       <p class="meta">
@@ -967,67 +624,131 @@ private void swap(int[] array, int a, int b) {
   
 
 
-<time datetime="2014-10-02T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/10/02/longest-word-made-from-other/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/10/02/longest-word-made-from-other/">Comments</a>
+           | <a href="/blog/2015/01/09/terminology-ngram/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/terminology-ngram/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><h3>n-gram</h3>
 
-<blockquote><p>Given a list of words, write a program to find the longest word made of other words in the list.</p>
+<p>In the fields of computational linguistics and probability, an <strong><a href="http://en.wikipedia.org/wiki/N-gram">n-gram</a></strong> is a contiguous sequence of n items from a given sequence of text or speech.</p>
 
-<p>EXAMPLE</p>
+<p>The items can be phonemes, syllables, letters, words or base pairs according to the application. The n-grams typically are collected from a text or speech corpus.</p>
 
-<p>Input: cat, banana, dog, nana, walk, walker, dogwalker</p>
+<h4>Example</h4>
 
-<p>Output: dogwalker</p></blockquote>
+<table border="1" width="100%" id="table5" cellpadding="3" style="border-collapse: collapse" bordercolor="#89B0D8" cellspacing="0">
+                <tbody><tr>
+                    <td bgcolor="#D9ECFF">
+                    <p align="center">frequency</p></td>
+                    <td bgcolor="#D9ECFF">
+                    <p align="center">word1</p></td>
+                    <td bgcolor="#D9ECFF">
+                    <p align="center">word2</p></td>
+                    <td bgcolor="#D9ECFF">
+                    <p align="center">word3</p></td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">1419</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">the</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">same</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">461</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">likely</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">432</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">better</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">than</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">266</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">difficult</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">235</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">of</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">the</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">226</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">than</p>
+                    </td>
+                </tr>
+</tbody></table>
 
-<h3>Solution</h3>
 
-<p><strong>Search it recursively from longest to shortest</strong>. Use HashSet to help us search for words quickly.</p>
+<h4>Downloadable n-grams sets for English</h4>
 
-<p>This question might look difficult at first, it&rsquo;s actually a very classical recursive search.</p>
+<ol>
+<li><strong><a href="https://catalog.ldc.upenn.edu/LDC2006T13">Google n-grams</a></strong>, based on the web as of 2006.</li>
+<li><strong><a href="http://www.ngrams.info/intro.asp">COCA n-grams</a></strong>, based on Corpus of Contemporary American English [COCA]. 450 million words from 1990 to 2012.</li>
+</ol>
 
-<h3>Code</h3>
 
-<pre><code>public static void printLongestWord(String[] arr) {
-    Arrays.sort(arr, new LengthComparator());
-    HashSet&lt;String&gt; set = new HashSet&lt;String&gt;();
-    for (String str : arr) {
-        set.add(str);
-    }
-    for (String word : arr) {
-        if (canDivide(word, 0, set)) {
-            System.out.println(word);
-            return;
-        }
-    }
-    System.out.println("can not find such word");
-}
-
-private static boolean canDivide(String word, int from, HashSet&lt;String&gt; set) {
-    if (from == word.length()) {
-        return true;
-    }
-    for (int i = from; i &lt; word.length(); i++) {
-        String str = word.substring(from, i + 1);
-        if (from == 0 &amp;&amp; i == word.length() - 1) {
-            continue;
-        } else if (!set.contains(str)) {
-            continue;
-        }
-        if (canDivide(word, i + 1, set)) {
-            return true;
-        }
-    }
-    return false;
-}
-</code></pre>
+<p>With n-grams data (2, 3, 4, 5-word sequences, with their frequency), we can carry out powerful queries offline.</p>
 </div>
   
   
@@ -1040,7 +761,7 @@ private static boolean canDivide(String word, int from, HashSet&lt;String&gt; se
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/09/most-frequent-word-from-book/">[Question] Most Frequent Word From a Book</a></h1>
     
     
       <p class="meta">
@@ -1056,10 +777,10 @@ private static boolean canDivide(String word, int from, HashSet&lt;String&gt; se
   
 
 
-<time datetime="2014-10-01T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/10/01/optimal-unconcatenate-doc/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/10/01/optimal-unconcatenate-doc/">Comments</a>
+           | <a href="/blog/2015/01/09/most-frequent-word-from-book/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/most-frequent-word-from-book/">Comments</a>
         
       </p>
     
@@ -1068,46 +789,168 @@ private static boolean canDivide(String word, int from, HashSet&lt;String&gt; se
 
   <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>Given a lengthy document without spaces, punctuation, and capitalization:</p>
+<p><a href="http://www.careercup.com/question?id=5715664853532672">link</a></p>
 
-<p>eg: iresetthecomputeritstilldidntboot</p>
+<blockquote><p>Let&rsquo;s say I gave you a long String and I wanted you to tell me the most common word in that String. How would you do that?</p>
 
-<p>Now add back in the punctation and capitalization.</p>
-
-<p>Most of the words will be in a dictionary, but some strings, like proper names, will not. Given a dictionary (a list of words), design an algorithm to find the optimal way of &ldquo;unconcatenating&rdquo; a sequence of words (by minimizing unrecognized sequences of characters).</p>
-
-<p>For example, the string &ldquo;jesslookedjustliketimherbrother&rdquo; would be optimally parsed as &ldquo;JESS looked just like TIM her brother&rdquo;. This parsing has seven unrecognized characters, which we have capitalized for clarity.</p></blockquote>
+<p>Follow-up: how about if I gave you the entire works of Alexandre Dumas, one of the most prolific authors in history. How would your solution work? How could you change it to solve this more specific problem?</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>The solution given in the book is very hard to understand. It uses HashMap to memorize the previous result.</p>
+<p>There are 2 solutions. Either <strong>HashMap</strong> or <strong>Trie</strong>. It&rsquo;s easy to think of first, but remember that Trie is designed to do this kind of job.</p>
 
-<p>After long time of struggle, I finally solved it with traditional DP approach. The key idea is to consider: &ldquo;<strong>whether I insert a space after this char, or not</strong>&rdquo;.</p>
+<blockquote><p>A trie will be more useful in the second situation where you will have millions of words. You can have a counter at every node to see its frequency</p></blockquote>
 
-<p>The code is concise and easy to read.</p>
+<p><strong>Now the follow up</strong>. For big data problems, we can always do <strong>divide and conquer</strong> by hash value.</p>
 
-<h3>Code</h3>
+<p>Alternatively, the comment by <a href="http://www.careercup.com/question?id=5715664853532672">Prince</a> mentioned how to solve with <strong>Map Reduce</strong>:</p>
 
-<pre><code>public static int parse(String doc, Trie dict) {
-    int len = doc.length();
-    int[] dp = new int[len + 1];
-    // dp[i] denotes the number of special chars in first i chars of docs
-    for (int i = 1; i &lt;= len; i++) {
-        dp[i] =  Integer.MAX_VALUE;
-        for (int j = 0; j &lt; i; j++) {
-            String str = doc.substring(j, i);
-            if (dict.contains(str, true)) {
-                // consider (i to j) a valid word
-                dp[i] = Math.min(dp[i], dp[j]);
-            } else {
-                // consider (i to j) special chars
-                dp[i] = Math.min(dp[i], dp[j] + i - j);
-            }
-        }
-    }
-    return dp[len];
-}
-</code></pre>
+<blockquote><p>Instead of loading it as a string first I would stream data so that I avoid memory spike. Further our map size might increases as new words are added to it. Also, we can use map reduce type job were we create map&lt;word, frequency> of each play in parallel and later join/collapse them this will reduce the time it will take to get result.</p>
+
+<p>Common phrase should be no different then above algorithm. However we need to rebuild our index with &lt;phase, frequency></p></blockquote>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/09/match-triplet-with-reverse-order/">[Question] Match Triplet With Reverse Order</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/09/match-triplet-with-reverse-order/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/match-triplet-with-reverse-order/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=11655778">link</a></p>
+
+<blockquote><p>Find the substring of length 3 which is present in the reverse order from the string.</p>
+
+<p>Ex: if the string is abcdcba (cba is the reverse of abc) so we should return cba.</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p><strong>HashMap (recommended)</strong>. Hash all substrings of length 3. O(n). Look up all reverse substrings of length 3 in this hash set. O(n) time and O(n) space.</p></li>
+<li><p><strong>KMP Algo</strong>. Take every substring of length 3. Reverse it and find it in the input using KMP. O(n<sup>2</sup>) time and O(1) space.</p></li>
+<li><p><strong>Build suffix tree</strong> of height 3. Then in reverse order, check triplets.</p></li>
+</ol>
+
+
+<p>The 3 solutions above all work well. Pick the one you love.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/09/big-data-top-k-frequency-3/">[Design] Big Data - Top K Frequency 3</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/09/big-data-top-k-frequency-3/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/big-data-top-k-frequency-3/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/a/3262855">link</a></p>
+
+<blockquote><p>The input is an endless stream of English words or phrases (we refer them as tokens).</p>
+
+<p>Output top N tokens we have seen so far (from all the tokens we have seen!)</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>We will discuss the following details of implementation and optimization.</p>
+
+<ol>
+<li>String into Integer</li>
+<li>Data Storage</li>
+<li>Process Incoming Streams</li>
+<li>Save result</li>
+</ol>
+
+
+<h4>1. String into Integer</h4>
+
+<p>This is a nice trick that improves eficiency a lot.</p>
+
+<blockquote><p>Though there is almost infinite possible words on the Internet, but after accumulating a large set of words, the possibility of finding new words becomes lower and lower.</p>
+
+<p>We have already found 4 million different words, and assigned a unique ID for each. This is important, because sorting and comparisons on integers is <strong>much much faster</strong> than on strings.</p></blockquote>
+
+<h4>2. Data Storage</h4>
+
+<blockquote><p>The system keeps archive data for every token. Basically it&rsquo;s pairs of (Token, Frequency).</p>
+
+<p>However, the table that stores the data would be so huge such that we have to partition the table physically. One partition scheme is <strong>based on ngrams</strong> of the token. If the token is a single word, it is 1gram. If the token is two-word phrase, it is 2gram.</p></blockquote>
+
+<p>Of course we can also divide the data by the hash value. For information on <strong>ngrams</strong>, read <strong>[Design] Terminology: n-gram</strong>.</p>
+
+<h4>3. Process Incoming Streams</h4>
+
+<blockquote><p>The system will absorbs incoming sentences until memory becomes fully utilized (Ya, we need a MemoryManager). After taking N sentences and storing in memory, the system pauses, and starts tokenize each sentence into words and phrases. Each token (word or phrase) is counted.</p></blockquote>
+
+<p>This data processing logic runs as a process under Memory-Manager. The next part is another processing running concurrently.</p>
+
+<h4>4. Save result</h4>
+
+<blockquote><p>Meanwhile, there will be another process that is activated once it finds any disk file generated by the system, then start merging it. Since the disk file is sorted, merging would take <strong>a similar process like merge sort</strong>.</p></blockquote>
+
+<p>There is <a href="http://stackoverflow.com/a/3262855">some more steps</a> afterwards, but they&rsquo;re trivial. I have listed out the basic steps for processing large stream of incoming data (as string), and how to find out the Top K keywords.</p>
+
+<p>I suggest you read previous <strong>[Design] Big Data &ndash; Top k Frequency</strong> posts before reading this.</p>
 </div>
   
   
@@ -1132,18 +975,18 @@ private static boolean canDivide(String word, int from, HashSet&lt;String&gt; se
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -1154,23 +997,23 @@ private static boolean canDivide(String word, int from, HashSet&lt;String&gt; se
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

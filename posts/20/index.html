@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question If you have a 2 GB file with one string per line, which sorting algorithm would you use to sort the file and why? Solution External Sorting &hellip;">
+  <meta name="description" content="Question link 有一个n*m（n和m都不超过50）的棋盘，有k个目标格子需要访问。需要访问的格子的横纵坐标存放在数组x[]和y[]中(0&lt;=x[i]&lt;n, 0&lt;=y[i]&lt;m)。 遍历的规则为： 每一步只能从一个目标格子水平或者竖直跳跃移动到另一个目标格子。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/07/sort-large-files/">[CC150v4] 9.4 Sort Large Files</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/16/orthogonal-traverse-map/">[Google] Orthogonal Traverse the Map (`)</a></h1>
     
     
       <p class="meta">
@@ -100,10 +100,10 @@
   
 
 
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-16T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/07/sort-large-files/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/sort-large-files/">Comments</a>
+           | <a href="/blog/2014/08/16/orthogonal-traverse-map/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/16/orthogonal-traverse-map/">Comments</a>
         
       </p>
     
@@ -112,51 +112,27 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>If you have a 2 GB file with one string per line, which sorting algorithm would you use to sort the file and why?</p></blockquote>
+<p><a href="http://www.itint5.com/oj/#22">link</a></p>
+
+<blockquote><p>有一个n*m（n和m都不超过50）的棋盘，有k个目标格子需要访问。需要访问的格子的横纵坐标存放在数组x[]和y[]中(0&lt;=x[i]&lt;n, 0&lt;=y[i]&lt;m)。</p>
+
+<p>遍历的规则为：</p>
+
+<p>每一步只能从一个目标格子水平或者竖直跳跃移动到另一个目标格子。</p>
+
+<p>连续的两步必须形成直角。即如果前一步是水平移动，那么下一步只能竖直移动。</p>
+
+<p>问是否存在一种遍历顺序，使得每个目标格子有且仅被访问一次。</p>
+
+<p>样例：k=8, x=[0, 0, 0, 0, 2, 2, 4, 4], y=[0, 2, 4, 6, 4, 6, 2, 4],对应于下图中A, B, C, D, F, E, G, H 8个目标格子，存在满足条件的遍历A->D->E->F->C->B->G->H。</p></blockquote>
+
+<p><img class="middle" src="/assets/images/orthogonal-map.jpg"></p>
 
 <h3>Solution</h3>
 
-<p><strong>External Sorting</strong> and N-way merge.</p>
+<blockquote><p>n,m的棋盘，<a href="http://www.itint5.com/discuss/22/%E7%9B%B4%E8%A7%92%E8%B7%AF%E7%BA%BF%E9%81%8D%E5%8E%86%E6%A3%8B%E7%9B%98">建一个包含n+m个顶点的图G</a>（为了方便说明，类似二分图将其分为两列，左边n个顶点，右边m个顶点，分别代表n行和n列）。</p>
 
-<ol>
-<li>Divide the file into K chunks, where X * K = 2 GB Bring each chunk into memory and sort the lines as usual using any O(n log n) algorithm Save the lines back to the file</li>
-<li>Now bring the next chunk into memory and sort</li>
-<li>Once we’re done, merge them one by one</li>
-</ol>
-
-
-<h3>Details</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/External_sorting#External_merge_sort">Wiki example</a> of sorting 900 megabytes of data using only 100 megabytes of RAM:</p>
-
-<ol>
-<li><strong>Read 100 MB of the data in main memory and sort</strong> by some conventional method, like quicksort.</li>
-<li>Write the sorted data to disk.</li>
-<li>Repeat steps 1 and 2 until all of the data is in sorted 100 MB chunks (there are 900MB / 100MB = 9 chunks), which now need to be merged into one single output file.</li>
-<li><strong>Read the first 10 MB (= 100MB / (9 chunks + 1)) of each sorted chunk</strong> into input buffers in main memory and allocate the remaining 10 MB for an output buffer. (In practice, it might provide better performance to make the output buffer larger and the input buffers slightly smaller.)</li>
-<li><strong>Perform a 9-way merge</strong> and store the result in the output buffer. Whenever the output buffer fills, write it to the final sorted file and empty it. Whenever any of the 9 input buffers empties, fill it with the next 10 MB of its associated 100 MB sorted chunk until no more data from the chunk is available. <strong>This is the key step that makes external merge sort work externally</strong> &mdash; because the merge algorithm only makes one pass sequentially through each of the chunks, each chunk does not have to be loaded completely; rather, sequential parts of the chunk can be loaded as needed.</li>
-</ol>
-
-
-<h3>Similar Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Sort-a-million-32-bit-integers-using-only-2MB-of-RAM-QTN_120936.htm">link</a></p>
-
-<blockquote><p>[Google] Sort a million 32 bit integers using only 2MB of RAM.</p></blockquote>
-
-<p>1 million integers = 4MB which is > 2MB RAM.</p>
-
-<p>Solution: external sort &ndash; divide and conquer</p>
-
-<ol>
-<li>read half the list into 2MB ram and sort using quicksort (quicksort uses logn space &ndash; however 0.5m integers is less than 2MB (2000kb v 2048kb) so this should be okay).</li>
-<li>write sorted data to disk</li>
-<li>repeat for next chunk</li>
-<li>merging results: we need an output buffer. lets say this is 1MB. then we read 512KB from each of your chunks into input buffers. we then perform a 2-way merge of the data. when an input buffer becomes empty we can pull in the remainder of the chunk.</li>
-<li>when the output buffer is full we write this to disk.</li>
-<li>when the process completes we are left with 2x 1MB files sorted in the correct order.</li>
-</ol>
-
+<p>对于目标格子(i,j)，左边第i个顶点和右边第j个顶点连一条边。最后的问题其实就是问转换之后的图G是否存在欧拉欧拉回路或者欧拉路径。</p></blockquote>
 </div>
   
   
@@ -169,7 +145,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/07/Random-error-debugging-1/">[Testing] Random Error Debugging 1</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/16/Excel-decimal-conversion/">[ItInt5] Excel Decimal Conversion</a></h1>
     
     
       <p class="meta">
@@ -185,10 +161,10 @@
   
 
 
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-16T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/07/Random-error-debugging-1/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/Random-error-debugging-1/">Comments</a>
+           | <a href="/blog/2014/08/16/Excel-decimal-conversion/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/16/Excel-decimal-conversion/">Comments</a>
         
       </p>
     
@@ -197,231 +173,78 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://stackoverflow.com/questions/4531742/debugging-a-program-that-crashes-10-times-in-different-places">link</a></p>
+<p><a href="http://www.itint5.com/oj/#23">link</a></p>
 
-<blockquote><p>You are given the source to an application which is crashing during run time. After running it 10 times in a debugger, you find it never crashes in the same place.</p>
+<blockquote><p>Excel中的行列数用A~Z 26个字母表示，A, B, C, D, …, Z, AA, AB, …, AZ, BA, BB, … 分别表示10进制数1, 2, 3, 4, …, 26, 27, 28, …, 52, 53, 54…。</p>
 
-<p>What programming errors could be causing this crash? How would you test each one?</p></blockquote>
-
-<h3>Analysis</h3>
-
-<ol>
-<li><p>code depends on <strong>system time or RNG</strong></p></li>
-<li><p>disk full, i.e. other processes may delete a different file causing more space to be available</p></li>
-<li><p>memory issue, i.e. other processes allocate and/or free memory</p></li>
-<li><p>a pointer points to a random location in memory that is changed by another process causing some values be &ldquo;valid&rdquo; (very rare though)</p></li>
-</ol>
-
-
-<p><a href="http://stackoverflow.com/a/4531769">In general</a> a situation <strong>with other process</strong> is likely.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/07/Million-phone-numbers/">[Google] Million Phone Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/07/Million-phone-numbers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/Million-phone-numbers/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question 1</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/How-would-you-store-1-million-phone-numbers-QTN_456.htm">link</a></p>
-
-<blockquote><p>How would you store 1 million phone numbers?</p></blockquote>
+<p>请实现2个函数decToExcel和excelToDec，将10进制数转换为Excel数，以及将Excel数转换为10进制数。</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>BitMap.</p>
-
-<blockquote><p>The key here is that 1 million phone numbers will be within some range, likely 10 million or so. 10 million bits = 10<sup>7</sup> bits ~ 0.12 GB. Just have a bit array where the first bit being set implies that the first phone number is set (e.g., 10 000 000) and the last bit indicates the last phone number (10 999 999). If you find a number in the list, just set the appropriate bit. You now have a bit vector of size 1million bits, sorted, and to check for a particular number, you just check whether the corresponding bit is set.</p></blockquote>
-
-<h3>Question 2</h3>
-
-<p><a href="http://www.careercup.com/question?id=7997766">link</a></p>
-
-<blockquote><p>How would you sort 1 million phone numbers?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>BitMap or radix sort, both are O(n) complexity.</p>
-
-<p>Read more <a href="http://www.vex.net/~trebla/compsci/sorting-phone-numbers.html">here</a>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/07/Distributed-network-bottleneck/">[Design] Distributed Network Bottleneck</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/07/Distributed-network-bottleneck/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/07/Distributed-network-bottleneck/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Question</h2>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32702821.html">link</a></p>
-
-<blockquote><p>一个distributed的环境，有很多机器，现在你发现性能有问题，可能是网络带宽造成的，你怎么解决？ (你不能更换网络设备的前提下)</p></blockquote>
-
-<h3>Answer</h3>
-
-<ol>
-<li>Identify problem</li>
-</ol>
-
-
-<p>首先得判定是否真的是网络造成的，就算是网络问题，哪些机器之间的网络问题？ 这个得先大概了解high level component dependency relationship，</p>
-
-<p>看看是不是cpu memory disk都没有问题。 可以profile几个机器看看是不是 a lot of time spent waiting for network calls.</p>
-
-<ol>
-<li>Locate the faulty component</li>
-</ol>
-
-
-<p>判定是网络问题之后看是哪些components之间，或是某个component里面有很多网络通讯。</p>
-
-<ol>
-<li>Improvement</li>
-</ol>
-
-
-<p>不能更换设备的话，能不能改network topology来让critical path machine之间的带宽有改善。</p>
-
-<p>要是不能改topology就只能改程序了。还是先identify top offender,然后就只能慢慢改了</p>
-
-<ol>
-<li>What&rsquo;s more</li>
-</ol>
-
-
-<p>要还有时间的话就可以聊聊问啥不能换设备，是资金问题还是用的已经是top of the line了？</p>
-
-<p>或者是在public cloud上？</p>
-
-<p>Answer suggested by user <strong>remus</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/06/Postorder-successor-Binary-Tree/">[Google] Postorder Successor in Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/06/Postorder-successor-Binary-Tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/06/Postorder-successor-Binary-Tree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5173972006076416">link</a></p>
-
-<blockquote><p>Write an algorithm to find the ‘next’ post-order successor of a given node in a binary tree and binary search tree.</p>
-
-<ol>
-<li>where each node has a link to its parent.</li>
-<li>without parent pointer</li>
-</ol>
-
-
-<p>Implement 2 versions of the algorithm: 1.) binary tree 2.) BST</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>In postorder, any node below current node shall be &lsquo;predecessor&rsquo; of current node. Thus we only care about current node&rsquo;s parent.</p>
-
-<p>Suggested by a user:</p>
-
-<pre><code>1) parent pointer is given. 
-- go to the parent of the current node. 
-- if current node is the right child of its parent =&gt; print parent. 
-- else return leftmost node of the right sub-tree of parent. 
-
-2) parent pointer is not given. 
-- traverse the tree and find the parent of the current node 
-- do the same as method (1). 
+<p>Note the indexing starts from 1, not from 0. This caused some trouble for me.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public String decToExcel(int decNum) {
+    decNum--;
+    int digits = 1;
+    int exponen = 26;
+    while (decNum &gt;= exponen) {
+        decNum -= exponen;
+        exponen *= 26;
+        digits++;
+    }
+    // now we know the total number of digits
+    int num = decNum;
+    int total = exponen / 26;
+    String ans = "";
+    for (int i = 0; i &lt; digits; i++) {
+        ans += (char) (num / total + 'A');
+        num %= total;
+        total /= 26;
+    }
+    return ans;
+}
+
+public int excelToDec(String excelNum) {
+    int digits = excelNum.length();
+    int total = 1;
+    int sum = 1;
+    for (int i = 1; i &lt; digits; i++) {
+        total *= 26;
+        sum += total;
+    }
+    for (int i = 0; i &lt; digits; i++) {
+        sum += (excelNum.charAt(i) - 'A') * total;
+        total /= 26;
+    }
+    return sum;
+}
+</code></pre>
+
+<p><strong>updated code</strong>: we can actually do it recursively. The code is much more concise (the code is found in the eclipse project).</p>
+
+<pre><code>//将十进制数转换为excel数
+public String decToExcel(int decNum) {
+    if (decNum == 0) {
+        return "";
+    }
+    decNum--;
+    char last = (char) ('A' + decNum % 26);
+    return decToExcel(decNum / 26) + last;
+}
+
+//将excel数转换为十进制数
+public int excelToDec(String excelNum) {
+    if (excelNum.equals("")) {
+        return 0;
+    }
+    int len = excelNum.length();
+    int last = 1 + excelNum.charAt(len - 1) - 'A';
+    return excelToDec(excelNum.substring(0, len - 1)) * 26 + last;
+}
 </code></pre>
 </div>
   
@@ -435,7 +258,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/06/Networks-and-TCP-IP/">[Design] Networks and TCP/IP</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Task-scheduling-question/">[Facebook] Task Scheduling Question</a></h1>
     
     
       <p class="meta">
@@ -451,259 +274,10 @@
   
 
 
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/06/Networks-and-TCP-IP/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/06/Networks-and-TCP-IP/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Overview</h2>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Internet_protocol_suite">Internet protocol suite</a></strong> is a networking model and communications protocols used by the Internet. It is commonly known as <strong>TCP/IP</strong>.</p>
-
-<p>Four abstraction layers:</p>
-
-<ol>
-<li>Application layer</li>
-<li>Transport layer</li>
-<li>Internet layer</li>
-<li>Link layer</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/network-layers-connected.png"></p>
-
-<p>The protocols are maintained by the <strong>Internet Engineering Task Force</strong> (IETF).</p>
-
-<h3>A summary of four-layer model</h3>
-
-<ol>
-<li>Application: authentication, compression, and end user services</li>
-<li>Transport: handles the flow of data between systems and provides access to the network for applications via the BSD socket library</li>
-<li>Network: packet routing</li>
-<li>Link: Kernel OS/device driver interface to the network interface on the computer.</li>
-</ol>
-
-
-<p><a href="http://searchnetworking.techtarget.com/news/851291/TCP-Internet-Protocol-and-OSI">source</a></p>
-
-<h3>More details</h3>
-
-<p><strong>The Application layer</strong>:</p>
-
-<ol>
-<li>where applications create user data and communicate with other applications on another host (make use of Transport Layer to provide reliable or unreliable pipes to other processes).</li>
-<li>different application architecture, such as the client-server model and peer-to-peer.</li>
-<li>SMTP, FTP, SSH, HTTP all operate above this layer.</li>
-<li>processes are addressed via ports.</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/network-ports.gif"></p>
-
-<blockquote><p>Well-known official port numbers are in the range of 0 &ndash; 255. Port 256 &ndash; 1023 are reserved for other well-known services. 1024 &ndash; 65535 are neither in-use nor reserved. They are used when TCP/IP automatically assigns port numbers to client programs.</p></blockquote>
-
-<p><strong>The Transport Layer</strong>:</p>
-
-<ol>
-<li>performs host-to-host communications.</li>
-<li>&ldquo;UDP&rdquo; provides unreliable datagram service.</li>
-<li>&ldquo;<strong>Transmission Control Protocol</strong>&rdquo; provides flow-control, connection establishment, and reliable transmission of data.</li>
-</ol>
-
-
-<p><strong>The Internet layer</strong>:</p>
-
-<ol>
-<li>exchange datagrams across network boundaries.</li>
-<li>establishes internetworking thus establishes the Internet.</li>
-<li>&ldquo;<strong>Internet Protocol</strong>&rdquo;, defines IP addresses and the routing structures used for the TCP/IP protocol suite.</li>
-<li>routing: transport datagrams to the next IP router that has the connectivity to a network closer to the final data destination.</li>
-</ol>
-
-
-<p><strong>The Link layer</strong>:</p>
-
-<ol>
-<li>defines the networking methods within local network link without intervening routers.</li>
-<li>describe local network topology and the interfaces needed to effect transmission of Internet layer datagrams to next-neighbor hosts.</li>
-</ol>
-
-
-<h3>Difference from OSI</h3>
-
-<p>The Internet protocol suite was in use <strong>before the OSI model</strong>, and is well established worldwide.</p>
-
-<p><a href="http://electronicdesign.com/what-s-difference-between/what-s-difference-between-osi-seven-layer-network-model-and-tcpip">The OSI model</a>, however, is a proven concept that is used in all other data communications protocols. It will continue to be used as a guideline for all other communications applications.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/06/HTTP-headers/">[Design] HTTP Headers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/06/HTTP-headers/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/06/HTTP-headers/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Overview</h2>
-
-<p><strong>HTTP is an Application Layer protocol</strong> which stands for &ldquo;Hypertext Transfer Protocol&rdquo;. The entire World Wide Web uses it.</p>
-
-<p>There&rsquo;re <strong><a href="http://www.differencebetween.net/technology/internet/difference-between-tcp-and-http/">a series of sessions</a></strong> in HTTP where client sends a request and server sends a reply message back to client including the request, an error message, or another piece of information.</p>
-
-<p><a href="http://code.tutsplus.com/tutorials/http-headers-for-dummies--net-8039">HTTP headers</a> are the core part of these HTTP requests and responses, and they carry information about the client browser, the requested page, the server and more.</p>
-
-<h3>Example HTTP request</h3>
-
-<pre><code>GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1
-Host: net.tutsplus.com
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-Accept-Language: en-us,en;q=0.5
-Accept-Encoding: gzip,deflate
-Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
-Keep-Alive: 300
-Connection: keep-alive
-Cookie: PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120
-Pragma: no-cache
-Cache-Control: no-cache
-</code></pre>
-
-<h3>Example HTTP response</h3>
-
-<pre><code>HTTP/1.x 200 OK
-Transfer-Encoding: chunked
-Date: Sat, 28 Nov 2009 04:36:25 GMT
-Server: LiteSpeed
-Connection: close
-X-Powered-By: W3 Total Cache/0.8
-Pragma: public
-Expires: Sat, 28 Nov 2009 05:36:25 GMT
-Etag: "pub1259380237;gz"
-Cache-Control: max-age=3600, public
-Content-Type: text/html; charset=UTF-8
-Last-Modified: Sat, 28 Nov 2009 03:50:37 GMT
-X-Pingback: http://net.tutsplus.com/xmlrpc.php
-Content-Encoding: gzip
-Vary: Accept-Encoding, Cookie, User-Agent
-
-&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;
-&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
-&lt;head&gt;
-&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
-&lt;title&gt;Top 20+ MySQL Best Practices - Nettuts+&lt;/title&gt;
-&lt;!-- ... rest of the html ... --&gt;
-</code></pre>
-
-<p>These HTTP requests are also sent and received for other things, such as images, CSS files, JavaScript files etc. That is why browser may send 40 or more HTTP requests for 1 article page.</p>
-
-<h3>Request Methods</h3>
-
-<p>The three most commonly used request methods are: GET, POST and HEAD.</p>
-
-<h4>GET: Retrieve a Document</h4>
-
-<p>Get an article site:</p>
-
-<pre><code>GET /tutorials/other/top-20-mysql-best-practices/ HTTP/1.1
-</code></pre>
-
-<p>Submit a form information:</p>
-
-<pre><code>GET /foo.php?first_name=John&amp;last_name=Doe&amp;action=Submit HTTP/1.1
-</code></pre>
-
-<p>Each input is added in the <strong>query string</strong>.</p>
-
-<h4>POST: Send Data to the Server</h4>
-
-<p>Even though you can send data to the server using GET and the query string, <strong>in many cases POST will be preferable</strong>. Sending large amounts of data using GET is not practical and has limitations.</p>
-
-<pre><code>POST /foo.php HTTP/1.1
-Host: localhost
-User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-Accept-Language: en-us,en;q=0.5
-Accept-Encoding: gzip,deflate
-Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
-Keep-Alive: 300
-Connection: keep-alive
-Referer: http://localhost/test.php
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 43
-
-first_name=John&amp;last_name=Doe&amp;action=Submit
-</code></pre>
-
-<p>The header contains no query string no more. The last line (data) is the query string.</p>
-
-<h4>HEAD: Retrieve Header Information</h4>
-
-<p>HEAD is identical to GET, except the server does not return the content in the HTTP response. It&rsquo;s faster than GET.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/06/Connect-nodes-avoid-intersect/">[Google] Connect Graph Nodes and Avoid Intersect</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/08/06/Connect-nodes-avoid-intersect/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/06/Connect-nodes-avoid-intersect/">Comments</a>
+           | <a href="/blog/2014/08/15/Task-scheduling-question/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/15/Task-scheduling-question/">Comments</a>
         
       </p>
     
@@ -712,21 +286,121 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.careercup.com/question?id=5138832865361920">link</a></p>
+<p><a href="http://www.itint5.com/oj/#10">link</a></p>
 
-<blockquote><p>Draw a graph as a graph. Assume there is graphics library to draw lines and all. Just tell how will you order the vertices such that the edges don&rsquo;t intersect and they seem ordered.</p></blockquote>
+<blockquote><p>有n个任务需要完成（编号1到n），任务之间有一些依赖关系，如果任务a依赖于任务b和c，那么只有当任务b和任务c完成之后才能完成任务a。给定所有的依赖关系，判断这些任务是否能够完成。如果能够完成，请给出一个合法的任务完成序列。</p>
+
+<p>样例：</p>
+
+<p>n=5</p>
+
+<p>1->2,3</p>
+
+<p>3->4</p>
+
+<p>上述样例中任务1依赖于任务2和任务3，任务3依赖于任务4，那么存在合法的任务完成序列4,3,2,1,5</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>There&rsquo;s no clear solution. Someone suggest the following:</p>
+<p><strong>Classic topology sorting</strong>, refer to <a href="http://www.itint5.com/discuss/8/%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6java%E7%A8%8B%E5%BA%8F">this nice answer</a>.</p>
 
-<ol>
-<li>printing topological sort result (refer to post &lsquo;Topology Sort&rsquo;)</li>
-<li>edges should not intersect, finding if a graph is planar</li>
-</ol>
+<h3>My Code</h3>
 
+<pre><code>public int[] myJobSchedulerWithoutQueue(Map&lt;Integer, List&lt;Integer&gt;&gt; deps,
+        int n) {
+    int[] ans = new int[n];
 
-<p>There&rsquo;s various <a href="http://en.wikipedia.org/wiki/Planarity_testing">Planarity Testing Algorithms</a>.</p>
+    int[] depCount = new int[n];
+    // eg. job 1 depends on job 2 and 3, thus depCount[1-1] = 2
+    Map&lt;Integer, List&lt;Integer&gt;&gt; graph = new HashMap&lt;Integer, List&lt;Integer&gt;&gt;();
+    // graph would be reversed version of deps, used for topology sorting
+    // eg. 2 would point to 1, and 3 would points to 1
+    for (int i : deps.keySet()) {
+        depCount[i - 1] = deps.get(i).size();
+        for (int j : deps.get(i)) {
+            // add (j, i) pair into graph
+            if (!graph.containsKey(j)) {
+                graph.put(j, new ArrayList&lt;Integer&gt;());
+            }
+            graph.get(j).add(i);
+        }
+    }
+    // now we got depCount[] and graph ready, let's rock
+    int sorted = 0;
+    while (sorted != n) {
+        // first find a 'p' so that depCount[p] = 0
+        int p = 0;
+        while (p &lt; n &amp;&amp; depCount[p] != 0) {
+            p++;
+        }
+        if (p == n) {
+            // unable to find a new node to sort, sorting failed
+            break;
+        }
+        // remember p is only the index, the value should be +1
+        int val = p + 1;
+        ans[sorted++] = val;
+        depCount[p] = -1;
+        if (graph.containsKey(val)) {
+            for (int i : graph.get(val)) {
+                depCount[i - 1]--;
+            }
+        }
+    }
+    if (sorted == n)
+        return ans; // sort sucess
+    else
+        return null; // sort failed
+}
+</code></pre>
+
+<p>The following is very similar implementation, but using a Queue to store temporary nodes.</p>
+
+<pre><code>public int[] myJobSchedulerWithQueue(Map&lt;Integer, List&lt;Integer&gt;&gt; deps, int n) {
+    int[] ans = new int[n];
+
+    int[] depCount = new int[n];
+    // eg. job 1 depends on job 2 and 3, thus depCount[1-1] = 2
+    Map&lt;Integer, List&lt;Integer&gt;&gt; graph = new HashMap&lt;Integer, List&lt;Integer&gt;&gt;();
+    // graph would be reversed version of deps, used for topology sorting
+    // eg. 2 would point to 1, and 3 would points to 1
+    for (int i : deps.keySet()) {
+        depCount[i - 1] = deps.get(i).size();
+        for (int j : deps.get(i)) {
+            // add (j, i) pair into graph
+            if (!graph.containsKey(j)) {
+                graph.put(j, new ArrayList&lt;Integer&gt;());
+            }
+            graph.get(j).add(i);
+        }
+    }
+    // now we got depCount[] and graph ready, let's rock
+    int sorted = 0;
+    Queue&lt;Integer&gt; queue = new LinkedList&lt;Integer&gt;();
+    while (sorted != n) {
+        for (int i = 0; i &lt; depCount.length; i++) {
+            if (depCount[i] == 0) {
+                queue.offer(i + 1);
+                depCount[i] = -1;
+            }
+        }
+        if (queue.isEmpty()) {
+            break; // sorting failed
+        }
+        int val = queue.poll();
+        ans[sorted++] = val;
+        if (graph.containsKey(val)) {
+            for (int i : graph.get(val)) {
+                depCount[i - 1]--;
+            }
+        }
+    }
+    if (sorted == n)
+        return ans; // sort sucess
+    else
+        return null; // sort failed
+}
+</code></pre>
 </div>
   
   
@@ -739,7 +413,7 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/06/Ambiguous-File-Matching/">[Google] Ambiguous File Matching</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Product-all-ones/">[Google] Product All 1s</a></h1>
     
     
       <p class="meta">
@@ -755,10 +429,10 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
   
 
 
-<time datetime="2014-08-06T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/06/Ambiguous-File-Matching/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/06/Ambiguous-File-Matching/">Comments</a>
+           | <a href="/blog/2014/08/15/Product-all-ones/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/15/Product-all-ones/">Comments</a>
         
       </p>
     
@@ -767,30 +441,36 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.careercup.com/question?id=5678301561487360">link</a></p>
+<p><a href="http://www.itint5.com/oj/#18">link</a></p>
 
-<blockquote><p>Given 10 files (text files) each of size of 900 Mb.</p>
+<blockquote><p>给定一个非负整数a（不超过10<sup>6</sup>），是否存在整数b，使得a和b的乘积全为1。如果存在，返回最小的乘积的位数。如果不存在，返回-1。</p>
 
-<p>Given another file named &ldquo;hello&rdquo;. match the contents of this file with other 10 file and return the file whose contents closely match with the contents of file &ldquo;hello&rdquo;.</p></blockquote>
+<p>样例：a=3，存在b=37，使得3*37=111，则函数应返回3（111的位数）。</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>The solution given on the site is not adequate, but I have to choose one that make a little sense.</p>
+<p>There&rsquo;s 1 equation of mod operation, which is helpful:</p>
 
-<blockquote><p>Score each file&rsquo;s contents on several parameters:</p>
+<blockquote><p>(a * b) mod x = ((mx+a&#8217;) * (nx+b&#8217;)) mod x = (a&#8217; mod x) * (b&#8217; mod x) = (a mod x) * (b mod x)</p>
 
-<ol>
-<li>no. of words</li>
-<li>no. of letters</li>
-<li>no. of spaces</li>
-<li>count of each of the letters</li>
-<li>count of each words</li>
-</ol>
+<p>i.e.  (a * b) mod x = (a mod x) * (b mod x)</p></blockquote>
 
+<p>Altough <a href="http://www.itint5.com/discuss/136/%E8%BF%99%E9%A2%98%E6%88%91%E8%B6%85%E6%97%B6%E4%BA%86%EF%BC%8C%E8%AF%B7%E9%97%AE%E5%A6%82%E4%BD%95%E7%BC%A9%E7%9F%AD%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4">I don&rsquo;t understand why</a> does it contribute to the incredibly short solution code posted below. I can&rsquo;t solve this question, freakly speaking.</p>
 
-<p>Give weightage to each of the properties and arrive at a number (score). The closest of the scores is the answer.</p></blockquote>
+<h3>Code</h3>
 
-<p>I think maybe can use <a href="http://en.wikipedia.org/wiki/Bloom_filter#Counting_filters">Counting Bloom Filter</a>, although bloom filter does not record word sequences.</p>
+<pre><code>int findMinAllOne(int a) {
+    if (a &lt; 0 || (a % 10) % 2 == 0 || a % 10 == 5)
+        return -1;
+
+    int ans = 1;
+    for (int p = 1; p != 0; p %= a) {
+        p = 10 * p + 1;
+        ++ans;
+    }
+    return a == 1 ? ans - 1 : ans;
+}
+</code></pre>
 </div>
   
   
@@ -803,7 +483,7 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/08/05/Write-a-RNG/">[Google] Write a Random Number Generator</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Knight-tour-jumpable-question/">[ItInt5] 跳马问题加强版</a></h1>
     
     
       <p class="meta">
@@ -819,10 +499,10 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
   
 
 
-<time datetime="2014-08-05T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/08/05/Write-a-RNG/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/08/05/Write-a-RNG/">Comments</a>
+           | <a href="/blog/2014/08/15/Knight-tour-jumpable-question/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/15/Knight-tour-jumpable-question/">Comments</a>
         
       </p>
     
@@ -831,17 +511,489 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.careercup.com/question?id=5173972006076416">link</a></p>
+<p><a href="http://www.itint5.com/oj/#12">link</a></p>
+
+<blockquote><p>有一个无限大的棋盘，棋盘上有一匹马，马可以从长宽分别为p和q的矩形一个角移动到对角。即假设马当前的位置为(x,y)，那么下一步可以移动到(x+p,y+q)，(x+p,y-q)，(x-p,y+q)，(x-p,y-q)，(x+q,y+p)，(x+q,y-p)，(x-q,y+p)或者(x-q,y-p)这8个位置。</p>
+
+<p>问马是否能从坐标(x,y)按照上述移动规则移动到坐标(x2,y2)。</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>Basically, the formula is as follows:</p>
+<p><a href="http://www.itint5.com/discuss/16/%E8%B7%B3%E9%A9%AC%E9%97%AE%E9%A2%98%E5%8A%A0%E5%BC%BA%E7%89%88">ref</a></p>
 
-<blockquote><p>number = (previous_number * constant + other_constant) mod third_constant</p></blockquote>
+<ol>
+<li>计算dx=x-x2,dy=y-y2。</li>
+<li>求出p,q的最大公约数g，如果dx或者dy不能被g整除，那么很显然无解。</li>
+<li>将p,q,dx,dy都除以g，现在p和q互质了。</li>
+<li>注意到马可以跳到点(0,2p)（先(p,q)跳一下，然后(p,-q)跳一下），重复这个过程，马可以跳到任意(0,2kp)的点，由于对称性，也可以跳到任意(2kp,0)的点。
+5.下面这一步很关键，由于p,q互质，那么存在x,y满足px+qy=1（扩展欧几里德定理）。这样，马可以跳到(0,2)和和(2,0)，由于对称性，马可以跳到任意坐标都为偶数点。</li>
+<li>有了上面的结论，其实只用考虑(0,0),(0,1),(1,0),(1,1)这4个点是否可达。(0,0)是可达的，(0,1)和(1,0)由于对称性只用考虑(0,1)。</li>
+<li>对于(1,1)，其实是永远可达的。如果q,p都为奇数，可以先跳到(1+p,1+q)的点（利用5中的结论，可以跳到都是偶数的点），然后(-p,-q)跳到(1,1)。如果p,q一奇一偶，可以先跳到(1+p+q,1+q+p)的点（利用5中的结论），然后(-p,-q),(-q,-p)两步跳到(1,1)。</li>
+<li>对于(0,1)，如果p,q一奇一偶，那么也是永远可达的（同7可证）。如果p,q都是奇数，那么是不可能跳到(0,1)的，因为两个奇数不管怎么加减交替运算都不可能变成一奇一偶。</li>
+</ol>
 
-<p>The three constants are carefully selected, and a typical choice is:</p>
 
-<blockquote><p>number = (previous_number * 214013 + 2531011) mod 2<sup>15</sup></p></blockquote>
+<p>所以最后的结论就是：<strong>第3步之后，如果p,q一奇一偶，那么可达。否则dx,dy同奇或同偶才可达</strong>。</p>
+
+<p>gcd的代码 (concise version):</p>
+
+<pre><code>int gcd(int a, int b) {
+    return b ? gcd(b, a % b) : a;
+}
+</code></pre>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>int gcd(int a, int b){
+    return b? gcd(b, a%b) : a;
+}
+
+bool canJump(int p, int q, int x, int y, int x2, int y2) {
+    if(p==0 &amp;&amp; q==0) return (x==x2)&amp;&amp;(y==y2);
+    int xDist = x2 - x, yDist = y2 - y;
+    int g1 = gcd(p, q);
+    if( xDist % g1 || yDist % g1) 
+        return false;
+    p = p/g1;
+    q = q/g1;
+    xDist = xDist/g1;
+    yDist = yDist/g1;
+    if((p-q)%2 ) 
+        return true;
+    else 
+        return (xDist-yDist)%2 == 0;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Greatest-common-divisor/">[Question] Greatest Common Divisor</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/15/Greatest-common-divisor/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/15/Greatest-common-divisor/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Get GCD in more efficient code</p></blockquote>
+
+<h3>Code</h3>
+
+<p>this is 掉渣天。</p>
+
+<pre><code>public int gcd(int a, int b) {
+    return b == 0 ? a : gcd(b, a % b);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Alphabet-table/">[Google] Alphabet Table (`)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/15/Alphabet-table/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/15/Alphabet-table/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.sina.com.cn/s/blog_979956cc0101i67x.html">link</a></p>
+
+<blockquote><p>每一种语言，都有自己的字母表，类似英文的a-z，但是顺序不相同。例如，有的语言可能是z是第一个之类的。现在给定这个语言的字典，请分析这个字典，得到这个语言的字母表的顺序。</p>
+
+<p>例如：有如下的字母：C CAC CB BCC BA。 经过分析，得到字母表为C->A->B。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><a href="http://page.renren.com/601882592/channel-noteshow-927705419">http://page.renren.com/601882592/channel-noteshow-927705419</a></p>
+
+<ol>
+<li>C 2. CAC 3. CB 4. BCC 5. BA 经过分析，得到字母表为C->A->B。</li>
+</ol>
+
+
+<p>分析 字典序相邻的位置的字符串，只会有如下两种情况：</p>
+
+<p>（1）排在前面的字符串是下一个串的子串，如C与CAC</p>
+
+<p>（2）两个字符串具有第一对不相同的字符对，如CAC和CBB，第一个不相同的字符对为（A，B），这是就要求A在字母表中的顺序在B前面。对于后面字符并没有要求，如并不要求第二个不相同的字符对（C，B）中的C在字母表中的顺序在B前面。</p>
+
+<p>所以按照第（2）种情况建图，然后对该有向无环图求拓扑排序即可。</p>
+
+<p>So this becomes a Topology Sorting question.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>pair&lt;char,char&gt;  constructEdge(const string &amp; src1, const string &amp; src2)
+{
+     int min_len = min(src1.length(), src2.length());
+     int i = 0;
+     while(i &lt; min_len &amp;&amp; src1[i] == src2[i]){
+           i++;
+     }
+     if(i &lt; min_len){
+           return  make_pair(src1[i], src2[i]);
+     }else{
+           return  make_pair('\0','\0');
+     }
+}
+//-1, 0, 1
+int  alphaTable(const vector&lt;string&gt; &amp;  dict, vector&lt;char&gt; &amp; alpha_table)
+{
+     unordered_map&lt;char,set&lt;char&gt; &gt;  edges;
+     set&lt;char&gt; nodes;
+     for(const string &amp; word : dict){
+          for(char c : word){
+              nodes.insert(c);
+          }
+     }
+     unordered_map&lt;char,int&gt;  in_degree;
+     for(int i = 1; i &lt; dict.length(); i++){
+          pair edge = constructEdge(dict[i-1],dict[i]);
+          if(edge.first != '\0'){
+              edges[edge.first].insert(edge.second);
+              in_degree[edge.second]++;
+          }
+     }
+     queue&lt;char&gt;  q;
+     for(char node : nodes){
+         if(in_degree[node] == 0){
+              q.push(node);
+         }
+     }
+     alpha_table.clear();
+     int result = 0;
+     while(!q.empty()){
+        if(q.size() &gt; 1){
+            result = 1;
+        }
+        char  c = q.front();
+        q.pop();
+        alpha_table.push_back(c);
+        for(char node : edges[c]){
+             in_degree[node] --;
+             if(in_degree[node] == 0){
+                  q.push(node);
+             }
+         }
+     }//while
+     if(alpha_table.size() &lt; nodes.size()){
+         result = -1;
+     }
+     return result;    
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/14/Large-string-find-substring/">[Facebook] Query Search (HashMap, Suffix Array)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/14/Large-string-find-substring/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/14/Large-string-find-substring/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#15">link</a></p>
+
+<blockquote><p>有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。</p>
+
+<p>注意：query是动态的输入进行查询的，预先并不知道所有的query。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Best idea of the solution is to use Suffix Tree</strong> and similar alternatives.</p>
+
+<p><strong>Solution 1</strong> is <a href="http://www.itint5.com/discuss/27/%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E9%A2%84%E5%A4%84%E7%90%86">an nice idea using HashMap</a>.</p>
+
+<blockquote><p>我是把所有长度&lt; =10的子串，哈希一下存放到10个哈希表中。</p>
+
+<p>至于哈希函数的选取，随便选一个应该都不会超时。</p></blockquote>
+
+<p><strong>Solution 2</strong> is using &lsquo;<strong>suffix array</strong>&rsquo;. The most important point of this idea is to only make a substring instance <strong>for every 10 characters</strong>.</p>
+
+<blockquote><p>只用=10的子串。然后二分查找</p>
+
+<p>用=10的字串排序即可，如包含更短的串会使得预处理变成O(10nlg(10n))。 查找的复杂度可能没什么变化，使用&lt;=10会是O(lg(10n))，而只使用=10子串初始化的话，因为可能还要进行短query跟长子串间的前缀比较，复杂度会是O(10lgn)，稍微有点提高。</p></blockquote>
+
+<p>Which is to say, using substring length == 10, we comsume <strong>less time for pre-processing</strong>, and a little <strong>more time when querying</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>Suffix tree solution from <a href="http://www.itint5.com/discuss/203/%E8%B6%85%E7%AE%80%E5%8D%95%E7%9A%84prefix-array-java-code">here</a></strong>, note written by me</p>
+
+<pre><code>private List&lt;String&gt; prefixList;
+
+// pre-process the large string
+public void initWithString(String str) {
+    Set&lt;String&gt; strs = new HashSet&lt;String&gt;();
+
+    for(int i = 0; i &lt; str.length(); ++i) {
+        strs.add(str.substring(i, Math.min(str.length(), i + 10)));
+    }
+    prefixList = new ArrayList&lt;String&gt;(strs);
+    Collections.sort(prefixList);
+}
+
+// find the query substring
+public boolean existSubString(String query) {
+    int low = 0;
+    int high = prefixList.size() - 1;
+    while(low &lt;= high) {
+        int mid = (low + high) / 2;
+        int comp = prefixList.get(mid).compareTo(query);
+        if(comp == 0)  {
+            return true;
+        }
+        if(prefixList.get(mid).startsWith(query)) {
+            return true;
+        }
+        if(comp &gt; 0) //mid &gt; query
+        {
+            high = mid - 1;
+        }else{
+            low = mid + 1;
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/12/circus-man-ordering/">[CC150v4] 9.7 Circus Tower Routine</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-12T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/12/circus-man-ordering/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/12/circus-man-ordering/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>A circus is designing a tower routine consisting of people standing atop one another’s shoulders. For practical and aesthetic reasons, each person must be both shorter and lighter than the person below him or her. Given the heights and weights of each person in the circus, write a method to compute the largest possible number of people in such a tower.</p>
+
+<p>EXAMPLE:</p>
+
+<p>Input: (ht, wt): (65, 100) (70, 150) (56, 90) (75, 190) (60, 95) (68, 110)</p>
+
+<p>Output: The longest tower is length 6 and includes from top to bottom: (56, 90) (60,95) (65,100) (68,110) (70,150) (75,190)</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The solution given in the book is unclear, but it&rsquo;s a very simple idea which is pointed out <a href="http://www.careercup.com/question?id=9339758">here</a> and <a href="http://hawstein.com/posts/9.7.html">here</a>.</p>
+
+<ol>
+<li>sort the input persons by &lsquo;height&rsquo;. O(nlogn)</li>
+<li>find the longest increasing &lsquo;weight&rsquo; sequence in the sorted list. This can be done in O(nlogn) with DP.</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public int longestTower(List&lt;Man&gt; list) {
+    Collections.sort(list, new ManComparator());
+    // now find the longest increasing sequence of 'weight' property
+    int len = list.size();
+    int maxLen = 1;
+    int[] dp = new int[len];
+    for (int i = 1; i &lt; len; i++) {
+        dp[i] = 1;
+        for (int j = 0; j &lt; i; j++) {
+            if (list.get(i).weight &gt; list.get(j).weight) {
+                dp[i] = Math.max(dp[i], dp[j] + 1);
+            }
+        }
+        maxLen = Math.max(maxLen, dp[i]);
+    }
+    return maxLen;
+}
+
+class ManComparator implements Comparator&lt;Man&gt; {
+    @Override
+    public int compare(Man o1, Man o2) {
+        return o1.height - o2.height;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/12/From-ClientServer-to-Multi-Tier/">[Design] From Client/Server to Multi-Tier</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-12T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/08/12/From-ClientServer-to-Multi-Tier/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/08/12/From-ClientServer-to-Multi-Tier/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Client/Server</h3>
+
+<p><a href="http://wiki.remobjects.com/wiki/From_Client/Server_to_Multi-Tier">link</a></p>
+
+<p>Client have <strong>direct and full access to the physical database</strong> based on their login string. This is the major weakness of the Client/Server paradigm. The system is vulnerable to attacks.</p>
+
+<p>Because all business logic was <strong>implemented on the client application</strong>, changes to business logic means redeploying new client software to all users again.</p>
+
+<p>Another drawback is that the network interface provided by most back-end database systems has been designed for access over the local network, using fast connections and no firewalls. Nowadays, many clients’ software needs to run from employee&rsquo;s home offices or from airport lounges. In many cases such connections <strong>will be unreliable or inefficient</strong> to work on.</p>
+
+<h3>Multi-Tier</h3>
+
+<p>The communication between clients and middle-tier server is <strong>no longer tied to a protocol dictated by the database</strong> (no database drivers or connection string on the client). Client applications can authenticate with <strong>a username and password (compare to login string)</strong>.</p>
+
+<p>Communication can be done via HTTP or HTTPS, alternatively or additionally, open standards such as <strong>SOAP, OData and JSON can be used to expose a middle tier</strong> to different clients using protocols that are widely understood.</p>
+
+<p>Biggest advantage is that <strong>all the business logic is transferred from client application into the middle tier</strong>. And the middle tier holds the final control over what data goes in or out.</p>
+
+<p>Still, there&rsquo;re still some business logic on the client tier as well. But it only <strong>complement the rules</strong> that are enforced on the server. Eg. Twitter enforce the 140 character limit locally, and stop you from sending a tweet that is too long (by graying out the Send button).</p>
+
+<p>That means, client side checks are for convenience, and for convenience only; the middle tier server is and must be authoritative for what is allowed and what is not.</p>
 </div>
   
   
@@ -866,18 +1018,18 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -888,23 +1040,23 @@ first_name=John&amp;last_name=Doe&amp;action=Submit
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

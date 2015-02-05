@@ -111,7 +111,7 @@ outline of all &hellip;">
 
 <div class="entry-content"><h3>Question</h3>
 
-<p><a href="">link</a></p>
+<p><a href="http://www.algorithmist.com/index.php/UVa_105">link</a></p>
 
 <blockquote><p>Given n buildings, each building is an rectangle located on
 x-axis, and indicated by (x1, x2, height). Calculate the
@@ -123,7 +123,7 @@ outline of all buildings. Output them in order.</p></blockquote>
 
 <p><strong>Solution 2 is using Sweeping line algorithm</strong>. Sweep from left to right, always try to find the largest height of the rectangle.</p>
 
-<p>First make sure the rectangles are sorted. While sweeping, if sees an building-start, insert the height to the heap. If a building-end, remove from the heap. Then the current maximum height is the max point in the heap.</p>
+<p>First make sure the rectangles are sorted. While sweeping, if sees an building-start, insert the height to the heap. If a building-end, remove from the heap. Then the current maximum height is the max point in the heap. A visualized explanation can be found <a href="https://briangordon.github.io/2014/08/the-skyline-problem.html">here</a>.</p>
 
 <p>Total cost is O(nlogn), <a href="http://qr.ae/Yt74m">source</a>.</p>
 
@@ -135,9 +135,20 @@ outline of all buildings. Output them in order.</p></blockquote>
 </ol>
 
 
+<p><strong>Updated on Feb 1st, 2015</strong>: using floor 26 of <a href="http://www.mitbbs.com/article_t1/JobHunting/32569901_0_2.html">this post</a>, we can do insertion and deletion in max-heap, then peek the largest element in the heap.</p>
+
+<blockquote><p>把所有的turning points 放在一起，根据coordination从小到大sort 。</p>
+
+<p>再用max-heap, 把所有的turning points扫一遍，遇到start turning point, 把
+volume放入max-heap. 遇到end turning point，把对应的volume从max-heap中取出。</p>
+
+<p>max-heap的max 值就是对应区间的最大volume</p></blockquote>
+
+<p>Code presented below.</p>
+
 <h3>Code</h3>
 
-<p>Brate force <a href="http://www.cs.ucf.edu/~dmarino/ucf/java/Skyline.java">code</a>:</p>
+<p>Brate force code from <a href="http://www.cs.ucf.edu/~dmarino/ucf/java/Skyline.java">ucf</a>:</p>
 
 <pre><code>public static void main(String[] args) throws IOException {
 
@@ -194,7 +205,67 @@ outline of all buildings. Output them in order.</p></blockquote>
 }
 </code></pre>
 
-<p>The heap solution is much too complex. It can be found <a href="http://courses.oreillyschool.com/data-structures-algorithms/overviewAlgorithms.html">here</a>.</p>
+<p>The heap solution:</p>
+
+<pre><code>public int[] skyline(List&lt;Building&gt; bds, int min, int max) {
+    int[] output = new int[max - min];
+
+    List&lt;Edge&gt;[] edges = new List[max - min];
+    for (int i = 0; i &lt; edges.length; i++) {
+        edges[i] = new ArrayList&lt;Edge&gt;();
+    }
+    for (Building b : bds) {
+        // put all edges into an array of edges
+        edges[b.from].add(new Edge(b, true));
+        edges[b.to].add(new Edge(b, false));
+    }
+
+    Queue&lt;Building&gt; heap = new PriorityQueue&lt;Building&gt;(100,
+            new Comparator&lt;Building&gt;() {
+                public int compare(Building b1, Building b2) {
+                    return b2.height - b1.height;
+                }
+            });
+    for (int i = 0; i &lt; edges.length; i++) {
+        // insert or remove each building at position i into max heap
+        for (Edge e : edges[i]) {
+            if (e.isEnter) {
+                heap.add(e.building);
+            } else {
+                heap.remove(e.building);
+            }
+        }
+        // then culculate the current hight, which is top of the heap
+        if (!heap.isEmpty()) {
+            output[i] = heap.peek().height;
+        }
+    }
+
+    return output;
+}
+
+static class Edge {
+    Building building;
+    boolean isEnter;
+
+    public Edge(Building bld, boolean enter) {
+        building = bld;
+        isEnter = enter;
+    }
+}
+
+static class Building {
+    int from;
+    int to;
+    int height;
+
+    public Building(int a, int b, int c) {
+        from = a;
+        to = b;
+        height = c;
+    }
+}
+</code></pre>
 </div>
 
 
@@ -264,18 +335,18 @@ outline of all buildings. Output them in order.</p></blockquote>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -286,23 +357,23 @@ outline of all buildings. Output them in order.</p></blockquote>
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>

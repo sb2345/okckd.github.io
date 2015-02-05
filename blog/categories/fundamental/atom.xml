@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Fundamental | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/fundamental/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-21T00:50:28+08:00</updated>
+  <updated>2015-02-05T23:59:04+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,250 +14,245 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[Fundamental] Travelling Salesman Problem]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/30/Travelling-salesman-problem/"/>
-    <updated>2014-08-30T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/30/Travelling-salesman-problem</id>
-    <content type="html"><![CDATA[### TSP problem
+    <title type="html"><![CDATA[[Fundamental] Implement Trie and Suffix Tree]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/28/implement-trie-suffix-tree/"/>
+    <updated>2015-01-28T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/28/implement-trie-suffix-tree</id>
+    <content type="html"><![CDATA[### Trie Node
 
-[Given a list of cities](http://en.wikipedia.org/wiki/Travelling_salesman_problem) and the distances between each pair of cities, what is the shortest possible route that visits each city exactly once and returns to the origin city? 
+    public class TrieNode {
+        boolean isLeaf;
+        TrieNode[] child;
 
-It is an NP-hard problem in combinatorial optimization. We will discuss 2 category of solutions: 
+        public TrieNode(boolean isLeaf) {
+            this.isLeaf = isLeaf;
+            this.child = new TrieNode[26];
+        }
 
-1. Exact algorithms
-1. Heuristic and approximation algorithms
+        public void insert(String str) {
+            if (str == null || str.length() == 0) {
+                this.isLeaf = true;
+                return;
+            }
+            char cur = str.charAt(0);
+            if (child[cur - 'a'] == null) {
+                child[cur - 'a'] = new TrieNode(str.length() == 1);
+            }
+            child[cur - 'a'].insert(str.substring(1));
+        }
 
-### Exact algorithms
+        public boolean trieSearch(String str) {
+            // have to consider leaf node
+            if (str == null || str.length() == 0) {
+                return isLeaf;
+            }
+            char cur = str.charAt(0);
+            if (child[cur - 'a'] == null) {
+                return false;
+            }
+            return child[cur - 'a'].trieSearch(str.substring(1));
+        }
 
-1. __Brute force search__, which the run time is O(n!), which is impossible for 20 cities. 
+        public boolean suffixTreeSearch(String str) {
+            // suffixTreeSearch don't consider leaf node
+            // cuz we search for prefix of suffixes
+            if (str == null || str.length() == 0) {
+                return true;
+            }
+            char cur = str.charAt(0);
+            if (child[cur - 'a'] == null) {
+                return false;
+            }
+            return child[cur - 'a'].suffixTreeSearch(str.substring(1));
+        }
+    }
 
-1. __DP__ Held–Karp algorithm. O(n^2 x 2^n). 
+### Trie
 
-1. __Branch-and-bound__ algorithm. This can process 40-60 cities. 
+    public class Trie {
+        TrieNode root;
 
-### Heuristic and approximation algorithms
+        public Trie(String[] input) {
+            root = new TrieNode(false);
 
-1. __Greedy__, or Nearest Neighbour algorithm. (an improved version is called Nearest Fragment algorithm, which connect NN in groups)
+            for (String str : input) {
+                root.insert(str);
+            }
+        }
 
-1. __Minimum Spanning Tree (MST)__, build the [MST](http://en.m.wikipedia.org/wiki/Minimum_spanning_tree) using [Kruskal's algorithm](http://en.wikipedia.org/wiki/Kruskal's_algorithm) and then do a __Depth-first Tree Tour__. [link](http://www.youtube.com/watch?v=HWHZAtQl1vI) to video. 
+        public boolean search(String query) {
+            return root.trieSearch(query);
+        }
+    }
 
-	1. Sort all edges from small to large, then add edges into MST as long as no cycle is created. In the end, a MST is achieved. 
-	
-	1. Do Depth-first Tree Tour(DFTT)
-	
-	1. Length of DFTT is 2 x weight of MST.
-	
-	1. Skip some nodes that's only visited once. 
+#### Suffix Tree
 
-	1. We get an legitimate solution. 
+Suffix tree might also consider the __List of indexes__ thing, which I do not take into consideration in my code. 
 
-### Iterative improvement
+    public class SuffixTree {
+        TrieNode root;
 
-Now these are the solutions. However we can improve it by doing __2-opt Swap__. 
+        public SuffixTree(String input) {
+            root = new TrieNode(false);
 
-It means selecting 2 edges at random. If swapping results in an improvement, then keep it. Keep doing this. [link](http://www.youtube.com/watch?v=SC5CX8drAtU) to video. 
+            for (int i = 0; i < input.length(); i++) {
+                root.insert(input.substring(i));
+            }
+        }
+
+        public boolean search(String query) {
+            return root.suffixTreeSearch(query);
+        }
+    }
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Fundamental] Min-Max Algorithm]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/30/Min-max-algorithm/"/>
-    <updated>2014-08-30T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/30/Min-max-algorithm</id>
-    <content type="html"><![CDATA[### Definition
+    <title type="html"><![CDATA[[Fundamental] Suffix Tree]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/27/suffix-tree/"/>
+    <updated>2015-01-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/27/suffix-tree</id>
+    <content type="html"><![CDATA[[ref](http://www.geeksforgeeks.org/pattern-searching-set-8-suffix-tree-introduction/)
 
-For every two-person, zero-sum game with finitely many strategies, there exists a value V and a mixed strategy for each player, such that
+### Suffix tree
 
-1. Given player 2's strategy, the best payoff possible for player 1 is V, and
-1. Given player 1's strategy, the best payoff possible for player 2 is −V.
+Both KMP Algorithm and Rabin Karp Algorithm __pre-process the pattern__ to make the pattern searching faster. The best time complexity that we could get by preprocessing pattern is __O(n), where n is length of the text__. 
 
-Equivalently, Player 1's strategy guarantees him a payoff of V regardless of Player 2's strategy. 
+Now we will discuss an approach that __pre-processes the text__. A suffix tree is built of the text. After preprocessing text (building suffix tree of text), we can __search any pattern in O(m) time__ where m is length of the pattern.
 
-Put it in a simple way: MAX tries to __max the utility__, and MIN try to __min it__. 
+Though search is very fast - just proportional to length of the pattern, it may become costly if __the text changes frequently__. It is good for fixed text or less frequently changing text though.
 
-<img class="middle" src="/assets/images/minmax-example-1.png">
+#### Suffix Tree VS. Trie
 
-### Steps
+__A Suffix Tree is a compressed trie of all suffixes of the given text__. 
 
-1. Have a __heuristic evaluation function__, which gives a value to non-final game states. 
-1. Generate the values down to terminal states. 
-1. Min-max calculate the utility, like this: 
+#### Compressed Trie
 
-<img class="middle" src="/assets/images/minmax-example-2.png">
+__A Compressed Trie__ is obtained from standard trie by joining chains of single nodes. 
 
-### An example
+Example, a standard trie: 
 
-Othello game:
+<img class="middle" src="/assets/images/standardtrieNew.png">
 
-> A player can place a new piece in a position if there exists at least one straight (horizontal, vertical, or diagonal) occupied line between the new piece and another piece of the same kind, with one or more contiguous pieces from the opponent player between them. 
->
-> After placing the new piece, the pieces from the opponent player will be captured and become the pieces from the same player. 
->
-> The player with the most pieces on the board wins. 
+A Compressed Trie: 
 
-First, the __heuristic evaluation function__:
+<img class="middle" src="/assets/images/CompressedTrieNew.png">
 
-<img class="middle" src="/assets/images/minmax-example-2.png">
+#### build a Suffix Tree
 
-Now, generate terminal level utility values: 
+1. Generate all suffixes of given text.
+1. Consider all suffixes as individual words and build a compressed trie.
 
-<img class="middle" src="/assets/images/minmax-example-3.png">
+Eg.
 
-Now, do min-max algorithm: 
+    banana\0
+    anana\0
+    nana\0
+    ana\0
+    na\0
+    a\0
+    \0
 
-<img class="middle" src="/assets/images/minmax-example-4.png">
-
-### Pruning
-
-The performance of the naïve minimax algorithm may be improved dramatically, without affecting the result, [by the use of](http://en.wikipedia.org/wiki/Minimax#Minimax_algorithm_with_alternate_moves) __alpha-beta pruning__. 
-
-[Alpha–beta pruning](http://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning) is a search algorithm that seeks to decrease the number of nodes that are evaluated by the minimax algorithm in its search tree. 
-
-<img class="middle" src="/assets/images/minmax-ab-pruning.png">
+Example question: __[CC150v4] 20.8 Full Text Search (Suffix Tree)__
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Fundamental] A-Star Search]]></title>
-    <link href="http://okckd.github.io/blog/2014/08/30/A-start-search/"/>
-    <updated>2014-08-30T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/08/30/A-start-search</id>
-    <content type="html"><![CDATA[### Definition
+    <title type="html"><![CDATA[[Fundamental] Suffix Array]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/27/suffix-array/"/>
+    <updated>2015-01-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/27/suffix-array</id>
+    <content type="html"><![CDATA[[ref](http://www.geeksforgeeks.org/suffix-array-set-1-introduction/)
 
-A* is a computer algorithm that is widely used in pathfinding and graph traversal. 
+### Suffix Array
 
-It uses a knowledge-plus-heuristic cost function like this: 
+A suffix array is a sorted array of all suffixes of a given string. 
 
-> f (n) = g(n) + h(n)
->
-> f (n): estimated total cost of path through n to goal
->
-> g(x) = past path-cost function
->
-> h(x) = future path-cost function, which is an admissible "heuristic estimate" of the distance from x to the goal
+__Any suffix tree based algorithm__ can be replaced with an algorithm __that uses a suffix array__ enhanced with additional information and solves the same problem in the same time complexity. 
 
-What sets A* __apart from a greedy best-first search__ is that it also takes the distance already traveled into account.
+__Naive algorithm__ for construction of suffix array is to consider all suffixes, sort them using a O(nLogn) sorting algorithm and while sorting, maintain original indexes. Time complexity is _O(n^2 * Logn)__. 
+
+There is an advanced __nLogn Algorithm__ algorithm available to read [here](http://www.geeksforgeeks.org/suffix-array-set-2-a-nlognlogn-algorithm/). Basic idea is to "Sort according to first two characters" and then "according to first four character". 
+
+Example question: __[Facebook] Query Search (HashMap, suffix array)__. 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Fundamental] Prefix Tree]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/27/prefix-tree/"/>
+    <updated>2015-01-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/27/prefix-tree</id>
+    <content type="html"><![CDATA[[ref](http://www.geeksforgeeks.org/trie-insert-and-search/)
+
+### Prefix tree
+
+1. Building a well balanced BST needs time proportional to M * log N, where M is maximum string length and N is number of keys in tree. 
+1. Using trie, search in O(M) time. 
+1. The penalty is on trie storage requirements.
 
 ### Implementation
 
-[Maintains a priority queue](http://en.wikipedia.org/wiki/A*_search_algorithm#Process) (lower f(x) means higher priority). At each step, node with the lowest f(x) value is removed from the queue, and neighbors are added to the queue. 
+1. Every node of trie consists of multiple branches. 
+1. Each branch represents a possible character of keys. 
+1. Mark the last node of every key as leaf node. 
 
-This continues until a goal node has a lower f value than any node in the queue. Goal found! 
+	struct trie_node
+	{
+		int value; /* Used to mark leaf nodes */
+		trie_node_t *children[ALPHABET_SIZE];
+	};
 
-### Relationship with Dijkstra
+Note that a __non-terminating node can also be marked as leaf__. Eg. 
 
-__[Dijkstra is a special case](http://stackoverflow.com/a/1332478) for A*__ (when the [heuristics is 0](http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Algorithm)).
+                       root
+                    /   \    \
+                    t  'a'    b
+                    |   |     |
+                    h   n    'y'
+                    |   |  \    \
+                   'e'  s  'y'  'e'
+                 /  |   |
+                i   r   w
+               /    |   |
+             'r'   'e'  e
+                        |
+                       'r'
 
-Illustration (A-star):
+The leaf nodes are quoted in ''.
 
-<img class="middle" src="/assets/images/path-find-Astar.gif">
+Insert and search costs __O(key_length)__, however the memory requirements of trie is __O(ALPHABET_SIZE * key_length * N)__ where N is number of keys in trie. 
 
-Illustration (Dijkstra's algorithm):
-
-<img class="middle" src="/assets/images/path-find-Dijkstras.gif">
+__Compressed trie__, ternary search tree, etc. can be used to minimize memory requirements of trie. 
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Fundamental] Recap on Java HashMap]]></title>
-    <link href="http://okckd.github.io/blog/2014/05/10/Recap-java-hashmap/"/>
-    <updated>2014-05-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/05/10/Recap-java-hashmap</id>
-    <content type="html"><![CDATA[#### The HashMap
+    <title type="html"><![CDATA[[Fundamental] Pattern Searching Algorithms]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/27/pattern-searching-algorithms/"/>
+    <updated>2015-01-27T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/27/pattern-searching-algorithms</id>
+    <content type="html"><![CDATA[[ref](http://www.geeksforgeeks.org/tag/pattern-searching/page/2/)
 
-<blockquote cite="http://www.sparknotes.com/cs/searching/hashtables/section1.html">
-<div>
-<a href="http://www.sparknotes.com/cs/searching/hashtables/section1.html">link</a>
-</div>
-<p>
-A hash table is made up of two parts: an array (the actual table where the data to be searched is stored) and a mapping function, known as a hash function. 
-</p>
-<p>
-The hash function is a mapping from the input space to the integer space that defines the indices of the array. In other words, the hash function provides a way for assigning numbers to the input data such that the data can then be stored at the array index corresponding to the assigned number.
-</p>
-</blockquote>
+### Overview
 
-For example, if I want to store <"Durant">, I pass "Durant" into the hash function, and get (let's say) number 3. So in the Hash Table, it will store table(3 -> "Durant"). 
+strStr() is a classic question in CS. There are various ways to solve (which we have discussed before), this is a summarization: 
 
-In this way, the __searching of HashMap can almost achieve  O(1) time in best case__ (like array access). 
+1. naive - O(m * n) 
 
-However,
+1. [KMP](http://www.geeksforgeeks.org/searching-for-patterns-set-2-kmp-algorithm/) - O(n) in worst case
 
-<blockquote cite="http://stackoverflow.com/a/9214421">
-<div>
-<a href="http://stackoverflow.com/a/9214421">link</a>
-</div>
-<p>
-For average case, It really is (as the wikipedia page says) O(1+n/k) where K is the hash table size. If K is large enough, then the result is effectively O(1). But suppose K is 10 and N is 100. In that case each bucket will have on average 10 entries, so the search time is definitely not O(1); it is a linear search through up to 10 entries.
-</p>
-</blockquote>
+1. [Rabin-Karp](http://www.geeksforgeeks.org/searching-for-patterns-set-3-rabin-karp-algorithm/), rolling hash - between O(m * n) and O(m + n)
 
-In practise, we will just assume search in HashMap always O(1). 
+    Matches the hash value of the pattern with the hash value of pattern. If the hash values match, then only it starts matching individual characters. 
 
-Below is a great conclusion.
+1. [Modified naive algo](http://www.geeksforgeeks.org/pattern-searching-set-4-a-naive-string-matching-algo-question/), only work if pattern contains no duplicate characters. 
 
-<blockquote cite="http://stackoverflow.com/a/9214594">
-<div>
-<a href="http://stackoverflow.com/a/9214594">link</a>
-</div>
-<p><a href="http://en.wikipedia.org/wiki/Hash_table">Hash tables</a> are <code>O(1)</code> <strong>average and <a href="http://en.wikipedia.org/wiki/Amortized_analysis">amortized</a></strong> case complexity, however is suffers from <code>O(n)</code> <strong>worst case</strong> time complexity. [And I think this is where your confusion is]</p>
+    Only match the first char. This case is quite boring, can skip. 
 
-<p>Hash tables suffer from <code>O(n)</code> worst time complexity due to two reasons:</p>
+1. Suffix tree
 
-<ol>
-<li>If too many elements were hashed into the same key: looking inside this key may take <code>O(n)</code> time.</li>
-<li>Once a hash table has passed its <a href="http://en.wikipedia.org/wiki/Load_balancing_%28computing%29">load balance</a> - it has to rehash [create a new bigger table, and re-insert each element to the table]. </li>
-</ol>
-
-<p>However, it is said to be <code>O(1)</code> average and amortized case because:</p>
-
-<ol>
-<li>It is very rare that many items will be hashed to the same key [if you chose a good hash function and you don't have too big load balance.</li>
-<li>The rehash operation, which is <code>O(n)</code>, can at most happen after <code>n/2</code> ops, which are all assumed <code>O(1)</code>: Thus when you sum the average time per op, you get : <code>(n*O(1) + O(n)) / n) = O(1)</code></li>
-</ol>
-</blockquote>]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Fundamental] Java Bit Operation]]></title>
-    <link href="http://okckd.github.io/blog/2014/05/10/Java-bit-operation/"/>
-    <updated>2014-05-10T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2014/05/10/Java-bit-operation</id>
-    <content type="html"><![CDATA[### Bit operators
-
-<table border="2">
-  <tr>
-    <th>operator</th>
-    <th>what is means</th>
-  </tr>
-  <tr>
-    <td>~</td>
-    <td>invert every bit</td>
-  </tr>
-  <tr>
-    <td>&lt;&lt;</td>
-    <td>shift left (same as *2)</td>
-  </tr>
-  <tr>
-    <td>&gt;&gt;</td>
-    <td>signed shift right</td>
-  </tr>
-  <tr>
-    <td>&gt;&gt;&gt;</td>
-    <td>unsigned shift right</td>
-  </tr>
-  <tr>
-    <td>^</td>
-    <td>XOR</td>
-  </tr>
-  <tr>
-    <td>|</td>
-    <td>OR</td>
-  </tr>
-</table>
-<br />
-
-Note the unsigned right shift operator ">>>" shifts a __zero into the leftmost position__, while the leftmost position after ">>" __depends on sign extension__.
+    Will discuss in details. 
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Question | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/question/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-01-21T00:50:28+08:00</updated>
+  <updated>2015-02-05T23:59:04+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -14,532 +14,244 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[Palantir] Largest Basin Size in Matrix]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/20/basin-size-in-matrix/"/>
-    <updated>2015-01-20T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/20/basin-size-in-matrix</id>
+    <title type="html"><![CDATA[[Amazon] Grep Command Interview Question]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/04/grep-command-interview-question/"/>
+    <updated>2015-02-04T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/04/grep-command-interview-question</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.careercup.com/question?id=15380670)
+[link](http://www.careercup.com/question?id=1799)
 
-A group of farmers has some elevation data, and we’re going to help them understand how rainfall flows over their farmland.
-
-We’ll represent the land as a two-dimensional array of altitudes and use the following model, based on the idea that water flows downhill:
-
-If a cell’s neighboring cells all have higher altitudes, we call this cell a sink; water collects in sinks. Two cells are neighbors if the rows and columns each differ by at most one. Hence an interior cell will have eight neighbors, a cell on the edge will have five neighbors, and a cell in a corner will have three neighbors.
-
-Otherwise, water will flow to the neighboring cell with the lowest altitude. If a cell is not a sink, you may assume it has a unique lowest neighbor and that this neighbor will be lower than the cell.
-Cells that drain into the same sink – directly or indirectly – are said to be part of the same basin.
- 
-Your challenge is to partition the map into basins. In particular, given a map of elevations, your code should partition the map into basins and output the sizes of the basins, in descending order.
- 
-Assume the elevation maps are square. Input will begin with a line with one integer, S, the height (and width) of the map. The next S lines will each contain a row of the map, each with S integers – the elevations of the S cells in the row.  Some farmers have small land plots such as the examples below, while some have larger plots.  However, in no case will the total size of the farmland exceed 1000x1000.
- 
-Note: The input uses unix line endings (\n). If you try to view the sample inputs on a windows machine with a program that does not convert line endings (like Notepad), you will see the input appear all on a single line.
- 
-Your code should output a space-separated list of the basin sizes, in descending order. (Trailing spaces are ignored.)
- 
-While correctness and performance are the most important parts of this problem, a human will be reading your solution, so please make an effort to submit clean, readable code. In particular, do not write code as if you were solving a problem for a competition.
- 
-A few examples are below.
- 
-Input:
-
-           3
-           1 5 2
-           2 4 7
-           3 6 9
-
-Output:
-
-                7 2
- 
-The basins, labeled with A’s and B’s, are:
-
-           A A B
-           A A B
-           A A A
-
-Input:
-
-           1
-           10
-
-Output:
-
-           1
- 
-There is only one basin in this case.
-
-Input:
-
-           5
-           1 0 2 5 8
-           2 3 4 7 9
-           3 5 7 9 9
-           1 2 5 5 3
-           3 3 5 1 0
-
-Output:
-
-           10 8 7
-
-The basins, labeled with A’s, B’s, and C’s, are:
-
-           A A A A A
-           A A A A A
-           B B B C C
-           B B C C C
-           B B C C C
-
-Input:
-
-           4
-           0 3 2 3
-           3 2 1 4
-           3 4 3 3
-           5 5 2 0
-
-Output:
-
-           6 5 5
-
-The basins, labeled with A’s, B’s, and C’s, are:
-
-           A A B B
-           A A B B
-           A B C C
-           A C C C
+> You have 50,000 html files, some of which contain phone numbers. How would you create a list of all the files which contain phone numbers? 
 
 ### Solution
 
-I did not find a 'best' solution online, but there's a good enough explanation available [here](http://stackoverflow.com/questions/24336686/find-the-largest-basin-size-in-a-given-matrix): 
+This is a famous inteview question by former Amazon engineer [Steve Yegge](https://sites.google.com/site/steveyegge2/five-essential-phone-screen-questions): 
 
-1. First store index according to their heights.
+> About 25% to 35% of all software development engineer candidates, independent of experience level, cannot solve this problem, even given the entire interview hour and lots of hints. 
 
-1. Then iterate from smallest height to largest height.
-
-1. If current index is not visited, make it Basin surface (where water can collect), and make all higher neighbours as Non-Basin surface.
-
-1. Repeat step 3 till all indexes are visited.
-
-1. DFS find each basin
+This question tests your understanding of scripting languages. 
 
 ### Code
 
-I post my solution written in 2013. 
-
-    public class MeSolution2013 {
-
-        public static void main(String args[]) {
-
-            String inputFile;
-            int testCaseNumber = 1;
-
-            while (true) {
-                inputFile = "input" + testCaseNumber + ".txt";
-                BufferedReader in;
-                try {
-                    URI uri = MeSolution2013.class.getResource(inputFile).toURI();
-                    in = new BufferedReader(new FileReader(new File(uri)));
-                } catch (Exception e) {
-                    // there is not more test cases
-                    break;
-                }
-
-                Scanner sc = new Scanner(in);
-                int length = sc.nextInt();
-                int[][] elevation = new int[length][length];
-                for (int i = 0; i < length; i++) {
-                    for (int j = 0; j < length; j++) {
-                        elevation[i][j] = sc.nextInt();
-                    }
-                }
-
-                List<Pair> sinkList = new ArrayList<Pair>();
-
-                // first find out all sink nodes
-                for (int i = 0; i < length; i++) {
-                    for (int j = 0; j < length; j++) {
-                        if (elevation[i][j] < lowestNeighbor(i, j, elevation)) {
-                            // (i,j) is a sink point
-                            sinkList.add(new Pair(i, j));
-                        }
-                    }
-                }
-
-                // then for each sink node, return the count
-                int[] basinSize = new int[sinkList.size()];
-                for (int i = 0; i < sinkList.size(); i++) {
-                    basinSize[i] = count(sinkList.get(i).X, sinkList.get(i).Y,
-                            elevation);
-                }
-                Arrays.sort(basinSize);
-
-                for (int i = sinkList.size() - 1; i >= 0; i--) {
-                    System.out.print(basinSize[i]);
-                    if (i != 0)
-                        System.out.print(" ");
-                }
-                System.out.println();
-                testCaseNumber++;
-            }
-        }
-
-        static int count(int x, int y, int[][] ele) {
-
-            int num = 1;
-
-            // if the neighbour is higher than current, add count to current count
-            // if all neighbours are lower than current, return 1
-
-            // diagonal neighbors
-            if (withinBound(x - 1, y, ele) && rainFlowFrom(x, y, x - 1, y, ele)) { // upper
-                                                                                    // elment
-                num += count(x - 1, y, ele);
-            }
-            if (withinBound(x + 1, y, ele) && rainFlowFrom(x, y, x + 1, y, ele)) { // lower
-                                                                                    // element
-                num += count(x + 1, y, ele);
-            }
-            if (withinBound(x, y - 1, ele) && rainFlowFrom(x, y, x, y - 1, ele)) { // left
-                                                                                    // hand
-                                                                                    // side
-                num += count(x, y - 1, ele);
-            }
-            if (withinBound(x, y + 1, ele) && rainFlowFrom(x, y, x, y + 1, ele)) { // right
-                                                                                    // hand
-                                                                                    // side
-                num += count(x, y + 1, ele);
-            }
-
-            // diagonal neighbors
-            if (withinBound(x - 1, y - 1, ele)
-                    && rainFlowFrom(x, y, x - 1, y - 1, ele)) { // upper elment
-                num += count(x - 1, y - 1, ele);
-            }
-            if (withinBound(x + 1, y + 1, ele)
-                    && rainFlowFrom(x, y, x + 1, y + 1, ele)) { // lower element
-                num += count(x + 1, y + 1, ele);
-            }
-            if (withinBound(x + 1, y - 1, ele)
-                    && rainFlowFrom(x, y, x + 1, y - 1, ele)) { // left hand side
-                num += count(x + 1, y - 1, ele);
-            }
-            if (withinBound(x - 1, y + 1, ele)
-                    && rainFlowFrom(x, y, x - 1, y + 1, ele)) { // right hand side
-                num += count(x - 1, y + 1, ele);
-            }
-
-            return num;
-        }
-
-        static Boolean withinBound(int x, int y, int[][] ele) {
-            int bound = ele.length;
-            return (x >= 0 && x < bound && y >= 0 && y < bound);
-        }
-
-        static Boolean rainFlowFrom(int a, int b, int c, int d, int[][] ele) {
-            // rain in (c,d) flows into (a,b).
-            if (ele[a][b] >= ele[c][d])
-                // if (a,b) is higher than (c,d), impossible to flow this way
-                return false;
-
-            int lowest = lowestNeighbor(c, d, ele);
-
-            return (ele[a][b] == lowest);
-            // the question states "you may assume it has a unique lowest neighbor"
-            // so if flow to (a,b), then that is the unique lowest height.
-        }
-
-        static int lowestNeighbor(int a, int b, int[][] ele) {
-            int height = 9999999;
-
-            // adjacent neighbor
-            if (withinBound(a - 1, b, ele) && ele[a - 1][b] < height) {
-                height = ele[a - 1][b];
-            }
-            if (withinBound(a + 1, b, ele) && ele[a + 1][b] < height) {
-                height = ele[a + 1][b];
-            }
-            if (withinBound(a, b - 1, ele) && ele[a][b - 1] < height) {
-                height = ele[a][b - 1];
-            }
-            if (withinBound(a, b + 1, ele) && ele[a][b + 1] < height) {
-                height = ele[a][b + 1];
-            }
-
-            // diagonal neighbor
-            if (withinBound(a - 1, b - 1, ele) && ele[a - 1][b - 1] < height) {
-                height = ele[a - 1][b - 1];
-            }
-            if (withinBound(a + 1, b - 1, ele) && ele[a + 1][b - 1] < height) {
-                height = ele[a + 1][b - 1];
-            }
-            if (withinBound(a - 1, b + 1, ele) && ele[a - 1][b + 1] < height) {
-                height = ele[a - 1][b + 1];
-            }
-            if (withinBound(a + 1, b + 1, ele) && ele[a + 1][b + 1] < height) {
-                height = ele[a + 1][b + 1];
-            }
-            return height;
-        }
-    }
-
-    class Pair {
-
-        public int X;
-        public int Y;
-
-        public Pair(int _x, int _y) {
-            X = _x;
-            Y = _y;
-        }
-    }
+    grep -l -R --perl-regexp "\b(\(\d{3}\)\s*|\d{3}-)\d{3}-\d{4}\b" * > output.txt
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[Question] Check if Given Point Inside Polygon]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/19/check-if-point-inside-polygon/"/>
-    <updated>2015-01-19T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/19/check-if-point-inside-polygon</id>
-    <content type="html"><![CDATA[### Question
+    <title type="html"><![CDATA[[Question] Stock Span Problem (Couting BST)]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/01/stock-span-problem/"/>
+    <updated>2015-02-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/01/stock-span-problem</id>
+    <content type="html"><![CDATA[### Question 
 
-[link](http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/)
+> Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price. 
 
-> Given a polygon and a point ‘p’, find if ‘p’ lies inside the polygon or not. The points lying on the border are considered inside.
+Definition of 'span' have got 2 variant: 
 
-<img class="middle" src="/assets/images/point-in-polygon.png">
+### Variant 1
+
+[link](http://www.geeksforgeeks.org/the-stock-span-problem/)
+
+> Span is the number of consecutive days right before that day, which have less or equal stock value. 
+
+> (Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.
 
 ### Solution
 
-Prerequisite reading: __[Question] Check if two line segments intersect__. 
+<img class="middle" src="/assets/images/StockSpanProblem1.png">
 
-Suggested by G4G, this is a simple idea to check:
+Use stack. 
 
-<img class="middle" src="/assets/images/polygon31-300x169.png">
+### Variant 2
 
-1. Draw a horizontal line to the right of each point and extend it to infinity
+[link](http://www.careercup.com/question?id=4825417139617792)
 
-1. Count the number of times the line intersects with polygon edges.
-
-1. A point is inside the polygon if either count of intersections is odd or point lies on an edge of polygon. 
-
-1. Note the special case of point 'g'. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Check if Two Line Segments Intersect]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/19/check-if-line-segment-intersect/"/>
-    <updated>2015-01-19T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/19/check-if-line-segment-intersect</id>
-    <content type="html"><![CDATA[### Question
-
-[link](http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/)
-
-> Given two line segments (p1, q1) and (p2, q2), check if 2 line segments intersect. 
-
-### Orientation 
-
-Considering 3 pointer, orientation can be: 
-
-1. counterclockwise
-1. clockwise
-1. colinear (not considering direction)
-
-<img class="middle" src="/assets/images/line-orientation.png">
-
-Note that orientation only tells the order and sequence relationship of 3 points. __It tells nothing about intersection__. 
-
-### Intersection
-
-Considering 2 line segments: (p1,q1) and (p2,q2). 
-
-#### Case 1: general
-
-Two line segment intersect if __BOTH__ the 2 conditions hold: 
-
-1. (p1, q1, p2) and (p1, q1, q2) have different orientations and
-1. (p2, q2, p1) and (p2, q2, q1) have different orientations
-
-<img class="middle" src="/assets/images/GeneralCaseExamples1.png">
-
-<img class="middle" src="/assets/images/examplesGeneralCase211.png">
-
-#### Case 2: special
-
-The speical case is: __what if all 4 pointers (p1, q1, p2, q2) are all on the same line__!!! Well, this definitely can happen. 
-
-If so, check if the values of x-axis and y-axis intersect. I.e. the below 2 cases: 
-
-<img class="middle" src="/assets/images/examplesSpecialCase1.png">
-
-### Code 
-
-Translated from G4G: 
-
-	public boolean intersect(Pair p1, Pair q1, Pair p2, Pair q2) {
-
-		int o1 = orientation(p1, q1, p2);
-		int o2 = orientation(p1, q1, q2);
-		int o3 = orientation(p2, q2, p1);
-		int o4 = orientation(p2, q2, q1);
-
-		// General case
-		if (o1 != o2 && o3 != o4) {
-			// 2 lines intersect
-			return true;
-		}
-
-		// Special Cases
-		Segment seg1 = new Segment(p1, q1);
-		Segment seg2 = new Segment(p2, q2);
-
-		// p1, q1 and p2 are colinear and p2 lies on segment p1q1
-		if (o1 == 0 && onSegment(seg1, p2))
-			return true;
-
-		// p1, q1 and p2 are colinear and q2 lies on segment p1q1
-		if (o2 == 0 && onSegment(seg1, q2))
-			return true;
-
-		// p2, q2 and p1 are colinear and p1 lies on segment p2q2
-		if (o3 == 0 && onSegment(seg2, p1))
-			return true;
-
-		// p2, q2 and q1 are colinear and q1 lies on segment p2q2
-		if (o4 == 0 && onSegment(seg2, q1))
-			return true;
-
-		return false; // Doesn't fall in any of the above cases
-	}
-
-	private boolean onSegment(Segment seg, Pair q) {
-		// check if q lies on line segment seg(p1, p2)
-		if (q.x <= Math.max(seg.p1.x, seg.p2.x)
-				&& q.x >= Math.min(seg.p1.x, seg.p2.x)
-				&& q.y <= Math.max(seg.p1.y, seg.p2.y)
-				&& q.y >= Math.min(seg.p1.y, seg.p2.y))
-			return true;
-
-		return false;
-	}
-
-	private int orientation(Pair first, Pair second, Pair third) {
-		int val = (second.y - first.y) * (third.x - second.x)
-				- (second.x - first.x) * (third.y - second.y);
-		if (val == 0) {
-			// colinear
-			return 0;
-		} else {
-			// clock or counterclock wise (1 or -1)
-			return val / Math.abs(val);
-		}
-	}
-
-	class Segment {
-		Pair p1;
-		Pair p2;
-
-		public Segment(Pair p1, Pair p2) {
-			this.p1 = p1;
-			this.p2 = p2;
-		}
-	}
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] Maximum Square Sub-matrix With All 1s]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/18/max-squre-with-all-1/"/>
-    <updated>2015-01-18T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/18/max-squre-with-all-1</id>
-    <content type="html"><![CDATA[### Question
-
-[link](http://www.geeksforgeeks.org/maximum-size-sub-matrix-with-all-1s-in-a-binary-matrix/)
-
-> Given a binary matrix, find out the maximum size square sub-matrix with all 1s. For example, consider the below binary matrix.
-
-       0  1  1  0  1 
-       1  1  0  1  0 
-       0  1  1  1  0
-       1  1  1  1  0
-       1  1  1  1  1
-       0  0  0  0  0
-
-> The maximum square sub-matrix with all set bits is size 9. Note we only find __square__, not rectangles! (this makes it much easier)
+> Span is the amount of days before the given day where the stock price is less than that of given day. 
 
 ### Solution
 
-Since __square only__, we can use DP. [Quoted answer](http://www.geeksforgeeks.org/maximum-size-sub-matrix-with-all-1s-in-a-binary-matrix/) below: 
+The top answer in [here](http://www.careercup.com/question?id=4825417139617792) is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3. 
 
-> Let the given binary matrix be M[R][C]. The idea of the algorithm is to construct an auxiliary size matrix S[][] in which each entry S[i][j] represents size of the square sub-matrix with all 1s including M[i][j] where M[i][j] is the rightmost and bottommost entry in sub-matrix.
+Instead, the __BST (AVL tree) solution is correct__. It's commented by user zahidbuet106. 
 
-> 1. Construct a sum matrix S[R][C] for the given M[R][C].
->
->   1. Copy first row and first columns as it is from M[][] to S[][]
->
->   1. For other entries, use following expressions to construct S[][]
+> insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the __size of left subtree__ at the node being inserted. This will give us our desired smaller element count. 
 
-             If M[i][j] is 1 then
-                S[i][j] = min(S[i][j-1], S[i-1][j], S[i-1][j-1]) + 1
-             Else /*If M[i][j] is 0*/
-                S[i][j] = 0
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Amazon] Lexicographic Rank of a String]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/18/Lexicographic-rank-of-string/"/>
-    <updated>2015-01-18T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/18/Lexicographic-rank-of-string</id>
-    <content type="html"><![CDATA[### Question
+> We also need to handle balancing the tree while insert. 
 
-[link](http://www.geeksforgeeks.org/lexicographic-rank-of-a-string/)
+__The key of this question is the special BST, where each node stores an additional counting number__. 
 
-> Given a string, find its rank among all its permutations sorted lexicographically. 
+This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it's ranking within the past history. 
 
-> For example, rank of “abc” is 1, rank of “acb” is 2, and rank of “cba” is 6.
+Read another very interesting post: __[CC150v5] 11.8 Get Rank in Stream of Integers__.
 
-### Solution
+### Code
 
-Let the given string be “__STRING__”. In the input string, ‘S’ is the first character. There are total 6 characters and __4 of them are smaller than ‘S’__. So there can be __4 * 5!__ smaller strings where first character is smaller than ‘S’, like following: 
+	class TreeNodePlus extends TreeNode {
+		int leftCount;
+		int dupCount;
 
-    R X X X X X
-    I X X X X X
-    N X X X X X
-    G X X X X X
-
-Repeat the same process for T, and we get: 
-
-    Rank = 4*5! + 4*4! + 3*3! + 1*2! + 1*1! + 0*0! = 597
-
-### Code 
-
-	public int getRank(String input) {
-		if (input == null || input.length() == 0) {
-			return 0;
+		public TreeNodePlus(int v, int leftC) {
+			super(v);
+			this.leftCount = leftC;
+			this.dupCount = 1;
 		}
-		input = input.toUpperCase();
-		return helper(input) + 1;
-	}
 
-	public int helper(String input) {
-		if (input == null || input.length() == 0) {
-			return 0;
-		}
-		char headChar = input.charAt(0);
-		int countSmallerThanHead = 0;
-		for (char ch : input.toCharArray()) {
-			if (ch < headChar) {
-				countSmallerThanHead++;
+		public int findRank(TreeNodePlus node) {
+			TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+			TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+			if (this == node) {
+				return 0;
+			} else if (node.val < this.val) {
+				if (this.left == null) {
+					return 0;
+				} else {
+					return leftBranch.findRank(node);
+				}
+			} else {
+				if (this.right == null) {
+					return this.leftCount + this.dupCount;
+				} else {
+					return this.leftCount + this.dupCount
+							+ rightBranch.findRank(node);
+				}
 			}
 		}
-		return countSmallerThanHead * Common.factorial(input.length() - 1)
-				+ helper(input.substring(1));
+
+		public TreeNodePlus insertNum(int num) {
+			TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+			TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+			if (num == this.val) {
+				this.dupCount++;
+				return this;
+			} else if (num < this.val) {
+				// insert num to the left branch
+				this.leftCount++;
+				if (this.left == null) {
+					this.left = new TreeNodePlus(num, 0);
+					return (TreeNodePlus) this.left;
+				} else {
+					return leftBranch.insertNum(num);
+				}
+			} else {
+				// insert num to the right branch
+				// this.leftCount does not change
+				if (this.right == null) {
+					this.right = new TreeNodePlus(num, 0);
+					return (TreeNodePlus) this.right;
+				} else {
+					return rightBranch.insertNum(num);
+				}
+			}
+		}
 	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Greedy] Each Employee 2 Events]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/01/each-employee-two-events/"/>
+    <updated>2015-02-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/01/each-employee-two-events</id>
+    <content type="html"><![CDATA[[link](http://www.careercup.com/question?id=7894677)
+
+### Question 
+
+> You are given N ranges of date offsets when N employees are present in an organization. Something like 
+
+        1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
+        2-6 
+        8-9 
+        .. 
+        1-14 
+
+> Organize an event on minimum number of days such that each employee can attend the event at least twice.
+
+### Solution
+
+__Greedy algorithm__, according to the [top answer](http://www.careercup.com/question?id=7894677): 
+
+1. First, sort all ranges based on ENDING date in increasing order (bucket or counting sort). 
+
+1. For each range, select last two days (because they produce maximum possibility to overlap next range) 
+
+1. Skip following ranges that also contains those two days, until:
+
+    1. a range that either covers only one day (we then select last day of this range) or 
+    1. does not cover any of the two (we then select last two days of this range). 
+
+1. Then continue.
+
+### Code
+
+not written
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Greedy] Activity Selection Problem]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem/"/>
+    <updated>2015-02-01T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem</id>
+    <content type="html"><![CDATA[[link](http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/)
+
+### Question 
+
+> Given n activities with their start and finish times. 
+
+> Select maximum number of activities that can be performed in one run. 
+
+> Example:
+
+         start[]  =  {1, 3, 0, 5, 8, 5};
+         finish[] =  {2, 4, 6, 7, 9, 9};
+
+         output[] = {0, 1, 3, 4}
+
+### Solution
+
+__Greedy algorithm__, according to [gfg](http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/): 
+
+1. Sort the activities according to their finishing time
+
+1. Select the first activity from the sorted array and print it.
+
+1. For the rest, if start time is greater than previous finish time, then select this activity.
+
+### Code
+
+not written.
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] 2D Bin Packing]]></title>
+    <link href="http://okckd.github.io/blog/2015/01/30/2d-bin-packing/"/>
+    <updated>2015-01-30T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/01/30/2d-bin-packing</id>
+    <content type="html"><![CDATA[### Question 
+
+[link](http://en.wikipedia.org/wiki/Bin_packing_problem)
+
+> Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.
+
+<img class="middle" src="/assets/images/bin-packing.png">
+
+### Solution
+
+Explanation from [here](http://stackoverflow.com/a/8765049): 
+
+1. Build a binary tree. Each branch in the tree contains a sprite. 
+1. Each __leaf node represents available space__. 
+1. Initially the tree has just the root node, which represents all available space. 
+1. To add a sprite to the tree, search the tree for an unoccupied (leaf) node __big enough__ to hold the sprite. 
+1. Turn that node from a leaf into a branch by setting the sprite as the node's occupant and giving the node two children. 
+1. One child represents the remaining space to the right of the sprite; 
+1. the other represents the remaining space below the sprite and the first child.
+
+For detailed implementation and code, refer to [this](http://codeincomplete.com/posts/2011/5/7/bin_packing/) comprehensite guide. BTW, it's used for __auto generating CSS Sprites__ which puts images into a large graph. 
 ]]></content>
   </entry>
   

@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a binary matrix, find out the maximum size square sub-matrix with all 1s. For example, consider the below binary matrix. 0 1 1 0 &hellip;">
+  <meta name="description" content="Question Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price. Definition of &lsquo;span& &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/01/18/max-squre-with-all-1/">[Question] Maximum Square Sub-matrix With All 1s</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/02/01/stock-span-problem/">[Question] Stock Span Problem (Couting BST)</a></h1>
     
     
       <p class="meta">
@@ -100,10 +100,10 @@
   
 
 
-<time datetime="2015-01-18T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2015/01/18/max-squre-with-all-1/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/18/max-squre-with-all-1/">Comments</a>
+           | <a href="/blog/2015/02/01/stock-span-problem/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/stock-span-problem/">Comments</a>
         
       </p>
     
@@ -112,38 +112,663 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.geeksforgeeks.org/maximum-size-sub-matrix-with-all-1s-in-a-binary-matrix/">link</a></p>
+<blockquote><p>Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price.</p></blockquote>
 
-<blockquote><p>Given a binary matrix, find out the maximum size square sub-matrix with all 1s. For example, consider the below binary matrix.</p></blockquote>
+<p>Definition of &lsquo;span&rsquo; have got 2 variant:</p>
 
-<pre><code>   0  1  1  0  1 
-   1  1  0  1  0 
-   0  1  1  1  0
-   1  1  1  1  0
-   1  1  1  1  1
-   0  0  0  0  0
-</code></pre>
+<h3>Variant 1</h3>
 
-<blockquote><p>The maximum square sub-matrix with all set bits is size 9. Note we only find <strong>square</strong>, not rectangles! (this makes it much easier)</p></blockquote>
+<p><a href="http://www.geeksforgeeks.org/the-stock-span-problem/">link</a></p>
+
+<blockquote><p>Span is the number of consecutive days right before that day, which have less or equal stock value.</p>
+
+<p>(Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>Since <strong>square only</strong>, we can use DP. <a href="http://www.geeksforgeeks.org/maximum-size-sub-matrix-with-all-1s-in-a-binary-matrix/">Quoted answer</a> below:</p>
+<p><img class="middle" src="/assets/images/StockSpanProblem1.png"></p>
 
-<blockquote><p>Let the given binary matrix be M[R][C]. The idea of the algorithm is to construct an auxiliary size matrix S[][] in which each entry S[i][j] represents size of the square sub-matrix with all 1s including M[i][j] where M[i][j] is the rightmost and bottommost entry in sub-matrix.</p>
+<p>Use stack.</p>
+
+<h3>Variant 2</h3>
+
+<p><a href="http://www.careercup.com/question?id=4825417139617792">link</a></p>
+
+<blockquote><p>Span is the amount of days before the given day where the stock price is less than that of given day.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The top answer in <a href="http://www.careercup.com/question?id=4825417139617792">here</a> is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3.</p>
+
+<p>Instead, the <strong>BST (AVL tree) solution is correct</strong>. It&rsquo;s commented by user zahidbuet106.</p>
+
+<blockquote><p>insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the <strong>size of left subtree</strong> at the node being inserted. This will give us our desired smaller element count.</p>
+
+<p>We also need to handle balancing the tree while insert.</p></blockquote>
+
+<p><strong>The key of this question is the special BST, where each node stores an additional counting number</strong>.</p>
+
+<p>This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it&rsquo;s ranking within the past history.</p>
+
+<p>Read another very interesting post: <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>class TreeNodePlus extends TreeNode {
+    int leftCount;
+    int dupCount;
+
+    public TreeNodePlus(int v, int leftC) {
+        super(v);
+        this.leftCount = leftC;
+        this.dupCount = 1;
+    }
+
+    public int findRank(TreeNodePlus node) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (this == node) {
+            return 0;
+        } else if (node.val &lt; this.val) {
+            if (this.left == null) {
+                return 0;
+            } else {
+                return leftBranch.findRank(node);
+            }
+        } else {
+            if (this.right == null) {
+                return this.leftCount + this.dupCount;
+            } else {
+                return this.leftCount + this.dupCount
+                        + rightBranch.findRank(node);
+            }
+        }
+    }
+
+    public TreeNodePlus insertNum(int num) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (num == this.val) {
+            this.dupCount++;
+            return this;
+        } else if (num &lt; this.val) {
+            // insert num to the left branch
+            this.leftCount++;
+            if (this.left == null) {
+                this.left = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.left;
+            } else {
+                return leftBranch.insertNum(num);
+            }
+        } else {
+            // insert num to the right branch
+            // this.leftCount does not change
+            if (this.right == null) {
+                this.right = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.right;
+            } else {
+                return rightBranch.insertNum(num);
+            }
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/limit-request-per-second/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/limit-request-per-second/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">link</a></p>
+
+<blockquote><p>有一个接口叫 void setRPS(int num);</p>
+
+<p>接下来不断有request过来，如何实现下面的接口，返回accept或者deny，</p></blockquote>
+
+<pre><code>bool process(int timestamp){
+
+}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Suggested by level 5 of <a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">this post</a>:</p>
 
 <ol>
-<li><p>Construct a sum matrix S[R][C] for the given M[R][C].</p></li>
-<li><p> Copy first row and first columns as it is from M[][] to S[][]</p></li>
-<li><p> For other entries, use following expressions to construct S[][]</p></li>
+<li>maintain a variable for the number of request processed/rejected.
+
+<ol>
+<li>This variable must be atomic, thus a <strong>AtomicInteger</strong>.</li>
+<li>the variable is called &lsquo;count&rsquo;</li>
 </ol>
+</li>
+<li>have a method to process request
+
+<ol>
+<li>if count &lt; limit, do it</li>
+<li>otherwise, reject</li>
+</ol>
+</li>
+<li><strong>This is the most important</strong>: clear the count every 1 seconds!
+
+<ol>
+<li>eg. LIMIT = 5r/s, so:</li>
+<li>the <strong>first 5 number of requests in every second</strong> are getting fulfilled</li>
+<li>from 6th request onward, the request all rejected, until the next second.</li>
+</ol>
+</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<pre><code>public class SetRps {
+
+    AtomicInteger count = new AtomicInteger(0);
+    int limit = -1;
+    int printIndex = 1;
+    long startTimestamp = -1;
+
+    void setRPS(int num) {
+        limit = num;
+    }
+
+    boolean process(long timestamp) {
+        // suppose timestamp is ms
+        synchronized (this) {
+            if (count.get() &lt; limit) {
+                // can process
+                count.incrementAndGet();
+                System.out.println(printIndex++ + ". processing request "
+                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
+                return true;
+            }
+            if (timestamp - startTimestamp &gt;= 1000) {
+                // every 1 seconds, reset
+                count.set(0);
+                startTimestamp = timestamp;
+                System.out.println("clear!");
+                return true;
+            }
+        }
+        return false;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/each-employee-two-events/">[Greedy] Each Employee 2 Events</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/each-employee-two-events/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/each-employee-two-events/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.careercup.com/question?id=7894677">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>You are given N ranges of date offsets when N employees are present in an organization. Something like</p></blockquote>
+
+<pre><code>    1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
+    2-6 
+    8-9 
+    .. 
+    1-14 
+</code></pre>
+
+<blockquote><p>Organize an event on minimum number of days such that each employee can attend the event at least twice.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to the <a href="http://www.careercup.com/question?id=7894677">top answer</a>:</p>
+
+<ol>
+<li><p>First, sort all ranges based on ENDING date in increasing order (bucket or counting sort).</p></li>
+<li><p>For each range, select last two days (because they produce maximum possibility to overlap next range)</p></li>
+<li><p>Skip following ranges that also contains those two days, until:</p>
+
+<ol>
+<li>a range that either covers only one day (we then select last day of this range) or</li>
+<li>does not cover any of the two (we then select last two days of this range).</li>
+</ol>
+</li>
+<li><p>Then continue.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/Activity-Selection-Problem/">[Greedy] Activity Selection Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/Activity-Selection-Problem/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>Given n activities with their start and finish times.</p>
+
+<p>Select maximum number of activities that can be performed in one run.</p>
+
+<p>Example:</p></blockquote>
+
+<pre><code>     start[]  =  {1, 3, 0, 5, 8, 5};
+     finish[] =  {2, 4, 6, 7, 9, 9};
+
+     output[] = {0, 1, 3, 4}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to <a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">gfg</a>:</p>
+
+<ol>
+<li><p>Sort the activities according to their finishing time</p></li>
+<li><p>Select the first activity from the sorted array and print it.</p></li>
+<li><p>For the rest, if start time is greater than previous finish time, then select this activity.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/30/2d-bin-packing/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/30/2d-bin-packing/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Bin_packing_problem">link</a></p>
+
+<blockquote><p>Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/bin-packing.png"></p>
+
+<h3>Solution</h3>
+
+<p>Explanation from <a href="http://stackoverflow.com/a/8765049">here</a>:</p>
+
+<ol>
+<li>Build a binary tree. Each branch in the tree contains a sprite.</li>
+<li>Each <strong>leaf node represents available space</strong>.</li>
+<li>Initially the tree has just the root node, which represents all available space.</li>
+<li>To add a sprite to the tree, search the tree for an unoccupied (leaf) node <strong>big enough</strong> to hold the sprite.</li>
+<li>Turn that node from a leaf into a branch by setting the sprite as the node&rsquo;s occupant and giving the node two children.</li>
+<li>One child represents the remaining space to the right of the sprite;</li>
+<li>the other represents the remaining space below the sprite and the first child.</li>
+</ol>
+
+
+<p>For detailed implementation and code, refer to <a href="http://codeincomplete.com/posts/2011/5/7/bin_packing/">this</a> comprehensite guide. BTW, it&rsquo;s used for <strong>auto generating CSS Sprites</strong> which puts images into a large graph.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/29/product-array-puzzle/">[Question] Product Array Puzzle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/29/product-array-puzzle/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/29/product-array-puzzle/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/amazon-interview-set-78-fresher-internship/">link</a></p>
+
+<blockquote><p>Given an array of integers , replace each element with the product of the remaining elements.</p></blockquote>
+
+<p>  Eg : Input &ndash; 1 2 3 4</p>
+
+<pre><code>   Output : 24 12 8 6 
+</code></pre>
+
+<blockquote><p>Do not use division.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Store the product of the left side elements for each integer, and also the right side.</p>
+
+<p>For eg : L[]= {1 , 1 , 2 , 6 }</p>
+
+<p>and R[] = { 24 , 12 , 4 , 1}</p>
+
+<p>The multiply R[i] and L[i] to get the resultant array.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/29/calculate-area/">[Apple] Calculate Area</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/29/calculate-area/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/29/calculate-area/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Calculate area:</p></blockquote>
+
+<p><img class="middle" src="/assets/images/calculate-area.jpg"></p>
+
+<h3>Analysis</h3>
+
+<p>We are only able to come up with 2 equations using the obvious relationship between semicircle and square. But we have x, y and z variables.</p>
+
+<p><img class="middle" src="/assets/images/calculate-area-xyz.jpg"></p>
+
+<p>How do we proceed?</p>
+
+<h3>Solution</h3>
+
+<p>Thanks to my girlfriend, who came up with the solution:</p>
+
+<p><img class="middle" src="/assets/images/calculate-area-solution.jpg"></p>
+
+<p>The tiny small shaded area can be calculated by substracting the <strong>isosceles triangle (等腰三角形)</strong> from a 1/12 circle.</p>
+
+<p>And the tiny small shaded area is simply a part of the larger shaded area.</p>
+
+<p>Do you own math.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/29/Packing-Rectangles/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/29/Packing-Rectangles/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://olympiads.win.tue.nl/ioi95/task/pack.html">link</a></p>
+
+<blockquote><p>Four rectangles are given. Find the smallest enclosing (new) rectangle into which these four may be fitted without overlapping. By smallest rectangle we mean the one with the smallest area.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/packing-rect.gif"></p>
+
+<h3>Greedy</h3>
+
+<p><a href="http://stackoverflow.com/a/1213571">Greedy</a> placement from <strong>large (area) to small</strong>.</p>
+
+<ol>
+<li>Put the largest rectangle remaining into your packed area.</li>
+<li>If it can&rsquo;t fit anywhere, place it in a place that extends the pack region as little as possible.</li>
+<li>Repeat until you finish with the smallest rectangle.</li>
+</ol>
+
+
+<h3>Optimal Solution</h3>
+
+<p><a href="http://stackoverflow.com/a/4264497">There is a trade-off</a> between implementation complexity/time and optimality, but there is a wide range of algorithms to choose from.</p>
+
+<p>Below is quoted:</p>
+
+<blockquote>
+    <div class="post-text" itemprop="text">
+<ol>
+<li><p>First-Fit Decreasing Height (FFDH) algorithm<br>
+FFDH packs the next item R (in non-increasing height) on the first level where R fits. If no level can accommodate R, a new level is created.<br>
+Time complexity of FFDH: O(n·log n).<br>
+Approximation ratio: FFDH(I)&lt;=(17/10)·OPT(I)+1; the asymptotic bound of 17/10 is tight.</p></li>
+<li><p>Next-Fit Decreasing Height (NFDH) algorithm<br>
+NFDH packs the next item R (in non-increasing height) on the current level if R fits. Otherwise, the current level is &#8220;closed&#8221; and a new level is created.<br>
+Time complexity: O(n·log n).<br>
+Approximation ratio: NFDH(I) &lt;= 2·OPT(I)+1; the asymptotic bound of 2 is tight.</p></li>
+<li><p>Best-Fit Decreasing Height (BFDH) algorithm<br>
+BFDH packs the next item R (in non-increasing height) on the level, among those that can accommodate R, for which the residual horizontal space is the minimum. If no level can accommodate R, a new level is created. </p></li>
+<li><p>Bottom-Left (BL) Algorithm<br>
+BL first order items by non-increasing width. BL packs the next item as near to the bottom as it will fit and then as close to the left as it can go without overlapping with any packed item. Note that BL is not a level-oriented packing algorithm.<br>
+Time complexity: O(n^2).<br>
+Approximation ratio: BL(I) &lt;= 3·OPT(I).  </p></li>
+<li><p>Baker&#8217;s Up-Down (UD) algorithm<br>
+UD uses a combination of BL and a generalization of NFDH. The width of the strip and the items are normalized so that the strip is of unit width. UD orders the items in non-increasing width and then divides the items into five groups, each with width in the range (1/2, 1], (1/3,1/2], (1/4,1/3], (1/5,1/4], (0,1/5]. The strip is also divided into five regions R1, ··· , R5. Basically, some items of width in the range (1/i+1, 1/i], for 1 &lt;= i &lt;= 4, are packed to region Ri by BL. Since BL leaves a space of increasing width from top to bottom at the right side of the strip, UD takes this advantage by first packing the item to Rj for j = 1, ··· , 4 (in order) from top to bottom. If there is no such space, the item is packed to Ri by BL. Finally, items of size at most 1/5 are packed to the spaces in R1, ··· , R4 by the (generalized) NFDH algorithm. Again if there is no space in these regions, the item is packed to R5 using NFDH.<br>
+Approximation ratio: UD(I) &lt;= (5/4) · OPT(I)+(53/8)H, where H is the maximum height of the items; the asymptotic bound of 5/4 is tight.</p></li>
+<li><p>Reverse-fit (RF) algorithm<br>
+RF also normalizes the width of the strip and the items so that the strip is of unit width. RF first stacks all items of width greater than 1/2. Remaining items are sorted in non-increasing height and will be packed above the height H0 reached by those greater than 1/2. Then RF repeats the following process. Roughly speaking, RF packs items from left to right with their bottom along the line of height H0 until there is no more room. Then packs items from right to left and from top to bottom (called reverse-level) until the total width is at least 1/2. Then the reverse-level is dropped down until (at least) one of them touches some item below. The drop down is somehow repeated.<br>
+Approximation ratio: RF(I) &lt;= 2·OPT(I).</p></li>
+<li><p>Steinberg&#8217;s algorithm<br>
+Steinberg&#8217;s algorithm, denoted as M in the paper, estimates an upper bound of the height H required to pack all the items such that it is proved that the input items can be packed into a rectangle of width W and height H. They then define seven procedures (with seven conditions), each to divide a problem into two smaller ones and solve them recursively. It has been showed that any tractable problem satisfies one of the seven conditions.<br>
+Approximation ratio: M(I) &lt;= 2·OPT(I).</p></li>
+<li><p>Split-Fit algorithm (SF)
+SF divides items into two groups, L1 with width greater than 1/2 and L2 at most 1/2. All items of L1 are first packed by FFDH. Then they are arranged so that all items with width more than 2/3 are below those with width at most 2/3. This creates a rectangle R of space with width 1/3. Remaining items in L2 are then packed to R and the space above those packed with L1 using FFDH. The levels created in R are considered to be below those created above the packing of L1.<br>
+Approximation ratio: SF(I) &lt;= (3/2) ·OPT(I) + 2; the asymptotic bound of 3/2 is tight.</p></li>
+<li><p>Sleator&#8217;s algorithm<br>
+Sleater&#8217;s algorithm consists of four steps:</p>
+
+<ol>
+<li><p>All items of width greater than 1/2 are packed on top of one another in the bottom of the strip. Suppose h0 is the height of the resulting packing All subsequent packing will occur above h0.</p></li>
+<li><p>Remaining items are ordered by non-increasing height. A level of items are packed (in non-increasing height order) from left to right along the line of height h0. </p></li>
+<li><p>A vertical line is then drawn in the middle to cut the strip into two equal halves (note this line may cut an item that is packed partially in the right half). Draw two horizontal line segments of length one half, one across the left half (called the left baseline) and one across the right half (called the right baseline) as low as possible such that the two lines do not cross any item.</p></li>
+<li><p>Choose the left or right baseline which is of a lower height and pack a level of items into the corresponding half of the strip until the next item is too wide.</p></li>
+</ol>
+
+<p>A new baseline is formed and Step (4) is repeated on the lower baseline until all items are packed.<br>
+Time complexity: O(n ·log n).<br>
+The approximation ratio of Sleator&#8217;s algorithm is 2.5 which is tight.</p></li>
+</ol>
+    </div>
 </blockquote>
 
-<pre><code>         If M[i][j] is 1 then
-            S[i][j] = min(S[i][j-1], S[i-1][j], S[i-1][j-1]) + 1
-         Else /*If M[i][j] is 0*/
-            S[i][j] = 0
-</code></pre>
+
+
 </div>
   
   
@@ -156,7 +781,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/01/18/lexicographic-order-from-dict/">[Google] Lexicographic Order From Dictionary</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a></h1>
     
     
       <p class="meta">
@@ -172,10 +797,10 @@
   
 
 
-<time datetime="2015-01-18T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2015/01/18/lexicographic-order-from-dict/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/18/lexicographic-order-from-dict/">Comments</a>
+           | <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/28/two-dimensional-knapsack-problem/">Comments</a>
         
       </p>
     
@@ -184,111 +809,76 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.careercup.com/question?id=13394663">link</a></p>
+<p><a href="http://blog.sina.com.cn/s/blog_8a24b3a3010190ak.html">link</a></p>
 
-<blockquote><p>Given set of words that are lexicographically sorted, return lexicographic order. E.g:</p></blockquote>
+<blockquote><p>给定n种物品和一背包。物品i的重量是wi，体积是bi，其价值为vi，背包的容量为C，容积为D。问应如何选择装入背包中的物品，使得装入背包中物品的总价值最大？</p>
 
-<pre><code>abc
-acd
-bcc
-bed
-bdc
-dab
-</code></pre>
+<p>在选择装入背包的物品时，对每种物品i只有两种选择，即装入背包或者不装入背包。不能将物品i装入背包多次，也不能只装入部分的物品i。试设计一个解此问题的动态规划算法，并分析算法的计算复杂性。</p></blockquote>
 
-<blockquote><p>The order of letters for the given example would be</p></blockquote>
+<h3>Analysis</h3>
 
-<pre><code>a-&gt;b-&gt;c-&gt;e-&gt;d
-</code></pre>
+<p>This is a extended question from <strong>[Question] 0-1 Knapsack Problem</strong>.</p>
+
+<p>Same solution, just use 3D-array for DP.</p>
 
 <h3>Solution</h3>
 
-<blockquote><p>Just form a graph(DAG) and do a topological sort.</p></blockquote>
+<p>First of all, define a 2D array, Knapsack(n,W) denotes getting &lsquo;n&#8217;th item, with weight &#8216;W&rsquo;. When n == 0 or W = 0, dp value is 0.</p>
 
-<p>Start from the first pair in the dictionary. Compare two strings in this pair <strong>till first mismatch</strong>.</p>
+<blockquote><p>int[][][] dp = new int[n + 1][W + 1][B + 1];</p></blockquote>
 
-<p>Eg: <strong>aad &amp; aab</strong>, in this case create an edge <strong>d &ndash;> b</strong>.</p>
+<p>Now if item &lsquo;n&rsquo; is able to fit in:</p>
 
-<p>More details is available <a href="http://codereview.stackexchange.com/questions/48292/return-the-lexicographic-order">here</a>.</p>
+<blockquote><p>dp[i][j][k] = max(dp[i-1][j][k] , dp[i-1][j-w[i]][k-b[i]] + v[i]);</p></blockquote>
+
+<p>If not able to fit in:</p>
+
+<blockquote><p>dp[i][j][k] = dp[i-1][j][k];</p></blockquote>
 
 <h3>Code</h3>
 
-<pre><code>public String lexicoOrder(String[] dict) {
-    String ans = "";
+<p>Code from <a href="http://blog.sina.com.cn/s/blog_8a24b3a3010190ak.html">绝对快乐一生</a>:</p>
 
-    // for each pair, maintain 2 HashMap
-    HashMap&lt;Character, Integer&gt; incount = new HashMap&lt;Character, Integer&gt;();
-    HashMap&lt;Character, List&lt;Character&gt;&gt; connection = new HashMap&lt;Character, List&lt;Character&gt;&gt;();
-    for (String str : dict) {
-        for (char c : str.toCharArray()) {
-            incount.put(c, 0);
-            connection.put(c, new ArrayList&lt;Character&gt;());
-        }
-    }
-    buildGraph(dict, incount, connection);
+<pre><code>int main()
+{
+   int i,j,k;
+   int n,c,d;
+   int w[MAX] = {0};   //重量
+   int b[MAX] = {0};   //体积
+   int v[MAX] = {0};   //价值
+   cout&lt;&lt;"请输入物品个数:";
+   cin&gt;&gt;n;
+   cout&lt;&lt;"请输入背包的容量及容积:";
+   cin&gt;&gt;c&gt;&gt;d;
+   cout&lt;&lt;"请依次输入各个物品的重量,体积,价值:(共"&lt;&lt;n&lt;&lt;"个)"&lt;&lt;endl;
+   for(i =1;i&lt;n+1;i++)
+   {
+       cin&gt;&gt;w[i]&gt;&gt;b[i]&gt;&gt;v[i];
+   }
 
-    // start topology sorting
-    Queue&lt;Character&gt; temp = new LinkedList&lt;Character&gt;();
-    for (char c : incount.keySet()) {
-        if (incount.get(c) == 0) {
-            temp.offer(c);
-            incount.remove(c);
-            // remove any node whose incount is 0
-        }
-    }
-    while (!temp.isEmpty()) {
-        char top = temp.poll();
-        ans += top;
-        // 'top' is next char in line. remove it and delete connections
-        List&lt;Character&gt; inNodes = connection.get(top);
-        for (char c : inNodes) {
-            // remove incount for all nodes from inNodes
-            incount.put(c, incount.get(c) - 1);
-            if (incount.get(c) == 0) {
-                incount.remove(c);
-                temp.offer(c);
-            }
-        }
-    }
-    if (incount.size() == 0)
-        return ans;
-    else
-        return "unable to find a valid char sequence.";
-}
+   int dp[50][50][50]={0}; 
+   //dp[i][j][k] i代表着第1到第i个物品，j代表的是重量，k代表的是容积，dp为最优价值
 
-public void buildGraph(String[] dict, HashMap&lt;Character, Integer&gt; incount,
-        HashMap&lt;Character, List&lt;Character&gt;&gt; connection) {
-    // build the graph map
-    // abc
-    // acd
-    // bcc
-    // bed
-    // bdc
-    // dab
-    for (int i = 0; i &lt; dict.length - 1; i++) {
-        // compare dict[i] and dict[i+1]
-        String str1 = dict[i];
-        String str2 = dict[i + 1];
-        int p = 0;
-        while (p &lt; str1.length() &amp;&amp; p &lt; str2.length()) {
-            if (str1.charAt(p) == str2.charAt(p)) {
-                p++;
-            } else {
-                break;
-            }
-        }
-        if (p == str1.length()) {
-            // this is special case eg. "ab" &amp; "abc"
-            // this will not give up any information about lexico order
-            continue;
-        }
-        char from = str1.charAt(p);
-        char to = str2.charAt(p);
-        // update incount
-        incount.put(to, incount.get(to) + 1);
-        // update connection
-        connection.get(from).add(to);
-    }
+   for(i=1;i&lt;n+1;i++)
+       for(j =1;j &lt;=c;j++)
+           for(k = 1 ;k &lt;= d ; k++)
+           {
+               if(w[i]&lt;=j&amp;&amp;b[i]&lt;=k)  
+               //当前物品重量小于当前容量，且体积小于容积时 ，才可以考虑装入物品的问题
+                   dp[i][j][k] = max(dp[i-1][j][k] , dp[i-1][j-w[i]][k-b[i]] + v[i]);
+               else dp[i][j][k] = dp[i-1][j][k];
+           }
+   cout&lt;&lt;"背包能放物品的最大价值为:"&lt;&lt;dp[n][c][d]&lt;&lt;endl;
+  int x[MAX] ={0};   //记录是否被选中
+  for(i =n;i&gt;1;i--)
+       if(dp[i][c][d]==dp[i-1][c][d])x[i] =0;
+      else {x[i]=1;c -= w[i];d -= b[i];}
+   x[1]=(dp[1][c][d])?1:0;
+   cout&lt;&lt;"被选入背包的物品的编号,质量和体积,价值分别是:"&lt;&lt;endl;
+   for(i=1;i&lt;&lt;/span&gt;n+1;i++)
+       if(x[i]==1)
+           cout&lt;&lt;"第"&lt;&lt;i&lt;&lt;"个物品: "&lt;&lt;w[i]&lt;&lt;"  "&lt;&lt;b[i]&lt;&lt;"  "&lt;&lt;v[i]&lt;&lt;endl;
+
 }
 </code></pre>
 </div>
@@ -303,7 +893,7 @@ public void buildGraph(String[] dict, HashMap&lt;Character, Integer&gt; incount,
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/01/18/Lexicographic-rank-of-string/">[Amazon] Lexicographic Rank of a String</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a></h1>
     
     
       <p class="meta">
@@ -319,921 +909,103 @@ public void buildGraph(String[] dict, HashMap&lt;Character, Integer&gt; incount,
   
 
 
-<time datetime="2015-01-18T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2015/01/18/Lexicographic-rank-of-string/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/18/Lexicographic-rank-of-string/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/lexicographic-rank-of-a-string/">link</a></p>
-
-<blockquote><p>Given a string, find its rank among all its permutations sorted lexicographically.</p>
-
-<p>For example, rank of “abc” is 1, rank of “acb” is 2, and rank of “cba” is 6.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Let the given string be “<strong>STRING</strong>”. In the input string, ‘S’ is the first character. There are total 6 characters and <strong>4 of them are smaller than ‘S’</strong>. So there can be <strong>4 * 5!</strong> smaller strings where first character is smaller than ‘S’, like following:</p>
-
-<pre><code>R X X X X X
-I X X X X X
-N X X X X X
-G X X X X X
-</code></pre>
-
-<p>Repeat the same process for T, and we get:</p>
-
-<pre><code>Rank = 4*5! + 4*4! + 3*3! + 1*2! + 1*1! + 0*0! = 597
-</code></pre>
-
-<h3>Code</h3>
-
-<pre><code>public int getRank(String input) {
-    if (input == null || input.length() == 0) {
-        return 0;
-    }
-    input = input.toUpperCase();
-    return helper(input) + 1;
-}
-
-public int helper(String input) {
-    if (input == null || input.length() == 0) {
-        return 0;
-    }
-    char headChar = input.charAt(0);
-    int countSmallerThanHead = 0;
-    for (char ch : input.toCharArray()) {
-        if (ch &lt; headChar) {
-            countSmallerThanHead++;
-        }
-    }
-    return countSmallerThanHead * Common.factorial(input.length() - 1)
-            + helper(input.substring(1));
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/17/find-nodes-distance-k-binary-tree/">[Amazon] Find Nodes of Distance K From Binary Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-17T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/17/find-nodes-distance-k-binary-tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/17/find-nodes-distance-k-binary-tree/">Comments</a>
+           | <a href="/blog/2015/01/28/implement-trie-suffix-tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/28/implement-trie-suffix-tree/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><h3>Trie Node</h3>
 
-<p><a href="http://www.careercup.com/question?id=15069740">link</a></p>
+<pre><code>public class TrieNode {
+    boolean isLeaf;
+    TrieNode[] child;
 
-<blockquote><p>Find the nodes at d distance from a certain node in a Binary Tree</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><a href="http://www.geeksforgeeks.org/print-nodes-distance-k-given-node-binary-tree/">There are two types</a> of nodes to be considered:</p>
-
-<ol>
-<li>Nodes in the subtree rooted of the target node.</li>
-<li>Other nodes, may be an ancestor of target, or a node in some other subtree.</li>
-</ol>
-
-
-<p>The details of find these nodes:</p>
-
-<ol>
-<li><p>Find the nodes which can be reached in k hops from the given node.</p></li>
-<li><p>Second part we look at those nodes <strong>on the upper part of the tree</strong>. The parent of the given node is 1 hop away. Hence in the <strong>other child subtree</strong> of the parent, we find nodes with k-1 hops.</p>
-
-<p> Similarly the grand parent of B, we find nodes with k &ndash; 2 distance.</p></li>
-</ol>
-
-
-<p>Implementation:</p>
-
-<ol>
-<li><p>Start from root, <strong>store all nodes in a queue</strong> of maximum size k till you reach the given node.</p></li>
-<li><p>Call FindNodesAtDistance() on the nodes from the queue to get all the nodes <strong>distance k -i</strong> from the node.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/12/java-blocking-queue-2/">[Java OOP] Java BlockingQueue (2)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/12/java-blocking-queue-2/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/12/java-blocking-queue-2/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Blocking Queue Implementation</h3>
-
-<p><img class="middle" src="/assets/images/blocking-queue.png"></p>
-
-<p><a href="http://tutorials.jenkov.com/java-concurrency/blocking-queues.html">source</a></p>
-
-<ol>
-<li><p>A blocking queue is a queue, so we init a queue with a pre-defined size.</p></li>
-<li><p>BlockingQueue Class comes with Java 5, in java.util.concurrent.BlockingQueue. This example is only used to help you understand what&rsquo;s happening behind the scene.</p></li>
-<li><p>Both <strong>enqueue(Object o){}</strong> and <strong>dequeue(){}</strong> are <strong>synchronized</strong> method.</p></li>
-<li><p>Both methods do <strong>while { wait(); }</strong> and then <strong>notifyAll()</strong>.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>public class MyBlockingQueue {
-
-    private List&lt;Object&gt; queue = new LinkedList&lt;Object&gt;();
-    private int size = 10;
-
-    public MyBlockingQueue(int size) {
-        this.size = size;
+    public TrieNode(boolean isLeaf) {
+        this.isLeaf = isLeaf;
+        this.child = new TrieNode[26];
     }
 
-    public synchronized void enqueue(Object item) throws InterruptedException {
-        while (this.queue.size() == this.size) {
-            wait();
+    public void insert(String str) {
+        if (str == null || str.length() == 0) {
+            this.isLeaf = true;
+            return;
         }
-        if (this.queue.size() == 0) {
-            notifyAll();
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            child[cur - 'a'] = new TrieNode(str.length() == 1);
         }
-        this.queue.add(item);
+        child[cur - 'a'].insert(str.substring(1));
     }
 
-    public synchronized Object dequeue() throws InterruptedException {
-        while (this.queue.size() == 0) {
-            wait();
+    public boolean trieSearch(String str) {
+        // have to consider leaf node
+        if (str == null || str.length() == 0) {
+            return isLeaf;
         }
-        if (this.queue.size() == this.size) {
-            notifyAll();
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            return false;
         }
-
-        return this.queue.remove(0);
+        return child[cur - 'a'].trieSearch(str.substring(1));
     }
 
-    public boolean isEmpty() {
-        return this.queue.isEmpty();
+    public boolean suffixTreeSearch(String str) {
+        // suffixTreeSearch don't consider leaf node
+        // cuz we search for prefix of suffixes
+        if (str == null || str.length() == 0) {
+            return true;
+        }
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            return false;
+        }
+        return child[cur - 'a'].suffixTreeSearch(str.substring(1));
     }
 }
 </code></pre>
 
-<h3>Another example</h3>
+<h3>Trie</h3>
 
-<p>This BlockingQueue example makes use MyBlockingQueue that we defined above.</p>
+<pre><code>public class Trie {
+    TrieNode root;
 
-<pre><code>public class Main {
+    public Trie(String[] input) {
+        root = new TrieNode(false);
 
-    public static void main(String[] args) throws Exception {
+        for (String str : input) {
+            root.insert(str);
+        }
+    }
 
-        MyBlockingQueue queue = new MyBlockingQueue(1024);
-
-        Producer producer = new Producer(queue);
-        Consumer consumer = new Consumer(queue);
-
-        new Thread(producer).start();
-        new Thread(consumer).start();
-
-        Thread.sleep(4000);
+    public boolean search(String query) {
+        return root.trieSearch(query);
     }
 }
 </code></pre>
 
-<p>Producer</p>
+<h4>Suffix Tree</h4>
 
-<pre><code>public class Producer implements Runnable {
+<p>Suffix tree might also consider the <strong>List of indexes</strong> thing, which I do not take into consideration in my code.</p>
 
-    protected MyBlockingQueue queue = null;
+<pre><code>public class SuffixTree {
+    TrieNode root;
 
-    public Producer(MyBlockingQueue queue) {
-        this.queue = queue;
-    }
+    public SuffixTree(String input) {
+        root = new TrieNode(false);
 
-    public void run() {
-        System.out.println("Producer starting... ");
-        try {
-            for (int i = 1; i &lt;= 5; i++) {
-                queue.enqueue("" + i);
-                Thread.sleep(500);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-}
-</code></pre>
-
-<p>Consumer</p>
-
-<pre><code>public class Consumer implements Runnable {
-
-    protected MyBlockingQueue queue = null;
-
-    public Consumer(MyBlockingQueue queue) {
-        this.queue = queue;
-    }
-
-    public void run() {
-        try {
-            for (int i = 1; i &lt;= 5; i++) {
-                System.out.println(queue.dequeue());
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Consumer finished. ");
-    }
-}
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>Producer starting... 
-1
-2
-3
-4
-5
-Consumer finished. 
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/12/java-blocking-queue-1/">[Java OOP] Java BlockingQueue (1)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/12/java-blocking-queue-1/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/12/java-blocking-queue-1/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p><strong><a href="http://tutorials.jenkov.com/java-concurrency/blocking-queues.html">A blocking queue</a></strong> is a queue that blocks when you try to <strong>dequeue from a empty queue</strong>, or if you try to <strong>enqueue items into a full queue</strong>.</p>
-
-<p><img class="middle" src="/assets/images/blocking-queue.png"></p>
-
-<h4>Details</h4>
-
-<ol>
-<li><p>BlockingQueue <strong>doesn’t accept null values</strong>. Otherwise throw NullPointerException.</p></li>
-<li><p>BlockingQueue implementations are <strong>thread-safe</strong>. All queuing methods are atomic in nature and use internal locks or other forms of concurrency control.</p></li>
-<li><p>BlockingQueue interface is part of java collections framework and it’s primarily used for implementing <strong>producer consumer problem</strong>.</p></li>
-</ol>
-
-
-<p>Two important methods:</p>
-
-<ol>
-<li><p>put(E e): This method is used to insert elements to the queue, if the queue is full it waits for the space to be available.</p></li>
-<li><p>E take(): This method retrieves and remove the element from the head of the queue, if queue is empty it waits for the element to be available.</p></li>
-</ol>
-
-
-<h4>Usage</h4>
-
-<p><a href="http://tutorials.jenkov.com/java-util-concurrent/blockingqueue.html">BlockingQueue is typically used</a> to have one thread produce objects, with another thread consumes (producer consumer problem). Refer to <strong>[Design] Producer Consumer Problem</strong>.</p>
-
-<h3>Example 1</h3>
-
-<p>This example shows <strong>how changing the speed of consuming and producing</strong> results in different sequence of outputs, using a BlockingQueue. The size of the BlockingQueue is initialized at 5.</p>
-
-<pre><code>public class Main {
-
-    // original post from:
-    // http://www.journaldev.com/1034/java-blockingqueue-example-implementing-producer-consumer-problem
-
-    private static final Setting testFullQueue = new Setting(3, 10, 0);
-    private static final Setting testEmptyQueue = new Setting(10, 3, 100);
-
-    public static void main(String[] args) {
-
-        // Creating BlockingQueue of size 5
-        BlockingQueue&lt;Message&gt; queue = new ArrayBlockingQueue&lt;&gt;(5);
-
-        Setting variableSetting = testFullQueue;
-        Producer producer = new Producer(queue, variableSetting.produceSpeed);
-        Consumer consumer = new Consumer(queue, variableSetting.consumeSpeed,
-                variableSetting.consumerDelay);
-
-        // starting producer to produce messages in queue
-        new Thread(producer).start();
-
-        // starting consumer to consume messages from queue
-        new Thread(consumer).start();
-
-        System.out.println("Producer and Consumer has been started");
-    }
-
-    static class Setting {
-        int produceSpeed;
-        int consumeSpeed;
-        int consumerDelay;
-
-        public Setting(int a, int b, int c) {
-            this.produceSpeed = a;
-            this.consumeSpeed = b;
-            this.consumerDelay = c;
-        }
-    }
-}
-</code></pre>
-
-<p>Producer</p>
-
-<pre><code>public class Producer implements Runnable {
-
-    private BlockingQueue&lt;Message&gt; queue;
-    int produceSpeed;
-
-    public Producer(BlockingQueue&lt;Message&gt; q, int a) {
-        this.queue = q;
-        this.produceSpeed = a;
-    }
-
-    @Override
-    public void run() {
-        // produce messages
-        for (int i = 0; i &lt; 13; i++) {
-            Message msg = new Message("" + i);
-            try {
-                Thread.sleep(produceSpeed);
-                queue.put(msg);
-                System.out.println("Produced " + msg.getMsg() + "           ("
-                        + queue.size() + " items)");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        // adding exit message
-        Message msg = new Message("exit");
-        try {
-            queue.put(msg);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (int i = 0; i &lt; input.length(); i++) {
+            root.insert(input.substring(i));
         }
     }
 
-}
-</code></pre>
-
-<p>Consumer</p>
-
-<pre><code>public class Consumer implements Runnable {
-
-    private BlockingQueue&lt;Message&gt; queue;
-    int consumeSpeed;
-    int consumerDelay;
-
-    public Consumer(BlockingQueue&lt;Message&gt; q, int a, int b) {
-        this.queue = q;
-        this.consumeSpeed = a;
-        this.consumerDelay = b;
+    public boolean search(String query) {
+        return root.suffixTreeSearch(query);
     }
-
-    @Override
-    public void run() {
-        try {
-            // initial delay: used to wait for producer to
-            // fill up the queue
-            Thread.sleep(consumerDelay);
-            Message msg;
-            // consuming messages until exit message is received
-            while ((msg = queue.take()).getMsg() != "exit") {
-            System.out.println("         " + msg.getMsg() + " Consumed"+ "  ("
-                    + queue.size() + " items)");
-                Thread.sleep(consumeSpeed);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Consumer finished working. Exit. ");
-    }
-}
-</code></pre>
-
-<p>Message Class</p>
-
-<pre><code>public class Message {
-    private String msg;
-
-    public Message(String str){
-        this.msg=str;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-}
-</code></pre>
-
-<p>Output (testFullQueue):</p>
-
-<pre><code>Producer and Consumer has been started
-Produced 0           (0 items)
-         0 Consumed  (0 items)
-Produced 1           (1 items)
-Produced 2           (2 items)
-         1 Consumed  (1 items)
-Produced 3           (2 items)
-Produced 4           (3 items)
-Produced 5           (4 items)
-         2 Consumed  (3 items)
-Produced 6           (4 items)
-Produced 7           (5 items)
-         3 Consumed  (5 items)
-Produced 8           (5 items)
-         4 Consumed  (4 items)
-Produced 9           (5 items)
-         5 Consumed  (4 items)
-Produced 10           (5 items)
-         6 Consumed  (4 items)
-Produced 11           (5 items)
-         7 Consumed  (4 items)
-Produced 12           (5 items)
-         8 Consumed  (4 items)
-         9 Consumed  (4 items)
-         10 Consumed  (3 items)
-         11 Consumed  (2 items)
-         12 Consumed  (1 items)
-Consumer finished working. Exit. 
-</code></pre>
-
-<p>Output (testEmptyQueue):</p>
-
-<pre><code>Producer and Consumer has been started
-Produced 0           (1 items)
-Produced 1           (2 items)
-Produced 2           (3 items)
-Produced 3           (4 items)
-Produced 4           (5 items)
-Produced 5           (5 items)
-         0 Consumed  (5 items)
-         1 Consumed  (4 items)
-         2 Consumed  (3 items)
-Produced 6           (4 items)
-         3 Consumed  (3 items)
-         4 Consumed  (2 items)
-Produced 7           (3 items)
-         5 Consumed  (2 items)
-         6 Consumed  (1 items)
-         7 Consumed  (0 items)
-Produced 8           (1 items)
-         8 Consumed  (0 items)
-Produced 9           (1 items)
-         9 Consumed  (0 items)
-Produced 10           (1 items)
-         10 Consumed  (0 items)
-Produced 11           (0 items)
-         11 Consumed  (0 items)
-Produced 12           (1 items)
-         12 Consumed  (0 items)
-Consumer finished working. Exit. 
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/12/blocking-queue-and-thread-pool/">[Java OOP] BlockingQueue and Thread Pool</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/12/blocking-queue-and-thread-pool/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/12/blocking-queue-and-thread-pool/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Blocking Queue VS. Thread Pool</h3>
-
-<p>These are 2 very different things, however it might be a little bit confusing for a layman. I have very little knowledge about Java multi-threading. But after writing some example of thread pool and blockingqueue, I am able to identify some significant differences between the 2 DS:</p>
-
-<ol>
-<li><p>Thread pools are often used in multi threaded servers. For example, we create 10 thread only for processing 1,000 tasks. However in BlockingQueue, there&rsquo;re typically only 2 thread: Producer and Consumer. Of course there can be more, but the basic pattern defines only 2 (types of) threads.</p></li>
-<li><p>Threads are added into thread pool, while in BlockingQueue, it stores tasks (runnables).</p></li>
-</ol>
-
-
-<p>It&rsquo;s not a common practise to compare the 2 DS. If you read this and have got some interesting thoughts, do not hesitate to let me know by commenting below!</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/numer-of-occurrence-given-subsequence/">[Question] Number of Occurence of Given Sub-sequence</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/numer-of-occurrence-given-subsequence/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/numer-of-occurrence-given-subsequence/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/6877249/find-the-number-of-occurrences-of-a-subsequence-in-a-string">link</a></p>
-
-<blockquote><p>Given a digit &lsquo;3141592653&rsquo;, find number of occurence of subsequence &ldquo;123&rdquo;. Note that the sequence occurs twice:</p></blockquote>
-
-<pre><code>3141592653
- 1    2  3
-   1  2  3
-</code></pre>
-
-<blockquote><p>Output 2.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Refer to <strong>[LeetCode 115] Distinct Subsequences</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/numer-of-distinct-subsequence/">[Question] Number of Distinct Sub-sequence</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/numer-of-distinct-subsequence/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/numer-of-distinct-subsequence/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/5151483/how-to-find-the-number-of-distinct-subsequences-of-a-string">link</a></p>
-
-<blockquote><p>Find the number of distinct subsequences of a string (include &ldquo;&rdquo; as a subsequence).</p>
-
-<p>For example, Input</p></blockquote>
-
-<pre><code>AAA 
-ABCDEFG 
-CODECRAFT 
-</code></pre>
-
-<blockquote><p>Output</p></blockquote>
-
-<pre><code>4 
-128 
-496 
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>In <strong>[LeetCode 115] Distinct Subsequences</strong>, we discuss finding occurence of a given subsequence.</p>
-
-<p>Now if we do not specify a subsequence, <strong>we want the total number of distinct subsequence</strong>.</p>
-
-<p>The solution is DP, with the following equation:</p>
-
-<pre><code>Let, 
-
-dp[i] = number of distinct subsequences ending with a[i]
-
-last[i] = last position of character i in the given string.
-</code></pre>
-
-<p><strong>Equation</strong>:</p>
-
-<pre><code>dp[i] = dp[last[i] - 1] + ... + dp[i - 1]
-</code></pre>
-
-<p>The final result is:</p>
-
-<pre><code>Distinct Subsequences = dp[1] + ... dp[len - 1]
-</code></pre>
-
-<p>Example 1:</p>
-
-<pre><code>Input   : - A B C
-dp array: 1 1 2 4
-Total = 8
-</code></pre>
-
-<p>Example 2:</p>
-
-<pre><code>Input   : - A A C
-dp array: 1 1 1 3
-Total = 6
-</code></pre>
-
-<p>The code is posted below.</p>
-
-<h3>Optimize Solution</h3>
-
-<p>There is a good optimization of this DP solution, which is to <strong>keep another dp array &lsquo;sum&rsquo;</strong>, which sum[i] = dp[1] + dp[2] + &hellip; + dp[i]. The final answer would be sum[len &ndash; 1].</p>
-
-<p>This nice idea is from <a href="http://stackoverflow.com/a/5152203">this post</a>. Credit goes to <strong>IVlad</strong>.</p>
-
-<h3>Code</h3>
-
-<p>un-optimized code. calculate dp[0] &hellip; dp[n], then sum to final result.</p>
-
-<pre><code>public int countDistinctSubseq(String input) {
-    int len = input.length();
-    int[] dp = new int[len + 1];
-    // dp[i] denotes the number of distinct subseq within first 'i' chars
-    dp[0] = 1;
-    // the first 0 chars is "" - we consider it as 1 subseq
-
-    for (int i = 1; i &lt;= len; i++) {
-        // set dp[i]
-        // dp[i] = dp[i-1] + ... + dp[k] where input{k} == input{i}
-        int p = i - 1;
-        while (p &gt;= 0) {
-            dp[i] += dp[p];
-            if (p &gt; 0 &amp;&amp; input.charAt(p - 1) == input.charAt(i - 1)) {
-                // when meeting a same char ahead of position i, stop
-                // adding to dp[i]
-                break;
-            }
-            p--;
-        }
-    }
-    int sum = 0;
-    for (int i : dp) {
-        sum += i;
-    }
-    return sum;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/longest-repeating-substring/">[Amazon] Longest Repeating Substring</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/11/longest-repeating-substring/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/longest-repeating-substring/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=9182781">link</a></p>
-
-<blockquote><p>Finding the longest repeated substring.</p>
-
-<p>Example: &ldquo;banana&rdquo; ==> &ldquo;ana&rdquo;</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are 2 solutions: Suffix array, and Suffix tree.</p>
-
-<p><strong>1. Suffix array</strong>. Simple code, explained <a href="http://www.careercup.com/question?id=9182781">here</a>.</p>
-
-<blockquote><p>Bentley&rsquo;s programming pearl book has the simplest implementation (less than 15 lines code) which sort all suffix, and then check common prefix length among adjacent suffix. The time complexity is O(n<sup>2logn</sup>) for sorting the suffix (which has avg length of O(n)).</p></blockquote>
-
-<p>A detailed step-by-step <a href="http://nriverwang.blogspot.com/2013/04/longest-repeated-substring.html">explanation</a>:</p>
-
-<pre><code>str = banana, its suffixes are:
-banana
-anana
-nana
-ana
-na
-a
-</code></pre>
-
-<p>after sort, the suffix array looks like:</p>
-
-<pre><code>a
-ana
-anana
-banana
-na
-nana
-</code></pre>
-
-<p>Then for each two adjacent suffixes, check the length of the common prefix.</p>
-
-<p>The answer is &ldquo;ana&rdquo; (if overlapping is allowed, otherwise, should be &ldquo;an&rdquo;).</p>
-
-<p><strong>2. Suffix tree</strong>. Suggest by <a href="http://qr.ae/6W9yJ">this post</a>, Or <a href="http://www.careercup.com/question?id=9182781">this</a>:</p>
-
-<blockquote><p>a good solution is to create a suffix tree for the given word and then find the deepest internal node in that tree (node with at least 2 descendants under it)&hellip;</p></blockquote>
-
-<p>For a nice PPT presentation about suffix tree, look <a href="https://www.cs.cmu.edu/~ckingsf/bioinfo-lectures/suffixtrees.pdf">here</a>.</p>
-
-<h3>Code</h3>
-
-<p>Suffix array approach.</p>
-
-<pre><code>public String longestRepeat(String input) {
-    int len = input.length();
-    String[] suffixArray = new String[len];
-    for (int i = 0; i &lt; len; i++) {
-        suffixArray[i] = input.substring(i);
-    }
-    // now sort the suffix array
-    Arrays.sort(suffixArray);
-    String longest = "";
-    // start to compare neighborhood suffixes, and check LCP
-    for (int i = 0; i &lt; suffixArray.length - 1; i++) {
-        String lcp = longestCommonPrefix(suffixArray[i], suffixArray[i + 1]);
-        if (lcp.length() &gt; longest.length()) {
-            longest = lcp;
-        }
-    }
-    return longest;
-}
-
-private String longestCommonPrefix(String s1, String s2) {
-    int p = 0;
-    while (p &lt; s1.length() &amp;&amp; p &lt; s2.length()) {
-        if (s1.charAt(p) != s2.charAt(p)) {
-            break;
-        }
-        p++;
-    }
-    return s1.substring(0, p);
 }
 </code></pre>
 </div>
@@ -1260,18 +1032,18 @@ private String longestCommonPrefix(String s1, String s2) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (58)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (5)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (45)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (24)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (102)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (7)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
@@ -1282,23 +1054,23 @@ private String longestCommonPrefix(String s1, String s2) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a>
+        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/java-abstract-class-interface/">[Java OOP] Interface and Abstract Classes</a>
+        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/difference-http-https/">[Design] Difference Between HTTP and HTTPS</a>
+        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/20/basin-size-in-matrix/">[Palantir] Largest Basin Size in Matrix</a>
+        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
       </li>
     
   </ul>
