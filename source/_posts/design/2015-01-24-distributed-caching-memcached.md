@@ -46,31 +46,45 @@ Memcached is open source, high-performance distributed memory object used for ca
 __Where Memcached can be used?__
 
 •  Social Networking -> Profile Caching
+
 •  Content Aggregation -> HTML/ Page Caching
+
 •  Ad targeting -> Cookie/profile tracking
+
 •  Relationship -> Session caching
+
 •  E-commerce -> Session and HTML caching
+
 •  Location-based services -> Data-base query scaling
+
 •  Gaming and entertainment -> Session caching
 
 __Why use Memcached?__
 
 •  Speed up application processes
+
 •  It determines what to store and what not to
+
 •  Reduce the number of retrieval requests to the database
+
 •  Cuts down the I/O ( Input/Output) access (hard disk)
 
 __In what condition does retrieving cache fail?__
 
 •  Memory allocated for the cache is exhausted
+
 •  Item from cache is deleted
+
 •  Individual item in the cache is expired
 
 __What is the drawback of Memcached?__
  
 •  It is not a persistent data store
+
 •  Not a database
+
 •  It is not an application specific
+
 •  It cannot cache large object
 
 __Give more details about memcached failures__

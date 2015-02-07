@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Java OOP] Listener / Observer pattern "
+title: "[Java OOP] Observer pattern "
 comments: true
 category: Java OOP
 
@@ -10,7 +10,7 @@ category: Java OOP
 
 __[The observer pattern](http://en.wikipedia.org/wiki/Observer_pattern)__ is a software design pattern in which an object(subject) maintains a list of dependents(observers), and notifies them automatically of any state changes (usually by calling one of their methods). 
 
-The Observer pattern is mainly used to implement distributed event handling systems. It's also a key part in MVC architectural. 
+The Observer pattern is mainly used to implement distributed event handling systems. It's also __a key part in MVC architectural pattern__. 
 
 ### Example
 
