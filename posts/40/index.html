@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a binary tree, find the maximum path sum. The path may start and end at any node in the tree. For example:
-Given the below binary &hellip;">
+  <meta name="description" content="Question link There are N children standing in a line. Each child is assigned a rating value. You are giving candies to these children subjected to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,7 +84,7 @@ Given the below binary &hellip;">
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/">[LeetCode 124] Binary Tree Maximum Path Sum</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/31/Candy/">[LeetCode 135] Candy</a></h1>
     
     
       <p class="meta">
@@ -101,10 +100,10 @@ Given the below binary &hellip;">
   
 
 
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-31T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Binary-Tree-Maximum-Path-Sum/">Comments</a>
+           | <a href="/blog/2014/05/31/Candy/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/31/Candy/">Comments</a>
         
       </p>
     
@@ -113,27 +112,21 @@ Given the below binary &hellip;">
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/binary-tree-maximum-path-sum/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/candy/">link</a></p>
 
 <div class="question-content">
             <p></p><p>
-Given a binary tree, find the maximum path sum.
+There are <i>N</i> children standing in a line. Each child is assigned a rating value. 
 </p>
-
 <p>
-The path may start and end at any node in the tree.
+You are giving candies to these children subjected to the following requirements:
 </p>
-
+<ul>
+<li>Each child must have at least one candy.</li>
+<li>Children with a higher rating get more candies than their neighbors.</li>
+</ul>
 <p>
-For example:<br>
-Given the below binary tree,
-</p><pre>       1
-      / \
-     2   3
-</pre>
-<p></p>
-<p>
-Return <code>6</code>.
+What is the minimum candies you must give?
 </p><p></p>
           </div>
 
@@ -141,633 +134,6 @@ Return <code>6</code>.
 <h3>Stats</h3>
 
 <table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a difficult DFS question</strong>.</p>
-
-<p>The basic idea is:</p>
-
-<blockquote><p>When we are in a root node, how we decided to include current node in the maximum path sum? We need to calculate the depth in both subtree. In the meantime, we need to set a variable &ldquo;max&rdquo; to store the max path sum we found during the recursion.</p>
-
-<p>Pay attention that when a subtree sum to negative value, we discard this subtree.</p>
-
-<p>Otherwise, max path sum including current node is <strong>leftSum + cur.val + rightSum</strong></p>
-
-<p>Max depth of current node is <strong>(maximum value of leftSum and rightSum) + cur.val</strong></p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There are 2 points that may incur problems during coding, they are:</p>
-
-<ol>
-<li><p>The recursive solution is calculating the &lsquo;max height&rsquo; while checking &lsquo;its own max path sum&rsquo;. It&rsquo;s a bit hard to explain. Basic idea is doing 2 things at same time, while traversing (are one result is returned, another is stored in a public variable, at least for code 1 below).</p></li>
-<li><p>Note that &lsquo;max height&rsquo; of a child branch can be nagative. In this case, WE MUST SET IT TO 0.</p></li>
-</ol>
-
-
-<p>The first point is a concept seen in previous questions, but I forgot which. The second point is important, because I missed this and got failed a few times without any clue.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, recursive solution</strong></p>
-
-<pre><code>int max = Integer.MIN_VALUE;
-
-public int maxPathSum(TreeNode root) {
-    maxHeight(root);
-    return max;
-}
-
-private int maxHeight(TreeNode node) {
-    if (node == null) return 0;
-    int l = Math.max(0, maxHeight(node.left));
-    int r = Math.max(0, maxHeight(node.right));
-    max = Math.max(max, l + r + node.val);
-    return node.val + Math.max(l, r);
-}
-</code></pre>
-
-<p><strong>Second, previous code refactored</strong>.</p>
-
-<p>I removed the global variable, and instead pass an array as reference in the recursion. In this way the &lsquo;shared&rsquo; array achieve same functionality as a global variable.</p>
-
-<pre><code>public int maxPathSum(TreeNode root) {
-    int[] shared = {Integer.MIN_VALUE};
-    maxHeight(root, shared);
-    return shared[0];
-}
-
-private int maxHeight(TreeNode node, int[] shared) {
-    if (node == null) return 0;
-    int l = Math.max(0, maxHeight(node.left, shared));
-    int r = Math.max(0, maxHeight(node.right, shared));
-    shared[0] = Math.max(shared[0], l + r + node.val);
-    return node.val + Math.max(l, r);
-}
-</code></pre>
-
-<p><strong>Updated on June 10th, it&rsquo;s a terrible practise to use global variable</strong>. The <a href="http://answer.ninechapter.com/solutions/binary-tree-maximum-path-sum/">new solution</a> suggested by Mr. Huang uses a new ResultType Class to solve the problem.</p>
-
-<pre><code>private class ResultType {
-    int singlePath, maxPath;
-    ResultType(int singlePath, int maxPath) {
-        this.singlePath = singlePath;
-        this.maxPath = maxPath;
-    }
-}
-
-public int maxPathSum(TreeNode root) {
-    ResultType result = helper(root);
-    return result.maxPath;
-}
-
-private ResultType helper(TreeNode node) {
-    // null case
-    if (node == null) {
-        return new ResultType(0, Integer.MIN_VALUE);
-    }
-    // divide
-    ResultType ll = helper(node.left);
-    ResultType rr = helper(node.right);
-    // conquer
-    int curSinglePath = Math.max(0, node.val + 
-            Math.max(ll.singlePath, rr.singlePath));
-    int childMaxPath = Math.max(ll.maxPath, rr.maxPath);
-    int curMaxPath = Math.max(childMaxPath, node.val + 
-            ll.singlePath + rr.singlePath);
-    // done
-    return new ResultType(curSinglePath, curMaxPath);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-III/">[LeetCode 123] Best Time to Buy and Sell Stock III</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-III/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-III/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
-
-<p>Design an algorithm to find the maximum profit. You may complete at most <i>two</i> transactions.</p>
-
-<p><b>Note:</b><br>
-You may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is much harder to solve then previous 2 question combined</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>The best solution is explained in <a href="http://rleetcode.blogspot.sg/2014/02/best-time-to-buy-and-sell-stock-iii-java.html">this blog</a>.</p>
-
-<blockquote><p>we can just dived the whole prices array at every point, try to calculate max profit from left and from right respectively&hellip;</p>
-
-<p>However, there are many repeat calculations. So we can apply DP to record max profits for each left side and right side. then add them together at each point.</p></blockquote>
-
-<p>A detailed illustration with examples can be found <a href="http://yucoding.blogspot.sg/2012/12/leetcode-question-10-best-time-to-buy.html">here</a>.</p>
-
-<p>However, the coding part is slightly difficult at least for me. <strong>I made a terrible mistake with the variable &lsquo;leftMin&rsquo; and &lsquo;rightMax&rsquo;</strong>. I declared it as <strong>&lsquo;rightMin&rsquo;</strong> instead, and then the program logic is wrong. We should avoid this kind of mistakes.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int maxProfit(int[] prices) {
-    int len = prices.length;
-    if (len == 0) return 0;
-    int leftMin = Integer.MAX_VALUE, rightMax = Integer.MIN_VALUE;
-    int leftPro[] = new int[len], rightPro[] = new int[len];
-    for (int j = 0; j &lt;= len - 1; j ++) {
-        leftMin = Math.min(leftMin, prices[j]);
-        if (j == 0) leftPro[0] = 0;
-        else leftPro[j] = Math.max(leftPro[j-1], prices[j] - leftMin);
-    }
-    for (int k = len - 1; k &gt;= 0; k --) {
-        rightMax = Math.max(rightMax, prices[k]);
-        if (k == len - 1) rightPro[len-1] = 0;
-        else rightPro[k] = Math.max(rightPro[k+1], rightMax - prices[k]);
-    }
-    int totalPro = 0;
-    for (int i = 0; i &lt; len; i ++) {
-        totalPro = Math.max(totalPro, leftPro[i] + rightPro[i]);
-    }
-    return totalPro;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-II/">[LeetCode 122] Best Time to Buy and Sell Stock II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
-
-<p>Design an algorithm to find the maximum profit. You may complete as many transactions as you like (ie, buy one and sell one share of the stock multiple times). However, you may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Solution</h3>
-
-<p><strong>This solution is best explained <a href="http://jane4532.blogspot.sg/2013/07/best-time-to-buy-and-sell-stock.html">here</a></strong>.</p>
-
-<blockquote><p>就从左到右轮一遍，遇到递增的都给加起来呗。</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public int maxProfit(int[] prices) {
-    int len = prices.length;
-    if (len &lt;= 1) return 0;
-    int profit = 0;
-    for (int i = 1; i &lt; len; i ++) 
-        profit += Math.max(0, prices[i] - prices[i-1]);
-    return profit;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock/">[LeetCode 121] Best Time to Buy and Sell Stock</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/28/Best-Time-to-Buy-and-Sell-Stock/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/best-time-to-buy-and-sell-stock/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Say you have an array for which the <i>i</i><sup>th</sup> element is the price of a given stock on day <i>i</i>.</p>
-
-<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a question from a MIT course</strong>, <a href="http://courses.csail.mit.edu/iap/interview/materials.php">Hacking a Google Interview</a>.</p>
-
-<p>I did not solve it, but it&rsquo;s actually very simple to do.</p>
-
-<h3>Solution</h3>
-
-<p>The solution is explained <a href="http://leetcode.com/2010/11/best-time-to-buy-and-sell-stock.html">here</a>:</p>
-
-<blockquote><p>To solve this problem efficiently, you would need to track the minimum value’s index. As you traverse, update the minimum value’s index when a new minimum is met. Then, compare the difference of the current element with the minimum value. Save the buy and sell time when the difference exceeds our maximum difference (also update the maximum difference).</p>
-
-<p>Time is O(N)</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public int maxProfit(int[] prices) {
-    int len = prices.length;
-    if (len &lt;= 1) return 0;
-    int min = prices[0];
-    int max = Integer.MIN_VALUE;
-    for (int i = 1; i &lt; len; i ++) {
-        max = Math.max(max, prices[i] - min);
-        min = Math.min(min, prices[i]);
-    }
-    return Math.max(max, 0);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Triangle/">[LeetCode 120] Triangle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/27/Triangle/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Triangle/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/triangle/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.</p>
-
-<p>
-For example, given the following triangle<br>
-</p><pre>[
-     [<font color="red">2</font>],
-    [<font color="red">3</font>,4],
-   [6,<font color="red">5</font>,7],
-  [4,<font color="red">1</font>,8,3]
-]
-</pre>
-<p></p>
-<p>
-The minimum path sum from top to bottom is <code>11</code> (i.e., <font color="red">2</font> + <font color="red">3</font> + <font color="red">5</font> + <font color="red">1</font> = 11).
-</p>
-
-<p>
-<b>Note:</b><br>
-Bonus point if you are able to do this using only <i>O</i>(<i>n</i>) extra space, where <i>n</i> is the total number of rows in the triangle.
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a math question</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>It&rsquo;s an easy question. Instead of normal DP transition function, this one is <strong>so-called bottom-up approach</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int minimumTotal(ArrayList&lt;ArrayList&lt;Integer&gt;&gt; triangle) {
-    int len = triangle.size();
-    if (len == 0) return 0;
-    int[] m = new int[len];
-    m[0] = triangle.get(0).get(0);
-    for (int i = 1; i &lt; len; i ++) {
-        ArrayList&lt;Integer&gt; cur = triangle.get(i);
-        for (int j = i; j &gt;= 0; j --) {
-            if (j == i) m[j] = m[j-1] + cur.get(j);
-            else if (j == 0) m[j] = m[0] + cur.get(0);
-            else m[j] = Math.min(m[j-1], m[j]) + cur.get(j);
-        }
-    }
-    int min = Integer.MAX_VALUE;
-    for (Integer k: m)
-        min = Math.min(min, k);
-    return min;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node-II/">[LeetCode 117] Populating Next Right Pointers in Each Node II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Follow up for problem &#8221;<i>Populating Next Right Pointers in Each Node</i>&#8221;.</p>
-<p>What if the given tree could be any binary tree? Would your previous solution still work?</p>
-<p>
-<b>Note:</b>
-</p><ul><li>You may only use constant extra space.</li></ul>
-<p></p>
-<p>
-For example,<br>
-Given the following binary tree,<br>
-</p><pre>         1
-       /  \
-      2    3
-     / \    \
-    4   5    7
-</pre>
-<p></p>
-<p>
-After calling your function, the tree should look like:<br>
-</p><pre>         1 -&gt; NULL
-       /  \
-      2 -&gt; 3 -&gt; NULL
-     / \    \
-    4-&gt; 5 -&gt; 7 -&gt; NULL
-</pre>
-<p></p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
     <tr>
         <td>Adjusted Difficulty</td>
         <td bgcolor="red">4</td>
@@ -785,109 +151,47 @@ After calling your function, the tree should look like:<br>
 
 <p><strong>This is a difficult question</strong>.</p>
 
-<p>We can of course do a BFS, but that&rsquo;s too simple, and it&rsquo;s not related to previous question, thus <strong>Queue</strong> is not the answer we&rsquo;re looking for.</p>
+<p>Directly doing it will result in a lot of trace-backs. The following picture gives a clear idea of what the problem is:</p>
 
-<p><strong>There are 2 ways to solve this problem, recursively and iteratively</strong>. The 2 solutions are quite different, I will explain them.</p>
+<p><img class="middle" src="/assets/images/candy.png"></p>
+
+<p>When traversing from low to high (upward sloping), just increase candy, that&rsquo;s fine. But when sloping down, we would have no idea what value to set until we reach the min point. <strong><a href="http://fisherlei.blogspot.sg/2013/11/leetcode-candy-solution.html">Fish Lei</a> have a good solution of &ldquo;trace-back algorithm&rdquo;</strong> to re-adjust the values by traversing back to the top again.</p>
+
+<p>However, I personally think the 2nd solution is way more splendid, that I will not cover 1st solution in detail.</p>
 
 <h3>Solution</h3>
 
-<p><strong>First solution is non-recursion, which is from <a href="http://rleetcode.blogspot.sg/2014/03/follow-up-for-problem-populating-next.html">this blog</a></strong>. First we declare a pointer &lsquo;cur&rsquo; that points to a node. We assume the &lsquo;next-links&rsquo; are already built in current level, and our job is to generate the &lsquo;next-links&rsquo; for the next level.</p>
+<p><strong>The 2nd solution is very similar to &ldquo;Trapping Rain Water&rdquo;</strong>. <a href="http://zhaohongze.com/wordpress/2013/12/10/leetcode-candy/">This blog</a> is the best explanation I found from Internet.</p>
 
-<p>In order to do that, we need another 2 pointers in the next level (one head and one tail) to keep track of the position till where we have finished building the links. So &lsquo;cur&rsquo; keep traversing thru current level, until it reaches the end. Then, we move &lsquo;cur&rsquo; to the head of next level, and continue the process.</p>
+<blockquote><ol>
+<li>For the first time, scan from left to right. If current rating is larger than the left one, give one more candy to current child than the left one.</li>
+<li>For the second time, scan from right to left. If current rating is larger than the right one, give one more candy to current child than the right one.</li>
+</ol>
 
-<p>The coding part is not difficult, <strong>which is not the case for next solution</strong>.</p>
 
-<p><strong>Second solution is recursive, and it is written in <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-populating-next-right-pointers_29.html">this blog</a></strong>. Same as previous solution, we assume that current level have all &lsquo;next-links&rsquo; ready, and we will build these links for next level.</p>
-
-<p>The way of getting next link for child nodes is a bit different, but I guess that&rsquo;s fine. The difficult part is <strong>during recursive call, I NEED TO CALL THE RECURSION METHOD FOR RIGHT CHILD FIRST, THEN LEFT CHILD</strong>. The reason is, the links from left child to right child is going to be used in the recursion call. If we do left first, we will have problem getting <strong>current.left.next</strong> (which in this case, will be null). I spent a terribly long time debugging this error, until I found a great explanation <a href="https://oj.leetcode.com/discuss/1942/anyone-helps-to-find-bug-for-my-code">here</a>.</p>
-
-<blockquote><p>in your code: connect(root->left); connect(root->right);</p>
-
-<p>which means you first recurs left sub-tree, then right subtree. The problem is the right subtree&rsquo;s next pointers are not processed. So in your example, 9->next should be 1, however, when you traverse the left sub tree, 9&rsquo;s next pointer is still NULL. Your code will think 9 is the end of the third level, so the fourth level&rsquo;s 0 will have its next to be NULL.</p></blockquote>
+<p>We consider the policy as two folds, left policy and right policy. Left policy means a child has more candies than his left one if his rating is higher than his left one. The first scan ensures that the distribution meets left policy. The second scan ensures that the distribution meets right policy. However, it will not violate left policy.</p></blockquote>
 
 <h3>Code</h3>
 
-<p><strong>First, my initial solution making use of queue</strong>. It is around 50ms slower than the other solutions.</p>
+<p><strong>2nd solution</strong></p>
 
-<pre><code>public void connect(TreeLinkNode root) {
-    if (root == null) return;
-    LinkedList&lt;TreeLinkNode&gt; list = new LinkedList&lt;TreeLinkNode&gt;();
-    list.add(root);
-    while (! list.isEmpty()) {
-        LinkedList&lt;TreeLinkNode&gt; newList = new LinkedList&lt;TreeLinkNode&gt;();
-        while (! list.isEmpty()) {
-            TreeLinkNode node = list.remove();
-            if (! list.isEmpty()) node.next = list.get(0);
-            if (node.left != null) newList.add(node.left);
-            if (node.right != null) newList.add(node.right);
-        }
-        list = newList;
+<pre><code>public int candy(int[] ratings) {
+    int len = ratings.length;
+    if (len &lt;= 1) return len;
+    int[] candy = new int[len];
+    candy[0] = candy[len-1] = 1;
+    for (int i = 1; i &lt; len; i ++) {
+        if (ratings[i] &gt; ratings[i-1])
+            candy[i] = candy[i-1] + 1;
+        else candy[i] = 1;
     }
-}
-</code></pre>
-
-<p><strong>Second, non-recursion solution</strong></p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    TreeLinkNode nextLevelHead = null;
-    TreeLinkNode nextLevelTail = null;
-    TreeLinkNode cur = root;
-    while (cur != null) {
-        if (cur.left != null) {
-            if (nextLevelHead == null) {
-                nextLevelHead = cur.left;
-                nextLevelTail = cur.left;
-            }
-            else {
-                nextLevelTail.next = cur.left;
-                nextLevelTail = cur.left;
-            }
-        }
-        if (cur.right != null) {
-            if (nextLevelHead == null) {
-                nextLevelHead = cur.right;
-                nextLevelTail = cur.right;
-            }
-            else {
-                nextLevelTail.next = cur.right;
-                nextLevelTail = cur.right;
-            }
-        }
-        cur = cur.next;
-        if (cur == null) {
-            cur = nextLevelHead;
-            nextLevelHead = null;
-            nextLevelTail = null;
-        }
+    for (int i = len-2; i &gt;= 0; i --) {
+        if (ratings[i] &gt; ratings[i+1])
+            candy[i] = Math.max(candy[i], candy[i+1] + 1);
     }
-}
-</code></pre>
-
-<p><strong>Third, recursive solution</strong></p>
-
-<pre><code>public void connect(TreeLinkNode root) {
-    if (root == null) return;
-    // now find root.next's valid child
-    TreeLinkNode n = root.next, nextLevelNext = null;
-    while (n != null &amp;&amp; nextLevelNext == null) {
-        if (n.left != null) {
-            nextLevelNext = n.left;
-            break;
-        }
-        if (n.right != null) {
-            nextLevelNext = n.right;
-            break;
-        }
-        n = n.next;
-    }
-    // now nextLevelNext is fetched
-    if (root.right != null) 
-        root.right.next = nextLevelNext;
-    if (root.left != null) 
-        root.left.next = root.right == null ? nextLevelNext : root.right;
-    // recursion call
-    connect(root.right);
-    connect(root.left);
+    int sum = 0;
+    for (int i = 0; i &lt; len; i ++) sum += candy[i];
+    return sum;
 }
 </code></pre>
 </div>
@@ -902,7 +206,7 @@ After calling your function, the tree should look like:<br>
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node/">[LeetCode 116] Populating Next Right Pointers in Each Node</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/30/Word-Ladder-II/">[LeetCode 126] Word Ladder II (Unsolvable)</a></h1>
     
     
       <p class="meta">
@@ -918,10 +222,10 @@ After calling your function, the tree should look like:<br>
   
 
 
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-30T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Populating-Next-Right-Pointers-in-Each-Node/">Comments</a>
+           | <a href="/blog/2014/05/30/Word-Ladder-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/30/Word-Ladder-II/">Comments</a>
         
       </p>
     
@@ -930,50 +234,229 @@ After calling your function, the tree should look like:<br>
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/populating-next-right-pointers-in-each-node/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/word-ladder-ii/">link</a></p>
 
 <div class="question-content">
             <p></p><p>
-Given a binary tree
-</p><pre>    struct TreeLinkNode {
-      TreeLinkNode *left;
-      TreeLinkNode *right;
-      TreeLinkNode *next;
-    }
+Given two words (<i>start</i> and <i>end</i>), and a dictionary, find all shortest transformation sequence(s) from <i>start</i> to <i>end</i>, such that:
+</p>
+<ol>
+<li>Only one letter can be changed at a time</li>
+<li>Each intermediate word must exist in the dictionary</li>
+</ol>
+
+<p>
+For example,
+</p>
+<p>
+Given:<br>
+<i>start</i> = <code>"hit"</code><br>
+<i>end</i> = <code>"cog"</code><br>
+<i>dict</i> = <code>["hot","dot","dog","lot","log"]</code><br>
+</p>
+<p>
+Return<br>
+</p><pre>  [
+    ["hit","hot","dot","dog","cog"],
+    ["hit","hot","lot","log","cog"]
+  ]
 </pre>
 <p></p>
 
-<p>Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to <code>NULL</code>.</p>
-
-<p>Initially, all next pointers are set to <code>NULL</code>.</p>
-
 <p>
-<b>Note:</b>
+<b>Note:</b><br>
 </p><ul>
-<li>You may only use constant extra space.</li>
-<li>You may assume that it is a perfect binary tree (ie, all leaves are at the same level, and every parent has two children).</li>
+<li>All words have the same length.</li>
+<li>All words contain only lowercase alphabetic characters.</li>
 </ul>
-<p></p>
-
-<p>
-For example,<br>
-Given the following perfect binary tree,<br>
-</p><pre>         1
-       /  \
-      2    3
-     / \  / \
-    4  5  6  7
-</pre>
-<p></p>
-<p>
-After calling your function, the tree should look like:<br>
-</p><pre>         1 -&gt; NULL
-       /  \
-      2 -&gt; 3 -&gt; NULL
-     / \  / \
-    4-&gt;5-&gt;6-&gt;7 -&gt; NULL
-</pre>
 <p></p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is an unsolvable question</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>A solution is available <a href="http://blog.csdn.net/whuwangyi/article/details/21611433">here</a>, but I did not solved it and I gave up.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class Node {  
+    public int dist;  
+    public String str;  
+    public LinkedList&lt;Node&gt; prev;  
+
+    public Node(int dist, String str) {  
+        this.dist = dist;  
+        this.str = str;  
+        this.prev = new LinkedList&lt;Node&gt;();
+    }
+
+    public void addPrev(Node pNode) {  
+        prev.add(pNode);  
+    }  
+}  
+
+public ArrayList&lt;ArrayList&lt;String&gt;&gt; findLadders(String start,  
+        String end, HashSet&lt;String&gt; dict) {  
+    dict.add(end);  
+
+    // Key: the dictionary string; Value: Node  
+    Map&lt;String, Node&gt; map = new HashMap&lt;String, Node&gt;();  
+    Queue&lt;String&gt; queue = new LinkedList&lt;String&gt;();  
+
+    Node startNode = new Node(1, start);  
+    queue.offer(start);  
+    map.put(start, startNode);  
+
+    ArrayList&lt;ArrayList&lt;String&gt;&gt; ret = new ArrayList&lt;ArrayList&lt;String&gt;&gt;();  
+
+    while (!queue.isEmpty()) {  
+        String str = queue.poll();  
+
+        if (str.equals(end)) {  
+            getPaths(map.get(end), map, new ArrayList&lt;String&gt;(), ret);  
+            return ret;  
+        }  
+
+        for (int i = 0; i &lt; str.length(); i++) {  
+            for (int j = 0; j &lt;= 25; j++) {  
+                // transform it into another word  
+                String newStr = replace(str, i, (char) ('a' + j));  
+
+                // if a new word is explored  
+                if (dict.contains(newStr)) {  
+                    if (!map.containsKey(newStr)) {  
+                        // construct a new node  
+                        Node node = map.get(str);  
+                        Node newNode = new Node(node.dist + 1, newStr);  
+                        newNode.prev = new LinkedList&lt;Node&gt;();  
+                        newNode.prev.add(node);  
+
+                        map.put(newStr, newNode);  
+                        queue.offer(newStr);  
+                    } else {  
+                        Node node = map.get(newStr);  
+                        Node prevNode = map.get(str);  
+
+                        // increase the path set  
+                        if (node.dist == prevNode.dist + 1) {  
+                            node.addPrev(prevNode);  
+                            // queue.offer(newStr); // will cause TLE!!!  
+                        }  
+                    }  
+                }  
+            }  
+        }  
+    }  
+
+    return ret; // return an empty set  
+}  
+
+// replace the index of the given string with the given char  
+private String replace(String str, int index, char c) {  
+    StringBuilder sb = new StringBuilder(str);  
+    sb.setCharAt(index, c);  
+    return sb.toString();  
+}  
+
+// get all the paths by using DFS  
+private void getPaths(Node end, Map&lt;String, Node&gt; map,  
+        ArrayList&lt;String&gt; curPath, ArrayList&lt;ArrayList&lt;String&gt;&gt; paths) {  
+    if (end == null) {  
+        paths.add(curPath);  
+        return;  
+    }  
+
+    curPath.add(0, end.str);  
+    if (!end.prev.isEmpty()) {  
+        for (Node prevNode : end.prev) {  
+            getPaths(prevNode, map, new ArrayList&lt;String&gt;(curPath), paths);  
+        }  
+    } else {  
+        getPaths(null, map, curPath, paths);  
+    }  
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/30/Palindrome-Partitioning-II/">[LeetCode 132] Palindrome Partitioning II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/30/Palindrome-Partitioning-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/30/Palindrome-Partitioning-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/palindrome-partitioning-ii/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a string <i>s</i>, partition <i>s</i> such that every substring of the partition is a palindrome.
+</p>
+<p>
+Return the minimum cuts needed for a palindrome partitioning of <i>s</i>.
+</p>
+<p>
+For example, given <i>s</i> = <code>"aab"</code>,<br>
+Return <code>1</code> since the palindrome partitioning <code>["aa","b"]</code> could be produced using 1 cut.
+</p><p></p>
           </div>
 
 
@@ -986,11 +469,205 @@ After calling your function, the tree should look like:<br>
     </tr>
     <tr>
         <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
+        <td bgcolor="red">4</td>
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is DP, but not traditional DP question</strong></p>
+
+<h4>IT IS DOUBLE DP!</h4>
+
+<p>It is very hard for me to even understand the solution, but <strong>I have found a great analysis from <a href="http://blog.sina.com.cn/s/blog_b9285de20101iwqt.html">peking2&rsquo;s blog</a></strong>.</p>
+
+<blockquote><p>这题一般人一看就是DP，DP公式也很容易推出，算是一道简单的DP。</p>
+
+<p>dp(i) = min( 1+dp(j+1), if substring(i,j) is palindrome)</p>
+
+<p>从以上的分析时间复杂度为O(n<sup>3</sup>), 主要是因为检查回文也需要O(n)的时间。因此这题有意思的一点就是如何降低时间复杂度到O(n<sup>2</sup>)？</p>
+
+<p><strong>其实这题是两个DP混杂在了一起</strong>，这也是这道题最有意思的地方。另外一个DP就是跟检查回文有关了，公式如下</p>
+
+<p>dp(i)(j)=true if s(i)==s(j) &amp;&amp; dp(i+1)(j-1)</p>
+
+<p>也就是说，你要检查一个回文只需要知道头尾的字符相等，并且中间的字串已经成为了回文即可。O(1)复杂度。</p></blockquote>
+
+<p><strong>A more detailed analysis is available in <a href="http://fisherlei.blogspot.sg/2013/03/leetcode-palindrome-partitioning-ii.html">this blog</a></strong>.</p>
+
+<blockquote cite="http://fisherlei.blogspot.sg/2013/03/leetcode-palindrome-partitioning-ii.html">
+
+    <b>[Thoughts]</b>
+    <br>凡是求最优解的，一般都是走DP的路线。这一题也不例外。首先求dp函数，
+    <br>
+    <br>定义函数
+    <br>D[i,n] = 区间[i,n]之间最小的cut数，n为字符串长度
+    <br>
+    <br>&nbsp;a &nbsp; b &nbsp; a &nbsp; b &nbsp; b &nbsp; b &nbsp; a &nbsp; b &nbsp; b &nbsp; a &nbsp; b &nbsp; a
+    <br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;n
+    <br>如果现在求[i,n]之间的最优解？应该是多少？简单看一看，至少有下面一个解
+    <br>
+    <br>
+    <br>&nbsp;a &nbsp; b &nbsp; a &nbsp; b &nbsp; b &nbsp; b &nbsp; a &nbsp; b &nbsp; b &nbsp; a &nbsp; b &nbsp; a
+    <br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+    <span style="color: red;">j</span>&nbsp;
+    <span style="color: red;">j+1</span>&nbsp; &nbsp; n
+    <br>
+    <br>此时 &nbsp;D[i,n] = min(D[i, j] + D[j+1,n]) &nbsp;i&lt;=j &lt;n。这是个二维的函数，实际写代码时维护比较麻烦。所以要转换成一维DP。如果每次，从i往右扫描，每找到一个回文就算一次DP的话，就可以转换为
+    <br>D[i] = 区间[i,n]之间最小的cut数，n为字符串长度， 则,
+    <br>
+    <br>D[i] = min(1+D[j+1] ) &nbsp; &nbsp;i&lt;=j &lt;n
+    <br>
+    <br>有个转移函数之后，一个问题出现了，就是如何判断[i,j]是否是回文？每次都从i到j比较一遍？太浪费了，这里也是一个DP问题。
+    <br>定义函数
+    <br>P[i][j] = true if [i,j]为回文
+    <br>
+    <br>那么
+    <br>P[i][j] = str[i] == str[j] &amp;&amp; P[i+1][j-1];
+    <br>
+</blockquote>
+
+
+<h3>Solution</h3>
+
+<p>The coding is not easy, especially <strong>when 2 DP are written in 1 for-loop</strong>.</p>
+
+<p>I wrote many times until I finally achieved the nice and concise solution that you see below.</p>
+
+<h3>Code</h3>
+
+<p><strong>Doing everything in 1 loop</strong>, not an intuitive code.</p>
+
+<pre><code>public int minCut(String s) {
+    int len = s.length();
+    if (len &lt;= 1) return 0;
+    boolean[][] pl = new boolean[len][len];
+    int[] dp = new int[len];
+    for (int i = len-1; i &gt;= 0; i --) {
+        dp[i] = Integer.MAX_VALUE;
+        for (int j = i; j &lt; len; j ++) {
+            // first set pl[][], then update dp[i]
+            if (j - i &lt;= 1) pl[i][j] = s.charAt(i) == s.charAt(j);
+            else pl[i][j] = s.charAt(i) == s.charAt(j) &amp; pl[i+1][j-1];
+            if (pl[i][j]) {
+                if (j == len-1) dp[i] = 0;
+                else 
+                    dp[i] = Math.min(dp[i], dp[j+1] + 1);
+            }
+        }
+    }
+    return dp[0];
+}
+</code></pre>
+
+<p><strong>Updated on July 18th, 2014</strong>, written by me.</p>
+
+<pre><code>boolean[][] map = null;
+
+public int minCut(String s) {
+    if (s == null || s.length() == 0) {
+        return 0;
+    }
+    map = getMap(s);
+    int len = s.length();
+    int[] dp = new int[len + 1];
+    dp[0] = -1;
+    for (int i = 0; i &lt; len; i++) {
+        dp[i+1] = Integer.MAX_VALUE;
+        for (int j = 0; j &lt;= i; j++) {
+            if (map[j][i]) {
+                dp[i+1] = Math.min(dp[i+1], dp[j] + 1);
+            }
+        }
+    }
+    return dp[len];
+}
+
+private boolean[][] getMap(String s) {
+    int len = s.length();
+    boolean[][] map = new boolean[len][len];
+    for (int i = len - 1; i &gt;= 0; i--) {
+        for (int j = 0; j &lt; len; j++) {
+            if (i &gt; j) {
+                continue;
+            } else if (i == j) {
+                map[i][j] = true;
+            } else {
+                if (i + 1 == j) {
+                    map[i][j] = s.charAt(i) == s.charAt(j);
+                } else {
+                    map[i][j] = s.charAt(i) == s.charAt(j) &amp;&amp; map[i+1][j-1];
+                }
+            }
+        }
+    }
+    return map;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/30/Insertion-Sort-List/">[LeetCode 147] Insertion Sort List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/30/Insertion-Sort-List/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/30/Insertion-Sort-List/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/insertion-sort-list/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Sort a linked list using insertion sort.</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
     </tr>
     <tr>
         <td>Time to use</td>
@@ -1003,44 +680,59 @@ After calling your function, the tree should look like:<br>
 
 <h3>Analysis</h3>
 
-<p><strong>Although this question is not hard, it needs a bit thinking</strong>.</p>
-
-<p>The important point is, how to effectively make use of the &lsquo;next link&rsquo; generated before, to help us solve this problem.</p>
+<p><strong>This question is a little tricky, but not difficult</strong>. First important thing is to konw what is <a href="http://en.wikipedia.org/wiki/Insertion_sort">insertion sort</a>. It is always keeping a sorted list, and then get next unsorted element and insert into correct position of the sorted list.</p>
 
 <h3>Solution</h3>
 
-<p><strong>My solution is actually very good</strong>. It pass current node and next node into a method, and then generate links for current node&rsquo;s children.</p>
+<p><strong>Almost all solutions on internet is same, so I will just explain my code</strong>. My code can be optimized a little bit by studying <a href="http://blog.csdn.net/linhuanmars/article/details/21144553">this blog</a>, but I guess it&rsquo;s just refactoring 1 or 2 variables and execution time would not be affected.</p>
 
-<p><strong>There is a even <a href="http://leetcode.com/2010/03/first-on-site-technical-interview.html">better solution</a></strong>, which directly make use of the &lsquo;next link&rsquo; generated already. In fact, it&rsquo;s same as my solution, except it uses one less variable. Great idea it is!</p>
+<p>My solution is dividing the list into 2 parts: sorted part and unsorted part. <strong>I keep getting next node from unsorted and insert into sorted</strong>.</p>
 
-<h3>Code</h3>
+<h3>My code</h3>
 
-<p><strong>First, my solution</strong></p>
+<p>Recursion:</p>
 
-<pre><code>public void connect(TreeLinkNode root) {
-    link(root, null);
-}
-
-private void link(TreeLinkNode node, TreeLinkNode rr){
-    if (node == null || node.left == null) return;
-    node.left.next = node.right;
-    if (rr == null) node.right.next = null;
-    else node.right.next = rr.left;
-
-    link(node.left, node.left.next);
-    link(node.right, node.right.next);
+<pre><code>public ListNode insertionSortList(ListNode head) {
+    if (head == null || head.next == null) return head;
+    ListNode sorted = new ListNode(Integer.MIN_VALUE);
+    sorted.next = head;
+    ListNode unsort = head.next;
+    head.next = null;
+    // the sorted and unsort both are not null at this point
+    while (unsort != null) {
+        ListNode pos = sorted;
+        ListNode cur = unsort;
+        unsort = unsort.next;
+        while (pos.next != null &amp;&amp; pos.val &lt; cur.val 
+            &amp;&amp; pos.next.val &lt; cur.val) pos = pos.next;
+        // now insert (cur) to (pos.next)
+        cur.next = pos.next;
+        pos.next = cur;
+    }
+    return sorted.next;
 }
 </code></pre>
 
-<p><strong>Second, better solution</strong></p>
+<p><strong>Updated on June 17th, rewrote the code with dummy head</strong>. This is different solution, with better readability.</p>
 
-<pre><code>public void connect(TreeLinkNode root) {
-    if (root == null || root.left == null || root.right == null) 
-        return;
-    root.left.next = root.right;
-    root.right.next = root.next == null ? null : root.next.left;
-    connect(root.left);
-    connect(root.right);
+<pre><code>public ListNode insertionSortList(ListNode head) {
+    if (head == null) {
+        return null;
+    }
+    ListNode dummy = new ListNode(0);
+    ListNode cur = head;
+    while (cur != null) {
+        // insert cur into correct pos
+        ListNode pos = dummy;
+        while (pos.next != null &amp;&amp; pos.next.val &lt; cur.val) {
+            pos = pos.next;
+        }
+        ListNode temp = cur.next;
+        cur.next = pos.next;
+        pos.next = cur;
+        cur = temp;
+    }
+    return dummy.next;
 }
 </code></pre>
 </div>
@@ -1055,7 +747,7 @@ private void link(TreeLinkNode node, TreeLinkNode rr){
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Path-Sum-II/">[LeetCode 113] Path Sum II</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/30/Clone-Graph/">[LeetCode 133] Clone Graph</a></h1>
     
     
       <p class="meta">
@@ -1071,10 +763,10 @@ private void link(TreeLinkNode node, TreeLinkNode rr){
   
 
 
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-30T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/27/Path-Sum-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Path-Sum-II/">Comments</a>
+           | <a href="/blog/2014/05/30/Clone-Graph/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/30/Clone-Graph/">Comments</a>
         
       </p>
     
@@ -1083,30 +775,379 @@ private void link(TreeLinkNode node, TreeLinkNode rr){
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/path-sum-ii/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/clone-graph/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+
+<p class="font-color"></p><p class="font-color">
+Clone an undirected graph. Each node in the graph contains a <code>label</code> and a list of its <code>neighbors</code>.
+</p>
+
+<div class="bg-color bg-img font-color">
+<br>
+<b>OJ&#8217;s undirected graph serialization:</b>
+
+<p class="font-color">
+Nodes are labeled uniquely.
+</p>
+
+We use <code>#</code> as a separator for each node, and <code>,</code> as a separator for node label and each neighbor of the node.
+<p class="font-color"></p>
+
+<p class="font-color">
+As an example, consider the serialized graph <code><font color="red">{<font color="black">0</font>,1,2#</font><font color="blue"><font color="black">1</font>,2#</font><font color="green"><font color="black">2</font>,2}</font></code>.
+</p>
+
+<p class="font-color">
+The graph has a total of three nodes, and therefore contains three parts as separated by <code>#</code>.
+</p><ol>
+<li>First node is labeled as <code><font color="black">0</font></code>. Connect node <code><font color="black">0</font></code> to both nodes <code><font color="red">1</font></code> and <code><font color="red">2</font></code>.</li>
+<li>Second node is labeled as <code><font color="black">1</font></code>. Connect node <code><font color="black">1</font></code> to node <code><font color="blue">2</font></code>.</li>
+<li>Third node is labeled as <code><font color="black">2</font></code>. Connect node <code><font color="black">2</font></code> to node <code><font color="green">2</font></code> (itself), thus forming a self-cycle.</li>
+</ol>
+<p class="font-color"></p>
+
+<p class="font-color">
+Visually, the graph looks like the following:
+</p><pre class="bg-color bg-img font-color">       1
+      / \
+     /   \
+    0 --- 2
+         / \
+         \_/
+</pre>
+<p class="font-color"></p>
+
+</div><p class="font-color"></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">thought for a while</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a difficult coding question, although the idea is simple</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>Two solution: <strong>BFS (recommended) and DFS</strong>. <a href="http://leetcode.com/2012/05/clone-graph-part-i.html">This</a> is a good analysis article.</p>
+
+<blockquote cite="http://leetcode.com/2012/05/clone-graph-part-i.html">
+<p>Let’s analyze this further by using the below example:</p>
+<div style="text-align: center; margin-bottom: 30px;"> <a href="http://www.leetcode.com/wp-content/uploads/2012/05/graph.png"><img src="http://www.leetcode.com/wp-content/uploads/2012/05/graph.png" alt="" title="graph" width="211" height="84" class="aligncenter size-full wp-image-1365"></a><span style="font-size: x-small;">A simple graph</span></div>
+<p>Assume that the starting point of the graph is A. First, you make a copy of node A (A2), and found that A has only one neighbor B. You make a copy of B (B2) and connects A2-&gt;B2 by pushing B2 as A2′s neighbor. Next, you find that B has A as neighbor, which you have already made a copy of. Here, we have to be careful not to make a copy of A again, but to connect B2-&gt;A2 by pushing A2 as B2′s neighbor. But, how do we know if a node has already been copied?</p>
+</blockquote>
+
+
+<p><strong>Basic idea is to use HashMap to store the already-copied nodes</strong>.</p>
+
+<p>My first attempt is DFS by making use of a &lsquo;visited&rsquo; Set to mark which node I have copied and which is not. This is a nice idea and it solved the problem neatly.</p>
+
+<p>But after reading <a href="http://www.programcreek.com/2012/12/leetcode-clone-graph-java/">this article</a>, I realize that <strong>&lsquo;visited&rsquo; is not needed for BFS solution</strong>!</p>
+
+<p><strong>The trick is, whenever I do a &lsquo;HashMap.put(curNode, newNode)&rsquo;, I push &lsquo;curNode&rsquo; to queue</strong>. This very well replaces the functionality of the &lsquo;visited&rsquo; set. It also guarantees that when I pop a new element from the queue, <strong>I CAN ALWAYS FIND ITS CORRESPONDING COPY</strong> from the HashMap &ndash; always there.</p>
+
+<h3>Code</h3>
+
+<p><strong>First, my DFS code</strong></p>
+
+<pre><code>public UndirectedGraphNode cloneGraph(UndirectedGraphNode node) {
+    if (node == null) return null;
+    UndirectedGraphNode newNode = new UndirectedGraphNode(node.label);
+    HashMap&lt;Integer, UndirectedGraphNode&gt; map = 
+        new HashMap&lt;Integer, UndirectedGraphNode&gt;();
+    map.put(node.label, newNode);
+    copy(node, newNode, map, new HashSet&lt;Integer&gt;());
+    return newNode;
+}
+
+private void copy(UndirectedGraphNode orin, UndirectedGraphNode cp,
+        HashMap&lt;Integer, UndirectedGraphNode&gt; map,
+        HashSet&lt;Integer&gt; visited) {
+    if (visited.contains(orin.label))
+        return;
+    else
+        visited.add(orin.label);
+    for (UndirectedGraphNode n : orin.neighbors) {
+        if (map.containsKey(n.label)) {
+            cp.neighbors.add(map.get(n.label));
+        } else {
+            UndirectedGraphNode newNode = new UndirectedGraphNode(n.label);
+            map.put(n.label, newNode);
+            cp.neighbors.add(map.get(n.label));
+        }
+    }
+    // do DFS recursively
+    for (int i = 0; i &lt; orin.neighbors.size(); i++) {
+        copy(orin.neighbors.get(i), cp.neighbors.get(i), map, visited);
+    }
+}
+</code></pre>
+
+<p><strong>Second, my BFS code without using &lsquo;visited&rsquo; HashSet</strong></p>
+
+<pre><code>public UndirectedGraphNode cloneGraph(UndirectedGraphNode node) {
+    if (node == null) return null;
+    HashMap&lt;UndirectedGraphNode, UndirectedGraphNode&gt; map 
+            = new HashMap&lt;UndirectedGraphNode, UndirectedGraphNode&gt;();
+    map.put(node, new UndirectedGraphNode(node.label));
+    LinkedList&lt;UndirectedGraphNode&gt; queue = new LinkedList&lt;UndirectedGraphNode&gt;();
+    queue.add(node);
+    // queue is guaranteed to always have non-traversed nodes
+    while ( !queue.isEmpty() ) {
+        UndirectedGraphNode orin = queue.remove();
+        UndirectedGraphNode cp = map.get(orin);
+        for (UndirectedGraphNode n : orin.neighbors) {
+            if ( !map.containsKey(n) ) {
+                map.put(n, new UndirectedGraphNode(n.label));
+                queue.add(n);
+            }
+            UndirectedGraphNode newNode = map.get(n);
+            cp.neighbors.add(newNode);
+        }
+    }
+    return map.get(node);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/29/Word-Ladder/">[LeetCode 127] Word Ladder</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/29/Word-Ladder/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/29/Word-Ladder/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/word-ladder/">link</a></p>
 
 <div class="question-content">
             <p></p><p>
-Given a binary tree and a sum, find all root-to-leaf paths where each path&#8217;s sum equals the given sum.
+Given two words (<i>start</i> and <i>end</i>), and a dictionary, find the length of shortest transformation sequence from <i>start</i> to <i>end</i>, such that:
 </p>
-
-For example:<br>
-Given the below binary tree and <code>sum = 22</code>,
-<pre>              5
-             / \
-            4   8
-           /   / \
-          11  13  4
-         /  \    / \
-        7    2  5   1
-</pre>
+<ol>
+<li>Only one letter can be changed at a time</li>
+<li>Each intermediate word must exist in the dictionary</li>
+</ol>
 
 <p>
-return<br>
-</p><pre>[
-   [5,4,11,2],
-   [5,8,4,5]
-]
+For example,
+</p>
+<p>
+Given:<br>
+<i>start</i> = <code>"hit"</code><br>
+<i>end</i> = <code>"cog"</code><br>
+<i>dict</i> = <code>["hot","dot","dog","lot","log"]</code><br>
+</p>
+<p>
+As one shortest transformation is <code>"hit" -&gt; "hot" -&gt; "dot" -&gt; "dog" -&gt; "cog"</code>,<br>
+return its length <code>5</code>.
+</p>
+
+<p>
+<b>Note:</b><br>
+</p><ul>
+<li>Return 0 if there is no such transformation sequence.</li>
+<li>All words have the same length.</li>
+<li>All words contain only lowercase alphabetic characters.</li>
+</ul>
+<p></p><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is an extremely difficult question</strong>.</p>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>This question is <strong>find shortest path</strong>, so we shall choose <strong>BFS</strong> over DFS.</p></li>
+<li><p>Since finding an element in HashSet is O(1) time, <strong>we can generate all the possible strings of distance = 1</strong> and check if they are in the dictionary. In this way, we reduce time complexity from O(m x n) to O(m x 26).</p></li>
+<li><p>If a word is found from the dictionary, remove it.</p></li>
+</ol>
+
+
+<p><strong>For the 3rd point, we remove the word from dict</strong>. It might be hard to understand. <a href="http://blog.csdn.net/zxzxy1988/article/details/8591890">This blog</a> explains it clear enough.</p>
+
+<blockquote cite="http://blog.csdn.net/zxzxy1988/article/details/8591890">
+另外一个需要注意的地方就是，如果我们曾经遍历过某个元素，我会将其从字典中删除，以防以后再次遍历到这个元素。这里有几种情况：<br><br>
+1.以后再也遍历不到这个元素，那么我们删除它当然没有任何问题。<br><br>
+2.我们以后会遍历到该元素，又分为两种情况：<br><br>
+(1)在本层我们就能遍历到该元素。也就是说，我们到达这个元素有两条路径，而且它们都是最短路径。<br><br>
+对于本题来说，是没有什么影响的，因为到dog距离都是3，到dig距离都是4。但是后面我们做word ladder 2的时候，如果没有考虑这个情况，将是非常致命的，因为题目要求输出最短路径的所有情况<br><br>
+(2)在更下层我们才能够遍历到该元素。比如hot-&gt;dot-&gt;dog-&gt;dig和hot-&gt;hat-&gt;dat-&gt;dag-&gt;dog-&gt;dig，如果第一次我们找到了dog并且将其删除，那么第二次我们实际上是找不到这个元素的。这样对于本题来说，没有任何影响。对于word ladder 2来说，因为也是要输出最短路径，所以也不会有任何影响。<br><br>
+</blockquote>
+
+
+<h3>Code</h3>
+
+<p><strong>BFS solution</strong></p>
+
+<p>This is similar to the code posted in <a href="http://www.programcreek.com/2012/12/leetcode-word-ladder/">this article</a>.</p>
+
+<pre><code>public int ladderLength(String start, String end, HashSet&lt;String&gt; dict) {
+    if (start.equals(end)) return 1;
+    LinkedList&lt;String&gt; words = new LinkedList&lt;String&gt;();
+    LinkedList&lt;Integer&gt; nums = new LinkedList&lt;Integer&gt;();
+    words.add(start);
+    nums.add(1);
+    while (!words.isEmpty()) {
+        String word = words.remove();
+        int num = nums.remove();
+        // otherwise, change each char in word, and find it from dict
+        char[] charArr = word.toCharArray();
+        for (int i = 0; i &lt; charArr.length; i++) {
+            char originChar = charArr[i];
+            for (char j = 'a'; j &lt;= 'z'; j++) {
+                charArr[i] = j;
+                String newWord = new String(charArr);
+                if (newWord.equals(end))
+                    return num + 1;
+                if (dict.contains(newWord)) {
+                    dict.remove(newWord);
+                    words.add(newWord);
+                    nums.add(num + 1);
+                }
+            }
+            charArr[i] = originChar;
+        }
+    }
+    return 0;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/29/Surrounded-Regions/">[LeetCode 130] Surrounded Regions</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/29/Surrounded-Regions/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/29/Surrounded-Regions/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/surrounded-regions/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a 2D board containing <code>'X'</code> and <code>'O'</code>, capture all regions surrounded by <code>'X'</code>.</p>
+
+<p>A region is captured by flipping all <code>'O'</code>s into <code>'X'</code>s in that surrounded region.
+</p>
+
+<p>
+For example,<br>
+</p><pre>X X X X
+X O O X
+X X O X
+X O X X
+</pre>
+<p></p>
+
+<p>
+After running your function, the board should be:
+</p><pre>X X X X
+X X X X
+X X X X
+X O X X
 </pre>
 <p></p><p></p>
           </div>
@@ -1117,19 +1158,19 @@ return<br>
 <table border="2">
     <tr>
         <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
         <td bgcolor="yellow">3</td>
     </tr>
     <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
         <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
     </tr>
 </table>
 
@@ -1138,31 +1179,73 @@ return<br>
 
 <h3>Analysis</h3>
 
-<p><strong>This is a standard question</strong></p>
+<p><strong>This question can be solved by DFS or BFS search</strong>.</p>
+
+<p><strong>The idea is simple</strong>. For each edge nodes, if it is an &lsquo;O&rsquo;, search for all connected &lsquo;O&rsquo;s and mark it. My first attemps used another array to store result. It works, but it&rsquo;s actually bad, because space usage is huge. We can actually mark the connected nodes using some special character, for example in my case, &#8216;R&rsquo;. Then the solution can work in-place.</p>
+
+<p>So this is the standard solution.</p>
 
 <h3>Solution</h3>
 
-<p>My code is simple DFS. However, the coding part is not easy. Note that value can be negative, and think about when to add result into list.</p>
+<p>However, there is <strong>one big problem</strong> with my DFS solution.</p>
 
-<p>Just write it by hand and get an idea of it.</p>
+<p><strong>For super-large test cases, it gets &lsquo;java.lang.StackOverflowError&rsquo; exception</strong>. It&rsquo;s very werid to me, until I read <a href="https://oj.leetcode.com/discuss/1723/my-code-can-not-pass-this-longest-case">this blog</a>.</p>
+
+<blockquote><p>If you use DFS Recursive, you will get Runtime Error. But if you implement DFS by stack, just like doing BFS by Queue, your code will get accepted.</p>
+
+<p>Recursive dfs would take too much resource (too many calls which require space to store the calling state) than bfs for long long case. Considering one of test case with 200x200 matrix, in worst case the longest path (number of calls) might take 200x200 = 40,000 long. While with bfs, the maximal calls are about less than 400.</p></blockquote>
+
+<p>One more thing, so <strong>DFS with stack, or BFS with queue, which one would consume less space</strong>? I think BFS. The difference is DFS space usage is max depth, while BFS is the max width. However in this question, each node have 4 adjacent nodes, so the DFS space usage would be increased to 3 x (max depth). More details on this topic, please refer to <strong>DFS, BFS and space efficiency</strong>.</p>
+
+<p>If any reader have an idea on this, please comment!</p>
 
 <h3>Code</h3>
 
-<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; pathSum(TreeNode root, int sum) {
-    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;Integer&gt;&gt;();
-    helper(root, sum, new ArrayList&lt;Integer&gt;(), ans);
-    return ans;
+<p><strong>bfs code realized with a queue</strong></p>
+
+<pre><code>public void solve(char[][] board) {
+    if (board.length == 0) return;
+    int m = board.length, n = board[0].length;
+    for (int i = 0; i &lt; m; i ++) {
+        dfs(board, i, 0);
+        dfs(board, i, n-1);
+    }
+    for (int j = 0; j &lt; n; j ++) {
+        dfs(board, 0, j);
+        dfs(board, m-1, j);
+    }
+    for (int i = 0; i &lt; m; i ++) 
+        for (int j = 0; j &lt; n; j ++) 
+            if (board[i][j] == 'R') 
+                board[i][j] = 'O';
+            else if (board[i][j] == 'O') 
+                board[i][j] = 'X';
 }
 
-private void helper(TreeNode node, int total, ArrayList&lt;Integer&gt; list, 
-                    ArrayList&lt;ArrayList&lt;Integer&gt;&gt; ans) {
-    if (node == null) return;
-    list.add(node.val);
-    if (node.val == total &amp;&amp; node.left == null &amp;&amp; node.right == null)
-        ans.add(new ArrayList(list));
-    helper(node.left, total - node.val, list, ans);
-    helper(node.right, total - node.val, list, ans);
-    list.remove(list.size() - 1);
+private void dfs(char[][] board, int x, int y) {
+    int m = board.length, n = board[0].length;
+    Queue&lt;Integer&gt; aa = new LinkedList&lt;Integer&gt;();
+    Queue&lt;Integer&gt; bb = new LinkedList&lt;Integer&gt;();
+    aa.add(x);
+    bb.add(y);
+    while (!aa.isEmpty()) {
+        int a = aa.remove();
+        int b = bb.remove();
+        if (a &lt; 0 || a &gt;= m || b &lt; 0 || b &gt;= n) 
+            continue;
+        if (board[a][b] == 'X' || board[a][b] == 'R') 
+            continue;
+        board[a][b] = 'R';
+
+        aa.add(a - 1);
+        bb.add(b);
+        aa.add(a + 1);
+        bb.add(b);
+        aa.add(a);
+        bb.add(b - 1);
+        aa.add(a);
+        bb.add(b + 1);
+    }
 }
 </code></pre>
 </div>
@@ -1177,7 +1260,7 @@ private void helper(TreeNode node, int total, ArrayList&lt;Integer&gt; list,
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Path-Sum/">[LeetCode 112] Path Sum</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/29/Sum-Root-to-Leaf-Numbers/">[LeetCode 129] Sum Root to Leaf Numbers</a></h1>
     
     
       <p class="meta">
@@ -1193,10 +1276,10 @@ private void helper(TreeNode node, int total, ArrayList&lt;Integer&gt; list,
   
 
 
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-05-29T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/05/27/Path-Sum/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Path-Sum/">Comments</a>
+           | <a href="/blog/2014/05/29/Sum-Root-to-Leaf-Numbers/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/29/Sum-Root-to-Leaf-Numbers/">Comments</a>
         
       </p>
     
@@ -1205,132 +1288,26 @@ private void helper(TreeNode node, int total, ArrayList&lt;Integer&gt; list,
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="https://oj.leetcode.com/problems/path-sum/">link</a></p>
+<p><a href="https://oj.leetcode.com/problems/sum-root-to-leaf-numbers/">link</a></p>
 
 <div class="question-content">
-            <p></p><p>
-Given a binary tree and a sum, determine if the tree has a root-to-leaf path such that adding up all the values along the path equals the given sum.
-</p>
+            <p></p><p>Given a binary tree containing digits from <code>0-9</code> only, each root-to-leaf path could represent a number.</p>
+<p>An example is the root-to-leaf path <code>1-&gt;2-&gt;3</code> which represents the number <code>123</code>.</p>
 
-For example:<br>
-Given the below binary tree and <code>sum = 22</code>,
-<pre>              5
-             / \
-            4   8
-           /   / \
-          11  13  4
-         /  \      \
-        7    2      1
+<p>Find the total sum of all root-to-leaf numbers.</p>
+
+<p>For example,
+</p><pre>    1
+   / \
+  2   3
 </pre>
-
+<p></p>
 <p>
-return true, as there exist a root-to-leaf path <code>5-&gt;4-&gt;11-&gt;2</code> which sum is 22.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="white">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This question can be solved with either DFS or BFS</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>My code is <strong>DFS recursion</strong>.</p>
-
-<p>I found another BFS non-recursive solution <a href="http://www.programcreek.com/2013/01/leetcode-path-sum/">here</a>, but I did not post this code, because this question is too simple.</p>
-
-<p><strong>One more thing, the last line of code has a \|\| operation</strong>. Isn&rsquo;t it duplicate execution? I mean if answer is found in root.left, no need to check root.right.</p>
-
-<p>Actually it&rsquo;s not duplication. The <a href="http://docs.oracle.com/javase/tutorial/java/nutsandbolts/op2.html">official doc</a> explains it:</p>
-
-<blockquote><p>The &amp;&amp; and \|\| operators perform Conditional-AND and Conditional-OR operations on two boolean expressions. These operators exhibit &ldquo;short-circuiting&rdquo; behavior, which means that the second operand is evaluated only if needed.</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public boolean hasPathSum(TreeNode root, int sum) {
-    if (root == null) return false;
-    if (root.left == null &amp;&amp; root.right == null) 
-        return (sum == root.val);
-    return hasPathSum(root.left, sum - root.val) 
-        || hasPathSum(root.right, sum - root.val);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/27/Pascal-Triangle-II/">[LeetCode 119] Pascal&#8217;s Triangle II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/05/27/Pascal-Triangle-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/05/27/Pascal-Triangle-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/pascals-triangle-ii/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given an index <i>k</i>, return the <i>k</i><sup>th</sup> row of the Pascal&#8217;s triangle.</p>
-
-<p>
-For example, given <i>k</i> = 3,<br>
-Return <code>[1,3,3,1]</code>.
+The root-to-leaf path <code>1-&gt;2</code> represents the number <code>12</code>.<br>
+The root-to-leaf path <code>1-&gt;3</code> represents the number <code>13</code>.
 </p>
-
 <p>
-<b>Note:</b><br>
-Could you optimize your algorithm to use only <i>O</i>(<i>k</i>) extra space?
+Return the sum = 12 + 13 = <code>25</code>.
 </p><p></p>
           </div>
 
@@ -1340,7 +1317,7 @@ Could you optimize your algorithm to use only <i>O</i>(<i>k</i>) extra space?
 <table border="2">
     <tr>
         <td>Frequency</td>
-        <td bgcolor="white">1</td>
+        <td bgcolor="red">4</td>
     </tr>
     <tr>
         <td>Difficulty</td>
@@ -1348,11 +1325,11 @@ Could you optimize your algorithm to use only <i>O</i>(<i>k</i>) extra space?
     </tr>
     <tr>
         <td>Adjusted Difficulty</td>
-        <td bgcolor="lime"></td>
+        <td bgcolor="lime">2</td>
     </tr>
     <tr>
         <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
+        <td bgcolor="white">10 minutes</td>
     </tr>
 </table>
 
@@ -1361,50 +1338,365 @@ Could you optimize your algorithm to use only <i>O</i>(<i>k</i>) extra space?
 
 <h3>Analysis</h3>
 
-<p><strong>This is a math question</strong>.</p>
+<p><strong>This is DFS standard question</strong>.</p>
 
-<p>First code below is my code.</p>
+<h3>Solution</h3>
 
-<p>Second code is a very concise solution from <a href="http://xiaotong-blog.herokuapp.com/posts/16">this blog</a>.</p>
+<p>I posted 2 pieces of my code, and 1 best code (from <a href="http://blog.sina.com.cn/s/blog_b9285de20101iv6l.html">this blog</a>).</p>
 
 <h3>Code</h3>
 
-<p><strong>First, my code</strong></p>
+<p><strong>First, my solution using List</strong>.</p>
 
-<pre><code>public ArrayList&lt;Integer&gt; getRow(int rowIndex) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    if (rowIndex == 0) {
-        ans.add(1);
-        return ans;
+<pre><code>int sum = 0;
+
+public int sumNumbers(TreeNode root) {
+    dfs(root, new LinkedList&lt;Integer&gt;());
+    return sum;
+}
+
+private void dfs(TreeNode node, LinkedList&lt;Integer&gt; list) {
+    if (node == null) return;
+    if (node.left == null &amp;&amp; node.right == null) {
+        int num = 0;
+        for (int i = 0; i &lt; list.size(); i ++) 
+            num = num * 10 + list.get(i);
+        sum += num * 10 + node.val;
+        return;
     }
-    int[] nodes = new int[rowIndex + 1];
-    nodes[0] = 1;
-    for (int k = 1; k &lt;= rowIndex; k++) {
-        for (int i = k / 2; i &gt;= 1; i--) {
-            if (k % 2 == 0 &amp;&amp; i == k / 2)
-                nodes[i] = 2 * nodes[i - 1];
-            else
-                nodes[i] = nodes[i - 1] + nodes[i];
-        }
-        for (int j = k / 2 + 1; j &lt;= k; j++) {
-            nodes[j] = nodes[k - j];
-        }
-    }
-    for (Integer a: nodes) ans.add(a);
-    return ans;
+    // if node is not null, not a leaf
+    list.add(node.val);
+    dfs(node.left, list);
+    dfs(node.right, list);
+    list.remove(list.size() - 1);
 }
 </code></pre>
 
-<p><strong>Second, a better version</strong></p>
+<p><strong>Second, previous code refactored, without using list</strong>, because it&rsquo;s not necessary to know the previous path.</p>
 
-<pre><code>public ArrayList&lt;Integer&gt; getRow(int rowIndex) {
-    ArrayList&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    for (int j = 0; j &lt;= rowIndex; j ++){
-        for (int i = 1; i &lt; ans.size(); i ++)
-            ans.set(i-1, ans.get(i-1)+ans.get(i));
-        ans.add(0,1);
+<pre><code>int sum = 0;
+public int sumNumbers(TreeNode root) {
+    dfs(root, 0);
+    return sum;
+}
+
+private void dfs(TreeNode node, int preVal) {
+    if (node == null) return;
+    int curVal = preVal * 10 + node.val;
+    if (node.left == null &amp;&amp; node.right == null) {
+        int num = 0;
+        sum += curVal;
+        return;
     }
+    // if node is not null, not a leaf
+    dfs(node.left, curVal);
+    dfs(node.right, curVal);
+}
+</code></pre>
+
+<p><strong>Third, best solution</strong></p>
+
+<pre><code>public int sumNumbers(TreeNode root) {
+    return dfs(root,0);
+}
+
+int dfs(TreeNode root, int sum){
+    if(root==null) return 0;
+    sum=sum*10+root.val;
+    if(root.left==null &amp;&amp; root.right==null) return sum;
+    return dfs(root.left,sum) + dfs(root.right,sum);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/29/Palindrome-Partitioning/">[LeetCode 131] Palindrome Partitioning</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/29/Palindrome-Partitioning/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/29/Palindrome-Partitioning/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/palindrome-partitioning/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given a string <i>s</i>, partition <i>s</i> such that every substring of the partition is a palindrome.
+</p>
+<p>
+Return all possible palindrome partitioning of <i>s</i>.
+</p>
+<p>
+For example, given <i>s</i> = <code>"aab"</code>,<br>
+
+Return
+</p><pre>  [
+    ["aa","b"],
+    ["a","a","b"]
+  ]
+</pre>
+<p></p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is an extremely classic question</strong>.</p>
+
+<p>It&rsquo;s not very hard to solve, although it looked impossible at first.</p>
+
+<h3>Solution</h3>
+
+<p><strong>The solution is DFS</strong>.</p>
+
+<p>It&rsquo;s very standard DFS code, I will not go into coding details. This type of &ldquo;return all possible path&rdquo; question is always related to DFS, keep this in mind!</p>
+
+<p>The code is borrowing ideas from <a href="http://blog.sina.com.cn/s/blog_b9285de20101jbtl.html">peking2&rsquo;s blog</a>. He also had an <strong>analysis on this series of questions</strong>:</p>
+
+<blockquote><p>我觉得一般有三种变形，解法各有不同。</p>
+
+<ol>
+<li>最后结果是一个整数，比如Palindrome Partitioning II。这个用DP来解</li>
+<li>最后求一个结果，比如最小切法。这个用DP＋backtrack来解</li>
+<li>求所有的结果。这个一般用DFS来解。</li>
+</ol>
+</blockquote>
+
+<p>This question is the 3rd case. <a href="http://fisherlei.blogspot.sg/2013/03/leetcode-palindrome-partitioning.html">Fish Lei</a> also said the same.</p>
+
+<blockquote><p>这种需要输出所有结果的基本上都是DFS的解法</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public ArrayList&lt;ArrayList&lt;String&gt;&gt; partition(String s) {
+    // int len = s.length();
+    ArrayList&lt;ArrayList&lt;String&gt;&gt; ans = new ArrayList&lt;ArrayList&lt;String&gt;&gt;();
+    helper(ans, new ArrayList&lt;String&gt;(), s, 0);
     return ans;
+}
+
+private void helper(ArrayList&lt;ArrayList&lt;String&gt;&gt; ans, ArrayList&lt;String&gt; cur, 
+        String s, int start) {
+    int len = s.length();
+    if (start == len) {
+        ans.add(new ArrayList&lt;String&gt;(cur));
+        return;
+    }
+    for (int i = start + 1; i &lt;= len; i ++) {
+        String sub = s.substring(start, i);
+        if (isPal(sub)) {
+            cur.add(sub);
+            helper(ans, cur, s, i);
+            cur.remove(cur.size() - 1);
+        }
+    }
+}
+
+private boolean isPal(String str) {
+    int left = 0, right = str.length() - 1;
+    while (left &lt; right) {
+        if (str.charAt(left) != str.charAt(right)) 
+            return false;
+        left++;
+        right--;
+    }
+    return true;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/29/Longest-Consecutive-Sequence/">[LeetCode 128] Longest Consecutive Sequence</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/05/29/Longest-Consecutive-Sequence/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/05/29/Longest-Consecutive-Sequence/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/longest-consecutive-sequence/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given an unsorted array of integers, find the length of the longest consecutive elements sequence.
+</p>
+<p>
+For example,<br>
+Given <code>[100, 4, 200, 1, 3, 2]</code>,<br>
+The longest consecutive elements sequence is <code>[1, 2, 3, 4]</code>. Return its length: <code>4</code>.
+</p>
+<p>
+Your algorithm should run in O(<i>n</i>) complexity.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">just coding is easy</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>I did not solve this question</strong>. We are going to make use of <strong>HashSet</strong>.</p>
+
+<p>Information on HashSet from <a href="http://docs.oracle.com/javase/7/docs/api/java/util/HashSet.html">official document</a>:</p>
+
+<blockquote><p><strong>java.util.HashSet</strong></p>
+
+<p>This class <strong>implements the Set interface</strong>, backed by a <strong>hash table</strong> (actually a HashMap instance). It makes no guarantees as to the <strong>iteration order</strong> of the set; in particular, it does not guarantee that the order will remain constant over time. This class permits the <strong>null element</strong>.</p>
+
+<p>This class offers <strong>constant time performance</strong> for the basic operations (add, remove, contains and size), assuming the hash function disperses the elements properly among the buckets. Iterating over this set requires time proportional to the sum of the HashSet instance&rsquo;s size (the number of elements) plus the &ldquo;capacity&rdquo; of the backing HashMap instance (the number of buckets). Thus, it&rsquo;s very important not to set the initial capacity too high (or the load factor too low) if iteration performance is important.</p>
+
+<p>Note that this implementation is <strong>not synchronized</strong>. If multiple threads access a hash set concurrently, and at least one of the threads modifies the set, it must be synchronized externally.</p></blockquote>
+
+<p><strong>To summarize it, HashSet</strong>:</p>
+
+<ol>
+<li><p>implements Set interface</p></li>
+<li><p>implemented by using a hash table</p></li>
+<li><p>un-ordered</p></li>
+<li><p>add, remove and contains methods have constant time O(1)</p></li>
+<li><p>can have null element</p></li>
+<li><p>not sync</p></li>
+</ol>
+
+
+<h3>Solution</h3>
+
+<p><strong>Well explained in <a href="http://stackoverflow.com/a/7453295">this site</a></strong>.</p>
+
+<blockquote><p>Dump everything to a hash set.</p>
+
+<p>Now go through the hashset. For each element, look up the set for all values neighboring the current value. Keep track of the largest sequence you can find, while removing the elements found from the set. Save the count for comparison.</p>
+
+<p>Repeat this until the hashset is empty.</p>
+
+<p>Assuming lookup, insertion and deletion are O(1) time, this algorithm would be O(N) time.</p></blockquote>
+
+<p><strong>Updated on July 4th, 2014</strong>: Look at the 2nd for-loop. Here if I do &lsquo;for (Integer in: set)&rsquo; to iterate all numbers, I will get &ldquo;java.util.ConcurrentModificationException &rdquo;. This is because we are iterating while modifying. <strong>The most tricky part of this solution is iteration thru the array</strong>, instead of the set. Take note of that!</p>
+
+<h3>Code</h3>
+
+<pre><code>public int longestConsecutive(int[] num) {
+    int longest = 1;
+    HashSet&lt;Integer&gt; set = new HashSet&lt;Integer&gt;();
+    for (Integer in: num) set.add(in);
+    for (Integer in: num) {
+        int left = in - 1, right = in + 1;
+        while (set.contains(left)) {
+            set.remove(left);
+            left --;
+        }
+        while (set.contains(right)) {
+            set.remove(right);
+            right ++;
+        }
+        longest = Math.max(longest, right - left - 1);
+    }
+    return longest;
 }
 </code></pre>
 </div>
@@ -1431,17 +1723,17 @@ Could you optimize your algorithm to use only <i>O</i>(<i>k</i>) extra space?
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (66)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (10)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (57)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (26)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (113)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1453,23 +1745,23 @@ Could you optimize your algorithm to use only <i>O</i>(<i>k</i>) extra space?
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+        <a href="/blog/2015/02/08/unbalanced-tree-into-balanced-tree/">[Google] Transform a Unbalanced Tree Into Balanced Tree</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
+        <a href="/blog/2015/02/08/generate-number-with-given-probability/">[Facebook] Generate Number With Given Probability</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
+        <a href="/blog/2015/02/08/difference-internet-and-www/">[Design] Difference: Internet and the Web</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
+        <a href="/blog/2015/02/08/bg-data-common-elements-lists/">[Design] Big Data - Find Common Elements in 2 Lists</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
+        <a href="/blog/2015/02/07/reservoir-sampling/">[Question] Reservoir Sampling</a>
       </li>
     
   </ul>

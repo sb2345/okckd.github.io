@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a continuous twitter feed, design an algorithm to return the 100 most
-frequent words used at this minute, this hour and this day &hellip;">
+  <meta name="description" content="Question link X and Y are strings formed by 0 or 1. Distance is define as: D(X,Y) = Remove chars common at the start from both X &amp; Y. Then add &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,7 +84,849 @@ frequent words used at this minute, this hour and this day &hellip;">
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/01/09/big-data-real-time-top-k/">[Design] Big Data - Real Time Top K</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/01/11/crazy-distance-string/">[Google] Crazy Distance Between Strings</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/11/crazy-distance-string/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/crazy-distance-string/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/15061908/google-interview-find-crazy-distance-between-strings">link</a></p>
+
+<blockquote><p>X and Y are strings formed by 0 or 1. Distance is define as:</p></blockquote>
+
+<pre><code>D(X,Y) = Remove chars common at the start from both X &amp; Y. 
+Then add the remaining lengths from both the strings.
+</code></pre>
+
+<blockquote><p>For e.g.</p></blockquote>
+
+<pre><code>D(1111, 1000) = Only First alphabet is common. So the remaining string is 111 &amp; 000. Therefore the result length("111") &amp; length("000") = 3 + 3 = 6
+</code></pre>
+
+<blockquote><p>For e.g.</p></blockquote>
+
+<pre><code>D(0101, 01100) = Only First two alphabets are common. So the remaining string is 01 &amp; 100. Therefore the result length("01") &amp; length("100") = 2 + 3 = 5
+</code></pre>
+
+<blockquote><p>Now given n input, say like</p></blockquote>
+
+<pre><code>1111
+1000
+101
+1100
+</code></pre>
+
+<blockquote><p>Find out the maximum crazy distance between 2 strings.</p>
+
+<p><strong>n is</strong> the number of input strings. <strong>m is</strong> the max length of any input string.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is the <a href="http://stackoverflow.com/a/15062640">source</a>.</p>
+
+<blockquote><p>Put the strings into a tree, where 0 means go left and 1 means go right. <strong>O(m*n) time</strong>.</p></blockquote>
+
+<p>Example:</p>
+
+<pre><code>            Root
+             1
+          0      1
+         0 1*   0  1
+        0*     0*    1*
+</code></pre>
+
+<blockquote><p>where the * means that an element ends there. Constructing this tree clearly takes O(n m).</p>
+
+<p>Now we have to find <strong>the diameter of the tree</strong> (the longest path between two nodes).</p></blockquote>
+
+<p>How to find out longest path between 2 leaf nodes? Please refer to <strong>[Google] Diameter of a Binary Tree</strong> for explanation.</p>
+
+<p>Total time complexity is <strong>O(m*n) time</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int crazyDist(String[] input) {
+    TreeNode root = this.buildTree(input);
+    return this.findMaxPath(root).path - 1;
+}
+
+private Result findMaxPath(TreeNode node) {
+    if (node == null) {
+        return new Result(Integer.MIN_VALUE, 0);
+    }
+    Result lr = this.findMaxPath(node.left);
+    Result rr = this.findMaxPath(node.right);
+    int path = Math.max(lr.path, rr.path);
+    if (lr.depth != 0 &amp;&amp; rr.depth != 0) {
+        // this check is important, because if any of the child node is
+        // NULL, this root will not be eligible for computing the path
+        path = Math.max(path, lr.depth + rr.depth + 1);
+        // Why? cuz diameter must go from one leaf, thru root, and reach
+        // another leaf. This is different from "Maximum Path Sum" leetcode
+    }
+    return new Result(path, 1 + Math.max(lr.depth, rr.depth));
+}
+
+private TreeNode buildTree(String[] input) {
+    TreeNode root = new TreeNode(123);
+    // share a common root. this root is deducted from the final calculation
+    for (String str : input) {
+        // insert str under the root
+        TreeNode p = root;
+        for (char c : str.toCharArray()) {
+            if (c == '0') {
+                if (p.left == null) {
+                    p.left = new TreeNode(124);
+                    // if 0, go to left; otherwise go to right
+                    // thus value of TreeNodes does not really matter
+                }
+                p = p.left;
+            } else {
+                if (p.right == null) {
+                    p.right = new TreeNode(125);
+                }
+                p = p.right;
+            }
+        }
+    }
+    return root;
+}
+
+class Result {
+    int path;
+    int depth;
+
+    public Result(int a, int b) {
+        path = a;
+        depth = b;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/">[Google] Check if Repeating Subsequence Exists</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/11/check-if-repeating-subsequence-exist/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/check-if-repeating-subsequence-exist/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5931067269709824">link</a></p>
+
+<blockquote><p>Given a string, find if there is any sub-sequence that repeats itself. Do not reuse any char.</p>
+
+<p>Eg:</p></blockquote>
+
+<pre><code>1. abab &lt;------yes, ab is repeated
+2. abba &lt;---- No, a and b follow different order 
+3. acbdaghfb &lt;-------- yes, a followed by b twice 
+4. abcdacb &lt;----- yes, a followed by b twice 
+</code></pre>
+
+<blockquote><p>Note that no char should be reused. I.e. &ldquo;aab&rdquo; is a false.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This looks like a question without any clue. However, this actually is a modified version of <strong>[LintCode] Longest Common Subsequence</strong>.</p>
+
+<p>Look at that question: there&rsquo;s 2 input string, and they match char-by-char. For this question, we are simply <strong>matching input string with input string itself</strong>. And chars should be match <strong>ONLY</strong> at different positions, that&rsquo;s the key. As pointed out by the <a href="http://www.careercup.com/question?id=5931067269709824">top comment</a>:</p>
+
+<blockquote><p>Now we can modify the longest_common_subsequence(a, a) to find the value of the longest repeated subsequence in a by excluding the cases when i == j</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public boolean checkRepeatSubseq(String input) {
+    int len = input.length();
+    int[][] dp = new int[len + 1][len + 1];
+    // dp[i][j] denotes the length of subseq between 2 strings:
+    // 1. first i chars of input
+    // 2. first j chars of input
+    for (int i = 1; i &lt;= len; i++) {
+        for (int j = i; j &lt;= len; j++) {
+            if (i != j &amp;&amp; input.charAt(i - 1) == input.charAt(j - 1)) {
+                int temp = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                dp[i][j] = Math.max(temp, dp[i - 1][j - 1] + 1);
+            } else {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    return dp[len][len] &gt;= 2;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/all-repeating-substring-given-length/">[LinkedIn] Find All Repeating Substring With Given Length</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/11/all-repeating-substring-given-length/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/all-repeating-substring-given-length/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=6495932900179968">link</a></p>
+
+<blockquote><p>Find all the repeating substring of specified length in a large string sequence.</p>
+
+<p>For e.g.</p></blockquote>
+
+<pre><code>Input String: "ABCACBABC" 
+repeated sub-string length: 3 
+Output: ABC 
+</code></pre>
+
+<blockquote><p>eg.</p></blockquote>
+
+<pre><code>Input String: "ABCABCA" 
+repeated sub-string length: 2 
+Output: AB, BC, CA
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Similar to <strong>[Amazon] Longest Repeating Substring</strong>, the best solution is to do <strong>Suffix Tree</strong>, or suffix array. We then need to print nodes on a certain level, who has more than 1 descendant.</p>
+
+<p>However, since the length of substring is given, we can also do simply iteration: insert all substring with given length into a HashSet, and check repetition. <a href="https://github.com/techpanja/interviewproblems/blob/master/src/strings/repeatingstringsofspecifiedlength/RepeatingStringOfSpecificLength.java">ref</a></p>
+
+<h3>Code</h3>
+
+<p>Suffix tree solution: not written.</p>
+
+<p>Hashset code:</p>
+
+<pre><code>public List&lt;String&gt; solve(String input, int k) {
+    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    HashSet&lt;String&gt; set = new HashSet&lt;String&gt;();
+    for (int i = 0; i &lt;= input.length() - k; i++) {
+        String sub = input.substring(i, i + k);
+        if (set.contains(sub)) {
+            ans.add(sub);
+        }
+        set.add(sub);
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">[Question] All Distinct Subsequences With Given Length</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://11011110.livejournal.com/254164.html">link</a></p>
+
+<blockquote><p>Find a polynomial-time algorithm that takes a string of length n, and a number k, output the number of distinct k-character subsequences.</p>
+
+<p>For instance, input &ldquo;food&rdquo; and number k=2, output should be 4. There are four distinct 2-character subsequences of &ldquo;food&rdquo;: &ldquo;fo&rdquo;, &ldquo;fd&rdquo;, &ldquo;oo&rdquo;, and &ldquo;od&rdquo;.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Similar to <strong>[Question] Number of distinct sub-sequence</strong>, we solve this problem with DP. The dp equation is a bit difficult to write.</p>
+
+<p>The idea come from comment from <a href="http://11011110.livejournal.com/254164.html">gareth_rees</a>:</p>
+
+<blockquote><p>Let θ(S, k) be the number of distinct k-character subsequences in the string S of length n.</p>
+
+<p>Clearly θ(S, k) = 1 if n = k or k = 0</p>
+
+<p>and θ(S, k) = 0 if n &lt; k.</p>
+
+<p>Otherwise, <strong>choose 1 unique char from S</strong>, and deduct k by 1, then do the DP calculation with the remaining part of S.</p></blockquote>
+
+<p>Look at this example:</p>
+
+<pre><code>θ("food", 2) = θ("ood", 1) + θ("od", 1) + θ("", 1)
+= (θ("od", 0) + θ("", 0)) + (θ("d", 0) + θ("", 0)) + 0
+= (1 + 1) + (1 + 1)
+= 4
+</code></pre>
+
+<p><strong>&ldquo;food&rdquo; is divided into 3 parts</strong>. First part we choose &ldquo;f&rdquo; to be the first char, thus the value is θ(&ldquo;ood&rdquo;, 1). Second part we choose &ldquo;o&rdquo;, and final part we choose &ldquo;d&rdquo;.</p>
+
+<p><strong>Note that when we choose a char, it must never have been chosen before</strong>. In case of &ldquo;food&rdquo;, we only choose &lsquo;f&rsquo;, &lsquo;o&rsquo;, &rsquo;d&#8217; once for each.</p>
+
+<p>This is a very difficult DP question, but the explanation really makes the answer easier. Read my implementation below.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int countSubSeq(String input, int k) {
+    // assuming all input chars are small letter
+    return choose(input, 0, k);
+}
+
+private int choose(String input, int start, int numChar) {
+    int charLeft = input.length() - start;
+    if (charLeft == numChar || numChar == 0) {
+        return 1;
+    } else if (charLeft &lt; numChar || numChar &lt; 0) {
+        return 0;
+    }
+    // now numChar is smaller than charLeft, and larger than 0
+    // start to pick a char (which is at first appearance)
+    int total = 0;
+    HashSet&lt;Character&gt; chosen = new HashSet&lt;Character&gt;();
+    while (start &lt; input.length()) {
+        char currentChar = input.charAt(start);
+        if (!chosen.contains(currentChar)) {
+            // pick the char pointer by 'start'
+            total += choose(input, start + 1, numChar - 1);
+            chosen.add(currentChar);
+        }
+        start++;
+    }
+    return total;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/11/Diameter-of-Binary-Tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/diameter-of-a-binary-tree/">link</a></p>
+
+<blockquote><p>The diameter of a tree (sometimes called the width) is the number of nodes on the longest path between two leaves in the tree.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/tree-diameter-1.gif"></p>
+
+<h3>Solution</h3>
+
+<p>This is a similar question to <strong>[LeetCode 124] Binary Tree Maximum Path Sum</strong>. <strong>However there&rsquo;s a significant difference</strong> which might be overlooked while coding.</p>
+
+<p>Look at this example:</p>
+
+<pre><code>     0
+       1
+        1
+       0  1
+           1
+</code></pre>
+
+<p>If we only want to find the max path, that would return result of 5, which is root-to-rightmost-leaf. However, the diameter should be 4, which is the distance between 2 leaf nodes.</p>
+
+<p>A solution is available for reading <a href="http://stackoverflow.com/a/3124575">here</a>.</p>
+
+<p>For <strong>[Google] Crazy Distance Between Strings</strong>, there is another special case: {&ldquo;1&rdquo;, &ldquo;11&rdquo;, &ldquo;10&rdquo;}. The program will not output correct result (1), because this is not really the diameter of a tree, but instead, a max path from a non-leaf to a leaf. I leave this part for you to finish.</p>
+
+<h3>Code</h3>
+
+<p>Refer to <strong>[Google] Crazy Distance Between Strings</strong> for complete code.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/10/reverse-a-stack/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/reverse-a-stack/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/">link</a></p>
+
+<blockquote><p>Reverse a stack using recursion. You are not allowed to use loops or data structure, and you can only use the following functions:</p></blockquote>
+
+<pre><code>isEmpty(S)
+push(S)
+pop(S)
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Well since we are not allowed to use additional DS or loop, we have to use system stack to help us!</p>
+
+<p>We add a new method: <strong>insert at stack bottom</strong>. Then we can solve this question recursively. Nice question, and tricky answer!</p>
+
+<h3>Code</h3>
+
+<pre><code>public void reverse(Stack&lt;Integer&gt; stack) {
+    if (stack.isEmpty() || stack.size() == 1) {
+        return;
+    }
+    int top = stack.pop();
+    this.reverse(stack);
+    this.insertAtBottom(stack, top);
+}
+
+private void insertAtBottom(Stack&lt;Integer&gt; stack, int val) {
+    if (stack.isEmpty()) {
+        stack.push(val);
+        return;
+    }
+    int temp = stack.pop();
+    this.insertAtBottom(stack, val);
+    stack.push(temp);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/minimum-range-inclueds-at-least-1/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5103437989543936">link</a></p>
+
+<blockquote><p>There are many sorted arrays. Find a minimum range, so that in each array there&rsquo;s at least one integer within this range.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Min-heap</strong>. <a href="http://www.careercup.com/question?id=16759664">source</a></p>
+
+<blockquote><p>There are k lists of sorted integers. Make a min heap of size k containing 1 element from each list. Keep track of min and max element and calculate the range.</p>
+
+<p>In min heap, minimum element is at top. Delete the minimum element and another element instead of that from the same list to which minimum element belong. Repeat the process till any one of the k list gets empty.</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public void printMinRange(int[][] input) {
+    Comparator&lt;Pointer&gt; compr = new HeapComparator(input);
+    // Note that we pass in 'input' arrays to the comparator
+    PriorityQueue&lt;Pointer&gt; heap = new PriorityQueue&lt;Pointer&gt;(SIZE, compr);
+
+    int maxVal = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; SIZE; i++) {
+        heap.add(new Pointer(i, 0));
+        // insert the head of each array into the heap
+        maxVal = Math.max(maxVal, input[i][0]);
+        // keep additional value to keep track of the max value in heap
+    }
+
+    int left = 0;
+    int right = Integer.MAX_VALUE;
+    while (heap.size() == SIZE) {
+        Pointer p = heap.remove();
+        // first, update the range
+        if (maxVal - input[p.index][p.position] &lt; right - left) {
+            right = maxVal;
+            left = input[p.index][p.position];
+        }
+        // then, push the next element after 'p' to the heap
+        // meanwhile, update 'maxVal'
+        if (p.position + 1 &lt; input[p.index].length) {
+            Pointer nextP = new Pointer(p.index, p.position + 1);
+            heap.add(nextP);
+            maxVal = Math.max(maxVal, input[nextP.index][nextP.position]);
+        }
+        // when 'p' is the last element in the row, terminate loop
+    }
+    System.out.println("Left boundary: " + left);
+    System.out.println("Right boundary: " + right);
+}
+
+class HeapComparator implements Comparator&lt;Pointer&gt; {
+
+    int[][] arrays = null;
+
+    public HeapComparator(int[][] input) {
+        arrays = input;
+    }
+
+    public int compare(Pointer p1, Pointer p2) {
+        return arrays[p1.index][p1.position]
+                - arrays[p2.index][p2.position];
+    }
+}
+
+class Pointer {
+    int index, position;
+
+    public Pointer(int x, int y) {
+        index = x;
+        position = y;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/10/max-count-array-in-queue/">[Google] Maximum Count Array in a Queue</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/10/max-count-array-in-queue/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/max-count-array-in-queue/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32856675_0_1.html#top">link1</a></p>
+
+<blockquote><p>给一个数组a[n]，令s[i]为a[i+1..n-1]中比a[i]大的数的数量。</p>
+
+<p>求最大的s[i]。要求O(nlogn)</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is very similar question to <strong>[Google] Form a Queue Given Heights</strong>. The idea is to insert elements into BST and count number of larger elements.</p>
+
+<p>Naitive solution can be reached with a list.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/10/form-queue-given-heights/">[Google] Form a Queue Given Heights</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/10/form-queue-given-heights/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/10/form-queue-given-heights/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/">link1</a>, <a href="http://www.weiming.info/zhuti/JobHunting/31903469/">link2</a>, <a href="http://www.mitbbs.com/article_t1/JobHunting/32856675_0_1.html#top">link3</a>.</p>
+
+<blockquote><p>There is an array of integers which represent heights of persons.</p>
+
+<p>Given another array&hellip; Let&rsquo;s call it count-array. It contain how many persons in front of him are greater than him in height.</p>
+
+<p>求原数组。(原数组中元素是从1到n。)</p>
+
+<p>Example:</p></blockquote>
+
+<pre><code>Input(Count array): 0, 0, 2, 0
+Output(原数组): 2, 3, 1, 4
+</code></pre>
+
+<blockquote><p>求nlogn的算法。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is naive solution from floor 29 of <a href="http://www.weiming.info/zhuti/JobHunting/31903469/">this thread</a>:</p>
+
+<blockquote><p>总结一下，用一个List存放1&hellip;n。</p>
+
+<p>从头到尾扫描给定的数组，每得到一个值，从List里删掉。</p>
+
+<p>因为List里数据是有序的，因此remove操作可以使用二分法，复杂度为O(logn).</p>
+
+<p>这样本算法复杂度为O(nlogn).</p></blockquote>
+
+<p>Example:</p>
+
+<pre><code>count array 
+i C[0,0,2,0]   N[4, 3, 2, 1]
+3 C[3] = 0     在N里面删除N[0]=4, N=[3, 2, 1],   Ans=[4]
+2 C[2] = 2     在N里面删除N[2]=1, N=[3, 2],   Ans=[1, 4]
+1 C[1] = 0     在N里面删除N[0]=3, N=[2],   Ans=[3, 1, 4]
+0 C[0] = 0     在N里面删除N[0]=2, N=[], Ans=[2, 3, 1, 4]
+</code></pre>
+
+<p>But there is a problm here, since removing item from list requires O(n), we will achieve O(n<sup>2</sup>) time. How do we optimize this?</p>
+
+<p><strong>The answer is BST</strong> with each node keeping track of how many nodes is on the left branch, and how many on right branch. For details of this type of TreeNode, refer to <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
+
+<p>The conclusion:</p>
+
+<blockquote><p>可以化归为这样一道题：</p>
+
+<p>设计一个有序的数据结构，最初里头有自然数1到n这n个元素，</p>
+
+<p>随后这些元素可以被删除，但剩下元素仍然保持有序。</p>
+
+<p>要求实现方法GetKthElement(int k)和RemoveKthElemenet(int k)，</p>
+
+<p>使得它们在任意时刻都不超过O(lgN), N为当前的元素个数</p>
+
+<p>感觉要结合BST之类</p></blockquote>
+
+<h3>Code</h3>
+
+<p>Naive approach, O(n<sup>2</sup>):</p>
+
+<pre><code>public int[] form(int peopleCount, int[] countArray) {
+    int len = peopleCount;
+    int[] heightQueue = new int[len];
+    List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();
+    for (int i = peopleCount; i &gt; 0; i--) {
+        list.add(i);
+    }
+    for (int i = len - 1; i &gt;= 0; i--) {
+        heightQueue[i] = list.remove(countArray[i]);
+    }
+    return heightQueue;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/09/terminology-ngram/">[Design] Terminology: N-gram</a></h1>
     
     
       <p class="meta">
@@ -103,1138 +944,129 @@ frequent words used at this minute, this hour and this day &hellip;">
 
 <time datetime="2015-01-09T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2015/01/09/big-data-real-time-top-k/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/big-data-real-time-top-k/">Comments</a>
+           | <a href="/blog/2015/01/09/terminology-ngram/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/09/terminology-ngram/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><h3>n-gram</h3>
 
-<p><a href="http://stackoverflow.com/questions/10189685/realtime-tracking-of-top-100-twitter-words-per-min-hour-day">link</a></p>
+<p>In the fields of computational linguistics and probability, an <strong><a href="http://en.wikipedia.org/wiki/N-gram">n-gram</a></strong> is a contiguous sequence of n items from a given sequence of text or speech.</p>
 
-<blockquote><p>Given a continuous twitter feed, design an algorithm to return the 100 most
-frequent words used at this minute, this hour and this day.</p></blockquote>
+<p>The items can be phonemes, syllables, letters, words or base pairs according to the application. The n-grams typically are collected from a text or speech corpus.</p>
 
-<h3>Analysis</h3>
+<h4>Example</h4>
 
-<p>This is a frequent and useful problem for companies like Google and Twitter.</p>
+<table border="1" width="100%" id="table5" cellpadding="3" style="border-collapse: collapse" bordercolor="#89B0D8" cellspacing="0">
+                <tbody><tr>
+                    <td bgcolor="#D9ECFF">
+                    <p align="center">frequency</p></td>
+                    <td bgcolor="#D9ECFF">
+                    <p align="center">word1</p></td>
+                    <td bgcolor="#D9ECFF">
+                    <p align="center">word2</p></td>
+                    <td bgcolor="#D9ECFF">
+                    <p align="center">word3</p></td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">1419</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">the</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">same</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">461</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">likely</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">432</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">better</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">than</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">266</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">difficult</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">235</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">of</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">the</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">226</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">much</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">more</p>
+                    </td>
+                    <td bgcolor="#F5F9FC">
+                    <p style="line-height: 150%; margin-top:0; margin-bottom:0" align="center">than</p>
+                    </td>
+                </tr>
+</tbody></table>
 
-<p>The first solution below is <strong>an approximation method</strong> which select keywords that occur more than a certain threshold.</p>
 
-<p>The second solution is <strong>more accurate</strong> but RAM-intensive.</p>
-
-<h3>Lossy Count</h3>
-
-<p><strong>Solution 1 is a modified version of <a href="http://stackoverflow.com/a/8033083">Lossy Count</a></strong>. The detailed steps are explained <a href="http://stackoverflow.com/a/3260905">here</a>:</p>
-
-<blockquote><p>Start with an empty map (red-black tree). The keys will be search terms, and the values will be a counter for the term.</p>
+<h4>Downloadable n-grams sets for English</h4>
 
 <ol>
-<li><p>Look at each item in the stream.</p></li>
-<li><p>If the term exists in the map, increment the associated counter.</p></li>
-<li><p>Otherwise, if the map has fewer candidates than you&rsquo;re looking for, add it to the map with a count of one.</p></li>
-<li><p>However, if the map is &ldquo;full&rdquo;, decrement the counter in each entry. If any counter reaches zero during this process, remove it from the map.</p></li>
-</ol>
-</blockquote>
-
-<p><a href="http://www.cse.ust.hk/vldb2002/VLDB2002-proceedings/slides/S10P03slides.pdf">This slide show</a> explains <strong>Lossy Count</strong>, which is to divide input data into chunks. Then count elements and decrease counter by 1 after each chunk.</p>
-
-<p><strong>Note that the result is NOT the top frequency items</strong>. Instead, the final results are <strong>order-dependent</strong>, giving heavier weight to the counts processed last. It maybe helpful in some cases, cuz we want to check the latest trend. However, if we want more accurate top keywords for all data, we will <strong>do a second pass over the log data</strong>.</p>
-
-<p>Now let&rsquo;s discuss the threshold. Use &ldquo;aaabcd&rdquo; and map size = 2 as example. &lsquo;a&rsquo; will be inserted into map with occurance = 3. Then &lsquo;b&rsquo; is inserted, and removed. &lsquo;c&rsquo; is inserted, and removed. &rsquo;d&#8217; is inserted. Since we always decrease 1 at each step, &lsquo;a&rsquo; should only have occurance of 1 at the end. As explained <a href="http://stackoverflow.com/a/3260905">here</a>:</p>
-
-<blockquote><p>If we limit the map to 99 entries, we are guaranteed to find any term that occurs more than 1/(1 + 99) (1%) of the time.</p></blockquote>
-
-<p>We change the size of the map to change the threshold. The occurance of in the final result does not matter.</p>
-
-<h3>Solution 2</h3>
-
-<p>The lossy count does not actually produce the hourly, daily and monthly result accurately. Solution 2 will discuss how we deal with retiring old data in an accurate way.</p>
-
-<p>Suggested by <a href="http://stackoverflow.com/a/3260768">this answer</a>, <strong>we keep a 30-day list for each keyword</strong>, that counts the daily occurance. This list is FIFO. When we remove and insert a new counter value, we update monthly total.</p>
-
-<p>Alaternatively, <a href="http://stackoverflow.com/a/10190836">this answer</a> suggests keeping 1440 (24 * 60) HashMaps, each storing the information for one minute. <strong>And another 2 HashMap for the rolling total for the past hour, and past day</strong>.</p>
-
-<blockquote><p>You need an array of 1440 (24*60) word+count hash maps organized the way that you describe; these are your minute-by-minute counts. You need two additional hash maps &ndash; for the rolling total of the hour and the day.</p>
-
-<p>Define two operations on hash maps &ndash; add and subtract, with the semantic of merging counts of identical words, and removing words when their count drops to zero.</p>
-
-<p>Each minute you start a new hash map, and update counts from the feed. At the end of the minute, you place that hash map into the array for the current minute, add it to the rolling total for the hour and for the day, and then subtract the hash map of an hour ago from the hourly running total, and subtract the hash map of 24 hours ago from the daily running total.</p></blockquote>
-
-<p>This is a very good solution, which I would recommend as the standard solution to this &ldquo;Real Time Top k&rdquo; problem.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/08/number-of-distinct-substrings/">[Google] Number of Distinct Substrings</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/08/number-of-distinct-substrings/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/08/number-of-distinct-substrings/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.quora.com/Given-a-string-how-do-I-find-the-number-of-distinct-substrings-of-the-string">link</a></p>
-
-<blockquote><p>Given a string, find the number of distinct substrings of the string. Example:</p>
-
-<p>input = &ldquo;aaaa&rdquo;,</p>
-
-<p>output = 4 (the 4 substrings are &ldquo;a&rdquo;, &ldquo;aa&rdquo;, &ldquo;aaa&rdquo;, &ldquo;aaaa&rdquo;)</p>
-
-<p>input = &ldquo;abcd&rdquo;,</p>
-
-<p>output = 10 (&ldquo;a&rdquo;, &ldquo;b&rdquo;, &ldquo;c&rdquo;, &ldquo;d&rdquo;, &ldquo;ab&rdquo;, &ldquo;bc&rdquo;, &ldquo;cd&rdquo;, &ldquo;abc&rdquo;, &ldquo;bcd&rdquo;, &ldquo;abcd&rdquo;)</p>
-
-<p>input = &ldquo;banana&rdquo;,</p>
-
-<p>output = 15 (&ldquo;a&rdquo;, &ldquo;an&rdquo;, &ldquo;ana&rdquo;, &ldquo;anan&rdquo;, &ldquo;anana&rdquo;, &ldquo;b&rdquo;, &ldquo;ba&rdquo;, &ldquo;ban&rdquo;, &ldquo;bana&rdquo;, &ldquo;banan&rdquo;, &ldquo;banana&rdquo;, &ldquo;n&rdquo;, &ldquo;na&rdquo;, &ldquo;nan&rdquo;, &ldquo;nana&rdquo;)</p></blockquote>
-
-<p>This is also a question on <a href="http://www.spoj.com/problems/DISUBSTR/">SPOJ</a>.</p>
-
-<h3>Solution</h3>
-
-<p>This is a very good question, which tests Suffix tree, LCP and string manipulation knowledges.</p>
-
-<p><strong>The solution is to build a suffix tree</strong>. This is because:</p>
-
-<blockquote><p>If you look through the <strong><a href="http://qr.ae/6o6Nk">prefixes of each suffix</a></strong> of a string, you have covered all substrings of that string.</p></blockquote>
-
-<p>There are 2 implementations. First one is slightly simpler.</p>
-
-<h4>Implementation 1</h4>
-
-<p><strong>Suffix array + LCP</strong> (longest common prefix). Take &ldquo;Banana&rdquo; as input, then the suffixes:</p>
-
-<pre><code>0) BANANA
-1) ANANA
-2) NANA
-3) ANA
-4) NA
-5) A
-</code></pre>
-
-<p>Sort it:</p>
-
-<pre><code>5) A
-3) ANA
-1) ANANA
-0) BANANA
-4) NA
-2) NANA
-</code></pre>
-
-<p>Then we start calculate number of substring (that is prefixes of suffix). After removing duplicated prefix, the count is:</p>
-
-<pre><code>5) A - 1
-3) ANA - 2
-1) ANANA - 2
-0) BANANA - 6
-4) NA - 2
-2) NANA - 2
-</code></pre>
-
-<p>Total number is:</p>
-
-<pre><code>1 + 2 + 2 + 6 + 2 + 2 = 15
-</code></pre>
-
-<p>But wait, realize something? &ldquo;A&rdquo; is simply duplicate substring in &ldquo;ANA&rdquo;, which appers in &ldquo;ANANA&rdquo;. Keep this in mind, cuz we need to observe this in the 2nd implementation, too.</p>
-
-<p>Finally, the total number is calculated like this:</p>
-
-<pre><code>for each suffix
-    ans += length(suffix) - LCP(suffix, previous suffix)
-</code></pre>
-
-<p>For more details, read <a href="http://qr.ae/6o6Nk">here</a>.</p>
-
-<h4>Implementation 2</h4>
-
-<p>Build a suffix tree, like this:</p>
-
-<p><img class="middle" src="/assets/images/suffix-tree-banana.png"></p>
-
-<p>Number of substrings is simply the <strong>sum of levels of each leaf</strong>. For the 3 branches of the suffix tree, number of levels are: 6, 5 and 4 respectively. Total = 15.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/08/all-number-given-decimal-scale/">[Google] Check All Numbers Given the Decimal Scale</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/08/all-number-given-decimal-scale/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/08/all-number-given-decimal-scale/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32859887.html">link</a></p>
-
-<blockquote><p>检查一个字符串是否包含k位a进制数的所有表示形式。</p>
-
-<p>保证原字符串的所有字串都是合法的k位a进制数。</p>
-
-<p>&ldquo;00110, a=2, k=2&rdquo; => true （包括了00，01，10，11）</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>First find all substrings with length == k, then generate all numbers in a scale. This is not a difficult question.</p>
-
-<p>We may want to score the substrings in a HashMap/HashSet. <strong>The hashing procedure is preferrably using <a href="http://en.wikipedia.org/wiki/Rolling_hash">Rolling hash</a></strong>.</p>
-
-<blockquote><p>Rolling Hash</p>
-
-<p>A rolling hash is a hash function where the input is hashed in a window that moves through the input.</p>
-
-<p>A few hash functions allow a rolling hash to be computed very quickly—the new hash value is rapidly calculated given only the old hash value, the old value removed from the window, and the new value added to the window—similar to the way a moving average function can be computed much more quickly than other low-pass filters.</p></blockquote>
-
-<p>Rolling Hash is commonly used in <strong><a href="http://www.geeksforgeeks.org/searching-for-patterns-set-3-rabin-karp-algorithm/">Rabin-Karp Algorithm</a></strong> to speed up strStr() string pattern matching.</p>
-
-<p>People in the origin post &ndash; they discuss about &ldquo;<strong>slide window check</strong>&rdquo; algorithm. I do not understand what&rsquo;s the benefit of this. If you read this and would like to help me, please leave a comment. Thanks!</p>
-
-<h3>A similar question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32860321.html">This</a> is simply the reverse of the question above:</p>
-
-<blockquote><p>给出最短的字符串, which is used to 表示k位a进制数的所有表示形式.</p></blockquote>
-
-<p>This question is solved using <strong><a href="http://en.wikipedia.org/wiki/De_Bruijn_sequence">De Bruijn sequence</a></strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/">[Facebook] Scheduling Jobs With Max Cost</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/07/scheduling-jobs-with-max-cost/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Given-a-set-of-n-jobs-with-start-time-end-time-cost-find-a-subset-so-that-no-2-jobs-overlap-and-the-cost-is-maximum-QTN_440168.htm">link</a></p>
-
-<blockquote><p>Given a set of n jobs with [start time, end time, cost], find a subset so that no 2 jobs overlap and the cost is maximum.</p>
-
-<p>Let&rsquo;s assume the input is already sorted by start_time.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><a href="http://cs.stackexchange.com/a/14237">Somebody</a> mentioned <strong>Interval Graph</strong>, so check it out if you interested!</p>
-
-<p>I am going to discuss both DP and recursive solution.</p>
-
-<p>This question reminds me of <strong>[Question] 0-1 Knapsack Problem</strong> and <strong>[Question] Coin Change Problem</strong>, cuz the basic idea is to compare 2 conditions:</p>
-
-<ol>
-<li>include current element</li>
-<li>or, not include current element</li>
+<li><strong><a href="https://catalog.ldc.upenn.edu/LDC2006T13">Google n-grams</a></strong>, based on the web as of 2006.</li>
+<li><strong><a href="http://www.ngrams.info/intro.asp">COCA n-grams</a></strong>, based on Corpus of Contemporary American English [COCA]. 450 million words from 1990 to 2012.</li>
 </ol>
 
 
-<p>A very good DP solution is presented in <a href="http://cs.stackexchange.com/a/16842">here</a>. The code below is written by me and it&rsquo;s very intuitive to read.</p>
-
-<p>Leave me a comment if you have questions. And one more thing~ Happy new year!</p>
-
-<h3>Code</h3>
-
-<p>Dp</p>
-
-<pre><code>private int dpSolution(Job[] jobs, int size) {
-    int[] dp = new int[size];
-    dp[size - 1] = jobs[size - 1].cost;
-    // cost of last job equals to just itself
-    for (int k = size - 2; k &gt;= 0; k--) {
-        int next = findNextJob(jobs, k);
-        int includeK = jobs[k].cost;
-        if (next &lt; size) {
-            includeK += dp[next];
-        }
-        int excludeK = dp[k + 1];
-        dp[k] = Math.max(includeK, excludeK);
-    }
-    return dp[0];
-}
-
-private int findNextJob(Job[] jobs, int k) {
-    int finishTime = jobs[k].finish;
-    int next = k + 1;
-    while (next &lt; jobs.length) {
-        if (jobs[next].start &lt; finishTime) {
-            next++;
-        } else {
-            break;
-        }
-    }
-    return next;
-}
-</code></pre>
-
-<p>Recursion</p>
-
-<pre><code>public int recursiveSolution(Job[] jobs, int size, int k) {
-    // max cost from (k)th job and onwards
-    if (k == size) {
-        return 0;
-    }
-    // (k)th job must not conflict with any previous job
-    int next = findNextJob(jobs, k);
-    int includeK = jobs[k].cost + recursiveSolution(jobs, size, next);
-    int excludeK = recursiveSolution(jobs, size, k + 1);
-    return Math.max(includeK, excludeK);
-}
-
-private int findNextJob(Job[] jobs, int k) {
-    int finishTime = jobs[k].finish;
-    int next = k + 1;
-    while (next &lt; jobs.length) {
-        if (jobs[next].start &lt; finishTime) {
-            next++;
-        } else {
-            break;
-        }
-    }
-    return next;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/07/longest-common-substring/">[Question] Longest Common Substring</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/07/longest-common-substring/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/07/longest-common-substring/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/longest-common-substring/">link</a></p>
-
-<blockquote><p>Given two strings ‘X’ and ‘Y’, find the length of the longest common substring.</p>
-
-<p>For example, if the given strings are “GeeksforGeeks” and “GeeksQuiz”, the output should be 5 as longest common substring is “Geeks”.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This question is to be distinguished from <strong>[LintCode] Longest Common Subsequence</strong>.</p>
-
-<p>The solution is DP, too. Even the code is similar. Read my code below.</p>
-
-<p><strong>Updated on Jan 26th, 2015</strong>: there is another approach using <strong>Suffix Array</strong>, suggested by <a href="http://www.geeksforgeeks.org/suffix-tree-application-5-longest-common-substring-2/">this post</a> &ndash; but wait! Do not try to read that article, because you won&rsquo;t easily understand its explanations. I will summarize it in simple English:</p>
-
-<ol>
-<li>Concatenate String X with a &ldquo;#&rdquo; sign, and String Y with a &ldquo;$&rdquo; sign.</li>
-<li>Build a suffix tree using both strings</li>
-<li>find out node with <strong>both &ldquo;$&rdquo; and &ldquo;#&rdquo; as child</strong>.</li>
-</ol>
-
-
-<p>In the case of (X = xabxa, and Y = babxba), the branch &ldquo;abx&rdquo; would be the deepest node that qualifies. Thus the result. Code is not written.</p>
-
-<h3>Code</h3>
-
-<pre><code>public String LCSubstr(String s, String t) {
-    int longest = 0;
-    int tPos = -1;
-
-    // dp[i][j] represents the LCSubstr ending at position i and j
-    int[][] dp = new int[t.length() + 1][s.length() + 1];
-    for (int i = 1; i &lt;= t.length(); i++) {
-        for (int j = 1; j &lt;= s.length(); j++) {
-            if (t.charAt(i - 1) == s.charAt(j - 1)) {
-                dp[i][j] = dp[i - 1][j - 1] + 1;
-                if (dp[i][j] &gt; longest) {
-                    longest = dp[i][j];
-                    tPos = i;
-                }
-            }
-        }
-    }
-    return t.substring(tPos - longest, tPos);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/07/P2P-technology/">[Design] P2P Technology</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/07/P2P-technology/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/07/P2P-technology/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Peer-to-peer">Peer-to-peer</a> (P2P) networking</strong> is a distributed application architecture that partitions tasks or work loads between peers.</p>
-
-<p>Peers are <strong>both suppliers and consumers</strong> of resources, in contrast to the traditional client-server model where communication is usually to and from a central server. A typical example of a file transfer that uses the client-server model is the <strong>File Transfer Protocol</strong> (FTP) service in which the client and server programs are distinct: the clients initiate the transfer, and the servers satisfy these requests.</p>
-
-<p>This architecture was popularized by the file sharing system Napster, originally released in 1999.</p>
-
-<h4>Precedure</h4>
-
-<ol>
-<li>Alice run P2P client software.
-
-<ol>
-<li>connect to Internet and get new IP address for each connection</li>
-<li>register her files in P2P system</li>
-<li>request &ldquo;Harry Potter&rdquo;</li>
-<li>find other peers who have the copy</li>
-<li>choose one and copy to her PC.</li>
-<li>meanwhile, Alice is servig her files for other people</li>
-</ol>
-</li>
-<li>Act like a server</li>
-<li>Act like a client</li>
-<li>User keyword to search content (like google)</li>
-</ol>
-
-
-<h3>P2P Types</h3>
-
-<ol>
-<li><p>Unstructured P2P: <strong>no coupling between nodes and file location</strong></p>
-
-<ol>
-<li>Napster</li>
-<li>Gnutella</li>
-<li>KaZaA</li>
-</ol>
-</li>
-<li><p>Structured P2P: <strong>tight coupling between nodes and file location</strong></p>
-
-<ol>
-<li>DHT</li>
-</ol>
-</li>
-</ol>
-
-
-<h4>Napster</h4>
-
-<p>Register at Napster server.</p>
-
-<p>Centralized search, and P2P distributing.</p>
-
-<h4>Gnutella</h4>
-
-<p><strong>Decentralized</strong> design for searching:</p>
-
-<ol>
-<li>No central directory server</li>
-<li>Each node maintain a list of neighbors (overlay network)</li>
-</ol>
-
-
-<p><strong>Search by flooding</strong>:</p>
-
-<ol>
-<li>BFS traversal.</li>
-<li>Define maximum number of hops</li>
-<li>Expanded-ring TTL search means to try 1 hop first, then try 2 hops, then 3&hellip;</li>
-</ol>
-
-
-<p>Join nodes:</p>
-
-<ol>
-<li>Use Bootstrap node to get some IP addresses</li>
-<li>Join these IP, which becomes neighbors.</li>
-</ol>
-
-
-<p>Shortcomings:</p>
-
-<ol>
-<li>Flooding is <strong>NOT a scalable design</strong>.</li>
-<li>Download may not complete.</li>
-<li>Possibility of search failure, even then the resource presents.</li>
-</ol>
-
-
-<h4>KaZaA</h4>
-
-<p>Combines Napster and Gnutella.</p>
-
-<p>Each peer is a supernode or assigned to a supernode. Each supernode connects to 30~50 other supernodes. The supernode acts like a mini-Napster hub.</p>
-
-<p>At registration, a PC connects to a supernode. If a supernode goes down, obtains updated list and elect another one.</p>
-
-<p>Search within supernode, then in other supernodes. If found many nodes holding the file, do parallel downloading.</p>
-
-<p>Automatic recovery if 1 server peer goes down. Use <strong>ContentHash</strong> to search.</p>
-
-<h4>Structured P2P</h4>
-
-<p>For Distributed HashTable services, refer to <strong>[Design] Distributed hash table</strong>.</p>
-
-<h3>Conclusion</h3>
-
-<ol>
-<li><p>Unstructured P2P:</p>
-
-<ol>
-<li><strong>no coupling between nodes and file location</strong></li>
-<li>Centralized direcotry service (except Gnutella)</li>
-<li>Search by flooding (overhead)</li>
-<li>Hierarchical architecture (non-scalable)</li>
-</ol>
-</li>
-<li><p>Structured P2P:</p>
-
-<ol>
-<li><strong>tight coupling between nodes and file location</strong></li>
-<li>DHT using consistent hashing (eg. Chord, and many other types)</li>
-<li>A node is assigned to hold particular content</li>
-<li>Search with more efficiency</li>
-</ol>
-</li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/06/distributed-hash-table/">[Design] Distributed Hash Table</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/06/distributed-hash-table/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/06/distributed-hash-table/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://blog.csdn.net/yfkiss/article/details/6977509">ref</a></p>
-
-<h3>Distributed hash table</h3>
-
-<p><strong>A <a href="http://en.wikipedia.org/wiki/Distributed_hash_table">distributed hash table</a> (DHT) is a class of a decentralized distributed system</strong> that provides a lookup service similar to a hash table. (key,value) pairs are stored in a DHT, and any participating node can efficiently retrieve the value associated with a given key.</p>
-
-<p>对于一个key/value对，DHT在分布式集群中，提供像HashTable一样的服务，例如简单快捷的存取、查询。</p>
-
-<p><img class="middle" src="/assets/images/DHT.png"></p>
-
-<p>DHTs form an infrastructure that can be used to build more complex services, such as anycast, cooperative Web caching, distributed file systems, domain name services, instant messaging, multicast, and also <strong>peer-to-peer file sharing</strong> and content distribution systems.</p>
-
-<h4>Properties</h4>
-
-<p>Unlike unstructured P2P, <strong>DHT is tightly coupled between nodes and file locations</strong>. (when request a content, directly go to the content instead of <strong>searching by flooding</strong>)</p>
-
-<p>DHT has the following properties:</p>
-
-<ol>
-<li><p><strong>Autonomy and Decentralization</strong>: the nodes collectively form the system without any central coordination.</p></li>
-<li><p><strong>Fault tolerance</strong>: the system should be reliable (in some sense) even with nodes continuously joining, leaving, and failing.</p></li>
-<li><p><strong>Scalability</strong>: the system should function efficiently even with thousands or millions of nodes.</p></li>
-</ol>
-
-
-<h4>Building a DHT</h4>
-
-<ol>
-<li>Hash function that maps a file to a unique ID. Eg. hash(&ldquo;Harry Potter&rdquo;) &ndash;> 3912.</li>
-<li>Distribute <strong>range space</strong> for all nodes in the network.</li>
-<li>The desinated node stores the location of the file. (this is indirect approach)</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/range-space.PNG"></p>
-
-<h4>Search in DHT</h4>
-
-<ol>
-<li>Search query <strong>routed to the node whose range covers the file</strong>.</li>
-<li>Each node would retains a <strong>routing information</strong> that is implemented in a fully distributed manner (i.e. no central point, no single point of failure).</li>
-</ol>
-
-
-<p>There is different hashing and routing techniques associated with DHT. The most important is <strong>Consistent Hashing</strong> and <strong>Chord Routing</strong>.</p>
-
-<h3>Consistent Hashing</h3>
-
-<p>&mdash;<a href="http://en.wikipedia.org/wiki/Consistent_hashing">Consistent hashing</a><strong> is a special kind of hashing such that when a hash table is resized and consistent hashing is used, </strong>only K/n keys need to be remapped__ on average, where K is the number of keys, and n is the number of slots.</p>
-
-<h4>Motivation</h4>
-
-<p>In most traditional hash tables, a change in the number of array slots causes <strong>nearly all keys</strong> to be remapped. Specifically, <a href="http://blog.csdn.net/sparkliang/article/details/5279393">the 3 cases below</a> can end up in a technology crisis:</p>
-
-<ol>
-<li><p>leaves/failures &ndash; 一个 cache 服务器 m down 掉了（在实际应用中必须要考虑这种情况），这样所有映射到 cache m 的对象都会失效，怎么办，需要把 cache m 从 cache 中移除，这时候 cache 是 N-1 台，映射公式变成了 hash(object)%(N-1)；</p></li>
-<li><p>join &ndash; 由于访问加重，需要添加 cache ，这时候 cache 是 N+1 台，映射公式变成了 hash(object)%(N+1)</p></li>
-<li><p>scalability &ndash; 由于硬件能力越来越强，你可能想让后面添加的节点多做点活，显然上面的 hash 算法也做不到。</p></li>
-</ol>
-
-
-<h4>Technique</h4>
-
-<p>Consistent hashing is based on mapping each object to a point on the edge of a circle. The system maps each available machine to pseudo-randomly distributed points on the edge of the same circle.</p>
-
-<ol>
-<li>假定哈希key均匀的分布在一个环上</li>
-<li>所有的节点也都分布在同一环上</li>
-<li>每个节点只负责一部分Key，当节点加入、退出时只影响加入退出的节点和其邻居节点或者其他节点只有少量的Key受影响</li>
-</ol>
-
-
-<p>For a very detailed steps of consistent hashing, read <a href="http://blog.csdn.net/sparkliang/article/details/5279393">this Chinese blog</a>.</p>
-
-<p><img class="middle" src="/assets/images/consistent-hashing.PNG"></p>
-
-<p>In this way, 一致性Hash在node加入/离开时，不会导致映射关系的重大变化。</p>
-
-<h3>Routing (searching)</h3>
-
-<p><strong>Simple Routing</strong> would search successor node, and runtime is linear. These node would keep O(1) <strong>routing information</strong>, and spend O(n) time in <strong>query routing</strong>.</p>
-
-<p>Otherwise, we make every node store ID and IP of all nodes, thus query routing takes O(1) but routing information is O(n).</p>
-
-<p>We&rsquo;ll now discuss <strong>Chord Routing</strong>.</p>
-
-<h4>Chord Routing</h4>
-
-<p>Each node stores more info <strong>closely following it</strong> on the identifier circle than nodes further away. That is, the subsequent nodes at position 1, 2, 4, 8, 16, 32&hellip; (each entry is called a <strong>finger</strong>)</p>
-
-<p><img class="middle" src="/assets/images/chord-routing.PNG"></p>
-
-<p>为网络中每个Node分配一个唯一id（可以通过机器的mac地址做Hash），假设整个网络有N 个节点，我们可以认为这些整数首尾相连形成一个环，称之为Chord环。两个节点间的距离定义为节点间下标差，每个节点会存储一张路由表(Finger表)，表内顺时针按照离本节点2、4、8、16、32.……2i的距离选定log2N个其他节点的ip信息来记录。</p>
-
-<p><strong>Routing information</strong> maintained at each node: O(logN).</p>
-
-<p><strong>Query routing</strong> take O(logN) time.</p>
-
-<h3>Join and leave in Chord</h3>
-
-<p>It&rsquo;s very much like insertion and removal in Doubly Linked List. Read it yourself.</p>
-
-<p><img class="middle" src="/assets/images/join-in-chord.PNG"></p>
-
-<p>Special thanks to the online resources written by some CSDN bloggers.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/06/cloud-grid-cluster/">[Design] Cloud, Grid and Cluster</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/06/cloud-grid-cluster/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/06/cloud-grid-cluster/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://stackoverflow.com/questions/9723040/what-is-the-difference-between-cloud-grid-and-cluster">ref</a></p>
-
-<h3>Cluster VS. Grid</h3>
-
-<p><strong><a href="http://stackoverflow.com/a/9753568">Cluster differs</a> from Cloud and Grid in that</strong></p>
-
-<ol>
-<li>a cluster is a group of computers connected by a local area network (LAN)</li>
-<li>cloud and grid are more wide scale and can be geographically distributed.</li>
-</ol>
-
-
-<p>Another way to put it is to say that</p>
-
-<ol>
-<li>a cluster is tightly coupled</li>
-<li>a Grid or a cloud is loosely coupled.</li>
-</ol>
-
-
-<p>Also, <strong>the hardware</strong>:</p>
-
-<ol>
-<li>clusters are made up of machines with similar hardware</li>
-<li>clouds and grids are made up of machines with possibly very different hardware configurations.</li>
-</ol>
-
-
-<h3>Computer cluster</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Computer_cluster">A computer cluster</a></strong> consists of a set of tightly connected computers that work together as a single system.</p>
-
-<p>Unlike grid computers, computer clusters have each node set to <strong>perform the same task</strong>, controlled and scheduled by software.</p>
-
-<p>In most circumstances, all of the nodes use the <strong>same hardware and OS</strong>. They are connected in <strong>LAN</strong> with each node running its <strong>own piece</strong> of OS.</p>
-
-<p>They are used to improve <strong>performance</strong> and <strong>availability</strong> over that of a single computer, while being more <strong>cost effective</strong>.</p>
-
-<p>Computer clusters emerged as a result of:</p>
-
-<ol>
-<li>low-cost microprocessors,</li>
-<li>high-speed networks,</li>
-<li>software for high-performance distributed computing</li>
-</ol>
-
-
-<h3>Grid computing</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Grid_computing">Grid computing</a></strong> is the collection of computer resources from multiple locations to reach a common goal. Each computer have <strong>non-interactive workloads</strong>. It&rsquo;s like a <strong>&ldquo;super virtual computer”</strong> composed of many networked loosely coupled computers acting together to perform large tasks.</p>
-
-<p>Unlike conventional high performance computing systems such as <strong>cluster computing</strong>, grid computers have each node set to <strong>perform a different task</strong>.</p>
-
-<p>Grid computers also tend to be more <strong>geographically dispersed</strong> than cluster computers. Grids are often constructed with general-purpose grid middleware software libraries.</p>
-
-<p>Major disadvantage with Grid Computing is, <strong>if one piece of software on a node fails</strong>, other pieces of the software on the other nodes may fail.</p>
-
-<h3>Cloud computing</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Cloud_computing">Cloud computing</a></strong> is terminology based on utility and <strong>consumption of computing resources</strong>.</p>
-
-<h4>SaaS</h4>
-
-<p>An application doesn&rsquo;t access resources it requires directly, rather it accesses them through <strong>something <a href="http://stackoverflow.com/a/1068133">like a service</a></strong>. Instead of talking to a specific hard drive for storage, and a specific CPU for computation, etc, it talks to some <strong>service that provides these resources</strong>. The service then maps any requests for resources to its physical resources.</p>
-
-<p>The services themselves <a href="http://stackoverflow.com/a/9753568">have long been referred to</a> as <strong>Software as a Service (SaaS)</strong>. The datacenter hardware and software is what we call <strong>a Cloud</strong>. When a Cloud is made available in a pay-as-you-go manner to the general public, we call it a <strong>Public Cloud</strong>; the service being sold is <strong>Utility Computing</strong>.</p>
-
-<h4>Sharing of Resources</h4>
-
-<p>Usually the service <strong>dynamically allocate resources</strong> to maximize the effectiveness of the shared resources(per users and per demand).</p>
-
-<p>For example, a cloud computer facility that serves European users during European business hours with a specific application (e.g., email) may reallocate the same resources to serve North American users during North America&rsquo;s business hours with a different application (e.g., a web server).</p>
-
-<p>With cloud computing, multiple users can access a single server to retrieve and update their data <strong>without purchasing licenses for different applications</strong>.</p>
-
-<h4>Scalability</h4>
-
-<ol>
-<li><p>If an application requires only <strong>a small amount of some resource</strong>, say computation, then the service only allocates a small amount, say a small share on a single physical CPU.</p></li>
-<li><p>If the application requires <strong>a large amount of some resource</strong>, then the service allocates that large amount, say a grid of CPUs.</p></li>
-</ol>
-
-
-<p>All the complex handling and coordination is performed <strong>by the service, not the application</strong>. In this way the application can scale well.</p>
-
-<p><a href="http://stackoverflow.com/a/1068133">For example</a> a web site written &ldquo;on the cloud&rdquo; may share a server with many other web sites while it has a low amount of traffic. If it ever has massive amounts of traffic, it may be moved to its own dedicated server, or <strong>grid of servers</strong>. This is all handled <strong>by the cloud service (provider)</strong>, so the application shouldn&rsquo;t have to be modified drastically to cope.</p>
-
-<h4>Other Advantages</h4>
-
-<p>Using Cloud Computing, companies can <a href="http://www.ibeehosting.com/blog/what-is-the-difference-between-cloud-computing-and-grid-computing.html">scale upto High capacities</a> immediately without investing in new infrastructure, training the people or new software licensing. It is more useful for small and medium scale businesses who wants to outsource their Data Center infrastructure, or some larger companies also prefer if they want to cut down the costs of building data-centers internally in order to get peak load capacity. In short, consumers use what they need and pay accordingly.</p>
-
-<h3>Grid Computing VS. Cloud Computing</h3>
-
-<ol>
-<li><p>Grid Computing is the parent of Cloud computing, cloud actually evolves from Grid Computing.</p></li>
-<li><p>A cloud would usually use a grid. A grid is not necessarily a cloud.</p></li>
-<li><p>Resource distribution: Cloud computing is a centralized model whereas grid computing is a decentralized model where the computation could occur over many administrative domains.</p></li>
-<li><p>Ownership: A grid is a collection of computers which is owned by multiple parties in multiple locations and connected together so that users can share the combined power of resources. Whereas a cloud is a collection of computers usually owned by a single party.</p></li>
-</ol>
-
-
-<h4>Examples</h4>
-
-<p>Examples of Clouds: Amazon Web Services (AWS), Google App Engine, Dropbox, Gmail, Facebook, Youtube, Rapidshare</p>
-
-<p>Examples of Grids: FutureGrid</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/06/big-data-storage/">[Design] Big Data Storage</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/06/big-data-storage/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/06/big-data-storage/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.mitbbs.com/article/JobHunting/32580869_0.html">ref</a></p>
-
-<h3>Question</h3>
-
-<p><strong>Given 1 trillion messages</strong> on fb and each message has at max 10 words.</p>
-
-<p>How do you build the <strong>index table</strong> and how many machines do you need on the <strong>cluster</strong> to store the index table?</p>
-
-<h3>One possible answer</h3>
-
-<p>Total data = 1 trillion * 10 words * 6 bytes / word = 60TB = one small NetApp box</p>
-
-<p><strong>Index by hashed userid</strong>; will distribute traffic effectively across servers; cache active users recent messages in memory.</p>
-
-<p><a href="http://www.glassdoor.com/Interview/Given-a-set-of-n-jobs-with-start-time-end-time-cost-find-a-subset-so-that-no-2-jobs-overlap-and-the-cost-is-maximum-QTN_440168.htm">Cannot use Netapp box</a>. From what I read in FB engg blog, they have all the info in main memory of server.</p>
-
-<p>Total data = 1 trillion * 10 words * 6 bytes / word = 60TB + 1TB for Indexes.</p>
-
-<p>Considering servers have 64 GB ram. 61 GB usable to store index, 1000 servers.</p>
-
-<h4>For more information</h4>
-
-<p>Read 2 other posts: <strong>[Design] Distributed hash table</strong> and <strong>[Design] Cloud, Grid and Cluster</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/06/Json-prettifier/">[Facebook] Write a Json Prettifier</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-06T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/06/Json-prettifier/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/06/Json-prettifier/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Write-a-function-to-prettify-Json-objects-QTN_151361.htm">link</a></p>
-
-<p>Input:</p>
-
-<pre><code>{"firstName":"John","lastName":"Smith","isAlive":true,"age" :25,"height_cm":167.6,"address":{"streetAddress":"212ndStre et","city":"NewYork","state":"NY","postalCode":"10021-3100" },"phoneNumbers":[{"type":"home","number":"212555-1234"},{" type":"office","number":"646555-4567"}],"children":[],"spou se":null}
-</code></pre>
-
-<p>Output:</p>
-
-<pre><code>{
-  "firstName": "John",
-  "lastName": "Smith",
-  "isAlive": true,
-  "age": 25,
-  "height_cm": 167.6,
-  "address": {
-    "streetAddress": "21 2nd Street",
-    "city": "New York",
-    "state": "NY",
-    "postalCode": "10021-3100"
-  },
-  "phoneNumbers": [
-    {
-      "type": "home",
-      "number": "212 555-1234"
-    },
-    {
-      "type": "office",
-      "number": "646 555-4567"
-    }
-  ],
-  "children": [],
-  "spouse": null
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Since I did not find anything useful online, I spent an hour writing the following code. These are the things to take into consideration:</p>
-
-<ol>
-<li><p><strong>Line break</strong> after a comma, a left bracket, or prior to a right bracket. A special pattern is &ldquo;},&rdquo; &ndash; we only do line break once after the comma.</p></li>
-<li><p><strong>Indentation</strong> is important. It&rsquo;s a little complex cuz we reduce indentation <strong>BEFORE</strong> printing out a right bracket, but increase indentation <strong>AFTER the left bracket</strong>.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>public void prettify(String input) throws Exception {
-
-    // observation the rules for Json format:
-    // 1. each line end with either a { , or }
-    // 2. indentation depends on number of brackets
-    int len = input.length();
-    int left = 0;
-    int right = 0;
-    int tab = 0;
-
-    while (left &lt; len) {
-        // first, advance right pointer to the next line break point
-        while (right &lt; len) {
-            if (input.charAt(right) == '}' || input.charAt(right) == ']') {
-                // first case, if point to a closing bracket
-                tab--;
-                // indentation should change right away should we find a
-                // closing bracket
-                if (right + 1 &lt; len &amp;&amp; input.charAt(right + 1) != ',') {
-                    break;
-                }
-            } else if (input.charAt(right) == ','
-                    || input.charAt(right) == '{'
-                    || input.charAt(right) == '[') {
-                // second case, break at , or {
-                break;
-            } else if (right + 1 &lt; len
-                    &amp;&amp; (input.charAt(right + 1) == '}' || input
-                            .charAt(right + 1) == ']')) {
-                // third case, break prior to }
-                // we need not swap the order of first and third case,
-                // because when we found a closing bracket, we need to
-                // change indentation right away
-                break;
-            }
-            right++;
-        }
-
-        // now print the chars from left pointer to right inclusively
-        if (right == len) {
-            // end of input
-            if (tab != 0) {
-                throw new Exception("Json format error!");
-            }
-            right--;
-            // this is for the convenience of printing last line
-        }
-        printIndentation(tab);
-        System.out.println(input.substring(left, right + 1));
-        if (input.charAt(right) == '{' || input.charAt(right) == '[') {
-            tab++;
-        }
-
-        // last, update pointers
-        left = ++right;
-    }
-}
-
-private void printIndentation(int tab) {
-    for (int i = 0; i &lt; tab; i++) {
-        System.out.print("    ");
-    }
-}
-</code></pre>
+<p>With n-grams data (2, 3, 4, 5-word sequences, with their frequency), we can carry out powerful queries offline.</p>
 </div>
   
   
@@ -1259,17 +1091,17 @@ private void printIndentation(int tab) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (66)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (10)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (57)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (26)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (113)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1281,23 +1113,23 @@ private void printIndentation(int tab) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+        <a href="/blog/2015/02/08/unbalanced-tree-into-balanced-tree/">[Google] Transform a Unbalanced Tree Into Balanced Tree</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
+        <a href="/blog/2015/02/08/generate-number-with-given-probability/">[Facebook] Generate Number With Given Probability</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
+        <a href="/blog/2015/02/08/difference-internet-and-www/">[Design] Difference: Internet and the Web</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
+        <a href="/blog/2015/02/08/bg-data-common-elements-lists/">[Design] Big Data - Find Common Elements in 2 Lists</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
+        <a href="/blog/2015/02/07/reservoir-sampling/">[Question] Reservoir Sampling</a>
       </li>
     
   </ul>

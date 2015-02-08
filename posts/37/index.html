@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a singly linked list L: L0→L1→…→Ln-1→Ln,
-reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→… You must do this in-place without altering the &hellip;">
+  <meta name="description" content="Template (BFS) BFS can be implemented using either 2 queues (replacing) or 1 queue. Of course 1 queue is better. link public ArrayList&lt;ArrayList& &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -85,7 +84,7 @@ reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→… You must do this in-place w
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/06/03/Reorder-List/">[LeetCode 143] Reorder List</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/10/NineChap-Binary-Tree-BFS/">[NineChap 3.2] Binary Tree BFS</a></h1>
     
     
       <p class="meta">
@@ -101,1208 +100,1393 @@ reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→… You must do this in-place w
   
 
 
-<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/06/03/Reorder-List/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Reorder-List/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/reorder-list/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-Given a singly linked list <i>L</i>: <i>L</i><sub>0</sub>→<i>L</i><sub>1</sub>→…→<i>L</i><sub><i>n</i>-1</sub>→<i>L</i><sub>n</sub>,<br>
-reorder it to: <i>L</i><sub>0</sub>→<i>L</i><sub><i>n</i></sub>→<i>L</i><sub>1</sub>→<i>L</i><sub><i>n</i>-1</sub>→<i>L</i><sub>2</sub>→<i>L</i><sub><i>n</i>-2</sub>→…
-</p>
-
-<p class="font-color">You must do this in-place without altering the nodes&#8217; values.</p>
-
-<p class="font-color">
-For example,<br>
-Given <code>{1,2,3,4}</code>, reorder it to <code>{1,4,2,3}</code>.
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a difficult question to think</strong>.</p>
-
-<p>I first solved it with an stack which stores the second half nodes. It works. However, IT IS NOT A IN-PLACE SOLUTION, thus it&rsquo;s wrong.</p>
-
-<p>Eventually I did not solve it.</p>
-
-<p><strong>There is only one standard solution from the Internet</strong>. <a href="http://www.programcreek.com/2013/12/in-place-reorder-a-singly-linked-list-in-java/">This blog</a> explains it.</p>
-
-<blockquote><ol>
-<li>Break list in the middle to two lists (use fast &amp; slow pointers)</li>
-<li>Reverse the order of the second list</li>
-<li>Merge two list back together</li>
-</ol>
-</blockquote>
-
-<p>Simple, right? <strong>Because of the nature of linked list, a lot of things can be done in-place</strong>, so we need not use any other data strucutres.</p>
-
-<h3>Solution</h3>
-
-<p>The code is a bit lengthy and difficult to write. It took me a while, but passed in 1 go.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, code written by me</strong></p>
-
-<pre><code>public void reorderList(ListNode head) {
-    if (head == null || head.next == null) {
-        return;
-    }
-    ListNode slow = head, fast = head;
-    while (fast != null) {
-        if (fast.next != null &amp;&amp; fast.next.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-        }
-        else {
-            fast = null;
-        }
-    }
-    // if length = 2, slow point to 1st
-    // if length = 3, slow point to 2nd
-    // if length = 4, slow point to 2nd
-    ListNode secondHalf = slow.next;
-    slow.next = null;
-    // now reverse secondHalf
-    ListNode p = secondHalf;
-    while (p.next != null) {
-        ListNode tail = p.next.next;
-        p.next.next = secondHalf;
-        secondHalf = p.next;
-        p.next = tail;
-    }
-    // now merge 2 list: head and secondHalf
-    ListNode a = head, b = secondHalf;
-    while (a != null &amp;&amp; b != null) {
-        ListNode temp1 = a.next;
-        ListNode temp2 = b.next;
-        a.next = b;
-        b.next = temp1;
-        a = temp1;
-        b = temp2;
-    }
-}
-</code></pre>
-
-<p><strong>Second, code written by <a href="https://oj.leetcode.com/discuss/236/does-this-problem-solution-time-complexity-space-comlexity">someone</a></strong></p>
-
-<pre><code>public void reorderList(ListNode head) {
-    // IMPORTANT: Please reset any member data you declared, as
-    // the same Solution instance will be reused for each test case.
-    if (head == null || head.next == null) return;
-    ListNode fast = head;
-    ListNode slow = head;
-    while(fast != null &amp;&amp; fast.next != null) {
-        fast = fast.next.next;
-        slow = slow.next;
-    }
-    ListNode reverseHead = slow.next;           // find the second half of list
-    slow.next = null;                           // make first half end point to null
-    reverseHead = reverse(reverseHead);         // reverse second half     
-    ListNode cur = head;        
-    while(reverseHead != null) {                // link together
-        ListNode tmp = reverseHead.next;
-        reverseHead.next = cur.next;
-        cur.next = reverseHead;
-        cur = cur.next.next;
-        reverseHead = tmp;
-    }
-}
-private ListNode reverse(ListNode head) {
-    if (head == null || head.next == null) return head;
-    ListNode prev = new ListNode(0);
-    prev.next = head;
-    head = prev;
-    ListNode cur = prev.next;
-    while(cur.next != null) {
-        ListNode tmp = cur.next;
-        cur.next = tmp.next;
-        tmp.next = prev.next;
-        prev.next = tmp;
-    }
-    return prev.next;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/03/Max-Points-on-a-Line/">[LeetCode 149] Max Points on a Line</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/03/Max-Points-on-a-Line/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Max-Points-on-a-Line/">Comments</a>
+           | <a href="/blog/2014/06/10/NineChap-Binary-Tree-BFS/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/10/NineChap-Binary-Tree-BFS/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><h2>Template (BFS)</h2>
 
-<p><a href="https://oj.leetcode.com/problems/max-points-on-a-line/">link</a></p>
+<p>BFS can be implemented using either 2 queues (replacing) or 1 queue. Of course 1 queue is better.</p>
 
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">Given <i>n</i> points on a 2D plane, find the maximum number of points that lie on the same straight line.</p><p class="font-color"></p>
-          </div>
+<p><a href="http://answer.ninechapter.com/solutions/bfs-template/">link</a></p>
 
+<pre><code>public ArrayList&lt;ArrayList&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    ArrayList result = new ArrayList();
 
-<h3>Stats</h3>
+    if (root == null)
+        return result;
 
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
+    Queue&lt;TreeNode&gt; queue = new LinkedList&lt;TreeNode&gt;();
+    queue.offer(root);
 
+    while (!queue.isEmpty()) {
+        ArrayList&lt;Integer&gt; level = new ArrayList&lt;Integer&gt;(); // important
+        int size = queue.size();
+        for (int i = 0; i &lt; size; i++) {
+            TreeNode head = queue.poll();
+            level.add(head.val);
+            if (head.left != null)
+                queue.offer(head.left);
+            if (head.right != null)
+                queue.offer(head.right);
+        }
+        result.add(level); // important
+    }
 
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a difficult coding question</strong>.</p>
-
-<p>The idea is simple. For n points, there are n * (n-1) lines. Check slopes and then count total, we would get the answer.</p>
-
-<p>However, coding of this idea is very difficult.</p>
-
-<h3>Solution</h3>
-
-<p><strong>Firstly, there are 2 special cases when calculating the slope</strong>. The 2 points may locate in same position. And when point1.x = point2.x, slope = infinity. It&rsquo;s easy to omit these 2 cases and result in mistake.</p>
-
-<p>Secondly, when we count, we declare 2 variables: samePointNumber and maxPointCountWithSameSlope. <strong>It&rsquo;s very important to initialize both values to 1 instead of 0</strong>! Why? Because these values just can&rsquo;t be 0. I failed my 2nd version code when input = {(0,0), (0,0)}, the program shows result of 0, instead of 2.</p>
-
-<p><strong>Thirdly, about what data structure to use for counting</strong>. There is a discussion about this at <a href="https://oj.leetcode.com/discuss/2573/better-way-to-use-hashmap-for-this-question">here</a></p>
-
-<blockquote><ol>
-<li>storing the vertical slopes as Double.NaN. That allows Double to represent every slope uniquely as (y/x).</li>
-<li>It is unsafe using floating points to make a hash, and -0.0 != 0.0</li>
-</ol>
-</blockquote>
-
-<p>It&rsquo;s great that using <strong>Double.NaN</strong>, it saves us time and effort to count vertical points. Second point is very valid, but it turns out that using HashMap&lt;Double, Integer> can AC.</p>
-
-<p>P.S. It is always not a good practise to use Double as hash key. See <a href="http://stackoverflow.com/questions/1074781/double-in-hashmap">here</a>.</p>
-
-<p><strong>Fourthly, I made a mistake here</strong>:</p>
-
-<blockquote><p>double slope = (p.y &ndash; q.y) / (p.x &ndash; q.x);</p></blockquote>
-
-<p>And it&rsquo;s wrong. Why? Note that <strong>Point.x and Point.y are both integers</strong>. Integer division will return integer. We must cast it.</p>
-
-<blockquote><p>double slope = (double) (p.y &ndash; q.y) / (p.x &ndash; q.x);</p></blockquote>
-
-<p><strong>Last, OMG I wish this is last, but not least, we can reduce execution time to half</strong> by checking only the points with larger index than the anchor point (that&rsquo;s the name for &lsquo;current point&rsquo;). Good idea, right?</p>
-
-<p>One more thing, <strong>how to iterate thru the HashMap</strong> (value only)? There is an easy way:</p>
-
-<pre><code>for (Integer a : map.values()) {
-    a;
+    return result;
 }
 </code></pre>
 
-<p>That&rsquo;s all I&rsquo;ve found for now.</p>
+<h2>Question list</h2>
 
-<p><strong>Updated on Aug 12th, 2014</strong></p>
-
-<p>Based on the solution given in CC150 v4 Q10.6 on Page 199, it&rsquo;s a <strong>proper way to solve with HashMap&lt;Line, Integer></strong> instead of using HashMap&lt;Double, Integer>.</p>
-
-<p>The reason is mentioned, it&rsquo;s &lsquo;<strong>unsafe using floating points to make a hash</strong>&rsquo;.</p>
-
-<p>Note that if we were to write our own &lsquo;Line&rsquo; class, <strong>we must override the 2 methods</strong>:</p>
+<p><strong>BFS</strong></p>
 
 <ol>
-<li>public int hashCode() {}</li>
-<li>public boolean equals(Object o) {}</li>
+<li><p><strong><a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal/">Binary Tree Level Order Traversal</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/25/Binary-Tree-Level-Order-Traversal-II/">Binary Tree Level Order Traversal II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/25/Binary-Tree-Zigzag-Level-Order-Traversal/">Binary Tree Zigzag Level Order Traversal</a></strong></p></li>
 </ol>
 
 
-<h3>Code</h3>
-
-<p><strong>written by me, Version3 using HashMap</strong></p>
-
-<pre><code>public int maxPoints(Point[] points) {
-    if (points.length &lt;= 1)
-        return points.length;
-    HashMap&lt;Double, Integer&gt; map = null;
-    int totalMax = 0;
-    for (Point p : points) {
-        int samePoint = 1;
-        map = new HashMap&lt;Double, Integer&gt;();
-        for (Point q : points) {
-            if (q == p || p.x &gt; q.x) {
-            } else if (p.x == q.x &amp;&amp; p.y == q.y) {
-                samePoint++;
-            } else {
-                double slope = Double.NaN;
-                if (p.x != q.x) {
-                    slope = (double) (p.y - q.y) / (p.x - q.x);
-                }
-                if (!map.containsKey(slope)) {
-                    map.put(slope, 1);
-                }
-                map.put(slope, map.get(slope) + 1);
-            }
-        }
-        int pointMax = 1;
-        for (Integer a : map.values()) {
-            pointMax = Math.max(pointMax, a);
-        }
-        totalMax = Math.max(totalMax, pointMax + samePoint - 1);
-    }
-    return totalMax;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/03/LRU-Cache/">[LeetCode 146] LRU Cache</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/03/LRU-Cache/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/LRU-Cache/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/lru-cache/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-Design and implement a data structure for Least Recently Used (LRU) cache. It should support the following operations: <code>get</code> and <code>set</code>.
-</p>
-
-<p class="font-color">
-<code>get(key)</code> - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1.<br>
-<code>set(key, value)</code> - Set or insert the value if the key is not already present. When the cache reached its capacity, it should invalidate the least recently used item before inserting a new item.
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">Very difficult</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a difficult question</strong>, I can&rsquo;t write the solution easily even after a month.</p>
-
-<h3>Solution</h3>
-
-<p>The solution is to use a Doubly-linked-list and a HashMap. Doing this allows O(1) search, remove and insert. A very nice and sophisticated data structure example, and very high frequency in interviews.</p>
-
-<p><strong>2 important things to note while coding</strong>:</p>
+<p><strong>Additional</strong></p>
 
 <ol>
-<li><p>We need 2 helper methods: removeNode() and setNodeAsHead().</p>
-
-<p> Because we reuse both methods for get() and set() methods.</p></li>
-<li><p>Initialization of LRU</p>
-
-<p> We need 5 variables: capacity, current size(optional but good to have), hashmap, head, tail.</p></li>
-<li><p>Initialization of DoubleLinkedListNode</p>
-
-<p> This is easy, but <strong>do not forget about both key and value variable</strong>. We must use DoubleLinkedListNode.key when we want to delete tail.</p></li>
+<li><p><strong><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Preorder-and-Inorder/">Construct Binary Tree from Preorder and Inorder</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/27/Construct-Binary-Tree-from-Inorder-and-Postorder/">Construct Binary Tree from Inorder and Postorder</a></strong></p></li>
 </ol>
 
 
-<h3>Code</h3>
+<h2>Code</h2>
 
-<p><strong>Updated on July 1st, 2014</strong>.</p>
+<p>First 3 questions are basically same. Below code is for question 1. There is no &lsquo;catch-ya&rsquo;, it&rsquo;s very standard code.</p>
 
-<p>This question tests your ability to write some DS by yourself, eg. DoubleLinkedList.</p>
-
-<pre><code>public class LRUCache {
-
-    int size;
-    int capacity;
-
-    DoubleLinkedList head;
-    DoubleLinkedList tail;
-    HashMap&lt;Integer, DoubleLinkedList&gt; map;
-
-    public LRUCache(int capacity) {
-        this.size = 0;
-        this.capacity = capacity;
-        head = null;
-        tail = null;
-        map = new HashMap&lt;Integer, DoubleLinkedList&gt;();
-    }
-
-    public void remove(DoubleLinkedList node) {
-        if (node == head &amp;&amp; node == tail) {
-            head = null;
-            tail = null;
-        } else if (node == head) {
-            head.next.prev = null;
-            head = head.next;
-        } else if (node == tail) {
-            tail.prev.next = null;
-            tail = tail.prev;
-        } else {
-            node.prev.next = node.next;
-            node.next.prev = node.prev;
-        }
-        node.prev = null;
-        node.next = null;
-    }
-
-    public void setHead(DoubleLinkedList node) {
-        node.next = head;
-        node.prev = null;
-        if (head != null) {
-            head.prev = node;
-        }
-
-        head = node;
-        if (tail == null) {
-            tail = node;
-        }
-    }
-
-    public int get(int key) {
-        if (!map.containsKey(key)) {
-            // if key is not found
-            return -1;
-        } else {
-            // if key is found
-            DoubleLinkedList target = map.get(key);
-            remove(target);
-            setHead(target);
-            return head.val;
-        }
-    }
-
-    public void set(int key, int value) {
-        if (this.get(key) != -1) {
-            // key exist before, just replace the old value
-            DoubleLinkedList old = map.get(key);
-            old.val = value;
-        } else {
-            // this is a new key-value pair, insert it
-            DoubleLinkedList newHead = new DoubleLinkedList(key, value);
-            map.put(key, newHead);
-            setHead(newHead);
-            if (size == capacity) {
-                // delete tail
-                map.remove(tail.key);
-                remove(tail);
-            } else {
-                size++;
-            }
-        }
-    }
-
-    class DoubleLinkedList {
-        int key;
-        int val;
-        DoubleLinkedList prev;
-        DoubleLinkedList next;
-        public DoubleLinkedList(int k, int v) {
-            this.key = k;
-            this.val = v;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/03/Implement-DFS-using-stack/">[Design] Implemention of DFS Using a Stack</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/03/Implement-DFS-using-stack/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Implement-DFS-using-stack/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>First Word</h3>
-
-<p>This post talks about how to implement DFS without recursion.</p>
-
-<p>We have studied 2 kinds of DFS in the post <strong>DFS, BFS and space efficiency</strong>. We will skip &ldquo;true DFS&rdquo; here, and only talk about &ldquo;pseudo-DFS&rdquo; implementation.</p>
-
-<p>Remember, <strong>space usage of psudo-DFS is O(depth x branching factor)</strong>.</p>
-
-<h3>Analysis</h3>
-
-<p>A DFS without recursion is basically the same as BFS &ndash; but use a stack instead of a queue as the data structure.</p>
-
-<p>More details are discussed in <a href="http://stackoverflow.com/questions/21508765/how-to-implement-depth-first-search-for-graph-with-non-recursive-aprroach">this thread</a>.</p>
-
-<h3>Implementation</h3>
-
-<p>The following code come from <a href="http://stackoverflow.com/a/21508819">this post</a>.</p>
-
-<pre><code>DFS(source):
-  s &lt;- new stack
-  visited &lt;- {} //empty set
-  s.push(source)
-  while (s.empty() == false):
-    current &lt;- s.pop()
-    if (current is in visited):
-        continue
-    visited.add(current)
-    //do something with current
-    for each node v such that (source,v) is an edge:
-        s.push(v)
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/03/Evaluate-Reverse-Polish-Notation/">[LeetCode 150] Evaluate Reverse Polish Notation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/03/Evaluate-Reverse-Polish-Notation/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Evaluate-Reverse-Polish-Notation/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/evaluate-reverse-polish-notation/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-Evaluate the value of an arithmetic expression in <a href="http://en.wikipedia.org/wiki/Reverse_Polish_notation" class="font-color">Reverse Polish Notation</a>.
-</p>
-
-<p class="font-color">
-Valid operators are <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>. Each operand may be an integer or another expression.
-</p>
-
-<p class="font-color">
-Some examples:<br>
-</p><pre>  ["2", "1", "+", "3", "*"] -&gt; ((2 + 1) * 3) -&gt; 9
-  ["4", "13", "5", "/", "+"] -&gt; (4 + (13 / 5)) -&gt; 6
-</pre>
-<p class="font-color"></p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a classic question</strong>. It&rsquo;s easy.</p>
-
-<h3>Code</h3>
-
-<p><strong>my code</strong></p>
-
-<pre><code>public int evalRPN(String[] tokens) {
-    if (tokens == null || tokens.length == 0)
-        return 0;
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    for (int p = 0; p &lt; tokens.length; p ++) {
-        char cur = tokens[p].charAt(0);
-        if (cur &gt;= '0' &amp;&amp; cur &lt;= '9' 
-                || tokens[p].length() &gt; 1)
-            stack.push(Integer.parseInt(tokens[p]));
-        else if (cur == '+') {
-            int num1 = stack.pop();
-            int num2 = stack.pop();
-            stack.push(num1 + num2);
-        }
-        else if (cur == '-') {
-            int num1 = stack.pop();
-            int num2 = stack.pop();
-            stack.push(num2 - num1);
-        }
-        else if (cur == '*') {
-            int num1 = stack.pop();
-            int num2 = stack.pop();
-            stack.push(num1 * num2);
-        }
-        else if (cur == '/') {
-            int num1 = stack.pop();
-            int num2 = stack.pop();
-            stack.push(num2 / num1);
-        }
-    }
-    return stack.pop();
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">[LeetCode 145] Binary Tree Postorder Traversal</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/03/Binary-Tree-Postorder-Traversal/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Binary-Tree-Postorder-Traversal/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/binary-tree-postorder-traversal/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">Given a binary tree, return the <i>postorder</i> traversal of its nodes&#8217; values.</p>
-
-<p class="font-color">
-For example:<br>
-Given binary tree <code>{1,#,2,3}</code>,<br>
-</p><pre>   1
-    \
-     2
-    /
-   3
-</pre>
-<p class="font-color"></p>
-<p class="font-color">
-return <code>[3,2,1]</code>.
-</p>
-
-<p class="font-color"><b>Note:</b> Recursive solution is trivial, could you do it iteratively?</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>Unlike pre-order traversal, <strong>this is a very difficult question</strong>.</p>
-
-<h3>Solution</h3>
-
-<p><strong>First, I wrote the solution using a HashSet, and it works</strong>. However, this solution is not good because it uses some space.
-For more generalized way to write DFS code, read another post <strong>Implement DFS using a Stack</strong>.</p>
-
-<p><strong>The best and most popular solution is proposed by <a href="http://leetcode.com/2010/10/binary-tree-post-order-traversal.html">1337c0d3r</a></strong>. It basically uses 1 more pointer to track the current status (whether I&rsquo;m traversing down, or up, and in which direction etc.). The extra pointer is called &lsquo;prev&rsquo;.</p>
-
-<blockquote><p>We use a prev variable to keep track of the previously-traversed node. Let’s assume curr is the current node that’s on top of the stack. When prev is curr‘s parent, we are traversing down the tree. In this case, we try to traverse to curr‘s left child if available (ie, push left child to the stack). If it is not available, we look at curr‘s right child. If both left and right child do not exist (ie, curr is a leaf node), we print curr‘s value and pop it off the stack.</p>
-
-<p>If prev is curr‘s left child, we are traversing up the tree from the left. We look at curr‘s right child. If it is available, then traverse down the right child (ie, push right child to the stack), otherwise print curr‘s value and pop it off the stack.</p>
-
-<p>If prev is curr‘s right child, we are traversing up the tree from the right. In this case, we print curr‘s value and pop it off the stack.</p></blockquote>
-
-<p>Referring to his code, I wrote the 2nd piece of code below and it works.</p>
-
-<p><strong>Amazingly, that code can be simplified, which becomes the 3rd code</strong> (I thought it won&rsquo;t pass at first). The way that code got simplified is by keeping current pointer steady, so that the 2 pointers can meet. Altough program logic is exactly same, this interesting code is worth reading.</p>
-
-<h3>Code</h3>
-
-<p><strong>First, my solution using HashSet</strong></p>
-
-<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
-    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
-    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
-    if (root != null) stack.push(root);
-    HashSet&lt;TreeNode&gt; visited = new HashSet&lt;TreeNode&gt;();
-    while (!stack.isEmpty()) {
-        TreeNode cur = stack.pop();
-        if (visited.contains(cur))
-            ans.add(cur.val);
-        else {
-            stack.push(cur);
-            visited.add(cur);
-            if (cur.right != null) stack.push(cur.right);
-            if (cur.left != null) stack.push(cur.left);
-        }
-    }
-    return ans;
-}
-</code></pre>
-
-<p><strong>Second, using 2 pointers</strong></p>
-
-<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
-    List&lt;Integer&gt; ans = new LinkedList&lt;Integer&gt;();
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new LinkedList&lt;List&lt;Integer&gt;&gt;();
     if (root == null) {
         return ans;
     }
-    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
-    stack.push(root);
-    TreeNode pre = null, cur = null;
-    while (!stack.isEmpty()) {
-        cur = stack.peek();
-        if (pre == null || pre.left == cur || pre.right == cur) {
-            if (cur.left == null &amp;&amp; cur.right == null) {
-                ans.add(stack.pop().val);
+    Queue&lt;TreeNode&gt; q = new LinkedList&lt;TreeNode&gt;();
+    q.offer(root);
+    while(!q.isEmpty()) {
+        int size = q.size();
+        List&lt;Integer&gt; level = new LinkedList&lt;Integer&gt;();
+        for (int i = 0; i &lt; size; i ++) {
+            TreeNode node = q.poll();
+            level.add(node.val);
+            if (node.left != null) {
+                q.offer(node.left);
             }
-            else if (cur.left != null) {
-                stack.push(cur.left);
-            }
-            else if (cur.right != null) {
-                stack.push(cur.right);
-            }
-        }
-        else if (cur.left == pre) {
-            if (cur.right != null) {
-                stack.push(cur.right);
-            }
-            else {
-                ans.add(stack.pop().val);
+            if (node.right != null) {
+                q.offer(node.right);
             }
         }
-        else if (cur.right == pre) {
-            ans.add(stack.pop().val);
-        }
-        pre = cur;
+        ans.add(level);
     }
     return ans;
 }
 </code></pre>
 
-<p><strong>Third, simplified version of 2nd code</strong></p>
+<p><strong>Construct Binary Tree from Preorder and Inorder</strong> &ndash; written by me</p>
 
-<p><strong>Commented on June 10th</strong>: Note that &lsquo;pre&rsquo; and &lsquo;cur&rsquo; are never going to be apart for more then 1 edge (they can overlap)</p>
+<pre><code>public TreeNode buildTree(int[] preorder, int[] inorder) {
+    if (preorder == null || inorder == null || preorder.length != inorder.length) {
+        return null;
+    }
+    return helper(preorder, 0, preorder.length-1, inorder, 0, inorder.length-1);
+}
 
-<pre><code>public List&lt;Integer&gt; postorderTraversal(TreeNode root) {
-    List&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
-    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
-    TreeNode prev = null; // previously traversed node
-    TreeNode curr = root;
+private TreeNode helper(int[] preorder, int a, int b, int[] inorder, int c, int d) {
+    if (a &gt; b) {
+        return null;
+    }
+    int headVal = preorder[a];
+    TreeNode head = new TreeNode(headVal);
+    int p = c;
+    while (p &lt;= d) {
+        if (inorder[p] == headVal) {
+            break;
+        }
+        p ++;
+    }
+    head.left = helper(preorder, a+1, a+p-c, inorder, c, p-1);
+    head.right = helper(preorder, b-d+p+1, b, inorder, p+1, d);
+    return head;
+}
+</code></pre>
+
+<p><strong>Construct Binary Tree from Inorder and Postorder</strong> &ndash; similar to previous code, copied from <a href="http://answer.ninechapter.com/solutions/construct-binary-tree-from-inorder-and-postorder-traversal/">ninechap</a></p>
+
+<pre><code>private int findPosition(int[] arr, int start, int end, int key) {
+    int i;
+    for (i = start; i &lt;= end; i++) {
+        if (arr[i] == key) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+private TreeNode myBuildTree(int[] inorder, int instart, int inend,
+        int[] postorder, int poststart, int postend) {
+    if (instart &gt; inend) {
+        return null;
+    }
+
+    TreeNode root = new TreeNode(postorder[postend]);
+    int position = findPosition(inorder, instart, inend, postorder[postend]);
+
+    root.left = myBuildTree(inorder, instart, position - 1,
+            postorder, poststart, poststart + position - instart - 1);
+    root.right = myBuildTree(inorder, position + 1, inend,
+            postorder, poststart + position - instart, postend - 1);
+    return root;
+}
+
+public TreeNode buildTree(int[] inorder, int[] postorder) {
+    if (inorder.length != postorder.length) {
+        return null;
+    }
+    return myBuildTree(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/NineChap-Binary-Search-Tree/">[NineChap 3.3] Binary Search Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/10/NineChap-Binary-Search-Tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/10/NineChap-Binary-Search-Tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Question list</h2>
+
+<p><strong>BST</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/26/Validate-Binary-Search-Tree/">Validate Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/11/BST-insert-and-delete/">Insert a Node in Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/11/BST-insert-and-delete/">Delete a Node in Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/13/Search-range-BST-trim-BST/">Search Range in a Binary Search Tree</a></strong></p></li>
+</ol>
+
+
+<p><strong>Additional</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/25/Recover-Binary-Search-Tree/">Recover Binary Search Tree</a></strong> &ndash; used global variable</p></li>
+<li><p><strong><a href="/blog/2014/05/26/Convert-Sorted-Array-to-Binary-Search-Tree/">Convert Sorted Array to Binary Search Tree</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/26/Convert-Sorted-List-to-Binary-Search-Tree/">Convert Sorted List to Binary Search Tree</a></strong> &ndash; used global variable</p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<p><strong>Validate Binary Search Tree</strong></p>
+
+<pre><code>public boolean isValidBST(TreeNode root) {
+    return validate(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
+}
+
+private boolean validate(TreeNode node, int min, int max) {
+    if (node == null) {
+        return true;
+    }
+    if (node.val &lt;= min || max &lt;= node.val) {
+        return false;
+    }
+    return validate(node.left, min, node.val) &amp; validate(node.right, node.val, max);
+}
+</code></pre>
+
+<p><strong>Insert a Node in Binary Search Tree</strong> and <strong>Delete a Node in Binary Search Tree</strong> are written in a new post.</p>
+
+<p><strong>Search Range in a Binary Search Tree</strong></p>
+
+<p>There is a new post for this.</p>
+
+<p><strong>Recover Binary Search Tree</strong></p>
+
+<pre><code>// 3 global variables used
+TreeNode first = null;
+TreeNode second = null; 
+TreeNode current = null;
+
+public void recoverTree(TreeNode root) {
+    traverse(root);
+    if (first != null) {
+        int temp = first.val;
+        first.val = second.val;
+        second.val = temp;
+    }
+}
+
+public void traverse(TreeNode root) {
     if (root == null) {
+        return;
+    }
+    traverse(root.left);
+    // inorder traversal
+    if (current != null &amp;&amp; current.val &gt; root.val) {
+        if (first == null) {
+            first = current;
+        }
+        second = root;
+    }
+    current = root;
+    traverse(root.right);
+}
+</code></pre>
+
+<p><strong>Convert Sorted Array to Binary Search Tree</strong></p>
+
+<pre><code>public TreeNode sortedArrayToBST(int[] num) {
+    if (num == null || num.length == 0) {
+        return null;
+    }
+    return build(num, 0, num.length - 1);
+}
+
+private TreeNode build(int[] num, int start, int end) {
+    if (start &gt; end) {
+        return null;
+    }
+    int mid = start + (end - start) / 2;
+    TreeNode head = new TreeNode(num[mid]);
+    head.left = build(num, start, mid - 1);
+    head.right = build(num, mid + 1, end);
+    return head;
+}
+</code></pre>
+
+<p><strong>Convert Sorted List to Binary Search Tree</strong> &ndash; note that this solution uses 1 global variable</p>
+
+<pre><code>ListNode cur = null;
+
+public TreeNode sortedListToBST(ListNode head) {
+    // count total length of the list 
+    ListNode p = head;
+    int count = 0;
+    while (p != null) {
+        p = p.next;
+        count++;
+    }
+    // start to traverse the tree and fill in data
+    cur = head;
+    return build(0, count - 1);
+}
+
+private TreeNode build(int start, int end) {
+    if (start &gt; end) {
+        return null;
+    }
+    int mid = start + (end - start) / 2;
+    TreeNode head = new TreeNode(0);
+    head.left = build(start, mid - 1);
+    head.val = cur.val;
+    cur = cur.next;
+    head.right = build(mid + 1, end);
+    return head;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree-II/">[LeetCode Plus] Lowest Common Ancestor of Binary Tree (II)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree-II/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/10/Lowest-Common-Ancestor-Tree-II/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-ii.html">link</a></p>
+
+<div class="entry bg-color bg-img font-color">
+    <blockquote>
+        <p class="font-color">Given a binary tree, find the lowest common ancestor of two given nodes in the tree. Each node contains a parent pointer which links to its parent.</p>
+    </blockquote>
+    <p class="font-color bg-color bg-img"><span id="more-797" class="font-color"></span>
+        <br> <strong><span style="color: red;" class="font-color">Note:</span></strong>
+        <br>This is Part II of Lowest Common Ancestor of a Binary Tree. If you need to find the lowest common ancestor without parent pointers, please read <a href="http://www.leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-i.html" class="font-color">Lowest Common Ancestor of a Binary Tree Part I</a>.
+        <br>
+    </p><pre>        _______<span style="color: #990000;" class="font-color">3</span>______
+       /              \
+    ___<span style="color: #990000;" class="font-color">5</span>__          ___<span style="color: #990000;" class="font-color">1</span>__
+   /      \        /      \
+   <span style="color: #990000;" class="font-color">6</span>      _<span style="color: #990000;" class="font-color">2       0       8</span>
+         /  \
+         <span style="color: #990000;" class="font-color">7   4</span></pre>
+    <p class="font-color">If you are not so sure about the definition of lowest common ancestor (LCA), please refer to my previous post: <a href="http://www.leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-search-tree.html" class="font-color">Lowest Common Ancestor of a Binary Search Tree (BST)</a> or the definition of LCA <a href="http://en.wikipedia.org/wiki/Lowest_common_ancestor" class="font-color">here</a>. Using the tree above as an example, the LCA of nodes <span style="color: #990000;" class="font-color">5</span> and <span style="color: #990000;" class="font-color">1</span> is <span style="color: #990000;" class="font-color">3</span>. Please note that LCA for nodes <span style="color: #990000;" class="font-color">5</span> and <span style="color: #990000;" class="font-color">4</span> is <span style="color: #990000;" class="font-color">5</span>.</p>
+    <p class="font-color">In my last post: <a href="http://www.leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-i.html" class="font-color">Lowest Common Ancestor of a Binary Tree Part I</a>, we have devised a recursive solution which finds the LCA in O(<em>n</em>) time. If each node has a pointer that link to its parent, could we devise a better solution?</p>
+    <p class="font-color"><strong>Hint:</strong>
+        <br>No recursion is needed. There is an easy solution which uses extra space. Could you eliminate the need of extra space?</p>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p><strong>If have parent pointer, we do not wish to use extra space for the solution</strong>.</p>
+
+<ol>
+<li>Find the height of both nodes (from the head)</li>
+<li>By calculating the height difference, move the lower nodes up (follow the parent path) to the same level as the other node.</li>
+<li>Two nodes move up together until they meet.</li>
+<li>This solution requires no extra space.</li>
+</ol>
+
+
+<p>Here is <strong>a very similar question: <a href="http://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/">Intersection of 2 LinkedList</a></strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>// As root-&gt;parent is NULL, we don't need to pass root in.
+Node *LCA(Node *p, Node *q) {
+  int h1 = getHeight(p);
+  int h2 = getHeight(q);
+  // swap both nodes in case p is deeper than q.
+  if (h1 &gt; h2) {
+    swap(h1, h2);
+    swap(p, q);
+  }
+  // invariant: h1 &lt;= h2.
+  int dh = h2 - h1;
+  for (int h = 0; h &lt; dh; h++)
+    q = q-&gt;parent;
+  while (p &amp;&amp; q) {
+    if (p == q) return p;
+    p = p-&gt;parent;
+    q = q-&gt;parent;
+  }
+  return NULL;  // p and q are not in the same tree
+}
+
+int getHeight(Node *p) {
+  int height = 0;
+  while (p) {
+    height++;
+    p = p-&gt;parent;
+  }
+  return height;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree/">[LeetCode Plus] Lowest Common Ancestor of Binary Tree (I)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/10/Lowest-Common-Ancestor-Tree/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/10/Lowest-Common-Ancestor-Tree/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-i.html">link</a></p>
+
+<div class="entry bg-color bg-img font-color">
+    <blockquote>
+        <p class="font-color bg-color bg-img">Given a binary tree, find the lowest common ancestor of two given nodes in the tree.</p>
+    </blockquote>
+    <p class="font-color bg-color bg-img"><span id="more-790" class="font-color"></span>
+        <br>
+    </p><pre class="bg-color bg-img font-color">        _______<span style="color: #990000;" class="font-color">3</span>______
+       /              \
+    ___<span style="color: #990000;" class="font-color">5</span>__          ___<span style="color: #990000;" class="font-color">1</span>__
+   /      \        /      \
+   <span style="color: #990000;" class="font-color">6</span>      _<span style="color: #990000;" class="font-color">2       0       8</span>
+         /  \
+         <span style="color: #990000;" class="font-color">7   4</span></pre>
+    <p class="font-color">If you are not so sure about the definition of lowest common ancestor (LCA), please refer to my previous post: <a href="http://www.leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-search-tree.html" class="font-color bg-color bg-img">Lowest Common Ancestor of a Binary Search Tree (BST)</a> or the definition of LCA <a href="http://en.wikipedia.org/wiki/Lowest_common_ancestor" class="font-color">here</a>. Using the tree above as an example, the LCA of nodes <strong><span style="color: #990000;" class="font-color">5</span></strong> and <strong><span style="color: #990000;" class="font-color">1</span></strong> is <strong><span style="color: #990000;" class="font-color">3</span></strong>. Please note that LCA for nodes <strong><span style="color: #990000;" class="font-color">5</span> </strong>and <strong><span style="color: #990000;" class="font-color">4</span> </strong>is <strong><span style="color: #990000;" class="font-color">5</span></strong>.</p>
+    <p class="font-color bg-color bg-img"><strong>Hint:</strong>
+        <br>Top-down or bottom-up? Consider both approaches and see which one is more efficient.</p>
+</div>
+
+
+<p><strong>This question appears on CC150v5 Q4.7</strong>.</p>
+
+<h3>Analysis</h3>
+
+<p>This tree is not BST, so it&rsquo;s more difficult then previous. Top-down approach would take O(n<sup>2</sup>) time due to duplicate traverse.</p>
+
+<p><strong>However, there is a very good bottom-up approach with O(n) time</strong>. This solution, though very tricky, is the most standard and common interview question that can be asked about Binary Tree.</p>
+
+<blockquote><p>We traverse from the bottom, and once we reach a node which matches one of the two nodes, we pass it up to its parent. The parent would then test its left and right subtree if each contain one of the two nodes. If yes, then the parent must be the LCA and we pass its parent up to the root. If not, we pass the lower node which contains either one of the two nodes (if the left or right subtree contains either p or q), or NULL (if both the left and right subtree does not contain either p or q) up.</p></blockquote>
+
+<p>The coding is very concise.</p>
+
+<blockquote cite="http://leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-tree-part-i.html">
+<p class="font-color"><strong>Notes:<br> </strong>The LCA problem had been studied extensively by many computer scientists. There exists efficient algorithms for finding LCA in constant time after initial processing of the tree in linear time. For the adventurous reader, please read this article for more details: <a href="http://www.topcoder.com/tc?module=Static&amp;d1=tutorials&amp;d2=lowestCommonAncestor" class="font-color">Range Minimum Query and Lowest Common Ancestor in Topcoder</a>.
+</p>
+</blockquote>
+
+
+<h3>Code</h3>
+
+<p><strong>updated on Sep 15th, 2014</strong>: code from CC150v5 Q4.7</p>
+
+<pre><code>public static TreeNode commonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+    if (root == null) {
+        return null;
+    } else if (root == p) {
+        return p;
+    } else if (root == q) {
+        return q;
+    }
+    if (commonAncestor(root.left, p, q) == null) {
+        return commonAncestor(root.right, p, q);
+    } else if (commonAncestor(root.right, p, q) == null) {
+        return commonAncestor(root.left, p, q);
+    } else {
+        return root;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/Lowest-Common-Ancestor-BST/">[LeetCode Plus] Lowest Common Ancestor of BST</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/10/Lowest-Common-Ancestor-BST/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/10/Lowest-Common-Ancestor-BST/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/07/lowest-common-ancestor-of-a-binary-search-tree.html">link</a></p>
+
+<div class="entry bg-color bg-img font-color">
+    <blockquote class="bg-color bg-img font-color">
+        <p class="font-color bg-color bg-img">Given a binary search tree (BST), find the lowest common ancestor of two given nodes in the BST.</p>
+    </blockquote>
+    <p class="font-color bg-color bg-img"><span id="more-782" class="font-color"></span>
+        <br>
+    </p><pre class="bg-color bg-img font-color">        _______<span style="color: #990000;" class="font-color">6</span>______
+       /              \
+    ___<span style="color: #990000;" class="font-color">2</span>__          ___<span style="color: #990000;" class="font-color">8</span>__
+   /      \        /      \
+   <span style="color: #990000;" class="font-color">0</span>      _<span style="color: #990000;" class="font-color">4       7       9</span>
+         /  \
+         <span style="color: #990000;" class="font-color">3   5</span></pre>
+    <p class="font-color bg-color bg-img">Using the above tree as an example, the lowest common ancestor (LCA) of nodes <span style="color: #990000;" class="font-color">2</span> and <span style="color: #990000;" class="font-color bg-color bg-img">8</span> is <span style="color: #990000;" class="font-color">6</span>. But how about LCA of nodes <span style="color: #990000;" class="font-color">2</span> and <span style="color: #990000;" class="font-color">4</span>? Should it be <span style="color: #990000;" class="font-color">6</span> or <span style="color: #990000;" class="font-color">2</span>?</p>
+    <p class="font-color bg-color bg-img">According to the <a href="http://en.wikipedia.org/wiki/Least_common_ancestor" class="font-color">definition of LCA on  Wikipedia</a>: &#8220;The lowest common ancestor is defined between two nodes <em>v</em> and <em>w</em> as the lowest node in T that has both <em>v</em> and <em>w</em> as descendants (where we allow a node to be a descendant of itself).&#8221; Since a node can be a descendant of itself, the LCA of <span style="color: #990000;" class="font-color">2</span> and <span style="color: #990000;" class="font-color">4</span> should be <span style="color: #990000;" class="font-color">2</span>, according to this definition.</p>
+    <p class="font-color bg-color bg-img"><strong>Hint:</strong>
+        <br>A top-down walk from the root of the tree is enough.</p>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p><strong>This question is the easiest of this series of questions</strong>. I will quote the solution analysis.</p>
+
+<blockquote><p>There’s only three cases you need to consider.</p></blockquote>
+
+<pre><code>1. Both nodes are to the left of the tree.
+2. Both nodes are to the right of the tree.
+3. One node is on the left while the other is on the right. This node must be LCA. 
+4. Current node equals to one of the two nodes, this node must be the LCA. 
+</code></pre>
+
+<blockquote><p>The run time complexity is O(h), where h is the height of the BST.</p></blockquote>
+
+<h3>Code</h3>
+
+<p>The code is not written by me.</p>
+
+<pre><code>Node *LCA(Node *root, Node *p, Node *q) {
+  if (!root || !p || !q) return NULL;
+  if (max(p-&gt;data, q-&gt;data) &lt; root-&gt;data)
+    return LCA(root-&gt;left, p, q);
+  else if (min(p-&gt;data, q-&gt;data) &gt; root-&gt;data)
+    return LCA(root-&gt;right, p, q);
+  else
+    return root;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/10/First-Character-Appearing-Once/">[Question] First Character Appearing Only Once</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/10/First-Character-Appearing-Once/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/10/First-Character-Appearing-Once/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://codercareer.blogspot.sg/2011/10/no-13-first-character-appearing-only.html">link</a></p>
+
+<blockquote><p>Problem: Implement a function to find the first character in a string which only appears once.</p>
+
+<pre><code>For example: It returns ‘b’ when the input is “abaccdeff”.
+</code></pre></blockquote>
+
+<h3>Analysis</h3>
+
+<p>Great solution from <a href="http://stackoverflow.com/a/2285561">Ryan</a>:</p>
+
+<blockquote><p>You can&rsquo;t know that the character is un-repeated until you&rsquo;ve processed the whole string, so my suggestion would be&hellip;</p></blockquote>
+
+<p>Keep 2 lists.</p>
+
+<p>One stores chars that appear once, the other list stores repeated chars.</p>
+
+<p>Code is shown below.</p>
+
+<pre><code>def first_non_repeated_character(string):
+  chars = []
+  repeated = []
+  for character in string:
+    if character in chars:
+      chars.remove(character)
+      repeated.append(character)
+    else:
+      if not character in repeated:
+        chars.append(character)
+  if len(chars):
+    return chars[0]
+  else:
+    return False
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/09/NineChap-Sorted-array/">[NineChap 2.2] Sorted Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/09/NineChap-Sorted-array/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/09/NineChap-Sorted-array/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Sorted Array</h2>
+
+<h4>Template</h4>
+
+<p>There is no template.</p>
+
+<h4>Question list</h4>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/09/Remove-Duplicates-from-Sorted-Array/">Remove Duplicates from Sorted Array</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/22/Remove-Duplicates-from-Sorted-Array-II/">Remove Duplicates from Sorted Array II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/23/Merge-Sorted-Array/">Merge Sorted Array</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/04/26/Median-of-Two-Sorted-Arrays/">Median of Two Sorted Arrays</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/08/Recover-Rotated-Sorted-Array/">Recover Rotated Sorted Array</a></strong></p></li>
+</ol>
+
+
+<h4>Additional</h4>
+
+<ol>
+<li><p><strong><a href="/blog/2014/06/03/Reverse-Words-in-a-String/">Reverse Words in a String</a></strong></p></li>
+<li><p><strong>Rotate String</strong></p>
+
+<p> Given string &ldquo;abcdefg&rdquo; and offset = 3, the rotated string is &ldquo;efgabcd&rdquo;.</p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<p><strong>Remove Duplicates from Sorted Array</strong></p>
+
+<pre><code>public int removeDuplicates(int[] A) {
+    if (A == null || A.length == 0) {
+        return 0;
+    }
+    int left = 1;
+    int right = 1;
+    while (right &lt; A.length) {
+        if (A[right - 1] != A[right]) {
+            A[left] = A[right];
+            left++;
+        }
+        right++;
+    }
+    return left;
+}
+</code></pre>
+
+<p><strong>Remove Duplicates from Sorted Array II</strong> &ndash; slightly difficult in coding</p>
+
+<pre><code>public int removeDuplicates(int[] A) {
+    if (A == null || A.length == 0) {
+        return 0;
+    }
+    int left = 1;
+    int right = 1;
+    boolean twice = false;
+    while (right &lt; A.length) {
+        if (A[right - 1] != A[right]) {
+            A[left++] = A[right++];
+            twice = false;
+        } else if (!twice){
+            A[left++] = A[right++];
+            twice = true;
+        } else {
+            right++;
+        }
+    }
+    return left;
+}
+</code></pre>
+
+<p><strong>Merge Sorted Array</strong></p>
+
+<p>Easy question, tail to head merge.</p>
+
+<p><strong>Median of Two Sorted Arrays</strong></p>
+
+<p>This question is Find kth largest from A&amp;B. Refer to original post.</p>
+
+<p><strong>Recover Rotated Sorted Array</strong></p>
+
+<p>I wrote a new post.</p>
+
+<p><strong>Reverse Words in a String</strong></p>
+
+<pre><code>public String reverseWords(String s) {
+    if (s == null || s.length() == 0) {
+        return s;
+    }
+    String[] words = s.split(" ");
+    String firstReversed = "";
+    for (int i = 0; i &lt; words.length; i ++) {
+        if (words[i].equals("")) continue;
+        firstReversed += inPlaceReverse(words[i]) + " ";
+    }
+    return inPlaceReverse(firstReversed);
+}
+
+private String inPlaceReverse(String str) {
+    if (str == null || str.length() == 0) return str;
+    char[] chars = str.trim().toCharArray();
+    int left = 0;
+    int right = chars.length - 1;
+    while (left &lt; right) {
+        char temp = chars[left];
+        chars[left] = chars[right];
+        chars[right] = temp;
+        left ++;
+        right --;
+    }
+    return String.valueOf(chars);
+}
+</code></pre>
+
+<p><strong>Rotate String</strong></p>
+
+<p>Same strategy.</p>
+
+<h2>Conclusion</h2>
+
+<ol>
+<li>If array is sorted, try binary search</li>
+<li>If array is not sorted, try sort it first</li>
+<li>When you see &lsquo;rotated array&rsquo;, think of &lsquo;list reverse&rsquo;.</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/08/Recover-Rotated-Sorted-Array/">[LintCode] Recover Rotated Sorted Array</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/08/Recover-Rotated-Sorted-Array/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/08/Recover-Rotated-Sorted-Array/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.lintcode.com/en/problem/recover-rotated-sorted-array/">link</a></p>
+
+<div style="min-height:100px" class="bg-color bg-img font-color">
+
+    <p class="font-color">
+        Given a <strong>rotated</strong> sorted array, recover it to sorted array in-place.
+    </p>
+    <div class="m-t-lg m-b-lg bg-color bg-img font-color">
+        <b>Example</b>
+        <div class="bg-color bg-img font-color">
+            <p class="font-color"><span style="color:#B22222;" class="font-color"><strong>[4, 5, 1, 2, 3]</strong></span> -&gt; <span style="color:#B22222;" class="font-color"><strong>[1, 2, 3, 4, 5]</strong></span>
+            </p>
+        </div>
+    </div>
+
+    <div>
+        <b>Challenge</b>
+        <div>
+            <p class="font-color">
+                In-place, O(1) extra space and O(n) time.
+            </p>
+        </div>
+    </div>
+
+    <div class="m-t-lg m-b-lg bg-color bg-img font-color">
+        <b>Clarification</b>
+        <div id="clarification" class=" bg-color bg-img font-color">
+            <p class="font-color">What is rotated array:</p>
+
+            <p class="font-color">&nbsp; &nbsp; - For example, the orginal array is [1,2,3,4], The rotated array of it can be [1,2,3,4], [2,3,4,1], [3,4,1,2], [4,1,2,3]</p>
+
+        </div>
+    </div>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p>O(n) time and O(a) space is required.</p>
+
+<p>Find the rotate position and rotate each half. After this:</p>
+
+<p class="font-color"><span style="color:#B22222;" class="font-color"><strong>[4, 5, 1, 2, 3]</strong></span> -&gt; <span style="color:#B22222;" class="font-color"><strong>[5, 4, 3, 2, 1]</strong></span>
+</p>
+
+
+<p>Then reverse it again.</p>
+
+<p>This solution is called &ldquo;三步翻转法&rdquo;, an extremely common interview algorithm. Similar questions are &ldquo;Reverse word list&rdquo; from LeetCode.</p>
+
+<h3>My code</h3>
+
+<p><strong>my first code</strong>.</p>
+
+<p>I used binary search to find the rotate position.</p>
+
+<pre><code>public void recoverRotatedSortedArray(ArrayList&lt;Integer&gt; nums) {
+    // write your code
+    if (nums == null || nums.size() &lt;= 1) {
+        return;
+    }
+    int left = 0, right = nums.size() - 1;
+    int mid;
+    while (left + 1 &lt; right) {
+        mid = left + (right - left) / 2;
+        if (nums.get(mid) &gt;= nums.get(left)) {
+            left = mid;
+        }
+        else {
+            right = mid;
+        }
+    }
+    if (nums.get(left) &lt;= nums.get(right)) {
+        return;
+    }
+    // rotate 2 parts: [0, left] and [right, size-1]
+    inPlaceRotate(nums, 0, left);
+    inPlaceRotate(nums, right, nums.size() - 1);
+    inPlaceRotate(nums, 0, nums.size() - 1);
+}
+
+private void inPlaceRotate(ArrayList&lt;Integer&gt; nums, int left, int right) {
+    while (left &lt; right) {
+        int temp = nums.get(left);
+        nums.set(left, nums.get(right));
+        nums.set(right, temp);
+        left ++;
+        right --;
+    }
+}
+</code></pre>
+
+<p><strong>my second code</strong></p>
+
+<p>Note the total time O(n), so binary search is not benefiting at all. It&rsquo;s OK to changed binary search to normal search.</p>
+
+<pre><code>public void recoverRotatedSortedArray(ArrayList&lt;Integer&gt; nums) {
+    // write your code
+    if (nums == null || nums.size() &lt;= 1) {
+        return;
+    }
+    int p = 1;
+    while (p &lt; nums.size()) {
+        if (nums.get(p - 1) &gt; nums.get(p)) {
+            break;
+        }
+        p++;
+    }
+    inPlaceRotate(nums, 0, p - 1);
+    inPlaceRotate(nums, p, nums.size() - 1);
+    inPlaceRotate(nums, 0, nums.size() - 1);
+}
+
+private void inPlaceRotate(ArrayList&lt;Integer&gt; nums, int left, int right) {
+    while (left &lt; right) {
+        int temp = nums.get(left);
+        nums.set(left, nums.get(right));
+        nums.set(right, temp);
+        left++;
+        right--;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/08/NineChap-Binary-Search/">[NineChap 2.1] Binary Search</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/06/08/NineChap-Binary-Search/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/08/NineChap-Binary-Search/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Binary Search</h2>
+
+<h4>Recursion or While-Loop?</h4>
+
+<p>In general, it&rsquo;s never a good idea to do binary search with recursion, because that&rsquo;ll make the interview too boring.</p>
+
+<h4>Template</h4>
+
+<p><a href="http://answer.ninechapter.com/solutions/binary-search/">link</a></p>
+
+<p>This template is able to locate the first (or last) occurance of an element <strong>when array contains duplications</strong>.</p>
+
+<p>If item too small/large, left/right boundary is returned.</p>
+
+<p>Read Question &ldquo;Search for a Range&rdquo; for more details.</p>
+
+<pre><code>int binarySearch(vector&lt;int&gt; &amp;A, int target) {
+    if (A.size() == 0) {
+        return -1;
+    }
+
+    int start = 0;
+    int end = A.size() - 1;
+    int mid;
+
+    while (start + 1 &lt; end) {
+        mid = start + (end - start) / 2;
+        if (A[mid] &lt; target) {
+            start = mid;
+        } else {
+            end = mid;
+        }
+    }
+
+    if (A[start] == target) {
+        return start;
+    }
+    if (A[end] == target) {
+        return end;
+    }
+
+    return -1;
+}
+</code></pre>
+
+<h4>Keypoints</h4>
+
+<ol>
+<li>start + 1 &lt; end</li>
+<li>start + (end-start)/2</li>
+<li>A[mid] ==, &lt;, ></li>
+<li>A[start/end] == target</li>
+</ol>
+
+
+<h2>Question list</h2>
+
+<p><strong>Binary search</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/12/Search-Insert-Position/">Search Insert Position</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/12/Search-for-a-Range/">Search for a Range</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/12/Search-in-Rotated-Sorted-Array/">Search in Rotated Sorted Array</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/22/Search-in-Rotated-Sorted-Array-II/">Search in Rotated Sorted Array II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/21/Search-a-2D-Matrix/">Search a 2D Matrix</a></strong></p></li>
+</ol>
+
+
+<p><strong>Additional</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/06/10/Searching-a-2D-Sorted-Matrix/">Search a 2D Matrix II</a></strong> &ndash; A tricky question</p></li>
+<li><p><strong>Find the First Bad Version</strong></p>
+
+<p> The code base version is an integer and start from 0 to n. One day, someone commit a bad version in the code case, so it caused itself and the following versions are all failed in the unittests. You can determine whether a version is bad by the following interface:</p>
+
+<blockquote><p>boolean isBadVersion(int version);</p></blockquote>
+
+<p> Find the first bad version.</p></li>
+<li><p><strong>Find a peek</strong></p>
+
+<p> There is an array which we can assume the numbers in adjcent positions are different. and A[0] &lt; A[1] &amp;&amp; A[A.length &ndash; 2] > A[A.length &ndash; 1]. We consider a position P is a peek if A[P] > A[P-1] &amp;&amp; A[P] > A[P+1]. Find a peek in this array.</p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<p>All following code are written with the template provided above.</p>
+
+<p><strong>Search Insert Position</strong></p>
+
+<pre><code>public int searchInsert(int[] A, int target) {
+    // 6 minutes
+    if (A == null || A.length == 0) {
+        return 0;
+    }
+    int left = 0, right = A.length - 1;
+    int mid;
+    while (left + 1 &lt; right) {
+        mid = left + (right - left) / 2;
+        if (A[mid] &lt; target) {
+            left = mid;
+        }
+        else {
+            right = mid;
+        }
+    }
+    if (target &lt;= A[left]) {
+        // equal or less than first element
+        return left;
+    }
+    else if (A[left] &lt; target &amp;&amp; target &lt;= A[right]) {
+        return right;
+    }
+    else {
+        // bigger than largest element
+        return right + 1;
+    }
+}
+</code></pre>
+
+<p><strong>Search for a Range</strong></p>
+
+<pre><code>public int[] searchRange(int[] A, int target) {
+    // 6 minutes
+    int[] result = new int[2];
+    result[0] = -1;
+    result[1] = -1;
+    if (A == null || A.length == 0) {
         return result;
     }
-    stack.push(root);
-    while (!stack.empty()) {
-        curr = stack.peek();
-        if (prev == null || prev.left == curr || prev.right == curr) {
-        // traverse down the tree
-            if (curr.left != null) {
-                stack.push(curr.left);
-            } else if (curr.right != null) {
-                stack.push(curr.right);
-            }
-        } else if (curr.left == prev) {
-        // traverse up the tree from the left
-            if (curr.right != null) {
-                stack.push(curr.right);
-            }
-        } else if (curr.right == prev || curr == prev){
-        // traverse up the tree from the right
-        // or at a leaf point
-            result.add(curr.val);
-            stack.pop();
+    // find the start point of target
+    int left = 0, right = A.length - 1, mid;
+    while (left + 1 &lt; right) {
+        mid = left + (right - left) / 2;
+        if (A[mid] &lt; target) {
+            left = mid;
         }
-        prev = curr;
+        else {
+            right = mid;
+        }
+    }
+    if (A[left] == target) {
+        result[0] = left;
+    }
+    else if (A[right] == target) {
+        result[0] = right;
+    }
+    else {
+        return result;
+    }
+    // find the end point of target
+    left = 0;
+    right = A.length - 1;
+    while (left + 1 &lt; right) {
+        mid = left + (right - left) / 2;
+        if (A[mid] &lt;= target) {
+            left = mid;
+        }
+        else {
+            right = mid;
+        }
+    }
+    if (A[right] == target) {
+        result[1] = right;
+    }
+    else if (A[left] == target) {
+        result[1] = left;
     }
     return result;
 }
 </code></pre>
-</div>
-  
-  
 
+<p><strong>Search in Rotated Sorted Array</strong></p>
 
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/03/Big-endian-little-endian/">[Design] Big Endian and Little Endian</a></h1>
-    
-    
-      <p class="meta">
-        
+<p>Note: this is an high-freq qeustion. Every company will ask this question.</p>
 
+<p>The solution is using 4 if-conditions. It takes long time first, because I compare A[mid] with target. It become complex.</p>
 
+<p>We should compared A[left] and A[mid] first, then it&rsquo;ll be much easier for coding.</p>
 
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/03/Big-endian-little-endian/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/03/Big-endian-little-endian/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Difference</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Endianness">Big-endian</a> systems store the most significant byte of a word in the smallest address</strong> and the least significant byte is stored in the largest address.</p>
-
-<p><strong>Little-endian systems, in contrast, store the least significant byte in the smallest address</strong>.</p>
-
-<p>Both forms of endianness are in widespread use in computing and networking.</p>
-
-<h3>Example</h3>
-
-<p><img class="middle" src="/assets/images/big-endian.png"></p>
-
-<p>The data word &ldquo;0A 0B 0C 0D&rdquo; (a set of 4 bytes written out using left-to-right positional, hexadecimal notation) and the four memory locations with addresses a, a+1, a+2 and a+3.</p>
-
-<p>In Big-endian systems, byte 0A is stored in a, 0B in a+1, 0C in a+2 and 0D in a+3. In Little-endian systems, the order is reversed with 0D stored in memory address a, 0C in a+1, 0B in a+2, and 0A in a+3.</p>
-
-<h3>Why ?</h3>
-
-<p>IBMs and Intel x86 are little endian, while Motorolas and Sun are big endian.</p>
-
-<p><strong>Big-endian</strong> is the most common convention in data <strong>networking (including IPv6)</strong>, and <strong>little-endian</strong> is popular among <strong>microprocessors</strong> in part due to Intel.</p>
-
-<p>Why is endianness so important? Suppose you are storing int values to a file, then you send the file to a machine which uses the opposite endianness and read in the value. You&rsquo;ll run into problems because of endianness. You&rsquo;ll read in reversed values that won&rsquo;t make sense.</p>
-
-<p>Endianness is also a big issue when sending numbers over the network. Again, if you send a value from a machine of one endianness to a machine of the opposite endianness, you&rsquo;ll have problems. This is even worse over the network, because you might not be able to determine the endianness of the machine that sent you the data.</p>
-
-<p>The solution is to send 4 byte quantities using <a href="http://www.tutorialspoint.com/unix_sockets/network_byte_orders.htm">network byte order</a> which is arbitrarily picked to be one of the endianness (not sure if it&rsquo;s big or little, but it&rsquo;s one of them). If your machine has the same endianness as network byte order, then great, no change is needed. If not, then you must reverse the bytes.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/02/Word-Break-II/">[LeetCode 140] Word Break II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/02/Word-Break-II/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Word-Break-II/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/word-break-ii/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-Given a string <i>s</i> and a dictionary of words <i>dict</i>, add spaces in <i>s</i> to construct a sentence where each word is a valid dictionary word.
-</p>
-
-<p class="font-color">
-Return all such possible sentences.
-</p>
-
-<p class="font-color">
-For example, given<br>
-<i>s</i> = <code>"catsanddog"</code>,<br>
-<i>dict</i> = <code>["cat", "cats", "and", "sand", "dog"]</code>.
-</p>
-
-<p class="font-color">
-A solution is <code>["cats and dog", "cat sand dog"]</code>.
-</p>
-<p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a tough question</strong>. Standard DFS search would work, but we need to check &lsquo;breakable&rsquo; first. Otherwise, I got TLE.</p>
-
-<p><strong>Check breakable is a easy DP</strong>, and we do not need to remove any elements from the dictionary. (Word ladder needs remove elements from dictionary, don&rsquo;t confuse them).</p>
-
-<h3>Solution</h3>
-
-<p><strong>Updated on July 4th, 2014</strong>. The DFS code actually standard, but keep in mind to check breakable first (using DP).</p>
-
-<h3>Code</h3>
-
-<p><strong>DFS with pruning and DP breakable check</strong>, with the again-updated code on Sep 12th, 2014.</p>
-
-<pre><code>public List&lt;String&gt; wordBreak(String s, Set&lt;String&gt; dict) {
-    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-    if (s == null || s.length() == 0 || dict == null) {
-        return ans;
-    } else if (!canBreak(s, dict)) {
-        return ans;
+<pre><code>public int search(int[] A, int target) {
+    // this is the 4th time that I do this question
+    // 7 minutes
+    if (A == null || A.length == 0) {
+        return -1;
     }
-    helper(ans, "", s, 0, dict);
-    return ans;
-}
-
-private void helper(List&lt;String&gt; ans, String str, String s, int pos, Set&lt;String&gt; dict) {
-    int len = s.length();
-    if (pos == len) {
-        ans.add(str.substring(1));
-        return;
-    }
-    for (int i = pos; i &lt; len; i++) {
-        String sub = s.substring(pos, i + 1);
-        if (dict.contains(sub)) {
-            helper(ans, str + " " + sub, s, i + 1, dict);
-        }
-    }
-}
-
-public boolean canBreak(String s, Set&lt;String&gt; dict) {
-    if (s == null || s.length() == 0) {
-        return true;
-    }
-    int len = s.length();
-    boolean[] dp = new boolean[len + 1];
-    dp[0] = true;
-    for (int i = 1; i &lt;= len; i++) {
-        for (int j = 0; j &lt; i; j++) {
-            if (!dp[j]) {
-                continue;
+    int left = 0;
+    int right = A.length - 1;
+    int mid;
+    while (left + 1 &lt; right) {
+        mid = left + (right - left) / 2;
+        if (A[mid] == target) {
+            return mid;
+        } else if (A[left] &lt; A[mid]) {
+            if (A[left] &lt;= target &amp;&amp; target &lt; A[mid]) {
+                right = mid;
+            } else {
+                left = mid;
             }
-            if (dict.contains(s.substring(j, i))) {
-                dp[i] = true;
-                break;
+        } else {
+            if (A[mid] &lt; target &amp;&amp; target &lt;= A[right]) {
+                left = mid;
+            } else {
+                right = mid;
             }
         }
     }
-    return dp[len];
+    if (A[left] == target) {
+        return left;
+    } else if (A[right] == target) {
+        return right;
+    } 
+    return -1;
 }
 </code></pre>
-</div>
-  
-  
 
+<p><strong>Search in Rotated Sorted Array II</strong></p>
 
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/02/Word-Break/">[LeetCode 139] Word Break</a></h1>
-    
-    
-      <p class="meta">
-        
+<p>There are multiple ways to remove duplications. My previous solution is removing duplicate before entering the while-loop, which is a very good idea.</p>
 
+<p>Binary can&rsquo;t be used, because there might be: value of start = mid = end. In this case, the entire list needs to be search. Impossible!</p>
 
+<p>The worse case will anyway take O(n) time. To indicate the time complexity is regardless of binary search, Mr. Huang suggests the following code:</p>
 
+<pre><code>public boolean search(int[] A, int target) {
+    for (int i = 0; i &lt; A.length; i ++) {
+        if (A[i] == target) {
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
 
+<p><strong>Search a 2D Matrix</strong></p>
 
+<p>my code (2D search):</p>
 
-
-
-  
-
-
-<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/06/02/Word-Break/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Word-Break/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/word-break/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-Given a string <i>s</i> and a dictionary of words <i>dict</i>, determine if <i>s</i> can be segmented into a space-separated sequence of one or more dictionary words.
-</p>
-
-<p class="font-color">For example, given<br>
-<i>s</i> = <code>"leetcode"</code>,<br>
-<i>dict</i> = <code>["leet", "code"]</code>.
-</p>
-
-<p class="font-color">
-Return true because <code>"leetcode"</code> can be segmented as <code>"leet code"</code>.
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a standard DP question</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>I see a lot of people solve this DP problem with 2D array. It actually requires only 1D aray.</p>
-
-<p>Declare an boolean array of (input string length) + 1, and dp[i] mean whether or not subtring(0,i) is work-breakable. Then the problem is clear and easy.</p>
-
-<p>Pay attention to index while coding.</p>
-
-<h3>Code</h3>
-
-<p><strong>my code</strong></p>
-
-<pre><code>public boolean wordBreak(String s, Set&lt;String&gt; dict) {
-    int len = s.length();
-    if (len == 0 || dict.isEmpty())  {
+<pre><code>public boolean searchMatrix(int[][] matrix, int target) {
+    // 13 miniutes
+    if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
         return false;
     }
-    boolean[] dp = new boolean[len + 1];
-    dp[0] = true;
-    for (int i = 1; i &lt;= len; i ++)  {
-        for (int j = 0; j &lt; i; j ++)  {
-            if (dp[j] &amp;&amp; dict.contains(s.substring(j, i)))  {
-                dp[i] = true;
-                break;
-            }
+    int m = matrix.length;
+    int n = matrix[0].length;
+    // find target vertically from matrix[0] to matrix[m-1]
+    int top = 0, bottom = m - 1;
+    int mid;
+    while (top + 1 &lt; bottom) {
+        mid = top + (bottom - top) / 2;
+        if (matrix[mid][0] &lt; target) {
+            top = mid;
+        }
+        else {
+            bottom = mid;
         }
     }
-    return dp[len];
+    // locate the row number
+    int row = -1;
+    if (matrix[top][0] &lt;= target &amp;&amp; target &lt;= matrix[top][n-1]) {
+        row = top;
+    }
+    else if (matrix[bottom][0]&lt;=target &amp;&amp; target &lt;= matrix[bottom][n-1]) {
+        row = bottom;
+    }
+    else {
+        return false;
+    }
+    // now find target from matrix[row]
+    int left = 0, right = n - 1;
+    while (left + 1 &lt; right) {
+        mid = left + (right - left) / 2;
+        if (matrix[row][mid] &lt; target) {
+            left = mid;
+        }
+        else {
+            right = mid;
+        }
+    }
+    return (matrix[row][left] == target || matrix[row][right] == target);
 }
 </code></pre>
+
+<p>better code (1D search):</p>
+
+<pre><code>public boolean searchMatrix(int[][] matrix, int target) {
+    int rows = matrix.length;
+    int cols = matrix[0].length;
+    int start = 0;
+    int end = rows * cols - 1;
+    while (start &lt;= end) {
+        int mid = (start + end) / 2;
+        // Tricks to treat it as a 1-D array
+        int digit = matrix[mid / cols][mid % cols];
+        if (target == digit) {
+            return true;
+        } else if (target &gt; digit) {
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return false;
+}
+</code></pre>
+
+<p><strong>Search a 2D Matrix II</strong></p>
+
+<p>Read my new post for details.</p>
+
+<p><strong>Find the First Bad Version</strong></p>
+
+<p>A simple binary search.</p>
+
+<p><strong>Find a peek</strong></p>
+
+<p>A binary search, and for each &lsquo;mid&rsquo; point, judge weather it&rsquo;s a peek, or it&rsquo;s upward sloping, or downward sloping.</p>
+
+<p>Code skipped.</p>
+
+<h2>Conclusion</h2>
+
+<h4>Always try to exclude a half.</h4>
 </div>
   
   
@@ -1315,7 +1499,7 @@ Return true because <code>"leetcode"</code> can be segmented as <code>"leet code
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/06/02/Sort-List/">[LeetCode 148] Sort List</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/05/Software-testing/">[Testing] Software Testing</a></h1>
     
     
       <p class="meta">
@@ -1331,93 +1515,148 @@ Return true because <code>"leetcode"</code> can be segmented as <code>"leet code
   
 
 
-<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-05T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/06/02/Sort-List/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/06/02/Sort-List/">Comments</a>
+           | <a href="/blog/2014/06/05/Software-testing/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/06/05/Software-testing/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Question</h3>
+  <div class="entry-content"><h2>First Word</h2>
 
-<p><a href="https://oj.leetcode.com/problems/sort-list/">link</a></p>
+<p>There are generally four levels of tests: unit testing, integration testing, system testing, and acceptance testing.</p>
 
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">Sort a linked list in <i>O</i>(<i>n</i> log <i>n</i>) time using constant space complexity.</p><p class="font-color"></p>
-          </div>
+<p>Software testing methods are traditionally divided into white-box and black-box testing.</p>
+
+<p>One of the testing methodologies is &ldquo;V-model&rdquo;.</p>
+
+<p><img class="middle" src="/assets/images/Testing-V-Model.jpg"></p>
+
+<h2>Testing Types and process</h2>
+
+<h4>Regression testing</h4>
+
+<p>There&rsquo;re a lot of types, one of them is called &ldquo;Regression testing&rdquo;.</p>
+
+<p>Regression testing focuses on finding defects <strong>after a major code change has occurred</strong>. In other words, it encsures that changes does not introduce new faults.</p>
+
+<h4>Testing process</h4>
+
+<p>Traditional: <strong>waterfall</strong>. Testing is done by independent group of testers after development. This practice often results in the testing phase being used as a project buffer to compensate for project delays.</p>
+
+<p>New trend: <strong>Agile or Extreme</strong>, which adhere to <strong>TDD Model</strong>. In this process, unit tests are written first. This methodology increases the testing effort done by development.</p>
+
+<p><strong>Bottom Up Testing</strong>: lowest level components are tested first, then integrated and used to facilitate the testing of higher level components.</p>
+
+<p><strong>Top Down Testing</strong>: top integrated modules are tested and the branch of the module is tested step by step until the end.</p>
+
+<h2>Testing Methods</h2>
+
+<h4>Black-box</h4>
+
+<p><a href="http://en.wikipedia.org/wiki/Black-box_testing">Black-box</a> testing is a method of software testing that examines the functionality of an application without peering into its internal structures or workings. This can be applied to every level of software testing: unit, integration, system and acceptance.</p>
+
+<h4>White-box</h4>
+
+<p><a href="http://en.wikipedia.org/wiki/White-box_testing">White-box</a> testing (also known as structural testing) is a method of testing software that tests internal structures or workings of an application, as opposed to its functionality. In white-box testing, an internal perspective of the system and programming skills are used to design test cases. The tester chooses inputs to exercise paths through the code and determine the appropriate outputs.</p>
+
+<h4>Other-box</h4>
+
+<p>A black-box tester is unaware of the internal structure of the application to be tested, while a white-box tester has access to the internal structure of the application.</p>
+
+<p><a href="http://en.wikipedia.org/wiki/Grey_box_testing">Gray-box</a> testing is a combination of both. Testers require both highlevel and detailed knowledge of the application.</p>
+
+<h2>Whitebox in detail</h2>
+
+<p>Whitebox testing is based on program code. The extent to which source code is executed (covered).</p>
+
+<ol>
+<li>statement coverage</li>
+<li>path coverage</li>
+<li>(multiple-) condition coverage</li>
+<li>decision / branch coverage</li>
+<li>loop coverage</li>
+<li>definition-use coverage</li>
+</ol>
 
 
-<h3>Stats</h3>
+<p>Use of &ldquo;flow graphs&rdquo; to test the coverage. <a href="http://people.cs.aau.dk/~bnielsen/TOV07/lektioner/whitebox-07.pdf">source</a></p>
 
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
+<h2>Blackbox in detail</h2>
+
+<ol>
+<li>Equivalence partitioning</li>
+<li>Boundary value analysis</li>
+<li>Behavioural testing (interaction with w/ an environment)</li>
+<li>Random testing (random walk thru the system/mouse click)</li>
+<li>Stress testing (huge data, DoS attack, power off)</li>
+<li>Error guessing (Ad hoc, not really a technique)</li>
+</ol>
 
 
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+<h4>Equivalence partitioning</h4>
 
-<h3>Analysis</h3>
+<p>This is related to &ldquo;validate&rdquo; input. First identify input equivalence classes, then make the test case by changing each valid cases into invalid.</p>
 
-<p><strong>This is a difficult question</strong>.</p>
+<p>The <a href="http://en.wikipedia.org/wiki/Equivalence_partitioning">testing theory</a> related to equivalence partitioning says that only one test case of each partition is needed. In other words it is sufficient to select one test case out of each partition to test the program. To use more cases will not find new faults.</p>
 
-<p>To sort with O(nlgn) time, we must use either quick sort or <strong>merge sort</strong>.</p>
+<p>The values within one partition are considered to be &ldquo;equivalent&rdquo;. Thus the number of test cases can be reduced considerably.</p>
 
-<h3>Solution</h3>
+<blockquote><p>Example:</p>
 
-<p>This is a standard merge sort algorithm. The details can be found <a href="http://www.programcreek.com/2012/11/leetcode-solution-merge-sort-linkedlist-in-java/">here</a>.</p>
+<p>There are 12 months per year</p>
 
-<p>I am being lazy here, I reused the code from &ldquo;Merge Two Sorted Lists&rdquo;. Surprisingly it worked! Just remember, we must set the last node of first half to point to null.</p>
+<p>Valid partition is from january to december</p>
 
-<h3>Code</h3>
+<p>Invalid partition is from &lt;=0 and >=13</p></blockquote>
 
-<pre><code>public ListNode sortList(ListNode head) {
-    if (head == null || head.next == null) 
-        return head;
-    int len = 0;
-    ListNode temp = head;
-    while (temp != null) {
-        temp = temp.next;
-        len ++;
-    }
-    temp = head;
-    for (int i = 1; i &lt; len / 2; i ++)
-        temp = temp.next;
-    ListNode firstHalf = head, secondHalf = temp.next;
-    temp.next = null;
-    return mergeTwoLists(sortList(firstHalf), 
-                         sortList(secondHalf));
-}
+<p>A longer but better <a href="http://users.csc.calpoly.edu/~jdalbey/205/Resources/grocerystore.html">example</a></p>
 
-// The following code is copied from
-// Question - Merge Two Sorted Lists
-public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-    ListNode pre = new ListNode(Integer.MIN_VALUE);
-    ListNode cur = pre;
-    while (l1 != null &amp;&amp; l2 != null) {
-        if (l1.val &lt; l2.val) {
-            cur.next = l1;
-            l1 = l1.next;
-        } else {
-            cur.next = l2;
-            l2 = l2.next;
-        }
-        cur = cur.next;
-    }
-    if (l1 == null) cur.next = l2;
-    else cur.next = l1;
-    return pre.next;
-}
-</code></pre>
+<h4>Boundary Value Analysis</h4>
+
+<ol>
+<li>Testing boundary conditions (directly on, above, and beneath the edges)</li>
+<li>Choose input boundary values</li>
+<li>Choose input boundary values that reaches output boundary (given the input value, choose expected output +/&ndash; 1)</li>
+</ol>
+
+
+<blockquote><p>Example:</p>
+
+<p>Suppose an integer boundary is 1 to 50, Then test for 0,2 values &amp; 49, 51 vales.</p>
+
+<p>Suppose input = 5, output = 100, then test input = 5, output = 99, 100, 101</p></blockquote>
+
+<p>Don’t start with designing white-box test cases! Start with black-box test cases, then check white-box coverage.</p>
+
+<p><a href="http://people.cs.aau.dk/~bnielsen/TOV07/lektioner/blackbox-07.pdf">source</a></p>
+
+<h4>More examples</h4>
+
+<p><strong>Q: how to test a log-in window</strong>?</p>
+
+<p>A: Eq. class: username empty, exits, don&rsquo;t exist and exceed length limit. Same for password field. Boundary: input length equals, less than or larger than length limit. <a href="http://www.geekinterview.com/question_details/23184">source</a></p>
+
+<p><strong>Q: how to test a vendor machine</strong>?</p>
+
+<ol>
+<li><p>Functional: put in $$ and get a coke</p></li>
+<li><p>Edge condition: put in Chinese RMB?</p></li>
+<li><p>Stress: keep putting $$ and popping goods</p></li>
+<li><p>Security: can you break the machine?</p></li>
+</ol>
+
+
+<h2>Last Word</h2>
+
+<p>Sometime it is not feasible to test everything. Instead, prioritize your testing so that you only focus on areas that present the greatest risk or have the greatest probability of occurring.</p>
+
+<p>For example, you might choose to test the slowest client computer, the busiest server, or the least reliable network link.</p>
+
+<p><a href="http://technet.microsoft.com/en-us/library/cc782852(v=ws.10">source</a>.aspx)</p>
 </div>
   
   
@@ -1442,17 +1681,17 @@ public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (66)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (10)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (57)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (26)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (113)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1464,23 +1703,23 @@ public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+        <a href="/blog/2015/02/08/unbalanced-tree-into-balanced-tree/">[Google] Transform a Unbalanced Tree Into Balanced Tree</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
+        <a href="/blog/2015/02/08/generate-number-with-given-probability/">[Facebook] Generate Number With Given Probability</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
+        <a href="/blog/2015/02/08/difference-internet-and-www/">[Design] Difference: Internet and the Web</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
+        <a href="/blog/2015/02/08/bg-data-common-elements-lists/">[Design] Big Data - Find Common Elements in 2 Lists</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
+        <a href="/blog/2015/02/07/reservoir-sampling/">[Question] Reservoir Sampling</a>
       </li>
     
   </ul>

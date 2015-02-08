@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given a sorted set, find if there exist three elements in Arithmetic Progression or not. Solution This is a rather simple Arithmetic &hellip;">
+  <meta name="description" content="Question 1 A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i. Given a sorted array of distinct integers, write a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -84,7 +84,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-triplet/">[Google] Arithmetic Progression Triplet</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/09/17/find-magic-index/">[CC150v5] 9.3 Find Magic Index</a></h1>
     
     
       <p class="meta">
@@ -100,10 +100,149 @@
   
 
 
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-17T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/09/11/arithmetic-progression-triplet/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/11/arithmetic-progression-triplet/">Comments</a>
+           | <a href="/blog/2014/09/17/find-magic-index/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/17/find-magic-index/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question 1</h3>
+
+<blockquote><p>A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i.</p>
+
+<p>Given a sorted array of distinct integers, write a method to find a magic index, if one exists, in array A.</p></blockquote>
+
+<h3>Question 2</h3>
+
+<blockquote><p>FOLLOW UP: What if the values are not distinct?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult binary search question</strong>!</p>
+
+<p><strong>Question 1 is slightly easier</strong>: we simplyl use binary search, and we are able to discard half of the array each time.</p>
+
+<ol>
+<li>if (array[mid] > mid), then we discard the right half.</li>
+<li>if (array[mid] &lt; mid), then we discard the left half.</li>
+</ol>
+
+
+<p><strong>Question 2 is difficult</strong>. We cannot discard half of the input any more. Instead, we discard a range between (mid) and (array[mid]). Then check left and right part seperately.</p>
+
+<p>So, I wrote the following code:</p>
+
+<pre><code>int mid = left + (right - left) / 2;
+if (array[mid] == mid) {
+    return mid;
+} else {
+    int smaller = Math.min(array[mid], mid);
+    int larger = Math.max(array[mid], mid);
+    int leftResult = helper(array, left, smaller);
+    if (leftResult != -1) {
+        return leftResult;
+    } else {
+        return helper(array, larger, right);
+    }
+}
+</code></pre>
+
+<p>This becomes an endless loop. We did not discard point &lsquo;mid&rsquo; in the code above. The correct code is posted below.</p>
+
+<h3>Code</h3>
+
+<p><strong>code for non-duplicate input</strong></p>
+
+<pre><code>public static int myAnswerNonDup(int[] array) {
+    int len = array.length;
+    return helper(array, 0, len - 1);
+}
+
+public static int helper(int[] array, int left, int right) {
+    if (right &lt; left) {
+        return -1;
+    }
+    int mid = left + (right - left) / 2;
+    if (array[mid] == mid) {
+        return mid;
+    } else if (array[mid] &lt; mid) {
+        // discard all element to the left of array[mid]
+        return helper(array, mid + 1, right);
+    } else {
+        return helper(array, left, mid - 1);
+    }
+}
+</code></pre>
+
+<p><strong>code for have-duplicate input</strong></p>
+
+<pre><code>public static int myAnswerWithDup(int[] array) {
+    int len = array.length;
+    return helper(array, 0, len - 1);
+}
+
+public static int helper(int[] array, int left, int right) {
+    if (right &lt; left) {
+        return -1;
+    }
+    int mid = left + (right - left) / 2;
+    if (array[mid] == mid) {
+        return mid;
+    } else {
+        int smaller = 0;
+        int larger = 0;
+        if (array[mid] &lt; mid) {
+            smaller = array[mid];
+            larger = mid + 1;
+        } else if (array[mid] &gt; mid) {
+            smaller = mid - 1;
+            larger = array[mid];
+        }
+        int leftResult = helper(array, left, smaller);
+        if (leftResult != -1) {
+            return leftResult;
+        } else {
+            return helper(array, larger, right);
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/16/swap-odd-even-bits/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/swap-odd-even-bits/">Comments</a>
         
       </p>
     
@@ -112,39 +251,286 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">link</a></p>
-
-<blockquote><p>Given a sorted set, find if there exist three elements in Arithmetic Progression or not.</p></blockquote>
+<blockquote><p>Write a program to swap odd and even bits in an integer with as few instructions as possible (e.g., bit 0 and bit 1 are swapped, bit 2 and bit 3 are swapped, and so on).</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>This is a rather simple Arithmetic Progression question</strong>.</p>
+<p>Mask odd and even bits seperately.</p>
 
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">To find the three elements</a>, we first fix an element as middle element and search for other two (one smaller and one greater).</p></blockquote>
+<h3>Code</h3>
 
-<p>O(n<sup>2</sup>) time.</p>
+<pre><code>public static int swapOddEvenBits(int x) {
+    return (((x &amp; 0xaaaaaaaa) &gt;&gt; 1) | ((x &amp; 0x55555555) &lt;&lt; 1));
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/16/google-guess-password/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/google-guess-password/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">link</a></p>
+
+<blockquote><p>给你一个password 假定6位</p>
+
+<p>有个function, 每call一次就给你一个triplet 是password 里的随即三位(order不变)。比如google, 可能返回: ggl, goe, oog, ool&hellip;</p>
+
+<p>问如何最有效破译这个密码?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is just a rough idea suggested by Level 6 of <a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">this post</a>.</p>
+
+<blockquote><p>六位密码随机给三位，应该有C(6, 3) = 20个bucket。</p>
+
+<p>如果密码是abcdef，那么以a开头的bucket应该是 C(5, 2) = 10个。以b开头的buckt应该是C(4, 2) = 6个，以c开头的是3个，以d开头的是1个&hellip;. from this, we know the probability of the occurrance of each letter.</p></blockquote>
+
+<p>In this case, we generate many triplets, and calculate based on their frequencies. However, the guy also wrote about this condition:</p>
+
+<blockquote><p>如果abcd中间有相同(there are same letters in the 6-char password)，那么就会出现以a开头的是11个（abca)，13个(abad)，14个(abaa)，16个(aacd)，17个(aaca),19个(aaad)或者20个(aaaa).</p>
+
+<p>思路是比较清楚，不过算法还要想想。</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>not written</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/16/calculate-bits-convertions/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/calculate-bits-convertions/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a function to determine the number of bits (change) required to convert integer A to integer B.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Using XOR operation, we can find out number of bits that are different.</p>
+
+<p>The next important thing is to know <strong>how to count the number of &lsquo;1&rsquo;s in a integer</strong>. It&rsquo;s like this:</p>
+
+<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
+
+<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>code 1</strong></p>
+
+<pre><code>public static int calcBitsSwapMe1(int a, int b) {
+    int num = a ^ b;
+    int count = 0;
+    while (num != 0) {
+        count += num &amp; 1;
+        num = num &gt;&gt;&gt; 1;
+    }
+    return count;
+}
+</code></pre>
+
+<p><strong>code 2</strong></p>
+
+<pre><code>public static int calcBitsSwapMe2(int a, int b) {
+    int num = a ^ b;
+    int count = 0;
+    while (num != 0) {
+        num = num &amp; (num - 1);
+        count++;
+    }
+    return count;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/16/bottles-of-spills/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/bottles-of-spills/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You have 20 bottles of pills. 19 bottles have 1.0 gram pills, but one has pills of weight 1.1 grams.</p>
+
+<p>Given a scale, how to find the heavy bottle <strong>only scaling ONCE</strong>?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Take 1 pill from Bottle 1, 2 pills from Bottle 2, and so on. We&rsquo;ll expect (1 + 2 + &hellip; + 20) = 210 gram of pills.</p>
+
+<p>The answer would be {(weight &ndash; 210 grams) / 0.1}.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/16/binary-merge-two-numbers/">[CC150v5] 5.1 Binary Merge 2 Numbers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/16/binary-merge-two-numbers/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/16/binary-merge-two-numbers/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>You are given two 32-bit numbers, N andM, and two bit positions, i and j. Write a method to insert M into Nsuch that M starts at bit j and ends at bit i. You can assume that the bits j through i have enough space to fit all ofM. That is, ifM= 10011, you can assume that there are at least 5 bits between j and i. You would not, for example, have j-3 and i=2, because M could not fully fit between bit 3 and bit 2.</p>
+
+<p>EXAMPLE:</p>
+
+<p>Input: N = 16000000000, M = 10011, i = 2, j = 6</p>
+
+<p>Output: N = 10001001100</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a basic bit manipulation question</strong>. The key is to use binary maks. Two things to note:</p>
+
+<ol>
+<li><p>The &lsquo;~&rsquo; means negate. So (~0) is a sequence of 1 (the value equals to -1).</p></li>
+<li><p>When shifting bits, <strong>DO NOT USE &lsquo;>>&rsquo; because it&rsquo;s signed shift</strong>. Instead, <strong>use &lsquo;>>>&rsquo; (unsigned right shift operator)</strong>.</p></li>
+</ol>
+
 
 <h3>Code</h3>
 
 <p><strong>written by me</strong></p>
 
-<pre><code>public boolean longest(int[] A) {
-    int len = A.length;
-    for (int i = 1; i &lt; len - 1; i++) {
-        int left = i - 1;
-        int right = i + 1;
-        while (left &gt;= 0 &amp;&amp; right &lt; len) {
-            int total = A[left] + A[right];
-            if (total &gt; 2 * A[i]) {
-                left--;
-            } else if (total &lt; 2 * A[i]) {
-                right++;
-            } else {
-                return true;
-            }
-        }
-    }
-    return false;
+<pre><code>public static int myAnswer(int n, int m, int i, int j) {
+    int rr = (~0 &gt;&gt;&gt; (31 - j));
+    int ll = (~0 &lt;&lt; i);
+    // printBinary(rr);
+    // printBinary(ll);
+
+    int middleMask = ll &amp; rr;
+    int twoEndMask = ll ^ rr;
+
+    n = n &amp; twoEndMask;
+    m = (m &lt;&lt; i) &amp; middleMask;
+
+    return n | m;
 }
 </code></pre>
 </div>
@@ -159,7 +545,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/09/11/arithmetic-progression-longest/">[Google] Arithmetic Progression Longest</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-of-animals/">[CC150v5] 3.7 Stack of Animals</a></h1>
     
     
       <p class="meta">
@@ -175,10 +561,10 @@
   
 
 
-<time datetime="2014-09-11T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/09/11/arithmetic-progression-longest/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/11/arithmetic-progression-longest/">Comments</a>
+           | <a href="/blog/2014/09/15/stack-of-animals/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/stack-of-animals/">Comments</a>
         
       </p>
     
@@ -187,382 +573,127 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://www.careercup.com/question?id=8211177">link</a></p>
+<blockquote><p>An animal shelter holds only dogs and cats. People must adopt either the &ldquo;oldest&rdquo; animals, or they can select whether they would prefer a dog or a cat (and will receive the oldest animal of that type). They cannot select which specific animal they would like.</p>
 
-<blockquote><p>Given an array of integers A, give an algorithm to find the longest Arithmetic progression in it, i.e find a sequence i1 &lt; i2 &lt; … &lt; ik, such that</p>
-
-<p>A[i1], A[i2], …, A[ik] forms an arithmetic progression, and k is the largest possible.</p>
-
-<p>The sequence S1, S2, …, Sk is called an arithmetic progression if S(j+1) – S(j) is a constant.</p></blockquote>
+<p>Create the data structures to maintain this system and implement operations such as enqueue, dequeueAny, dequeueDog and dequeueCat. You may use the built-in LinkedList data structure.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p><strong>This is a rather difficult Arithmetic Progression question</strong>.</p>
+<p>There are 2 solutions.</p>
 
-<p>The solution is 2-D DP.</p>
+<p><strong>First one is using a single queue</strong>. This makes &lsquo;dequeueAny&rsquo; easy, but &lsquo;dequeueCat&rsquo; and &lsquo;dequeueDog&rsquo; difficult.</p>
 
-<blockquote><p><a href="http://www.geeksforgeeks.org/length-of-the-longest-arithmatic-progression-in-a-sorted-array/">The idea is</a> to create a 2D table dp[n][n]. An entry dp[i][j] in this table stores LLAP with input[i] and input[j] as first two elements of AP(j > i).</p>
+<p><strong>Second approach would be using 2 queues for dogs and cats</strong>. We need something like timestamp to be stored (more space usage).</p>
 
-<p>The last column of the table is always 2. Rest of the table is filled <strong>from bottom right to top left</strong>.</p>
-
-<p>To fill rest of the table, j (second element in AP) is first fixed. i and k are searched for a fixed j. If i and k are found such that i, j, k form an AP, then <strong>the value of dp[i][j] is set as dp[j][k] + 1</strong>.</p>
-
-<p><strong>Note that the value of dp[j][k] must have been filled</strong> before as the loop traverses from right to left columns.</p></blockquote>
-
-<p>The 2 difficult points of this question:</p>
-
-<ol>
-<li>how to come up with the transation formula. (i.e. <strong>dp[i][j] = dp[j][k] + 1</strong>, when (i, j, k) forms a AP).</li>
-<li>how to fill up all dp[i][j] in each loop of j. (Once inside the if-else, once outside the main while-loop)</li>
-</ol>
-
+<p>When we return, we peek both queues are choose the older one. <strong>This is recommended solution in the book</strong>.</p>
 
 <h3>Code</h3>
 
-<p><strong>written by me</strong></p>
+<p><strong>from the book</strong></p>
 
-<pre><code>public int longest(int[] A) {
-    int len = A.length;
-    int[][] dp = new int[len][len];
-    for (int i = 0; i &lt; len; i++) {
-        // the pair ending at last position is always a progression
-        dp[i][len - 1] = 2;
+<p>Animal.java</p>
+
+<pre><code>public abstract class Animal {
+    int order;
+    String name;
+
+    public Animal(String n) {
+        name = n;
     }
-    int longest = 1;
-    for (int j = len - 2; j &gt;= 0; j--) {
-        // for each j, find i and k that makes 1 progression
-        int i = j - 1;
-        int k = j + 1;
-        while (i &gt;= 0 &amp;&amp; k &lt; len) {
-            int total = A[i] + A[k];
-            if (total &gt; 2 * A[j]) {
-                // this is important!
-                dp[i][j] = 2;
-                i--;
-            } else if (total &lt; 2 * A[j]) {
-                k++;
-            } else {
-                // found a valid progression triplet A(i, j, k)
-                dp[i][j] = dp[j][k] + 1;
-                longest = Math.max(longest, dp[i][j]);
-                i--;
-                k++;
-            }
-        }
-        // this is important!
-        while (i &gt;= 0) {
-            dp[i][j] = 2;
-            i--;
-            // If the loop was stopped due to k becoming more than
-            // n-1, set the remaining dp[i][j] as 2
-        }
+
+    public abstract String name();
+
+    public boolean isOlderThan(Animal a) {
+        return this.order &lt; a.order;
     }
-    return longest;
+}
+
+class Cat extends Animal {
+    public Cat(String n) {
+        super(n);
+    }
+
+    public String name() {
+        return "Cat: " + name;
+    }
+}
+
+class Dog extends Animal {
+    public Dog(String n) {
+        super(n);
+    }
+
+    public String name() {
+        return "Dog: " + name;
+    }
 }
 </code></pre>
-</div>
-  
-  
 
+<p>AnimalQueue.java</p>
 
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/10/top-million-from-billion/">[CC150v4] 20.6 Top Million From Billion</a></h1>
-    
-    
-      <p class="meta">
-        
+<pre><code>public class AnimalQueue {
+    LinkedList&lt;Dog&gt; dogs = new LinkedList&lt;Dog&gt;();
+    LinkedList&lt;Cat&gt; cats = new LinkedList&lt;Cat&gt;();
+    private int order = 0;
 
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/10/top-million-from-billion/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/top-million-from-billion/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Describe an algorithm to find the largest 1 million numbers in 1 billion numbers.</p>
-
-<p>Assume that the computer memory can hold all one billion numbers.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>There&rsquo;re enough discussion on <strong>Top K problems</strong> so far in this blog. The suggest solutions is:</p>
-
-<ol>
-<li><p>Sort</p></li>
-<li><p>Min Heap, O(n logm) time.</p></li>
-<li><p>Quick select algorithm. O(n) time.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/10/submatrix-with-largest-sum/">[CC150v4] 20.12 Sub-matrix With Largest Sum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/10/submatrix-with-largest-sum/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/submatrix-with-largest-sum/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given an NxN matrix of positive and negative integers, write code to find the sub-matrix with the largest possible sum.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>I wrote about this question before: <strong>[Question] Max Sum In A 2D Array (sub-matrix)</strong>, and the solution gave a better time complexity (O(n<sup>3</sup>)) than in the book (O(n<sup>4</sup>)).</p>
-
-<ol>
-<li>locate a row &ndash; O(n)</li>
-<li>locate another row &ndash; O(n)</li>
-<li>compute sub value of that column &ndash; O(n), and then find largest subarray in array &ndash; also O(n)</li>
-<li>The above 3 steps each take O(n) time, total time is O(n<sup>3</sup>).</li>
-</ol>
-
-
-<p>Please refer to the other post for more detail.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/10/generate-m-from-array-of-n/">[CC150v4] 20.3 Generate M Int From Array of Size N</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/10/generate-m-from-array-of-n/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/generate-m-from-array-of-n/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a method to randomly generate a set of m integers from an array of size n. Each element must have equal probability of being chosen.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is very similar to another post I wrote: <strong>[Question] Shuffle An Array (Fisher–Yates)</strong>.</p>
-
-<p>The basic idea is to choose element one by one using RNG. After choosing an int, swap it to top and <strong>then mark this element as &lsquo;dead&rsquo;</strong>. Next time, the RNG will not touch on the &lsquo;dead&rsquo; elements.</p>
-
-<p><strong>Very similar to Fisher–Yates Shuffle</strong>, and the code below is written by me.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int[] pickMRandomly(int[] original, int m) {
-    int[] ans = new int[m];
-    for (int i = 0; i &lt; m; i++) {
-        int rand = Question.listRand.get(i);
-        // note: rand is RN in the range [i, max]
-        ans[i] = original[rand];
-        original[rand] = original[i];
-        // now (i)th position in original is dead
-        // no one cares what value is at original[i]
+    public void enqueue(Animal a) {
+        a.order = order;
+        order++;
+        if (a instanceof Dog) {
+            dogs.addLast((Dog) a);
+        } else if (a instanceof Cat) {
+            cats.addLast((Cat) a);
+        }
     }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
 
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/10/full-text-search/">[CC150v4] 20.8 Full Text Search (Suffix Tree)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/10/full-text-search/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/full-text-search/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given a string s and an array of smaller strings T, design a method to search s for each small string in T.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a very classic question of string search</strong>, favored by Google and Facebook.</p>
-
-<p>The solution is <strong>suffix tree</strong> (to be distinguished from <strong>trie</strong>, or prefix tree, which searched word by its prefix). Suffix tree is good for search a proportion of a long string. For example, using &ldquo;bibs&rdquo; to build a suffix tree like this:</p>
-
-<p><img class="middle" src="/assets/images/suffix-tree-example-bibs.png"></p>
-
-<p>The building of suffix tree and searching is not a very lengthy code. It&rsquo;s posted below and it&rsquo;s not written by me.</p>
-
-<h3>Code</h3>
-
-<p>Main method:</p>
-
-<pre><code>public static void main(String[] args) {
-    String testString = "mississippi";
-    String[] stringList = { "is", "sip", "hi", "sis" };
-    SuffixTree tree = new SuffixTree(testString);
-    for (String s : stringList) {
-        ArrayList&lt;Integer&gt; list = tree.getIndexes(s);
-        if (list != null) {
-            System.out.println(s + ": " + list.toString());
+    public Animal dequeueAny() {
+        if (dogs.size() == 0) {
+            return dequeueCats();
+        } else if (cats.size() == 0) {
+            return dequeueDogs();
+        }
+        Dog dog = dogs.peek();
+        Cat cat = cats.peek();
+        if (dog.isOlderThan(cat)) {
+            return dogs.poll();
         } else {
-            System.out.println(s + ": does not exist.");
-        }
-    }
-}
-</code></pre>
-
-<p>SuffixTree.java</p>
-
-<pre><code>public class SuffixTree {
-    SuffixTreeNode root = new SuffixTreeNode();
-
-    public SuffixTree(String s) {
-        // create a suffix tree with input string s
-        for (int i = 0; i &lt; s.length(); i++) {
-            String suffix = s.substring(i);
-            root.insertString(suffix, i);
+            return cats.poll();
         }
     }
 
-    public ArrayList&lt;Integer&gt; getIndexes(String s) {
-        return root.getIndexes(s);
-    }
-}
-</code></pre>
-
-<p>SuffixTreeNode.java</p>
-
-<pre><code>public class SuffixTreeNode {
-
-    char value;
-    HashMap&lt;Character, SuffixTreeNode&gt; children;
-    ArrayList&lt;Integer&gt; indexes = new ArrayList&lt;Integer&gt;();
-
-    public SuffixTreeNode() {
-        children = new HashMap&lt;Character, SuffixTreeNode&gt;();
-    }
-
-    public void insertString(String s, int index) {
-        indexes.add(index);
-        if (s != null &amp;&amp; s.length() &gt; 0) {
-            value = s.charAt(0);
-            SuffixTreeNode child = null;
-            if (children.containsKey(value)) {
-                child = children.get(value);
-            } else {
-                child = new SuffixTreeNode();
-                children.put(value, child);
-            }
-            String remainder = s.substring(1);
-            child.insertString(remainder, index);
+    public Animal peek() {
+        if (dogs.size() == 0) {
+            return cats.peek();
+        } else if (cats.size() == 0) {
+            return dogs.peek();
         }
-    }
-
-    public ArrayList&lt;Integer&gt; getIndexes(String s) {
-        if (s == null || s.length() == 0) {
-            return indexes;
+        Dog dog = dogs.peek();
+        Cat cat = cats.peek();
+        if (dog.isOlderThan(cat)) {
+            return dog;
         } else {
-            char first = s.charAt(0);
-            if (children.containsKey(first)) {
-                String remainder = s.substring(1);
-                return children.get(first).getIndexes(remainder);
-            }
+            return cat;
         }
-        return null;
+    }
+
+    public int size() {
+        return dogs.size() + cats.size();
+    }
+
+    public Dog dequeueDogs() {
+        return dogs.poll();
+    }
+
+    public Dog peekDogs() {
+        return dogs.peek();
+    }
+
+    public Cat dequeueCats() {
+        return cats.poll();
+    }
+
+    public Cat peekCats() {
+        return cats.peek();
     }
 }
 </code></pre>
@@ -578,7 +709,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/09/10/find-subsquare-with-black-border/">[CC150v4] 20.11 Find Subsquare With Black Border</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/09/15/stack-get-min-value/">[CC150v5] 3.2 Stack Min Value</a></h1>
     
     
       <p class="meta">
@@ -594,10 +725,10 @@
   
 
 
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/09/10/find-subsquare-with-black-border/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/find-subsquare-with-black-border/">Comments</a>
+           | <a href="/blog/2014/09/15/stack-get-min-value/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/stack-get-min-value/">Comments</a>
         
       </p>
     
@@ -606,72 +737,184 @@
 
   <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>Imagine you have a square matrix, where each cell is filled with either black or white.</p>
+<blockquote><p>How would you design a stack which, in addition to push and pop, also has a function min which returns the minimum element?</p>
 
-<p>Design an algorithm to find the maximum subsquare such that all four borders are filled with black pixels.</p></blockquote>
+<p>Push, pop and min should all operate in 0(1) time.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>There is no better way to solve this except Brute Force. First find a point (as the top-left corner), and then test square size from large to small.</p>
+<p>This is <strong>a very tricky question</strong>.</p>
 
-<p>The code below is from the book.</p>
+<p>The key is how to use the minimum space to achieve O(1) query min operation. The trick is to count how many times the same min-value occur. Eg.</p>
+
+<blockquote><p>input: 5,3,3,1,1,2,2,2,2,2,2,2.</p>
+
+<p>stack: 5,3,3,1,1.</p></blockquote>
+
+<p>So we can pop &lsquo;1&rsquo; twice, pop &lsquo;3&rsquo; twice, and pop &lsquo;5&rsquo; once. Read the code!</p>
 
 <h3>Code</h3>
 
-<pre><code>public static Subsquare findMaxSquareInMatrix(int[][] matrix) {
-    assert (matrix.length &gt; 0);
-    for (int row = 0; row &lt; matrix.length; row++) {
-        assert (matrix[row].length == matrix.length);
-    }
+<pre><code>public class StackMyAnswer extends Stack&lt;Integer&gt; {
 
-    int N = matrix.length;
-    int currentMaxSize = 0;
-    Subsquare sq = null;
-    int col = 0;
+    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
 
-    // Iterate through each column from left to right
-    while (N - col &gt; currentMaxSize) { // See step 4 above
-        for (int row = 0; row &lt; matrix.length; row++) {
-            // starting from the biggest
-            int size = N - Math.max(row, col);
-            while (size &gt; currentMaxSize) {
-                if (checkSquareBorders(matrix, row, col, size)) {
-                    currentMaxSize = size;
-                    sq = new Subsquare(row, col, size);
-                    break; // go to next (full) column
-                }
-                size--;
-            }
+    public void push(int value) {
+        if (min.isEmpty() || value &lt;= min.peek()) {
+            min.push(value);
         }
-        col++;
+        super.push(value);
     }
-    return sq;
+
+    public Integer pop() {
+        int val = super.pop();
+        if (!min.isEmpty() &amp;&amp; val == min.peek()) {
+            min.pop();
+        }
+        return val;
+    }
+
+    public int min() {
+        if (min.isEmpty()) {
+            return Integer.MAX_VALUE;
+        }
+        return min.peek();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/15/linked-list-palindrome/">[CC150v5] 2.7 Linked List Palindrome</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2014/09/15/linked-list-palindrome/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/linked-list-palindrome/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement a function to check if a linked list is a palindrome.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>There are multiple solutions for this question.</p>
+
+<p><strong>First, maybe the simplest solution of all</strong>, is to compare the list with the reversed list (compare first half would be enough). This is a very nice idea.</p>
+
+<p><strong>Second solution is iterative approach</strong>. My code below is to first get the total length, then <strong>use a Stack</strong>. Alternatively, we can also use <strong>fast/slow pointer</strong> to find the mid point. This solution is easiest to write.</p>
+
+<p><strong>Third solution is recursive</strong>. We basically uses a public pointer to:</p>
+
+<ol>
+<li>get starting value</li>
+<li>check middle parts</li>
+<li>get ending value</li>
+<li>if starting == ending and middle part is valid, then true.</li>
+</ol>
+
+
+<p>This code is not easy to write, and hard to think.</p>
+
+<p>It&rsquo;s best to know both iterative and recursive solution.</p>
+
+<h3>Code</h3>
+
+<p>Iterative</p>
+
+<pre><code>public static boolean isPalindrome1(LinkedListNode head) {
+    int len = getListLength(head);
+    int half = len / 2;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    for (int i = 0; i &lt; half; i++) {
+        stack.push(head.data);
+        head = head.next;
+    }
+    if (len % 2 == 1) {
+        head = head.next;
+    }
+    for (int i = 0; i &lt; half; i++) {
+        if (head.data != stack.pop()) {
+            return false;
+        }
+        head = head.next;
+    }
+    return true;
+}
+</code></pre>
+
+<p>Recursive</p>
+
+<pre><code>private static LinkedListNode p;
+
+public static boolean isPalindrome2(LinkedListNode head) {
+    p = head;
+    int len = getListLength(head);
+    return helper2(0, len - 1);
 }
 
-private static boolean checkSquareBorders(int[][] matrix, int row, int col,
-        int size) {
-    // Check top and bottom border.
-    for (int j = 0; j &lt; size; j++) {
-        if (matrix[row][col + j] == 1) {
+public static boolean helper2(int from, int to) {
+    if (from &gt; to) {
+        return true;
+    } else if (from == to) {
+        p = p.next;
+        return true;
+    } else {
+        // first get fromVal, then check middlep part, last, get toVal
+        int fromVal = p.data;
+        p = p.next;
+        if (!helper2(from + 1, to - 1)) {
             return false;
         }
-        if (matrix[row + size - 1][col + j] == 1) {
-            return false;
-        }
-    }
-
-    // Check left and right border.
-    for (int i = 1; i &lt; size - 1; i++) {
-        if (matrix[row + i][col] == 1) {
-            return false;
-        }
-        if (matrix[row + i][col + size - 1] == 1) {
+        int toVal = p.data;
+        p = p.next;
+        if (fromVal != toVal) {
             return false;
         }
     }
     return true;
 }
 </code></pre>
+
+<p>Shared method:</p>
+
+<pre><code>private static int getListLength(LinkedListNode node) {
+    int count = 0;
+    while (node != null) {
+        count++;
+        node = node.next;
+    }
+    return count;
+}
+</code></pre>
 </div>
   
   
@@ -684,7 +927,7 @@ private static boolean checkSquareBorders(int[][] matrix, int row, int col,
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/09/10/count-2s-in-digits/">[CC150v4] 20.4 Count 2s in Digits</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/09/15/implement-stack/">[CC150v5] 3.0 Example - Implement Stack</a></h1>
     
     
       <p class="meta">
@@ -700,87 +943,10 @@ private static boolean checkSquareBorders(int[][] matrix, int row, int col,
   
 
 
-<time datetime="2014-09-10T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-09-15T00:00:00+08:00" pubdate data-updated="true"></time>
         
-           | <a href="/blog/2014/09/10/count-2s-in-digits/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/10/count-2s-in-digits/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a method to count the number of 2s between 0 and n.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This is a difficult question</strong>, especially hard to come up with the correct formula. Eg.</p>
-
-<blockquote><p>f(279) = {(79 + 1) + 2 * f(99)} + f(79)</p>
-
-<p>f(513) = {100 + 5 * f(99)} + f(13)</p></blockquote>
-
-<p>Take 513 as example, the first digit is 5. We know that all the 200+ is within the range, so <strong>there&rsquo;re 100 twos in the first digit</strong>. Then, for the rest of the digits, we get f(99) for number between 0 and 99, and another f(99) for number between 100 and 199&hellip; and <strong>this happens 5 times until 499</strong>. That&rsquo;s why we have 5 multiple by f(99).</p>
-
-<p>In the end, we do the calculation <strong>recursively for reminder number 13</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int myAnswer(int n) {
-    if (n == 0)
-        return 0;
-    int power = 1;
-    while (power * 10 &lt;= n) {
-        power *= 10;
-    }
-
-    int first = n / power;
-    int reminder = n % power;
-    int firstDigit2count = 0;
-    if (first &gt; 2) {
-        firstDigit2count = power;
-    } else if (first == 2) {
-        firstDigit2count = reminder + 1;
-    }
-    int totalCountBeforeReminder = firstDigit2count
-            + (first * myAnswer(power - 1));
-    return totalCountBeforeReminder + myAnswer(reminder);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/09/get-max-without-comparator/">[CC150v4] 19.4 Get Max Number Without Comparator</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/09/get-max-without-comparator/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/09/get-max-without-comparator/">Comments</a>
+           | <a href="/blog/2014/09/15/implement-stack/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2014/09/15/implement-stack/">Comments</a>
         
       </p>
     
@@ -789,164 +955,50 @@ private static boolean checkSquareBorders(int[][] matrix, int row, int col,
 
   <div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>Write a method which finds the maximum of two numbers. You should not use if-else or any other comparison operator.</p>
-
-<p>EXAMPLE</p>
-
-<p>Input: 5, 10</p>
-
-<p>Output: 10</p></blockquote>
-
-<p>This is also on <strong>CC150v5 Q17.4</strong>.</p>
+<blockquote><p>Implement a stack.</p></blockquote>
 
 <h3>Solution</h3>
 
-<p>We can&rsquo;t use >, &lt; or if-else statement, but we can use mathematical operator like subtract and bit operators.</p>
-
-<p>Calculate (a-b) and do (a + K(a-b)) can help us (where K is either 0 or -1).</p>
-
-<p><strong>Updated on Sep 29th</strong>: according to CC150v5 Q17.4, there can be errros when <strong>(a-b) is overflows</strong>. So this is the modified version of solution:</p>
-
-<ol>
-<li>do a sign check of a and b</li>
-<li>if a and b are same sign, do it just like before</li>
-<li>if a and b are different sign, the &lsquo;K&rsquo; value only depends on a.</li>
-</ol>
-
-
-<p>I posted the modified solution below as well.</p>
+<p><strong>Stack uses LinkedNode to implement</strong>.</p>
 
 <h3>Code</h3>
 
-<p><strong>first solution from v4</strong>, written by me:</p>
+<pre><code>public class MyStack {
 
-<pre><code>public static int getMax(int a, int b) {
-    int c = a - b;
-    int signBit = c &gt;&gt; 31 &amp; 1;
-    // if (a-b) is negative, sign = 1
-    // otherwise, sign = 0
-    return a - signBit * c;
-}
-</code></pre>
+    Node top;
 
-<p><strong>modified solution</strong>, no overflow issues.</p>
-
-<pre><code>public static int getMax(int a, int b) {
-    int sign;
-    // if a,b have different sign, then go with first number
-    if (sign(a) == sign(b)) {
-        sign = sign(a - b);
-    } else {
-        sign = sign(a);
-    }
-    // sign is 0 if a &gt;= b
-    // sign is -1 is a &lt; b
-    return a + (a - b) * sign;
-}
-
-private static int sign(int c) {
-    return c &gt;&gt; 31;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/09/convert-int-to-english/">[CC150v4] 19.6 Convert Integer to English</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-09T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2014/09/09/convert-int-to-english/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2014/09/09/convert-int-to-english/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Given an integer between 0 and 999,999, print an English phrase that describes the integer (eg, “One Thousand, Two Hundred Thirty Four”).</p></blockquote>
-
-<p>This is also on <strong>CC150v5 Q17.7</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>The solution in book isn&rsquo;t good, so I wrote the code myself. Read it below.</p>
-
-<h3>Code</h3>
-
-<pre><code>private static String[] arr1 = { "Zero ", "One ", "Two ", "Three ",
-        "Four ", "Five ", "Six ", "Seven ", "Eight ", "Nine " };
-
-private static String[] arr11 = { "Ten ", "Eleven ", "Twelve ",
-        "Thirteen ", "Fourteen ", "Fifteen ", "Sixteen ", "Seventeen ",
-        "Eighteen ", "Nineteen " };
-
-private static String[] arr10 = { "", "Ten ", "Twenty ", "Thirty ",
-        "Forty ", "Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety " };
-
-public static String numtostring(int num) {
-    int part1 = num / 1000;
-    int part2 = num % 1000;
-    if (part1 == 0) {
-        return numBelowTrousand(part2);
-    } else {
-        return numBelowTrousand(part1) + "Thousand, "
-                + numBelowTrousand(part2);
-    }
-}
-
-public static String numBelowTrousand(int num) {
-    StringBuilder sb = new StringBuilder();
-    // assume num is below 1000
-
-    // first, convert hundred digit
-    int hundred = num / 100;
-    if (hundred != 0) {
-        sb.append(arr1[hundred] + "Hundred ");
+    public int pop() {
+        if (top == null) {
+            return -1;
+        }
+        int returnVal = top.val;
+        top = top.next;
+        return returnVal;
     }
 
-    // second, convert the rest of digits
-    num %= 100;
-    if (num != 0) {
-        int ten = num / 10;
-        int one = num % 10;
-        if (ten == 1) {
-            sb.append(arr11[num - 10]);
-        } else {
-            if (ten != 0) {
-                // ten is in the range of [2,9]
-                sb.append(arr10[ten]);
-            }
-            if (one != 0) {
-                sb.append(arr1[one]);
-            }
+    public int peek() {
+        if (top == null) {
+            return -1;
+        }
+        return top.val;
+
+    }
+
+    public void push(int val) {
+        Node newNode = new Node(val);
+        newNode.next = top;
+        top = newNode;
+    }
+
+    class Node {
+
+        int val;
+        Node next;
+
+        Node(int value) {
+            val = value;
         }
     }
-    return sb.toString();
 }
 </code></pre>
 </div>
@@ -973,17 +1025,17 @@ public static String numBelowTrousand(int num) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (63)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (66)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
-<li class='category'><a href='/blog/categories/facebook/'>facebook (9)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (10)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (52)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (25)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (57)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (26)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (111)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (113)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -995,23 +1047,23 @@ public static String numBelowTrousand(int num) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/02/05/winning-game-rank-pagerank/">[Design] Winning Games Rank (Pagerank)</a>
+        <a href="/blog/2015/02/08/unbalanced-tree-into-balanced-tree/">[Google] Transform a Unbalanced Tree Into Balanced Tree</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a>
+        <a href="/blog/2015/02/08/generate-number-with-given-probability/">[Facebook] Generate Number With Given Probability</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
+        <a href="/blog/2015/02/08/difference-internet-and-www/">[Design] Difference: Internet and the Web</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a>
+        <a href="/blog/2015/02/08/bg-data-common-elements-lists/">[Design] Big Data - Find Common Elements in 2 Lists</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a>
+        <a href="/blog/2015/02/07/reservoir-sampling/">[Question] Reservoir Sampling</a>
       </li>
     
   </ul>
