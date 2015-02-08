@@ -1,11 +1,10 @@
 ---
 layout: post
-title: "[Design] Big Data - Fuzzy Search url"
+title: "[Design] Big Data - Fuzzy Search url (Bloom Filter) "
 comments: true
 categories:
 - Design
 - String search
-
 ---
 
 ### Question 
