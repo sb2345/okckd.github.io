@@ -3,8 +3,6 @@ layout: post
 title: "[NineChap 9] Big Date, System Design and Resume (`)"
 comments: true
 category: NineChap
-
-published: false
 ---
 
 ## Resume
