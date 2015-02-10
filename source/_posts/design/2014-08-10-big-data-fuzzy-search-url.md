@@ -15,7 +15,7 @@ categories:
 
 ### Bloom Filter
 
-自从Burton Bloom在70年代提出[Bloom Filter](http://blog.csdn.net/v_july_v/article/details/6685894)之后，Bloom Filter就被广泛用于__拼写检查和数据库系统中__。
+自从Burton Bloom在70年代提出[Bloom Filter](http://blog.csdn.net/v_july_v/article/details/6685894)之后，Bloom Filter就被广泛用于__拼写检查，数据库系统中。。。可以实现数据字典，进行数据的判重，或者集合求交集__
 
 #### 基本原理及要点
 

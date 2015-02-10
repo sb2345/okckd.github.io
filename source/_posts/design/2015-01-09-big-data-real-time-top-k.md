@@ -23,7 +23,7 @@ The first solution below is __an approximation method__ which select keywords th
 
 The second solution is __more accurate__ but RAM-intensive. 
 
-### Lossy Count
+### Lossy Count (used to get an inaccurate trend) 
 
 __Solution 1 is a modified version of [Lossy Count](http://stackoverflow.com/a/8033083)__. The detailed steps are explained [here](http://stackoverflow.com/a/3260905): 
 
