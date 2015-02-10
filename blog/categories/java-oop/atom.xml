@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java Oop | Woodstock Blog]]></title>
   <link href="http://okckd.github.io/blog/categories/java-oop/atom.xml" rel="self"/>
   <link href="http://okckd.github.io/"/>
-  <updated>2015-02-08T18:40:21+08:00</updated>
+  <updated>2015-02-10T17:18:47+08:00</updated>
   <id>http://okckd.github.io/</id>
   <author>
     <name><![CDATA[Charlie Brown]]></name>
@@ -12,6 +12,66 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Java OOP] Can Abstract Class Have No Abstract Method]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/09/abstract-class-without-abstract-method/"/>
+    <updated>2015-02-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/09/abstract-class-without-abstract-method</id>
+    <content type="html"><![CDATA[### Can abstract class have constructor
+
+[Yes, it can](http://www.geeksforgeeks.org/abstract-classes-in-java/). 
+
+In this way, we create classes that cannot be instantiated, but can only be inherited.
+
+For example, Java template pattern.
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Java OOP] Can Abstract Class Have Constructor]]></title>
+    <link href="http://okckd.github.io/blog/2015/02/09/abstract-class-constructor/"/>
+    <updated>2015-02-09T00:00:00+08:00</updated>
+    <id>http://okckd.github.io/blog/2015/02/09/abstract-class-constructor</id>
+    <content type="html"><![CDATA[### Can abstract class have constructor
+
+[Yes, it can](http://www.mitbbs.com/article_t/JobHunting/32257933.html). However, if we create an instance using it, it's error. 
+
+Consider [this example](http://www.geeksforgeeks.org/abstract-classes-in-java/): 
+
+abstract class Base {
+    Base() { System.out.println("Base Constructor Called"); }
+    abstract void fun();
+}
+class Derived extends Base {
+    Derived() { System.out.println("Derived Constructor Called"); }
+    void fun() { System.out.println("Derived fun() called"); }
+}
+class Main {
+    public static void main(String args[]) { 
+       Derived d = new Derived();
+    }
+}
+
+Output:
+
+    Base Constructor Called
+    Derived Constructor Called
+
+### More info on constructor: 
+
+The [constructor in an abstract class](http://stackoverflow.com/a/261159): 
+
+1. is used when you want to perform some initialization
+1. you may define more than one constructor (with different arguments)
+1. if you don't define a constructor, then the compiler will automatically generate one for you.
+1. your subclass constructor have to call a constructor from the abstract class
+1. you can define all your constructors protected (cuz making them public is pointless)
+
+Constructor of abstract class can be used in __[Template Pattern](http://www.tutorialspoint.com/design_pattern/template_pattern.htm)__, where the template is defined as a abstract class. 
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Java OOP] PubSub (Publish–subscribe) Pattern]]></title>
@@ -131,361 +191,6 @@ __Use interface when__:
 1. you think that the API will not change for a while.
 
 1. you want to have something similar to multiple inheritance.
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Java OOP] Java BlockingQueue (2)]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/12/java-blocking-queue-2/"/>
-    <updated>2015-01-12T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/12/java-blocking-queue-2</id>
-    <content type="html"><![CDATA[### Blocking Queue Implementation
-
-<img class="middle" src="/assets/images/blocking-queue.png">
-
-[source](http://tutorials.jenkov.com/java-concurrency/blocking-queues.html)
-
-1. A blocking queue is a queue, so we init a queue with a pre-defined size. 
-
-1. BlockingQueue Class comes with Java 5, in java.util.concurrent.BlockingQueue. This example is only used to help you understand what's happening behind the scene. 
-
-1. Both __enqueue(Object o){}__ and __dequeue(){}__ are __synchronized__ method. 
-
-1. Both methods do __while { wait(); }__ and then __notifyAll()__. 
-
-### Code
-
-    public class MyBlockingQueue {
-
-        private List<Object> queue = new LinkedList<Object>();
-        private int size = 10;
-
-        public MyBlockingQueue(int size) {
-            this.size = size;
-        }
-
-        public synchronized void enqueue(Object item) throws InterruptedException {
-            while (this.queue.size() == this.size) {
-                wait();
-            }
-            if (this.queue.size() == 0) {
-                notifyAll();
-            }
-            this.queue.add(item);
-        }
-
-        public synchronized Object dequeue() throws InterruptedException {
-            while (this.queue.size() == 0) {
-                wait();
-            }
-            if (this.queue.size() == this.size) {
-                notifyAll();
-            }
-
-            return this.queue.remove(0);
-        }
-
-        public boolean isEmpty() {
-            return this.queue.isEmpty();
-        }
-    }
-
-### Another example
-
-This BlockingQueue example makes use MyBlockingQueue that we defined above.  
-
-    public class Main {
-
-        public static void main(String[] args) throws Exception {
-
-            MyBlockingQueue queue = new MyBlockingQueue(1024);
-
-            Producer producer = new Producer(queue);
-            Consumer consumer = new Consumer(queue);
-
-            new Thread(producer).start();
-            new Thread(consumer).start();
-
-            Thread.sleep(4000);
-        }
-    }
-
-Producer
-
-    public class Producer implements Runnable {
-
-        protected MyBlockingQueue queue = null;
-
-        public Producer(MyBlockingQueue queue) {
-            this.queue = queue;
-        }
-
-        public void run() {
-            System.out.println("Producer starting... ");
-            try {
-                for (int i = 1; i <= 5; i++) {
-                    queue.enqueue("" + i);
-                    Thread.sleep(500);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-Consumer
-
-    public class Consumer implements Runnable {
-
-        protected MyBlockingQueue queue = null;
-
-        public Consumer(MyBlockingQueue queue) {
-            this.queue = queue;
-        }
-
-        public void run() {
-            try {
-                for (int i = 1; i <= 5; i++) {
-                    System.out.println(queue.dequeue());
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Consumer finished. ");
-        }
-    }
-
-Output: 
-
-    Producer starting... 
-    1
-    2
-    3
-    4
-    5
-    Consumer finished. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Java OOP] Java BlockingQueue (1)]]></title>
-    <link href="http://okckd.github.io/blog/2015/01/12/java-blocking-queue-1/"/>
-    <updated>2015-01-12T00:00:00+08:00</updated>
-    <id>http://okckd.github.io/blog/2015/01/12/java-blocking-queue-1</id>
-    <content type="html"><![CDATA[### Overview
-
-__[A blocking queue](http://tutorials.jenkov.com/java-concurrency/blocking-queues.html)__ is a queue that blocks when you try to __dequeue from a empty queue__, or if you try to __enqueue items into a full queue__. 
-
-<img class="middle" src="/assets/images/blocking-queue.png">
-
-#### Details 
-
-1. BlockingQueue __doesn’t accept null values__. Otherwise throw NullPointerException.
-
-1. BlockingQueue implementations are __thread-safe__. All queuing methods are atomic in nature and use internal locks or other forms of concurrency control.
-
-1. BlockingQueue interface is part of java collections framework and it’s primarily used for implementing __producer consumer problem__. 
-
-Two important methods: 
-
-1. put(E e): This method is used to insert elements to the queue, if the queue is full it waits for the space to be available.
-
-1. E take(): This method retrieves and remove the element from the head of the queue, if queue is empty it waits for the element to be available.
-
-#### Usage
-
-[BlockingQueue is typically used](http://tutorials.jenkov.com/java-util-concurrent/blockingqueue.html) to have one thread produce objects, with another thread consumes (producer consumer problem). Refer to __[Design] Producer Consumer Problem__. 
-
-### Example 1
-
-This example shows __how changing the speed of consuming and producing__ results in different sequence of outputs, using a BlockingQueue. The size of the BlockingQueue is initialized at 5. 
-
-    public class Main {
-
-        // original post from:
-        // http://www.journaldev.com/1034/java-blockingqueue-example-implementing-producer-consumer-problem
-
-        private static final Setting testFullQueue = new Setting(3, 10, 0);
-        private static final Setting testEmptyQueue = new Setting(10, 3, 100);
-
-        public static void main(String[] args) {
-
-            // Creating BlockingQueue of size 5
-            BlockingQueue<Message> queue = new ArrayBlockingQueue<>(5);
-
-            Setting variableSetting = testFullQueue;
-            Producer producer = new Producer(queue, variableSetting.produceSpeed);
-            Consumer consumer = new Consumer(queue, variableSetting.consumeSpeed,
-                    variableSetting.consumerDelay);
-
-            // starting producer to produce messages in queue
-            new Thread(producer).start();
-
-            // starting consumer to consume messages from queue
-            new Thread(consumer).start();
-
-            System.out.println("Producer and Consumer has been started");
-        }
-
-        static class Setting {
-            int produceSpeed;
-            int consumeSpeed;
-            int consumerDelay;
-
-            public Setting(int a, int b, int c) {
-                this.produceSpeed = a;
-                this.consumeSpeed = b;
-                this.consumerDelay = c;
-            }
-        }
-    }
-
-Producer
-
-    public class Producer implements Runnable {
-
-        private BlockingQueue<Message> queue;
-        int produceSpeed;
-
-        public Producer(BlockingQueue<Message> q, int a) {
-            this.queue = q;
-            this.produceSpeed = a;
-        }
-
-        @Override
-        public void run() {
-            // produce messages
-            for (int i = 0; i < 13; i++) {
-                Message msg = new Message("" + i);
-                try {
-                    Thread.sleep(produceSpeed);
-                    queue.put(msg);
-                    System.out.println("Produced " + msg.getMsg() + "           ("
-                            + queue.size() + " items)");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            // adding exit message
-            Message msg = new Message("exit");
-            try {
-                queue.put(msg);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
-
-Consumer
-
-    public class Consumer implements Runnable {
-
-        private BlockingQueue<Message> queue;
-        int consumeSpeed;
-        int consumerDelay;
-
-        public Consumer(BlockingQueue<Message> q, int a, int b) {
-            this.queue = q;
-            this.consumeSpeed = a;
-            this.consumerDelay = b;
-        }
-
-        @Override
-        public void run() {
-            try {
-                // initial delay: used to wait for producer to
-                // fill up the queue
-                Thread.sleep(consumerDelay);
-                Message msg;
-                // consuming messages until exit message is received
-                while ((msg = queue.take()).getMsg() != "exit") {
-				System.out.println("         " + msg.getMsg() + " Consumed"+ "  ("
-						+ queue.size() + " items)");
-                    Thread.sleep(consumeSpeed);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Consumer finished working. Exit. ");
-        }
-    }
-
-Message Class
-
-    public class Message {
-        private String msg;
-
-        public Message(String str){
-            this.msg=str;
-        }
-
-        public String getMsg() {
-            return msg;
-        }
-    }
-
-Output (testFullQueue): 
-
-    Producer and Consumer has been started
-    Produced 0           (0 items)
-             0 Consumed  (0 items)
-    Produced 1           (1 items)
-    Produced 2           (2 items)
-             1 Consumed  (1 items)
-    Produced 3           (2 items)
-    Produced 4           (3 items)
-    Produced 5           (4 items)
-             2 Consumed  (3 items)
-    Produced 6           (4 items)
-    Produced 7           (5 items)
-             3 Consumed  (5 items)
-    Produced 8           (5 items)
-             4 Consumed  (4 items)
-    Produced 9           (5 items)
-             5 Consumed  (4 items)
-    Produced 10           (5 items)
-             6 Consumed  (4 items)
-    Produced 11           (5 items)
-             7 Consumed  (4 items)
-    Produced 12           (5 items)
-             8 Consumed  (4 items)
-             9 Consumed  (4 items)
-             10 Consumed  (3 items)
-             11 Consumed  (2 items)
-             12 Consumed  (1 items)
-    Consumer finished working. Exit. 
-
-Output (testEmptyQueue):
-
-    Producer and Consumer has been started
-    Produced 0           (1 items)
-    Produced 1           (2 items)
-    Produced 2           (3 items)
-    Produced 3           (4 items)
-    Produced 4           (5 items)
-    Produced 5           (5 items)
-             0 Consumed  (5 items)
-             1 Consumed  (4 items)
-             2 Consumed  (3 items)
-    Produced 6           (4 items)
-             3 Consumed  (3 items)
-             4 Consumed  (2 items)
-    Produced 7           (3 items)
-             5 Consumed  (2 items)
-             6 Consumed  (1 items)
-             7 Consumed  (0 items)
-    Produced 8           (1 items)
-             8 Consumed  (0 items)
-    Produced 9           (1 items)
-             9 Consumed  (0 items)
-    Produced 10           (1 items)
-             10 Consumed  (0 items)
-    Produced 11           (0 items)
-             11 Consumed  (0 items)
-    Produced 12           (1 items)
-             12 Consumed  (0 items)
-    Consumer finished working. Exit. 
 ]]></content>
   </entry>
   
