@@ -36,6 +36,8 @@ __The 10th floor gives the best solution__:
 
 > complexity O(k*n^2)
 
+Suggested at [this post](http://www.mitbbs.com/article_t/JobHunting/32602449.html), we can also use __A* search (with heuristic function)__ to solve. 
+
 ### Code
 
 __not written__
