@@ -9,8 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link an arbitrary tree. split it into as many subtrees as you can. the
-number of nodes of the subtree must be even. Solution This is a &hellip;">
+  <meta name="description" content="Publish–subscribe pattern The publish–subscribe pattern is a messaging pattern where senders of messages, called publishers, do not send messages &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +78,359 @@ number of nodes of the subtree must be even. Solution This is a &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/05/pubsub-pattern/">[Java OOP] PubSub (Publish–subscribe) Pattern</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/05/pubsub-pattern/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/05/pubsub-pattern/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Publish–subscribe pattern</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">The publish–subscribe pattern</a> is a messaging pattern</strong> where senders of messages, called publishers, do not send messages directly to specific subscribers. Instead, published messages are characterized into classes without knowledge of subscribers.</p>
+
+<p>Similarly, subscribers express interest in one or more classes, without knowledge of what publishers there are.</p>
+
+<ol>
+<li>greater network scalability</li>
+<li>a more dynamic network topology</li>
+<li>decreased flexibility to modify the Publisher and its structure of the data published.</li>
+</ol>
+
+
+<p>Pub/sub is typically a part of a larger <strong>message-oriented middleware system</strong>. e.g. Java Message Service (JMS).</p>
+
+<h3>Difference w/ observer pattern</h3>
+
+<p>Refer to <strong>[Java OOP] Observer pattern</strong> or <a href="http://stackoverflow.com/questions/15594905/difference-between-observer-pub-sub-and-data-binding">this link</a>:</p>
+
+<h4>Observer, or Observable/Observer:</h4>
+
+<blockquote><p>A design pattern by which an object is imbued with the ability to notify others of specific events &ndash; typically done using actual events, which are kind of like slots in the object with the shape of a specific function/method. The observable is the one who provides notifications, and the observer receives those notifications. In .net, the observable can expose an event and the observer subscribes to that event with an &ldquo;event handler&#8221;shaped hook. No assumptions are made about the specific mechanism which notifications occur, nor about the number of observers one observable can notify.</p></blockquote>
+
+<h4>Pub/Sub:</h4>
+
+<blockquote><p>Another name (perhaps with more &ldquo;broadcast&rdquo; semantics) of the Observable/Observer pattern, which usually implies a more &ldquo;dynamic&rdquo; flavor &ndash; observers can subscribe or unsubscribe to notifications and one observable can &ldquo;shout out&rdquo; to multiple observers. In .net, one can use the standard events for this, since events are a form of MulticastDelegate, and so can support delivery of events to multiple subscribers, and also support unsubscription. Pub/sub has a slightly different meaning in certain contexts, usually involving more &ldquo;anonymity&rdquo; between event and eventer, which can be facilitated by any number of abstractions, usually involving some &ldquo;middle man&rdquo; (such as a message queue) who knows all parties, but the individual parties don&rsquo;t know about each other.</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/05/multi-server-messaging-system/">[Google] Multi-server Messaging System</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/05/multi-server-messaging-system/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/05/multi-server-messaging-system/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32547841.html">link</a></p>
+
+<blockquote><p>Multiple threads can publish and receive each other&rsquo;s message:</p></blockquote>
+
+<ol>
+<li><p>whenever a thread publishes a message, all the other threads can receive and print out that message;</p></li>
+<li><p>if multiple message get published, the messages should be queued or whatever recorded and other threads can print out the message one by one;</p></li>
+<li><p>no published message should be missed by any other threads.</p></li>
+</ol>
+
+
+<h3>Solution</h3>
+
+<p>Suggested by <a href="http://www.mitbbs.com/article_t/JobHunting/32547841.html">level 13</a>:</p>
+
+<blockquote><p>给每个thread分一个blocking queue就完了。这题延伸开来是个很好的设计题, pubsub, messaging framework etc.</p></blockquote>
+
+<p>Using a blocking queue to store messages for each server. It&rsquo;s pretty much like consumer-producer. But here, the server takes on both roles. Read my code below, or <strong>[Java OOP] PubSub (Publish–subscribe) pattern</strong> to learn about <strong>PubSub</strong>.</p>
+
+<h3>Code</h3>
+
+<p>Below is my code, it may not be the correct solution. If you would like to discuss, please leave me a comment!</p>
+
+<pre><code>public class MessagingServer implements Runnable {
+
+    String serverId;
+    List&lt;MessagingServer&gt; servers;
+    BlockingQueue&lt;String&gt; messages;
+    boolean isFinished;
+
+    public MessagingServer(String id, List&lt;MessagingServer&gt; list, int qSize) {
+        this.serverId = id;
+        this.servers = list;
+        messages = new ArrayBlockingQueue&lt;String&gt;(qSize);
+        isFinished = false;
+    }
+
+    public void run() {
+        // this would be the consumer
+        while (!isFinished) {
+            String msg;
+            try {
+                msg = messages.take();
+                System.out.println(serverId + " says: " + msg);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void printMessage(String msg) {
+        // this is the producer
+        // System.out.println(serverId + " says: " + msg);
+
+        // insert this msg in the blockingQ of all other servers
+        for (MessagingServer server : servers) {
+            server.messages.add(this.serverId + " said: " + msg);
+        }
+    }
+
+    public void terminate() {
+        this.isFinished = true;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/05/implement-blocking-q/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/05/implement-blocking-q/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14622668">link</a></p>
+
+<blockquote><p>Implement a Blocking queue.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>First thing first, the most important characteristic of a BlockingQueue is:</p>
+
+<blockquote><p><strong>thread-safe</strong> BlockingQueue</p></blockquote>
+
+<p>Second, we need to make sure to handle the following 2 methods:</p>
+
+<blockquote><p><strong>notifyAll();</strong></p>
+
+<p><strong>wait();</strong></p></blockquote>
+
+<p>Last, remember that <strong>wait()</strong> has got a <strong>checked exception</strong>(InterruptedException). We end up with the code:</p>
+
+<pre><code>public synchronized void enqueue(Object item) throws InterruptedException {
+    while (this.queue.size() == this.size) {
+        wait();
+    }
+    if (this.queue.size() == 0) {
+        notifyAll();
+    }
+    this.queue.add(item);
+}
+</code></pre>
+
+<h3>Code</h3>
+
+<p>The entire class, refer to <strong>[Java OOP] Java BlockingQueue (2)</strong>:</p>
+
+<pre><code>public class MyBlockingQueue {
+
+    private List&lt;Object&gt; queue = new LinkedList&lt;Object&gt;();
+    private int size = 10;
+
+    public MyBlockingQueue(int size) {
+        this.size = size;
+    }
+
+    public synchronized void enqueue(Object item) throws InterruptedException {
+        while (this.queue.size() == this.size) {
+            wait();
+        }
+        if (this.queue.size() == 0) {
+            notifyAll();
+        }
+        this.queue.add(item);
+    }
+
+    public synchronized Object dequeue() throws InterruptedException {
+        while (this.queue.size() == 0) {
+            wait();
+        }
+        if (this.queue.size() == this.size) {
+            notifyAll();
+        }
+
+        return this.queue.remove(0);
+    }
+
+    public boolean isEmpty() {
+        return this.queue.isEmpty();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/04/snakes-and-ladders/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/04/snakes-and-ladders/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14955106">link</a></p>
+
+<blockquote><p>Given a board of snakes and ladders game, provide an algorithm to find the minimum number of dice rolls required to reach 100 from 1.</p></blockquote>
+
+<h3>Solution 1</h3>
+
+<p>Recommended: <strong>Graph (shortest path)</strong>. <a href="http://www.careercup.com/question?id=14955106">ref</a>:</p>
+
+<ol>
+<li><p>k is linked to k + 1 k + 2, k + 3, k + 4, k + 5, k +6.</p></li>
+<li><p>If has a ladder, connect it too.</p></li>
+<li><p>Find shortest path.</p></li>
+</ol>
+
+
+<p>Solution 2 is <strong>DP</strong>.</p>
+
+<h3>Variant</h3>
+
+<p>If the question asks: find the way to climb as many ladder as possible. Then this question would be solved differently.</p>
+
+<p>Any ideas?</p>
+
+<p>Solution below.</p>
+
+<p>&hellip;</p>
+
+<p>&hellip;</p>
+
+<p>&hellip;</p>
+
+<p>Read <strong>[Greedy] Activity Selection Problem</strong>.</p>
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -779,326 +1131,6 @@ You ultimately end up with 1.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/02/01/limit-request-per-second/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/limit-request-per-second/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">link</a></p>
-
-<blockquote><p>有一个接口叫 void setRPS(int num);</p>
-
-<p>接下来不断有request过来，如何实现下面的接口，返回accept或者deny，</p></blockquote>
-
-<pre><code>bool process(int timestamp){
-
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Suggested by level 5 of <a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">this post</a>:</p>
-
-<ol>
-<li>maintain a variable for the number of request processed/rejected.
-
-<ol>
-<li>This variable must be atomic, thus a <strong>AtomicInteger</strong>.</li>
-<li>the variable is called &lsquo;count&rsquo;</li>
-</ol>
-</li>
-<li>have a method to process request
-
-<ol>
-<li>if count &lt; limit, do it</li>
-<li>otherwise, reject</li>
-</ol>
-</li>
-<li><strong>This is the most important</strong>: clear the count every 1 seconds!
-
-<ol>
-<li>eg. LIMIT = 5r/s, so:</li>
-<li>the <strong>first 5 number of requests in every second</strong> are getting fulfilled</li>
-<li>from 6th request onward, the request all rejected, until the next second.</li>
-</ol>
-</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>public class SetRps {
-
-    AtomicInteger count = new AtomicInteger(0);
-    int limit = -1;
-    int printIndex = 1;
-    long startTimestamp = -1;
-
-    void setRPS(int num) {
-        limit = num;
-    }
-
-    boolean process(long timestamp) {
-        // suppose timestamp is ms
-        synchronized (this) {
-            if (count.get() &lt; limit) {
-                // can process
-                count.incrementAndGet();
-                System.out.println(printIndex++ + ". processing request "
-                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
-                return true;
-            }
-            if (timestamp - startTimestamp &gt;= 1000) {
-                // every 1 seconds, reset
-                count.set(0);
-                startTimestamp = timestamp;
-                System.out.println("clear!");
-                return true;
-            }
-        }
-        return false;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/each-employee-two-events/">[Greedy] Each Employee 2 Events</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/02/01/each-employee-two-events/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/each-employee-two-events/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.careercup.com/question?id=7894677">link</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>You are given N ranges of date offsets when N employees are present in an organization. Something like</p></blockquote>
-
-<pre><code>    1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
-    2-6 
-    8-9 
-    .. 
-    1-14 
-</code></pre>
-
-<blockquote><p>Organize an event on minimum number of days such that each employee can attend the event at least twice.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Greedy algorithm</strong>, according to the <a href="http://www.careercup.com/question?id=7894677">top answer</a>:</p>
-
-<ol>
-<li><p>First, sort all ranges based on ENDING date in increasing order (bucket or counting sort).</p></li>
-<li><p>For each range, select last two days (because they produce maximum possibility to overlap next range)</p></li>
-<li><p>Skip following ranges that also contains those two days, until:</p>
-
-<ol>
-<li>a range that either covers only one day (we then select last day of this range) or</li>
-<li>does not cover any of the two (we then select last two days of this range).</li>
-</ol>
-</li>
-<li><p>Then continue.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p>not written</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/Activity-Selection-Problem/">[Greedy] Activity Selection Problem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/02/01/Activity-Selection-Problem/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">link</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>Given n activities with their start and finish times.</p>
-
-<p>Select maximum number of activities that can be performed in one run.</p>
-
-<p>Example:</p></blockquote>
-
-<pre><code>     start[]  =  {1, 3, 0, 5, 8, 5};
-     finish[] =  {2, 4, 6, 7, 9, 9};
-
-     output[] = {0, 1, 3, 4}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p><strong>Greedy algorithm</strong>, according to <a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">gfg</a>:</p>
-
-<ol>
-<li><p>Sort the activities according to their finishing time</p></li>
-<li><p>Select the first activity from the sorted array and print it.</p></li>
-<li><p>For the rest, if start time is greater than previous finish time, then select this activity.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p>not written.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-30T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/30/2d-bin-packing/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/30/2d-bin-packing/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Bin_packing_problem">link</a></p>
-
-<blockquote><p>Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/bin-packing.png"></p>
-
-<h3>Solution</h3>
-
-<p>Explanation from <a href="http://stackoverflow.com/a/8765049">here</a>:</p>
-
-<ol>
-<li>Build a binary tree. Each branch in the tree contains a sprite.</li>
-<li>Each <strong>leaf node represents available space</strong>.</li>
-<li>Initially the tree has just the root node, which represents all available space.</li>
-<li>To add a sprite to the tree, search the tree for an unoccupied (leaf) node <strong>big enough</strong> to hold the sprite.</li>
-<li>Turn that node from a leaf into a branch by setting the sprite as the node&rsquo;s occupant and giving the node two children.</li>
-<li>One child represents the remaining space to the right of the sprite;</li>
-<li>the other represents the remaining space below the sprite and the first child.</li>
-</ol>
-
-
-<p>For detailed implementation and code, refer to <a href="http://codeincomplete.com/posts/2011/5/7/bin_packing/">this</a> comprehensite guide. BTW, it&rsquo;s used for <strong>auto generating CSS Sprites</strong> which puts images into a large graph.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -1120,13 +1152,13 @@ You ultimately end up with 1.
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (10)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (61)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (62)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (114)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (116)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1136,6 +1168,10 @@ You ultimately end up with 1.
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/02/12/executives-schedule/">[LinkedIn] Executive&#8217;s Schedule</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/02/11/speed-up-web-page-4/">[Design] Speed Up Webpage for Slow Connection (4)</a>
@@ -1151,10 +1187,6 @@ You ultimately end up with 1.
     
       <li class="post">
         <a href="/blog/2015/02/11/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/10/design-cache-system/">[Design] Design Cache System (`)</a>
       </li>
     
   </ul>

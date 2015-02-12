@@ -9,7 +9,7 @@
   <meta name="author" content="Charlie Brown">
 
   
-  <meta name="description" content="Question link Given an array of integers , replace each element with the product of the remaining elements. Eg : Input &ndash; 1 2 3 4 Output : 24 12 &hellip;">
+  <meta name="description" content="Question link 有一个接口叫 void setRPS(int num); 接下来不断有request过来，如何实现下面的接口，返回accept或者deny， bool process(int timestamp){ } Solution Suggested by level 5 of &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,326 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/limit-request-per-second/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/limit-request-per-second/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">link</a></p>
+
+<blockquote><p>有一个接口叫 void setRPS(int num);</p>
+
+<p>接下来不断有request过来，如何实现下面的接口，返回accept或者deny，</p></blockquote>
+
+<pre><code>bool process(int timestamp){
+
+}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Suggested by level 5 of <a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">this post</a>:</p>
+
+<ol>
+<li>maintain a variable for the number of request processed/rejected.
+
+<ol>
+<li>This variable must be atomic, thus a <strong>AtomicInteger</strong>.</li>
+<li>the variable is called &lsquo;count&rsquo;</li>
+</ol>
+</li>
+<li>have a method to process request
+
+<ol>
+<li>if count &lt; limit, do it</li>
+<li>otherwise, reject</li>
+</ol>
+</li>
+<li><strong>This is the most important</strong>: clear the count every 1 seconds!
+
+<ol>
+<li>eg. LIMIT = 5r/s, so:</li>
+<li>the <strong>first 5 number of requests in every second</strong> are getting fulfilled</li>
+<li>from 6th request onward, the request all rejected, until the next second.</li>
+</ol>
+</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<pre><code>public class SetRps {
+
+    AtomicInteger count = new AtomicInteger(0);
+    int limit = -1;
+    int printIndex = 1;
+    long startTimestamp = -1;
+
+    void setRPS(int num) {
+        limit = num;
+    }
+
+    boolean process(long timestamp) {
+        // suppose timestamp is ms
+        synchronized (this) {
+            if (count.get() &lt; limit) {
+                // can process
+                count.incrementAndGet();
+                System.out.println(printIndex++ + ". processing request "
+                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
+                return true;
+            }
+            if (timestamp - startTimestamp &gt;= 1000) {
+                // every 1 seconds, reset
+                count.set(0);
+                startTimestamp = timestamp;
+                System.out.println("clear!");
+                return true;
+            }
+        }
+        return false;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/each-employee-two-events/">[Greedy] Each Employee 2 Events</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/each-employee-two-events/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/each-employee-two-events/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.careercup.com/question?id=7894677">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>You are given N ranges of date offsets when N employees are present in an organization. Something like</p></blockquote>
+
+<pre><code>    1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
+    2-6 
+    8-9 
+    .. 
+    1-14 
+</code></pre>
+
+<blockquote><p>Organize an event on minimum number of days such that each employee can attend the event at least twice.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to the <a href="http://www.careercup.com/question?id=7894677">top answer</a>:</p>
+
+<ol>
+<li><p>First, sort all ranges based on ENDING date in increasing order (bucket or counting sort).</p></li>
+<li><p>For each range, select last two days (because they produce maximum possibility to overlap next range)</p></li>
+<li><p>Skip following ranges that also contains those two days, until:</p>
+
+<ol>
+<li>a range that either covers only one day (we then select last day of this range) or</li>
+<li>does not cover any of the two (we then select last two days of this range).</li>
+</ol>
+</li>
+<li><p>Then continue.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/Activity-Selection-Problem/">[Greedy] Activity Selection Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/02/01/Activity-Selection-Problem/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/02/01/Activity-Selection-Problem/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>Given n activities with their start and finish times.</p>
+
+<p>Select maximum number of activities that can be performed in one run.</p>
+
+<p>Example:</p></blockquote>
+
+<pre><code>     start[]  =  {1, 3, 0, 5, 8, 5};
+     finish[] =  {2, 4, 6, 7, 9, 9};
+
+     output[] = {0, 1, 3, 4}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to <a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">gfg</a>:</p>
+
+<ol>
+<li><p>Sort the activities according to their finishing time</p></li>
+<li><p>Select the first activity from the sorted array and print it.</p></li>
+<li><p>For the rest, if start time is greater than previous finish time, then select this activity.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+           | <a href="/blog/2015/01/30/2d-bin-packing/#disqus_thread"
+             data-disqus-identifier="http://okckd.github.io/blog/2015/01/30/2d-bin-packing/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Bin_packing_problem">link</a></p>
+
+<blockquote><p>Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/bin-packing.png"></p>
+
+<h3>Solution</h3>
+
+<p>Explanation from <a href="http://stackoverflow.com/a/8765049">here</a>:</p>
+
+<ol>
+<li>Build a binary tree. Each branch in the tree contains a sprite.</li>
+<li>Each <strong>leaf node represents available space</strong>.</li>
+<li>Initially the tree has just the root node, which represents all available space.</li>
+<li>To add a sprite to the tree, search the tree for an unoccupied (leaf) node <strong>big enough</strong> to hold the sprite.</li>
+<li>Turn that node from a leaf into a branch by setting the sprite as the node&rsquo;s occupant and giving the node two children.</li>
+<li>One child represents the remaining space to the right of the sprite;</li>
+<li>the other represents the remaining space below the sprite and the first child.</li>
+</ol>
+
+
+<p>For detailed implementation and code, refer to <a href="http://codeincomplete.com/posts/2011/5/7/bin_packing/">this</a> comprehensite guide. BTW, it&rsquo;s used for <strong>auto generating CSS Sprites</strong> which puts images into a large graph.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -636,301 +956,6 @@ a\0
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/27/suffix-array/">[Fundamental] Suffix Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/27/suffix-array/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/suffix-array/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/suffix-array-set-1-introduction/">ref</a></p>
-
-<h3>Suffix Array</h3>
-
-<p>A suffix array is a sorted array of all suffixes of a given string.</p>
-
-<p><strong>Any suffix tree based algorithm</strong> can be replaced with an algorithm <strong>that uses a suffix array</strong> enhanced with additional information and solves the same problem in the same time complexity.</p>
-
-<p><strong>Naive algorithm</strong> for construction of suffix array is to consider all suffixes, sort them using a O(nLogn) sorting algorithm and while sorting, maintain original indexes. Time complexity is _O(n<sup>2</sup> * Logn)__.</p>
-
-<p>There is an advanced <strong>nLogn Algorithm</strong> algorithm available to read <a href="http://www.geeksforgeeks.org/suffix-array-set-2-a-nlognlogn-algorithm/">here</a>. Basic idea is to &ldquo;Sort according to first two characters&rdquo; and then &ldquo;according to first four character&rdquo;.</p>
-
-<p>Example question: <strong>[Facebook] Query Search (HashMap, suffix array)</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/27/prefix-tree/">[Fundamental] Prefix Tree</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/27/prefix-tree/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/prefix-tree/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/trie-insert-and-search/">ref</a></p>
-
-<h3>Prefix tree</h3>
-
-<ol>
-<li>Building a well balanced BST needs time proportional to M * log N, where M is maximum string length and N is number of keys in tree.</li>
-<li>Using trie, search in O(M) time.</li>
-<li>The penalty is on trie storage requirements.</li>
-</ol>
-
-
-<h3>Implementation</h3>
-
-<ol>
-<li>Every node of trie consists of multiple branches.</li>
-<li>Each branch represents a possible character of keys.</li>
-<li><p>Mark the last node of every key as leaf node.</p>
-
-<p> struct trie_node
- {
-     int value; /<em> Used to mark leaf nodes </em>/
-     trie_node_t *children[ALPHABET_SIZE];
- };</p></li>
-</ol>
-
-
-<p>Note that a <strong>non-terminating node can also be marked as leaf</strong>. Eg.</p>
-
-<pre><code>                   root
-                /   \    \
-                t  'a'    b
-                |   |     |
-                h   n    'y'
-                |   |  \    \
-               'e'  s  'y'  'e'
-             /  |   |
-            i   r   w
-           /    |   |
-         'r'   'e'  e
-                    |
-                   'r'
-</code></pre>
-
-<p>The leaf nodes are quoted in &lsquo;&rsquo;.</p>
-
-<p>Insert and search costs <strong>O(key_length)</strong>, however the memory requirements of trie is <strong>O(ALPHABET_SIZE * key_length * N)</strong> where N is number of keys in trie.</p>
-
-<p><strong>Compressed trie</strong>, ternary search tree, etc. can be used to minimize memory requirements of trie.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/27/pattern-searching-algorithms/">[Fundamental] Pattern Searching Algorithms</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/27/pattern-searching-algorithms/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/pattern-searching-algorithms/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/tag/pattern-searching/page/2/">ref</a></p>
-
-<h3>Overview</h3>
-
-<p>strStr() is a classic question in CS. There are various ways to solve (which we have discussed before), this is a summarization:</p>
-
-<ol>
-<li><p>naive &ndash; O(m * n)</p></li>
-<li><p><a href="http://www.geeksforgeeks.org/searching-for-patterns-set-2-kmp-algorithm/">KMP</a> &ndash; O(n) in worst case</p></li>
-<li><p><a href="http://www.geeksforgeeks.org/searching-for-patterns-set-3-rabin-karp-algorithm/">Rabin-Karp</a>, rolling hash &ndash; between O(m * n) and O(m + n)</p>
-
-<p> Matches the hash value of the pattern with the hash value of pattern. If the hash values match, then only it starts matching individual characters.</p></li>
-<li><p><a href="http://www.geeksforgeeks.org/pattern-searching-set-4-a-naive-string-matching-algo-question/">Modified naive algo</a>, only work if pattern contains no duplicate characters.</p>
-
-<p> Only match the first char. This case is quite boring, can skip.</p></li>
-<li><p>Suffix tree</p>
-
-<p> Will discuss in details.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/27/generate-request-id/">[Google] Generate Request ID</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-           | <a href="/blog/2015/01/27/generate-request-id/#disqus_thread"
-             data-disqus-identifier="http://okckd.github.io/blog/2015/01/27/generate-request-id/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5169800024162304">link</a></p>
-
-<blockquote><p>Design a system to <strong>return an unique ID for each request</strong>.</p>
-
-<p>(For most of requests, the ID value should increase as time goes, the system should handle 1000 requests per second at least. )</p>
-
-<p>Note: <strong>Timestamps</strong> alone is not valid since there might be multiple requests with same timestamps.</p></blockquote>
-
-<h3>Idea 1</h3>
-
-<h4>Generating UUID</h4>
-
-<p><strong>A universally unique identifier (UUID)</strong> is an identifier standard used in software construction. A UUID is simply a 128-bit value.</p>
-
-<p>Generating unique IDs is easy. All modern OS&#8217;es have that functionality built in.</p>
-
-<p><strong>Detail</strong>: UUIDs may be generated from a combination of <strong>system time stamp, CPU/system ID</strong>, NIC MAC addresses, HBA WWNs, server id etc.</p>
-
-<h4>Clarifications</h4>
-
-<p>Let&rsquo;s assume the following:</p>
-
-<ol>
-<li><p>What&rsquo;s the length of the ID?</p>
-
-<p> &lt;= 128 bits. In that case I&rsquo;ll choose the standard 128 bit UUID format.</p></li>
-<li><p>The requirement states the system should handle 1000 request/s at least.</p></li>
-<li><p>What&rsquo;s the average request rate?</p>
-
-<p> 1000 &lt; avg req. rate &lt; 10,000</p></li>
-<li><p>What&rsquo;s the max. burst rate the system must handle?</p>
-
-<p> &lt; 1,000,000</p></li>
-<li><p>What&rsquo;s the max. latency (wait time) for a request?</p>
-
-<p> 1 ms</p></li>
-</ol>
-
-
-<h4>Solution</h4>
-
-<p>It&rsquo;s a classical consumer-producer problem.</p>
-
-<p>In this case we have many consumers of UUIDs and one producer. Let&rsquo;s assume the OS provides an API to generate UUIDs and the max. running time of the API is 1ms.</p>
-
-<ol>
-<li><p>Pre-allocate 2 Mio UUIDs into an array / stack/ heap (depending on implementation) structure.</p></li>
-<li><p>If no overhead 2 Mio UUIDs would take ~ 32MB of RAM. Not a problem on today&rsquo;s server system with many GB of RAM, but may be a problem on an embedded system.</p></li>
-<li><p>2 Mio UUIDs ensures system can handle burst rate.</p></li>
-<li><p>The solution needs to ensure that its pool of UUIDs doesn&rsquo;t run out as consumers request them and they are replenished.</p></li>
-</ol>
-
-
-<h3>Idea 2</h3>
-
-<p>This question is quite open-ended.</p>
-
-<p>For starter, how about <strong>appending random(N) to the timestamp</strong>? N can be large enough to make collisions unlikely. If each server has an ID we can also include it to further reduce collisions.</p>
-
-<p>If IDs must be unique, then I suppose you can <strong>design a counter</strong> that will return an ID and increment it at the same time. You will then <strong>need mutex to access this counter</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/6">&larr; Older</a>
@@ -952,13 +977,13 @@ a\0
 <li class='category'><a href='/blog/categories/experience/'>experience (3)</a></li>
 <li class='category'><a href='/blog/categories/facebook/'>facebook (10)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (61)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (62)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (153)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (114)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (116)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -968,6 +993,10 @@ a\0
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/02/12/executives-schedule/">[LinkedIn] Executive&#8217;s Schedule</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/02/11/speed-up-web-page-4/">[Design] Speed Up Webpage for Slow Connection (4)</a>
@@ -983,10 +1012,6 @@ a\0
     
       <li class="post">
         <a href="/blog/2015/02/11/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/10/design-cache-system/">[Design] Design Cache System (`)</a>
       </li>
     
   </ul>
