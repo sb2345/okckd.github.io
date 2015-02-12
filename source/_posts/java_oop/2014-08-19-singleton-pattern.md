@@ -16,7 +16,7 @@ __[Singleton pattern](http://en.wikipedia.org/wiki/Singleton_pattern)__ is a des
 
 Since Java 5.0, the easiest way to create a Singleton is the __[enum type approach](http://en.wikipedia.org/wiki/Singleton_pattern#The_Enum_way)__. Here the code is not given. 
 
-We will instead cover a very popular implementation: __[Lazy initialization](http://en.wikipedia.org/wiki/Singleton_pattern#Lazy_initialization)__. 
+We will instead cover a very popular implementation: __[Lazy initialization](http://en.wikipedia.org/wiki/Singleton_pattern#Lazy_initialization)__ using double-checked locking: 
 
     public class SingletonDemo {
         private static volatile SingletonDemo instance = null;
@@ -33,7 +33,7 @@ We will instead cover a very popular implementation: __[Lazy initialization](htt
         }
     }
 
-An alternate simpler version (non-sync):
+An alternate simpler and cleaner version may be used at the expense of potentially lower concurrency in a multithreaded environment:
 
     public class SingletonDemo {
         private static SingletonDemo instance = null;
