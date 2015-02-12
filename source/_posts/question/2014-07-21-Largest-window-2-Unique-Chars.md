@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Largest Window Containing 2 Unique Characters "
+title: "[Question] Longest Substring with At Most Two Distinct Characters "
 comments: true
 category: Question
 tags: [ src ]
