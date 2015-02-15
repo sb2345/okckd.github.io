@@ -18,7 +18,7 @@ category: Design
 
 #### Page fault
 
-Page fault is an __interrupt__ that occurs when a program requests data that is __not currently in real memory__. The interrupt triggers the operating system to fetch the data from a virtual memory and load it into RAM.
+A [page fault](http://en.wikipedia.org/wiki/Page_fault) is a trap to the software raised by the hardware when a program __accesses a page that is mapped in the virtual address space__, but __not loaded in physical memory__. In the typical case the operating system tries to handle the page fault by making the required page accessible at a location in physical memory or terminates the program in the case of an illegal access. 
 
 An __invalid page fault__ or __page fault error__ occurs when the operating system cannot find the data in virtual memory. This usually happens when the virtual memory area, or the table that maps virtual addresses to real addresses, becomes corrupt.
 

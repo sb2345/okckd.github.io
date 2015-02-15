@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Design] Cryptographic Hash Function "
+title: "[Design] Cryptographic Hash, MD5 and Digital signature "
 comments: true
 category: Design
 
@@ -17,7 +17,11 @@ The input is called 'message' and output (the hash value) is called '__digest__'
 Common examples are:
 
 1. MD5
+    1. 128-bit (16-byte) hash value, typically expressed with 32 digit hex number
+    1. have colllision attack risks
 1. SHA-1 (said to be [better than MD5](http://security.stackexchange.com/questions/19705/is-sha1-better-than-md5-only-because-it-generates-a-hash-of-160-bits))
+    1. 160-bit (20-byte) hash value, typically expressed with 40 digit hex number
+    1. No known collision found so far
 
 #### Properties
 

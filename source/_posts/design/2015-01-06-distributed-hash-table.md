@@ -47,7 +47,7 @@ There is different hashing and routing techniques associated with DHT. The most 
 
 ### Consistent Hashing
 
---[Consistent hashing](http://en.wikipedia.org/wiki/Consistent_hashing)__ is a special kind of hashing such that when a hash table is resized and consistent hashing is used, __only K/n keys need to be remapped__ on average, where K is the number of keys, and n is the number of slots. 
+__[Consistent hashing](http://en.wikipedia.org/wiki/Consistent_hashing)__ is a special kind of hashing such that when a hash table is resized and consistent hashing is used, __only K/n keys need to be remapped__ on average, where K is the number of keys, and n is the number of slots. 
 
 #### Motivation
 
