@@ -19,7 +19,7 @@ tags: [ src ]
 
 ### Solution
 
-__If have parent pointer, it's easy__. Read solution [here](http://tech-queries.blogspot.sg/2010/04/inorder-succesor-in-binary-tree.html). 
+__If have parent pointer, it's easy__. Read solution [here](http://tech-queries.blogspot.sg/2010/04/inorder-succesor-in-binary-tree.html) or __[CC150v4] 4.5 Find Next Node in BST__. 
 
 __If no parent pointer, then we make use of the property of BST, can get an O(h) solution__. h is the height. 
 
