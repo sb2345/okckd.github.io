@@ -62,4 +62,4 @@ Your router essentially guides your request through the network, helping the pac
 
 ### Even more
 
-An even more detailed article can be found [here](http://www.garshol.priv.no/download/text/http-tut.html), or [here](http://igoro.com/archive/what-really-happens-when-you-navigate-to-a-url/).
+An even more detailed article can be found [here](http://www.garshol.priv.no/download/text/http-tut.html). And a __great step-by-step example using facebook.com can be found [here](http://igoro.com/archive/what-really-happens-when-you-navigate-to-a-url/).
