@@ -52,10 +52,10 @@ My first request of AdSense is rejected because of "__Site does not comply with 
 
 Thanks for the effort from [this reference](https://www.hi29.net/post/2013/11/30/octopresszen-mo-fang-adsense/).
 
-## Some stats
+## Updates
 
-{% img middle /assets/images/google-analytics-20150408.png %}
+Apr 9th update: my re-submission of Google AdSense is not approached, because of "not enough content". I don't know what else to do, so I switched to another ad platform. 
 
-My blog has around 700 click per day. 
+Apr 11th update: For the first time ever, my blog has more than 1,000 visit per day. 
 
-Update: my re-submission of Google AdSense is not approached, because of "not enough content". I don't know what else to do, so I switched to another ad platform. 
+{% img middle /assets/images/google-analytics-20150411.png %}
