@@ -57,3 +57,5 @@ Thanks for the effort from [this reference](https://www.hi29.net/post/2013/11/30
 {% img middle /assets/images/google-analytics-20150408.png %}
 
 My blog has around 700 click per day. 
+
+Update: my re-submission of Google AdSense is not approached, because of "not enough content". I don't know what else to do, so I switched to another ad platform. 

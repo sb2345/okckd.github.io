@@ -50,7 +50,7 @@ Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)
 
 ### Analysis
 
-__This question is basic mathematics__. There is another similar question __Spiral Matrix__. 
+__This question is basic mathematics__. There is another similar question __[LeetCode 54] Spiral Matrix__. 
 
 The difficult part is writing the code. 
 

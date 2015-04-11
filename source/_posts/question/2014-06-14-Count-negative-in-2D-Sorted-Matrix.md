@@ -6,7 +6,6 @@ category: Question
 tags: [ unit test needed ]
 ---
 
-
 ### Question 
 
 [link](http://leetcode.com/2010/10/searching-2d-sorted-matrix.html)
