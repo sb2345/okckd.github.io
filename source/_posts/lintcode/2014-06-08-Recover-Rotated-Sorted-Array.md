@@ -6,8 +6,8 @@ category: Lintcode
 tags: [ ]
 ---
 
-
 ### Question 
+
 [link](http://www.lintcode.com/en/problem/recover-rotated-sorted-array/)
 
 <div style="min-height:100px" class="bg-color bg-img font-color">
@@ -52,54 +52,13 @@ Find the rotate position and rotate each half. After this:
 <p class="font-color"><span style="color:#B22222;" class="font-color"><strong>[4, 5, 1, 2, 3]</strong></span> -&gt; <span style="color:#B22222;" class="font-color"><strong>[5, 4, 3, 2, 1]</strong></span>
 </p>
 
-Then reverse it again. 
+Then reverse it again. This solution is called "三步翻转法", an extremely common interview algorithm. Similar questions are [[LeetCode 151] Reverse Words in a String]({% post_url /leetcode/2014-06-03-Reverse-Words-in-a-String %}). 
 
-This solution is called "三步翻转法", an extremely common interview algorithm. Similar questions are "Reverse word list" from LeetCode. 
+__Updated on Apr 11th, 2015__: 
+
+Thanks to the __nice little help from [Shawn](https://disqus.com/by/disqus_QOTDaDZFgi/)__, I found out that using __binary search__ to find the rotation point is impossible, because of duplication. I wasn't able to point this out previously, thus apologize to all!
 
 ### My code 
-
-__my first code__.
-
-I used binary search to find the rotate position. 
-
-    public void recoverRotatedSortedArray(ArrayList<Integer> nums) {
-        // write your code
-        if (nums == null || nums.size() <= 1) {
-            return;
-        }
-        int left = 0, right = nums.size() - 1;
-        int mid;
-        while (left + 1 < right) {
-            mid = left + (right - left) / 2;
-            if (nums.get(mid) >= nums.get(left)) {
-                left = mid;
-            }
-            else {
-                right = mid;
-            }
-        }
-        if (nums.get(left) <= nums.get(right)) {
-            return;
-        }
-        // rotate 2 parts: [0, left] and [right, size-1]
-        inPlaceRotate(nums, 0, left);
-        inPlaceRotate(nums, right, nums.size() - 1);
-        inPlaceRotate(nums, 0, nums.size() - 1);
-    }
-    
-    private void inPlaceRotate(ArrayList<Integer> nums, int left, int right) {
-        while (left < right) {
-            int temp = nums.get(left);
-            nums.set(left, nums.get(right));
-            nums.set(right, temp);
-            left ++;
-            right --;
-        }
-    }
-    
-__my second code__
-
-Note the total time O(n), so binary search is not benefiting at all. It's OK to changed binary search to normal search. 
 
 	public void recoverRotatedSortedArray(ArrayList<Integer> nums) {
 		// write your code

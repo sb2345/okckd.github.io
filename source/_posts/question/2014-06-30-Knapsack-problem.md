@@ -18,7 +18,7 @@ category: Question
 
 ### Analysis
 
-This is a very similar question to "Coin Change", because directly using recursion to solve will result in a lot of re-calculations. It's a DP question. 
+This is a very similar question to __[Question] Coin Change Problem__, because directly using recursion to solve will result in a lot of re-calculations. It's a DP question. 
 
 ### Solution
 
