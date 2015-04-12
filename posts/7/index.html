@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="ref Suffix tree Both KMP Algorithm and Rabin Karp Algorithm pre-process the pattern to make the pattern searching faster. The best time complexity &hellip;">
+  <meta name="description" content="Question link Four rectangles are given. Find the smallest enclosing (new) rectangle into which these four may be fitted without overlapping. By &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,353 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/29/Packing-Rectangles/">[Question] Packing Rectangles</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/29/Packing-Rectangles/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://olympiads.win.tue.nl/ioi95/task/pack.html">link</a></p>
+
+<blockquote><p>Four rectangles are given. Find the smallest enclosing (new) rectangle into which these four may be fitted without overlapping. By smallest rectangle we mean the one with the smallest area.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/packing-rect.gif"></p>
+
+<h3>Greedy</h3>
+
+<p><a href="http://stackoverflow.com/a/1213571">Greedy</a> placement from <strong>large (area) to small</strong>.</p>
+
+<ol>
+<li>Put the largest rectangle remaining into your packed area.</li>
+<li>If it can&rsquo;t fit anywhere, place it in a place that extends the pack region as little as possible.</li>
+<li>Repeat until you finish with the smallest rectangle.</li>
+</ol>
+
+
+<h3>Optimal Solution</h3>
+
+<p><a href="http://stackoverflow.com/a/4264497">There is a trade-off</a> between implementation complexity/time and optimality, but there is a wide range of algorithms to choose from.</p>
+
+<p>Below is quoted:</p>
+
+<blockquote>
+    <div class="post-text" itemprop="text">
+<ol>
+<li><p>First-Fit Decreasing Height (FFDH) algorithm<br>
+FFDH packs the next item R (in non-increasing height) on the first level where R fits. If no level can accommodate R, a new level is created.<br>
+Time complexity of FFDH: O(n·log n).<br>
+Approximation ratio: FFDH(I)&lt;=(17/10)·OPT(I)+1; the asymptotic bound of 17/10 is tight.</p></li>
+<li><p>Next-Fit Decreasing Height (NFDH) algorithm<br>
+NFDH packs the next item R (in non-increasing height) on the current level if R fits. Otherwise, the current level is &#8220;closed&#8221; and a new level is created.<br>
+Time complexity: O(n·log n).<br>
+Approximation ratio: NFDH(I) &lt;= 2·OPT(I)+1; the asymptotic bound of 2 is tight.</p></li>
+<li><p>Best-Fit Decreasing Height (BFDH) algorithm<br>
+BFDH packs the next item R (in non-increasing height) on the level, among those that can accommodate R, for which the residual horizontal space is the minimum. If no level can accommodate R, a new level is created. </p></li>
+<li><p>Bottom-Left (BL) Algorithm<br>
+BL first order items by non-increasing width. BL packs the next item as near to the bottom as it will fit and then as close to the left as it can go without overlapping with any packed item. Note that BL is not a level-oriented packing algorithm.<br>
+Time complexity: O(n^2).<br>
+Approximation ratio: BL(I) &lt;= 3·OPT(I).  </p></li>
+<li><p>Baker&#8217;s Up-Down (UD) algorithm<br>
+UD uses a combination of BL and a generalization of NFDH. The width of the strip and the items are normalized so that the strip is of unit width. UD orders the items in non-increasing width and then divides the items into five groups, each with width in the range (1/2, 1], (1/3,1/2], (1/4,1/3], (1/5,1/4], (0,1/5]. The strip is also divided into five regions R1, ··· , R5. Basically, some items of width in the range (1/i+1, 1/i], for 1 &lt;= i &lt;= 4, are packed to region Ri by BL. Since BL leaves a space of increasing width from top to bottom at the right side of the strip, UD takes this advantage by first packing the item to Rj for j = 1, ··· , 4 (in order) from top to bottom. If there is no such space, the item is packed to Ri by BL. Finally, items of size at most 1/5 are packed to the spaces in R1, ··· , R4 by the (generalized) NFDH algorithm. Again if there is no space in these regions, the item is packed to R5 using NFDH.<br>
+Approximation ratio: UD(I) &lt;= (5/4) · OPT(I)+(53/8)H, where H is the maximum height of the items; the asymptotic bound of 5/4 is tight.</p></li>
+<li><p>Reverse-fit (RF) algorithm<br>
+RF also normalizes the width of the strip and the items so that the strip is of unit width. RF first stacks all items of width greater than 1/2. Remaining items are sorted in non-increasing height and will be packed above the height H0 reached by those greater than 1/2. Then RF repeats the following process. Roughly speaking, RF packs items from left to right with their bottom along the line of height H0 until there is no more room. Then packs items from right to left and from top to bottom (called reverse-level) until the total width is at least 1/2. Then the reverse-level is dropped down until (at least) one of them touches some item below. The drop down is somehow repeated.<br>
+Approximation ratio: RF(I) &lt;= 2·OPT(I).</p></li>
+<li><p>Steinberg&#8217;s algorithm<br>
+Steinberg&#8217;s algorithm, denoted as M in the paper, estimates an upper bound of the height H required to pack all the items such that it is proved that the input items can be packed into a rectangle of width W and height H. They then define seven procedures (with seven conditions), each to divide a problem into two smaller ones and solve them recursively. It has been showed that any tractable problem satisfies one of the seven conditions.<br>
+Approximation ratio: M(I) &lt;= 2·OPT(I).</p></li>
+<li><p>Split-Fit algorithm (SF)
+SF divides items into two groups, L1 with width greater than 1/2 and L2 at most 1/2. All items of L1 are first packed by FFDH. Then they are arranged so that all items with width more than 2/3 are below those with width at most 2/3. This creates a rectangle R of space with width 1/3. Remaining items in L2 are then packed to R and the space above those packed with L1 using FFDH. The levels created in R are considered to be below those created above the packing of L1.<br>
+Approximation ratio: SF(I) &lt;= (3/2) ·OPT(I) + 2; the asymptotic bound of 3/2 is tight.</p></li>
+<li><p>Sleator&#8217;s algorithm<br>
+Sleater&#8217;s algorithm consists of four steps:</p>
+
+<ol>
+<li><p>All items of width greater than 1/2 are packed on top of one another in the bottom of the strip. Suppose h0 is the height of the resulting packing All subsequent packing will occur above h0.</p></li>
+<li><p>Remaining items are ordered by non-increasing height. A level of items are packed (in non-increasing height order) from left to right along the line of height h0. </p></li>
+<li><p>A vertical line is then drawn in the middle to cut the strip into two equal halves (note this line may cut an item that is packed partially in the right half). Draw two horizontal line segments of length one half, one across the left half (called the left baseline) and one across the right half (called the right baseline) as low as possible such that the two lines do not cross any item.</p></li>
+<li><p>Choose the left or right baseline which is of a lower height and pack a level of items into the corresponding half of the strip until the next item is too wide.</p></li>
+</ol>
+
+<p>A new baseline is formed and Step (4) is repeated on the lower baseline until all items are packed.<br>
+Time complexity: O(n ·log n).<br>
+The approximation ratio of Sleator&#8217;s algorithm is 2.5 which is tight.</p></li>
+</ol>
+    </div>
+</blockquote>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/28/two-dimensional-knapsack-problem/">[Question] Two Dimensional Knapsack Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/28/two-dimensional-knapsack-problem/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.sina.com.cn/s/blog_8a24b3a3010190ak.html">link</a></p>
+
+<blockquote><p>给定n种物品和一背包。物品i的重量是wi，体积是bi，其价值为vi，背包的容量为C，容积为D。问应如何选择装入背包中的物品，使得装入背包中物品的总价值最大？</p>
+
+<p>在选择装入背包的物品时，对每种物品i只有两种选择，即装入背包或者不装入背包。不能将物品i装入背包多次，也不能只装入部分的物品i。试设计一个解此问题的动态规划算法，并分析算法的计算复杂性。</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>This is a extended question from <strong>[Question] 0-1 Knapsack Problem</strong>.</p>
+
+<p>Same solution, just use 3D-array for DP.</p>
+
+<h3>Solution</h3>
+
+<p>First of all, define a 2D array, Knapsack(n,W) denotes getting &lsquo;n&#8217;th item, with weight &#8216;W&rsquo;. When n == 0 or W = 0, dp value is 0.</p>
+
+<blockquote><p>int[][][] dp = new int[n + 1][W + 1][B + 1];</p></blockquote>
+
+<p>Now if item &lsquo;n&rsquo; is able to fit in:</p>
+
+<blockquote><p>dp[i][j][k] = max(dp[i-1][j][k] , dp[i-1][j-w[i]][k-b[i]] + v[i]);</p></blockquote>
+
+<p>If not able to fit in:</p>
+
+<blockquote><p>dp[i][j][k] = dp[i-1][j][k];</p></blockquote>
+
+<h3>Code</h3>
+
+<p>Code from <a href="http://blog.sina.com.cn/s/blog_8a24b3a3010190ak.html">绝对快乐一生</a>:</p>
+
+<pre><code>int main()
+{
+   int i,j,k;
+   int n,c,d;
+   int w[MAX] = {0};   //重量
+   int b[MAX] = {0};   //体积
+   int v[MAX] = {0};   //价值
+   cout&lt;&lt;"请输入物品个数:";
+   cin&gt;&gt;n;
+   cout&lt;&lt;"请输入背包的容量及容积:";
+   cin&gt;&gt;c&gt;&gt;d;
+   cout&lt;&lt;"请依次输入各个物品的重量,体积,价值:(共"&lt;&lt;n&lt;&lt;"个)"&lt;&lt;endl;
+   for(i =1;i&lt;n+1;i++)
+   {
+       cin&gt;&gt;w[i]&gt;&gt;b[i]&gt;&gt;v[i];
+   }
+
+   int dp[50][50][50]={0}; 
+   //dp[i][j][k] i代表着第1到第i个物品，j代表的是重量，k代表的是容积，dp为最优价值
+
+   for(i=1;i&lt;n+1;i++)
+       for(j =1;j &lt;=c;j++)
+           for(k = 1 ;k &lt;= d ; k++)
+           {
+               if(w[i]&lt;=j&amp;&amp;b[i]&lt;=k)  
+               //当前物品重量小于当前容量，且体积小于容积时 ，才可以考虑装入物品的问题
+                   dp[i][j][k] = max(dp[i-1][j][k] , dp[i-1][j-w[i]][k-b[i]] + v[i]);
+               else dp[i][j][k] = dp[i-1][j][k];
+           }
+   cout&lt;&lt;"背包能放物品的最大价值为:"&lt;&lt;dp[n][c][d]&lt;&lt;endl;
+  int x[MAX] ={0};   //记录是否被选中
+  for(i =n;i&gt;1;i--)
+       if(dp[i][c][d]==dp[i-1][c][d])x[i] =0;
+      else {x[i]=1;c -= w[i];d -= b[i];}
+   x[1]=(dp[1][c][d])?1:0;
+   cout&lt;&lt;"被选入背包的物品的编号,质量和体积,价值分别是:"&lt;&lt;endl;
+   for(i=1;i&lt;&lt;/span&gt;n+1;i++)
+       if(x[i]==1)
+           cout&lt;&lt;"第"&lt;&lt;i&lt;&lt;"个物品: "&lt;&lt;w[i]&lt;&lt;"  "&lt;&lt;b[i]&lt;&lt;"  "&lt;&lt;v[i]&lt;&lt;endl;
+
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/28/implement-trie-suffix-tree/">[Fundamental] Implement Trie and Suffix Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/28/implement-trie-suffix-tree/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Trie Node</h3>
+
+<pre><code>public class TrieNode {
+    boolean isLeaf;
+    TrieNode[] child;
+
+    public TrieNode(boolean isLeaf) {
+        this.isLeaf = isLeaf;
+        this.child = new TrieNode[26];
+    }
+
+    public void insert(String str) {
+        if (str == null || str.length() == 0) {
+            this.isLeaf = true;
+            return;
+        }
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            child[cur - 'a'] = new TrieNode(str.length() == 1);
+        }
+        child[cur - 'a'].insert(str.substring(1));
+    }
+
+    public boolean trieSearch(String str) {
+        // have to consider leaf node
+        if (str == null || str.length() == 0) {
+            return isLeaf;
+        }
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            return false;
+        }
+        return child[cur - 'a'].trieSearch(str.substring(1));
+    }
+
+    public boolean suffixTreeSearch(String str) {
+        // suffixTreeSearch don't consider leaf node
+        // cuz we search for prefix of suffixes
+        if (str == null || str.length() == 0) {
+            return true;
+        }
+        char cur = str.charAt(0);
+        if (child[cur - 'a'] == null) {
+            return false;
+        }
+        return child[cur - 'a'].suffixTreeSearch(str.substring(1));
+    }
+}
+</code></pre>
+
+<h3>Trie</h3>
+
+<pre><code>public class Trie {
+    TrieNode root;
+
+    public Trie(String[] input) {
+        root = new TrieNode(false);
+
+        for (String str : input) {
+            root.insert(str);
+        }
+    }
+
+    public boolean search(String query) {
+        return root.trieSearch(query);
+    }
+}
+</code></pre>
+
+<h4>Suffix Tree</h4>
+
+<p>Suffix tree might also consider the <strong>List of indexes</strong> thing, which I do not take into consideration in my code.</p>
+
+<pre><code>public class SuffixTree {
+    TrieNode root;
+
+    public SuffixTree(String input) {
+        root = new TrieNode(false);
+
+        for (int i = 0; i &lt; input.length(); i++) {
+            root.insert(input.substring(i));
+        }
+    }
+
+    public boolean search(String query) {
+        return root.suffixTreeSearch(query);
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -641,285 +988,6 @@ Pop X
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/24/distributed-caching-memcached/">[Design] Distributed Caching - Memcached</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/24/distributed-caching-memcached/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>What is Memcached?</h3>
-
-<p><a href="http://memcached.org/">Memcached</a> is an <strong>in-memory key-value store for small chunks of arbitrary data</strong> (strings, objects) from results of database calls, API calls, or page rendering.</p>
-
-<ol>
-<li>Free &amp; open source</li>
-<li>high-performance, distributed memory object caching system</li>
-<li>generic in nature</li>
-<li>intended for use in speeding up dynamic web applications by alleviating database load</li>
-</ol>
-
-
-<p>Definition from <a href="http://en.wikipedia.org/wiki/Memcached">wiki</a>:</p>
-
-<blockquote><p>Memcached is a <strong>general-purpose distributed memory caching system</strong>. It is often used to speed up dynamic database-driven websites by <strong>caching data and objects in RAM</strong> to reduce the number of times an <strong>external data source</strong> (such as a database or API) must be read.</p></blockquote>
-
-<h3>Who uses Memcached?</h3>
-
-<ol>
-<li>Facebook</li>
-<li>YouTube</li>
-<li>Twitter</li>
-<li>Amazon</li>
-<li>Reddit</li>
-<li>Yahoo</li>
-<li>Zynga</li>
-</ol>
-
-
-<h3>Why Memcached?</h3>
-
-<p>Run memcached on one or more hosts and then use the shared cache to store objects. Because each host’s RAM is storing information, the access speed <a href="http://www.blogs.zeenor.com/category/interview-questions/page/9">will be much faster than</a> having to load the information from disk. This can provide <strong>a significant performance boost in retrieving data</strong> versus loading the data natively from a database.</p>
-
-<p>Also, because the cache is just a repository for information, you can use the cache to store <strong>any data, including complex structures</strong> that would normally require a significant amount of effort to create, but in <strong>a ready-to-use format</strong>, helping to reduce the load on your MySQL servers.</p>
-
-<h3>FAQ</h3>
-
-<p><strong>What is Memcached?</strong></p>
-
-<p><a href="http://www.web-technology-experts-notes.in/2014/09/memcached-interview-questions-and-answers.html">It is component</a> which stored the data temporary for 1 Hour/ 6 Hour/1 Day etc. When we integrate the Memcached with our application, performance of application increased.</p>
-
-<p>Memcached is open source, high-performance distributed memory object used for caching so that execution can be enhanced at nth level.</p>
-
-<p><strong>Where Memcached can be used?</strong></p>
-
-<p>•  Social Networking &ndash;> Profile Caching</p>
-
-<p>•  Content Aggregation &ndash;> HTML/ Page Caching</p>
-
-<p>•  Ad targeting &ndash;> Cookie/profile tracking</p>
-
-<p>•  Relationship &ndash;> Session caching</p>
-
-<p>•  E-commerce &ndash;> Session and HTML caching</p>
-
-<p>•  Location-based services &ndash;> Data-base query scaling</p>
-
-<p>•  Gaming and entertainment &ndash;> Session caching</p>
-
-<p><strong>Why use Memcached?</strong></p>
-
-<p>•  Speed up application processes</p>
-
-<p>•  It determines what to store and what not to</p>
-
-<p>•  Reduce the number of retrieval requests to the database</p>
-
-<p>•  Cuts down the I/O ( Input/Output) access (hard disk)</p>
-
-<p><strong>In what condition does retrieving cache fail?</strong></p>
-
-<p>•  Memory allocated for the cache is exhausted</p>
-
-<p>•  Item from cache is deleted</p>
-
-<p>•  Individual item in the cache is expired</p>
-
-<p><strong>What is the drawback of Memcached?</strong></p>
-
-<p>•  It is not a persistent data store</p>
-
-<p>•  Not a database</p>
-
-<p>•  It is not an application specific</p>
-
-<p>•  It cannot cache large object</p>
-
-<p><strong>Give more details about memcached failures</strong></p>
-
-<p><a href="http://programmers.stackexchange.com/a/187101">Memcached servers</a> are indeed independent of each other. Memcached server is just an efficient key-value store implemented as in-memory hash table.</p>
-
-<p><strong>What makes memcached distributed is the client</strong>, which in most implementations can connect to a pool of servers. Typical implementations use consistent hashing, which means that when you add or remove server to/from a pool of N servers, you only have to remap 1/N keys.</p>
-
-<p>Typically keys are <strong>not duplicated</strong> on various hosts, as memcached is <strong>not meant to be persistent store</strong> and gives no guarantees that your value will persist (for example when running out of assigned memory, memcached server drops least recently used (LRU) elements). Thus it&rsquo;s assumed that your application should handle missing keys.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/24/design-google-suggest-autocomplete/">[Design] Design Google Suggest (Autocomplete)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/24/design-google-suggest-autocomplete/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p><strong>Google Suggest</strong> was <a href="http://googleblog.blogspot.sg/2004/12/ive-got-suggestion.html">launched in 2004</a> as a 20% time project from Google engineer Kevin Gibbs. He developed the idea on a <a href="http://www.theatlantic.com/technology/archive/2013/08/how-googles-autocomplete-was-created-invented-born/278991/">Google shuttle bus</a>.</p>
-
-<h3>Design</h3>
-
-<ol>
-<li>Use trie.</li>
-<li>Use cache (distributed cache)</li>
-</ol>
-
-
-<h4>Trie</h4>
-
-<p>Just make use of all keywords (including space) and build a trie out of it. Then you are good to go just search in Trie.</p>
-
-<p>A comparison of speed between DB, Set and Trie can be found <a href="http://sujitpal.blogspot.sg/2007/02/three-autocomplete-implementations.html">here</a>. A lot of implementation code can be found <a href="http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete">here</a>.</p>
-
-<h4>Memcached</h4>
-
-<p>Distributed caching + LRU replacement algorithm. Refer to <strong>[Design] Distributed Caching &ndash; memcached</strong> for more.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/20/top-n-from-sum-2-array/">[Google] Top N Values From Sum of 2 Arrays</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-20T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/20/top-n-from-sum-2-array/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=3213705">link</a></p>
-
-<blockquote><p>给定两个数组A，B，长度均为n，求A[0]+B[0],…,A[0]+B[n-1],…,A[n-1]+B[0],…,A[n-1]+B[n]总共n<sup>2</sup>个数的最大的n个值。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Use a Heap and then iteratively pop 1 and push 2 elements. Until n values has been filled.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int[] topN(int[] arr1, int[] arr2, int n) {
-    int[] ans = new int[n];
-    int index = n - 1;
-
-    PriorityQueue&lt;Pair&gt; heap = new PriorityQueue&lt;Pair&gt;(n,
-            new SpecialComparator(arr1, arr2));
-    Arrays.sort(arr1);
-    Arrays.sort(arr2);
-
-    Pair maxPair = new Pair(n - 1, n - 1);
-    heap.add(maxPair);
-
-    for (int i = 0; i &lt; n; i++) {
-        Pair next = heap.poll();
-        ans[index--] = arr1[next.x] + arr2[next.y];
-        if (next.y - 1 &gt;= 0) {
-            heap.add(new Pair(next.x, next.y - 1));
-        }
-        if (next.x - 1 &gt;= 0) {
-            heap.add(new Pair(next.x - 1, next.y));
-        }
-    }
-    return ans;
-}
-
-class SpecialComparator implements Comparator&lt;Pair&gt; {
-
-    int[] arr1, arr2;
-
-    public SpecialComparator(int[] a1, int[] a2) {
-        arr1 = a1;
-        arr2 = a2;
-    }
-
-    @Override
-    public int compare(Pair p1, Pair p2) {
-        // note that larger value shall go up top of the heap, so -1 * ...
-        return -1 * (arr1[p1.x] + arr2[p1.y] - arr1[p2.x] - arr2[p2.y]);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="8">&larr; Older</a>
@@ -943,7 +1011,7 @@ class SpecialComparator implements Comparator&lt;Pair&gt; {
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (157)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (160)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -959,23 +1027,23 @@ class SpecialComparator implements Comparator&lt;Pair&gt; {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/11/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/11/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/08/Intersection-of-Two-Linked-Lists/">[LeetCode 160] Intersection of Two Linked Lists </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/07/add-adsense-octopress/">[Octopress] Add Google AdSense to Octopress </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/07/Min-Stack/">[LeetCode 155] Min Stack </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/07/Maximum-Product-Subarray/">[LeetCode 152] Maximum Product Subarray </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/07/Find-Minimum-in-Rotated-Sorted-Array-II/">[LeetCode 154] Find Minimum in Rotated Sorted Array II </a>
       </li>
     
   </ul>
@@ -984,7 +1052,9 @@ class SpecialComparator implements Comparator&lt;Pair&gt; {
 
 
 
+<!--
 <script type="text/javascript" src="http://srvpub.com/adServe/banners?tid=29011_41781_0&size=120x600" ></script>
+&#8211;>
   
 </aside>
 

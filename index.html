@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Write a program to find the node at which the intersection of two singly linked lists begins. For example, the following two linked &hellip;">
+  <meta name="description" content="Question link Given two integers representing the numerator and denominator of a fraction, return the fraction in string format. If the fractional &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,464 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/fraction-to-recurring-decimal/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Given two integers representing the numerator and denominator of a fraction, return the fraction in string format.</p>
+
+<p>If the fractional part is repeating, enclose the repeating part in parentheses.</p>
+<p>
+For example,
+</p><ul>
+<li>Given numerator = 1, denominator = 2, return &#8220;0.5&#8221;.</li>
+<li>Given numerator = 2, denominator = 1, return &#8220;2&#8221;.</li>
+<li>Given numerator = 2, denominator = 3, return &#8220;0.(6)&#8221;.</li>
+</ul>
+<p></p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/Shangrila">@Shangrila</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/hash-table/">Hash Table</a>
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/math/">Math</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>Wow, this is just another incredible question on Leetcode. Quite a few difficult corner cases in the OJ.</p>
+
+<p>Current AC rate is first lowest at 12.4%.</p>
+
+<h3>Solution</h3>
+
+<p>There&rsquo;re 3 things that we must take note:</p>
+
+<ol>
+<li>Handle positive/nagetive cases well. Note that both numerator and denominator can be negative number. And there&rsquo;re also case like:</li>
+</ol>
+
+
+<blockquote><p>1 / -3 = -0.(3)</p></blockquote>
+
+<ol>
+<li>Note that we have to match the repetation of the actual numerator. Not the quotient. What do I mean by that?</li>
+</ol>
+
+
+<blockquote><p>1 / 6 = 0.1(6)</p>
+
+<p>1 / 333 = 0.(003)</p></blockquote>
+
+<ol>
+<li><p>Note below is <strong>how to override the equals() method</strong> (first one is wrong and second is right):</p>
+
+<p> public boolean equals(Pair p) {</p>
+
+<p> }</p>
+
+<p> public boolean equals(Object obj) {</p>
+
+<p> }</p></li>
+</ol>
+
+
+<p><strong>One more thing</strong>: Most other guys&#8217; solutions like <a href="http://www.programcreek.com/2014/03/leetcode-fraction-to-recurring-decimal-java/">this</a>, <a href="http://blog.csdn.net/ljiabin/article/details/42025037">this</a> and <a href="http://yuanhsh.iteye.com/blog/2176178">this</a> are using Hashing. It&rsquo;s fine and definitely good. I used linearly search though, which is a small time compromise. I am presenting my code below and please just consider it as something different. Keep in mind it&rsquo;s not the optimized solution.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class Solution {
+    public String fractionToDecimal(int numerator, int denominator) {
+        long quotient = (long) numerator / denominator;
+        long reminder = (long) numerator % denominator;
+        if (reminder == 0) {
+            return String.valueOf(quotient);
+        }
+
+        // The result has 3 parts: sign, integer part, and fraction part
+        // eg. -4 / 3 = -1 and the result of (1/3) = (3)
+        String sign = ((long) numerator * denominator &gt;= 0) ? "" : "-";
+        long integer = Math.abs(quotient);
+        String fraction = fraction(Math.abs((long)reminder), Math.abs((long)denominator));
+
+        // why do we have to seperate sign from integer?
+        // cuz 1 / -3 = -0.(3), while quotient is 0. 
+        // So, we can't simply concatenate quotient with fraction
+        return sign + integer + "." + fraction;
+    }
+
+    String fraction(long num, long denum) {
+        // eg. num = 1, denum = 4, should return "25"
+
+        List&lt;Pair&gt; list = new ArrayList&lt;Pair&gt;();
+        String result = "";
+        while (num != 0) {
+            num *= 10;
+            long digit = num / denum;
+
+            // eg. 1 / 333 = (003), so the pairs would be like this:
+            // {10, 0}, {100, 0}, {1000, 3}, {10, 0}...
+            Pair cur = new Pair(num, digit);
+            num %= denum;
+
+            // now add cur Pair to the list
+            if (list.indexOf(cur) == -1) {
+                list.add(cur);
+            } else {
+                // found a recurring dicimal in the previous output stream
+                int pos = list.indexOf(cur);
+                for (int i = 0; i &lt; pos; i++) {
+                    result += list.get(i).digit;
+                }
+                result += "(";
+                for (int i = pos; i &lt; list.size(); i++) {
+                    result += list.get(i).digit;
+                }
+                result += ")";
+                break;
+            }
+        }
+
+        // if there is recurring digit, the result should have already been generated
+        if (result.length() == 0) {
+            for (Pair p: list) {
+                result += p.digit;
+            }
+        }
+        return result;
+    }
+
+    class Pair {
+        long num;
+        long digit;
+
+        public Pair(long a, long b) {
+            num = a;
+            digit = b;
+        }
+
+        public boolean equals(Object obj) {
+            // note the equals interface passes in (Object obj)
+            // instead of a Pair object
+            Pair p = (Pair) obj;
+            return this.num == p.num &amp;&amp; this.digit == p.digit;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/11/Find-Peak-Element/">[LeetCode 162] Find Peak Element</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/11/Find-Peak-Element/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/find-peak-element/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>A peak element is an element that is greater than its neighbors.</p>
+
+<p>Given an input array where <code>num[i] ? num[i+1]</code>, find a peak element and return its index.</p>
+
+<p>The array may contain multiple peaks, in that case return the index to any one of the peaks is fine.</p>
+
+<p>You may imagine that <code>num[-1] = num[n] = -8</code>.</p>
+
+<p>For example, in array <code>[1, 2, 3, 1]</code>, 3 is a peak element and your function should return the index number 2.</p>
+
+<p class="showspoilers"><a href="#" onclick="showSpoilers(this); return false;">click to show spoilers.</a></p>
+
+<div class="spoilers" style="display: none;"><b>Note:</b>
+<p>Your solution should be in logarithmic complexity.</p>
+</div>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/array/">Array</a>
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/binary-search/">Binary Search</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>This basically is a binary search question. Instead of checking the values, we check the slope (upgoing or downslope).</p>
+
+<p><strong>The important point</strong> is the special cases like [1, 2, 3] or [3, 2, 1], we need to return the corner values. Well there&rsquo;re 2 ways to handle these corner cases.</p>
+
+<h3>Solution</h3>
+
+<p>First, referring to <a href="http://www.geeksforgeeks.org/find-a-peak-in-a-given-array/">G4G</a>, the corner case is handled in this way:</p>
+
+<pre><code>if ((mid == 0 || arr[mid-1] &lt;= arr[mid]) &amp;&amp;
+        (mid == n-1 || arr[mid+1] &lt;= arr[mid]))
+    return mid;
+</code></pre>
+
+<p>The code 1 below is doing similar things. That code is readable and easy to come up with. I recommend this solution during a interview.</p>
+
+<p>For those who are interested, there is a extremely concise solution thanks to <a href="http://blog.csdn.net/u010367506/article/details/41943309">Duplan</a>. I have the Java version posted below as code 2.</p>
+
+<h3>Code</h3>
+
+<p>Code 1</p>
+
+<pre><code>public class Solution {
+    public int findPeakElement(int[] num) {
+        if (num == null || num.length == 0) {
+            return 0;
+        } else if (num.length == 1) {
+            return 0;
+        } else if (num[0] &gt; num[1]) {
+            return 0;
+        } else if (num[num.length - 2] &lt; num[num.length - 1]) {
+            return num.length - 1;
+        }
+        // now the leftmost edge is increasing
+        // and the rightmost edge is also increasing backwards
+        return helper(num, 0, num.length - 1);
+    }
+
+    public int helper(int[] num, int left, int right) {
+        int mid = left + (right - left) / 2;
+        if (left + 2 == right) {
+            return mid;
+        } else if (num[mid] &gt; num[mid + 1]) {
+            // middle is decreasing, so peak on the left side
+            return helper(num, left, mid + 1);
+        } else {
+            return helper(num, mid, right);
+        }
+    }
+}
+</code></pre>
+
+<p>Code 2</p>
+
+<pre><code>public class Solution {
+    public int findPeakElement(int[] num) {
+        if (num == null || num.length == 0) {
+            return 0;
+        }
+        return helper(num, 0, num.length - 1);
+    }
+
+    public int helper(int[] num, int left, int right) {
+        int mid = left + (right - left) / 2;
+        if (left == right) {
+            return left;
+        } else if (num[mid] &gt; num[mid + 1]) {
+            // middle is decreasing, so peak on the left side
+            return helper(num, left, mid);
+        } else {
+            return helper(num, mid + 1, right);
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/11/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/11/Compare-Version-Numbers/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/compare-version-numbers/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Compare two version numbers <i>version1</i> and <i>version2</i>.<br>
+If <i>version1</i> &gt; <i>version2</i> return 1, if <i>version1</i> &lt; <i>version2</i> return -1, otherwise return 0.</p>
+
+<p>You may assume that the version strings are non-empty and contain only digits and the <code>.</code> character.<br>
+The <code>.</code> character does not represent a decimal point and is used to separate number sequences.<br>
+For instance, <code>2.5</code> is not &#8220;two and a half&#8221; or &#8220;half way to version three&#8221;, it is the fifth second-level revision of the second first-level revision.</p>
+
+<p>Here is an example of version numbers ordering:</p>
+<pre>0.1 &lt; 1.1 &lt; 1.2 &lt; 13.37</pre>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/string/">String</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>I&rsquo;ve seen a couple of interesting ideas on other people&rsquo;s blogs, including <a href="http://www.programcreek.com/2014/03/leetcode-compare-version-numbers-java/">one</a> that uses String.split() to convert input to an array, and <a href="http://www.meetqun.com/thread-3331-1-1.html">this one</a> which uses 2 pointers to compare.</p>
+
+<p>My solution might seem more intuitive for some. See below for my solution.</p>
+
+<h3>Solution</h3>
+
+<p>The idea is to identify what the current number is (before end of string, or before the next &lsquo;.&rsquo;). If there&rsquo;s no more string, value = 0, so the case of (1.0, 1) essentially equals. Without further ado, let&rsquo;s look at the code.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class Solution {
+    public int compareVersion(String version1, String version2) {
+        if (version1 == null || version2 == null) {
+            return 0;
+        }
+        return helper(version1, version2);
+    }
+
+    private int helper(String v1, String v2) {
+        if (v1.length() == 0 &amp;&amp; v2.length() == 0) {
+            return 0;
+        }
+
+        int num1 = 0;
+        int num2 = 0;
+
+        if (v1.length() != 0) {
+            int p1 = 0;
+            while (p1 &lt; v1.length() &amp;&amp; v1.charAt(p1) != '.') {
+                p1++;
+            }
+            num1 = Integer.parseInt(v1.substring(0, p1));
+            if (p1 &lt; v1.length()) p1++;
+            v1 = v1.substring(p1);
+        }
+
+        if (v2.length() != 0) {
+            int p2 = 0;
+            while (p2 &lt; v2.length() &amp;&amp; v2.charAt(p2) != '.') {
+                p2++;
+            }
+            num2 = Integer.parseInt(v2.substring(0, p2));
+            if (p2 &lt; v2.length()) p2++;
+            v2 = v2.substring(p2);
+        }
+
+        if (num1 != num2) {
+            return (num1 - num2) / Math.abs(num1 - num2);
+        } else {
+            return helper(v1, v2);
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -283,11 +741,13 @@ public class Solution {
 
 <p>Thanks for the effort from <a href="https://www.hi29.net/post/2013/11/30/octopresszen-mo-fang-adsense/">this reference</a>.</p>
 
-<h2>Some stats</h2>
+<h2>Updates</h2>
 
-<p><img class="middle" src="/assets/images/google-analytics-20150408.png"></p>
+<p>Apr 9th update: my re-submission of Google AdSense is not approached, because of &ldquo;not enough content&rdquo;. I don&rsquo;t know what else to do, so I switched to another ad platform.</p>
 
-<p>My blog has around 700 click per day.</p>
+<p>Apr 11th update: For the first time ever, my blog has more than 1,000 visit per day.</p>
+
+<p><img class="middle" src="/assets/images/google-analytics-20150411.png"></p>
 </div>
   
   
@@ -779,230 +1239,6 @@ What if <i>duplicates</i> are allowed?</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/14/speed-up-web-page-4/">[Design] Speed Up Webpage for Slow Connection (4)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-14T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/14/speed-up-web-page-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>What hijacks your load time</h3>
-
-<h4>1. Too Many HTTP Requests</h4>
-
-<p>This is the single biggest contributor to performance problems in most web pages.</p>
-
-<ol>
-<li><p>Concatenate scripts and stylesheets</p></li>
-<li><p>Combine images with sprites (put common images into a single large image file, then use CSS to position and selectively display the appropriate portion of the sprite image)</p></li>
-<li><p>Use fewer images, more CSS.</p></li>
-</ol>
-
-
-<h4>2. Minimal Client-side Processing</h4>
-
-<ol>
-<li><p>Validation on client. (eg. form input)</p></li>
-<li><p>Use web standards and MVC separation, making a maintainable, accessible, future-proof and max-performance website.</p>
-
-<p> Think of the HTML as the model, the CSS as the view, and the JavaScript as the controller. This separation tends to make code more efficient and maintainable, and makes many optimization techniques much more practical to apply.</p></li>
-<li><p>Push presentation code into the client tier (eg. Charts and graphs — push raw data to the client in JSON format, and use JavaScript and CSS to create pretty graphs.)</p></li>
-<li><p>Leverage Ajax techniques (only requiring small parts of the page to change in response to user actions)</p></li>
-</ol>
-
-
-<h4>3. Low Number of Parallel Requests</h4>
-
-<p>Fetch a script, parse and execute it, then fetch another one&hellip; this will use up all the available connections. There are things you can do to your HTML to allow virtually any browser to make many requests at once, which has a huge impact on latency.</p>
-
-<ol>
-<li><p>Use browser-appropriate domain sharding</p></li>
-<li><p>Use intelligent script loading</p></li>
-<li><p>Leverage Keep-Alive (reuse the same TCP connection for multiple HTTP request/response cycles)</p></li>
-</ol>
-
-
-<h4>4. Failure to leverage browser cache / local storage</h4>
-
-<ol>
-<li><p><a href="http://www.mnot.net/cache_docs/">HTTP cache overview</a></p></li>
-<li><p>Leverage local storage</p></li>
-</ol>
-
-
-<h4>5. Third-party widgets</h4>
-
-<ol>
-<li>Avoid third-party widgets!</li>
-<li>Try to use widgets that provide asynchronous implementations, so their inevitably terrible performance impacts their widget without dragging down your entire UX with it.</li>
-</ol>
-
-
-<h4>7. Failure to Use a Global Network</h4>
-
-<p>Amazon S3.</p>
-
-<p>Ref: <a href="http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/">http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/14/speed-up-web-page-3/">[Design] Speed Up Webpage for Slow Connection (3)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-14T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/14/speed-up-web-page-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Website KPI</h3>
-
-<p>There are <a href="https://community.compuwareapm.com/community/display/PUB/Best+Practices+on+Web+Site+Performance+Optimization">3 interesting phases</a> of a web site from an end-user performance perspective.</p>
-
-<ol>
-<li>First Impression</li>
-<li>OnLoad</li>
-<li>Fully Loaded Time.</li>
-</ol>
-
-
-<h3>Loading Time</h3>
-
-<p><strong>Question: what percentage of the time a user spends waiting for your page to load is spent after the HTML comes back to their browser</strong>?</p>
-
-<p>It is typically <strong><a href="http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/">over 90%</a></strong>.</p>
-
-<p>Most of the time users spend waiting on your website is spent after the HTML page has been retrieved by their browser.</p>
-
-<h4>Fetching the HTML is just the beginning</h4>
-
-<p><strong>In a nutshell, browsers parse your page’s HTML, sequentially discovering its assets</strong> (such as scripts, stylesheets, and images), requesting and then either parsing and executing them or displaying them as appropriate.</p>
-
-<p>But these assets are not simply fetched all at once. Instead, the <strong>browser opens a limited number of connections to the server(s)</strong> referenced by the page. There is <strong>overhead involved in establishing TCP and HTTP connections</strong>, and some <strong>unavoidable latency</strong> in pushing the request and response bytes back and forth across the network.</p>
-
-<p>So, in general, round trips between the browser and server are expensive. The structure of the HTML markup, the number and the ordering of its assets, are absolutely critical factors in its performance.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/14/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-14T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/14/speed-up-web-page-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>(&hellip; continued from last post)</p>
-
-<h4>9. Use a Content Delivery Network (CDN)</h4>
-
-<p>Your site’s speed is greatly affected by where the user’s location is, relative to your web server. The farther away they are, the more distance the data being transmitted has to travel. Having your content cached <strong>across multiple, strategically placed geographical locations</strong> helps take care of this problem.</p>
-
-<p>A CDN will often make your operating cost a little higher, but you definitely gain a speed bonus. Check out MaxCDN or <strong>Amazon Simple Storage Service (Amazon S3)</strong>.</p>
-
-<h4>10. Optimize Web Caching</h4>
-
-<p>Along with using caching systems, you should create websites that utilize <strong>web caching</strong> as much as possible. Web caching is when files are <strong>cached by the web browser</strong> for later use. Things that browsers can cache include CSS files, JavaScript files, and images.</p>
-
-<p>Aside from the basics, such as putting CSS and JavaScript code that are used in multiple pages in external files, there are many ways to make sure that you are caching your files in the most efficient way possible.</p>
-
-<p>For example, you can set HTTP response headers such as Expires and Last-Modified to reduce the need of re-downloading certain files when the user comes back to your site. To learn more, read about <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html">caching in HTTP</a> and <a href="https://developers.google.com/speed/docs/insights/LeverageBrowserCaching?csw=1#LeverageBrowserCaching">leveraging browser caching</a>.</p>
-
-<p>To set up HTTP Expires headers in Apache, read this tutorial on adding future expires headers.</p>
-
-<h4>Other mentions</h4>
-
-<ol>
-<li><p><strong>Avoid Resizing Images in HTML</strong> (using HTML’s width and height attributes), for the sake of smaller file size.</p></li>
-<li><p><strong>Optimize Image Sizes by Using the Correct File Format</strong>. Eg. JPG format often displays photographic images at smaller file sizes than PNG.</p></li>
-<li><p><strong>Optimize the Way You Write Code</strong>. For example, instead of using (h1)(em)Your heading(em)(h1), you can easily use CSS to make your headings italics.</p>
-
-<p> Writing code efficiently not only reduces file sizes of your HTML and CSS documents, but also makes it easier to maintain.</p></li>
-</ol>
-
-
-<p>Ref: <a href="http://sixrevisions.com/web-development/site-speed-performance/">http://sixrevisions.com/web-development/site-speed-performance/</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -1024,7 +1260,7 @@ What if <i>duplicates</i> are allowed?</p>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (157)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (160)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -1040,23 +1276,23 @@ What if <i>duplicates</i> are allowed?</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/11/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/11/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/08/Intersection-of-Two-Linked-Lists/">[LeetCode 160] Intersection of Two Linked Lists </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/07/add-adsense-octopress/">[Octopress] Add Google AdSense to Octopress </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/07/Min-Stack/">[LeetCode 155] Min Stack </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/07/Maximum-Product-Subarray/">[LeetCode 152] Maximum Product Subarray </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/07/Find-Minimum-in-Rotated-Sorted-Array-II/">[LeetCode 154] Find Minimum in Rotated Sorted Array II </a>
       </li>
     
   </ul>
@@ -1065,7 +1301,9 @@ What if <i>duplicates</i> are allowed?</p>
 
 
 
+<!--
 <script type="text/javascript" src="http://srvpub.com/adServe/banners?tid=29011_41781_0&size=120x600" ></script>
+&#8211;>
   
 </aside>
 

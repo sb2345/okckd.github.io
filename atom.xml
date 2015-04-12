@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="www.shuatiblog.com/"/>
-  <updated>2015-04-11T12:07:32+08:00</updated>
+  <updated>2015-04-12T14:50:31+08:00</updated>
   <id>www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,377 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode 166] Fraction to Recurring Decimal ]]></title>
+    <link href="www.shuatiblog.com/blog/2015/04/11/Fraction-to-Recurring-Decimal/"/>
+    <updated>2015-04-11T00:00:00+08:00</updated>
+    <id>www.shuatiblog.com/blog/2015/04/11/Fraction-to-Recurring-Decimal</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/fraction-to-recurring-decimal/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Given two integers representing the numerator and denominator of a fraction, return the fraction in string format.</p>
+
+<p>If the fractional part is repeating, enclose the repeating part in parentheses.</p>
+<p>
+For example,
+</p><ul>
+<li>Given numerator = 1, denominator = 2, return &#8220;0.5&#8221;.</li>
+<li>Given numerator = 2, denominator = 1, return &#8220;2&#8221;.</li>
+<li>Given numerator = 2, denominator = 3, return &#8220;0.(6)&#8221;.</li>
+</ul>
+<p></p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/Shangrila">@Shangrila</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/hash-table/">Hash Table</a>
+                  
+                  <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/math/">Math</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>Wow, this is just another incredible question on Leetcode. Quite a few difficult corner cases in the OJ.</p>
+
+<p>Current AC rate is first lowest at 12.4%.</p>
+
+<h3>Solution</h3>
+
+<p>There&rsquo;re 3 things that we must take note:</p>
+
+<ol>
+<li>Handle positive/nagetive cases well. Note that both numerator and denominator can be negative number. And there&rsquo;re also case like:</li>
+</ol>
+
+
+<blockquote><p>1 / -3 = -0.(3)</p></blockquote>
+
+<ol>
+<li>Note that we have to match the repetation of the actual numerator. Not the quotient. What do I mean by that?</li>
+</ol>
+
+
+<blockquote><p>1 / 6 = 0.1(6)</p>
+
+<p>1 / 333 = 0.(003)</p></blockquote>
+
+<ol>
+<li><p>Note below is <strong>how to override the equals() method</strong> (first one is wrong and second is right):</p>
+
+<p> public boolean equals(Pair p) {</p>
+
+<p> }</p>
+
+<p> public boolean equals(Object obj) {</p>
+
+<p> }</p></li>
+</ol>
+
+
+<p><strong>One more thing</strong>: Most other guys&#8217; solutions like <a href="http://www.programcreek.com/2014/03/leetcode-fraction-to-recurring-decimal-java/">this</a>, <a href="http://blog.csdn.net/ljiabin/article/details/42025037">this</a> and <a href="http://yuanhsh.iteye.com/blog/2176178">this</a> are using Hashing. It&rsquo;s fine and definitely good. I used linearly search though, which is a small time compromise. I am presenting my code below and please just consider it as something different. Keep in mind it&rsquo;s not the optimized solution.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class Solution {
+    public String fractionToDecimal(int numerator, int denominator) {
+        long quotient = (long) numerator / denominator;
+        long reminder = (long) numerator % denominator;
+        if (reminder == 0) {
+            return String.valueOf(quotient);
+        }
+
+        // The result has 3 parts: sign, integer part, and fraction part
+        // eg. -4 / 3 = -1 and the result of (1/3) = (3)
+        String sign = ((long) numerator * denominator &gt;= 0) ? "" : "-";
+        long integer = Math.abs(quotient);
+        String fraction = fraction(Math.abs((long)reminder), Math.abs((long)denominator));
+
+        // why do we have to seperate sign from integer?
+        // cuz 1 / -3 = -0.(3), while quotient is 0. 
+        // So, we can't simply concatenate quotient with fraction
+        return sign + integer + "." + fraction;
+    }
+
+    String fraction(long num, long denum) {
+        // eg. num = 1, denum = 4, should return "25"
+
+        List&lt;Pair&gt; list = new ArrayList&lt;Pair&gt;();
+        String result = "";
+        while (num != 0) {
+            num *= 10;
+            long digit = num / denum;
+
+            // eg. 1 / 333 = (003), so the pairs would be like this:
+            // {10, 0}, {100, 0}, {1000, 3}, {10, 0}...
+            Pair cur = new Pair(num, digit);
+            num %= denum;
+
+            // now add cur Pair to the list
+            if (list.indexOf(cur) == -1) {
+                list.add(cur);
+            } else {
+                // found a recurring dicimal in the previous output stream
+                int pos = list.indexOf(cur);
+                for (int i = 0; i &lt; pos; i++) {
+                    result += list.get(i).digit;
+                }
+                result += "(";
+                for (int i = pos; i &lt; list.size(); i++) {
+                    result += list.get(i).digit;
+                }
+                result += ")";
+                break;
+            }
+        }
+
+        // if there is recurring digit, the result should have already been generated
+        if (result.length() == 0) {
+            for (Pair p: list) {
+                result += p.digit;
+            }
+        }
+        return result;
+    }
+
+    class Pair {
+        long num;
+        long digit;
+
+        public Pair(long a, long b) {
+            num = a;
+            digit = b;
+        }
+
+        public boolean equals(Object obj) {
+            // note the equals interface passes in (Object obj)
+            // instead of a Pair object
+            Pair p = (Pair) obj;
+            return this.num == p.num &amp;&amp; this.digit == p.digit;
+        }
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode 162] Find Peak Element ]]></title>
+    <link href="www.shuatiblog.com/blog/2015/04/11/Find-Peak-Element/"/>
+    <updated>2015-04-11T00:00:00+08:00</updated>
+    <id>www.shuatiblog.com/blog/2015/04/11/Find-Peak-Element</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/find-peak-element/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>A peak element is an element that is greater than its neighbors.</p>
+
+<p>Given an input array where <code>num[i] ? num[i+1]</code>, find a peak element and return its index.</p>
+
+<p>The array may contain multiple peaks, in that case return the index to any one of the peaks is fine.</p>
+
+<p>You may imagine that <code>num[-1] = num[n] = -8</code>.</p>
+
+<p>For example, in array <code>[1, 2, 3, 1]</code>, 3 is a peak element and your function should return the index number 2.</p>
+
+<p class="showspoilers"><a href="#" onclick="showSpoilers(this); return false;">click to show spoilers.</a></p>
+
+<div class="spoilers" style="display: none;"><b>Note:</b>
+<p>Your solution should be in logarithmic complexity.</p>
+</div>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/array/">Array</a>
+                  
+                  <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/binary-search/">Binary Search</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>This basically is a binary search question. Instead of checking the values, we check the slope (upgoing or downslope).</p>
+
+<p><strong>The important point</strong> is the special cases like [1, 2, 3] or [3, 2, 1], we need to return the corner values. Well there&rsquo;re 2 ways to handle these corner cases.</p>
+
+<h3>Solution</h3>
+
+<p>First, referring to <a href="http://www.geeksforgeeks.org/find-a-peak-in-a-given-array/">G4G</a>, the corner case is handled in this way:</p>
+
+<pre><code>if ((mid == 0 || arr[mid-1] &lt;= arr[mid]) &amp;&amp;
+        (mid == n-1 || arr[mid+1] &lt;= arr[mid]))
+    return mid;
+</code></pre>
+
+<p>The code 1 below is doing similar things. That code is readable and easy to come up with. I recommend this solution during a interview.</p>
+
+<p>For those who are interested, there is a extremely concise solution thanks to <a href="http://blog.csdn.net/u010367506/article/details/41943309">Duplan</a>. I have the Java version posted below as code 2.</p>
+
+<h3>Code</h3>
+
+<p>Code 1</p>
+
+<pre><code>public class Solution {
+    public int findPeakElement(int[] num) {
+        if (num == null || num.length == 0) {
+            return 0;
+        } else if (num.length == 1) {
+            return 0;
+        } else if (num[0] &gt; num[1]) {
+            return 0;
+        } else if (num[num.length - 2] &lt; num[num.length - 1]) {
+            return num.length - 1;
+        }
+        // now the leftmost edge is increasing
+        // and the rightmost edge is also increasing backwards
+        return helper(num, 0, num.length - 1);
+    }
+
+    public int helper(int[] num, int left, int right) {
+        int mid = left + (right - left) / 2;
+        if (left + 2 == right) {
+            return mid;
+        } else if (num[mid] &gt; num[mid + 1]) {
+            // middle is decreasing, so peak on the left side
+            return helper(num, left, mid + 1);
+        } else {
+            return helper(num, mid, right);
+        }
+    }
+}
+</code></pre>
+
+<p>Code 2</p>
+
+<pre><code>public class Solution {
+    public int findPeakElement(int[] num) {
+        if (num == null || num.length == 0) {
+            return 0;
+        }
+        return helper(num, 0, num.length - 1);
+    }
+
+    public int helper(int[] num, int left, int right) {
+        int mid = left + (right - left) / 2;
+        if (left == right) {
+            return left;
+        } else if (num[mid] &gt; num[mid + 1]) {
+            // middle is decreasing, so peak on the left side
+            return helper(num, left, mid);
+        } else {
+            return helper(num, mid + 1, right);
+        }
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode 165] Compare Version Numbers ]]></title>
+    <link href="www.shuatiblog.com/blog/2015/04/11/Compare-Version-Numbers/"/>
+    <updated>2015-04-11T00:00:00+08:00</updated>
+    <id>www.shuatiblog.com/blog/2015/04/11/Compare-Version-Numbers</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/compare-version-numbers/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Compare two version numbers <i>version1</i> and <i>version2</i>.<br>
+If <i>version1</i> &gt; <i>version2</i> return 1, if <i>version1</i> &lt; <i>version2</i> return -1, otherwise return 0.</p>
+
+<p>You may assume that the version strings are non-empty and contain only digits and the <code>.</code> character.<br>
+The <code>.</code> character does not represent a decimal point and is used to separate number sequences.<br>
+For instance, <code>2.5</code> is not &#8220;two and a half&#8221; or &#8220;half way to version three&#8221;, it is the fifth second-level revision of the second first-level revision.</p>
+
+<p>Here is an example of version numbers ordering:</p>
+<pre>0.1 &lt; 1.1 &lt; 1.2 &lt; 13.37</pre>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/string/">String</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>I&rsquo;ve seen a couple of interesting ideas on other people&rsquo;s blogs, including <a href="http://www.programcreek.com/2014/03/leetcode-compare-version-numbers-java/">one</a> that uses String.split() to convert input to an array, and <a href="http://www.meetqun.com/thread-3331-1-1.html">this one</a> which uses 2 pointers to compare.</p>
+
+<p>My solution might seem more intuitive for some. See below for my solution.</p>
+
+<h3>Solution</h3>
+
+<p>The idea is to identify what the current number is (before end of string, or before the next &lsquo;.&rsquo;). If there&rsquo;s no more string, value = 0, so the case of (1.0, 1) essentially equals. Without further ado, let&rsquo;s look at the code.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class Solution {
+    public int compareVersion(String version1, String version2) {
+        if (version1 == null || version2 == null) {
+            return 0;
+        }
+        return helper(version1, version2);
+    }
+
+    private int helper(String v1, String v2) {
+        if (v1.length() == 0 &amp;&amp; v2.length() == 0) {
+            return 0;
+        }
+
+        int num1 = 0;
+        int num2 = 0;
+
+        if (v1.length() != 0) {
+            int p1 = 0;
+            while (p1 &lt; v1.length() &amp;&amp; v1.charAt(p1) != '.') {
+                p1++;
+            }
+            num1 = Integer.parseInt(v1.substring(0, p1));
+            if (p1 &lt; v1.length()) p1++;
+            v1 = v1.substring(p1);
+        }
+
+        if (v2.length() != 0) {
+            int p2 = 0;
+            while (p2 &lt; v2.length() &amp;&amp; v2.charAt(p2) != '.') {
+                p2++;
+            }
+            num2 = Integer.parseInt(v2.substring(0, p2));
+            if (p2 &lt; v2.length()) p2++;
+            v2 = v2.substring(p2);
+        }
+
+        if (num1 != num2) {
+            return (num1 - num2) / Math.abs(num1 - num2);
+        } else {
+            return helper(v1, v2);
+        }
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[LeetCode 160] Intersection of Two Linked Lists ]]></title>
@@ -166,11 +537,13 @@ public class Solution {
 
 <p>Thanks for the effort from <a href="https://www.hi29.net/post/2013/11/30/octopresszen-mo-fang-adsense/">this reference</a>.</p>
 
-<h2>Some stats</h2>
+<h2>Updates</h2>
 
-<p><img class="middle" src="www.shuatiblog.com/assets/images/google-analytics-20150408.png"></p>
+<p>Apr 9th update: my re-submission of Google AdSense is not approached, because of &ldquo;not enough content&rdquo;. I don&rsquo;t know what else to do, so I switched to another ad platform.</p>
 
-<p>My blog has around 700 click per day.</p>
+<p>Apr 11th update: For the first time ever, my blog has more than 1,000 visit per day.</p>
+
+<p><img class="middle" src="www.shuatiblog.com/assets/images/google-analytics-20150411.png"></p>
 ]]></content>
   </entry>
   
@@ -1025,155 +1398,6 @@ private String sequence(String s) {
     return sb.toString();
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Application Server vs. Web Server]]></title>
-    <link href="www.shuatiblog.com/blog/2015/02/11/Web-server-application-server/"/>
-    <updated>2015-02-11T00:00:00+08:00</updated>
-    <id>www.shuatiblog.com/blog/2015/02/11/Web-server-application-server</id>
-    <content type="html"><![CDATA[<h2>Overview</h2>
-
-<p>A Web server <strong>exclusively handles HTTP requests</strong>, whereas an application server <strong>serves business logic</strong> to application programs through any number of protocols (including HTTP).</p>
-
-<h4>Example: Apache Tomcat</h4>
-
-<p>web server + servlet container</p>
-
-<h4>Example: Glassfish</h4>
-
-<p><strong>application server</strong> (that supports EJB, JSF, JSP and servlets)</p>
-
-<h3>Apache Tomcat</h3>
-
-<p>Apache Tomcat is <a href="http://stackoverflow.com/a/2469984">a web server and</a> a Web container/Servlet container/JSP container (having all these names). It is used for strictly web-based applications but does not include the entire suite of capabilities of Java EE, thus not application server.</p>
-
-<p>Note: <strong>Tomcat is <a href="http://okckd.github.io/blog/2014/08/05/Web-server-application-server/">web container</a></strong> where as Apache is web server.</p>
-
-<h3>Servlet</h3>
-
-<p><a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/Servlet.html">A servlet</a> is <strong>a small Java program that runs within a Web server</strong>. Servlets receive and respond to requests from Web clients, usually across HTTP.</p>
-
-<h3>Glassfish</h3>
-
-<p>Tomcat is not Java EE container, but only a servlet container. <a href="http://stackoverflow.com/a/23563455">If you plan to</a> use full Java EE (which includes security and many other things), you have to switch from Tomcat to some of <strong>full Java EE application servers</strong>. Glassfish is one of them, others are TomEE, WildFly, IBM Websphere, Oracle Weblogic etc.</p>
-
-<h3>Web application</h3>
-
-<p><a href="http://www.service-architecture.com/articles/application-servers/j2ee_web_server_or_container.html">A Web application</a> runs within a <strong>Web container</strong> of a <strong>Web server</strong>. The Web container provides the runtime environment through components that provide naming context and life cycle management. A Web server <strong>may</strong> work with an EJB server to provide some of those services.</p>
-
-<p>Web applications are composed of web components and other data such as HTML pages. Web components can be <strong>servlets, JSP pages</strong> created with the JavaServer Pages™ technology, web filters, and web event listeners. These components execute in a web server and may respond to HTTP requests from web clients.</p>
-
-<h3>Application server VS. Web server, in short</h3>
-
-<p><strong>Web server</strong> just serves the web pages and it cannot enforce any application logic.</p>
-
-<p><strong>Application server</strong> maintains the application logic and serves the web pages in response to user request.</p>
-
-<p>That means application server can do both application logic maintanence and web page serving.</p>
-
-<p><strong>Final conclusion</strong>: Application server also contains the web server.</p>
-
-<blockquote><p>Application server = Web Server + EJB container.</p></blockquote>
-
-<h3>Web server Detail</h3>
-
-<p>A <a href="http://www.javaworld.com/article/2077354/learn-java/app-server-web-server-what-s-the-difference.html">Web server</a> <strong>handles the HTTP protocol</strong>. When the Web server receives an HTTP request, it responds with an HTTP response, such as sending back an HTML page.</p>
-
-<p>To process a request, a Web server may <strong>respond with a static HTML page</strong>, or delegate the <strong>dynamic response</strong> such as CGI scripts, JSPs (JavaServer Pages), servlets, ASPs (Active Server Pages), server-side JavaScripts, or some other server-side technology.</p>
-
-<p>Web server is used only for Jsp and Servlets and static functionality. It doesn’t support EJB and JMS and JAAS.</p>
-
-<h3>Application server Detail</h3>
-
-<p>An <a href="http://www.javaworld.com/article/2077354/learn-java/app-server-web-server-what-s-the-difference.html">Application server</a> <strong>exposes business logic to client applications</strong> through various protocols, possibly including HTTP. The clients can include GUIs (graphical user interface) running on a PC, a Web server, or even other application servers.</p>
-
-<p>In most cases, the server exposes this business logic through a component API, such as the EJB (Enterprise JavaBean) component model found on J2EE (Java 2 Platform, Enterprise Edition) application servers.</p>
-
-<h3>Example</h3>
-
-<p>There&rsquo;s <a href="http://www.javaworld.com/article/2077354/learn-java/app-server-web-server-what-s-the-difference.html">a nice example</a>: online store that provides real-time pricing.</p>
-
-<h4>Scenario 1: Web server</h4>
-
-<p>The Web server takes your request, then passes it to a server-side program able to handle the request. The server-side program looks up the pricing information from a database or a flat file. Once retrieved, the server-side program uses the information to formulate the HTML response, then the Web server sends it back to your Web browser.</p>
-
-<p>To summarize, a Web server simply processes HTTP requests <strong>by responding with HTML pages</strong>.</p>
-
-<h4>Scenario 2: Web server with an application server</h4>
-
-<p>Scenario 2 resembles Scenario 1 in that the Web server still delegates the response generation to a script. However, you can now put the business logic for the pricing lookup onto an application server.</p>
-
-<p>With that change, instead of the script knowing how to look up the data and formulate a response, the script can simply call the application server&rsquo;s lookup service. The script can then use the service&rsquo;s result when the script generates its HTML response.</p>
-
-<p>In this scenario, the application server serves the business logic for looking up a product&rsquo;s pricing information. That functionality doesn&rsquo;t say anything about display or how the client must use the information. Instead, the client and application server send data back and forth. When a client calls the application server&rsquo;s lookup service, the service simply looks up the information and returns it to the client.</p>
-
-<p>By separating the pricing logic from the HTML response-generating code, the pricing logic becomes far more reusable between applications. A second client, such as a cash register, could also call the same service as a clerk checks out a customer. In contrast, in Scenario 1 the pricing lookup service is not reusable because the information is embedded within the HTML page. To summarize, in Scenario 2&rsquo;s model, the Web server handles HTTP requests by replying with an HTML page while the application server serves application logic by processing pricing and availability requests.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Design Cache System (`)]]></title>
-    <link href="www.shuatiblog.com/blog/2015/02/10/design-cache-system/"/>
-    <updated>2015-02-10T00:00:00+08:00</updated>
-    <id>www.shuatiblog.com/blog/2015/02/10/design-cache-system</id>
-    <content type="html"><![CDATA[<h3>Easy version</h3>
-
-<p>[Q] Design a layer <strong>in front of a system</strong> which cache the last n requests and the responses to them from the system.</p>
-
-<p><strong><a href="http://blog.csdn.net/hexinuaa/article/details/6630384">Solution</a></strong>:</p>
-
-<p>[a] When a request comes look it up in the cache and if it hits then return the response from here and do not pass the request to the system</p>
-
-<p>[b] If the request is not found in the cache then pass it on to the system</p>
-
-<p>[c] Since cache can only store the last n requests, Insert the n+1th request in the cache and delete one of the older requests from the cache</p>
-
-<p>[d]Design one cache such that all operations can be done in O(1) – lookup, delete and insert.</p>
-
-<h3>Distributed Cache</h3>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Number of slices ]]></title>
-    <link href="www.shuatiblog.com/blog/2015/02/09/number-of-slices/"/>
-    <updated>2015-02-09T00:00:00+08:00</updated>
-    <id>www.shuatiblog.com/blog/2015/02/09/number-of-slices</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5090693043191808">link</a></p>
-
-<blockquote><p>Calculate the number of slices. Slice means that the difference between the maximum and minimum in the slice &lt;= 2.</p>
-
-<p>eg. Given array 3 5 7 6 3.</p>
-
-<p>There&rsquo;re 10: (0,0) (1,1) (2,2) (3,3) (4,4) (5,5) (0,1) (1,2) (1,3) (2,3).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>If only asked to output the total number of such slices, we can do it in <strong>O(n) using sliding-window-like algorithm</strong>, with the help of addtional queue-like data structure.</p>
-
-<p>This is <strong>a very difficult question</strong>! Quoted from the <a href="http://www.careercup.com/question?id=5090693043191808">top answer</a>:</p>
-
-<blockquote><p>The basic idea is that you can start with arr[0] and then see <strong>how many more elements you can include before you violate the max -min &lt;= K constraint</strong>. When you reach some index j you can no longer include, you know the maximum subarray starting at index 0 is arr[0&hellip;j-1], and you can count j different subarrays there.</p>
-
-<p>&hellip; you then start with a[1]. Now [1&hellip;j-1] has to be valid, so you try to advance the right boundary again (try arr[1&hellip;j], then arr[1&hellip;j+1]) and so on until again you reach a point past which you can&rsquo;t advance. Then you&rsquo;ll try string at a[2], and so on. This is what they mean when they talk about <strong>&ldquo;crawling&rdquo; over the array</strong>.</p>
-
-<p>The key issue here is how you will check whether a particular subarray is valid efficiently&hellip;</p></blockquote>
-
-<p>Sliding window is explained above. Now, <strong>the minMaxQueue</strong> explain in <a href="https://codility.com/media/train/solution-count-bounded-slices.pdf">this pdf</a>:</p>
-
-<blockquote><p>The PDF &hellip; have <strong>1 queue each</strong> (i.e. 2 queues in total) for min and max (the min is treated analogous to the max case).</p>
-
-<p>For maxQueue, whenever a new value comes in the max queue, they remove all values less than the value, since those <strong>can never be the max</strong>. For that reason the queue&rsquo;s values are in descending order. And the max at any given time is the first element.</p></blockquote>
-
-<p>In this way, getting min/max is O(1), thus entire solution is O(n). Nice question!</p>
-
-<h3>Code</h3>
-
-<p>Not written.</p>
 ]]></content>
   </entry>
   
