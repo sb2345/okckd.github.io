@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Please get the least number after deleting k digits from the input number. For example, if the input number is 24635, the least number &hellip;">
+  <meta name="description" content="Question link Convert a BST to a sorted circular doubly-linked list in-place. Think of the left and right pointers as synonymous to the previous and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,286 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/24/Convert-BST-To-Circular-DLL/">[LeetCode Plus] Convert BST to Circular DLL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/07/24/Convert-BST-To-Circular-DLL/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">link</a></p>
+
+<blockquote><p>Convert a BST to a sorted circular doubly-linked list in-place.</p>
+
+<p>Think of the left and right pointers as synonymous to the previous and next pointers in a doubly-linked list.</p></blockquote>
+
+<h3>One: Inorder</h3>
+
+<p>This question can be solved with <strong>inorder traversal with the help of a &lsquo;pre&rsquo; pointer</strong>.</p>
+
+<p>This solution is recommended by L33tcode, but not very intuitive, and difficult to write. The C++ code is attached below. <a href="http://leetcode.com/2010/11/convert-binary-search-tree-bst-to.html">source</a>.</p>
+
+<pre><code>void treeToDoublyList(Node *p, Node *&amp; prev, Node *&amp; head) {
+  if (!p) return;
+  treeToDoublyList(p-&gt;left, prev, head);
+  // current node's left points to previous node
+  p-&gt;left = prev;
+  if (prev)
+    prev-&gt;right = p;  // previous node's right points to current node
+  else
+    head = p; // current node (smallest element) is head of
+              // the list if previous node is not available
+  // as soon as the recursion ends, the head's left pointer 
+  // points to the last node, and the last node's right pointer
+  // points to the head pointer.
+  Node *right = p-&gt;right;
+  head-&gt;left = p;
+  p-&gt;right = head;
+  // updates previous node
+  prev = p;
+  treeToDoublyList(right, prev, head);
+}
+
+// Given an ordered binary tree, returns a sorted circular
+// doubly-linked list. The conversion is done in-place.
+Node* treeToDoublyList(Node *root) {
+  Node *prev = NULL;
+  Node *head = NULL;
+  treeToDoublyList(root, prev, head);
+  return head;
+}
+</code></pre>
+
+<h3>Two: Divide and conquer</h3>
+
+<p>The good and intuitive solution is to do D&amp;C and <strong>solve left and right recursively</strong>. Do note how the circular linked lists are merged, and be careful when replacing the pointers.</p>
+
+<p>The Java code is posted below. <a href="http://cslibrary.stanford.edu/109/TreeListRecursion.html">source</a></p>
+
+<pre><code>public static TreeNode convertBstToDLL(TreeNode root) {
+    // convert bst to circular dll 
+    if (root == null)
+        return (null);
+
+    // Recursively do the subtrees (leap of faith!)
+    TreeNode lln = convertBstToDLL(root.left);
+    TreeNode rrn = convertBstToDLL(root.right);
+
+    // Make root a circular DLL
+    root.left = root;
+    root.right = root;
+
+    // At this point we have three lists, merge them
+    lln = appendDLL(lln, root);
+    lln = appendDLL(lln, rrn);
+
+    return lln;
+}
+
+public static TreeNode appendDLL(TreeNode a, TreeNode b) {
+    // append 2 circular DLL
+    if (a == null)
+        return b;
+    if (b == null)
+        return a;
+
+    TreeNode aLast = a.left;
+    TreeNode bLast = b.left;
+
+    aLast.right = b;
+    b.left = aLast;
+    bLast.right = a;
+    a.left = bLast;
+
+    return a;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/23/Stack-with-2-queues/">[Question] Implement Stack Using Two Queues</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-23T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/07/23/Stack-with-2-queues/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/688276/implement-stack-using-two-queues">link</a></p>
+
+<blockquote><p>Given two queues with their standard operations (enqueue, dequeue, isempty, size), implement a stack with its standard operations (pop, push, isempty, size).</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>There should be TWO versions of the solution.</p>
+
+<ol>
+<li><p><strong>Version A</strong>: The stack should be efficient when <strong>pushing</strong> an item.</p></li>
+<li><p><strong>Version B</strong>: The stack should be efficient when <strong>popping</strong> an item.</p></li>
+</ol>
+
+
+<h3>Version A</h3>
+
+<p>The stack should be efficient when <strong>pushing</strong> an item.</p>
+
+<ol>
+<li><p>push:</p>
+
+<ol>
+<li>enqueue in queue1</li>
+</ol>
+</li>
+<li><p>pop:</p>
+
+<ol>
+<li>while size of queue1 is bigger than 1, pipe dequeued items from queue1 into queue2</li>
+<li>dequeue and return the last item of queue1, then switch the names of queue1 and queue2</li>
+</ol>
+</li>
+</ol>
+
+
+<h3>Version B</h3>
+
+<p>The stack should be efficient when <strong>popping</strong> an item.</p>
+
+<ol>
+<li><p>push:</p>
+
+<ol>
+<li>enqueue in queue2</li>
+<li>enqueue all items of queue1 in queue2, then switch the names of queue1 and queue2</li>
+</ol>
+</li>
+<li><p>pop:</p>
+
+<ol>
+<li>deqeue from queue1</li>
+</ol>
+</li>
+</ol>
+
+
+<p><a href="http://stackoverflow.com/a/688299">reference</a></p>
+
+<p>Learn and compare with another question <strong>[Question] Implement Queue Using Stacks</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong>, Version A.</p>
+
+<pre><code>public class StackBuiltWithTwoQueue {
+
+    // http://stackoverflow.com/questions/688276/implement-stack-using-two-queues
+
+    Queue&lt;Integer&gt; q1 = new LinkedList&lt;Integer&gt;();
+    Queue&lt;Integer&gt; q2 = new LinkedList&lt;Integer&gt;();
+
+    public static void main(String[] args) {
+        StackBuiltWithTwoQueue stack = new StackBuiltWithTwoQueue();
+        stack.push(1);
+        stack.push(2);
+        stack.push(3);
+        System.out.println(stack.pop());
+        stack.push(4);
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        stack.push(5);
+        stack.push(6);
+        stack.push(7);
+        stack.push(8);
+        stack.push(9);
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+        System.out.println(stack.pop());
+    }
+
+    public void push(int val) {
+        q1.offer(val);
+    }
+
+    public int pop() {
+        if (q1.isEmpty()) {
+            System.out.print("Stack is empty now ");
+            return -1;
+        }
+        while (q1.size() &gt; 1) {
+            q2.offer(q1.poll());
+        }
+        int topVal = q1.poll();
+        Queue&lt;Integer&gt; temp = q1;
+        q1 = q2;
+        q2 = temp;
+        return topVal;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -852,168 +1132,6 @@ bundle install
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/19/F-question-list/">[Facebook] F Question List</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/07/19/F-question-list/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Leetcode Questions</h3>
-
-<ol>
-<li>Inverse Integer</li>
-<li>Anagrams</li>
-<li>Edit distance</li>
-</ol>
-
-
-<h3>Difficult Questions</h3>
-
-<ol>
-<li>Binary hamming code</li>
-<li>有一个长度为n的字符串str，有非常多的关键字query（长度不超过10），需要判断每个关键字是否是str的子串。</li>
-<li>Given a dictionary and some words. Check whether these words exists in the dictionary.</li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/13/Twos-complement/">[Design] Two&#8217;s Complement</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-13T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/07/13/Twos-complement/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Overview</h3>
-
-<p>Two&rsquo;s complement is a binary signed number representation.</p>
-
-<p>Negative values are taken by subtracting the number from 2<sup>n</sup>. This is the most common method of representing signed integers on computers.</p>
-
-<h3>Example</h3>
-
-<table class="wikitable sortable jquery-tablesorter" style="text-align: center;">
-<thead><tr>
-<th class="headerSort bg-color bg-img font-color" tabindex="0" role="columnheader button" title="Sort ascending">Bits</th>
-<th class="headerSort bg-color bg-img font-color" tabindex="0" role="columnheader button" title="Sort ascending">Unsigned value</th>
-<th class="headerSort bg-color bg-img font-color" tabindex="0" role="columnheader button" title="Sort ascending">2&#8217;s complement value</th>
-</tr></thead><tbody>
-<tr>
-<td class="bg-color bg-img font-color">0111 1111</td>
-<td align="right" class="bg-color bg-img font-color">127 </td>
-<td align="right" class="bg-color bg-img font-color">127 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">0111 1110</td>
-<td align="right" class="bg-color bg-img font-color">126 </td>
-<td align="right" class="bg-color bg-img font-color">126 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">0000 0010</td>
-<td align="right" class="bg-color bg-img font-color">2 </td>
-<td align="right" class="bg-color bg-img font-color">2 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">0000 0001</td>
-<td align="right" class="bg-color bg-img font-color">1 </td>
-<td align="right" class="bg-color bg-img font-color">1 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">0000&nbsp;0000</td>
-<td align="right" class="bg-color bg-img font-color">0 </td>
-<td align="right" class="bg-color bg-img font-color">0 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1111 1111</td>
-<td align="right" class="bg-color bg-img font-color">255 </td>
-<td align="right" class="bg-color bg-img font-color">−1 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1111 1110</td>
-<td align="right" class="bg-color bg-img font-color">254 </td>
-<td align="right" class="bg-color bg-img font-color">−2 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1000 0010</td>
-<td align="right" class="bg-color bg-img font-color">130 </td>
-<td align="right" class="bg-color bg-img font-color">−126 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1000 0001</td>
-<td align="right" class="bg-color bg-img font-color">129 </td>
-<td align="right" class="bg-color bg-img font-color">−127 </td>
-</tr>
-<tr>
-<td class="bg-color bg-img font-color">1000 0000</td>
-<td align="right" class="bg-color bg-img font-color">128 </td>
-<td align="right" class="bg-color bg-img font-color">−128 </td>
-</tr>
-</tbody><tfoot></tfoot></table>
-
-
-<br/>
-
-
-<p>So basically &lsquo;1111 1111&rsquo; means -1, and &lsquo;1000 0000&rsquo; means -128.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="35">&larr; Older</a>
@@ -1041,7 +1159,7 @@ bundle install
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (119)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (121)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1053,6 +1171,14 @@ bundle install
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate within K Distance </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/12/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
       </li>
     
@@ -1062,14 +1188,6 @@ bundle install
     
       <li class="post">
         <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/08/Intersection-of-Two-Linked-Lists/">[LeetCode 160] Intersection of Two Linked Lists </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/07/add-adsense-octopress/">[Octopress] Add Google AdSense to Octopress </a>
       </li>
     
   </ul>
