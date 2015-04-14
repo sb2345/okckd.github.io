@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[ItInt5] Excel Decimal Conversion"
+title: "[ItInt5] Excel Decimal Conversion "
 comments: true
 category: Question
 tags: [ ItInt5 ]
@@ -58,7 +58,7 @@ __written by me__
         return sum;
     }
 
-__updated code__: we can actually do it recursively. The code is much more concise (the code is found in the eclipse project). 
+__updated code__: we can actually do it recursively. The code is much more concise. 
 
     //将十进制数转换为excel数
 	public String decToExcel(int decNum) {

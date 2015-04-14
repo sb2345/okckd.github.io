@@ -60,7 +60,7 @@ __The brute force solution in this case__ does not sound like a bad idea. This i
 
 So, this BF code is also posted below. 
 
-Just one more thing. I tested the __exact same BF code written in C++__. Compared to the __420ms__ it took Java to pass OJ test, C++ takes __8ms__ only! I was kind of shocked.
+Just one more thing. I tested the __exact same BF code written in C++__. Compared to the __420ms__ it took Java to pass OJ test, C++ takes __8ms__ only! I was a bit shocked.
 
 ### Code
 
