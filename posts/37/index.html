@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Given an array &ldquo;nums&rdquo; of integers and an int &ldquo;k&rdquo;, Partition the array (i.e move the elements in &ldquo;nums& &hellip;">
+  <meta name="description" content="Question link Given a value N, if we want to make change for N cents, and we have infinite supply of each of S = { S1, S2, .. , Sm} valued coins, how &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,344 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/30/Coin-Changing-Problem/">[Question] Coin Change Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/06/30/Coin-Changing-Problem/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/dynamic-programming-set-7-coin-change/">link</a></p>
+
+<blockquote><p>Given a value N, if we want to make change for N cents, and we have infinite supply of each of S = { S1, S2, .. , Sm} valued coins, how many ways can we make the change? The order of coins doesn’t matter.</p>
+
+<p>For example, for N = 4 and S = {1,2,3}, there are four solutions: {1,1,1,1},{1,1,2},{2,2},{1,3}. So output should be 4. For N = 10 and S = {2, 5, 3, 6}, there are five solutions: {2,2,2,2,2}, {2,2,3,3}, {2,2,6}, {2,3,5} and {5,5}. So the output should be 5.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>I did this question before, it&rsquo;s not a DFS search question, because question only asks the total number of ways.</p>
+
+<p>So what method do we use? Remember the 4 types of DP?</p>
+
+<blockquote><ol>
+<li><p>Input cannot sort</p></li>
+<li><p>Find minimum/maximum result</p></li>
+<li><p>Check the feasibility</p></li>
+<li><p>Count all possible solutions</p></li>
+</ol>
+</blockquote>
+
+<p>So, this is a DP question!</p>
+
+<h3>Solution</h3>
+
+<p>The solutions in in two parts:</p>
+
+<ol>
+<li>Solutions that do not contain mth coin (or Sm).</li>
+<li>Solutions that contain at least one Sm.</li>
+</ol>
+
+
+<p>Using m to denote the types of coin used, and n denote the total value, the equation is:</p>
+
+<blockquote><p>count( S, m, n ) = count( S, m &ndash; 1, n ) + count( S, m, n-S[m-1] )</p></blockquote>
+
+<p><strong>Solution one is using recursion</strong>. It&rsquo;s not good because of a lot of repeated calculation. But the code is extremely easy to write:</p>
+
+<pre><code>int count( int S[], int m, int n ) {
+    // If n is 0 then there is 1 solution (do not include any coin)
+    if (n == 0)
+        return 1;
+    // If n is less than 0 then no solution exists
+    if (n &lt; 0)
+        return 0;
+    // If there are no coins and n is greater than 0, then no solution exist
+    if (m &lt;=0 &amp;&amp; n &gt;= 1)
+        return 0;
+    // count is sum of solutions (i) including S[m-1] (ii) excluding S[m-1]
+    return count( S, m - 1, n ) + count( S, m, n-S[m-1] );
+}
+</code></pre>
+
+<p><strong>Solution two is DP</strong>, it&rsquo;s a little hard to write actually. Do it carefully.</p>
+
+<h3>Code</h3>
+
+<p>C++ code not written by me:</p>
+
+<pre><code>int count( int S[], int m, int n ) {
+    int i, j, x, y;
+
+    // We need n+1 rows as the table is consturcted in bottom up manner using 
+    // the base case 0 value case (n = 0)
+    int table[n+1][m];
+
+    // Fill the enteries for 0 value case (n = 0)
+    for (i=0; i&lt;m; i++)
+        table[0][i] = 1;
+
+    // Fill rest of the table enteries in bottom up manner  
+    for (i = 1; i &lt; n+1; i++)
+    {
+        for (j = 0; j &lt; m; j++)
+        {
+            // Count of solutions including S[j]
+            x = (i-S[j] &gt;= 0)? table[i - S[j]][j]: 0;
+
+            // Count of solutions excluding S[j]
+            y = (j &gt;= 1)? table[i][j-1]: 0;
+
+            // total count
+            table[i][j] = x + y;
+        }
+    }
+    return table[n][m-1];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/28/Single-Number-IV/">[Question] Single Number IV</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/06/28/Single-Number-IV/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/find-the-two-repeating-elements-in-a-given-array/">link</a></p>
+
+<blockquote><p>You are given an array of n+2 elements. All elements of the array are in range 1 to n. And all elements occur once except two numbers which occur twice. Find the two repeating numbers.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Solution 1</strong>: User count array. O(n) time and O(n) space. Not efficient enough.</p>
+
+<p><strong>Solution 2</strong>: Calculate sum of x,y and product of x,y. O(n) time and O(1) space, but there&rsquo;s risk of overflow.</p>
+
+<p><strong>Solution 3</strong>: XOR. Add number 1 to N to the array, and this becomes Single Number III. O(n) time and O(1) space.</p>
+
+<p>There is also a <strong>solution 4</strong>: Use array elements as index. This is the same method as used in <strong>[LeetCode 41] First Missing Positive</strong>.</p>
+
+<h3>Code</h3>
+
+<p>C++ Code from GFG</p>
+
+<pre><code>void printRepeating(int arr[], int size)
+{
+  int xor = arr[0]; /* Will hold xor of all elements */
+  int set_bit_no;  /* Will have only single set bit of xor */
+  int i;
+  int n = size - 2;
+  int x = 0, y = 0;
+
+  /* Get the xor of all elements in arr[] and {1, 2 .. n} */
+  for(i = 1; i &lt; size; i++)
+    xor ^= arr[i];
+  for(i = 1; i &lt;= n; i++)
+    xor ^= i;
+
+  /* Get the rightmost set bit in set_bit_no */
+  set_bit_no = xor &amp; ~(xor-1);
+
+  /* Now divide elements in two sets by comparing rightmost set
+   bit of xor with bit at same position in each element. */
+  for(i = 0; i &lt; size; i++)
+  {
+    if(arr[i] &amp; set_bit_no)
+      x = x ^ arr[i]; /*XOR of first set in arr[] */
+    else
+      y = y ^ arr[i]; /*XOR of second set in arr[] */
+  }
+  for(i = 1; i &lt;= n; i++)
+  {
+    if(i &amp; set_bit_no)
+      x = x ^ i; /*XOR of first set in arr[] and {1, 2, ...n }*/
+    else
+      y = y ^ i; /*XOR of second set in arr[] and {1, 2, ...n } */
+  }
+
+  printf("\n The two repeating elements are %d &amp; %d ", x, y);
+}     
+
+
+int main()
+{
+  int arr[] = {4, 2, 4, 5, 2, 3, 1};
+  int arr_size = sizeof(arr)/sizeof(arr[0]);  
+  printRepeating(arr, arr_size);
+  getchar();
+  return 0;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/28/Single-Number-III/">[Question] Single Number III</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/06/28/Single-Number-III/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/find-two-non-repeating-elements-in-an-array-of-repeating-elements/">link</a></p>
+
+<blockquote><p>In an array, all numbers in the array repeat twice except two numbers, which repeat only once.</p>
+
+<p>Assume all the numbers are placed randomly. Find the 2 numbers.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>The main idea of the solution is how to remove repeated elements. It&rsquo;s definitely <strong>using XOR</strong>.</p>
+
+<p>We need to try solve this problem like we did in &lsquo;Single number 1&rsquo; but how? We can divide the array into 2 part, each part containing 1 non-repeating number.</p>
+
+<p>The difficulty and the trick, is how do we divide?</p>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>xor = arr[0]^arr[1]^arr[2]&hellip;..arr[n-1]</p></li>
+<li><p>We can extract the rightmost set bit of any number n by taking ( n &amp; ~(n-1))</p></li>
+<li><p>We take any set bit of xor and <strong>divide the elements of the array in two sets</strong> – one set of elements with same bit set and other set with same bit not set.</p>
+
+<p> By doing so, we will get x in one set and y in another set.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>C++ Code from GFG</p>
+
+<pre><code>/* This finction sets the values of *x and *y to nonr-epeating
+ elements in an array arr[] of size n*/
+void get2NonRepeatingNos(int arr[], int n, int *x, int *y)
+{
+  int xor = arr[0]; /* Will hold xor of all elements */
+  int set_bit_no;  /* Will have only single set bit of xor */
+  int i;
+  *x = 0;
+  *y = 0;
+
+  /* Get the xor of all elements */
+  for(i = 1; i &lt; n; i++)
+   xor ^= arr[i];
+
+  /* Get the rightmost set bit in set_bit_no */
+  set_bit_no = xor &amp; ~(xor-1);
+
+  /* Now divide elements in two sets by comparing rightmost set
+   bit of xor with bit at same position in each element. */
+  for(i = 0; i &lt; n; i++)
+  {
+    if(arr[i] &amp; set_bit_no)
+     *x = *x ^ arr[i]; /*XOR of first set */
+    else
+     *y = *y ^ arr[i]; /*XOR of second set*/
+  }
+}
+
+/* Driver program to test above function */
+int main()
+{
+  int arr[] = {2, 3, 7, 9, 11, 2, 3, 11};
+  int *x = (int *)malloc(sizeof(int));
+  int *y = (int *)malloc(sizeof(int));
+  get2NonRepeatingNos(arr, 8, x, y);
+  printf("The non-repeating elements are %d and %d", *x, *y);
+  getchar();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1219,409 +1557,6 @@ Remove:
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Majority-Number/">[LintCode] Majority Number</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/28/Majority-Number/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/majority-number/">link</a></p>
-
-<blockquote><p>How to find the majority elelment in an array in O(n)?</p>
-
-<p>Note: The majority element is the element that occurs more than half of the size of the array</p>
-
-<p>Example: For [1, 1, 1, 1, 2, 2, 2], return 1</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>This question is called <strong><a href="http://www.cs.utexas.edu/~moore/best-ideas/mjrty/example.html">Moore’s Voting Algorithm</a></strong> (or Majority Vote Algorithm).</p>
-
-<p>Psudo-code from <a href="http://www.geeksforgeeks.org/majority-element/">GFG</a>:</p>
-
-<pre><code>findCandidate(a[], size)
-1.  Initialize index and count of majority element
-     maj_index = 0, count = 1
-2.  Loop for i = 1 to size – 1
-    (a)If a[maj_index] == a[i]
-        count++
-    (b)Else
-        count--;
-    (c)If count == 0
-        maj_index = i;
-        count = 1
-3.  Return a[maj_index]
-</code></pre>
-
-<p>Sometimess majority element does not exist, so you might want to do another iteration to double check.</p>
-
-<p>If the check shows invalid, then there&rsquo;s no majoirty element.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int majorityNumber(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    if (nums == null || nums.size() == 0) {
-        return 0;
-    }
-    int num = nums.get(0);
-    int count = 1;
-    for (int i = 1; i &lt; nums.size(); i++) {
-        if (count == 0) {
-            num = nums.get(i);
-            count = 1;
-        } else if (nums.get(i) == num) {
-            count++;
-        } else {
-            count--;
-        }
-    }
-    return num;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/27/Topology-sorting/">[Question] Topology Sort (Undone)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/27/Topology-sorting/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Topological_sorting">link</a></p>
-
-<blockquote><p>Topological ordering of a directed graph is a linear ordering of its vertices such that <strong>for every directed edge uv from vertex u to vertex v, u comes before v in the ordering</strong>.</p>
-
-<p>A topological ordering is possible if and only if the graph has no directed cycles, that is, if it is a <strong>directed acyclic graph (DAG)</strong>.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Canonical application of toposort is to schedule tasks with dependency (project management etc.) It&rsquo;s also used for computing formulas, logic synthesis, order of compilation (&lsquo;make&rsquo; command) and data serialization.</p>
-
-<p><img class="middle" src="/assets/images/topology_sort_example.png"></p>
-
-<h3>Solution</h3>
-
-<p>The usual algorithms have <strong>linear run-time</strong>, i.e. O(V + E).</p>
-
-<blockquote><p>First step is to find a list of &ldquo;start nodes&rdquo; which have no incoming edges. Then insert them into a set S and delete it. At least one such node must exist in an <strong>directed acyclic graph</strong>. From a university <a href="https://courses.cs.washington.edu/courses/cse326/03wi/lectures/RaoLect20.pdf">lecture</a>.</p></blockquote>
-
-<p>From Wiki:</p>
-
-<pre><code>L ← Empty list that will contain the sorted elements
-S ← Set of all nodes with no incoming edges
-while S is non-empty do
-    remove a node n from S
-    add n to tail of L
-    for each node m with an edge e from n to m do
-        remove edge e from the graph
-        if m has no other incoming edges then
-            insert m into S
-if graph has edges then
-    return error (graph has at least one cycle)
-else 
-    return L (a topologically sorted order)
-</code></pre>
-
-<p>If the graph is a DAG, <strong>a solution will be contained in the list L</strong> (the solution is not necessarily unique). Otherwise, the graph must have at least one cycle and therefore <strong>a topological sorting is impossible</strong>.</p>
-
-<h3>Code</h3>
-
-<p>The solution comes from <a href="http://codereview.stackexchange.com/questions/44689/topological-sort-in-java">here</a>.</p>
-
-<p><img class="middle" src="/assets/images/topology_sort.png" width="250" height="250"></p>
-
-<pre><code>public class Graph {
-    private int vertices;
-    private Set&lt;Node&gt; nodes = new HashSet&lt;Node&gt;();
-
-    public Graph(int vertices) {
-        this.vertices = vertices;
-    }
-
-    public void addVertex(Node node) {
-        this.nodes.add(node);
-    }
-
-    public Set&lt;Node&gt; topologicalSort() {
-        Queue&lt;Node&gt; q = new LinkedList&lt;Node&gt;();
-        Set&lt;Node&gt; topoSort = new LinkedHashSet&lt;Node&gt;();
-        int vertexProcessesCtr = 0;
-        for (Node m : this.nodes) {
-            vertexProcessesCtr = addToQueue(m, topoSort, vertexProcessesCtr, q);
-        }
-        while (!q.isEmpty()) {
-            Node m = q.poll();
-            for (Node child : m.getAdjacenctNode()) {
-                int indeq = child.getInDegree() - 1;
-                child.setInDegree(indeq);
-                vertexProcessesCtr = addToQueue(child, topoSort,
-                        vertexProcessesCtr, q);
-            }
-        }
-        if (vertexProcessesCtr &gt; this.vertices) {
-            System.out.println();
-        }
-        return topoSort;
-    }
-
-    private int addToQueue(Node node, Set&lt;Node&gt; topoSort, int vertexProcess,
-            Queue&lt;Node&gt; q) {
-        if (node.getInDegree() == 0) {
-            q.add(node);
-            topoSort.add(node);
-            return vertexProcess + 1;
-        }
-        return vertexProcess;
-    }
-
-    public static void main(String[] args) {
-        Graph g = new Graph(8);
-
-        Node TEN = new Node("10");
-        Node ELEVEN = new Node("11");
-        Node TWO = new Node("2");
-        Node THREE = new Node("3");
-        Node FIVE = new Node("5");
-        Node SEVEN = new Node("7");
-        Node EIGHT = new Node("8");
-        Node NINE = new Node("9");
-
-        SEVEN.AdjacenctNode.add(ELEVEN);
-        ELEVEN.inDegree++;
-        SEVEN.AdjacenctNode.add(EIGHT);
-        EIGHT.inDegree++;
-        FIVE.AdjacenctNode.add(ELEVEN);
-        ELEVEN.inDegree++;
-        THREE.AdjacenctNode.add(EIGHT);
-        EIGHT.inDegree++;
-        THREE.AdjacenctNode.add(TEN);
-        TEN.inDegree++;
-        ELEVEN.AdjacenctNode.add(TEN);
-        TEN.inDegree++;
-        ELEVEN.AdjacenctNode.add(TWO);
-        TWO.inDegree++;
-        ELEVEN.AdjacenctNode.add(NINE);
-        NINE.inDegree++;
-        EIGHT.AdjacenctNode.add(NINE);
-        NINE.inDegree++;
-
-        g.nodes.add(TWO);
-        g.nodes.add(THREE);
-        g.nodes.add(FIVE);
-        g.nodes.add(SEVEN);
-        g.nodes.add(EIGHT);
-        g.nodes.add(NINE);
-
-        System.out.println("Now calling the topologial sorts");
-        Set&lt;Node&gt; result = g.topologicalSort();
-        for (Node node : result) {
-            System.out.println(node.data + " ");
-        }
-    }
-}
-
-class Node {
-    public String data;
-    public int dist;
-    public int inDegree;
-    LinkedList&lt;Node&gt; AdjacenctNode = new LinkedList&lt;Node&gt;();
-
-    public void addAdjNode(final Node Child) {
-        AdjacenctNode.add(Child);
-        Child.inDegree++;
-    }
-
-    public Node(String data) {
-        super();
-        this.data = data;
-    }
-
-    public int getInDegree() {
-        return inDegree;
-    }
-
-    public void setInDegree(int inDegree) {
-        this.inDegree = inDegree;
-    }
-
-    public LinkedList&lt;Node&gt; getAdjacenctNode() {
-        return AdjacenctNode;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/27/Previous-Permutation/">[LintCode] Previous Permutation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-27T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/27/Previous-Permutation/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/previous-permuation/">link</a></p>
-
-<div style="min-height:100px">
-<p>Given a list of integers, which denote a permutation.</p>
-
-<p>Find the previous permutation in ascending order.</p>
-    
-<div class="m-t-lg m-b-lg">
-      <b>Note</b>
-      <div><p>The list may contains duplicate integers.</p>
-      </div>
-</div>
-    
-<div class="m-t-lg m-b-lg">
-      <b>Example</b>
-      <div><p>For <strong><span style="color:#B22222;">[1,3,2,3]</span></strong>, the previous permutation is <span style="color:#B22222;"><strong>[1,2,3,3]</strong></span></p>
-
-<p>For <span style="color:#B22222;"><strong>[1,2,3,4]</strong></span>, the previous permutation is <span style="color:#B22222;"><strong>[4,3,2,1]</strong></span></p>
-    </div>
-</div>
-</div>
-
-
-<h3>Analysis</h3>
-
-<p>This is almost the same question as &ldquo;Next Permutation&rdquo;.</p>
-
-<ol>
-<li>Find</li>
-<li>Swap</li>
-<li>Replace</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>public ArrayList&lt;Integer&gt; previousPermuation(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    if (nums == null || nums.size() == 0) {
-        return null;
-    }
-    int len = nums.size();
-    int p = len - 2;
-    // 1. find 1st increasing position from the back
-    while (p &gt;= 0 &amp;&amp; nums.get(p) &lt;= nums.get(p + 1)) {
-        p--;
-    }
-    // 2. swap p with the first smaller value from the back
-    if (p != -1) {
-        int q = len - 1;
-        while (nums.get(q) &gt;= nums.get(p)) {
-            q--;
-        }
-        swap(nums, p, q);
-    }
-    // swap array in range of (p+1, end)
-    int left = p + 1;
-    int right = len - 1;
-    while (left &lt; right) {
-        swap(nums, left++, right--);
-    }
-    return nums;
-}
-
-private void swap(ArrayList&lt;Integer&gt; num, int p, int q) {
-    int temp = num.get(p);
-    num.set(p, num.get(q));
-    num.set(q, temp);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="38">&larr; Older</a>
@@ -1645,7 +1580,7 @@ private void swap(ArrayList&lt;Integer&gt; num, int p, int q) {
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (160)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (163)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -1661,23 +1596,23 @@ private void swap(ArrayList&lt;Integer&gt; num, int p, int q) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Factorial-Trailing-Zeroes/">[LeetCode 172] Factorial Trailing Zeroes </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Excel-Sheet-Column-Title/">[LeetCode 168] Excel Sheet Column Number </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate within K Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
       </li>
     
   </ul>

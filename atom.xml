@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="www.shuatiblog.com/"/>
-  <updated>2015-04-12T23:18:08+08:00</updated>
+  <updated>2015-04-14T17:43:32+08:00</updated>
   <id>www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,261 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode 164] Maximum Gap ]]></title>
+    <link href="www.shuatiblog.com/blog/2015/04/13/Maximum-Gap/"/>
+    <updated>2015-04-13T00:00:00+08:00</updated>
+    <id>www.shuatiblog.com/blog/2015/04/13/Maximum-Gap</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/maximum-gap/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Given an unsorted array, find the maximum difference between the successive elements in its sorted form.</p>
+
+<p>Try to solve it in linear time/space.</p>
+
+<p>Return 0 if the array contains less than 2 elements.</p>
+
+<p>You may assume all elements in the array are non-negative integers and fit in the 32-bit signed integer range.</p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/porker2008">@porker2008</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/sort/">Sort</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p><strong>This is an extremely difficult question</strong> of bucket sort. I refered to <a href="http://www.programcreek.com/2014/03/leetcode-maximum-gap-java/">programcreek</a> and <a href="http://leetcode.tgic.me/maximum-gap/index.html">tgic&rsquo;s blog</a> for reference.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Basic idea is to put elements into buckets</strong>. The number of bucket is (almost) same as the number of elements in the input. In this way, each bucket <strong>ideally</strong> will contain 1 element.</p>
+
+<p>We then know that <strong>the max gap must be cross-bucket instead of within bucket</strong>. So we simply keep track of max and min value within each bucket for the purpose of calculating gap.</p>
+
+<p><strong>Why did I say &ldquo;number of bucket is (almost) same as the number of elements in the input&rdquo;</strong>? Well, consider this case: 3 values and (maxVal &ndash; minVal) == 100. We can make 3 bucket with size = 34. How about 5 values and (maxVal &ndash; minVal) == 6? Bucket size shall be either 1 or 2. So we&rsquo;ll have either 3 or 6 bucket.</p>
+
+<p>So, in the code below, you can see I make bucket size &ldquo;larger by 1&rdquo;:</p>
+
+<pre><code>// bSize is size of bucket (should be larger by 1)
+int bSize = (maxVal - minVal + 1) / num.length + 1;
+
+// calcualte number of buckets needed
+int bCount = (maxVal - minVal) / bSize + 1;
+Bucket[] buckets = new Bucket[bCount];
+</code></pre>
+
+<p>Note that simply use <strong>input.length</strong> as bucket count is wrong.</p>
+
+<h3>Code</h3>
+
+<p>My code written in Java:</p>
+
+<pre><code>public class Solution {
+    public int maximumGap(int[] num) {
+        if (num == null || num.length &lt; 2) {
+            return 0;
+        }
+
+        // find out max and min values of input
+        int minVal = num[0];
+        int maxVal = num[0];
+        for (int n: num) {
+            minVal = Math.min(minVal, n);
+            maxVal = Math.max(maxVal, n);
+        }
+        // bSize is size of bucket (should be larger by 1)
+        int bSize = (maxVal - minVal + 1) / num.length + 1;
+
+        // calcualte number of buckets needed
+        int bCount = (maxVal - minVal) / bSize + 1;
+        Bucket[] buckets = new Bucket[bCount];
+
+        // match every value into a bucket
+        // bucket maintains the max/min within the bucket
+        for (int n: num) {
+            int bIndex = (n - minVal) / bSize;
+            if (buckets[bIndex] == null) {
+                buckets[bIndex] = new Bucket(n, n);
+            } else {
+                buckets[bIndex].updateVal(n);
+            }
+        }
+
+        // for every bucket, check in sequence and get max gap
+        int gap = 0;
+        int pre = 0;
+        int cur = 1;
+        while (cur &lt; bCount) {
+            // skip all empty buckets
+            while (cur &lt; bCount &amp;&amp; buckets[cur] == null) {
+                cur++;
+            }
+            if (cur == bCount) break;
+            // update gap, pre and cur
+            gap = Math.max(gap, buckets[cur].min - buckets[pre].max);
+            pre = cur;
+            cur++;
+        }
+
+        return gap;
+    }
+
+    class Bucket {
+        int min;
+        int max;
+
+        public Bucket(int a, int b) {
+            min = a;
+            max = b;
+        }
+
+        public void updateVal(int val) {
+            min = Math.min(min, val);
+            max = Math.max(max, val);
+        }
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode 172] Factorial Trailing Zeroes ]]></title>
+    <link href="www.shuatiblog.com/blog/2015/04/13/Factorial-Trailing-Zeroes/"/>
+    <updated>2015-04-13T00:00:00+08:00</updated>
+    <id>www.shuatiblog.com/blog/2015/04/13/Factorial-Trailing-Zeroes</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/factorial-trailing-zeroes/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Given an integer <i>n</i>, return the number of trailing zeroes in <i>n</i>!.</p>
+
+<p><b>Note: </b>Your solution should be in logarithmic time complexity.</p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/math/">Math</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>This question I&rsquo;ve seen it quite a few time, also. We&rsquo;re basically count the number of factor 5s.</p>
+
+<p>Eg.</p>
+
+<blockquote><p>n = 5, count = 1</p>
+
+<p>n = 6, count = 1</p>
+
+<p>n = 10, count = 2</p>
+
+<p>n = 24, count = 4</p>
+
+<p>n = 25, count = 6</p>
+
+<p>n = 26, count = 6</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Please read this post <strong>[[LintCode] Trailing Zeros of Factorial(/blog/2014/07/02/Trailing-Zero-of-Factorial/)</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class Solution {
+    public int trailingZeroes(int n) {
+        if (n &lt; 5) {
+            return 0;
+        }
+        int res = 0;
+        long base = 5;
+        while (n &gt;= base) {
+            res += n / base;
+            base *= 5;
+        }
+        return res;
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[LeetCode 168] Excel Sheet Column Number ]]></title>
+    <link href="www.shuatiblog.com/blog/2015/04/13/Excel-Sheet-Column-Title/"/>
+    <updated>2015-04-13T00:00:00+08:00</updated>
+    <id>www.shuatiblog.com/blog/2015/04/13/Excel-Sheet-Column-Title</id>
+    <content type="html"><![CDATA[<h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/excel-sheet-column-number/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Related to question <a href="https://oj.leetcode.com/problems/excel-sheet-column-title/">Excel Sheet Column Title</a></p>
+<p>Given a column title as appear in an Excel sheet, return its corresponding column number.</p>
+
+<p>For example:</p>
+<pre>    A -&gt; 1
+    B -&gt; 2
+    C -&gt; 3
+    ...
+    Z -&gt; 26
+    AA -&gt; 27
+    AB -&gt; 28 </pre>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/math/">Math</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>This question I&rsquo;ve seen it quite a few time. It&rsquo;s very standard integer conversion question.</p>
+
+<h3>Solution</h3>
+
+<p>Please read this post <strong>[[ItInt5] Excel Decimal Conversion(/blog/2014/08/16/Excel-decimal-conversion/)</strong>.</p>
+
+<h3>Code</h3>
+
+<p>recursively:</p>
+
+<pre><code>public class Solution {
+    public String convertToTitle(int n) {
+        if (n &lt; 1) {
+            return "";
+        }
+        n--;
+        char ch = (char) ((n % 26) + 'A');
+        return convertToTitle(n / 26) + ch;
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Palantir] MultiMap in Java without using Collections ]]></title>
@@ -1161,219 +1416,6 @@ What if <i>duplicates</i> are allowed?</p>
 <h3>Code</h3>
 
 <p>not written.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Google] Minimum adjustments ]]></title>
-    <link href="www.shuatiblog.com/blog/2015/02/13/minimum-adjustments/"/>
-    <updated>2015-02-13T00:00:00+08:00</updated>
-    <id>www.shuatiblog.com/blog/2015/02/13/minimum-adjustments</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=6212066786410496">link</a></p>
-
-<blockquote><p>Given an integer array, adjust each integers so that the difference of every adjacent integers are not greater than a given number target.</p>
-
-<p>If the array before adjustment is A, the array after adjustment is B, you should minimize the sum of |A[i]-B[i]|</p>
-
-<p>Given [1,4,2,3] and target=1, one of the solutions is [2,3,2,3], the minimal adjustment cost is 2.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a difficult DP. Now we define 2D array like this:</p>
-
-<blockquote><p>dp[i][j]: the minimal adjust cost on changing A[i] to j</p></blockquote>
-
-<p>And the equation:</p>
-
-<blockquote><p>dp[i][j] = min{dp[i-1][k] + |j-A[i]|} s.t. |k-j| &lt;= target</p></blockquote>
-
-<p>Refer to the post by <a href="http://www.careercup.com/question?id=6212066786410496">simon.zhangsm</a></p>
-
-<h3>Code</h3>
-
-<p>Not written.</p>
-
-<p>Available at <a href="http://lintcode.com/en/problem/minimum-adjustment-cost/#">OJ</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LinkedIn] Unique combination of factors (因式分解) ]]></title>
-    <link href="www.shuatiblog.com/blog/2015/02/13/combination-of-factors/"/>
-    <updated>2015-02-13T00:00:00+08:00</updated>
-    <id>www.shuatiblog.com/blog/2015/02/13/combination-of-factors</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32803907_0_1.html">link</a></p>
-
-<blockquote><p>A question by dongfeiwww:</p>
-
-<p>打印一个数的所有乘数组合，从大到小，不要有重复</p>
-
-<p>Print all unique combinations of factors of a positive integer. For example given 24:</p></blockquote>
-
-<pre><code>24*1
-12*2
-8*3
-6*4
-6*2*2
-4*3*2
-3*2*2*2
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Simple DFS.</p>
-
-<h3>Code</h3>
-
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; factorCombinations(int n) {
-    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
-    helper(ans, n, n / 2, new ArrayList&lt;Integer&gt;());
-    return ans;
-}
-
-private void helper(List&lt;List&lt;Integer&gt;&gt; ans, int num, int largestFactor,
-        List&lt;Integer&gt; path) {
-    if (num == 1) {
-        ans.add(new ArrayList&lt;Integer&gt;(path));
-        return;
-    }
-    for (int i = largestFactor; i &gt; 1; i--) {
-        if (num % i == 0) {
-            path.add(i);
-            helper(ans, num / i, i, path);
-            path.remove(path.size() - 1);
-        }
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LinkedIn] Sum of integer weighted by depth ]]></title>
-    <link href="www.shuatiblog.com/blog/2015/02/13/Sum-integer-weighted-by-depth/"/>
-    <updated>2015-02-13T00:00:00+08:00</updated>
-    <id>www.shuatiblog.com/blog/2015/02/13/Sum-integer-weighted-by-depth</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5139875124740096">link</a></p>
-
-<pre><code>/** 
-* Given a nested list of integers, returns the sum of all integers in the list weighted by their depth 
-* For example, given the list {(1,1),2,(1,10)} the function should return 10 (four 1's at depth 2, one 2 at depth 1) 
-* Given the list {1,{4,{6}}} the function should return 27 (one 1 at depth 1, one 4 at depth 2, and one 6 at depth 3) 
-*/ 
-public int depthSum (List&lt;NestedInteger&gt; input) 
-{ // ur implementation here} 
-
-
-** 
-* This is the interface that represents nested lists. 
-* You should not implement it, or speculate about its implementation. 
-*/ 
-public interface NestedInteger 
-{ 
-/** @return true if this NestedInteger holds a single integer, rather than a nested list */ 
-boolean isInteger(); 
-
-/** @return the single integer that this NestedInteger holds, if it holds a single integer 
-* Return null if this NestedInteger holds a nested list */ 
-Integer getInteger(); 
-
-/** @return the nested list that this NestedInteger holds, if it holds a nested list 
-* Return null if this NestedInteger holds a single integer */ 
-List&lt;NestedInteger&gt; getList(); 
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>DFS recurse.</p>
-
-<h3>Code</h3>
-
-<p>The algo:</p>
-
-<pre><code>public int depthSum(List&lt;NestedInteger&gt; input, int weight) {
-    // ur implementation here
-    int sum = 0;
-    for (NestedInteger ni : input) {
-        if (ni.isInteger()) {
-            sum += ni.getInteger() * weight;
-        } else {
-            sum += depthSum(ni.getList(), weight + 1);
-        }
-    }
-    return sum;
-}
-</code></pre>
-
-<p>Interface and Impl:</p>
-
-<pre><code>/*
- * This is the interface that represents nested lists. You should not implement
- * it, or speculate about its implementation.
- */
-interface NestedInteger {
-    /**
-     * @return true if this NestedInteger holds a single integer, rather than a
-     *         nested list
-     */
-    boolean isInteger();
-
-    /**
-     * @return the single integer that this NestedInteger holds, if it holds a
-     *         single integer Return null if this NestedInteger holds a nested
-     *         list
-     */
-    Integer getInteger();
-
-    /**
-     * @return the nested list that this NestedInteger holds, if it holds a
-     *         nested list Return null if this NestedInteger holds a single
-     *         integer
-     */
-    List&lt;NestedInteger&gt; getList();
-}
-
-class NestedIntegerImpl implements NestedInteger {
-
-    int num;
-    List&lt;NestedInteger&gt; list = new ArrayList&lt;NestedInteger&gt;();
-
-    public NestedIntegerImpl(int number) {
-        num = number;
-        list = null;
-    }
-
-    public NestedIntegerImpl(List&lt;NestedInteger&gt; inputList) {
-        num = -1;
-        list = inputList;
-    }
-
-    @Override
-    public boolean isInteger() {
-        return list == null;
-    }
-
-    @Override
-    public Integer getInteger() {
-        if (isInteger()) {
-            return num;
-        }
-        return -1;
-    }
-
-    @Override
-    public List&lt;NestedInteger&gt; getList() {
-        return list;
-    }
-}
-</code></pre>
 ]]></content>
   </entry>
   

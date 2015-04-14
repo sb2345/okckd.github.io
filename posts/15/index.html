@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question Implement a CircularArray class that supports an array-like data structure which can be efficiently rotated. The class should use a generic &hellip;">
+  <meta name="description" content="Question Consider a simple node-like data structure called BiNode, which has pointers to two other nodes. public class BiNode { public BiNode node1, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,339 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/30/convert-bst-to-dll/">[CC150v5] 17.13 Convert BST to DLL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/30/convert-bst-to-dll/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Consider a simple node-like data structure called BiNode, which has pointers to two other nodes.</p></blockquote>
+
+<pre><code>public class BiNode {
+    public BiNode node1, node2;
+    public int data;
+}
+</code></pre>
+
+<blockquote><p>The data structure BiNode could be used to represent both a binary tree (where node1 is the left node and node2 is the right node) or a doubly linked list (where node1 is the previous node and node2 is the next node). Implement a method to convert a binary search tree (implemented with BiNode) into a doubly linked list. The values should be kept in order and the operation should be performed in place (that is, on the original data structure).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>At another post <strong>[LeetCode Plus] Convert BST to Circular DLL</strong>, we already discussed 2 approaches:</p>
+
+<ol>
+<li>in-order traversal approach</li>
+<li>divide and conquer approach</li>
+</ol>
+
+
+<p>First approach isn&rsquo;t intuitive. We will further discuss D&amp;C approach here.</p>
+
+<p><strong>The key of the solution is how we return both HEAD and TAIL</strong>. The book suggests 3 ways:</p>
+
+<ol>
+<li>Build a <strong>data structure</strong> to store both head and tail</li>
+<li><strong>Just return head</strong>, and retrieve tail by traversing thru &ndash; bad time complexity O(n<sup>2</sup>)</li>
+<li><strong>Use circular linked-list</strong>! Time O(n).</li>
+</ol>
+
+
+<p>I wrote the code for 1st and 2nd approach. And 3rd is already covered in previous post.</p>
+
+<ul>
+<li>You need to understand why we need the list to be circular.</li>
+</ul>
+
+
+<h3>Code</h3>
+
+<p><strong>Approach 1</strong></p>
+
+<pre><code>public static BiNode convert(BiNode root) {
+    BiNodePair res = helper(root);
+    return res.leftMost;
+}
+
+private static BiNodePair helper(BiNode node) {
+    if (node == null) {
+        return null;
+    }
+    BiNodePair res = new BiNodePair(node, node);
+    if (node.node1 != null) {
+        BiNodePair leftRes = helper(node.node1);
+        res.leftMost = leftRes.leftMost;
+        leftRes.rightMost.node2 = node;
+        node.node1 = leftRes.rightMost;
+    }
+    if (node.node2 != null) {
+        BiNodePair rightRes = helper(node.node2);
+        res.rightMost = rightRes.rightMost;
+        rightRes.leftMost.node1 = node;
+        node.node2 = rightRes.leftMost;
+    }
+    return res;
+}
+
+static class BiNodePair {
+    BiNode leftMost;
+    BiNode rightMost;
+
+    public BiNodePair(BiNode node1, BiNode node2) {
+        leftMost = node1;
+        rightMost = node2;
+    }
+}
+</code></pre>
+
+<p><strong>Approach 2</strong></p>
+
+<pre><code>public static BiNode convert(BiNode root) {
+    if (root == null) {
+        return null;
+    }
+    return helper(root);
+}
+
+private static BiNode helper(BiNode node) {
+    // node is not null
+    BiNode newHead = node;
+    // do left part
+    if (node.node1 != null) {
+        newHead = helper(node.node1);
+        BiNode leftTail = getListTail(newHead);
+        leftTail.node2 = node;
+        node.node1 = leftTail;
+    }
+    // do right part
+    if (node.node2 != null) {
+        BiNode rightHead = helper(node.node2);
+        node.node2 = rightHead;
+        rightHead.node1 = node;
+    }
+    return newHead;
+}
+
+private static BiNode getListTail(BiNode head) {
+    // head is not null
+    while (head.node2 != null) {
+        head = head.node2;
+    }
+    return head;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-28T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/28/get-rank-stream-integers/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values less than or equal to x).</p>
+
+<p>Implement the data structures and algorithms to support these operations. That is, implement the method <strong>track(int x)</strong>, which is called when each number is generated, and the method <strong>getRankOfNumber(int x)</strong>, which returns the number of values less than or equal to x (not including x itself).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This question requires a special type of Data Structure</strong>. It basically is a modified BST like this:</p>
+
+<blockquote><p>The tree node stores both number value and the <strong>count of node on left subtree</strong></p></blockquote>
+
+<p><img class="middle" src="/assets/images/get-rank-number-stream.png"></p>
+
+<p>Suppose we want to find the rank of 24 in the tree above. We would compare 24 with the root, 20, and find that 24 must reside on the right. The root has 4 nodes in its left subtree, and when we include the root itself, this gives us five total nodes smaller than 24. We set counter to 5.</p>
+
+<p>Then, we compare 24 with node 25 and find that 24 must be on the left. The value of counter does not update, since we&rsquo;re not &ldquo;passing over&rdquo; any smaller nodes. The value of counter is still 5.</p>
+
+<p>Next, we compare 24 with node 23,and find that 24 must be on the right. Counter gets incremented by just 1 (to 6), since 23 has no left nodes.</p>
+
+<p>Finally, we find 24 and we return counter: 6.</p>
+
+<h3>Code</h3>
+
+<p>Refer to another post <strong>[Question] Stock Span Problem</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/27/Order-array-by-sorting-middle/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
+
+<blockquote><ol>
+<li><p>找到heading的最长递增序列.</p></li>
+<li><p>找到tailing的最长的递增序列.</p></li>
+</ol>
+</blockquote>
+
+<p>After that:</p>
+
+<blockquote><ol>
+<li><p>用中间部分的min去shrink左边.</p></li>
+<li><p>用中间部分的max去shrink右边.</p></li>
+</ol>
+</blockquote>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static void findUnsortedSequence(int[] array, int[] ans) {
+    int len = array.length;
+    ans[0] = 0;
+    ans[1] = 0;
+
+    // find increasing sequence on left and on right
+    int leftPeak = 0;
+    while (leftPeak &lt; len - 1) {
+        if (array[leftPeak] &lt; array[leftPeak + 1]) {
+            leftPeak++;
+        } else {
+            break;
+        }
+    }
+    if (leftPeak == len - 1) {
+        return;
+    }
+    int rightBottom = len - 1;
+    while (rightBottom &gt; 0) {
+        if (array[rightBottom] &gt; array[rightBottom - 1]) {
+            rightBottom--;
+        } else {
+            break;
+        }
+    }
+
+    // leftPeak and rightBottom are found, now read mid part
+    int midMin = Integer.MAX_VALUE;
+    int midMax = Integer.MIN_VALUE;
+    for (int i = leftPeak; i &lt;= rightBottom; i++) {
+        midMin = Math.min(midMin, array[i]);
+        midMax = Math.max(midMax, array[i]);
+    }
+
+    // find left boudary and right boundary
+    int leftBound = leftPeak;
+    while (leftBound &gt;= 0) {
+        if (array[leftBound] &lt; midMin) {
+            break;
+        }
+        leftBound--;
+    }
+    int rightBound = rightBottom;
+    while (rightBound &lt; len) {
+        if (array[rightBound] &gt; midMax) {
+            break;
+        }
+        rightBound++;
+    }
+
+    // finish it up
+    ans[0] = leftBound + 1;
+    ans[1] = rightBound - 1;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -846,199 +1179,6 @@ public static int helper(int[] array, int left, int right) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/swap-odd-even-bits/">[CC150v5] 5.6 Swap Odd and Even Bits</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/16/swap-odd-even-bits/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a program to swap odd and even bits in an integer with as few instructions as possible (e.g., bit 0 and bit 1 are swapped, bit 2 and bit 3 are swapped, and so on).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Mask odd and even bits seperately.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int swapOddEvenBits(int x) {
-    return (((x &amp; 0xaaaaaaaa) &gt;&gt; 1) | ((x &amp; 0x55555555) &lt;&lt; 1));
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/google-guess-password/">[Google] Guess Password</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/16/google-guess-password/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">link</a></p>
-
-<blockquote><p>给你一个password 假定6位</p>
-
-<p>有个function, 每call一次就给你一个triplet 是password 里的随即三位(order不变)。比如google, 可能返回: ggl, goe, oog, ool&hellip;</p>
-
-<p>问如何最有效破译这个密码?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is just a rough idea suggested by Level 6 of <a href="http://www.mitbbs.com/article_t/JobHunting/32658281.html">this post</a>.</p>
-
-<blockquote><p>六位密码随机给三位，应该有C(6, 3) = 20个bucket。</p>
-
-<p>如果密码是abcdef，那么以a开头的bucket应该是 C(5, 2) = 10个。以b开头的buckt应该是C(4, 2) = 6个，以c开头的是3个，以d开头的是1个&hellip;. from this, we know the probability of the occurrance of each letter.</p></blockquote>
-
-<p>In this case, we generate many triplets, and calculate based on their frequencies. However, the guy also wrote about this condition:</p>
-
-<blockquote><p>如果abcd中间有相同(there are same letters in the 6-char password)，那么就会出现以a开头的是11个（abca)，13个(abad)，14个(abaa)，16个(aacd)，17个(aaca),19个(aaad)或者20个(aaaa).</p>
-
-<p>思路是比较清楚，不过算法还要想想。</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>not written</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/16/calculate-bits-convertions/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a function to determine the number of bits (change) required to convert integer A to integer B.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Using XOR operation, we can find out number of bits that are different.</p>
-
-<p>The next important thing is to know <strong>how to count the number of &lsquo;1&rsquo;s in a integer</strong>. It&rsquo;s like this:</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>code 1</strong></p>
-
-<pre><code>public static int calcBitsSwapMe1(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        count += num &amp; 1;
-        num = num &gt;&gt;&gt; 1;
-    }
-    return count;
-}
-</code></pre>
-
-<p><strong>code 2</strong></p>
-
-<pre><code>public static int calcBitsSwapMe2(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        num = num &amp; (num - 1);
-        count++;
-    }
-    return count;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="16">&larr; Older</a>
@@ -1062,7 +1202,7 @@ public static int helper(int[] array, int left, int right) {
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (160)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (163)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -1078,23 +1218,23 @@ public static int helper(int[] array, int left, int right) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Factorial-Trailing-Zeroes/">[LeetCode 172] Factorial Trailing Zeroes </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Excel-Sheet-Column-Title/">[LeetCode 168] Excel Sheet Column Number </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate within K Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
       </li>
     
   </ul>

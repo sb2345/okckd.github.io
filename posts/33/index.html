@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Pay attention on Number 3, 7, 9 and 11. The Divisibility Rules Divisible by: If: Examples: 2 The last digit is even (0,2,4,6,8) 128 is &hellip;">
+  <meta name="description" content="Question link There&rsquo;s a elephant, which can carry max 1000 bananas. The elephant eats a banana every 1 Km (both forward and back). Now we want &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,270 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Elephant-And-Bananas/">[Question] Elephant and Bananas</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/07/27/Elephant-And-Bananas/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://tech-queries.blogspot.sg/2011/04/elephant-and-banana.html">link</a></p>
+
+<blockquote><p>There&rsquo;s a elephant, which can carry max 1000 bananas. The elephant eats a banana every 1 Km (both forward and back).</p>
+
+<p>Now we want to transfer 3000 bananas to a place 1000 Km away. How many bananas can be left?</p>
+
+<p>Also solved to generalized problem (write code for solution).</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>If we subdivide distances for each kilometer</strong>. Notice if elephant wants to shift all the bananas 1 km, <strong>you will loose 5 bananas every km</strong>.</p>
+
+<p>So we transferred 2995 (998+998+999) to one km distance. This process continues until after 200 km, we have only 2000 bananas left with remaining distance of 800 km.</p>
+
+<p><strong>Start from here, we only loose 3 bananas every km</strong>. This goes on for another 334 km, we will have 998 bananas left, and the rest of the bananas can be transfered in a single journey.</p>
+
+<h3>Solution</h3>
+
+<p><strong>532 bananas</strong>.</p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>double transferBananas(double N, double D, double C, double F) {  
+    // base case: remaining bananas &lt;= C,  
+    // so carry all the bananas in one trip  
+    // at this point if distance is more than N/F,  
+    // elephant can never reach destination, return 0  
+    if (N &lt;= C) {
+        double bananasAtDestination = N - D*F;  
+        return (bananasAtDestination &gt;= 0.0) ?  
+            bananasAtDestination :  0.0;    // out of bananas!  
+    }  
+
+    // # trips you would travel back and forth  
+    int numTrips = 2*(ceil(N/C) - 1) + 1;  
+
+    // how many bananas you consume per km  
+    double costPerKm = numTrips * F;  
+
+    // remaining number of bananas after consumption, we want it  
+    // as an integer multiple of C.  
+    double remainingBananas = C*(ceil(N/C) - 1.0);  
+
+    // this is the distance you are able to travel before you  
+    // reach ONE LESS round trip fetching bananas  
+    // derived from eq: N - costPerKm * traveled = remaining bananas  
+
+    double traveled = (N - remainingBananas) / costPerKm;  
+
+    // we are able to travel greater (or equal) than the remaining  
+    // distance, so fetch the bananas right to the destination  
+    if (traveled &gt;= D)
+        return N - D*costPerKm;  
+
+    // calculate recursively as we travel ONE less round trip now.  
+    return transferBananas(remainingBananas, D-traveled, C, F);  
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/Coins-in-Line/">[LeetCode Plus] Coins in a Line</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/07/27/Coins-in-Line/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://leetcode.com/2011/02/coins-in-line.html">link</a></p>
+
+<blockquote><p>There are n coins in a line. Two players take turns to take a coin from one of the ends of the line until there are no more coins left. The player with the larger amount of money wins. Assume that you go first, describe an algorithm to compute the maximum amount of money you can win.</p>
+
+<p>There might be even or odd number of coins.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p><strong>There&rsquo;s a guaranteed &lsquo;win strategy&rsquo;</strong>, if the input array is even size. Find the sum of coins at even and odd positions respectively. Then, make sure you always take coin from even (or odd, whichever sum is bigger) position.</p>
+
+<p>This strategy is clever and simple, but <strong>DOES NOT maximize your total sum</strong>, and coins must be even number.</p>
+
+<h3>Solution</h3>
+
+<p><strong>The optimized solution is to use <a href="http://tech-queries.blogspot.sg/2011/06/get-maximum-sum-from-coins-in-line.html">2D DP</a></strong>. Now we have array A and C(i, j) which is the maximum sum possible when remaining coins are from i to j.</p>
+
+<p>You can take either i or j. Since the opponent is as smart as you, he would have chosen the choice that yields the minimum amount to you.</p>
+
+<p>So, the final equation is:</p>
+
+<blockquote><p>C(i, j) = MAX {</p>
+
+<pre><code>      Ai + MIN{C(i+2, j), C(i+1, j-1)}, 
+
+      Aj + MIN{C(i+1, j-1), C(i, j-2)} 
+</code></pre>
+
+<p>}</p></blockquote>
+
+<p>If interested, read <strong>[Fundamental] Min-Max Algorithm</strong> for more.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int maxMoney(int[] coins) {
+    int len = coins.length;
+    int[][] dp = new int[len][len];
+    for (int i = len - 1; i &gt;= 0; i--) {
+        for (int j = i; j &lt; len; j++) {
+            if (i == j) {
+                dp[i][j] = coins[i];
+            } else if (i + 1 == j) {
+                dp[i][j] = Math.max(coins[i], coins[j]);
+            } else {
+                int chooseHead = coins[i]
+                        + Math.min(dp[i + 2][j], dp[i + 1][j - 1]);
+                int chooseTail = coins[j]
+                        + Math.min(dp[i][j - 2], dp[i + 1][j - 1]);
+                dp[i][j] = Math.max(chooseHead, chooseTail);
+            }
+        }
+    }
+    return dp[0][len - 1];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/26/True-tell-brain-teaser/">[Question] Truth Tell Brain Teaser</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/07/26/True-tell-brain-teaser/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://tech-queries.blogspot.sg/2011/07/truth-or-lie.html">link</a></p>
+
+<blockquote><p>There are 100 people in a room. A person always speaks either lie or truth.</p>
+
+<p>When asked:</p></blockquote>
+
+<pre><code>1st person says =&gt; all are liars
+2nd person says =&gt; at most 1 speaks truth
+3rd person says =&gt; at most 2 speak truth
+4th person says =&gt; at most 3 speak truth
+.
+.
+.
+100th person says =&gt; at most 99 speak truth
+</code></pre>
+
+<blockquote><p>&ldquo;At most N&rdquo; means &ldquo;there&rsquo;re N or less than N&rdquo;.</p>
+
+<p>How many people speak only truth?</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li></li>
+<li><p>Assume 1st person speaks truth, then all including him should be liar. It means he doesn’t speak truth.</p></li>
+<li><p>Assume 2nd person speaks truth, then he is the only person who speaks truth. But if this statement is true then statements by all others are also true. I.e. if “at most 1 person speaks truth” is true then “at most N speak truth” is also true. So person 2 is also a liar.</p></li>
+<li><p>Assume 3rd person is speaking truth. But then the statements of person 4-100 are also true, which contradicts his own statement. It means that person 3 is also a liar.</p></li>
+<li><p>This process will continue since 50th person. So 1-50 people are liars.</p></li>
+<li><p>51st person says “at most 50 speak truth”. Lets say he is speaking truth. “at most 50” means any number from 0-50. It means that statements like “at most 51 speak truth” and “at most 70 speak truth” are also true. It means that people from 51 to 100 are speaking truth.</p></li>
+</ol>
+
+
+<p><strong>Hence, 50 people speak truth</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -702,234 +966,6 @@ private static int get10001stPrime() {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/24/Octal-and-Hexadecimal-Numbers/">[Java OOP] Octal and Hexadecimal Numbers in Java</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/07/24/Octal-and-Hexadecimal-Numbers/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/g-fact-61/">link</a></p>
-
-<blockquote><p>Predict the output of following program.</p></blockquote>
-
-<pre><code>public static void main(String[] args) {
-    int a = 012;
-    System.out.println("a is " + a);
-}
-</code></pre>
-
-<h3>Analysis</h3>
-
-<p>Putting a 0 before an integer constant makes it an <strong>octal number</strong> and putting 0x (or 0X) makes it a <strong>hexadecimal number</strong>.</p>
-
-<p><strong>Answer: 10</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/24/Multithreading-basics/">[Design] Multithreading Basics</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/07/24/Multithreading-basics/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Terminologies</h2>
-
-<h3>Atomicity, Atomic Operation</h3>
-
-<p><strong><a href="http://www.geeksforgeeks.org/g-fact-57/">Atomicity</a> is unbreakability</strong>, or uninterrupted operation.</p>
-
-<p>Atomic operation helps in understanding reentrancy, critical section, thread safety, synchronization primitives, etc.</p>
-
-<h3>Critical Section</h3>
-
-<p><strong><a href="http://www.geeksforgeeks.org/g-fact-70/">Critical section</a></strong> is group of instructions/statements or region of code that <strong>need to be executed atomically</strong>.</p>
-
-<p>If one thread tries to change a shared data while another thread tries to read, the result is unpredictable. It is critical to understand the importance of race condition while writing kernel mode programming.</p>
-
-<p>A simple solution to critical section:</p>
-
-<pre><code>acquireLock();
-Process Critical Section
-releaseLock();
-</code></pre>
-
-<h3>Synchronization primitives</h3>
-
-<p><a href="http://stackoverflow.com/a/8017629">Synchronization primitives</a> are simple software mechanisms for the purposes of supporting thread or process synchronization.</p>
-
-<p><strong>Mutex, event, conditional variables and semaphores</strong> are all synchronization primitives.</p>
-
-<p><strong>Critical section</strong> is not a synchronization primitive. It&rsquo;s a part of an execution path that must be protected from concurrent execution in order to maintain some invariants.</p>
-
-<p>You need to use some synchronization primitives to protect critical section.</p>
-
-<h3>Producer–consumer</h3>
-
-<p>Two processes, <a href="http://en.wikipedia.org/wiki/Producer-consumer_problem">producer and consumer</a>. Producer thread will collect the data and writes it to the buffer. Consumer thread will process the collected data from the buffer.</p>
-
-<p>Producer won&rsquo;t try to add when buffer&rsquo;s full and consumer won&rsquo;t remove when buffer&rsquo;s empty.</p>
-
-<p><strong>Solution 1: Mutex</strong></p>
-
-<p>A mutex provides mutual exclusion, either producer or consumer can have the key (mutex) and proceed with their work. As long as the buffer is filled by producer, the consumer needs to wait, and vice versa.</p>
-
-<p><strong>Solution 2: Semaphore</strong></p>
-
-<p><a href="http://en.wikipedia.org/wiki/Producer-consumer_problem#Using_semaphores">A semaphore</a> is a generalized mutex. In lieu of single buffer, we can split the 4 KB buffer into four 1 KB buffers (identical resources). A semaphore can be associated with these four buffers. The consumer and producer can work on different buffers at the same time.</p>
-
-<h3>Interrupt service routine</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Interrupt_handler">Interrupt service routine</a> (ISR), is a callback subroutine in an operating system or device driver whose execution is triggered by the reception of an interrupt.</p>
-
-<p><a href="http://stackoverflow.com/a/3392889">One good example</a> is reading from a hard drive. The drive is slow and you don&rsquo;t want your OS to wait for the data to come back; you want the OS to go and do other things. <strong>So you set up the system so that when the disk has the data (ready), it raises an interrupt</strong>. In the <strong>ISR for the disk</strong>, CPU will take the data and return it to the requester.</p>
-
-<p><strong>ISRs often need to happen quickly</strong> as the hardware can have a limited buffer, which will be overwritten by new data if it&rsquo;s now pulled off quickly enough.</p>
-
-<p>It&rsquo;s also important to have your ISR complete quickly as while the CPU is servicing one ISR other interrupts will be masked.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/07/24/First-non-repeating-character/">[Question] Find the First Non-repeating Character</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-24T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/07/24/First-non-repeating-character/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/given-a-string-find-its-first-non-repeating-character/">link</a></p>
-
-<blockquote><p>Question One: Given a string, find the first non-repeating character in it</p></blockquote>
-
-<p><a href="http://www.geeksforgeeks.org/find-first-non-repeating-character-stream-characters/">link</a></p>
-
-<blockquote><p>Question Two: Given a stream of characters, find the first non-repeating character from stream. You need to tell the first non-repeating character in O(1) time at any moment.</p></blockquote>
-
-<h3>From a string</h3>
-
-<ol>
-<li><p>Scan the string from left to right and construct the count array.</p></li>
-<li><p>Again, scan the string from left to right and check for count of each
-character, if you find an element who&rsquo;s count is 1, return it.</p></li>
-</ol>
-
-
-<p><strong>O(n) time</strong>.</p>
-
-<p>The array is size of 128 if it&rsquo;s ASCII encoding. It can also be replaced with a HashMap if the length of the string is small.</p>
-
-<h3>From a stream of chars</h3>
-
-<p><strong>Use a DLL (doubly linked list), 1 count array and 1 DLL-node array</strong>. Alternatively, the 2 arrays can be replaced with 2 HashMaps.</p>
-
-<p>In totally, one DLL and 2 array are used. <strong>The DLL</strong> is used to get the sequence of non-repeating chars. <strong>The 1st array</strong> is for char count, and <strong>the 2nd array</strong> is for fast loop-up in the DLL.</p>
-
-<p>The detailed precedure:</p>
-
-<ol>
-<li><p>Create an empty DLL and 2 arrays: repeated[] and dllMap[].</p></li>
-<li><p>To get the first non-repeating character, return the head of DLL.</p></li>
-<li><p>Following are steps to process a new character &lsquo;x&rsquo; in stream.</p>
-
-<ol>
-<li><p>If repeated[x] is false and dllMap[x] is NULL, append x to DLL and store it in dllMap[x].</p></li>
-<li><p>If repeated[x] is false and dllMap[x] is not NULL, get DLL node of x using dllMap[x] and remove the node. Set repeated[x] as true and optionally clear dllMap[x].</p></li>
-<li><p>If repeated[x] is true, ignore it.</p></li>
-</ol>
-</li>
-</ol>
-
-
-<p>I didn&rsquo;t write code for this question.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="34">&larr; Older</a>
@@ -953,7 +989,7 @@ character, if you find an element who&rsquo;s count is 1, return it.</p></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (160)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (163)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -969,23 +1005,23 @@ character, if you find an element who&rsquo;s count is 1, return it.</p></li>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Factorial-Trailing-Zeroes/">[LeetCode 172] Factorial Trailing Zeroes </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Excel-Sheet-Column-Title/">[LeetCode 168] Excel Sheet Column Number </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate within K Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
       </li>
     
   </ul>

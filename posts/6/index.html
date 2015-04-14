@@ -9,8 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link an arbitrary tree. split it into as many subtrees as you can. the
-number of nodes of the subtree must be even. Solution This is a &hellip;">
+  <meta name="description" content="Question link Multiple threads can publish and receive each other&rsquo;s message: whenever a thread publishes a message, all the other threads can &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +75,292 @@ number of nodes of the subtree must be even. Solution This is a &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/05/multi-server-messaging-system/">[Google] Multi-server Messaging System</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/05/multi-server-messaging-system/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32547841.html">link</a></p>
+
+<blockquote><p>Multiple threads can publish and receive each other&rsquo;s message:</p></blockquote>
+
+<ol>
+<li><p>whenever a thread publishes a message, all the other threads can receive and print out that message;</p></li>
+<li><p>if multiple message get published, the messages should be queued or whatever recorded and other threads can print out the message one by one;</p></li>
+<li><p>no published message should be missed by any other threads.</p></li>
+</ol>
+
+
+<h3>Solution</h3>
+
+<p>Suggested by <a href="http://www.mitbbs.com/article_t/JobHunting/32547841.html">level 13</a>:</p>
+
+<blockquote><p>给每个thread分一个blocking queue就完了。这题延伸开来是个很好的设计题, pubsub, messaging framework etc.</p></blockquote>
+
+<p>Using a blocking queue to store messages for each server. It&rsquo;s pretty much like consumer-producer. But here, the server takes on both roles. Read my code below, or <strong>[Java OOP] PubSub (Publish–subscribe) pattern</strong> to learn about <strong>PubSub</strong>.</p>
+
+<h3>Code</h3>
+
+<p>Below is my code, it may not be the correct solution. If you would like to discuss, please leave me a comment!</p>
+
+<pre><code>public class MessagingServer implements Runnable {
+
+    String serverId;
+    List&lt;MessagingServer&gt; servers;
+    BlockingQueue&lt;String&gt; messages;
+    boolean isFinished;
+
+    public MessagingServer(String id, List&lt;MessagingServer&gt; list, int qSize) {
+        this.serverId = id;
+        this.servers = list;
+        messages = new ArrayBlockingQueue&lt;String&gt;(qSize);
+        isFinished = false;
+    }
+
+    public void run() {
+        // this would be the consumer
+        while (!isFinished) {
+            String msg;
+            try {
+                msg = messages.take();
+                System.out.println(serverId + " says: " + msg);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void printMessage(String msg) {
+        // this is the producer
+        // System.out.println(serverId + " says: " + msg);
+
+        // insert this msg in the blockingQ of all other servers
+        for (MessagingServer server : servers) {
+            server.messages.add(this.serverId + " said: " + msg);
+        }
+    }
+
+    public void terminate() {
+        this.isFinished = true;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/05/implement-blocking-q/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14622668">link</a></p>
+
+<blockquote><p>Implement a Blocking queue.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>First thing first, the most important characteristic of a BlockingQueue is:</p>
+
+<blockquote><p><strong>thread-safe</strong> BlockingQueue</p></blockquote>
+
+<p>Second, we need to make sure to handle the following 2 methods:</p>
+
+<blockquote><p><strong>notifyAll();</strong></p>
+
+<p><strong>wait();</strong></p></blockquote>
+
+<p>Last, remember that <strong>wait()</strong> has got a <strong>checked exception</strong>(InterruptedException). We end up with the code:</p>
+
+<pre><code>public synchronized void enqueue(Object item) throws InterruptedException {
+    while (this.queue.size() == this.size) {
+        wait();
+    }
+    if (this.queue.size() == 0) {
+        notifyAll();
+    }
+    this.queue.add(item);
+}
+</code></pre>
+
+<h3>Code</h3>
+
+<p>The entire class, refer to <strong>[Java OOP] Java BlockingQueue (2)</strong>:</p>
+
+<pre><code>public class MyBlockingQueue {
+
+    private List&lt;Object&gt; queue = new LinkedList&lt;Object&gt;();
+    private int size = 10;
+
+    public MyBlockingQueue(int size) {
+        this.size = size;
+    }
+
+    public synchronized void enqueue(Object item) throws InterruptedException {
+        while (this.queue.size() == this.size) {
+            wait();
+        }
+        if (this.queue.size() == 0) {
+            notifyAll();
+        }
+        this.queue.add(item);
+    }
+
+    public synchronized Object dequeue() throws InterruptedException {
+        while (this.queue.size() == 0) {
+            wait();
+        }
+        if (this.queue.size() == this.size) {
+            notifyAll();
+        }
+
+        return this.queue.remove(0);
+    }
+
+    public boolean isEmpty() {
+        return this.queue.isEmpty();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/04/snakes-and-ladders/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14955106">link</a></p>
+
+<blockquote><p>Given a board of snakes and ladders game, provide an algorithm to find the minimum number of dice rolls required to reach 100 from 1.</p></blockquote>
+
+<h3>Solution 1</h3>
+
+<p>Recommended: <strong>Graph (shortest path)</strong>. <a href="http://www.careercup.com/question?id=14955106">ref</a>:</p>
+
+<ol>
+<li><p>k is linked to k + 1 k + 2, k + 3, k + 4, k + 5, k +6.</p></li>
+<li><p>If has a ladder, connect it too.</p></li>
+<li><p>Find shortest path.</p></li>
+</ol>
+
+
+<p>Solution 2 is <strong>DP</strong>.</p>
+
+<h3>Variant</h3>
+
+<p>If the question asks: find the way to climb as many ladder as possible. Then this question would be solved differently.</p>
+
+<p>Any ideas?</p>
+
+<p>Solution below.</p>
+
+<p>&hellip;</p>
+
+<p>&hellip;</p>
+
+<p>&hellip;</p>
+
+<p>Read <strong>[Greedy] Activity Selection Problem</strong>.</p>
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -885,207 +1170,6 @@ You ultimately end up with 1.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/each-employee-two-events/">[Greedy] Each Employee 2 Events</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/01/each-employee-two-events/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.careercup.com/question?id=7894677">link</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>You are given N ranges of date offsets when N employees are present in an organization. Something like</p></blockquote>
-
-<pre><code>    1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
-    2-6 
-    8-9 
-    .. 
-    1-14 
-</code></pre>
-
-<blockquote><p>Organize an event on minimum number of days such that each employee can attend the event at least twice.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Greedy algorithm</strong>, according to the <a href="http://www.careercup.com/question?id=7894677">top answer</a>:</p>
-
-<ol>
-<li><p>First, sort all ranges based on ENDING date in increasing order (bucket or counting sort).</p></li>
-<li><p>For each range, select last two days (because they produce maximum possibility to overlap next range)</p></li>
-<li><p>Skip following ranges that also contains those two days, until:</p>
-
-<ol>
-<li>a range that either covers only one day (we then select last day of this range) or</li>
-<li>does not cover any of the two (we then select last two days of this range).</li>
-</ol>
-</li>
-<li><p>Then continue.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p>not written</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/Activity-Selection-Problem/">[Greedy] Activity Selection Problem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/01/Activity-Selection-Problem/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">link</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>Given n activities with their start and finish times.</p>
-
-<p>Select maximum number of activities that can be performed in one run.</p>
-
-<p>Example:</p></blockquote>
-
-<pre><code>     start[]  =  {1, 3, 0, 5, 8, 5};
-     finish[] =  {2, 4, 6, 7, 9, 9};
-
-     output[] = {0, 1, 3, 4}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p><strong>Greedy algorithm</strong>, according to <a href="http://www.geeksforgeeks.org/greedy-algorithms-set-1-activity-selection-problem/">gfg</a>:</p>
-
-<ol>
-<li><p>Sort the activities according to their finishing time</p></li>
-<li><p>Select the first activity from the sorted array and print it.</p></li>
-<li><p>For the rest, if start time is greater than previous finish time, then select this activity.</p></li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p>not written.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/30/2d-bin-packing/">[Question] 2D Bin Packing</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-30T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/30/2d-bin-packing/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Bin_packing_problem">link</a></p>
-
-<blockquote><p>Objects of different volumes must be packed into a finite number of bins or containers each of volume V in a way that minimizes the number of bins used.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/bin-packing.png"></p>
-
-<h3>Solution</h3>
-
-<p>Explanation from <a href="http://stackoverflow.com/a/8765049">here</a>:</p>
-
-<ol>
-<li>Build a binary tree. Each branch in the tree contains a sprite.</li>
-<li>Each <strong>leaf node represents available space</strong>.</li>
-<li>Initially the tree has just the root node, which represents all available space.</li>
-<li>To add a sprite to the tree, search the tree for an unoccupied (leaf) node <strong>big enough</strong> to hold the sprite.</li>
-<li>Turn that node from a leaf into a branch by setting the sprite as the node&rsquo;s occupant and giving the node two children.</li>
-<li>One child represents the remaining space to the right of the sprite;</li>
-<li>the other represents the remaining space below the sprite and the first child.</li>
-</ol>
-
-
-<p>For detailed implementation and code, refer to <a href="http://codeincomplete.com/posts/2011/5/7/bin_packing/">this</a> comprehensite guide. BTW, it&rsquo;s used for <strong>auto generating CSS Sprites</strong> which puts images into a large graph.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="7">&larr; Older</a>
@@ -1109,7 +1193,7 @@ You ultimately end up with 1.
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (160)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (163)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -1125,23 +1209,23 @@ You ultimately end up with 1.
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Factorial-Trailing-Zeroes/">[LeetCode 172] Factorial Trailing Zeroes </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Excel-Sheet-Column-Title/">[LeetCode 168] Excel Sheet Column Number </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate within K Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
       </li>
     
   </ul>

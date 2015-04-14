@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Find the number of distinct subsequences of a string (include &ldquo;&rdquo; as a subsequence). For example, Input AAA ABCDEFG &hellip;">
+  <meta name="description" content="Overview A blocking queue is a queue that blocks when you try to dequeue from a empty queue, or if you try to enqueue items into a full queue. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,367 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/12/java-blocking-queue-1/">[Java OOP] Java BlockingQueue (1)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-12T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/12/java-blocking-queue-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Overview</h3>
+
+<p><strong><a href="http://tutorials.jenkov.com/java-concurrency/blocking-queues.html">A blocking queue</a></strong> is a queue that blocks when you try to <strong>dequeue from a empty queue</strong>, or if you try to <strong>enqueue items into a full queue</strong>.</p>
+
+<p><img class="middle" src="/assets/images/blocking-queue.png"></p>
+
+<h4>Details</h4>
+
+<ol>
+<li><p>BlockingQueue <strong>doesn’t accept null values</strong>. Otherwise throw NullPointerException.</p></li>
+<li><p>BlockingQueue implementations are <strong>thread-safe</strong>. All queuing methods are atomic in nature and use internal locks or other forms of concurrency control.</p></li>
+<li><p>BlockingQueue interface is part of java collections framework and it’s primarily used for implementing <strong>producer consumer problem</strong>.</p></li>
+</ol>
+
+
+<p>Two important methods:</p>
+
+<ol>
+<li><p>put(E e): This method is used to insert elements to the queue, if the queue is full it waits for the space to be available.</p></li>
+<li><p>E take(): This method retrieves and remove the element from the head of the queue, if queue is empty it waits for the element to be available.</p></li>
+</ol>
+
+
+<h4>Usage</h4>
+
+<p><a href="http://tutorials.jenkov.com/java-util-concurrent/blockingqueue.html">BlockingQueue is typically used</a> to have one thread produce objects, with another thread consumes (producer consumer problem). Refer to <strong>[Design] Producer Consumer Problem</strong>.</p>
+
+<h3>Example 1</h3>
+
+<p>This example shows <strong>how changing the speed of consuming and producing</strong> results in different sequence of outputs, using a BlockingQueue. The size of the BlockingQueue is initialized at 5.</p>
+
+<pre><code>public class Main {
+
+    // original post from:
+    // http://www.journaldev.com/1034/java-blockingqueue-example-implementing-producer-consumer-problem
+
+    private static final Setting testFullQueue = new Setting(3, 10, 0);
+    private static final Setting testEmptyQueue = new Setting(10, 3, 100);
+
+    public static void main(String[] args) {
+
+        // Creating BlockingQueue of size 5
+        BlockingQueue&lt;Message&gt; queue = new ArrayBlockingQueue&lt;&gt;(5);
+
+        Setting variableSetting = testFullQueue;
+        Producer producer = new Producer(queue, variableSetting.produceSpeed);
+        Consumer consumer = new Consumer(queue, variableSetting.consumeSpeed,
+                variableSetting.consumerDelay);
+
+        // starting producer to produce messages in queue
+        new Thread(producer).start();
+
+        // starting consumer to consume messages from queue
+        new Thread(consumer).start();
+
+        System.out.println("Producer and Consumer has been started");
+    }
+
+    static class Setting {
+        int produceSpeed;
+        int consumeSpeed;
+        int consumerDelay;
+
+        public Setting(int a, int b, int c) {
+            this.produceSpeed = a;
+            this.consumeSpeed = b;
+            this.consumerDelay = c;
+        }
+    }
+}
+</code></pre>
+
+<p>Producer</p>
+
+<pre><code>public class Producer implements Runnable {
+
+    private BlockingQueue&lt;Message&gt; queue;
+    int produceSpeed;
+
+    public Producer(BlockingQueue&lt;Message&gt; q, int a) {
+        this.queue = q;
+        this.produceSpeed = a;
+    }
+
+    @Override
+    public void run() {
+        // produce messages
+        for (int i = 0; i &lt; 13; i++) {
+            Message msg = new Message("" + i);
+            try {
+                Thread.sleep(produceSpeed);
+                queue.put(msg);
+                System.out.println("Produced " + msg.getMsg() + "           ("
+                        + queue.size() + " items)");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        // adding exit message
+        Message msg = new Message("exit");
+        try {
+            queue.put(msg);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+</code></pre>
+
+<p>Consumer</p>
+
+<pre><code>public class Consumer implements Runnable {
+
+    private BlockingQueue&lt;Message&gt; queue;
+    int consumeSpeed;
+    int consumerDelay;
+
+    public Consumer(BlockingQueue&lt;Message&gt; q, int a, int b) {
+        this.queue = q;
+        this.consumeSpeed = a;
+        this.consumerDelay = b;
+    }
+
+    @Override
+    public void run() {
+        try {
+            // initial delay: used to wait for producer to
+            // fill up the queue
+            Thread.sleep(consumerDelay);
+            Message msg;
+            // consuming messages until exit message is received
+            while ((msg = queue.take()).getMsg() != "exit") {
+            System.out.println("         " + msg.getMsg() + " Consumed"+ "  ("
+                    + queue.size() + " items)");
+                Thread.sleep(consumeSpeed);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Consumer finished working. Exit. ");
+    }
+}
+</code></pre>
+
+<p>Message Class</p>
+
+<pre><code>public class Message {
+    private String msg;
+
+    public Message(String str){
+        this.msg=str;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+}
+</code></pre>
+
+<p>Output (testFullQueue):</p>
+
+<pre><code>Producer and Consumer has been started
+Produced 0           (0 items)
+         0 Consumed  (0 items)
+Produced 1           (1 items)
+Produced 2           (2 items)
+         1 Consumed  (1 items)
+Produced 3           (2 items)
+Produced 4           (3 items)
+Produced 5           (4 items)
+         2 Consumed  (3 items)
+Produced 6           (4 items)
+Produced 7           (5 items)
+         3 Consumed  (5 items)
+Produced 8           (5 items)
+         4 Consumed  (4 items)
+Produced 9           (5 items)
+         5 Consumed  (4 items)
+Produced 10           (5 items)
+         6 Consumed  (4 items)
+Produced 11           (5 items)
+         7 Consumed  (4 items)
+Produced 12           (5 items)
+         8 Consumed  (4 items)
+         9 Consumed  (4 items)
+         10 Consumed  (3 items)
+         11 Consumed  (2 items)
+         12 Consumed  (1 items)
+Consumer finished working. Exit. 
+</code></pre>
+
+<p>Output (testEmptyQueue):</p>
+
+<pre><code>Producer and Consumer has been started
+Produced 0           (1 items)
+Produced 1           (2 items)
+Produced 2           (3 items)
+Produced 3           (4 items)
+Produced 4           (5 items)
+Produced 5           (5 items)
+         0 Consumed  (5 items)
+         1 Consumed  (4 items)
+         2 Consumed  (3 items)
+Produced 6           (4 items)
+         3 Consumed  (3 items)
+         4 Consumed  (2 items)
+Produced 7           (3 items)
+         5 Consumed  (2 items)
+         6 Consumed  (1 items)
+         7 Consumed  (0 items)
+Produced 8           (1 items)
+         8 Consumed  (0 items)
+Produced 9           (1 items)
+         9 Consumed  (0 items)
+Produced 10           (1 items)
+         10 Consumed  (0 items)
+Produced 11           (0 items)
+         11 Consumed  (0 items)
+Produced 12           (1 items)
+         12 Consumed  (0 items)
+Consumer finished working. Exit. 
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/12/blocking-queue-and-thread-pool/">[Java OOP] BlockingQueue and Thread Pool</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-12T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/12/blocking-queue-and-thread-pool/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Blocking Queue VS. Thread Pool</h3>
+
+<p>These are 2 very different things, however it might be a little bit confusing for a layman. I have very little knowledge about Java multi-threading. But after writing some example of thread pool and blockingqueue, I am able to identify some significant differences between the 2 DS:</p>
+
+<ol>
+<li><p>Thread pools are often used in multi threaded servers. For example, we create 10 thread only for processing 1,000 tasks. However in BlockingQueue, there&rsquo;re typically only 2 thread: Producer and Consumer. Of course there can be more, but the basic pattern defines only 2 (types of) threads.</p></li>
+<li><p>Threads are added into thread pool, while in BlockingQueue, it stores tasks (runnables).</p></li>
+</ol>
+
+
+<p>It&rsquo;s not a common practise to compare the 2 DS. If you read this and have got some interesting thoughts, do not hesitate to let me know by commenting below!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/numer-of-occurrence-given-subsequence/">[Question] Number of Occurence of Given Sub-sequence</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/11/numer-of-occurrence-given-subsequence/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/6877249/find-the-number-of-occurrences-of-a-subsequence-in-a-string">link</a></p>
+
+<blockquote><p>Given a digit &lsquo;3141592653&rsquo;, find number of occurence of subsequence &ldquo;123&rdquo;. Note that the sequence occurs twice:</p></blockquote>
+
+<pre><code>3141592653
+ 1    2  3
+   1  2  3
+</code></pre>
+
+<blockquote><p>Output 2.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Refer to <strong>[LeetCode 115] Distinct Subsequences</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -815,242 +1176,6 @@ private int choose(String input, int start, int numChar) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/10/reverse-a-stack/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/">link</a></p>
-
-<blockquote><p>Reverse a stack using recursion. You are not allowed to use loops or data structure, and you can only use the following functions:</p></blockquote>
-
-<pre><code>isEmpty(S)
-push(S)
-pop(S)
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Well since we are not allowed to use additional DS or loop, we have to use system stack to help us!</p>
-
-<p>We add a new method: <strong>insert at stack bottom</strong>. Then we can solve this question recursively. Nice question, and tricky answer!</p>
-
-<h3>Code</h3>
-
-<pre><code>public void reverse(Stack&lt;Integer&gt; stack) {
-    if (stack.isEmpty() || stack.size() == 1) {
-        return;
-    }
-    int top = stack.pop();
-    this.reverse(stack);
-    this.insertAtBottom(stack, top);
-}
-
-private void insertAtBottom(Stack&lt;Integer&gt; stack, int val) {
-    if (stack.isEmpty()) {
-        stack.push(val);
-        return;
-    }
-    int temp = stack.pop();
-    this.insertAtBottom(stack, val);
-    stack.push(temp);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=5103437989543936">link</a></p>
-
-<blockquote><p>There are many sorted arrays. Find a minimum range, so that in each array there&rsquo;s at least one integer within this range.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Min-heap</strong>. <a href="http://www.careercup.com/question?id=16759664">source</a></p>
-
-<blockquote><p>There are k lists of sorted integers. Make a min heap of size k containing 1 element from each list. Keep track of min and max element and calculate the range.</p>
-
-<p>In min heap, minimum element is at top. Delete the minimum element and another element instead of that from the same list to which minimum element belong. Repeat the process till any one of the k list gets empty.</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public void printMinRange(int[][] input) {
-    Comparator&lt;Pointer&gt; compr = new HeapComparator(input);
-    // Note that we pass in 'input' arrays to the comparator
-    PriorityQueue&lt;Pointer&gt; heap = new PriorityQueue&lt;Pointer&gt;(SIZE, compr);
-
-    int maxVal = Integer.MIN_VALUE;
-    for (int i = 0; i &lt; SIZE; i++) {
-        heap.add(new Pointer(i, 0));
-        // insert the head of each array into the heap
-        maxVal = Math.max(maxVal, input[i][0]);
-        // keep additional value to keep track of the max value in heap
-    }
-
-    int left = 0;
-    int right = Integer.MAX_VALUE;
-    while (heap.size() == SIZE) {
-        Pointer p = heap.remove();
-        // first, update the range
-        if (maxVal - input[p.index][p.position] &lt; right - left) {
-            right = maxVal;
-            left = input[p.index][p.position];
-        }
-        // then, push the next element after 'p' to the heap
-        // meanwhile, update 'maxVal'
-        if (p.position + 1 &lt; input[p.index].length) {
-            Pointer nextP = new Pointer(p.index, p.position + 1);
-            heap.add(nextP);
-            maxVal = Math.max(maxVal, input[nextP.index][nextP.position]);
-        }
-        // when 'p' is the last element in the row, terminate loop
-    }
-    System.out.println("Left boundary: " + left);
-    System.out.println("Right boundary: " + right);
-}
-
-class HeapComparator implements Comparator&lt;Pointer&gt; {
-
-    int[][] arrays = null;
-
-    public HeapComparator(int[][] input) {
-        arrays = input;
-    }
-
-    public int compare(Pointer p1, Pointer p2) {
-        return arrays[p1.index][p1.position]
-                - arrays[p2.index][p2.position];
-    }
-}
-
-class Pointer {
-    int index, position;
-
-    public Pointer(int x, int y) {
-        index = x;
-        position = y;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/10/max-count-array-in-queue/">[Google] Maximum Count Array in a Queue</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/10/max-count-array-in-queue/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32856675_0_1.html#top">link1</a></p>
-
-<blockquote><p>给一个数组a[n]，令s[i]为a[i+1..n-1]中比a[i]大的数的数量。</p>
-
-<p>求最大的s[i]。要求O(nlogn)</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is very similar question to <strong>[Google] Form a Queue Given Heights</strong>. The idea is to insert elements into BST and count number of larger elements.</p>
-
-<p>Naitive solution can be reached with a list.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="11">&larr; Older</a>
@@ -1074,7 +1199,7 @@ class Pointer {
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (160)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (163)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -1090,23 +1215,23 @@ class Pointer {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Factorial-Trailing-Zeroes/">[LeetCode 172] Factorial Trailing Zeroes </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Excel-Sheet-Column-Title/">[LeetCode 168] Excel Sheet Column Number </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate within K Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
       </li>
     
   </ul>

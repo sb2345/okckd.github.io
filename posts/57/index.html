@@ -9,9 +9,8 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Reverse digits of an integer. Example1: x = 123, return 321
-Example2: x = -123, return -321 Have you thought about this?
-Here are some &hellip;">
+  <meta name="description" content="Question link Implement regular expression matching with support for '.' and '*'. '.' Matches any single character.
+'*' Matches zero or more of the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +76,451 @@ Here are some &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/29/Regular-Expression-Matching/">[LeetCode 10] Regular Expression Matching</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/04/29/Regular-Expression-Matching/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/regular-expression-matching/">link</a></p>
+
+<div class="question-content">
+<p></p><p>Implement regular expression matching with support for <code>'.'</code> and <code>'*'</code>.</p>
+
+<pre>'.' Matches any single character.
+'*' Matches <b>zero or more of the preceding</b> element.
+
+The matching should cover the <b>entire</b> input string (not partial).
+
+The function prototype should be:
+bool isMatch(const char *s, const char *p)
+
+Some examples:
+isMatch("aa","a") → false
+isMatch("aa","aa") → true
+isMatch("aaa","aa") → false
+isMatch("aa", "a*") → true
+isMatch("aa", ".*") → true
+isMatch("ab", ".*") → true
+isMatch("aab", "c*a*b") → true
+</pre><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>Very important to note: Do not use DP</strong>. Why? Because eg. &ldquo;a*b&rdquo; will be considered as 2 parts: &ldquo;a*&rdquo; part and &ldquo;b&rdquo; part. Because star is considered to be bundled with previous char, it gives us difficulty in determine the size of the DP array. Of course, we still can do it, but I see nobody have provided a nice DP solution online. Let&rsquo;s just forget about it for now.</p>
+
+<p>The solution I&rsquo;m giving in this post, is to trim String and compare.</p>
+
+<p><strong>We only need to consider 2 cases</strong>:</p>
+
+<p>One, the next char is NOT a star sign. This requires simply char compare.</p>
+
+<p>Two, the next char is a star sign, this will require some effort.</p>
+
+<h3>Solution</h3>
+
+<p>In case of one letter bundled with a star sign, we iterate thru all possible number of repetition of current char (from 0 until large), and check validation one by one.</p>
+
+<p>A final important note, <strong>this question very much looks like DP, but NOT DP</strong>.</p>
+
+<h3>My code</h3>
+
+<p>My code.</p>
+
+<pre><code>public class Solution {
+    public boolean isMatch(String s, String p) {
+        // eg. s = "aab"  p = "c*a*b"
+        return check(s, p, 0, 0);
+    }
+
+    private boolean check(String s, String p, int start1, int start2) {
+        int len1 = s.length();
+        int len2 = p.length();
+        if (start1 == len1 &amp;&amp; start2 == len2) {
+            return true;
+        } else if (start2 == len2) {
+            // if p is used up, but still some letters left in s
+            return false;
+        }
+        // check if there is * after start2 in p
+        if (start2 == len2 - 1 || p.charAt(start2 + 1) != '*') {
+            // if there is no *
+            // match only 1 char
+            if (start1 == len1) {
+                // unable to match single char because s is fully used up
+            } else if (p.charAt(start2) != '.' &amp;&amp; s.charAt(start1) != p.charAt(start2)) {
+                // if single char could not be matched
+                return false;
+            } else {
+                // if single letter matches
+                return check(s, p, start1 + 1, start2 + 1);
+            }
+        } else {
+            // if there is a * following start2
+            if (check(s, p, start1, start2 + 2)) {
+                // the letter in p represent 0 chars
+                return true;
+            } else {
+                // the letter in p represent 1 or more chars
+                // advance start1 until the end of s
+                while (start1 &lt; len1) {
+                    // check if the char matches
+                    if (p.charAt(start2) != '.' &amp;&amp; s.charAt(start1) != p.charAt(start2)) {
+                        break;
+                    }
+                    if (check(s, p, start1 + 1, start2 + 2)) {
+                        return true;
+                    }
+                    start1++;
+                }
+            }
+        }
+        return false;
+    }
+}
+</code></pre>
+
+<p>A much shorter version from <a href="http://www.programcreek.com/2012/12/leetcode-regular-expression-matching-in-java/">someone else</a> making use of <strong>String.substring()</strong>. I refactored a bit.</p>
+
+<pre><code>public class Solution {
+    public boolean isMatch(String s, String p) {
+        // s is normal string, and p is regex string
+        if (p.length() == 0) {
+            return s.length() == 0;
+        } else if (p.length() &lt; 2 || p.charAt(1) != '*') {
+            // if 2nd char in p is not '*', then match character
+            if (s.length() == 0) {
+                return false;
+            } else if (p.charAt(0) != '.' &amp;&amp; s.charAt(0) != p.charAt(0)) {
+                return false;
+            } else {
+                return isMatch(s.substring(1), p.substring(1));
+            }
+        } else {
+            // if 2nd char in p is '*', then iterate all position repetitions
+            char repeatLetter = p.charAt(0);
+            for (int i = 0; i &lt;= s.length(); i++) {
+                // i is the number of repetition of repeatLetter, start from 0
+                if (i &gt; 0 &amp;&amp; repeatLetter != s.charAt(i - 1)
+                        &amp;&amp; repeatLetter != '.') {
+                    break;
+                } else {
+                    if (isMatch(s.substring(i), p.substring(2))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/29/Palindrome-Number/">[LeetCode 9] Palindrome Number</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/04/29/Palindrome-Number/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/palindrome-number/">link</a></p>
+
+<div class="question-content">
+<p></p><p>Determine whether an integer is a palindrome. Do this without extra space.</p>
+
+<div class="spoilers" style="display: block;"><b>Some hints:</b>
+
+<p>Could negative integers be palindromes? (ie, -1)</p>
+
+<p>If you are thinking of converting the integer to string, note the restriction of using extra space.</p>
+
+<p>You could also try reversing an integer. However, if you have solved the problem &#8220;Reverse Integer&#8221;, you know that the reversed integer might overflow. How would you handle such case?</p>
+
+<p>There is a more generic way of solving this problem.</p>
+
+</div><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="white">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This question is easy, and very similar to the &ldquo;Reverse Integer&rdquo; question. <strong>Simpliest solution is to just reverse the integer</strong> and compare with original number.</p>
+
+<p>But again, reversing the integer have chances of <strong>overflow</strong>. How do we work this out?</p>
+
+<h3>Solution</h3>
+
+<p>First, same as previous post <strong>[LeetCode 7] Reverse Integer</strong>, we can use Long type to handle the overflow issues.</p>
+
+<p>Second, <strong>we can also do direct compare</strong> to always compare the head and tail of the number. No numerical type conversion is needed. I came up with idea previously, and code is posted below.</p>
+
+<h3>My code</h3>
+
+<p>Use Long type:</p>
+
+<pre><code>public class Solution {
+    public boolean isPalindrome(int x) {
+        if (x &lt; 0) {
+            return false;
+        }
+        long rev = 0;
+        long original = x;
+        while (x != 0) {
+            rev = rev * 10 + (x % 10);
+            x = x / 10;
+        }
+        return original == rev;
+    }
+}
+</code></pre>
+
+<p>Compare head and tail:</p>
+
+<pre><code>public boolean isPalindrome(int x) {
+    if (x &lt; 0) {
+        return false;
+    }
+    int divide = 1;
+    while (x / divide &gt;= 10) {
+        divide *= 10;
+    }
+    int head = 0, tail = 0;
+    while (divide &gt; 0) {
+        head = x / divide;
+        tail = x % 10;
+        if (head != tail) {
+            return false;
+        }
+        x = x % divide / 10;
+        divide /= 100;
+    }
+    return true;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/29/Container-With-Most-Water/">[LeetCode 11] Container With Most Water</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-29T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/04/29/Container-With-Most-Water/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/container-with-most-water/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given <i>n</i> non-negative integers <i>a<sub>1</sub></i>, <i>a<sub>2</sub></i>, &#8230;, <i>a<sub>n</sub></i>, where each represents a point at coordinate (<i>i</i>, <i>a<sub>i</sub></i>). <i>n</i> vertical lines are drawn such that the two endpoints of line <i>i</i> is at (<i>i</i>, <i>a<sub>i</sub></i>) and (<i>i</i>, 0). Find two lines, which together with x-axis forms a container, such that the container contains the most water.
+</p>
+<p>Note: You may not slant the container.
+</p><p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>Assume i and j are 2 points in x-axis where i &lt; j. The container volume is decided by the shorter height among the two.</p>
+
+<p>Assume i is lower than j, there will be no i &lt; jj &lt; j that makes the area of (i,jj) greater than area of (i,j). <strong>In other words, all (i,jj) is smaller than (i,j) so there&rsquo;s no need to check them</strong>.</p>
+
+<p>Thus we move i forward by 1. This idea is explained in <a href="http://jane4532.blogspot.sg/2013/05/container-with-most-water-leetcode.html">this post</a>.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Two-pointer scan</strong>. And always move the shorter board index (if we consider it to be a rectangle bucket), as explained in <a href="http://fisherlei.blogspot.sg/2013/01/leetcode-container-with-most-water.html">this post</a>.</p>
+
+<h3>My code</h3>
+
+<pre><code>public class Solution {
+    public int maxArea(int[] height) {
+        if (height == null || height.length &lt;= 1) {
+            return 0;
+        }
+        int left = 0;
+        int right = height.length - 1;
+        int area = 0;
+        // start calculating area and shrinking the distance 
+        // between left and right pointer
+        while (left &lt; right) {
+            area = Math.max(area, (right - left) 
+                * Math.min(height[left], height[right]));
+            if (height[left] &lt; height[right]) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        return area;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -4382,7 +4826,7 @@ Validate Binary Search Tree</p>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (160)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (163)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -4398,23 +4842,23 @@ Validate Binary Search Tree</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Factorial-Trailing-Zeroes/">[LeetCode 172] Factorial Trailing Zeroes </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/13/Excel-Sheet-Column-Title/">[LeetCode 168] Excel Sheet Column Number </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate within K Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Find-Peak-Element/">[LeetCode 162] Find Peak Element </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal </a>
       </li>
     
   </ul>
