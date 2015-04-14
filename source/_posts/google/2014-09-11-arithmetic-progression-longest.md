@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Google] Arithmetic Progression Longest "
+title: "[Google] Length of Longest Arithmetic Progression (LLAP) "
 comments: true
 category: Google
 tags: [ src ]

@@ -29,7 +29,7 @@ This question basically is couting the number of factor 5 (because factor 2 is a
         }
         long d = 5;
         long result = 0;
-        while (d < n) {
+        while (d <= n) {
             result += n / d;
             d *= 5;
         }
