@@ -9,7 +9,9 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Given an unsorted array, find the maximum difference between the successive elements in its sorted form. Try to solve it in linear time &hellip;">
+  <meta name="description" content="Question link There is a pile of n wooden sticks. The length and weight of
+each stick are known in advance. The sticks are
+to be processed by a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +77,196 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/14/wooden-stick/">[UVa] Wooden Sticks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/14/wooden-stick/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=323">link</a></p>
+
+<p><body>There is a pile of <i>n </i>wooden sticks. The length and weight of
+each stick are known in advance. The sticks are
+to be processed by a woodworking machine in one by one fashion. It
+needs some time, called setup time, for
+the machine to prepare processing a stick. The setup times are
+associated with cleaning operations and
+changing tools and shapes in the machine. The setup times of the
+woodworking machine are given as follows:</p>
+
+<ul>
+<li>The setup time for the first wooden
+stick is 1 minute.</li>
+<li>
+Right after processing a stick of length <i>l </i>and weight <i>w
+</i>, the machine will need no setup time for a stick
+of length <i>l</i>&#8217; and weight <i>w</i>&#8217; if <i>l </i>&lt;=<i>l</i>&#8217;
+and <i>w </i>&lt;=<i>w</i>&#8217; . </li>
+</ul>
+
+
+<p>Otherwise, it will need 1 minute for setup.<br>
+You are to find the minimum setup time to process a given pile of <i>n
+</i>wooden sticks. For example, if you have
+five sticks whose pairs of length and weight are (4,9), (5,2), (2,1), (3,5),
+and (1,4) then the minimum setup
+time should be 2 minutes since there is a sequence of pairs (1,4),
+(3,5), (4,9), (2,1), (5,2).</p>
+
+<h2><font size="4" color="#ff0000"><a name="SECTION0001001000000000000000">Input</a> <br>
+</font></h2>
+
+
+<p>The input consists of <i>T</i> test cases. The number of test cases (<i>T</i>) is given in the first line of the input file. Each
+test case consists of two lines: The first line has an integer <i>n</i>,
+1&lt;=<i>n&lt;=</i>5000, that represents the number of
+wooden sticks in the test case, and the second line contains 2<i>n </i>positive
+integers <i>l<sub>1</sub></i>, <i>w<sub>1</sub></i>, <i>l<sub>2</sub></i>,
+<i>w<sub>2</sub></i>, &hellip;, <i>l<sub>n</sub></i>, <i>w<sub>n</sub></i>,
+each of magnitude at most 10000, where <i>l<sub>i</sub> </i>and <i>w<sub>i</sub>
+</i>are the length and weight of the <i>i </i>th wooden stick,
+respectively. The 2<i>n </i>integers are delimited by one or
+more spaces.</p>
+
+<h2><font size="4" color="#ff0000"><a name="SECTION0001002000000000000000">Output</a>&nbsp;</font>
+</h2>
+
+
+<p>The output should contain the minimum setup time in minutes, one per
+line.</p>
+
+<h2><font size="4" color="#ff0000"><a name="SECTION0001003000000000000000">Sample Input</a> <br>
+</font></h2>
+
+
+
+
+<pre>3
+5
+4 9 5 2 2 1 3 5 1 4
+3
+2 2 1 1 2 2
+3
+1 3 2 2 3 1
+</pre>
+
+
+
+
+<h2><font size="4" color="#ff0000"><a name="SECTION000
+1004000000000000000">Sample Output</a>&nbsp;</font>
+</h2>
+
+
+
+
+<pre>2
+1
+3
+</pre>
+
+
+<p></body></p>
+
+<h3>Analysis</h3>
+
+<p>This question is a little similar to <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>, yet different.</p>
+
+<h3>Solution</h3>
+
+<p>Solution quoted from <a href="http://www.csdn123.com/html/blogs/20130823/58042.htm">脚本百事通</a>:</p>
+
+<blockquote><p>按长度从小到大排序, 若长度相同, 则按重量从小到大排序(先按重量再按长度也行)</p>
+
+<p>然后, 我们针对当前木棍, 与剩下的木棍比较, 满足 w1 &lt;= w2 &amp;&amp; l1 &lt;= l2 的, 就更新一下当前棍, 并标记~</p>
+
+<p>当所有木棍都被编组后 输出到底设置了几次~</p></blockquote>
+
+<p><a href="http://www.android100.org/html/201502/03/109926.html">ref1</a>, <a href="http://blog.csdn.net/keshuai19940722/article/details/10735689">ref2</a></p>
+
+<h3>Code</h3>
+
+<p>The following Java code is written by me</p>
+
+<pre><code>public int count(Pair[] points) {
+    Arrays.sort(points, new PointComparator());
+    // now the array is sorted with Point.x
+    int total = 0;
+    int p = 0;
+    int len = points.length;
+
+    while (p &lt; len) {
+        // find the next non-null point
+        while (p &lt; len &amp;&amp; points[p] == null) {
+            p++;
+        }
+        if (p == len) {
+            break;
+        }
+        // use points[p] as the first elements in the queue
+        Pair temp = copy(points[p]);
+        points[p] = null;
+        total++;
+
+        // then mark all elements that follow points[p]
+        for (int k = p + 1; k &lt; len; k++) {
+            if (points[k] == null || points[k].y &lt; temp.y) {
+                continue;
+            }
+            temp = copy(points[k]);
+            points[k] = null;
+        }
+        p++;
+    }
+    return total;
+}
+
+Pair copy(Pair p) {
+    Pair newP = new Pair(p.x, p.y);
+    return newP;
+}
+
+class PointComparator implements Comparator&lt;Pair&gt; {
+
+    @Override
+    public int compare(Pair p1, Pair p2) {
+        return p1.x - p2.x;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1138,92 +1330,6 @@ public class Solution {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/07/add-adsense-octopress/">[Octopress] Add Google AdSense to Octopress</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-07T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/04/07/add-adsense-octopress/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Apply for Google AdSense</h2>
-
-<p>My first request of AdSense is rejected because of &ldquo;<strong>Site does not comply with Google policies</strong>&rdquo;. I do not know the exact reason, but I did the following things to get it through:</p>
-
-<ol>
-<li><p>I registered a top-level .COM domain name to replace the original github page&rsquo;s domain.</p></li>
-<li><p>I added &ldquo;Privacy Policy&rdquo; page, and added the link to the bottom of each blog post.</p></li>
-<li><p>I re-wrote the &ldquo;About Me&rdquo; page, and added in administrator email address.</p></li>
-<li><p>I updated a few more posts, making it more than 580 posts in total.</p></li>
-<li><p>I set up Google Webmaster Tools, and updated sitemap.xml in the configurations.</p></li>
-<li><p>I resubmitted my request of AdSense again.</p></li>
-</ol>
-
-
-<h2>Put AdSense in your blog</h2>
-
-<ol>
-<li><p>Create a new file: source/_includes/asides/advertise.html</p></li>
-<li><p>Copy and paste the code from AdSense, eg.</p>
-
-<pre><code> &lt;script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"&gt;&lt;/script&gt;
- &lt;!-- ad-name --&gt;
- &lt;ins class="adsbygoogle"
-      ...............
- &lt;script&gt;
- (adsbygoogle = window.adsbygoogle || []).push({});
- &lt;/script&gt;
-</code></pre></li>
-<li><p>Go to _config.yml, and look for &ldquo;default_asides&rdquo;, then add &ldquo;asides/advertise.html, &rdquo; in the beginning of the array</p>
-
-<p> default_asides: [asides/advertise.html, asides/category_list.html, asides/recent_posts.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]</p></li>
-<li><p>Now you&rsquo;ve added advertisement in your side menu.</p></li>
-<li><p>Go to source/_layouts/post.html and look for:</p>
-
-<p> &lt;h1>Comments&lt;/h1></p></li>
-<li><p>Below the h1 tag, add your AdSense code, again.</p></li>
-<li><p>Now you&rsquo;ve added advertisement above your comment area.</p></li>
-</ol>
-
-
-<p>Thanks for the effort from <a href="https://www.hi29.net/post/2013/11/30/octopresszen-mo-fang-adsense/">this reference</a>.</p>
-
-<h2>Updates</h2>
-
-<p>Apr 9th update: my re-submission of Google AdSense is not approached, because of &ldquo;not enough content&rdquo;. I don&rsquo;t know what else to do, so I switched to another ad platform.</p>
-
-<p>Apr 11th update: For the first time ever, my blog has more than 1,000 visit per day.</p>
-
-<p><img class="middle" src="/assets/images/google-analytics-20150411.png"></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -1249,7 +1355,7 @@ public class Solution {
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (121)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (122)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1259,6 +1365,10 @@ public class Solution {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/04/14/wooden-stick/">[UVa] Wooden Sticks </a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
@@ -1274,10 +1384,6 @@ public class Solution {
     
       <li class="post">
         <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate within K Distance </a>
       </li>
     
   </ul>
