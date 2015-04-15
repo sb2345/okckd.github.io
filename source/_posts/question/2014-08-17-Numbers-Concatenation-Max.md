@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "[ItInt5] Numbers Concatenation Max (Largest Number)"
+title: "[ItInt5] Numbers Concatenation Max (Largest Number) "
 comments: true
 category: Question
 tags: [ ItInt5 ]
 ---
 
-### Question 
+### Question
 
 [link](http://www.itint5.com/oj/#45)
 
@@ -20,19 +20,19 @@ tags: [ ItInt5 ]
 
 ### Solution
 
-__I will first list out 2 special cases__: 
+__I will first list out 2 special cases__:
 
 > {40, 20, 201} => 4020201
 >
 > {40, 20, 203} => 4020320
 
-Knowing about this 2 cases helps us to come up with a sorting-based algorithm. We only need to achieve this: 
+Knowing about this 2 cases helps us to come up with a sorting-based algorithm. We only need to achieve this:
 
 > 201 < 20
 >
 > 20 < 203
 
-By reading [this post](http://www.itint5.com/discuss/183/%E8%B0%81%E8%83%BD%E5%B8%AE%E6%88%91%E7%9C%8B%E4%B8%80%E4%B8%8B%E6%88%91%E7%9A%84%E4%BB%A3%E7%A0%81%EF%BC%8Cn-200%E6%97%B6%E6%8F%90%E7%A4%BAsegmentation), I found the best comparator solution, defined as below: 
+So the best comparator implementation would be:
 
     String firstNum = s1 + s2;
     String secondNum = s2 + s1;
