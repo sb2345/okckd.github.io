@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question How would you load test a webpage without using any test tools? Solution Load testing Load testing is testing under normal and peak load &hellip;">
+  <meta name="description" content="Question Given an integer between 0 and 999,999, print an English phrase that describes the integer (eg, “One Thousand, Two Hundred Thirty Four”). &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,228 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/09/convert-int-to-english/">[CC150v4] 19.6 Convert Integer to English</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/09/convert-int-to-english/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given an integer between 0 and 999,999, print an English phrase that describes the integer (eg, “One Thousand, Two Hundred Thirty Four”).</p></blockquote>
+
+<p>This is also on <strong>CC150v5 Q17.7</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>The solution in book isn&rsquo;t good, so I wrote the code myself. Read it below.</p>
+
+<h3>Code</h3>
+
+<pre><code>private static String[] arr1 = { "Zero ", "One ", "Two ", "Three ",
+        "Four ", "Five ", "Six ", "Seven ", "Eight ", "Nine " };
+
+private static String[] arr11 = { "Ten ", "Eleven ", "Twelve ",
+        "Thirteen ", "Fourteen ", "Fifteen ", "Sixteen ", "Seventeen ",
+        "Eighteen ", "Nineteen " };
+
+private static String[] arr10 = { "", "Ten ", "Twenty ", "Thirty ",
+        "Forty ", "Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety " };
+
+public static String numtostring(int num) {
+    int part1 = num / 1000;
+    int part2 = num % 1000;
+    if (part1 == 0) {
+        return numBelowTrousand(part2);
+    } else {
+        return numBelowTrousand(part1) + "Thousand, "
+                + numBelowTrousand(part2);
+    }
+}
+
+public static String numBelowTrousand(int num) {
+    StringBuilder sb = new StringBuilder();
+    // assume num is below 1000
+
+    // first, convert hundred digit
+    int hundred = num / 100;
+    if (hundred != 0) {
+        sb.append(arr1[hundred] + "Hundred ");
+    }
+
+    // second, convert the rest of digits
+    num %= 100;
+    if (num != 0) {
+        int ten = num / 10;
+        int one = num % 10;
+        if (ten == 1) {
+            sb.append(arr11[num - 10]);
+        } else {
+            if (ten != 0) {
+                // ten is in the range of [2,9]
+                sb.append(arr10[ten]);
+            }
+            if (one != 0) {
+                sb.append(arr1[one]);
+            }
+        }
+    }
+    return sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/09/Winner-tic-tac-toe/">[Google] Winner of Tic-tac-toe</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-09T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/09/Winner-tic-tac-toe/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">link</a></p>
+
+<blockquote><p>How would you determine if someone has won a game of tic-tac-toe on a board of any size?</p></blockquote>
+
+<p>(This is also on CC150v4 19.2 and CC150v4 17.2)</p>
+
+<h3>Solution</h3>
+
+<p>First, confirm that when the number of pieces in a line equals to the dimension of the board, one person wins. Eg. for 10 * 10 board, 10 pieces need to be in 1 line.</p>
+
+<p><strong><a href="http://www.glassdoor.com/Interview/How-would-you-determine-if-someone-has-won-a-game-of-tic-tac-toe-on-a-board-of-any-size-QTN_1104.htm">We can determine</a> if someone has won during a game in real time</strong>, as in checking after every move.</p>
+
+<blockquote><p>Create an array of size 2n+2 at the beginning of the game and fill it with zeros. Each spot in the array will be a sum of X&rsquo;s or O&rsquo;s horizontally (the first n places in the array), vertically (the second n places in the array) and diagonally (the last 2 places). Then with every move, you add 1 to the 2 places (or 3 if on a diagnol) of the array if X, and subtract 1 if its an O. After adding you check and see if the value of the array is equal to n or -n, if it is, n mean X has won and -n means O has won.</p></blockquote>
+
+<p>This is uses O(2n+2) space, but it&rsquo;s the best solution I can find online. I wrote code posted below.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>enum Piece {
+    Empty, Red, Blue
+};
+
+public static Piece hasWon3(Piece[][] board) {
+
+    int N = board.length;
+
+    // O(2n+2) space to store count info
+    int[] rowCnt = new int[N];
+    int[] colCnt = new int[N];
+    int[] digCnt = new int[2];
+
+    for (int i = 0; i &lt; N; i++) {
+        for (int j = 0; j &lt; N; j++) {
+
+            int pieceValue = 0;
+            if (board[i][j] == Piece.Blue) {
+                pieceValue = 1;
+            } else if (board[i][j] == Piece.Red) {
+                pieceValue = -1;
+            }
+
+            // if empty, pieceValue is 0
+            // if blue, add 1 in count
+            // if red, subtract 1 in count
+            rowCnt[i] += pieceValue;
+            if (checkFinish(rowCnt[i], N) != null) {
+                return checkFinish(rowCnt[i], N);
+            }
+
+            // after adding the count, check if the game finishes
+            colCnt[j] += pieceValue;
+            if (checkFinish(colCnt[j], N) != null) {
+                return checkFinish(colCnt[j], N);
+            }
+
+            if (i == j) {
+                digCnt[0] += pieceValue;
+                if (checkFinish(digCnt[0], N) != null) {
+                    return checkFinish(digCnt[0], N);
+                }
+            } else if (i + j == N) {
+                digCnt[1] += pieceValue;
+                if (checkFinish(digCnt[1], N) != null) {
+                    return checkFinish(digCnt[1], N);
+                }
+            }
+        }
+    }
+    // game not finished, continue
+    return Piece.Empty;
+}
+
+private static Piece checkFinish(int count, int N) {
+    if (count == N)
+        return Piece.Blue;
+    else if (count == -1 * N)
+        return Piece.Red;
+    else
+        return null;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -612,199 +834,6 @@ method.invoke(foo, null);
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/08/java-final-finally-finalize/">[CC150v4] 14.3 Java Final, Finally and Finalize</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/08/java-final-finally-finalize/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>What is the difference between Final, Finally, and finalize?</p></blockquote>
-
-<h3>final</h3>
-
-<p><strong>is a keyword</strong>.</p>
-
-<ol>
-<li><strong>Variable</strong> decleared as final should be initialized only once and cannot be changed.</li>
-<li><strong>Classes</strong> declared as final cannot be extended.</li>
-<li><strong>Methods</strong> declared as final cannot be overridden.</li>
-</ol>
-
-
-<p>Code:</p>
-
-<pre><code>private final String name = "foo";
-
-public final String toString() {  return "NULL"; }
-
-// final can also make a class not "inheritable"
-public final class finalClass {...}
-public class classNotAllowed extends finalClass {...} 
-// Not allowed
-</code></pre>
-
-<h3>finally</h3>
-
-<p><strong>is a block</strong>.</p>
-
-<p>The finally block <strong>always executes</strong> when the try block exits (even if an unexpected exception occurs).</p>
-
-<pre><code>lock.lock();
-try {
-    //do stuff
-} catch (SomeException se) {
-    //handle se
-} finally {
-    lock.unlock(); //always executed, even if Exception or Error or se
-}
-</code></pre>
-
-<h3>finalize</h3>
-
-<p><strong>is a method</strong>.</p>
-
-<p><strong>It&rsquo;s called by Garbage Collector</strong> before reclaiming GC eligible objects.</p>
-
-<pre><code>public void finalize() {
-    //free resources (e.g. unallocate memory)
-    super.finalize();
-}
-</code></pre>
-
-<p><a href="http://www.java2novice.com/java_interview_questions/final-finally-finalize/">source1</a></p>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/11/difference-between-final-finally-and-finalize-java.html">source2</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/08/implement-math-operators/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a method to implement *, &ndash; , / operations You should use only the + operator.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>First it&rsquo;s important to write a &lsquo;negate&rsquo; operator</strong>. The code given in the book:</p>
-
-<pre><code>public static int FnNegate(int a) {
-    int neg = 0;
-    int d = a &lt; 0 ? 1 : -1;
-    while (a != 0) {
-        neg += d;
-        a += d;
-    }
-    return neg;
-}
-</code></pre>
-
-<p><strong>Updated on Feb 1st, 2015</strong>, the negate method:</p>
-
-<pre><code>public static int negate(int a) {
-    // plus -1, then do XOR with 111111111
-    // eg. 1 -&gt; 0000000 -&gt; 11111111 = -1
-    // eg. -1 -&gt; 11111110 -&gt; 00000001 = 1
-    return (a + -1) ^ -1;
-}
-</code></pre>
-
-<p>And the check sign method:</p>
-
-<pre><code>public static boolean sameSign(int a, int b) {
-    // if first bit is same, then xor = 00000000
-    // if first bit is not same, xor = 10000000
-    int xor = (a ^ b) &amp; Integer.MIN_VALUE;
-    return xor == 0;
-}
-</code></pre>
-
-<p>Although we can only use +, the author also used > and &lt; comparison operators.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int negate(int a) {
-    // plus -1, then do XOR with 111111111
-    // eg. 1 -&gt; 0000000 -&gt; 11111111 = -1
-    // eg. -1 -&gt; 11111110 -&gt; 00000001 = 1
-    return (a + -1) ^ -1;
-}
-
-public static int minus(int a, int b) {
-    return a + negate(b);
-}
-
-public static boolean sameSign(int a, int b) {
-    // if first bit is same, then xor = 00000000
-    // if first bit is not same, xor = 10000000
-    int xor = (a ^ b) &amp; Integer.MIN_VALUE;
-    return xor == 0;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="20">&larr; Older</a>
@@ -828,7 +857,7 @@ public static boolean sameSign(int a, int b) {
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (166)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (168)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -848,19 +877,19 @@ public static boolean sameSign(int a, int b) {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/04/15/Largest-Number/">[LeetCode 179] Largest Number </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/15/Dungeon-Game/">[LeetCode 174] Dungeon Game </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/15/Binary-Search-Tree-Iterator/">[LeetCode 173] Binary Search Tree Iterator </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/14/wooden-stick/">[UVa] Wooden Sticks </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/14/NIM-stone-game/">[Question] 编程之美 NIM 一排石头的游戏 </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/14/Majority-Element/">[LeetCode 169] Majority Element </a>
       </li>
     
   </ul>

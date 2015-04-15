@@ -9,8 +9,9 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question 给出下面这个图 设计数据结构和算法求出图中所有的正方形数量 (count the number of squares). Solution Pre-processing: 从每一个点开始存储上下左右四个方向最多延伸到的位置
-Main algorithm: 枚举右下角位置 &hellip;">
+  <meta name="description" content="Question Design a Generic Deck of Cards Solution A simple design: enum Suit { HEART, DIAMOND, SPADES, CLUBS;
+} class Deck { List&lt;Card&gt; deck;
+} &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +77,223 @@ Main algorithm: 枚举右下角位置 &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/22/design-deck-card/">[CC150v5] 8.1 Design a Generic Deck of Cards</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-22T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/08/22/design-deck-card/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Design a Generic Deck of Cards</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>A simple design:</p>
+
+<pre><code>enum Suit {
+    HEART, DIAMOND, SPADES, CLUBS;
+}
+
+class Deck {
+    List&lt;Card&gt; deck;
+}
+
+class Card {
+    Suit suit;
+    int num;
+}
+</code></pre>
+
+<p>A more complex design:</p>
+
+<pre><code>enum Suit {
+    HEART, DIAMOND, SPADES, CLUBS;
+}
+
+class Deck&lt;T extends Card&gt; {
+    List&lt;Card&gt; deck;
+
+    public void shuffle() {
+    };
+}
+
+abstract class Card {
+    boolean available;
+    Suit suit;
+    int num;
+
+    public boolean isAvailable() {
+        return available;
+    };
+}
+
+class Hand&lt;T extends Card&gt; {
+    List&lt;Card&gt; cards;
+
+    public int score() {
+        int score = 0;
+        for (Card c : cards) {
+            score += c.num;
+        }
+        return score;
+    }
+
+    public void addCard(T card) {
+        cards.add(card);
+    }
+}
+
+// Now use the above generic Data Structure to make a
+// Blackjack Game
+class Blackjack extends Hand&lt;BlackJackCard&gt; {
+}
+
+class BlackJackCard extends Card {
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/20/Talk-about-singleton/">[Java OOP] About Singleton</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-20T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/08/20/Talk-about-singleton/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Implement Singlton</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
+
+<h4>using Enum</h4>
+
+<p>This is only available since Java 6.</p>
+
+<pre><code>public enum Singleton_Enum {
+    INSTANCE;
+}
+</code></pre>
+
+<h4>using double checked locking</h4>
+
+<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
+
+<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
+    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
+
+    private Singleton_DoubleCheckedLocking() {
+    }
+
+    public static Singleton_DoubleCheckedLocking getInstance() {
+        if (INSTANCE == null) {
+            synchronized (Singleton_DoubleCheckedLocking.class) {
+                // double checking Singleton instance
+                if (INSTANCE == null) {
+                    INSTANCE = new Singleton_DoubleCheckedLocking();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h4>using static factory method</h4>
+
+<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
+
+<pre><code>public class Singleton_StaticFactory {
+    // initailzed during class loading
+    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
+
+    // to prevent creating another instance of Singleton
+    private Singleton_StaticFactory() {
+    }
+
+    public static Singleton_StaticFactory getSingleton() {
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h3>About thread-safety</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
+
+<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
+
+<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
+
+<ol>
+<li>using static field</li>
+<li>using Enum</li>
+</ol>
+
+
+<h3>Q &amp; A</h3>
+
+<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
+
+<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -714,172 +932,6 @@ int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; poso
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/17/Expression-evaluation/">[Twitter] Arithmetic Expression Evaluation</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-17T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/08/17/Expression-evaluation/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#26">link</a></p>
-
-<blockquote><p>给定一个表达式字符串，其中只包含非负整数，加法，减法以及乘法符号，例如7+3<em>4</em>5+2+4-3-1。请写程序计算该表达式的值。</p>
-
-<p>提示：可以尝试使用递归算法，程序将非常简洁易写，很适用于面试场合。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Trying to solve this problem iteratively is like suicide</strong>. The code would be lengthy and buggy, and very hard to make it right.</p>
-
-<p><strong>The most important point about this question, is how to handle minus(&ndash;) sign</strong>. We know that when we see * and /, we evaluate immediately, and when sees + and &ndash;, we postpone it. However this case:</p>
-
-<blockquote><p>1 &ndash; 2 &ndash; 3</p></blockquote>
-
-<p>If we postpone the first minus sign, we would end up getting:</p>
-
-<blockquote><p>1 &ndash; (-1)</p></blockquote>
-
-<p>So it&rsquo;s wrong (outputing 2 in this case).</p>
-
-<p><strong>The solution to this issue is, consider (a &ndash; b) as (a + (-b))</strong>. That&rsquo;s why later in the code, you&rsquo;ll see a variable <strong>preNum</strong> being modified.</p>
-
-<p><a href="http://www.itint5.com/discuss/50/case%E9%87%8C%E9%9D%A2%E6%9C%89%E4%B8%80%E4%B8%AA%E5%B8%A6%E8%B4%9F%E6%95%B4%E6%95%B0%E7%9A%84%EF%BC%8C%E5%B9%B6%E6%B1%82%E9%80%92%E5%BD%92%E5%AE%9E%E7%8E%B0">ref</a></p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>int p;
-
-public int evaluate(String expr) {
-    p = 0;
-    int firstNum = getNumber(expr);
-    return helper(firstNum, expr);
-}
-
-private int helper(int preNum, String expr) {
-    // now p points to a operator (or end of string)
-    if (p == expr.length()) {
-        return preNum;
-    }
-    char operator = expr.charAt(p);
-    p++;
-    int nextNum = getNumber(expr);
-    switch (operator) {
-    case '+':
-        return preNum + helper(nextNum, expr);
-    case '-':
-        return preNum + helper(-1 * nextNum, expr);
-    case '*':
-        return helper(preNum * nextNum, expr);
-    default:
-        return helper(preNum / nextNum, expr);
-    }
-}
-
-private int getNumber(String expr) {
-    // now p points to a number
-    int num = 0;
-    while (p &lt; expr.length() &amp;&amp; expr.charAt(p) &gt;= '0'
-            &amp;&amp; expr.charAt(p) &lt;= '9') {
-        num = num * 10 + expr.charAt(p) - '0';
-        p++;
-    }
-    return num;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/16/orthogonal-traverse-map/">[Google] Orthogonal Traverse the Map (`)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/08/16/orthogonal-traverse-map/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#22">link</a></p>
-
-<blockquote><p>有一个n*m（n和m都不超过50）的棋盘，有k个目标格子需要访问。需要访问的格子的横纵坐标存放在数组x[]和y[]中(0&lt;=x[i]&lt;n, 0&lt;=y[i]&lt;m)。</p>
-
-<p>遍历的规则为：</p>
-
-<p>每一步只能从一个目标格子水平或者竖直跳跃移动到另一个目标格子。</p>
-
-<p>连续的两步必须形成直角。即如果前一步是水平移动，那么下一步只能竖直移动。</p>
-
-<p>问是否存在一种遍历顺序，使得每个目标格子有且仅被访问一次。</p>
-
-<p>样例：k=8, x=[0, 0, 0, 0, 2, 2, 4, 4], y=[0, 2, 4, 6, 4, 6, 2, 4],对应于下图中A, B, C, D, F, E, G, H 8个目标格子，存在满足条件的遍历A->D->E->F->C->B->G->H。</p></blockquote>
-
-<p><img class="middle" src="/assets/images/orthogonal-map.jpg"></p>
-
-<h3>Solution</h3>
-
-<blockquote><p>n,m的棋盘，<a href="http://www.itint5.com/discuss/22/%E7%9B%B4%E8%A7%92%E8%B7%AF%E7%BA%BF%E9%81%8D%E5%8E%86%E6%A3%8B%E7%9B%98">建一个包含n+m个顶点的图G</a>（为了方便说明，类似二分图将其分为两列，左边n个顶点，右边m个顶点，分别代表n行和n列）。</p>
-
-<p>对于目标格子(i,j)，左边第i个顶点和右边第j个顶点连一条边。最后的问题其实就是问转换之后的图G是否存在欧拉欧拉回路或者欧拉路径。</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="26">&larr; Older</a>
@@ -903,7 +955,7 @@ private int getNumber(String expr) {
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (166)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (168)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -923,19 +975,19 @@ private int getNumber(String expr) {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/04/15/Largest-Number/">[LeetCode 179] Largest Number </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/15/Dungeon-Game/">[LeetCode 174] Dungeon Game </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/15/Binary-Search-Tree-Iterator/">[LeetCode 173] Binary Search Tree Iterator </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/14/wooden-stick/">[UVa] Wooden Sticks </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/14/NIM-stone-game/">[Question] 编程之美 NIM 一排石头的游戏 </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/14/Majority-Element/">[LeetCode 169] Majority Element </a>
       </li>
     
   </ul>

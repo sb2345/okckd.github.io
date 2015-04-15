@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question You&#8217;reworking on the Google Chrome team when you receivea bug report: Chrome crashes on launch. What would you do? Step 1: Understand &hellip;">
+  <meta name="description" content="Question Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,294 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/27/Order-array-by-sorting-middle/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
+
+<blockquote><ol>
+<li><p>找到heading的最长递增序列.</p></li>
+<li><p>找到tailing的最长的递增序列.</p></li>
+</ol>
+</blockquote>
+
+<p>After that:</p>
+
+<blockquote><ol>
+<li><p>用中间部分的min去shrink左边.</p></li>
+<li><p>用中间部分的max去shrink右边.</p></li>
+</ol>
+</blockquote>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static void findUnsortedSequence(int[] array, int[] ans) {
+    int len = array.length;
+    ans[0] = 0;
+    ans[1] = 0;
+
+    // find increasing sequence on left and on right
+    int leftPeak = 0;
+    while (leftPeak &lt; len - 1) {
+        if (array[leftPeak] &lt; array[leftPeak + 1]) {
+            leftPeak++;
+        } else {
+            break;
+        }
+    }
+    if (leftPeak == len - 1) {
+        return;
+    }
+    int rightBottom = len - 1;
+    while (rightBottom &gt; 0) {
+        if (array[rightBottom] &gt; array[rightBottom - 1]) {
+            rightBottom--;
+        } else {
+            break;
+        }
+    }
+
+    // leftPeak and rightBottom are found, now read mid part
+    int midMin = Integer.MAX_VALUE;
+    int midMax = Integer.MIN_VALUE;
+    for (int i = leftPeak; i &lt;= rightBottom; i++) {
+        midMin = Math.min(midMin, array[i]);
+        midMax = Math.max(midMax, array[i]);
+    }
+
+    // find left boudary and right boundary
+    int leftBound = leftPeak;
+    while (leftBound &gt;= 0) {
+        if (array[leftBound] &lt; midMin) {
+            break;
+        }
+        leftBound--;
+    }
+    int rightBound = rightBottom;
+    while (rightBound &lt; len) {
+        if (array[rightBound] &gt; midMax) {
+            break;
+        }
+        rightBound++;
+    }
+
+    // finish it up
+    ans[0] = leftBound + 1;
+    ans[1] = rightBound - 1;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/26/implement-circular-array-java/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement a <strong>CircularArray</strong> class that supports an array-like data structure which can be efficiently rotated.</p>
+
+<p>The class should use a generic type, and should support iteration via the standard for (Object : circuLarArray) notation.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>First part of the question is solved by using an array and a pointer</strong>. The solution simplifies the question by fixing the array size (not a dynamic-resizing array).</p>
+
+<p><strong>The difficult part is how to write iterator</strong>.</p>
+
+<p>Note that we should support <strong>Java Generics</strong>:</p>
+
+<pre><code>class MyCircularArray&lt;T&gt;
+</code></pre>
+
+<p>Implement <strong>Iterable Interface</strong>:</p>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+}
+</code></pre>
+
+<p>Override <strong>iterator() method</strong>:</p>
+
+<pre><code>@Override
+public Iterator&lt;T&gt; iterator() {
+    return new MyIterator&lt;T&gt;(this);
+}
+</code></pre>
+
+<p>Write our own <strong>Iterator Class</strong>:</p>
+
+<pre><code>class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+}
+</code></pre>
+
+<p>Finish it up</p>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+        return new MyIterator&lt;T&gt;(this);
+    }
+
+    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+        @Override
+        public boolean hasNext() {
+        }
+
+        @Override
+        public T next() {
+        }
+
+        @Override
+        public void remove() {
+        }
+    }
+}
+</code></pre>
+
+<p>It might be confusing when implementing <strong>Iterable</strong> and <strong>Iterator</strong> Class.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class MyCircularArray&lt;T&gt; implements Iterable&lt;T&gt; {
+
+    T[] items;
+
+    int head;
+    int cur;
+
+    public MyCircularArray(int size) {
+        // this is really important (casting the type)
+        items = (T[]) new Object[size];
+
+        head = 0;
+        cur = 0;
+    }
+
+    public void put(T item) {
+        items[cur++] = item;
+        cur = cur % items.length;
+    }
+
+    public T get(int i) {
+        int newIndex = (i + head) % items.length;
+        return items[newIndex];
+    }
+
+    public void rotate(int shiftRight) {
+        head += shiftRight;
+        head = head % items.length;
+    }
+
+    @Override
+    public Iterator&lt;T&gt; iterator() {
+        return new MyIterator&lt;T&gt;(this);
+    }
+
+    class MyIterator&lt;T&gt; implements Iterator&lt;T&gt; {
+
+        T[] items;
+        int head;
+        int count;
+
+        public MyIterator(MyCircularArray&lt;T&gt; array) {
+            this.items = array.items;
+            this.head = array.head;
+            this.count = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.count != items.length;
+        }
+
+        @Override
+        public T next() {
+            if (hasNext()) {
+                return items[(head + count++) % items.length];
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+        }
+    }
+
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -791,132 +1079,6 @@ public static int helper(int[] array, int left, int right) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/16/calculate-bits-convertions/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a function to determine the number of bits (change) required to convert integer A to integer B.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Using XOR operation, we can find out number of bits that are different.</p>
-
-<p>The next important thing is to know <strong>how to count the number of &lsquo;1&rsquo;s in a integer</strong>. It&rsquo;s like this:</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>code 1</strong></p>
-
-<pre><code>public static int calcBitsSwapMe1(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        count += num &amp; 1;
-        num = num &gt;&gt;&gt; 1;
-    }
-    return count;
-}
-</code></pre>
-
-<p><strong>code 2</strong></p>
-
-<pre><code>public static int calcBitsSwapMe2(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        num = num &amp; (num - 1);
-        count++;
-    }
-    return count;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/bottles-of-spills/">[Brain Teaser] 6.1 Bottles of Pills</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/16/bottles-of-spills/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>You have 20 bottles of pills. 19 bottles have 1.0 gram pills, but one has pills of weight 1.1 grams.</p>
-
-<p>Given a scale, how to find the heavy bottle <strong>only scaling ONCE</strong>?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Take 1 pill from Bottle 1, 2 pills from Bottle 2, and so on. We&rsquo;ll expect (1 + 2 + &hellip; + 20) = 210 gram of pills.</p>
-
-<p>The answer would be {(weight &ndash; 210 grams) / 0.1}.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="17">&larr; Older</a>
@@ -940,7 +1102,7 @@ public static int helper(int[] array, int left, int right) {
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (166)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (168)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
@@ -960,19 +1122,19 @@ public static int helper(int[] array, int left, int right) {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/04/15/Largest-Number/">[LeetCode 179] Largest Number </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/04/15/Dungeon-Game/">[LeetCode 174] Dungeon Game </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/15/Binary-Search-Tree-Iterator/">[LeetCode 173] Binary Search Tree Iterator </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/04/14/wooden-stick/">[UVa] Wooden Sticks </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/14/NIM-stone-game/">[Question] 编程之美 NIM 一排石头的游戏 </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/14/Majority-Element/">[LeetCode 169] Majority Element </a>
       </li>
     
   </ul>
