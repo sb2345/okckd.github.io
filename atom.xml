@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="www.shuatiblog.com/"/>
-  <updated>2015-04-15T18:00:56+08:00</updated>
+  <updated>2015-04-15T21:59:37+08:00</updated>
   <id>www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -420,7 +420,7 @@ table.dungeon, .dungeon th, .dungeon td {
 
 </p><p>The demons had captured the princess (<b>P</b>) and imprisoned her in the bottom-right corner of a dungeon. The dungeon consists of M x N rooms laid out in a 2D grid. Our valiant knight (<b>K</b>) was initially positioned in the top-left room and must fight his way through the dungeon to rescue the princess. </p>
 <p>The knight has an initial health point represented by a positive integer. If at any point his health point drops to 0 or below, he dies immediately. </p>
-<p>Some of the rooms are guarded by demons, so the knight loses health (<i>negative</i> integers) upon entering these rooms; 
+<p>Some of the rooms are guarded by demons, so the knight loses health (<i>negative</i> integers) upon entering these rooms;
 other rooms are either empty (<i>0&#8217;s</i>) or contain magic orbs that increase the knight&#8217;s health (<i>positive</i> integers).</p>
 <p>In order to reach the princess as quickly as possible, the knight decides to move only rightward or downward in each step. </p>
 
@@ -429,21 +429,21 @@ other rooms are either empty (<i>0&#8217;s</i>) or contain magic orbs that incre
 <p>For example, given the dungeon below, the initial health of the knight must be at least <b>7</b> if he follows the optimal path <code>RIGHT-&gt; RIGHT -&gt; DOWN -&gt; DOWN</code>.</p>
 
 <table class="dungeon">
-<tbody><tr> 
-<td>-2 (K)</td> 
-<td>-3</td> 
-<td>3</td> 
-</tr> 
-<tr> 
-<td>-5</td> 
-<td>-10</td> 
-<td>1</td> 
-</tr> 
-<tr> 
-<td>10</td> 
-<td>30</td> 
-<td>-5 (P)</td> 
-</tr> 
+<tbody><tr>
+<td>-2 (K)</td>
+<td>-3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>-5</td>
+<td>-10</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>30</td>
+<td>-5 (P)</td>
+</tr>
 </tbody></table>
 <!---2K   -3  3
 -5   -10   1
@@ -458,24 +458,56 @@ other rooms are either empty (<i>0&#8217;s</i>) or contain magic orbs that incre
 <p></p>
 
 <p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/stellari">@stellari</a> for adding this problem and creating all test cases.</p><p></p>
-              
+
                 <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
                 <span class="hide">
-                  
+
                   <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/dynamic-programming/">Dynamic Programming</a>
-                  
+
                   <a class="btn btn-xs btn-primary" href="www.shuatiblog.com/tag/binary-search/">Binary Search</a>
-                  
+
                 </span>
-              
+
             </div>
 
 
 <h3>Analysis</h3>
 
+<p>The key of solving this problem is to <strong>do DP from bottom right to top left</strong>.</p>
+
 <h3>Solution</h3>
 
+<p>dp[i][j] means the minimum initial value of each position. As suggested by<a href="http://www.cnblogs.com/grandyang/p/4233035.html"></a>, the DP equation is:</p>
+
+<blockquote><p>dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) &ndash; dungeon[i][j]).</p></blockquote>
+
 <h3>Code</h3>
+
+<pre><code>public class Solution {
+    public int calculateMinimumHP(int[][] dungeon) {
+        if (dungeon == null) return 1;
+        int m = dungeon.length;
+        int n = dungeon[0].length;
+
+        int[][] dp = new int[m][n];
+        for (int i = m - 1; i &gt;= 0; i--) {
+            for (int j = n - 1; j &gt;= 0; j--) {
+                if (i == m - 1 &amp;&amp; j == n - 1) {
+                    dp[i][j] = Math.max(1, 1 - dungeon[i][j]);
+                } else if (i == m - 1) {
+                    dp[i][j] = Math.max(1, dp[i][j + 1] - dungeon[i][j]);
+                } else if (j == n - 1) {
+                    dp[i][j] = Math.max(1, dp[i + 1][j] - dungeon[i][j]);
+                } else {
+                    dp[i][j] = Math.max(1,
+                        Math.min(dp[i + 1][j], dp[i][j + 1]) - dungeon[i][j]);
+                }
+            }
+        }
+        return dp[0][0];
+    }
+}
+</code></pre>
 ]]></content>
   </entry>
   
