@@ -9,9 +9,8 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Given a collection of intervals, merge all overlapping intervals. For example,
-Given [1,3],[2,6],[8,10],[15,18],
-return [1,6],[8,10],[ &hellip;">
+  <meta name="description" content="Question link The set [1,2,3,…,n] contains a total of n! unique permutations. By listing and labeling all of the permutations in order,
+We get the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +76,629 @@ return [1,6],[8,10],[ &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/19/Permutation-Sequence/">[LeetCode 60] Permutation Sequence</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-19T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/05/19/Permutation-Sequence/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/permutation-sequence/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>The set <code>[1,2,3,…,<i>n</i>]</code> contains a total of <i>n</i>! unique permutations.</p>
+
+<p>By listing and labeling all of the permutations in order,<br>
+We get the following sequence (ie, for <i>n</i> = 3):
+</p><ol>
+<li><code>"123"</code></li>
+<li><code>"132"</code></li>
+<li><code>"213"</code></li>
+<li><code>"231"</code></li>
+<li><code>"312"</code></li>
+<li><code>"321"</code></li>
+</ol>
+<p></p>
+
+<p>Given <i>n</i> and <i>k</i>, return the <i>k</i><sup>th</sup> permutation sequence.</p>
+
+<p><b>Note:</b> Given <i>n</i> will be between 1 and 9 inclusive.</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="white">1</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a math problem</strong>. Trying to solve it using <strong>DFS</strong> like in &ldquo;Permutation&rdquo; or &ldquo;N queen&rdquo; will get time limit exceed exception.</p>
+
+<p><a href="http://fisherlei.blogspot.sg/2013/04/leetcode-permutation-sequence-solution.html">This blog</a> have a very good explanation of the math solution.</p>
+
+<blockquote cite="http://fisherlei.blogspot.sg/2013/04/leetcode-permutation-sequence-solution.html">
+    <div>
+        <br>[Thoughts]
+        <br>两个解法。
+        <br>第一，DFS
+        <br>递归遍历所有可能，然后累加计算，直至到K为止。
+        <br>
+        <br>第二，数学解法。
+        <br>
+        <br>假设有n个元素，第K个permutation是
+        <br>a1, a2, a3, &#8230;.. &nbsp; &#8230;, an
+        <br>那么a1是哪一个数字呢？
+        <br>
+        <br>那么这里，我们把a1去掉，那么剩下的permutation为
+        <br>a2, a3, &#8230;. &#8230;. an, 共计n-1个元素。 n-1个元素共有(n-1)!组排列，那么这里就可以知道
+        <br>
+        <br>设变量K1 = K
+        <br>a1 = K1 / (n-1)!
+        <br>
+        <br>同理，a2的值可以推导为
+        <br>a2 = K2 / (n-2)!
+        <br>K2 = K1 % (n-1)!
+        <br>&nbsp;&#8230;&#8230;.
+        <br>a(n-1) = K(n-1) / 1!
+        <br>K(n-1) = K(n-2) /2!
+        <br>
+        <br>an = K(n-1)
+    </div>
+</blockquote>
+
+
+<h3>Solution</h3>
+
+<p><strong>I have written a math recursive solution</strong> and code is below. It&rsquo;s very straight-forward.</p>
+
+<p>There is also <strong>direct math solution</strong>. However, how to handle the removal of elements from the unmatched list is a tough problem. <strong>I saw a lot of people using swap to do it</strong>, but I don&rsquo;t like this idea because of the bad readability of code.</p>
+
+<p><strong>Finally I found a readable code from <a href="http://xiaochongzhang.me/blog/?p=693">this blog</a></strong>. It&rsquo;s a very good solution.</p>
+
+<h3>My code</h3>
+
+<p><strong>updated on my birthday this year</strong></p>
+
+<pre><code>public String getPermutation(int n, int k) {
+    int index = k - 1;
+    List&lt;Integer&gt; nums = new ArrayList&lt;Integer&gt;();
+    for (int i = 1; i &lt;= n; i++) {
+        nums.add(i);
+    }
+    String ans = "";
+    for (int i = n - 1; i &gt;= 1; i--) {
+        int fact = factorial(i);
+        int nextIndex = index / fact;
+        index = index % fact;
+        ans += nums.remove(nextIndex);
+    }
+    ans += nums.get(0);
+    return ans;
+}
+
+private int factorial(int x) {
+    if (x == 0) return 0;
+    int ans = 1;
+    for (int i = 2; i &lt;= x; i++) {
+        ans *= i;
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/18/Valid-Number/">[LeetCode 65] Valid Number (Unsolvable)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/05/18/Valid-Number/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/valid-number/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Validate if a given string is numeric.</p>
+
+<p>
+Some examples:<br>
+<code>"0"</code> =&gt; <code>true</code><br>
+<code>"   0.1  "</code> =&gt; <code>true</code><br>
+<code>"abc"</code> =&gt; <code>false</code><br>
+<code>"1 a"</code> =&gt; <code>false</code><br>
+<code>"2e10"</code> =&gt; <code>true</code><br>
+</p>
+
+<p><b>Note:</b> It is intended for the problem statement to be ambiguous. You should gather all requirements up front before implementing one.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">unsolvable</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p>I am unable to solve this problem, but I found a <a href="http://leetcodenotes.wordpress.com/2013/11/23/leetcode-valid-number/">quite good solution</a>. I post the code below.</p>
+
+<h3>My code</h3>
+
+<pre><code>public boolean isNumber(String s) {
+    s = s.trim(); 
+    if (s.length() &gt; 0 &amp;&amp; s.charAt(s.length() - 1) == 'e')
+        return false; //avoid "3e" which is false
+    String[] t = s.split("e");
+    if (t.length == 0 || t.length &gt; 2) return false;
+    boolean res = valid(t[0], false);
+    if (t.length &gt; 1) res = res &amp;&amp; valid(t[1], true);
+    return res;
+}
+
+private boolean valid(String s, boolean hasDot) {
+    if (s.length() &gt; 0 &amp;&amp; (s.charAt(0) == '+' || s.charAt(0) == '-')) 
+        s = s.substring(1); //avoid "1+", "+", "+."
+    char[] arr = s.toCharArray();
+    if (arr.length == 0 || s.equals(".")) return false;
+    for (int i = 0; i &lt; arr.length; i++) {
+        if (arr[i] == '.') {
+            if (hasDot) return false;
+            hasDot = true;
+        } else if (!('0' &lt;= arr[i] &amp;&amp; arr[i] &lt;= '9'))
+            return false;
+    }
+    return true;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/18/Text-Justification/">[LeetCode 68] Text Justification (Unsolvable)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/05/18/Text-Justification/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/text-justification/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>
+Given an array of words and a length <i>L</i>, format the text such that each line has exactly <i>L</i> characters and is fully (left and right) justified.
+</p> 
+
+<p>
+You should pack your words in a greedy approach; that is, pack as many words as you can in each line. Pad extra spaces <code>' '</code> when necessary so that each line has exactly <i>L</i> characters.
+</p>
+
+<p>
+Extra spaces between words should be distributed as evenly as possible. If the number of spaces on a line do not divide evenly between words, the empty slots on the left will be assigned more spaces than the slots on the right.
+</p>
+
+<p>
+For the last line of text, it should be left justified and no extra space is inserted between words.
+</p>
+
+<p>
+For example,<br>
+<b>words</b>: <code>["This", "is", "an", "example", "of", "text", "justification."]</code><br>
+<b>L</b>: <code>16</code>.
+</p>
+
+<p>
+Return the formatted lines as:<br>
+</p><pre>[
+   "This    is    an",
+   "example  of text",
+   "justification.  "
+]
+</pre>
+<p></p>
+
+<p>
+<b>Note:</b> Each word is guaranteed not to exceed <i>L</i> in length.
+</p>
+
+
+<p class="showspoilers"><a href="#" onclick="showSpoilers(this); return false;">click to show corner cases.</a></p>
+
+<div class="spoilers" style="display: none;"><b>Corner Cases:</b>
+<p>
+</p><ul>
+<li>A line other than the last line might contain only one word. What should you do in this case?<br>
+In this case, that line should be left-justified.</li>
+<p></p>
+</ul></div><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">unsolvable</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">unsolvable</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p>I was not able to come up with a solution.</p>
+
+<p>I found solution in <a href="https://github.com/rffffffff007/leetcode/blob/master/Text%20Justification.java">here</a>, <a href="http://blog.csdn.net/linhuanmars/article/details/24063271">here</a> and <a href="http://gongxuns.blogspot.sg/2012/12/leetcodetext-justification.html">here</a>. I will post the code from first link.</p>
+
+<h3>My code</h3>
+
+<pre><code>public ArrayList &lt; String &gt; fullJustify(String[] words, int L) {
+    int wordsCount = words.length;
+    ArrayList &lt; String &gt; result = new ArrayList &lt; String &gt; ();
+    int curLen = 0;
+    int lastI = 0;
+    for (int i = 0; i &lt;= wordsCount; i++) {
+        if (i == wordsCount || curLen + words[i].length() + i - lastI &gt; L) {
+            StringBuffer buf = new StringBuffer();
+            int spaceCount = L - curLen;
+            int spaceSlots = i - lastI - 1;
+            if (spaceSlots == 0 || i == wordsCount) {
+                for (int j = lastI; j &lt; i; j++) {
+                    buf.append(words[j]);
+                    if (j != i - 1)
+                        appendSpace(buf, 1);
+                }
+                appendSpace(buf, L - buf.length());
+            } else {
+                int spaceEach = spaceCount / spaceSlots;
+                int spaceExtra = spaceCount % spaceSlots;
+                for (int j = lastI; j &lt; i; j++) {
+                    buf.append(words[j]);
+                    if (j != i - 1)
+                        appendSpace(buf, spaceEach + (j - lastI &lt; spaceExtra ? 1 : 0));
+                }
+            }
+            result.add(buf.toString());
+            lastI = i;
+            curLen = 0;
+        }
+        if (i &lt; wordsCount)
+            curLen += words[i].length();
+    }
+    return result;
+}
+
+private void appendSpace(StringBuffer sb, int count) {
+    for (int i = 0; i &lt; count; i++)
+        sb.append(' ');
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/18/Insert-Interval/">[LeetCode 57] Insert Interval</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-18T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/05/18/Insert-Interval/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/insert-interval/">link</a></p>
+
+<div class="question-content">
+            <p></p><p>Given a set of <i>non-overlapping</i> intervals, insert a new interval into the intervals (merge if necessary).</p>
+
+<p>You may assume that the intervals were initially sorted according to their start times.</p>
+
+<p>
+<b>Example 1:</b><br>
+Given intervals <code>[1,3],[6,9]</code>, insert and merge <code>[2,5]</code> in as <code>[1,5],[6,9]</code>.
+</p>
+
+<p>
+<b>Example 2:</b><br>
+Given <code>[1,2],[3,5],[6,7],[8,10],[12,16]</code>, insert and merge <code>[4,9]</code> in as <code>[1,2],[3,10],[12,16]</code>.
+</p>
+
+<p>
+This is because the new interval <code>[4,9]</code> overlaps with <code>[3,5],[6,7],[8,10]</code>.
+</p><p></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p><strong>This is not an easy question, though it&rsquo;s similar to the question &ldquo;Merge Intervals&rdquo;</strong>.</p>
+
+<p>First code is my solution.</p>
+
+<p><strong>Second code is from <a href="https://github.com/yuanx/leetcode/blob/master/InsertInterval.java">this repo</a></strong>. This is only 1 iteration, but in 3 stages. First, add all intervals ahead of newInterval into ans. Second, merge anything that can be merged with newInterval, and add to ans. Third, add the rest of intervals into ans.</p>
+
+<p><strong>Third code is from <a href="http://www.programcreek.com/2012/12/leetcode-insert-interval/">this blog</a></strong>. It&rsquo;s a very tricky solution.</p>
+
+<h3>My code</h3>
+
+<p><strong>My code</strong></p>
+
+<pre><code>/**
+ * Definition for an interval.
+ * public class Interval {
+ *     int start;
+ *     int end;
+ *     Interval() { start = 0; end = 0; }
+ *     Interval(int s, int e) { start = s; end = e; }
+ * }
+ */
+public class Solution {
+    public List&lt;Interval&gt; insert(List&lt;Interval&gt; intervals, Interval newInterval) {
+        if (intervals == null) {
+            return null;
+        }
+        int p = 0;
+        while (p &lt; intervals.size() &amp;&amp; intervals.get(p).start &lt; newInterval.start) {
+            p++;
+        }
+        intervals.add(p, newInterval);
+        if (p &gt; 0) {
+            p--;
+        }
+        // start merging from (p)th element
+        while (p &lt; intervals.size() - 1) {
+            if (intervals.get(p).end &gt;= intervals.get(p + 1).start) {
+                intervals.get(p).end = Math.max(intervals.get(p).end, intervals.get(p + 1).end);
+                intervals.remove(p + 1);
+            } else {
+                p++;
+            }
+        }
+        return intervals;
+    }
+}
+</code></pre>
+
+<p><strong>Second code</strong>.</p>
+
+<pre><code>public ArrayList&lt;Interval&gt; insert(ArrayList&lt;Interval&gt; intervals, Interval newInterval) {
+    ArrayList&lt;Interval&gt; re = new ArrayList&lt;Interval&gt;();
+    int len = intervals.size();
+    int i = 0;
+    while (i &lt; len) {
+        Interval temp = intervals.get(i);
+        if (temp.end &lt; newInterval.start)
+            re.add(temp);
+        else if (temp.start &gt; newInterval.end)
+            break;
+        else {
+            newInterval.start = Math.min(temp.start, newInterval.start);
+            newInterval.end = Math.max(temp.end, newInterval.end);
+        }
+        i++;
+    }
+    re.add(newInterval);
+    while (i &lt; len) {
+        re.add(intervals.get(i));
+        i++;
+    }
+    return re;
+}
+</code></pre>
+
+<p><strong>Third code, a popular solution</strong>. Very tricky and concise.</p>
+
+<pre><code>public ArrayList&lt;Interval&gt; insert(ArrayList&lt;Interval&gt; intervals, Interval newInterval) {
+    ArrayList&lt;Interval&gt; result = new ArrayList&lt;Interval&gt;();
+    for(Interval interval: intervals){
+        if(interval.end &lt; newInterval.start){
+            result.add(interval);
+        }else if(interval.start &gt; newInterval.end){
+            result.add(newInterval);
+            newInterval = interval;        
+        }else if(interval.end &gt;= newInterval.start 
+                || interval.start &lt;= newInterval.end){
+            newInterval = new Interval(
+                Math.min(interval.start, newInterval.start), 
+                Math.max(newInterval.end, interval.end));
+        }
+    }
+    result.add(newInterval); 
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -977,512 +1599,6 @@ return <code>5</code>.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/16/Jump-Game/">[LeetCode 55] Jump Game</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/05/16/Jump-Game/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/jump-game/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>
-Given an array of non-negative integers, you are initially positioned at the first index of the array.
-</p>
-<p>
-Each element in the array represents your maximum jump length at that position. 
-</p>
-<p>
-Determine if you are able to reach the last index.
-</p>
-
-<p>
-For example:<br>
-A = <code>[2,3,1,1,4]</code>, return <code>true</code>.
-</p>
-<p>
-A = <code>[3,2,1,0,4]</code>, return <code>false</code>.
-</p><p></p>
-</div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="white">1</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is a standard DP problem</strong>.</p>
-
-<h3>My code</h3>
-
-<pre><code>public class Solution {
-    public boolean canJump(int[] A) {
-        if (A == null || A.length &lt;= 1) {
-            return true;
-        }
-        int len = A.length;
-        int left = 0;
-        int right = 0;
-        while (left &lt;= right &amp;&amp; right &lt; len -1) {
-            right = Math.max(right, left + A[left]);
-            left++;
-        }
-        return right &gt;= len - 1;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/15/Wildcard-Matching/">[LeetCode 44] Wildcard Matching</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/05/15/Wildcard-Matching/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/wildcard-matching/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Implement wildcard pattern matching with support for <code>'?'</code> and <code>'*'</code>.</p>
-
-<pre>'?' Matches any single character.
-'*' Matches any sequence of characters (including the empty sequence).
-
-The matching should cover the <b>entire</b> input string (not partial).
-
-The function prototype should be:
-bool isMatch(const char *s, const char *p)
-
-Some examples:
-isMatch("aa","a") → false
-isMatch("aa","aa") → true
-isMatch("aaa","aa") → false
-isMatch("aa", "*") → true
-isMatch("aa", "a*") → true
-isMatch("ab", "?*") → true
-isMatch("aab", "c*a*b") → false
-</pre><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>This question is similar to &ldquo;Regex Matching&rdquo;, and in fact can be solved using similar (DFS recursion) approach. <a href="http://n00tc0d3r.blogspot.sg/2013/05/wildcard-matching.html">This blog</a> has the best analysis and solutions.</p>
-
-<p><strong>The solution is DP</strong>. The equation is not very difficult to write, but keep in mind to <strong>check character count before entering the algorithm</strong>. Failing to do so results in TLE.</p>
-
-<h3>My code</h3>
-
-<pre><code>public class Solution {
-    public boolean isMatch(String s, String p) {
-        if (s == null || p == null) {
-            return true;
-        }
-
-        // pre-check
-        int count = 0;
-        for (int i = 0; i &lt; p.length(); i++) {
-            if (p.charAt(i)!='*') count++;
-        }
-        if(count &gt; s.length()) {
-            return false;  
-        }
-        // end of pre-check
-
-        int m = s.length();
-        int n = p.length();
-        // note the order is n,m, 
-        // cuz we match each chars of p with chars of s
-        boolean[][] dp = new boolean[n + 1][m + 1];
-        for (int i = 0; i &lt;= n; i++) {
-            for (int j = 0; j &lt;= m; j++) {
-                if (i == 0 &amp;&amp; j == 0) {
-                    dp[i][j] = true;
-                } else if (i == 0) {
-                    dp[i][j] = false;
-                } else if (j == 0) {
-                    // there is a special case: ("", "*")
-                    if (p.charAt(i - 1) == '*' &amp;&amp; dp[i-1][j]) {
-                        dp[i][j] = true;
-                    } else {
-                        dp[i][j] = false;
-                    }
-                } else if (p.charAt(i - 1) != '*') {
-                    if (dp[i-1][j-1]) {
-                        if (p.charAt(i - 1) == '?' || p.charAt(i - 1) == s.charAt(j - 1)) {
-                            // single char matches
-                            dp[i][j] = true;
-                        }
-                    }
-                } else {
-                    // current char from p is a star
-                    // find the first place at which p matches with s
-                    int pos = 0;
-                    while (pos &lt;= m &amp;&amp; !dp[i-1][pos]) {
-                        pos++;
-                    }
-                    // starting from pos, all subsequent substring of s matches p
-                    while (pos &lt;= m) {
-                        dp[i][pos++] = true;
-                    }
-                    // important to break the for loop here and do not check for row i any more
-                    // this requires changing the nested loop to put j outside of i
-                    // the execution time decrease from TLE/1800ms to 800ms by adding this line
-                    break;
-                    // this break finished off all check for row i, and i advance to next row
-                }
-            }
-        }
-        return dp[n][m];
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/15/PowXN/">[LeetCode 50] Pow(x, N)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/05/15/PowXN/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/powx-n/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Implement pow(<i>x</i>, <i>n</i>).
-</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Solution</h3>
-
-<p><strong>This question have many interesting solutions</strong>. The bottom line is solving in O(lgn) time.</p>
-
-<p>First approach, we can <strong>keep cumulating power(x, 2 ^ n)</strong>.</p>
-
-<p>Second approach, <strong>divide and conquer</strong> which is explained in <a href="http://fisherlei.blogspot.sg/2012/12/leetcode-powx-n.html">this blog</a> and <a href="https://github.com/yuanx/leetcode/blob/master/Pow.java">this code</a>.</p>
-
-<p>Read code below.</p>
-
-<h3>My code</h3>
-
-<p>code 1, divide and conquer</p>
-
-<pre><code>public class Solution {
-    public double pow(double x, int n) {
-        if (n == 0) {
-            return 1;
-        } else if (n &lt; 0) {
-            if (n == Integer.MIN_VALUE) {
-                // since the negate of Integer.MIN_VALUE overflows... 
-                return (1 / x) / pow(x, Integer.MAX_VALUE);
-            } else {
-                return 1 / pow(x, -1 * n);
-            }
-        } else if (n % 2 == 0) {
-            return pow(x * x, n / 2);
-        } else {
-            return x * pow(x, n - 1);
-        }
-    }
-}
-</code></pre>
-
-<p>code 2, divide and conquer</p>
-
-<pre><code>public double pow(double x, int n) {
-    if (n &lt; 0) return 1 / helper(x, 0-n);
-    else return helper(x, n);
-}
-
-private double helper(double x, int n) {
-    if (n == 0) return 1;
-    double half = helper(x, n / 2);
-    return n % 2 == 1 ? x * half * half : half * half;
-}
-</code></pre>
-
-<p>code 3</p>
-
-<pre><code>public double pow(double x, int n) {
-    if (n == 0) return 1;
-    if (n == 2) return x * x;
-
-    if (n % 2 == 0) return pow(pow(x, n / 2), 2);
-    else if (n &gt; 0) return x * pow(pow(x, n / 2), 2);
-    else return 1 / x * pow(pow(x, n / 2), 2);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/15/Anagrams/">[LeetCode 49] Anagrams</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/05/15/Anagrams/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/anagrams/">link</a></p>
-
-<div class="question-content">
-            <p></p><p>Given an array of strings, return all groups of strings that are anagrams.
-</p>
-
-<p>Note: All inputs will be in lower-case.</p><p></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is not an extremely difficult question, but I always get TLE error</strong> (Time limit exceeded), before I realize that I have to use HashMap.</p>
-
-<h3>Solution</h3>
-
-<p><strong>The solution is making use of HashMap</strong> and sorting to check anagrams. For more, read <a href="http://blog.csdn.net/xudli/article/details/8550425">this blog</a>.</p>
-
-<h3>My code</h3>
-
-<pre><code>public class Solution {
-    public List&lt;String&gt; anagrams(String[] strs) {
-        List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-        if (strs == null || strs.length == 0) {
-            return ans;
-        }
-        HashMap&lt;String, List&lt;String&gt;&gt; map = new HashMap&lt;String, List&lt;String&gt;&gt;();
-        for (String str: strs) {
-            char[] chars = str.toCharArray();
-            Arrays.sort(chars);
-            String sorted = String.valueOf(chars);
-            if (!map.containsKey(sorted)) {
-                map.put(sorted, new ArrayList&lt;String&gt;());
-            }
-            map.get(sorted).add(str);
-        }
-        for (List&lt;String&gt; list: map.values()) {
-            if (list.size() &gt; 1) {
-                ans.addAll(list);
-            }
-        }
-        return ans;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="53">&larr; Older</a>
@@ -1506,11 +1622,11 @@ private double helper(double x, int n) {
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (163)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (165)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (122)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (123)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -1522,23 +1638,23 @@ private double helper(double x, int n) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/15/Binary-Search-Tree-Iterator/">[LeetCode 173] Binary Search Tree Iterator </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/14/wooden-stick/">[UVa] Wooden Sticks </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
+        <a href="/blog/2015/04/14/NIM-stone-game/">[Question] 编程之美 NIM 一排石头的游戏 </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/04/13/Factorial-Trailing-Zeroes/">[LeetCode 172] Factorial Trailing Zeroes </a>
+        <a href="/blog/2015/04/14/Majority-Element/">[LeetCode 169] Majority Element </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/04/13/Excel-Sheet-Column-Title/">[LeetCode 168] Excel Sheet Column Number </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
+        <a href="/blog/2015/04/14/Excel-Sheet-Column-Title/">Excel Sheet Column Title</a>
       </li>
     
   </ul>

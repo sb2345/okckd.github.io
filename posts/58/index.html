@@ -9,12 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="LeetCode Statistics link ID
-Question
-Diff
-Freq
-Data Structure
-Algorithms &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1 Two Sum 2 5 array sort & &hellip;">
+  <meta name="description" content="Question link Given a string, find the length of the longest substring without repeating characters. For example, the longest substring without &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +75,598 @@ Algorithms &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1 Two Sum 2 5 array 
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/27/longest-substring-without-repeating/">[LeetCode 3] Longest Substring Without Repeating Characters</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/04/27/longest-substring-without-repeating/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/longest-substring-without-repeating-characters/">link</a></p>
+
+<div class="question-content">
+<p></p><p>Given a string, find the length of the longest substring without repeating characters. For example, the longest substring without repeating letters for &#8220;abcabcbb&#8221; is &#8220;abc&#8221;, which the length is 3. For &#8220;bbbbb&#8221; the longest substring is &#8220;b&#8221;, with the length of 1.</p>
+<p></p></div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This question looks easy (well, isn&rsquo;t it?), but it <strong>really is not easy</strong>!.</p>
+
+<p><strong>The main idea is</strong>: an array of int(128) is used to keep track of the last occurance position of each character. So we iterate thru the characters while constently checking the last occurrence of the letter. Meanwhile, keep updating the longest distance.</p>
+
+<p><strong>There is 1 place where it&rsquo;s extremely easy to make mistake</strong>, that is the condition of update left points:</p>
+
+<pre><code>if (previousPos != -1&amp;&amp; previousPos &gt;= left) {
+    left = previousPos + 1;
+}
+</code></pre>
+
+<p>If you have an idea of using array int(128) to <strong>store last occurrence</strong>, and you got the above <strong>if condition</strong> correct, then you nailed it!</p>
+
+<p>Again, this is a tough question. There&rsquo;s a seemingly more intuitive solution using the sliding window method. It&rsquo;s very similar to [LeetCode 76] Minimum Window Substring.</p>
+
+<h3>Solution</h3>
+
+<p>Note what happens when a repeating char is found (2 different conditions).</p>
+
+<p><img class="middle" src="/assets/images/20130901224716625.png"></p>
+
+<h3>My code</h3>
+
+<p>The proper way:</p>
+
+<pre><code>public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        }
+
+        int[] flag = new int[128];
+        for (int i = 0; i &lt; flag.length; i++) {
+            flag[i] = -1;
+        }
+        // left and right pointer defines the valid range
+        int left = 0;
+        int right = 0;
+        int longest = 0;
+        int len = s.length();
+
+        while (right &lt; len) {
+            char letter = s.charAt(right);
+            int previousPos = flag[letter];
+            if (previousPos != -1&amp;&amp; previousPos &gt;= left) {
+                // if right pointer points to an old letter, and is within current range
+                // then we need to update our left pointer: 
+                // to bypass the previous occurrence of that letter
+                left = previousPos + 1;
+            }
+            flag[letter] = right;
+            // advance right pointer to the next letter, and calculate longest distance
+            right++;
+            longest = Math.max(longest, right - left);
+        }
+        return longest;
+    }
+}
+</code></pre>
+
+<p>The sliding window way:</p>
+
+<pre><code>public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        }
+        int len = s.length();
+        int left = 0;
+        int right = 1;
+        HashSet&lt;Character&gt; set = new HashSet&lt;Character&gt;();
+        set.add(s.charAt(0));
+        int longest = 1;
+        while (right &lt; len) {
+            // right pointer proceeds until boundary or duplicate char found
+            while (right &lt; len &amp;&amp; !set.contains(s.charAt(right))) {
+                set.add(s.charAt(right));
+                right++;
+                longest = Math.max(longest, right - left);
+            }
+            if (right == len) {
+                return longest;
+            } else {
+                // right pointer has reached a duplicate char.
+                // now move left pointer until that dup char is found
+                while (s.charAt(left) != s.charAt(right)) {
+                    set.remove(s.charAt(left));
+                    left++;
+                }
+                // left pointer advance by one to bypass the dup char
+                left++;
+                // right pointer advance by one to include the dup char
+                right++;
+            }
+        }
+        return Math.max(longest, right - left);
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/27/add-two-numbers/">[LeetCode 2] Add Two Numbers</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/04/27/add-two-numbers/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/add-two-numbers/">link</a></p>
+
+<div class="question-content">
+    <p></p>
+    <p>You are given two linked lists representing two non-negative numbers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.</p>
+    <p style="font-family:monospace">
+    <b>Input:</b> (2 -&gt; 4 -&gt; 3) + (5 -&gt; 6 -&gt; 4)<br>
+    <b>Output:</b> 7 -&gt; 0 -&gt; 8</p>
+    <p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Solution</h3>
+
+<p>This question is straight-forward. Just add one by one with a carry bit.</p>
+
+<h3>My code</h3>
+
+<pre><code>/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        return helper(l1, l2, 0);
+    }
+
+    private ListNode helper(ListNode l1, ListNode l2, int carry) {
+        if (l1 == null &amp;&amp; l2 == null) {
+            if (carry == 0) {
+                return null;
+            } else {
+                return new ListNode(1);
+            }
+        } else if (l1 == null) {
+            return helper(new ListNode(0), l2, carry);
+        } else if (l2 == null) {
+            return helper(l1, new ListNode(0), carry);
+        } else {
+            // both l1 and l2 have value
+            int sum = l1.val + l2.val + carry;
+            int resultNumber = sum % 10;
+            int newCarry = sum / 10;
+            ListNode ans = new ListNode(resultNumber);
+            ans.next = helper(l1.next, l2.next, newCarry);
+            return ans;
+        }
+    }
+}
+</code></pre>
+
+<p>Instead of doing it recursively, someone write a nice code for an iterative <a href="http://gongxuns.blogspot.sg/2012/12/leetcodeadd-two-numbers.html">solution</a></p>
+
+<pre><code>/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        int carry = 0;
+        ListNode res = new ListNode(0);
+        ListNode cur1 = l1, cur2 = l2, head = res;
+        while (cur1 != null || cur2 != null) {
+            if (cur1 != null) {
+                carry += cur1.val;
+                cur1 = cur1.next;
+            }
+            if (cur2 != null) {
+                carry += cur2.val;
+                cur2 = cur2.next;
+            }
+            head.next = new ListNode(carry % 10);
+            head = head.next;
+            carry /= 10;
+        }
+        if (carry == 1)
+            head.next = new ListNode(1);
+        return res.next;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/26/two-sum/">[LeetCode 1] Two Sum</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/04/26/two-sum/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/two-sum/">link</a></p>
+
+<div class="question-content">
+    <p></p><p>Given an array of integers, find two numbers such that they add up to a specific target number.</p>
+    <p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
+    <p>You may assume that each input would have exactly one solution.</p>
+    <p style="font-family:monospace">
+    <b>Input:</b> numbers={2, 7, 11, 15}, target=9<br>
+    <b>Output:</b> index1=1, index2=2
+    </p>
+    <p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="yellow">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>It&rsquo;s <strong>not a good idea to sort the input</strong>, because we are supposed to return the position index. Without sorting, we must use some data structure to help us!</p>
+
+<p>And the answer is HashMap.</p>
+
+<h3>Solution</h3>
+
+<p>Read thru the list of integers, and each time add (targer &ndash; curInt) to the hashmap.</p>
+
+<p>If the number is contained in the HashMap, solution found.</p>
+
+<h3>My code</h3>
+
+<pre><code>public class Solution {
+    public int[] twoSum(int[] numbers, int target) {
+        int[] result = new int[2];
+        if (numbers == null || numbers.length == 1) {
+            return result;
+        }
+        HashMap&lt;Integer, Integer&gt; map = new HashMap&lt;Integer, Integer&gt;();
+        for (int i = 0; i &lt; numbers.length; i++) {
+            if (map.containsKey(numbers[i])) {
+                result[0] = map.get(numbers[i]) + 1;
+                result[1] = i + 1;
+                return result;
+            } else {
+                // put &lt;key, value&gt; into hashmap where key is the number 
+                // that would complement the sum to be target. Like this: 
+                map.put(target - numbers[i], i);
+            }
+        }
+        return result;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/26/Median-of-Two-Sorted-Arrays/">[LeetCode 4] Median of Two Sorted Arrays</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/04/26/Median-of-Two-Sorted-Arrays/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/median-of-two-sorted-arrays/">link</a></p>
+
+<div class="question-content">
+    <p></p>
+    
+    <p>There are two sorted arrays A and B of size m and n respectively. Find the median of the two sorted arrays. The overall run time complexity should be O(log (m+n)).
+    </p>
+    
+    <p></p>
+</div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a tough question</strong>.</p>
+
+<p><strong>If the size of the 2 arrays (i.e. m and n) are same</strong>, this would become a much easier question with simple &ldquo;Divide and Conquer&rdquo; solution. Well, not extremely easy like everyone can solve it, but a much simpler one. I do recommend you to read more at <a href="http://www.geeksforgeeks.org/median-of-two-sorted-arrays/">this post</a> before you procceed.</p>
+
+<p>However, this question is not as simple. Let&rsquo;s talk about it.</p>
+
+<h3>Solution</h3>
+
+<p><strong>This first solution is well covered in the <a href="http://www2.myoops.org/course_material/mit/NR/rdonlyres/Electrical-Engineering-and-Computer-Science/6-046JFall-2005/30C68118-E436-4FE3-8C79-6BAFBB07D935/0/ps9sol.pdf">MIT CLRS handouts</a></strong>. The basic idea is, finding the median of the first array, then assuming this number is the final median, and look where this element should have been put in the second array. There are 3 possible conditions. For example, if the arrays are {1, 4, 5, 6, 26} and {2, 13, 34}. We first get number 5, and compare it with 13. Then we know that median shall be large than 5, and we continue this (like) binary search with O(lgn) complexity. This solution is complex and difficult in thinking. I would like to focus on a different solution.</p>
+
+<p><strong>Second solution, credit goes to <a href="http://answer.ninechapter.com/solutions/median-of-two-sorted-arrays/">ninechap</a></strong>. Finding the median is like finding the (k)th element from the combination of 2 arrays. We might have to search for (k)th element twice, but the overall complexity is always O(lg n).</p>
+
+<h3>My code</h3>
+
+<pre><code>public class Solution {
+    public double findMedianSortedArrays(int A[], int B[]) {
+        if (A == null || B == null) {
+            return 0;
+        }
+        int len = A.length + B.length;
+        int mid1 = (len + 1) / 2;
+        int mid2 = len / 2 + 1;
+        // there are chances the mid1 == mid2, (i.e. when odd elements) 
+        // for simplicity of the code, leave it this way. I admit I'm lazy. 
+        return ((double) getKth(A, B, 0, 0, mid1) 
+                + getKth(A, B, 0, 0, mid2)) / 2;
+    }
+
+    private int getKth(int A[], int B[], int start1, int start2, int k) {
+        // note that k start from 1, not from 0
+        int len1 = A.length;
+        int len2 = B.length;
+        if (start1 &gt;= len1) {
+            // all elements in A is used up.
+            return B[start2 + k - 1];
+        } else if (start2 &gt;= len2) {
+            return A[start1 + k - 1];
+        }
+        // now both A and B have elements left
+        if (k == 1) {
+            return Math.min(A[start1], B[start2]);
+        } else {
+            // eliminate half of k. Since k &gt;=2: 
+            int half = k / 2;
+            int mid1 = start1 + half - 1;
+            int mid2 = start2 + half - 1;
+            // this is the critical part. We now have mid1 and mid2
+            // and we try to eliminate all element to the left of
+            // either mid1 or mid2 (inclusively)
+            // so what I need is to compare the value of A[mid1] and B[mid2]
+            int val1 = Integer.MAX_VALUE;
+            if (mid1 &lt; len1) {
+                val1 = A[mid1];
+            }
+            int val2 = Integer.MAX_VALUE;
+            if (mid2 &lt; len2) {
+                val2 = B[mid2];
+            }
+            // this is another important point. mid1 and mid2 may be out of bound
+            // if so, the value should be MAX_VALUE because median could not fall on the other array
+            // why? draw it yourself and you'll see. I can't explain without a picture. 
+            if (val1 &gt; val2) {
+                // discard mid2 and all elements to the left of it. 
+                return getKth(A, B, start1, mid2 + 1, k - half);
+            } else {
+                return getKth(A, B, mid1 + 1, start2, k - half);
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>Note: starting from today, I would post my code with more focus on <strong>readability</strong>, instead of conciseness. Sometimes, the former is much more important than the latter.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -3473,11 +4060,11 @@ Validate Binary Search Tree</p>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (163)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (165)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (122)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (123)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
 <li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
@@ -3489,23 +4076,23 @@ Validate Binary Search Tree</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/04/15/Binary-Search-Tree-Iterator/">[LeetCode 173] Binary Search Tree Iterator </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/04/14/wooden-stick/">[UVa] Wooden Sticks </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap </a>
+        <a href="/blog/2015/04/14/NIM-stone-game/">[Question] 编程之美 NIM 一排石头的游戏 </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/04/13/Factorial-Trailing-Zeroes/">[LeetCode 172] Factorial Trailing Zeroes </a>
+        <a href="/blog/2015/04/14/Majority-Element/">[LeetCode 169] Majority Element </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/04/13/Excel-Sheet-Column-Title/">[LeetCode 168] Excel Sheet Column Number </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java without using Collections </a>
+        <a href="/blog/2015/04/14/Excel-Sheet-Column-Title/">Excel Sheet Column Title</a>
       </li>
     
   </ul>
