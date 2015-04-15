@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[LintCode] Majority Number"
+title: "[LintCode] Majority Number "
 comments: true
 category: LintCode
 
