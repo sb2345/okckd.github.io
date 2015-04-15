@@ -39,7 +39,7 @@ This question I've seen it quite a few time. It's very standard integer conversi
 
 ### Solution
 
-Please read this post __[[ItInt5] Excel Decimal Conversion({% post_url /question/2014-08-16-Excel-decimal-conversion %})__. 
+Please read this post __[[ItInt5] Excel Decimal Conversion]({% post_url /question/2014-08-16-Excel-decimal-conversion %})__. 
 
 ### Code
 

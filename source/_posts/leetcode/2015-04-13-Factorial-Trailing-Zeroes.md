@@ -5,7 +5,7 @@ comments: true
 category: Leetcode
 ---
 
-### Question 
+### Question
 
 [link](https://leetcode.com/problems/factorial-trailing-zeroes/)
 
@@ -15,21 +15,21 @@ category: Leetcode
 <p><b>Note: </b>Your solution should be in logarithmic time complexity.</p>
 
 <p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
-              
+
                 <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
                 <span class="hide">
-                  
+
                   <a class="btn btn-xs btn-primary" href="/tag/math/">Math</a>
-                  
+
                 </span>
-              
+
             </div>
 
 ### Analysis
 
-This question I've seen it quite a few time, also. We're basically count the number of factor 5s. 
+This question I've seen it quite a few time, also. We're basically count the number of factor 5s.
 
-Eg. 
+Eg.
 
 > n = 5, count = 1
 
@@ -45,7 +45,7 @@ Eg.
 
 ### Solution
 
-Please read this post __[[LintCode] Trailing Zeros of Factorial({% post_url /lintcode/2014-07-02-Trailing-Zero-of-Factorial %})__. 
+Please read this post __[[LintCode] Trailing Zeros of Factorial]({% post_url /lintcode/2014-07-02-Trailing-Zero-of-Factorial %})__.
 
 ### Code
 
@@ -61,5 +61,17 @@ Please read this post __[[LintCode] Trailing Zeros of Factorial({% post_url /lin
                 base *= 5;
             }
             return res;
+        }
+    }
+
+another pretty good solution:
+
+    public class Solution {
+        public int trailingZeroes(int n) {
+            int count = 0;
+            for (int i = n / 5; i > 0; i = i / 5) {
+                count = count + i;
+            }
+            return count;
         }
     }
