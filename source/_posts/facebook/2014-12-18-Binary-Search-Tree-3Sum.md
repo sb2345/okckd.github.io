@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Facebook] Binary Search Tree 3Sum (undone) "
+title: "[Facebook] Binary Search Tree 3Sum "
 comments: true
 category: Facebook
 tags: [ src ]
@@ -78,6 +78,4 @@ __DLL way, written by me__
 		return ans;
 	}
 
-__inorder way__
-
-undone
+__inorder way__ - basically is just __iterator of binary tree__. 
