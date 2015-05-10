@@ -5,8 +5,8 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[LeetCode 49] Anagrams - Woodstock Blog</title>
-  <meta name="author" content="Charlie Brown">
+  <title>[LeetCode 49] Anagrams - Shuatiblog.com</title>
+  <meta name="author" content="CodeMonkey">
 
   
   <meta name="description" content="Question link Given an array of strings, return all groups of strings that are anagrams. Note: All inputs will be in lower-case. Stats Frequency 4 &hellip;">
@@ -18,17 +18,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://okckd.github.io/blog/2014/05/15/Anagrams">
+  <link rel="canonical" href="www.shuatiblog.com/blog/2014/05/15/Anagrams/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Woodstock Blog" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Shuatiblog.com" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
   <script type="text/javascript">
@@ -47,14 +46,6 @@
 </head>
 
 <body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">Woodstock Blog</a></h1>
-  
-    <h2>What's the good of living if you don't try a few things?</h2>
-  
-</hgroup>
-
-</header>
   <nav role="navigation"><ul class="subscription" data-subscription="rss">
   <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
   
@@ -62,15 +53,21 @@
   
 <form action="https://www.google.com/search" method="get">
   <fieldset role="search">
-    <input type="hidden" name="q" value="site:okckd.github.io" />
+    <input type="hidden" name="q" value="site:www.shuatiblog.com" />
     <input class="search" type="text" name="q" results="0" placeholder="Search"/>
   </fieldset>
 </form>
   
 <ul class="main-navigation">
+    <li><a href="/">
+        <span class="blue_light">
+            Shuatiblog.com
+        </span>
+       
+    </a></li>
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
-  <li><a href="/about">About</a></li>
+  <li><a href="/about">About me</a></li>
 </ul>
 
 </nav>
@@ -78,6 +75,7 @@
     <div id="content">
       <div>
 <article class="hentry" role="article">
+    
   
   <header>
     
@@ -98,6 +96,8 @@
 
 
 <time datetime="2014-05-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="#disqus_thread">Comments</a>
         
       </p>
     
@@ -146,89 +146,45 @@
 
 <h3>Solution</h3>
 
-<p><strong>First, my solution is checking the number of occurance of each letter</strong> in every single string. This will become an array of size 26 * (size of input list). After I get this huge 2D array, do brute force check for same arrays. <strong>This solution sometimes works, and sometimes not, because runtime = 1900ms</strong>.</p>
-
-<p><strong>The most popular solution on the Internet</strong> is making use of HashMap and sorting to check anagrams. For example, <a href="http://blog.csdn.net/xudli/article/details/8550425">this blog</a>.</p>
+<p><strong>The solution is making use of HashMap</strong> and sorting to check anagrams. For more, read <a href="http://blog.csdn.net/xudli/article/details/8550425">this blog</a>.</p>
 
 <h3>My code</h3>
 
-<p><strong>My first solution, runtime = 1900ms</strong></p>
-
-<pre><code>public ArrayList&lt;String&gt; anagrams(String[] strs) {
-    int len = strs.length;
-    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-    if (len == 0)
-        return ans;
-    int[][] map = new int[len][27];
-    for (int i = 0; i &lt; len; i++) {
-        for (int j = 0; j &lt; strs[i].length(); j++) {
-            map[i][strs[i].charAt(j) - 'a']++;
+<pre><code>public class Solution {
+    public List&lt;String&gt; anagrams(String[] strs) {
+        List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+        if (strs == null || strs.length == 0) {
+            return ans;
         }
-        map[i][26] = strs[i].length(); // this is the sum of letters for line#i
-    }
-    // the entire map is filled in with occurance of each letter
-    int[] flag = new int[len];
-    for (int i = 0; i &lt; len; i++) {
-        if (flag[i] == 1)
-            continue;
-        for (int j = i + 1; j &lt; len; j++) {
-            if (flag[j] == 1) continue;
-            if (map[i][26] != map[j][26]) continue;
-            // compare line#i and line#j of the map
-            int k = 0;
-            for (k = 0; k &lt; 26; k++)
-                if (map[i][k] != map[j][k])
-                    break;
-            if (k == 26) {
-                flag[i] = 1;
-                flag[j] = 1;
+        HashMap&lt;String, List&lt;String&gt;&gt; map = new HashMap&lt;String, List&lt;String&gt;&gt;();
+        for (String str: strs) {
+            char[] chars = str.toCharArray();
+            Arrays.sort(chars);
+            String sorted = String.valueOf(chars);
+            if (!map.containsKey(sorted)) {
+                map.put(sorted, new ArrayList&lt;String&gt;());
+            }
+            map.get(sorted).add(str);
+        }
+        for (List&lt;String&gt; list: map.values()) {
+            if (list.size() &gt; 1) {
+                ans.addAll(list);
             }
         }
+        return ans;
     }
-    // the flag array marks the indexes of strs that matches occurance
-    // (which mean is anagram)
-    for (int i = 0; i &lt; len; i++) {
-        if (flag[i] == 1)
-            ans.add(strs[i]);
-    }
-    return ans;
-}   
-</code></pre>
-
-<p><strong>Most popular solution on Internet</strong>, written by me on July 15th.</p>
-
-<pre><code>public List&lt;String&gt; anagrams(String[] strs) {
-    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
-    HashMap&lt;String, List&lt;String&gt;&gt; map = new HashMap&lt;String, List&lt;String&gt;&gt;();
-    for (String s: strs) {
-        char[] letters = s.toCharArray();
-        Arrays.sort(letters);
-        String sortedLetters = String.valueOf(letters);
-        if (!map.containsKey(sortedLetters)) {
-            List&lt;String&gt; list = new ArrayList&lt;String&gt;();
-            list.add(s);
-            map.put(sortedLetters, list);
-        } else {
-            map.get(sortedLetters).add(s);
-        }
-    }
-    for (String k: map.keySet()) {
-        if (map.get(k).size() &gt; 1) {
-            ans.addAll(map.get(k));
-        }
-    }
-    return ans;
 }
 </code></pre>
 </div>
 
 
+  
   <footer>
     <p class="meta">
       
   
 
-<span class="byline author vcard">Posted by <span class="fn">Charlie Brown</span></span>
+<span class="byline author vcard">Posted by <span class="fn">CodeMonkey</span></span>
 
       
 
@@ -256,7 +212,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://okckd.github.io/blog/2014/05/15/Anagrams/" data-via="" data-counturl="http://okckd.github.io/blog/2014/05/15/Anagrams/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="www.shuatiblog.com/blog/2014/05/15/Anagrams/" data-via="" data-counturl="www.shuatiblog.com/blog/2014/05/15/Anagrams/" >Tweet</a>
   
   
   
@@ -265,7 +221,7 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/05/14/Trapping-Rain-Water/" title="Previous Post: [LeetCode 42] Trapping Rain Water">&laquo; [LeetCode 42] Trapping Rain Water</a>
+        <a class="basic-alignment left" href="/blog/2014/05/14/Trapping-Rain-Water/" title="Previous Post: [LeetCode 42] Trapping Rain Water ">&laquo; [LeetCode 42] Trapping Rain Water </a>
       
       
         <a class="basic-alignment right" href="/blog/2014/05/15/PowXN/" title="Next Post: [LeetCode 50] Pow(x, n)">[LeetCode 50] Pow(x, n) &raquo;</a>
@@ -274,7 +230,32 @@
   </footer>
 </article>
 
+
+  <section>
+    <h1>Comments</h1>
+      
+      
+      
+      <!--
+    <script type="text/javascript" src="http://srvpub.com/adServe/banners?tid=29011_41781_1&size=728x90" ></script>
+      -->
+      
+      
+    
+    <p>
+        For some mysterious reasons, my Disqus comment service is unable to use. So you could not leave me comment now. 
+    </p>
+      
+    <p>
+        For now, if you have any questions regarding my post, please email it to admin@shuatiblog.com
+    </p>
+        
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
+  </section>
+
+</div>
+
 
 <aside class="sidebar">
   
@@ -282,19 +263,21 @@
   <h1>Categories</h1>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
-<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (27)</a></li>
-<li class='category'><a href='/blog/categories/classic/'>classic (3)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (52)</a></li>
-<li class='category'><a href='/blog/categories/google/'>google (35)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (152)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (72)</a></li>
+<li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
+<li class='category'><a href='/blog/categories/facebook/'>facebook (10)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/google/'>google (63)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (15)</a></li>
-<li class='category'><a href='/blog/categories/octopress/'>octopress (1)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (85)</a></li>
-<li class='category'><a href='/blog/categories/string-search/'>string search (4)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (5)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
 
   </ul>
 </section>
@@ -303,23 +286,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/10/02/longest-word-made-from-other/">[CC150v5] 18.7 Longest Word Made From Other Words</a>
+        <a href="/blog/2015/05/11/Reverse-Bits/">[LeetCode 191] Reverse Bits </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/10/01/optimal-unconcatenate-doc/">[CC150v5] 17.14 Optimal Way to Unconcatenate Doc</a>
+        <a href="/blog/2015/05/11/Best-Time-to-Buy-and-Sell-Stock-IV/">[LeetCode 188] Best Time to Buy and Sell Stock IV </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/30/convert-bst-doubly-linked-list/">[CC150v5] 17.13 Convert BST to Doubly-Linked List</a>
+        <a href="/blog/2015/05/10/Rotate-Array/">[LeetCode 189] Rotate Array </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a>
+        <a href="/blog/2015/05/10/Number-of-Islands/">[LeetCode 200] Number of Islands </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/09/26/implement-circular-array-java/">[CC150v5] 14.6 Implement CircularArray in Java</a>
+        <a href="/blog/2015/05/10/Number-of-1-Bits/">[LeetCode 191] Number of 1 Bits </a>
       </li>
     
   </ul>
@@ -328,7 +311,9 @@
 
 
 
-
+<!--
+<script type="text/javascript" src="http://srvpub.com/adServe/banners?tid=29011_41781_0&size=120x600" ></script>
+-->
   
 </aside>
 
@@ -336,12 +321,28 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Charlie Brown -
+    Copyright &copy; 2015 - <a href="/about">CodeMonkey</a> -  All posts are my original writing, based uppon my personal view. <a href="/policy">Privacy Policy</a> - 
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
 </footer>
   
+
+<script type="text/javascript">
+      var disqus_shortname = 'woodstockblog';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'www.shuatiblog.com/blog/2014/05/15/Anagrams/';
+        var disqus_url = 'www.shuatiblog.com/blog/2014/05/15/Anagrams/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
 
@@ -354,7 +355,7 @@
       var twitterWidgets = document.createElement('script');
       twitterWidgets.type = 'text/javascript';
       twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
       document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
     })();
   </script>
