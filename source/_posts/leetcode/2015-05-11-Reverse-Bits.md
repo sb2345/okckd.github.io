@@ -34,13 +34,76 @@ If this function is called many times, how would you optimize it?
 
 ### Analysis
 
+This question is standard bit manipulation. We essentially get bits one by one from n, and append it to the result. 
 
+However, the question ask how to optimize it, to improve its performance. Em, that's interesting. 
 
 ### Solution
 
+First code is the standard solution. 
 
+I found another interesting solution from [programcreek](http://www.programcreek.com/2014/03/leetcode-reverse-bits-java/), which uses "swap bits" method. I've never seen this before, so I posted his solution below. 
+
+But is it really a faster solution? 
+
+Finally, I found something in [书影 博客](http://bookshadow.com/weblog/2015/03/08/leetcode-reverse-bits/), quoted as below: 
+
+> 以4位为单位执行反转，将0x0至0xF的反转结果预存在一个长度为16的数组中，反转时直接查询即可。
+
+Thus this is the best solution for performance. 
 
 ### Code
 
+My code
 
+    public class Solution {
+        // you need treat n as an unsigned value
+        public int reverseBits(int n) {
+            int result = 0;
+            for (int i = 0; i < 32; i++) {
+                int last = n & 1;
+                n >>= 1;
+                result <<= 1;
+                result = result | last;
+            }
+            return result;
+        }
+    }
 
+"swap bits"
+
+    public int reverseBits(int n) {
+        for (int i = 0; i < 16; i++) {
+            n = swapBits(n, i, 32 - i - 1);
+        }
+
+        return n;
+    }
+
+    public int swapBits(int n, int i, int j) {
+        int a = (n >> i) & 1;
+        int b = (n >> j) & 1;
+
+        if ((a ^ b) != 0) {
+            return n ^= (1 << i) | (1 << j);
+        }
+
+        return n;
+    }
+
+Best solution: 
+
+    char tb[16] = {0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
+
+    uint32_t reverseBits(uint32_t n) {
+            int curr = 0;
+            uint32_t ret = 0;
+            uint32_t msk = 0xF;
+            for(int i = 0; i < 8; i++) {
+                ret = ret << 4;
+                curr = msk&n;
+                ret |= tb[curr];
+                n = n >> 4;
+            }
+            return ret;
+    }
