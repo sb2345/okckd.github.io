@@ -16,16 +16,14 @@ tags: [ src ]
 
 ### Solution
 
-Let the given string be “__STRING__”. In the input string, ‘S’ is the first character. There are total 6 characters and __4 of them are smaller than ‘S’__. So there can be __4 * 5!__ smaller strings where first character is smaller than ‘S’, like following: 
+Let the given string be “__STRG__”. In the input string, ‘S’ is the first character. There are total 4 characters and __2 of them are smaller than ‘S’__. So there can be __2 * 3!__ smaller strings where first character is smaller than ‘S’, like following: 
 
-    R X X X X X
-    I X X X X X
-    N X X X X X
-    G X X X X X
+    G X X X
+    R X X X
 
 Repeat the same process for T, and we get: 
 
-    Rank = 4*5! + 4*4! + 3*3! + 1*2! + 1*1! + 0*0! = 597
+    Rank = 2*3! + 2*2! + 1*1! + 0*0! = 17
 
 ### Code 
 

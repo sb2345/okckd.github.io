@@ -28,53 +28,11 @@ Everyone can see it.
 
 ## Differences
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;border-color:#ccc;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#fff;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#f0f0f0;}
-</style>
-<table class="tg">
-  <tr>
-    <th class="tg-031e">Modifier</th>
-    <th class="tg-031e">Class</th>
-    <th class="tg-031e">Package</th>
-    <th class="tg-031e">SubClass</th>
-    <th class="tg-031e">World</th>
-  </tr>
-  <tr>
-    <td class="tg-031e">public</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">Y</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">protected</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">N</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">no modifier</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">N</td>
-    <td class="tg-031e">N</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">private</td>
-    <td class="tg-031e">Y</td>
-    <td class="tg-031e">N</td>
-    <td class="tg-031e">N</td>
-    <td class="tg-031e">N</td>
-  </tr>
-</table>
-<br />
+{% img middle /assets/images/java-access-level-table.png %}
 
-__Note__: 'No modifier' = 'Java default access right' = 'Package Private'. It's just different sayings.
+__Note__: Java default access setting is 'No modifier', which is also called '__Package Private__'.
 
-__Another note__: by saying 'subclass', it means subclass declared in another package. 
+__Another note__: by saying 'subclass', it means subclass declared in __another package__. 
 
 #### Example
 

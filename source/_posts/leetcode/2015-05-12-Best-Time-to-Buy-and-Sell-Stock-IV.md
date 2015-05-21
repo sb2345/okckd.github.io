@@ -31,7 +31,13 @@ You may not engage in multiple transactions at the same time (ie, you must sell 
 
 ### Analysis
 
+http://www.programcreek.com/2014/03/leetcode-best-time-to-buy-and-sell-stock-iv-java/
 
+http://www.cnblogs.com/grandyang/p/4295761.html
+
+http://blog.csdn.net/linhuanmars/article/details/23236995
+
+http://www.cnblogs.com/EdwardLiu/p/4306941.html
 
 ### Solution
 

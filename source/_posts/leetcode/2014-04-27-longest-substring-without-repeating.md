@@ -57,7 +57,7 @@ Again, this is a tough question. There's a seemingly more intuitive solution usi
 
 Note what happens when a repeating char is found (2 different conditions).
 
-{% img middle /assets/images/20130901224716625.png %}
+{% img middle /assets/images/longest-without-repeat.png %}
 
 ### My code 
 

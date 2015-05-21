@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[LeetCode 191] Reverse Bits "
+title: "[LeetCode 190] Reverse Bits "
 comments: true
 category: Leetcode
 ---

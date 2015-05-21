@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Java OOP] About Singleton"
+title: "[Java OOP] Singleton, 3 implementations "
 comments: true
 category: Java OOP
 

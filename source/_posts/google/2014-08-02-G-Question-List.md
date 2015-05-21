@@ -2,7 +2,7 @@
 layout: post
 title: "[Google] G Question List"
 comments: true
-category: Google
+category: Company-Google
 
 ---
 

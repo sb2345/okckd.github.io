@@ -7,7 +7,7 @@ sharing: true
 footer: true
 ---
 
-Hi folks! I am CodeMonkey and I am a Java developer and an algorithm rookie. {% img right /assets/images/7275831.png 300 %}
+Hi folks! I am CodeMonkey and I am a Java developer and an algorithm rookie.
 
 Are you looking for a job? Are you starting to learn algorithms? 
 

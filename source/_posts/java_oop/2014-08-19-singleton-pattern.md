@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Java OOP] Singleton Pattern "
+title: "[Java OOP] Singleton Pattern Introduction "
 comments: true
 category: Java OOP
 
