@@ -9,8 +9,8 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question 给出下面这个图 设计数据结构和算法求出图中所有的正方形数量 (count the number of squares). Solution Pre-processing: 从每一个点开始存储上下左右四个方向最多延伸到的位置
-Main algorithm: 枚举右下角位置 &hellip;">
+  <meta name="description" content="Implement Singlton 3 ways of writing Singleton. using Enum This is only available since Java 6. public enum Singleton_Enum { INSTANCE;
+} using double &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,117 @@ Main algorithm: 枚举右下角位置 &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/20/Talk-about-singleton/">[Java OOP] Singleton, 3 Implementations</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-20T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/08/20/Talk-about-singleton/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Implement Singlton</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
+
+<h4>using Enum</h4>
+
+<p>This is only available since Java 6.</p>
+
+<pre><code>public enum Singleton_Enum {
+    INSTANCE;
+}
+</code></pre>
+
+<h4>using double checked locking</h4>
+
+<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
+
+<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
+    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
+
+    private Singleton_DoubleCheckedLocking() {
+    }
+
+    public static Singleton_DoubleCheckedLocking getInstance() {
+        if (INSTANCE == null) {
+            synchronized (Singleton_DoubleCheckedLocking.class) {
+                // double checking Singleton instance
+                if (INSTANCE == null) {
+                    INSTANCE = new Singleton_DoubleCheckedLocking();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h4>using static factory method</h4>
+
+<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
+
+<pre><code>public class Singleton_StaticFactory {
+    // initailzed during class loading
+    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
+
+    // to prevent creating another instance of Singleton
+    private Singleton_StaticFactory() {
+    }
+
+    public static Singleton_StaticFactory getSingleton() {
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h3>About thread-safety</h3>
+
+<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
+
+<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
+
+<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
+
+<ol>
+<li>using static field</li>
+<li>using Enum</li>
+</ol>
+
+
+<h3>Q &amp; A</h3>
+
+<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
+
+<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -820,66 +931,6 @@ private int getNumber(String expr) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/16/orthogonal-traverse-map/">[Google] Orthogonal Traverse the Map (`)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/08/16/orthogonal-traverse-map/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.itint5.com/oj/#22">link</a></p>
-
-<blockquote><p>有一个n*m（n和m都不超过50）的棋盘，有k个目标格子需要访问。需要访问的格子的横纵坐标存放在数组x[]和y[]中(0&lt;=x[i]&lt;n, 0&lt;=y[i]&lt;m)。</p>
-
-<p>遍历的规则为：</p>
-
-<p>每一步只能从一个目标格子水平或者竖直跳跃移动到另一个目标格子。</p>
-
-<p>连续的两步必须形成直角。即如果前一步是水平移动，那么下一步只能竖直移动。</p>
-
-<p>问是否存在一种遍历顺序，使得每个目标格子有且仅被访问一次。</p>
-
-<p>样例：k=8, x=[0, 0, 0, 0, 2, 2, 4, 4], y=[0, 2, 4, 6, 4, 6, 2, 4],对应于下图中A, B, C, D, F, E, G, H 8个目标格子，存在满足条件的遍历A->D->E->F->C->B->G->H。</p></blockquote>
-
-<p><img class="middle" src="/assets/images/orthogonal-map.jpg"></p>
-
-<h3>Solution</h3>
-
-<blockquote><p>n,m的棋盘，<a href="http://www.itint5.com/discuss/22/%E7%9B%B4%E8%A7%92%E8%B7%AF%E7%BA%BF%E9%81%8D%E5%8E%86%E6%A3%8B%E7%9B%98">建一个包含n+m个顶点的图G</a>（为了方便说明，类似二分图将其分为两列，左边n个顶点，右边m个顶点，分别代表n行和n列）。</p>
-
-<p>对于目标格子(i,j)，左边第i个顶点和右边第j个顶点连一条边。最后的问题其实就是问转换之后的图G是否存在欧拉欧拉回路或者欧拉路径。</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="27">&larr; Older</a>
@@ -900,7 +951,7 @@ private int getNumber(String expr) {
 <li class='category'><a href='/blog/categories/design/'>design (72)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (29)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -919,6 +970,10 @@ private int getNumber(String expr) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload/override Compile/run Time (Static/Dynamic Polymorphism) </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/05/21/sort-letters-given-lexicographic-order/">[Palantir] Sort Letters Given Lexicographic Order </a>
       </li>
     
@@ -932,10 +987,6 @@ private int getNumber(String expr) {
     
       <li class="post">
         <a href="/blog/2015/05/10/Number-of-Islands/">[LeetCode 200] Number of Islands </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/10/Number-of-1-Bits/">[LeetCode 191] Number of 1 Bits </a>
       </li>
     
   </ul>

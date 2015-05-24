@@ -9,7 +9,9 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question Explain the data structures and algorithms that you would use to design an in-memory file system. Illustrate with an example in code where &hellip;">
+  <meta name="description" content="Question Design a Parking Lot. Solution Class hierarchy: A parking lot has multiple Levels.
+A Level has multiple Parking Spot.
+A Spot can park &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +77,207 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/25/design-parking-lot/">[CC150v5] 8.4 Design a Parking Lot</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-25T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/08/25/design-parking-lot/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Design a Parking Lot.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Class hierarchy:</p>
+
+<ol>
+<li>A parking lot has multiple Levels.</li>
+<li>A Level has multiple Parking Spot.</li>
+<li>A Spot can park motorcycle, car or bus, which all belongs to Vehicle.</li>
+</ol>
+
+
+<p>Implement methods:</p>
+
+<ol>
+<li>Vehicle.parkInSpot(Spot s)</li>
+<li>Vehicle.leaveSpot(Spot s)</li>
+<li>Vehicle.canFitIn(Spot s)</li>
+<li>ParkingLot.parkVehicle(Vehicle v)</li>
+<li>Level.parkVehicle(Vehicle v)</li>
+<li>Level.parkVehicleAtSpot(Vehicle v, Spot s)</li>
+<li>Level.findAvailableSpot(VehicleType vt)</li>
+</ol>
+
+
+<p><strong>ParkingLot Class is just a wrapper class of Levels</strong>. By doing this, we seperated out parking logic from other broader actions (like Spot management).</p>
+
+<p>The code below is from CC150v5. <strong>Its design is a bit strange</strong> (a car can occupy multiple spots), so just use this code as a guide but not a reference.</p>
+
+<h3>Code</h3>
+
+<p>ParkingLot.java</p>
+
+<pre><code>public class ParkingLot {
+    private Level[] levels;
+    private final int NUM_LEVELS = 5;
+
+    public ParkingLot() {
+        levels = new Level[NUM_LEVELS];
+        for (int i = 0; i &lt; NUM_LEVELS; i++) {
+            levels[i] = new Level(i, 30);
+        }
+    }
+
+    /* Park the vehicle in a spot (or multiple spots). Return false if failed. */
+    public boolean parkVehicle(Vehicle vehicle) {
+        for (int i = 0; i &lt; levels.length; i++) {
+            if (levels[i].parkVehicle(vehicle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void print() {
+        for (int i = 0; i &lt; levels.length; i++) {
+            System.out.print("Level" + i + ": ");
+            levels[i].print();
+            System.out.println("");
+        }
+        System.out.println("");
+    }
+}
+</code></pre>
+
+<p>Level.java</p>
+
+<pre><code>/* Represents a level in a parking garage */
+public class Level {
+    private int floor;
+    private ParkingSpot[] spots;
+    private int availableSpots = 0; // number of free spots
+    private static final int SPOTS_PER_ROW = 10;
+
+    public Level(int flr, int numberSpots) {
+        floor = flr;
+        spots = new ParkingSpot[numberSpots];
+        int largeSpots = numberSpots / 4;
+        int bikeSpots = numberSpots / 4;
+        int compactSpots = numberSpots - largeSpots - bikeSpots;
+        for (int i = 0; i &lt; numberSpots; i++) {
+            VehicleSize sz = VehicleSize.Motorcycle;
+            if (i &lt; largeSpots) {
+                sz = VehicleSize.Large;
+            } else if (i &lt; largeSpots + compactSpots) {
+                sz = VehicleSize.Compact;
+            }
+            int row = i / SPOTS_PER_ROW;
+            spots[i] = new ParkingSpot(this, row, i, sz);
+        }
+        availableSpots = numberSpots;
+    }
+
+    public int availableSpots() {
+        return availableSpots;
+    }
+
+    /* Try to find a place to park this vehicle. Return false if failed. */
+    public boolean parkVehicle(Vehicle vehicle) {
+        if (availableSpots() &lt; vehicle.getSpotsNeeded()) {
+            return false;
+        }
+        int spotNumber = findAvailableSpots(vehicle);
+        if (spotNumber &lt; 0) {
+            return false;
+        }
+        return parkStartingAtSpot(spotNumber, vehicle);
+    }
+
+    /* Park a vehicle starting at the spot spotNumber, and continuing until vehicle.spotsNeeded. */
+    private boolean parkStartingAtSpot(int spotNumber, Vehicle vehicle) {
+        vehicle.clearSpots();
+        boolean success = true;
+        for (int i = spotNumber; i &lt; spotNumber + vehicle.spotsNeeded; i++) {
+             success &amp;= spots[i].park(vehicle);
+        }
+        availableSpots -= vehicle.spotsNeeded;
+        return success;
+    }
+
+    /* find a spot to park this vehicle. Return index of spot, or -1 on failure. */
+    private int findAvailableSpots(Vehicle vehicle) {
+        int spotsNeeded = vehicle.getSpotsNeeded();
+        int lastRow = -1;
+        int spotsFound = 0;
+        for (int i = 0; i &lt; spots.length; i++) {
+            ParkingSpot spot = spots[i];
+            if (lastRow != spot.getRow()) {
+                spotsFound = 0;
+                lastRow = spot.getRow();
+            }
+            if (spot.canFitVehicle(vehicle)) {
+                spotsFound++;
+            } else {
+                spotsFound = 0;
+            }
+            if (spotsFound == spotsNeeded) {
+                return i - (spotsNeeded - 1);
+            }
+        }
+        return -1;
+    }
+
+    public void print() {
+        int lastRow = -1;
+        for (int i = 0; i &lt; spots.length; i++) {
+            ParkingSpot spot = spots[i];
+            if (spot.getRow() != lastRow) {
+                System.out.print("  ");
+                lastRow = spot.getRow();
+            }
+            spot.print();
+        }
+    }
+
+    /* When a car was removed from the spot, increment availableSpots */
+    public void spotFreed() {
+        availableSpots++;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1377,117 +1580,6 @@ class BlackJackCard extends Card {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/20/Talk-about-singleton/">[Java OOP] Singleton, 3 Implementations</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-20T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/08/20/Talk-about-singleton/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Implement Singlton</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">3 ways</a> of writing Singleton.</p>
-
-<h4>using Enum</h4>
-
-<p>This is only available since Java 6.</p>
-
-<pre><code>public enum Singleton_Enum {
-    INSTANCE;
-}
-</code></pre>
-
-<h4>using double checked locking</h4>
-
-<p>This is <strong>lazy loaded thread-safe</strong> Singleton, which is popular during Java 5 (with the use of Volatile variable).</p>
-
-<pre><code>public class Singleton_DoubleCheckedLocking implements Cloneable {
-    private static volatile Singleton_DoubleCheckedLocking INSTANCE;
-
-    private Singleton_DoubleCheckedLocking() {
-    }
-
-    public static Singleton_DoubleCheckedLocking getInstance() {
-        if (INSTANCE == null) {
-            synchronized (Singleton_DoubleCheckedLocking.class) {
-                // double checking Singleton instance
-                if (INSTANCE == null) {
-                    INSTANCE = new Singleton_DoubleCheckedLocking();
-                }
-            }
-        }
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h4>using static factory method</h4>
-
-<p>Singleton instance is <a href="http://javarevisited.blogspot.sg/2012/07/why-enum-singleton-are-better-in-java.html">static and final variable</a> it initialized when class is first loaded into memeory so creation of instance is inherently <strong>thread-safe</strong>.</p>
-
-<pre><code>public class Singleton_StaticFactory {
-    // initailzed during class loading
-    private static final Singleton_StaticFactory INSTANCE = new Singleton_StaticFactory();
-
-    // to prevent creating another instance of Singleton
-    private Singleton_StaticFactory() {
-    }
-
-    public static Singleton_StaticFactory getSingleton() {
-        return INSTANCE;
-    }
-}
-</code></pre>
-
-<h3>About thread-safety</h3>
-
-<p><a href="http://javarevisited.blogspot.sg/2012/12/how-to-create-thread-safe-singleton-in-java-example.html">Prior to Java 5</a> <strong>double checked locking</strong> mechanism is used to create thread-safe singleton in Java, which breaks if one Thread doesn&rsquo;t see instance created by other thread at same time and eventually you will end up with more than one instance of Singleton class.</p>
-
-<p>From Java 5 onwards <strong>volatile variable</strong> guarantee can be used to write thread safe singleton by using double checked locking pattern.</p>
-
-<p>I personally don&rsquo;t prefer that way as there are many other simpler alternatives like:</p>
-
-<ol>
-<li>using static field</li>
-<li>using Enum</li>
-</ol>
-
-
-<h3>Q &amp; A</h3>
-
-<p>Question: How do you prevent for creating another instance of Singleton using clone() method?</p>
-
-<p>Answer: Preferred way is not to implement Clonnable interface. And if you do, just throw Exception from clone() method as &ldquo;Can not create clone of Singleton class&rdquo;.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="26">&larr; Older</a>
@@ -1508,7 +1600,7 @@ class BlackJackCard extends Card {
 <li class='category'><a href='/blog/categories/design/'>design (72)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (28)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (29)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -1527,6 +1619,10 @@ class BlackJackCard extends Card {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload/override Compile/run Time (Static/Dynamic Polymorphism) </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/05/21/sort-letters-given-lexicographic-order/">[Palantir] Sort Letters Given Lexicographic Order </a>
       </li>
     
@@ -1540,10 +1636,6 @@ class BlackJackCard extends Card {
     
       <li class="post">
         <a href="/blog/2015/05/10/Number-of-Islands/">[LeetCode 200] Number of Islands </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/10/Number-of-1-Bits/">[LeetCode 191] Number of 1 Bits </a>
       </li>
     
   </ul>
