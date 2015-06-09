@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question Implement a CircularArray class that supports an array-like data structure which can be efficiently rotated. The class should use a generic &hellip;">
+  <meta name="description" content="Question Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,124 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/27/Order-array-by-sorting-middle/">[CC150v5] 17.6 Order an Array by Sorting Middle</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-27T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/27/Order-array-by-sorting-middle/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given an array of integers, write a method to find indices m and n such that if you sorted elements m through n, the entire array would be sorted. Minimize n-m (that is, find the smallest such sequence).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Referring to <a href="http://www.mitbbs.com/article_t/JobHunting/32772399.html">this guy</a>:</p>
+
+<blockquote><ol>
+<li><p>找到heading的最长递增序列.</p></li>
+<li><p>找到tailing的最长的递增序列.</p></li>
+</ol>
+</blockquote>
+
+<p>After that:</p>
+
+<blockquote><ol>
+<li><p>用中间部分的min去shrink左边.</p></li>
+<li><p>用中间部分的max去shrink右边.</p></li>
+</ol>
+</blockquote>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static void findUnsortedSequence(int[] array, int[] ans) {
+    int len = array.length;
+    ans[0] = 0;
+    ans[1] = 0;
+
+    // find increasing sequence on left and on right
+    int leftPeak = 0;
+    while (leftPeak &lt; len - 1) {
+        if (array[leftPeak] &lt; array[leftPeak + 1]) {
+            leftPeak++;
+        } else {
+            break;
+        }
+    }
+    if (leftPeak == len - 1) {
+        return;
+    }
+    int rightBottom = len - 1;
+    while (rightBottom &gt; 0) {
+        if (array[rightBottom] &gt; array[rightBottom - 1]) {
+            rightBottom--;
+        } else {
+            break;
+        }
+    }
+
+    // leftPeak and rightBottom are found, now read mid part
+    int midMin = Integer.MAX_VALUE;
+    int midMax = Integer.MIN_VALUE;
+    for (int i = leftPeak; i &lt;= rightBottom; i++) {
+        midMin = Math.min(midMin, array[i]);
+        midMax = Math.max(midMax, array[i]);
+    }
+
+    // find left boudary and right boundary
+    int leftBound = leftPeak;
+    while (leftBound &gt;= 0) {
+        if (array[leftBound] &lt; midMin) {
+            break;
+        }
+        leftBound--;
+    }
+    int rightBound = rightBottom;
+    while (rightBound &lt; len) {
+        if (array[rightBound] &gt; midMax) {
+            break;
+        }
+        rightBound++;
+    }
+
+    // finish it up
+    ans[0] = leftBound + 1;
+    ans[1] = rightBound - 1;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -961,84 +1079,6 @@ public static int helper(int[] array, int left, int right) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/16/calculate-bits-convertions/">[CC150v5] 5.5 Calculate Bits Conversion Required</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-16T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/16/calculate-bits-convertions/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Write a function to determine the number of bits (change) required to convert integer A to integer B.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Using XOR operation, we can find out number of bits that are different.</p>
-
-<p>The next important thing is to know <strong>how to count the number of &lsquo;1&rsquo;s in a integer</strong>. It&rsquo;s like this:</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>code 1</strong></p>
-
-<pre><code>public static int calcBitsSwapMe1(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        count += num &amp; 1;
-        num = num &gt;&gt;&gt; 1;
-    }
-    return count;
-}
-</code></pre>
-
-<p><strong>code 2</strong></p>
-
-<pre><code>public static int calcBitsSwapMe2(int a, int b) {
-    int num = a ^ b;
-    int count = 0;
-    while (num != 0) {
-        num = num &amp; (num - 1);
-        count++;
-    }
-    return count;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="18">&larr; Older</a>
@@ -1056,7 +1096,7 @@ public static int helper(int[] array, int left, int right) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (72)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (73)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (29)</a></li>
@@ -1078,6 +1118,10 @@ public static int helper(int[] array, int left, int right) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/06/08/linux-and-tcp-ports/">[Design] Linux and TCP ports </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload/override Compile/run Time (Static/Dynamic Polymorphism) </a>
       </li>
     
@@ -1091,10 +1135,6 @@ public static int helper(int[] array, int left, int right) {
     
       <li class="post">
         <a href="/blog/2015/05/10/Reverse-Bits/">[LeetCode 190] Reverse Bits </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/10/Number-of-Islands/">[LeetCode 200] Number of Islands </a>
       </li>
     
   </ul>

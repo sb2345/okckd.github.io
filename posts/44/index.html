@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Design and implement a data structure for Least Recently Used (LRU) cache. It should support the following operations: get and set. get &hellip;">
+  <meta name="description" content="Question link Given n points on a 2D plane, find the maximum number of points that lie on the same straight line. Stats Adjusted Difficulty 5 Time to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,163 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/03/Max-Points-on-a-Line/">[LeetCode 149] Max Points on a Line</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/06/03/Max-Points-on-a-Line/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://oj.leetcode.com/problems/max-points-on-a-line/">link</a></p>
+
+<div class="question-content bg-color bg-img font-color">
+            <p class="font-color"></p><p class="font-color">Given <i>n</i> points on a 2D plane, find the maximum number of points that lie on the same straight line.</p><p class="font-color"></p>
+          </div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">5</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p><strong>This is a difficult coding question</strong>.</p>
+
+<p>The idea is simple. For n points, there are n * (n-1) lines. Check slopes and then count total, we would get the answer.</p>
+
+<p>However, coding of this idea is very difficult.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Firstly, there are 2 special cases when calculating the slope</strong>. The 2 points may locate in same position. And when point1.x = point2.x, slope = infinity. It&rsquo;s easy to omit these 2 cases and result in mistake.</p>
+
+<p>Secondly, when we count, we declare 2 variables: samePointNumber and maxPointCountWithSameSlope. <strong>It&rsquo;s very important to initialize both values to 1 instead of 0</strong>! Why? Because these values just can&rsquo;t be 0. I failed my 2nd version code when input = {(0,0), (0,0)}, the program shows result of 0, instead of 2.</p>
+
+<p><strong>Thirdly, about what data structure to use for counting</strong>. There is a discussion about this at <a href="https://oj.leetcode.com/discuss/2573/better-way-to-use-hashmap-for-this-question">here</a></p>
+
+<blockquote><ol>
+<li>storing the vertical slopes as Double.NaN. That allows Double to represent every slope uniquely as (y/x).</li>
+<li>It is unsafe using floating points to make a hash, and -0.0 != 0.0</li>
+</ol>
+</blockquote>
+
+<p>It&rsquo;s great that using <strong>Double.NaN</strong>, it saves us time and effort to count vertical points. Second point is very valid, but it turns out that using HashMap&lt;Double, Integer> can AC.</p>
+
+<p>P.S. It is always not a good practise to use Double as hash key. See <a href="http://stackoverflow.com/questions/1074781/double-in-hashmap">here</a>.</p>
+
+<p><strong>Fourthly, I made a mistake here</strong>:</p>
+
+<blockquote><p>double slope = (p.y &ndash; q.y) / (p.x &ndash; q.x);</p></blockquote>
+
+<p>And it&rsquo;s wrong. Why? Note that <strong>Point.x and Point.y are both integers</strong>. Integer division will return integer. We must cast it.</p>
+
+<blockquote><p>double slope = (double) (p.y &ndash; q.y) / (p.x &ndash; q.x);</p></blockquote>
+
+<p><strong>Last, OMG I wish this is last, but not least, we can reduce execution time to half</strong> by checking only the points with larger index than the anchor point (that&rsquo;s the name for &lsquo;current point&rsquo;). Good idea, right?</p>
+
+<p>One more thing, <strong>how to iterate thru the HashMap</strong> (value only)? There is an easy way:</p>
+
+<pre><code>for (Integer a : map.values()) {
+    a;
+}
+</code></pre>
+
+<p>That&rsquo;s all I&rsquo;ve found for now.</p>
+
+<p><strong>Updated on Aug 12th, 2014</strong></p>
+
+<p>Based on the solution given in CC150 v4 Q10.6 on Page 199, it&rsquo;s a <strong>proper way to solve with HashMap&lt;Line, Integer></strong> instead of using HashMap&lt;Double, Integer>.</p>
+
+<p>The reason is mentioned, it&rsquo;s &lsquo;<strong>unsafe using floating points to make a hash</strong>&rsquo;.</p>
+
+<p>Note that if we were to write our own &lsquo;Line&rsquo; class, <strong>we must override the 2 methods</strong>:</p>
+
+<ol>
+<li>public int hashCode() {}</li>
+<li>public boolean equals(Object o) {}</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p><strong>written by me, Version3 using HashMap</strong></p>
+
+<pre><code>public int maxPoints(Point[] points) {
+    if (points.length &lt;= 1)
+        return points.length;
+    HashMap&lt;Double, Integer&gt; map = null;
+    int totalMax = 0;
+    for (Point p : points) {
+        int samePoint = 1;
+        map = new HashMap&lt;Double, Integer&gt;();
+        for (Point q : points) {
+            if (q == p || p.x &gt; q.x) {
+            } else if (p.x == q.x &amp;&amp; p.y == q.y) {
+                samePoint++;
+            } else {
+                double slope = Double.NaN;
+                if (p.x != q.x) {
+                    slope = (double) (p.y - q.y) / (p.x - q.x);
+                }
+                if (!map.containsKey(slope)) {
+                    map.put(slope, 1);
+                }
+                map.put(slope, map.get(slope) + 1);
+            }
+        }
+        int pointMax = 1;
+        for (Integer a : map.values()) {
+            pointMax = Math.max(pointMax, a);
+        }
+        totalMax = Math.max(totalMax, pointMax + samePoint - 1);
+    }
+    return totalMax;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1192,101 +1349,6 @@ Can you solve it without using extra space?
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/02/Linked-List-Cycle/">[LeetCode 141] Linked List Cycle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-02T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/02/Linked-List-Cycle/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://oj.leetcode.com/problems/linked-list-cycle/">link</a></p>
-
-<div class="question-content bg-color bg-img font-color">
-            <p class="font-color"></p><p class="font-color">
-Given a linked list, determine if it has a cycle in it.
-</p>
-
-<p class="font-color">
-Follow up:<br>
-Can you solve it without using extra space?
-</p><p class="font-color"></p>
-          </div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8211;</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p><strong>This is an famous question, historically know as the <a href="http://en.wikipedia.org/wiki/Cycle_detection#Tortoise_and_hare">Tortoise and hare</a></strong>.</p>
-
-<h3>Solution</h3>
-
-<p><a href="http://www.programcreek.com/2012/12/leetcode-linked-list-cycle/">This blog</a> has a great solution.</p>
-
-<blockquote><p>Use fast and low pointer. The advantage about fast/slow pointers is that when a circle is located, the fast one will catch the slow one for sure.</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public boolean hasCycle(ListNode head) {
-    if (head == null || head.next == null) 
-        return false;
-    ListNode first = head.next, second = first.next;
-    while (first != null &amp;&amp; second != null) {
-        if (first == second) return true;
-        first = first.next;
-        second = second.next;
-        if (second == null) return false;
-        second = second.next;
-    }
-    return false;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="45">&larr; Older</a>
@@ -1304,7 +1366,7 @@ Can you solve it without using extra space?
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (72)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (73)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (29)</a></li>
@@ -1326,6 +1388,10 @@ Can you solve it without using extra space?
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/06/08/linux-and-tcp-ports/">[Design] Linux and TCP ports </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload/override Compile/run Time (Static/Dynamic Polymorphism) </a>
       </li>
     
@@ -1339,10 +1405,6 @@ Can you solve it without using extra space?
     
       <li class="post">
         <a href="/blog/2015/05/10/Reverse-Bits/">[LeetCode 190] Reverse Bits </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/10/Number-of-Islands/">[LeetCode 200] Number of Islands </a>
       </li>
     
   </ul>
