@@ -32,15 +32,11 @@ tags: [ src ]
 
 1. Traverse the tree once and get the minimum and maximum horizontal distance with respect to root. 
 
-2. Iterate for each vertical line at distance minimum to maximum from root. 
+2. Iterate the tree and for each vertical line, fill in the values.  
 
-This solution is O(n^2), because getting the width of tree requires O(n) time. (Wait, is it not? Think about a complete tree of 3 level and 7 nodes)
-
-O(n) solution is available using a __[HashMap](www.geeksforgeeks.org/print-binary-tree-vertical-order-set-2/)__. 
+Now, getting the width of tree requires O(n) time. And entire solution is O(n) using a __[HashMap](www.geeksforgeeks.org/print-binary-tree-vertical-order-set-2/)__. 
 
 ### Code
-
-__written by me__, O(n^2) time.
 
     public List<List<Integer>> printVertically(TreeNode root) {
         List<List<Integer>> ans = new ArrayList<List<Integer>>();
