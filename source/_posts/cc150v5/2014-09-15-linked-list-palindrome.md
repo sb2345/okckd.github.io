@@ -25,13 +25,11 @@ __Third solution is recursive__. We basically uses a public pointer to:
 1. get ending value
 1. if starting == ending and middle part is valid, then true.
 
-This code is not easy to write, and hard to think. 
-
-It's best to know both iterative and recursive solution. 
+This code is pretty hard to think. 
 
 ### Code
 
-Iterative
+Iterative (with stack)
 
 	public static boolean isPalindrome1(LinkedListNode head) {
 		int len = getListLength(head);
@@ -53,7 +51,7 @@ Iterative
 		return true;
 	}
 
-Recursive
+Recursive (good solution, better use this)
 
 	private static LinkedListNode p;
 
@@ -83,15 +81,4 @@ Recursive
 			}
 		}
 		return true;
-	}
-
-Shared method:
-
-	private static int getListLength(LinkedListNode node) {
-		int count = 0;
-		while (node != null) {
-			count++;
-			node = node.next;
-		}
-		return count;
 	}

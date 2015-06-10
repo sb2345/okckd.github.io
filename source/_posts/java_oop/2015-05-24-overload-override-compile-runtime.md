@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Java OOP] Overload/override Compile/run Time (Static/Dynamic Polymorphism) "
+title: "[Java OOP] Overload, Override, Compile, Runtime (Static/Dynamic Polymph) "
 comments: true
 category: Java OOP
 
