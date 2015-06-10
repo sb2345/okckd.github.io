@@ -9,8 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Suppose N patients and M diseases. N is sufficiently large number and M is
-relatively small, say 30-ish. Each patient can have possible &hellip;">
+  <meta name="description" content="Question link Given a binary tree, print it vertically. The following example illustrates vertical order traversal. 1 / \ 2 3 / \ / \ 4 5 6 7 \ \ 8 9 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +75,121 @@ relatively small, say 30-ish. Each patient can have possible &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-17T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
+
+<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
+
+<pre><code>           1
+        /    \
+       2      3
+      / \    / \
+     4   5  6   7
+             \   \
+              8   9 
+
+The output of print this tree vertically will be:
+4
+2
+1 5 6
+3 8
+7
+9 
+</code></pre>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
+<li><p>Iterate the tree and for each vertical line, fill in the values.</p></li>
+</ol>
+
+
+<p>Now, getting the width of tree requires O(n) time. And entire solution is O(n) using a <strong><a href="www.geeksforgeeks.org/print-binary-tree-vertical-order-set-2/">HashMap</a></strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
+
+    // 1. find the range of left bound and right bound
+    int[] range = new int[2];
+    findRange(root, range, 0);
+
+    // 2. calculate number of columns in the result
+    int rootIndex = 0 - range[0];
+    int columns = range[1] - range[0] + 1;
+    for (int i = 0; i &lt; columns; i++) {
+        ans.add(new ArrayList&lt;Integer&gt;());
+    }
+
+    // 3. fill in vertically in a recursive manner
+    fillNode(ans, root, rootIndex);
+
+    return ans;
+}
+
+private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
+    if (node == null) {
+        return;
+    }
+    ans.get(index).add(node.val);
+    fillNode(ans, node.left, index - 1);
+    fillNode(ans, node.right, index + 1);
+}
+
+private void findRange(TreeNode node, int[] range, int position) {
+    if (node == null) {
+        return;
+    }
+    if (position &lt; range[0]) {
+        range[0] = position;
+    }
+    if (position &gt; range[1]) {
+        range[1] = position;
+    }
+    findRange(node.left, range, position - 1);
+    findRange(node.right, range, position + 1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -900,68 +1014,6 @@ private static BiNode getListTail(BiNode head) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/28/get-rank-stream-integers/">[CC150v5] 11.8 Get Rank in Stream of Integers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/28/get-rank-stream-integers/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the rank of a number x (the number of values less than or equal to x).</p>
-
-<p>Implement the data structures and algorithms to support these operations. That is, implement the method <strong>track(int x)</strong>, which is called when each number is generated, and the method <strong>getRankOfNumber(int x)</strong>, which returns the number of values less than or equal to x (not including x itself).</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>This question requires a special type of Data Structure</strong>. It basically is a modified BST like this:</p>
-
-<blockquote><p>The tree node stores both number value and the <strong>count of node on left subtree</strong></p></blockquote>
-
-<p><img class="middle" src="/assets/images/get-rank-number-stream.png"></p>
-
-<p>Suppose we want to find the rank of 24 in the tree above. We would compare 24 with the root, 20, and find that 24 must reside on the right. The root has 4 nodes in its left subtree, and when we include the root itself, this gives us five total nodes smaller than 24. We set counter to 5.</p>
-
-<p>Then, we compare 24 with node 25 and find that 24 must be on the left. The value of counter does not update, since we&rsquo;re not &ldquo;passing over&rdquo; any smaller nodes. The value of counter is still 5.</p>
-
-<p>Next, we compare 24 with node 23,and find that 24 must be on the right. Counter gets incremented by just 1 (to 6), since 23 has no left nodes.</p>
-
-<p>Finally, we find 24 and we return counter: 6.</p>
-
-<h3>Code</h3>
-
-<p>Refer to another post <strong>[Question] Stock Span Problem</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="17">&larr; Older</a>
@@ -979,7 +1031,7 @@ private static BiNode getListTail(BiNode head) {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (73)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (74)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (29)</a></li>
@@ -1001,11 +1053,15 @@ private static BiNode getListTail(BiNode head) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/">[Design] Cryptographic standard, AES and RSA </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/06/08/linux-and-tcp-ports/">[Design] Linux and TCP ports </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload/override Compile/run Time (Static/Dynamic Polymorphism) </a>
+        <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload, Override, Compile, Runtime (Static/Dynamic Polymph) </a>
       </li>
     
       <li class="post">
@@ -1014,10 +1070,6 @@ private static BiNode getListTail(BiNode head) {
     
       <li class="post">
         <a href="/blog/2015/05/10/Rotate-Array/">[LeetCode 189] Rotate Array </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/10/Reverse-Bits/">[LeetCode 190] Reverse Bits </a>
       </li>
     
   </ul>
