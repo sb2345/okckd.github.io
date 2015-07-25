@@ -1,0 +1,1256 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Shuatiblog.com</title>
+  <meta name="author" content="CodeMonkey">
+
+  
+  <meta name="description" content="Question link Implement a Blocking queue. Solution First thing first, the most important characteristic of a BlockingQueue is: thread-safe &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.shuatiblog.com/posts/8/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Shuatiblog.com" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-52495723-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:www.shuatiblog.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+    <li><a href="/">
+        <span class="blue_light">
+            Shuatiblog.com
+        </span>
+       
+    </a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/05/implement-blocking-q/">[Google] Implement a Blocking Queue</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/05/implement-blocking-q/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14622668">link</a></p>
+
+<blockquote><p>Implement a Blocking queue.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>First thing first, the most important characteristic of a BlockingQueue is:</p>
+
+<blockquote><p><strong>thread-safe</strong> BlockingQueue</p></blockquote>
+
+<p>Second, we need to make sure to handle the following 2 methods:</p>
+
+<blockquote><p><strong>notifyAll();</strong></p>
+
+<p><strong>wait();</strong></p></blockquote>
+
+<p>Last, remember that <strong>wait()</strong> has got a <strong>checked exception</strong>(InterruptedException). We end up with the code:</p>
+
+<pre><code>public synchronized void enqueue(Object item) throws InterruptedException {
+    while (this.queue.size() == this.size) {
+        wait();
+    }
+    if (this.queue.size() == 0) {
+        notifyAll();
+    }
+    this.queue.add(item);
+}
+</code></pre>
+
+<h3>Code</h3>
+
+<p>The entire class, refer to <strong>[Java OOP] Java BlockingQueue (2)</strong>:</p>
+
+<pre><code>public class MyBlockingQueue {
+
+    private List&lt;Object&gt; queue = new LinkedList&lt;Object&gt;();
+    private int size = 10;
+
+    public MyBlockingQueue(int size) {
+        this.size = size;
+    }
+
+    public synchronized void enqueue(Object item) throws InterruptedException {
+        while (this.queue.size() == this.size) {
+            wait();
+        }
+        if (this.queue.size() == 0) {
+            notifyAll();
+        }
+        this.queue.add(item);
+    }
+
+    public synchronized Object dequeue() throws InterruptedException {
+        while (this.queue.size() == 0) {
+            wait();
+        }
+        if (this.queue.size() == this.size) {
+            notifyAll();
+        }
+
+        return this.queue.remove(0);
+    }
+
+    public boolean isEmpty() {
+        return this.queue.isEmpty();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/snakes-and-ladders/">[Google] Snakes and Ladders</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/04/snakes-and-ladders/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=14955106">link</a></p>
+
+<blockquote><p>Given a board of snakes and ladders game, provide an algorithm to find the minimum number of dice rolls required to reach 100 from 1.</p></blockquote>
+
+<h3>Solution 1</h3>
+
+<p>Recommended: <strong>Graph (shortest path)</strong>. <a href="http://www.careercup.com/question?id=14955106">ref</a>:</p>
+
+<ol>
+<li><p>k is linked to k + 1 k + 2, k + 3, k + 4, k + 5, k +6.</p></li>
+<li><p>If has a ladder, connect it too.</p></li>
+<li><p>Find shortest path.</p></li>
+</ol>
+
+
+<p>Solution 2 is <strong>DP</strong>.</p>
+
+<h3>Variant</h3>
+
+<p>If the question asks: find the way to climb as many ladder as possible. Then this question would be solved differently.</p>
+
+<p>Any ideas?</p>
+
+<p>Solution below.</p>
+
+<p>&hellip;</p>
+
+<p>&hellip;</p>
+
+<p>&hellip;</p>
+
+<p>Read <strong>[Greedy] Activity Selection Problem</strong>.</p>
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/">[Google] Number of Subtrees With Even Nodes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/04/number-of-subtree-with-even-nodes/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32348573.html">link</a></p>
+
+<blockquote><p>an arbitrary tree. split it into as many subtrees as you can. the
+number of nodes of the subtree must be even.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult question</strong>. The idea is recursive solution, but be cautious deadling with NULL.</p>
+
+<p><strong>NULL can be regarded as a child branch of even node (0)</strong>, but NULL could not be seen as a subtreee.</p>
+
+<ol>
+<li>traverse each and every node in the tree</li>
+<li>for each node, take it as root, and find left and right branch with total sum of odd count of nodes.</li>
+<li>we do above step recursively</li>
+<li>include NULL as a subtree of EVEN number of nodes.</li>
+</ol>
+
+
+<p>The code below is my code and I haven&rsquo;t seen any reference to this question. If you read this, please comment and discuss with me!</p>
+
+<h3>Code</h3>
+
+<pre><code>public void traverseAndFindEvenSubstrees(List&lt;TreeNode&gt; ans, TreeNode node) {
+    if (node == null) {
+        return;
+    }
+    List&lt;TreeNode&gt; evenSubtrees = this.getSubtrees(node, true);
+    evenSubtrees.remove(null);
+    ans.addAll(evenSubtrees);
+
+    traverseAndFindEvenSubstrees(ans, node.left);
+    traverseAndFindEvenSubstrees(ans, node.right);
+}
+
+private List&lt;TreeNode&gt; getSubtrees(TreeNode root, boolean isEven) {
+    List&lt;TreeNode&gt; ans = new ArrayList&lt;TreeNode&gt;();
+    if (root == null) {
+        if (isEven) {
+            // NULL is considered as a subtree with even number (0) of nodes
+            ans.add(null);
+        }
+        return ans;
+    }
+    if (isEven) {
+        // we need 2 subtrees to have a combined nodes of odd numbers
+        for (int i = 0; i &lt;= 1; i++) {
+            List&lt;TreeNode&gt; leftGroup = getSubtrees(root.left, i == 0);
+            List&lt;TreeNode&gt; rightGroup = getSubtrees(root.right, i != 0);
+            // what we do here, is to make leftGroup and rightGroup have
+            // different boolean parameter, thus a total of odd count
+            for (TreeNode ln : leftGroup) {
+                for (TreeNode rn : rightGroup) {
+                    // note that NULL is included in either leftGroup or
+                    // rightGroup. we'll use that
+                    TreeNode newSubtree = new TreeNode(root.val);
+                    newSubtree.left = ln;
+                    newSubtree.right = rn;
+                    ans.add(newSubtree);
+                }
+            }
+        }
+        // now we've added all subtrees into ans, whose head is the root
+        // this means we does not inlcude NULL
+    } else {
+        for (int i = 0; i &lt;= 1; i++) {
+            List&lt;TreeNode&gt; leftGroup = getSubtrees(root.left, i == 0);
+            List&lt;TreeNode&gt; rightGroup = getSubtrees(root.right, i == 0);
+            for (TreeNode ln : leftGroup) {
+                for (TreeNode rn : rightGroup) {
+                    TreeNode newSubtree = new TreeNode(root.val);
+                    newSubtree.left = ln;
+                    newSubtree.right = rn;
+                    ans.add(newSubtree);
+                }
+            }
+        }
+    }
+    // now last step, add NULL (important)
+    if (isEven) {
+        ans.add(null);
+    }
+    return ans;
+}
+</code></pre>
+
+<p>Test data:</p>
+
+<pre><code>Test start
+Input is a BST with this structure: 
+4 
+2 6 
+1 3 5 7 
+
+Total subtree count = 16
+They are: 
+Tree 1:
+4 
+2 6 
+3 
+Tree 2:
+4 
+2 6 
+3 5 7 
+Tree 3:
+4 
+2 6 
+1 
+Tree 4:
+4 
+2 6 
+1 5 7 
+Tree 5:
+4 
+6 
+Tree 6:
+4 
+6 
+5 7 
+Tree 7:
+4 
+2 6 
+7 
+Tree 8:
+4 
+2 6 
+5 
+Tree 9:
+4 
+2 
+Tree 10:
+4 
+2 6 
+1 3 7 
+Tree 11:
+4 
+2 6 
+1 3 5 
+Tree 12:
+4 
+2 
+1 3 
+Tree 13:
+2 
+3 
+Tree 14:
+2 
+1 
+Tree 15:
+6 
+7 
+Tree 16:
+6 
+5 
+Total time = 0.006
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/grep-command-interview-question/">[Amazon] Grep Command Interview Question</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/04/grep-command-interview-question/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=1799">link</a></p>
+
+<blockquote><p>You have 50,000 html files, some of which contain phone numbers. How would you create a list of all the files which contain phone numbers?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a famous inteview question by former Amazon engineer <a href="https://sites.google.com/site/steveyegge2/five-essential-phone-screen-questions">Steve Yegge</a>:</p>
+
+<blockquote><p>About 25% to 35% of all software development engineer candidates, independent of experience level, cannot solve this problem, even given the entire interview hour and lots of hints.</p></blockquote>
+
+<p>This question tests your understanding of scripting languages.</p>
+
+<h3>Code</h3>
+
+<pre><code>grep -l -R --perl-regexp "\b(\(\d{3}\)\s*|\d{3}-)\d{3}-\d{4}\b" * &gt; output.txt
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/ds-insert-remove-getrandom/">[Google] Data Structure of Insert, Remove, GetRandom</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/04/ds-insert-remove-getrandom/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=11353907">link</a></p>
+
+<blockquote><p>Design a data structure where the following 3 functions at O(1):</p></blockquote>
+
+<pre><code>1. Insert(n) 
+2. GetRandomElement() 
+3. Remove(n) 
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Array is best for:</p>
+
+<ol>
+<li>random access</li>
+</ol>
+
+
+<p>HashMap is best for:</p>
+
+<ol>
+<li>Searching
+
+<ol>
+<li>insert</li>
+<li>remove</li>
+</ol>
+</li>
+</ol>
+
+
+<p><a href="http://stackoverflow.com/a/22083895">So the answer is</a> <strong>array + hashmap</strong>:</p>
+
+<ol>
+<li><p>Insertion can be done by appending to the array and adding to the hash-map.</p></li>
+<li><p>Deletion can be done by first looking up and removing the array index in the hash-map, then <strong>swapping the last element with that element in the array</strong>.</p></li>
+<li><p>Get random can be done by returning a random index from the array.</p></li>
+<li><p>All operations take O(1).</p></li>
+</ol>
+
+
+<p>Note <a href="http://stackoverflow.com/a/5684892">how hashmap is used</a>:</p>
+
+<blockquote><p>insert(value): append the value to array and let i be it&rsquo;s index in A. Set H[value]=i.</p></blockquote>
+
+<p>Hashmap stores value&rsquo;s index in the array &ndash; that is to say: <strong>this DS does not support inserting duplicating values</strong>.</p>
+
+<p>Finally, when we delete, we swap the last element to replace the gap. This is an nice idea!</p>
+
+<h4>follow-up</h4>
+
+<blockquote><p>what if we want to get the top x% number?</p></blockquote>
+
+<p>Well, heap of course. And note that <strong>Heap size is <a href="http://stackoverflow.com/a/9115884">auto-increasing</a></strong>:</p>
+
+<blockquote><p>PriorityQueue is unbounded, it can grow as big as your memory allows, and it will grow automatically when needed. The initialCapacity parameter is just a hint to reserve room for that many elements initially.</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/04/Collatz-Conjecture-oneness/">[Google] Collatz Conjecture (Oneness Property)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-04T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/04/Collatz-Conjecture-oneness/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Collatz Conjecture</h3>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Collatz_conjecture">Collatz conjecture</a> is a conjecture in mathematics known as the 3n + 1 conjecture.</p>
+
+<p>Take any natural number n.</p>
+
+<ol>
+<li>If n is even, divide it by 2 to get n / 2.</li>
+<li>If n is odd, multiply it by 3 and add 1 to obtain 3n + 1.</li>
+</ol>
+
+
+<p>Repeat the process (which has been called &ldquo;Half Or Triple Plus One&rdquo;, or HOTPO) indefinitely. The conjecture is that no matter what number you start with, <strong>you will always eventually reach 1</strong>.</p>
+
+<p>The property has also been called <strong>oneness</strong>.</p>
+
+<h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/5437445/collatz-conjecture-related-interview">link</a></p>
+
+<blockquote><p>Collatz conjecture says that if you do the following</p></blockquote>
+
+<pre><code>If n is even, replace n by n/2.
+If n is odd, replace n by 3n+1.
+You ultimately end up with 1.
+</code></pre>
+
+<blockquote><p>For instance, 5 &ndash;> 16 &ndash;> 8 &ndash;> 4 &ndash;> 2 &ndash;> 1</p>
+
+<p>Chain length is the number of steps required to get to 1. (The chain length of 1 is 0).</p>
+
+<p>Now, the problem is given natural numbers n and k, find all numbers between 1 and n, such that the chain length is &lt;= k.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Generate all numbers in backwards fashion, suggest by <a href="http://stackoverflow.com/a/5437672">templatetypedef</a>:</p>
+
+<pre><code>                  1
+                  |
+                  2
+                  |
+                  4
+                  |
+                  8
+                  |
+                  16
+                  | \
+                  32 \
+                  |   5
+                  64  |
+                 /|   10
+                / 128 | \
+               21     20 3
+</code></pre>
+
+<p><strong>Implementation</strong>: using a queue and keep appending numbers.</p>
+
+<p><strong>Duplication handling</strong>?</p>
+
+<blockquote><p>Assuming that the Collatz conjecture holds true, we&rsquo;ll never get any duplicates this way.</p></blockquote>
+
+<p><strong>Time complexity</strong> is O(S) time, where S is the number of numbers we need to output.</p>
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/03/monitor-request-per-second/">[Design] Monitor Rps for Past Sec/min/hr</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-03T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/03/monitor-request-per-second/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=6005446611566592">link</a></p>
+
+<blockquote><p>Given a server that has requests coming in.</p>
+
+<p>Design a data structure such that you can fetch the count of the number requests in the last second, minute and hour.</p></blockquote>
+
+<h3>Solution 1</h3>
+
+<p><strong>Keep a record of all request timestamps</strong>, suggested by the top answer by <a href="http://www.careercup.com/question?id=6005446611566592">whatevva</a>:</p>
+
+<ol>
+<li><p>Use a queue implemented as a resizable array to store the timestamps of all new requests</p></li>
+<li><p>maintain head/tail pointers as usual</p></li>
+<li><p>Also maintain three pointers, for past sec, past min and past hr.</p></li>
+</ol>
+
+
+<p>Whenever a request comes in, update 3 pointers. Then in the for-loop of the thread, remove old entries and also update 3 pointers.</p>
+
+<p>Print Rps in real time. I posted my code below (the code is without thread-safety consideration).</p>
+
+<h3>Solution 2</h3>
+
+<p>This solution does not store all timestamps, and it does not generate real-time Rps data. But it&rsquo;s good enough because result is only updated every 1 second, so its performance is better.</p>
+
+<p>Keep an array of int of size 60 * 60. Each second, use the <strong>number of request in the past second</strong> to update the array values <strong>in a rolling way</strong>.</p>
+
+<h3>Code</h3>
+
+<p>Solution 1. this is my code so please correct me!</p>
+
+<pre><code>public class SetRps {
+
+    AtomicInteger count = new AtomicInteger(0);
+    int limit = -1;
+    int printIndex = 1;
+    long startTimestamp = -1;
+
+    void setRPS(int num) {
+        limit = num;
+    }
+
+    boolean process(long timestamp) {
+        // suppose timestamp is ms
+        synchronized (this) {
+            if (count.get() &lt; limit) {
+                // can process
+                count.incrementAndGet();
+                System.out.println(printIndex++ + ". processing request "
+                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
+                return true;
+            }
+            if (timestamp - startTimestamp &gt;= 1000) {
+                // every 1 seconds, reset
+                count.set(0);
+                startTimestamp = timestamp;
+                System.out.println("clear!");
+                return true;
+            }
+        }
+        return false;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/stock-span-problem/">[Question] Stock Span Problem (Couting BST)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/01/stock-span-problem/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given stock price of Amazon for some consecutive days. Need to find the maximum span of each day’s stock price.</p></blockquote>
+
+<p>Definition of &lsquo;span&rsquo; have got 2 variant:</p>
+
+<h3>Variant 1</h3>
+
+<p><a href="http://www.geeksforgeeks.org/the-stock-span-problem/">link</a></p>
+
+<blockquote><p>Span is the number of consecutive days right before that day, which have less or equal stock value.</p>
+
+<p>(Or in GFG language): The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><img class="middle" src="/assets/images/StockSpanProblem1.png"></p>
+
+<p>Use stack.</p>
+
+<h3>Variant 2</h3>
+
+<p><a href="http://www.careercup.com/question?id=4825417139617792">link</a></p>
+
+<blockquote><p>Span is the amount of days before the given day where the stock price is less than that of given day.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The top answer in <a href="http://www.careercup.com/question?id=4825417139617792">here</a> is wrong. Eg. {1,3,2,4}, the count for 4 would be 2, instead of 3.</p>
+
+<p>Instead, the <strong>BST (AVL tree) solution is correct</strong>. It&rsquo;s commented by user zahidbuet106.</p>
+
+<blockquote><p>insert numbers in a AVL tree one by one from right to left. During each insert we will keep updating the <strong>size of left subtree</strong> at the node being inserted. This will give us our desired smaller element count.</p>
+
+<p>We also need to handle balancing the tree while insert.</p></blockquote>
+
+<p><strong>The key of this question is the special BST, where each node stores an additional counting number</strong>.</p>
+
+<p>This type of special BST is extremely frequntly used in Computer Science, especially when we want to dynamically insert elements and find out it&rsquo;s ranking within the past history.</p>
+
+<p>Read another very interesting post: <strong>[CC150v5] 11.8 Get Rank in Stream of Integers</strong>.</p>
+
+<h3>Code</h3>
+
+<pre><code>class TreeNodePlus extends TreeNode {
+    int leftCount;
+    int dupCount;
+
+    public TreeNodePlus(int v, int leftC) {
+        super(v);
+        this.leftCount = leftC;
+        this.dupCount = 1;
+    }
+
+    public int findRank(TreeNodePlus node) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (this == node) {
+            return 0;
+        } else if (node.val &lt; this.val) {
+            if (this.left == null) {
+                return 0;
+            } else {
+                return leftBranch.findRank(node);
+            }
+        } else {
+            if (this.right == null) {
+                return this.leftCount + this.dupCount;
+            } else {
+                return this.leftCount + this.dupCount
+                        + rightBranch.findRank(node);
+            }
+        }
+    }
+
+    public TreeNodePlus insertNum(int num) {
+        TreeNodePlus leftBranch = (TreeNodePlus) this.left;
+        TreeNodePlus rightBranch = (TreeNodePlus) this.right;
+
+        if (num == this.val) {
+            this.dupCount++;
+            return this;
+        } else if (num &lt; this.val) {
+            // insert num to the left branch
+            this.leftCount++;
+            if (this.left == null) {
+                this.left = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.left;
+            } else {
+                return leftBranch.insertNum(num);
+            }
+        } else {
+            // insert num to the right branch
+            // this.leftCount does not change
+            if (this.right == null) {
+                this.right = new TreeNodePlus(num, 0);
+                return (TreeNodePlus) this.right;
+            } else {
+                return rightBranch.insertNum(num);
+            }
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/01/limit-request-per-second/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">link</a></p>
+
+<blockquote><p>有一个接口叫 void setRPS(int num);</p>
+
+<p>接下来不断有request过来，如何实现下面的接口，返回accept或者deny，</p></blockquote>
+
+<pre><code>bool process(int timestamp){
+
+}
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Suggested by level 5 of <a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">this post</a>:</p>
+
+<ol>
+<li>maintain a variable for the number of request processed/rejected.
+
+<ol>
+<li>This variable must be atomic, thus a <strong>AtomicInteger</strong>.</li>
+<li>the variable is called &lsquo;count&rsquo;</li>
+</ol>
+</li>
+<li>have a method to process request
+
+<ol>
+<li>if count &lt; limit, do it</li>
+<li>otherwise, reject</li>
+</ol>
+</li>
+<li><strong>This is the most important</strong>: clear the count every 1 seconds!
+
+<ol>
+<li>eg. LIMIT = 5r/s, so:</li>
+<li>the <strong>first 5 number of requests in every second</strong> are getting fulfilled</li>
+<li>from 6th request onward, the request all rejected, until the next second.</li>
+</ol>
+</li>
+</ol>
+
+
+<h3>Code</h3>
+
+<pre><code>public class SetRps {
+
+    AtomicInteger count = new AtomicInteger(0);
+    int limit = -1;
+    int printIndex = 1;
+    long startTimestamp = -1;
+
+    void setRPS(int num) {
+        limit = num;
+    }
+
+    boolean process(long timestamp) {
+        // suppose timestamp is ms
+        synchronized (this) {
+            if (count.get() &lt; limit) {
+                // can process
+                count.incrementAndGet();
+                System.out.println(printIndex++ + ". processing request "
+                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
+                return true;
+            }
+            if (timestamp - startTimestamp &gt;= 1000) {
+                // every 1 seconds, reset
+                count.set(0);
+                startTimestamp = timestamp;
+                System.out.println("clear!");
+                return true;
+            }
+        }
+        return false;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/01/each-employee-two-events/">[Greedy] Each Employee 2 Events</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/01/each-employee-two-events/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.careercup.com/question?id=7894677">link</a></p>
+
+<h3>Question</h3>
+
+<blockquote><p>You are given N ranges of date offsets when N employees are present in an organization. Something like</p></blockquote>
+
+<pre><code>    1-4 (i.e. employee will come on 1st, 2nd, 3rd and 4th day ) 
+    2-6 
+    8-9 
+    .. 
+    1-14 
+</code></pre>
+
+<blockquote><p>Organize an event on minimum number of days such that each employee can attend the event at least twice.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Greedy algorithm</strong>, according to the <a href="http://www.careercup.com/question?id=7894677">top answer</a>:</p>
+
+<ol>
+<li><p>First, sort all ranges based on ENDING date in increasing order (bucket or counting sort).</p></li>
+<li><p>For each range, select last two days (because they produce maximum possibility to overlap next range)</p></li>
+<li><p>Skip following ranges that also contains those two days, until:</p>
+
+<ol>
+<li>a range that either covers only one day (we then select last day of this range) or</li>
+<li>does not cover any of the two (we then select last two days of this range).</li>
+</ol>
+</li>
+<li><p>Then continue.</p></li>
+</ol>
+
+
+<h3>Code</h3>
+
+<p>not written</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="9">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="7">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section class="well">
+  <h1>Categories</h1>
+  <ul id="categories" class="nav nav-list">
+    <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
+<li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (74)</a></li>
+<li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (29)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
+<li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
+<li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
+<li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
+<li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
+<li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
+<li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/">[Design] Cryptographic standard, AES and RSA </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/08/linux-and-tcp-ports/">[Design] Linux and TCP ports </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload, Override, Compile, Runtime (Static/Dynamic Polymph) </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/21/sort-letters-given-lexicographic-order/">[Palantir] Sort Letters Given Lexicographic Order </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/10/Rotate-Array/">[LeetCode 189] Rotate Array </a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+<!--
+<script type="text/javascript" src="http://srvpub.com/adServe/banners?tid=29011_41781_0&size=120x600" ></script>
+&#8211;>
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+    Copyright &copy; 2015 - <a href="/about">CodeMonkey</a> -  All posts are my original writing, based uppon my personal view. <a href="/policy">Privacy Policy</a> - 
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'woodstockblog';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
