@@ -4,7 +4,7 @@
   <title><![CDATA[Category: design | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-07-25T12:41:00+08:00</updated>
+  <updated>2015-08-21T00:25:01+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] How is Pipe implemented in Unix/Linux ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/23/how-is-pipe-implemented-unix/"/>
+    <updated>2015-08-23T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/23/how-is-pipe-implemented-unix</id>
+    <content type="html"><![CDATA[# Overview
+
+In Unix-like OS, __[a pipeline is a set of processes](https://goo.gl/0NAqd9) chained by their standard streams__, so that the output of each process (stdout) feeds directly as input (stdin) to the next one. 
+
+[Pipes are unidirectional byte streams which connect the standard output](http://stackoverflow.com/a/17503877) from one process into the standard input of another process. __Neither process is aware of this redirection__ and behaves just as it would normally. It is the shell which sets up these temporary pipes between the processes.
+
+# Process
+
+1. Linux has a VFS called __pipefs__ that is mounted in the kernel (not in user space)
+
+    > __[PipeFS](http://www.linux.org/threads/pipefs-sockfs-debugfs-and-securityfs.5383/)__ is a unique virtual filesystem. __This filesystem is mounted inside the kernel__ rather than in the userspace. While most filesystems are mounted under "/", PipeFS is mounted on "pipe:", __making PipeFS its own root__ (yes, a second root filesystem). 
+    >
+    > This filesystem is one superblock and cannot exceed that amount system-wide. The entry point of this filesystem/second-root is the system-call "pipe()". Unlike the other virtual/pseudo filesystems, this one cannot be viewed.
+    >
+    > Many of you may be wondering what purpose this PipeFS filesystem serves. Unix pipes use this filesystem. When a pipe is used (eg. ls | less), __the pipe() system-call makes a new pipe object on this filesystem__. Without this filesystem, pipes cannot be made. 
+    >
+    > Also, threads and forks communicate together via pipes. Without PipeFS, processes could not fork and threads could not communicate. 
+    >
+    > Network pipes also rely on this virtual/pseudo filesystem.
+
+1. pipefs has a single super block and is mounted at it's own root (pipe:), alongside /
+
+1. pipefs cannot be viewed directly unlike most file systems
+
+1. The entry to pipefs is via the pipe(2) syscall
+
+1. The pipe(2) syscall used by shells for piping with the | operator (or manually from any other process) creates a new file in pipefs which behaves pretty much like a normal file
+
+1. The file on the left hand side of the pipe operator has its stdout redirected to the temporary file created in pipefs
+
+1. The file on the right hand side of the pipe operator has its stdin set to the file on pipefs
+
+1. pipefs is stored in memory and through some kernel magic
+
+Ref: http://unix.stackexchange.com/q/148401
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] Cryptographic standard, AES and RSA ]]></title>
@@ -388,37 +431,6 @@ Fetch a script, parse and execute it, then fetch another one... this will use up
 Amazon S3. 
 
 Ref: http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] Speed Up Webpage for Slow Connection (3) ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/02/14/speed-up-web-page-3/"/>
-    <updated>2015-02-14T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/02/14/speed-up-web-page-3</id>
-    <content type="html"><![CDATA[### Website KPI
-
-There are [3 interesting phases](https://community.compuwareapm.com/community/display/PUB/Best+Practices+on+Web+Site+Performance+Optimization) of a web site from an end-user performance perspective. 
-
-1. First Impression
-1. OnLoad 
-1. Fully Loaded Time.
-
-### Loading Time
-
-__Question: what percentage of the time a user spends waiting for your page to load is spent after the HTML comes back to their browser__? 
-
-It is typically __[over 90%](http://www.sitepoint.com/seven-mistakes-that-make-websites-slow/)__. 
-
-Most of the time users spend waiting on your website is spent after the HTML page has been retrieved by their browser. 
-
-#### Fetching the HTML is just the beginning
-
-__In a nutshell, browsers parse your page’s HTML, sequentially discovering its assets__ (such as scripts, stylesheets, and images), requesting and then either parsing and executing them or displaying them as appropriate. 
-
-But these assets are not simply fetched all at once. Instead, the __browser opens a limited number of connections to the server(s)__ referenced by the page. There is __overhead involved in establishing TCP and HTTP connections__, and some __unavoidable latency__ in pushing the request and response bytes back and forth across the network.
-
-So, in general, round trips between the browser and server are expensive. The structure of the HTML markup, the number and the ordering of its assets, are absolutely critical factors in its performance.
 ]]></content>
   </entry>
   

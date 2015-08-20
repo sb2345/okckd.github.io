@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-07-25T12:41:00+08:00</updated>
+  <updated>2015-08-21T00:25:01+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,45 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] How is Pipe implemented in Unix/Linux ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/23/how-is-pipe-implemented-unix/"/>
+    <updated>2015-08-23T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/23/how-is-pipe-implemented-unix</id>
+    <content type="html"><![CDATA[<h1>Overview</h1>
+
+<p>In Unix-like OS, <strong><a href="https://goo.gl/0NAqd9">a pipeline is a set of processes</a> chained by their standard streams</strong>, so that the output of each process (stdout) feeds directly as input (stdin) to the next one.</p>
+
+<p><a href="http://stackoverflow.com/a/17503877">Pipes are unidirectional byte streams which connect the standard output</a> from one process into the standard input of another process. <strong>Neither process is aware of this redirection</strong> and behaves just as it would normally. It is the shell which sets up these temporary pipes between the processes.</p>
+
+<h1>Process</h1>
+
+<ol>
+<li><p>Linux has a VFS called <strong>pipefs</strong> that is mounted in the kernel (not in user space)</p>
+
+<blockquote><p><strong><a href="http://www.linux.org/threads/pipefs-sockfs-debugfs-and-securityfs.5383/">PipeFS</a></strong> is a unique virtual filesystem. <strong>This filesystem is mounted inside the kernel</strong> rather than in the userspace. While most filesystems are mounted under &ldquo;/&rdquo;, PipeFS is mounted on &ldquo;pipe:&rdquo;, <strong>making PipeFS its own root</strong> (yes, a second root filesystem).</p>
+
+<p>This filesystem is one superblock and cannot exceed that amount system-wide. The entry point of this filesystem/second-root is the system-call &ldquo;pipe()&rdquo;. Unlike the other virtual/pseudo filesystems, this one cannot be viewed.</p>
+
+<p>Many of you may be wondering what purpose this PipeFS filesystem serves. Unix pipes use this filesystem. When a pipe is used (eg. ls | less), <strong>the pipe() system-call makes a new pipe object on this filesystem</strong>. Without this filesystem, pipes cannot be made.</p>
+
+<p>Also, threads and forks communicate together via pipes. Without PipeFS, processes could not fork and threads could not communicate.</p>
+
+<p>Network pipes also rely on this virtual/pseudo filesystem.</p></blockquote></li>
+<li><p>pipefs has a single super block and is mounted at it&rsquo;s own root (pipe:), alongside /</p></li>
+<li><p>pipefs cannot be viewed directly unlike most file systems</p></li>
+<li><p>The entry to pipefs is via the pipe(2) syscall</p></li>
+<li><p>The pipe(2) syscall used by shells for piping with the | operator (or manually from any other process) creates a new file in pipefs which behaves pretty much like a normal file</p></li>
+<li><p>The file on the left hand side of the pipe operator has its stdout redirected to the temporary file created in pipefs</p></li>
+<li><p>The file on the right hand side of the pipe operator has its stdin set to the file on pipefs</p></li>
+<li><p>pipefs is stored in memory and through some kernel magic</p></li>
+</ol>
+
+
+<p>Ref: <a href="http://unix.stackexchange.com/q/148401">http://unix.stackexchange.com/q/148401</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] Cryptographic standard, AES and RSA ]]></title>
@@ -1711,133 +1750,6 @@ class PointComparator implements Comparator&lt;Pair&gt; {
             sum += (int) (ch - 'A' + 1);
         }
         return sum;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LeetCode 164] Maximum Gap ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/04/13/Maximum-Gap/"/>
-    <updated>2015-04-13T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/04/13/Maximum-Gap</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/maximum-gap/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given an unsorted array, find the maximum difference between the successive elements in its sorted form.</p>
-
-<p>Try to solve it in linear time/space.</p>
-
-<p>Return 0 if the array contains less than 2 elements.</p>
-
-<p>You may assume all elements in the array are non-negative integers and fit in the 32-bit signed integer range.</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/porker2008">@porker2008</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/sort/">Sort</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p><strong>This is an extremely difficult question</strong> of bucket sort. I refered to <a href="http://www.programcreek.com/2014/03/leetcode-maximum-gap-java/">programcreek</a> and <a href="http://leetcode.tgic.me/maximum-gap/index.html">tgic&rsquo;s blog</a> for reference.</p>
-
-<h3>Solution</h3>
-
-<p><strong>Basic idea is to put elements into buckets</strong>. The number of bucket is (almost) same as the number of elements in the input. In this way, each bucket <strong>ideally</strong> will contain 1 element.</p>
-
-<p>We then know that <strong>the max gap must be cross-bucket instead of within bucket</strong>. So we simply keep track of max and min value within each bucket for the purpose of calculating gap.</p>
-
-<p><strong>Why did I say &ldquo;number of bucket is (almost) same as the number of elements in the input&rdquo;</strong>? Well, consider this case: 3 values and (maxVal &ndash; minVal) == 100. We can make 3 bucket with size = 34. How about 5 values and (maxVal &ndash; minVal) == 6? Bucket size shall be either 1 or 2. So we&rsquo;ll have either 3 or 6 bucket.</p>
-
-<p>So, in the code below, you can see I make bucket size &ldquo;larger by 1&rdquo;:</p>
-
-<pre><code>// bSize is size of bucket (should be larger by 1)
-int bSize = (maxVal - minVal + 1) / num.length + 1;
-
-// calcualte number of buckets needed
-int bCount = (maxVal - minVal) / bSize + 1;
-Bucket[] buckets = new Bucket[bCount];
-</code></pre>
-
-<p>Note that simply use <strong>input.length</strong> as bucket count is wrong.</p>
-
-<h3>Code</h3>
-
-<p>My code written in Java:</p>
-
-<pre><code>public class Solution {
-    public int maximumGap(int[] num) {
-        if (num == null || num.length &lt; 2) {
-            return 0;
-        }
-
-        // find out max and min values of input
-        int minVal = num[0];
-        int maxVal = num[0];
-        for (int n: num) {
-            minVal = Math.min(minVal, n);
-            maxVal = Math.max(maxVal, n);
-        }
-        // bSize is size of bucket (should be larger by 1)
-        int bSize = (maxVal - minVal + 1) / num.length + 1;
-
-        // calcualte number of buckets needed
-        int bCount = (maxVal - minVal) / bSize + 1;
-        Bucket[] buckets = new Bucket[bCount];
-
-        // match every value into a bucket
-        // bucket maintains the max/min within the bucket
-        for (int n: num) {
-            int bIndex = (n - minVal) / bSize;
-            if (buckets[bIndex] == null) {
-                buckets[bIndex] = new Bucket(n, n);
-            } else {
-                buckets[bIndex].updateVal(n);
-            }
-        }
-
-        // for every bucket, check in sequence and get max gap
-        int gap = 0;
-        int pre = 0;
-        int cur = 1;
-        while (cur &lt; bCount) {
-            // skip all empty buckets
-            while (cur &lt; bCount &amp;&amp; buckets[cur] == null) {
-                cur++;
-            }
-            if (cur == bCount) break;
-            // update gap, pre and cur
-            gap = Math.max(gap, buckets[cur].min - buckets[pre].max);
-            pre = cur;
-            cur++;
-        }
-
-        return gap;
-    }
-
-    class Bucket {
-        int min;
-        int max;
-
-        public Bucket(int a, int b) {
-            min = a;
-            max = b;
-        }
-
-        public void updateVal(int val) {
-            min = Math.min(min, val);
-            max = Math.max(max, val);
-        }
     }
 }
 </code></pre>
