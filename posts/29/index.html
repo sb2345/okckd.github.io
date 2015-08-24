@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link 5亿个int找它们的中位数. Analysis Categorized under 双层桶划分. Idea: 首先我们将int划分为216个区域，然后读取数据统计落到各个区域里的数的个数，之后我们根据统计结果就可以判断中位数落到那个区域， &hellip;">
+  <meta name="description" content="Question link 给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？ Bloom Filter 自从Burton Bloom在70年代提出Bloom Filter之后，Bloom &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,79 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-fuzzy-search-url/">[Design] Big Data - Fuzzy Search Url (Bloom Filter)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/08/10/big-data-fuzzy-search-url/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+
+<blockquote><p>给你A,B两个文件，各存放50亿条URL，每条URL占用64字节，内存限制是4G，让你找出A,B文件共同的URL。如果是三个乃至n个文件呢？</p></blockquote>
+
+<h3>Bloom Filter</h3>
+
+<p>自从Burton Bloom在70年代提出<a href="http://blog.csdn.net/v_july_v/article/details/6685894">Bloom Filter</a>之后，Bloom Filter就被广泛用于<strong>拼写检查，数据库系统中。。。可以实现数据字典，进行数据的判重，或者集合求交集</strong></p>
+
+<h4>基本原理及要点</h4>
+
+<p>An empty Bloom filter is <strong>a bit array of m bits</strong>, all set to 0. There must also be <strong>k different hash functions</strong> defined, each of which maps or hashes some set element to one of the m array positions with a uniform random distribution.</p>
+
+<p>很明显这个过程并不保证查找的结果是100%正确的。同时也不支持删除一个已经插入的关键字，因为该关键字对应的位会牵动到其他的关键字。</p>
+
+<p>所以一个简单的改进就是 counting Bloom filter，用一个counter数组代替位数组，就可以支持删除了。</p>
+
+<h3>Error rate</h3>
+
+<pre><code>m: length of BF array (in bits)
+n: number of input elements
+k: number of hash functions
+</code></pre>
+
+<p>A Bloom filter <a href="http://en.wikipedia.org/wiki/Bloom_filter#Space_and_time_advantages">with 1% error</a> and an optimal value of k, in contrast, requires only about 9.6 bits per element (means m = 9.6 x n).</p>
+
+<h4>Usage</h4>
+
+<p>Bloom Filter可以用来实现数据字典，进行数据的判重，或者集合求交集.</p>
+
+<h3>Solution</h3>
+
+<p>Of course we can always use <strong>【分治+trie树/hash+小顶堆】</strong> standard solution, but for <strong>Fuzzy search, BF is the best</strong>.</p>
+
+<p>4G = 2<sup>32</sup> 大概是40亿 x 8大概是340亿bit，n = 50亿，如果按出错率0.01算需要的大概是480亿个bit。现在可用的是340亿，相差并不多，这样可能会使出错率上升些。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -963,72 +1036,6 @@ procedure consumer() {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/08/Max-sum-non-consecutive/">[Question] Max Sum of Non-Consecutive Elements</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-08T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/08/08/Max-sum-non-consecutive/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2009/05/max-possible-sum-of-non-consecutive.html">link</a></p>
-
-<blockquote><p>There is an integer array consisting positive numbers only.</p>
-
-<p>Find maximum possible sum of elements such that there are no 2 consecutive elements present in the sum.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>It&rsquo;s a little tricky to write the equation. Always remember the <strong>basic principle of DP</strong> is to assume that solution is found for (i -1), and then we calculate solution for input (i).</p>
-
-<p><strong>Don&rsquo;t miss the (i-1) part</strong>.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public int maxSumNonConsec(int[] input) {
-    int len = input.length;
-    int[] dp = new int[len];
-    dp[0] = input[0];
-    dp[1] = Math.max(input[0], input[1]);
-    for (int i = 2; i &lt; len; i++) {
-        dp[i] = Math.max(dp[i - 1], input[i] + dp[i - 2]);
-    }
-    return dp[len - 1];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="30">&larr; Older</a>
@@ -1049,7 +1056,7 @@ procedure consumer() {
 <li class='category'><a href='/blog/categories/design/'>design (75)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (29)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
@@ -1068,6 +1075,10 @@ procedure consumer() {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/08/24/three-property-object/">[Java OOP] Three Properties of Class/Object </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/23/SysDesign-class-1/">[NineChap Sys] System Design Class 1 </a>
       </li>
     
@@ -1081,10 +1092,6 @@ procedure consumer() {
     
       <li class="post">
         <a href="/blog/2015/06/08/linux-and-tcp-ports/">[Design] Linux and TCP ports </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload, Override, Compile, Runtime (Static/Dynamic Polymph) </a>
       </li>
     
   </ul>
