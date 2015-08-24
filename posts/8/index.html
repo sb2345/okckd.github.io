@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Multiple threads can publish and receive each other&rsquo;s message: whenever a thread publishes a message, all the other threads can &hellip;">
+  <meta name="description" content="Publish–subscribe pattern The publish–subscribe pattern is a messaging pattern where senders of messages, called publishers, do not send messages &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,69 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/05/pubsub-pattern/">[Java OOP] PubSub (Publish–subscribe) Pattern</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-02-05T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/02/05/pubsub-pattern/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Publish–subscribe pattern</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">The publish–subscribe pattern</a> is a messaging pattern</strong> where senders of messages, called publishers, do not send messages directly to specific subscribers. Instead, published messages are characterized into classes without knowledge of subscribers.</p>
+
+<p>Similarly, subscribers express interest in one or more classes, without knowledge of what publishers there are.</p>
+
+<ol>
+<li>greater network scalability</li>
+<li>a more dynamic network topology</li>
+<li>decreased flexibility to modify the Publisher and its structure of the data published.</li>
+</ol>
+
+
+<p>Pub/sub is typically a part of a larger <strong>message-oriented middleware system</strong>. e.g. Java Message Service (JMS).</p>
+
+<h3>Difference w/ observer pattern</h3>
+
+<p>Refer to <strong>[Java OOP] Observer pattern</strong> or <a href="http://stackoverflow.com/questions/15594905/difference-between-observer-pub-sub-and-data-binding">this link</a>:</p>
+
+<h4>Observer, or Observable/Observer:</h4>
+
+<blockquote><p>A design pattern by which an object is imbued with the ability to notify others of specific events &ndash; typically done using actual events, which are kind of like slots in the object with the shape of a specific function/method. The observable is the one who provides notifications, and the observer receives those notifications. In .net, the observable can expose an event and the observer subscribes to that event with an &ldquo;event handler&#8221;shaped hook. No assumptions are made about the specific mechanism which notifications occur, nor about the number of observers one observable can notify.</p></blockquote>
+
+<h4>Pub/Sub:</h4>
+
+<blockquote><p>Another name (perhaps with more &ldquo;broadcast&rdquo; semantics) of the Observable/Observer pattern, which usually implies a more &ldquo;dynamic&rdquo; flavor &ndash; observers can subscribe or unsubscribe to notifications and one observable can &ldquo;shout out&rdquo; to multiple observers. In .net, one can use the standard events for this, since events are a form of MulticastDelegate, and so can support delivery of events to multiple subscribers, and also support unsubscription. Pub/sub has a slightly different meaning in certain contexts, usually involving more &ldquo;anonymity&rdquo; between event and eventer, which can be facilitated by any number of abstractions, usually involving some &ldquo;middle man&rdquo; (such as a message queue) who knows all parties, but the individual parties don&rsquo;t know about each other.</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1055,121 +1118,6 @@ You ultimately end up with 1.
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/01/limit-request-per-second/">[Design] Limit the Request Per Second</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-01T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/01/limit-request-per-second/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">link</a></p>
-
-<blockquote><p>有一个接口叫 void setRPS(int num);</p>
-
-<p>接下来不断有request过来，如何实现下面的接口，返回accept或者deny，</p></blockquote>
-
-<pre><code>bool process(int timestamp){
-
-}
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Suggested by level 5 of <a href="http://www.mitbbs.com/article_t/JobHunting/32841633.html">this post</a>:</p>
-
-<ol>
-<li>maintain a variable for the number of request processed/rejected.
-
-<ol>
-<li>This variable must be atomic, thus a <strong>AtomicInteger</strong>.</li>
-<li>the variable is called &lsquo;count&rsquo;</li>
-</ol>
-</li>
-<li>have a method to process request
-
-<ol>
-<li>if count &lt; limit, do it</li>
-<li>otherwise, reject</li>
-</ol>
-</li>
-<li><strong>This is the most important</strong>: clear the count every 1 seconds!
-
-<ol>
-<li>eg. LIMIT = 5r/s, so:</li>
-<li>the <strong>first 5 number of requests in every second</strong> are getting fulfilled</li>
-<li>from 6th request onward, the request all rejected, until the next second.</li>
-</ol>
-</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<pre><code>public class SetRps {
-
-    AtomicInteger count = new AtomicInteger(0);
-    int limit = -1;
-    int printIndex = 1;
-    long startTimestamp = -1;
-
-    void setRPS(int num) {
-        limit = num;
-    }
-
-    boolean process(long timestamp) {
-        // suppose timestamp is ms
-        synchronized (this) {
-            if (count.get() &lt; limit) {
-                // can process
-                count.incrementAndGet();
-                System.out.println(printIndex++ + ". processing request "
-                        + timestamp % 100000 / 1000 + "," + timestamp % 1000);
-                return true;
-            }
-            if (timestamp - startTimestamp &gt;= 1000) {
-                // every 1 seconds, reset
-                count.set(0);
-                startTimestamp = timestamp;
-                System.out.println("clear!");
-                return true;
-            }
-        }
-        return false;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="9">&larr; Older</a>
@@ -1194,7 +1142,7 @@ You ultimately end up with 1.
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (16)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (17)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
@@ -1209,7 +1157,11 @@ You ultimately end up with 1.
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/08/23/how-is-pipe-implemented-unix/">[Design] How is Pipe implemented in Unix/Linux </a>
+        <a href="/blog/2015/08/23/SysDesign-class-1/">[NineChap Sys] System Design Class 1 </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/23/how-is-pipe-implemented-unix/">[Design] How is Pipe implemented in Unix/Linux </a>
       </li>
     
       <li class="post">
@@ -1222,10 +1174,6 @@ You ultimately end up with 1.
     
       <li class="post">
         <a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload, Override, Compile, Runtime (Static/Dynamic Polymph) </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/21/sort-letters-given-lexicographic-order/">[Palantir] Sort Letters Given Lexicographic Order </a>
       </li>
     
   </ul>
