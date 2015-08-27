@@ -202,7 +202,7 @@ design a payment system (Yelp &hellip;">
 <ol>
 <li><p>ban: fake user, advertising users&hellip; bannned by the management</p></li>
 <li><p>inactive: user choose to suspend his own account, voluntarily.</p></li>
-<li><p>delete account: normally we won&rsquo;t remove all related data (just make userId as &ldquo;deleted&rdquo;). Otherwise a lot of data can be violated. All your chatting history <strong>actually remains</strong>. 软删除。</p></li>
+<li><p>delete account: normally we won&rsquo;t remove all related data (just make userId as &ldquo;deleted&rdquo;). Otherwise a lot of data can be violated. All your chatting history <strong>actually remains</strong>.</p></li>
 </ol>
 
 
@@ -370,7 +370,7 @@ class Session extends Row {
 }
 </code></pre>
 
-<h3>Problem 1: System crashes before adding time</h3>
+<h3>Q5.1: System crashes before adding time</h3>
 
 <p>Solution: <strong>transaction with log</strong></p>
 
@@ -391,7 +391,7 @@ money=10; endTime=16_08_2016
 
 <blockquote><p>What happens if system crash during writing the log? or during the rollback?</p></blockquote>
 
-<h3>Problem 2: check list</h3>
+<h3>Q5.2: check list</h3>
 
 <ol>
 <li>one user id have 2 corresponding pro-services information.</li>
@@ -401,7 +401,114 @@ money=10; endTime=16_08_2016
 
 <p>Solution: have a checker class.</p>
 
-<h3>Problem 3:</h3>
+<h3>Q5.3: 2 simutaneous purchase.</h3>
+
+<p>Solution: lock.</p>
+
+<ol>
+<li>first process lock money &amp; endTime.</li>
+<li>Read money = 20</li>
+<li>another process try to lock, but end up waiting (sleeping).</li>
+<li>first process do the job, and release the lock.</li>
+<li>another process wakes up.</li>
+</ol>
+
+
+<blockquote><p>lock have time-out settings. It can be applied in distributed system as well.</p></blockquote>
+
+<p>Question: does lock make your execution slow?</p>
+
+<ol>
+<li><p>If another process is sleeping, CPU will be fully consumed by other process. So it won&rsquo;t impact.</p></li>
+<li><p>You can do some async processing, too.</p></li>
+<li><p>When you lock, try to lock only a small piece of code, not the entire method. In DB, lock only a row, not a table.</p></li>
+<li><p>Java <a href="https://en.wikipedia.org/wiki/Compare-and-swap">CAS</a> (Compare and swap )</p></li>
+</ol>
+
+
+<h3>Q5.4: machine crash</h3>
+
+<p>Solution: duplication.</p>
+
+<ol>
+<li><p>How many copies?</p>
+
+<p> Google did 3. Normally 2 in same data center, and 1 in another location.</p>
+
+<p> Backup data normally is on another machine. But there&rsquo;s also <a href="https://en.wikipedia.org/wiki/RAID">RAID</a> (redundant array of independent disks) which:</p>
+
+<blockquote><p>combines multiple physical disk drive components into a single logical unit for the purposes of <strong>data redundancy, performance improvement</strong>, or both.</p></blockquote></li>
+<li><p>When does the copy happen?</p>
+
+<p> Option 1 is <strong>doing everyday nightly</strong>. This is called a &lsquo;check point&rsquo;.</p>
+
+<p> Option 2 is use another server to support <strong>Shadow Redundancy</strong>. All data from Machine 0 will be copied to Machine 1 WHILE it happens. The result is, Machine 1 is identical to Machine 0. If Machine 0 crashes, Machine 1 may be behind less than 1 second.</p>
+
+<p> The way to duplicate is either re-play all the actions, or to read Machine 0&rsquo;s log and apply the new data.</p></li>
+<li><p>How to copy?</p>
+
+<p> User send data to 1 server, and from that server, pipeline. This ensures good usage of server bandwith, and serial transfer of data ensures low latency (several ms).</p>
+
+<p> It&rsquo;s also possible to do tree-like transfer, but the above method is preferred cuz all machine consume same bandwidth.</p></li>
+<li><p>What is log?</p>
+
+<p> It is actually &lsquo;checkpoint&rsquo; + log. It allows you to rollback.</p></li>
+</ol>
+
+
+<p>Summary:</p>
+
+<p><img class="middle" src="/assets/images/design-class2-data-redundancy-1.png"></p>
+
+<h3>Final note: Data consistency</h3>
+
+<p>Main sources of inconsistency comes from:</p>
+
+<ol>
+<li>network fault</li>
+<li>disk error</li>
+</ol>
+
+
+<p>The disk eror is solved by <strong>checksum</strong> (compare during disk writing).</p>
+
+<h1>Summary</h1>
+
+<p><strong><a href="https://en.wikipedia.org/wiki/ACID">ACID</a></strong> is a set of properties that guarantee that database transactions are processed reliably.</p>
+
+<ol>
+<li><p>Atomicity: <strong>all or nothing</strong></p>
+
+<p> Q5.1: System crashes before adding time</p></li>
+<li><p>Consistency: validate according to defined rules</p>
+
+<p> Q5.2: check list</p></li>
+<li><p>Isolation: independency between transactions <strong>(lock)</strong></p>
+
+<p> Q5.3: 2 simutaneous purchase.</p></li>
+<li><p>Durability: stored permanently</p>
+
+<p> Q5.4: machine crash</p></li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class2-summary.png"></p>
+
+<p>Question:</p>
+
+<ol>
+<li>design a user system (Netflix 2015)</li>
+</ol>
+
+
+<p>Hint: table design, register, login/out, password check, find password.</p>
+
+<ol>
+<li>Design payment system (Yelp, BigCommerce 2015)</li>
+</ol>
+
+
+<p>Hint: the question does not ask about table/ds design itself, but rather the problems associated with payment. Read about ACID principle.</p>
 </div>
 
 
@@ -450,6 +557,8 @@ money=10; endTime=16_08_2016
       
         <a class="basic-alignment left" href="/blog/2015/08/24/three-property-object/" title="Previous Post: [Java OOP] Three Properties of Class/Object ">&laquo; [Java OOP] Three Properties of Class/Object </a>
       
+      
+        <a class="basic-alignment right" href="/blog/2015/08/28/design-class-3/" title="Next Post: [NineChap Sys] System Design Class 3 ">[NineChap Sys] System Design Class 3  &raquo;</a>
       
     </p>
   </footer>
@@ -501,7 +610,7 @@ money=10; endTime=16_08_2016
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (18)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (19)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
@@ -514,6 +623,10 @@ money=10; endTime=16_08_2016
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/08/28/design-class-3/">[NineChap Sys] System Design Class 3 </a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/08/26/design-class-2/">[NineChap Sys] System Design Class 2 </a>
@@ -529,10 +642,6 @@ money=10; endTime=16_08_2016
     
       <li class="post">
         <a href="/blog/2015/07/23/how-is-pipe-implemented-unix/">[Design] How is Pipe implemented in Unix/Linux </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/">[Design] Cryptographic standard, AES and RSA </a>
       </li>
     
   </ul>

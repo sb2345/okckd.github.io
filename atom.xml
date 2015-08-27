@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-08-27T18:14:38+08:00</updated>
+  <updated>2015-08-28T01:13:27+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,15 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 3 ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/28/design-class-3/"/>
+    <updated>2015-08-28T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/28/design-class-3</id>
+    <content type="html"><![CDATA[<h1>Overview</h1>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[NineChap Sys] System Design Class 2 ]]></title>
@@ -114,7 +123,7 @@
 <ol>
 <li><p>ban: fake user, advertising users&hellip; bannned by the management</p></li>
 <li><p>inactive: user choose to suspend his own account, voluntarily.</p></li>
-<li><p>delete account: normally we won&rsquo;t remove all related data (just make userId as &ldquo;deleted&rdquo;). Otherwise a lot of data can be violated. All your chatting history <strong>actually remains</strong>. 软删除。</p></li>
+<li><p>delete account: normally we won&rsquo;t remove all related data (just make userId as &ldquo;deleted&rdquo;). Otherwise a lot of data can be violated. All your chatting history <strong>actually remains</strong>.</p></li>
 </ol>
 
 
@@ -282,7 +291,7 @@ class Session extends Row {
 }
 </code></pre>
 
-<h3>Problem 1: System crashes before adding time</h3>
+<h3>Q5.1: System crashes before adding time</h3>
 
 <p>Solution: <strong>transaction with log</strong></p>
 
@@ -303,7 +312,7 @@ money=10; endTime=16_08_2016
 
 <blockquote><p>What happens if system crash during writing the log? or during the rollback?</p></blockquote>
 
-<h3>Problem 2: check list</h3>
+<h3>Q5.2: check list</h3>
 
 <ol>
 <li>one user id have 2 corresponding pro-services information.</li>
@@ -313,7 +322,114 @@ money=10; endTime=16_08_2016
 
 <p>Solution: have a checker class.</p>
 
-<h3>Problem 3:</h3>
+<h3>Q5.3: 2 simutaneous purchase.</h3>
+
+<p>Solution: lock.</p>
+
+<ol>
+<li>first process lock money &amp; endTime.</li>
+<li>Read money = 20</li>
+<li>another process try to lock, but end up waiting (sleeping).</li>
+<li>first process do the job, and release the lock.</li>
+<li>another process wakes up.</li>
+</ol>
+
+
+<blockquote><p>lock have time-out settings. It can be applied in distributed system as well.</p></blockquote>
+
+<p>Question: does lock make your execution slow?</p>
+
+<ol>
+<li><p>If another process is sleeping, CPU will be fully consumed by other process. So it won&rsquo;t impact.</p></li>
+<li><p>You can do some async processing, too.</p></li>
+<li><p>When you lock, try to lock only a small piece of code, not the entire method. In DB, lock only a row, not a table.</p></li>
+<li><p>Java <a href="https://en.wikipedia.org/wiki/Compare-and-swap">CAS</a> (Compare and swap )</p></li>
+</ol>
+
+
+<h3>Q5.4: machine crash</h3>
+
+<p>Solution: duplication.</p>
+
+<ol>
+<li><p>How many copies?</p>
+
+<p> Google did 3. Normally 2 in same data center, and 1 in another location.</p>
+
+<p> Backup data normally is on another machine. But there&rsquo;s also <a href="https://en.wikipedia.org/wiki/RAID">RAID</a> (redundant array of independent disks) which:</p>
+
+<blockquote><p>combines multiple physical disk drive components into a single logical unit for the purposes of <strong>data redundancy, performance improvement</strong>, or both.</p></blockquote></li>
+<li><p>When does the copy happen?</p>
+
+<p> Option 1 is <strong>doing everyday nightly</strong>. This is called a &lsquo;check point&rsquo;.</p>
+
+<p> Option 2 is use another server to support <strong>Shadow Redundancy</strong>. All data from Machine 0 will be copied to Machine 1 WHILE it happens. The result is, Machine 1 is identical to Machine 0. If Machine 0 crashes, Machine 1 may be behind less than 1 second.</p>
+
+<p> The way to duplicate is either re-play all the actions, or to read Machine 0&rsquo;s log and apply the new data.</p></li>
+<li><p>How to copy?</p>
+
+<p> User send data to 1 server, and from that server, pipeline. This ensures good usage of server bandwith, and serial transfer of data ensures low latency (several ms).</p>
+
+<p> It&rsquo;s also possible to do tree-like transfer, but the above method is preferred cuz all machine consume same bandwidth.</p></li>
+<li><p>What is log?</p>
+
+<p> It is actually &lsquo;checkpoint&rsquo; + log. It allows you to rollback.</p></li>
+</ol>
+
+
+<p>Summary:</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class2-data-redundancy-1.png"></p>
+
+<h3>Final note: Data consistency</h3>
+
+<p>Main sources of inconsistency comes from:</p>
+
+<ol>
+<li>network fault</li>
+<li>disk error</li>
+</ol>
+
+
+<p>The disk eror is solved by <strong>checksum</strong> (compare during disk writing).</p>
+
+<h1>Summary</h1>
+
+<p><strong><a href="https://en.wikipedia.org/wiki/ACID">ACID</a></strong> is a set of properties that guarantee that database transactions are processed reliably.</p>
+
+<ol>
+<li><p>Atomicity: <strong>all or nothing</strong></p>
+
+<p> Q5.1: System crashes before adding time</p></li>
+<li><p>Consistency: validate according to defined rules</p>
+
+<p> Q5.2: check list</p></li>
+<li><p>Isolation: independency between transactions <strong>(lock)</strong></p>
+
+<p> Q5.3: 2 simutaneous purchase.</p></li>
+<li><p>Durability: stored permanently</p>
+
+<p> Q5.4: machine crash</p></li>
+</ol>
+
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class2-summary.png"></p>
+
+<p>Question:</p>
+
+<ol>
+<li>design a user system (Netflix 2015)</li>
+</ol>
+
+
+<p>Hint: table design, register, login/out, password check, find password.</p>
+
+<ol>
+<li>Design payment system (Yelp, BigCommerce 2015)</li>
+</ol>
+
+
+<p>Hint: the question does not ask about table/ds design itself, but rather the problems associated with payment. Read about ACID principle.</p>
 ]]></content>
   </entry>
   
@@ -2127,167 +2243,6 @@ other rooms are either empty (<i>0&#8217;s</i>) or contain magic orbs that incre
             node = node.left;
         }
         return next.val;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[UVa] Wooden Sticks ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/04/14/wooden-stick/"/>
-    <updated>2015-04-14T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/04/14/wooden-stick</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=323">link</a></p>
-
-<p><body>There is a pile of <i>n </i>wooden sticks. The length and weight of
-each stick are known in advance. The sticks are
-to be processed by a woodworking machine in one by one fashion. It
-needs some time, called setup time, for
-the machine to prepare processing a stick. The setup times are
-associated with cleaning operations and
-changing tools and shapes in the machine. The setup times of the
-woodworking machine are given as follows:</p>
-
-<ul>
-<li>The setup time for the first wooden
-stick is 1 minute.</li>
-<li>
-Right after processing a stick of length <i>l </i>and weight <i>w
-</i>, the machine will need no setup time for a stick
-of length <i>l</i>&#8217; and weight <i>w</i>&#8217; if <i>l </i>&lt;=<i>l</i>&#8217;
-and <i>w </i>&lt;=<i>w</i>&#8217; . </li>
-</ul>
-
-
-<p>Otherwise, it will need 1 minute for setup.<br>
-You are to find the minimum setup time to process a given pile of <i>n
-</i>wooden sticks. For example, if you have
-five sticks whose pairs of length and weight are (4,9), (5,2), (2,1), (3,5),
-and (1,4) then the minimum setup
-time should be 2 minutes since there is a sequence of pairs (1,4),
-(3,5), (4,9), (2,1), (5,2).</p>
-
-<h2><font size="4" color="#ff0000"><a name="SECTION0001001000000000000000">Input</a> <br>
-</font></h2>
-
-
-<p>The input consists of <i>T</i> test cases. The number of test cases (<i>T</i>) is given in the first line of the input file. Each
-test case consists of two lines: The first line has an integer <i>n</i>,
-1&lt;=<i>n&lt;=</i>5000, that represents the number of
-wooden sticks in the test case, and the second line contains 2<i>n </i>positive
-integers <i>l<sub>1</sub></i>, <i>w<sub>1</sub></i>, <i>l<sub>2</sub></i>,
-<i>w<sub>2</sub></i>, &hellip;, <i>l<sub>n</sub></i>, <i>w<sub>n</sub></i>,
-each of magnitude at most 10000, where <i>l<sub>i</sub> </i>and <i>w<sub>i</sub>
-</i>are the length and weight of the <i>i </i>th wooden stick,
-respectively. The 2<i>n </i>integers are delimited by one or
-more spaces.</p>
-
-<h2><font size="4" color="#ff0000"><a name="SECTION0001002000000000000000">Output</a>&nbsp;</font>
-</h2>
-
-
-<p>The output should contain the minimum setup time in minutes, one per
-line.</p>
-
-<h2><font size="4" color="#ff0000"><a name="SECTION0001003000000000000000">Sample Input</a> <br>
-</font></h2>
-
-
-
-
-<pre>3
-5
-4 9 5 2 2 1 3 5 1 4
-3
-2 2 1 1 2 2
-3
-1 3 2 2 3 1
-</pre>
-
-
-
-
-<h2><font size="4" color="#ff0000"><a name="SECTION000
-1004000000000000000">Sample Output</a>&nbsp;</font>
-</h2>
-
-
-
-
-<pre>2
-1
-3
-</pre>
-
-
-<p></body></p>
-
-<h3>Analysis</h3>
-
-<p>This question is a little similar to <a href="http://www.shuatiblog.com/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>, yet different.</p>
-
-<h3>Solution</h3>
-
-<p>Solution quoted from <a href="http://www.csdn123.com/html/blogs/20130823/58042.htm">脚本百事通</a>:</p>
-
-<blockquote><p>按长度从小到大排序, 若长度相同, 则按重量从小到大排序(先按重量再按长度也行)</p>
-
-<p>然后, 我们针对当前木棍, 与剩下的木棍比较, 满足 w1 &lt;= w2 &amp;&amp; l1 &lt;= l2 的, 就更新一下当前棍, 并标记~</p>
-
-<p>当所有木棍都被编组后 输出到底设置了几次~</p></blockquote>
-
-<p><a href="http://www.android100.org/html/201502/03/109926.html">ref1</a>, <a href="http://blog.csdn.net/keshuai19940722/article/details/10735689">ref2</a></p>
-
-<h3>Code</h3>
-
-<p>The following Java code is written by me</p>
-
-<pre><code>public int count(Pair[] points) {
-    Arrays.sort(points, new PointComparator());
-    // now the array is sorted with Point.x
-    int total = 0;
-    int p = 0;
-    int len = points.length;
-
-    while (p &lt; len) {
-        // find the next non-null point
-        while (p &lt; len &amp;&amp; points[p] == null) {
-            p++;
-        }
-        if (p == len) {
-            break;
-        }
-        // use points[p] as the first elements in the queue
-        Pair temp = copy(points[p]);
-        points[p] = null;
-        total++;
-
-        // then mark all elements that follow points[p]
-        for (int k = p + 1; k &lt; len; k++) {
-            if (points[k] == null || points[k].y &lt; temp.y) {
-                continue;
-            }
-            temp = copy(points[k]);
-            points[k] = null;
-        }
-        p++;
-    }
-    return total;
-}
-
-Pair copy(Pair p) {
-    Pair newP = new Pair(p.x, p.y);
-    return newP;
-}
-
-class PointComparator implements Comparator&lt;Pair&gt; {
-
-    @Override
-    public int compare(Pair p1, Pair p2) {
-        return p1.x - p2.x;
     }
 }
 </code></pre>
