@@ -9,8 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question Get GCD in more efficient code Code this is 掉渣天。 public int gcd(int a, int b) { return b == 0 ? a : gcd(b, a % b);
-} ">
+  <meta name="description" content="Question link 有一个无限大的棋盘，棋盘上有一匹马，马可以从长宽分别为p和q的矩形一个角移动到对角。即假设马当前的位置为(x,y)，那么下一步可以移动到(x+p,y+q)，(x+p,y-q)，(x-p,y+q)，(x-p,y-q)，(x+q,y+p)，(x+q,y-p)，(x-q,y+ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +75,100 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/15/Knight-tour-jumpable-question/">[ItInt5] 跳马问题加强版</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/08/15/Knight-tour-jumpable-question/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#12">link</a></p>
+
+<blockquote><p>有一个无限大的棋盘，棋盘上有一匹马，马可以从长宽分别为p和q的矩形一个角移动到对角。即假设马当前的位置为(x,y)，那么下一步可以移动到(x+p,y+q)，(x+p,y-q)，(x-p,y+q)，(x-p,y-q)，(x+q,y+p)，(x+q,y-p)，(x-q,y+p)或者(x-q,y-p)这8个位置。</p>
+
+<p>问马是否能从坐标(x,y)按照上述移动规则移动到坐标(x2,y2)。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><a href="http://www.itint5.com/discuss/16/%E8%B7%B3%E9%A9%AC%E9%97%AE%E9%A2%98%E5%8A%A0%E5%BC%BA%E7%89%88">ref</a></p>
+
+<ol>
+<li>计算dx=x-x2,dy=y-y2。</li>
+<li>求出p,q的最大公约数g，如果dx或者dy不能被g整除，那么很显然无解。</li>
+<li>将p,q,dx,dy都除以g，现在p和q互质了。</li>
+<li>注意到马可以跳到点(0,2p)（先(p,q)跳一下，然后(p,-q)跳一下），重复这个过程，马可以跳到任意(0,2kp)的点，由于对称性，也可以跳到任意(2kp,0)的点。
+5.下面这一步很关键，由于p,q互质，那么存在x,y满足px+qy=1（扩展欧几里德定理）。这样，马可以跳到(0,2)和和(2,0)，由于对称性，马可以跳到任意坐标都为偶数点。</li>
+<li>有了上面的结论，其实只用考虑(0,0),(0,1),(1,0),(1,1)这4个点是否可达。(0,0)是可达的，(0,1)和(1,0)由于对称性只用考虑(0,1)。</li>
+<li>对于(1,1)，其实是永远可达的。如果q,p都为奇数，可以先跳到(1+p,1+q)的点（利用5中的结论，可以跳到都是偶数的点），然后(-p,-q)跳到(1,1)。如果p,q一奇一偶，可以先跳到(1+p+q,1+q+p)的点（利用5中的结论），然后(-p,-q),(-q,-p)两步跳到(1,1)。</li>
+<li>对于(0,1)，如果p,q一奇一偶，那么也是永远可达的（同7可证）。如果p,q都是奇数，那么是不可能跳到(0,1)的，因为两个奇数不管怎么加减交替运算都不可能变成一奇一偶。</li>
+</ol>
+
+
+<p>所以最后的结论就是：<strong>第3步之后，如果p,q一奇一偶，那么可达。否则dx,dy同奇或同偶才可达</strong>。</p>
+
+<p>gcd的代码 (concise version):</p>
+
+<pre><code>int gcd(int a, int b) {
+    return b ? gcd(b, a % b) : a;
+}
+</code></pre>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>int gcd(int a, int b){
+    return b? gcd(b, a%b) : a;
+}
+
+bool canJump(int p, int q, int x, int y, int x2, int y2) {
+    if(p==0 &amp;&amp; q==0) return (x==x2)&amp;&amp;(y==y2);
+    int xDist = x2 - x, yDist = y2 - y;
+    int g1 = gcd(p, q);
+    if( xDist % g1 || yDist % g1) 
+        return false;
+    p = p/g1;
+    q = q/g1;
+    xDist = xDist/g1;
+    yDist = yDist/g1;
+    if((p-q)%2 ) 
+        return true;
+    else 
+        return (xDist-yDist)%2 == 0;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -840,60 +933,6 @@ public class CountCompleteBinayTreeNodes {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/10/big-data-top-k-frequency-2/">[Design] Big Data - Top K Frequency 2</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/08/10/big-data-top-k-frequency-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
-
-<blockquote><p>一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>The basic solution for &lsquo;Top K&rsquo; questions</strong> is 【分治+trie树/hash+小顶堆】.</p>
-
-<p>In the previous post <a href="/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>, we used HashMap for calculating query frequency. Now we <strong>use Trie to do it</strong>.</p>
-
-<blockquote><p>这题是考虑时间效率。用trie树统计每个词出现的次数，时间复杂度是O(n x le)（le表示单词的平准长度）。然后是找出出现最频繁的前10个词，可以用堆来实现，前面的题中已经讲到了，时间复杂度是O(n x lg10)。所以总的时间复杂度，是O(n x le)与O(n x lg10)中较大的哪一个。</p></blockquote>
-
-<h4>How to use Trie to calculate word frequency?</h4>
-
-<p>在Trie的node节点中<a href="http://blog.csdn.net/ohmygirl/article/details/7953814">添加count域后</a>，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="29">&larr; Older</a>
@@ -918,7 +957,7 @@ public class CountCompleteBinayTreeNodes {
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (17)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (18)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
@@ -933,11 +972,15 @@ public class CountCompleteBinayTreeNodes {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/08/26/design-class-2/">[NineChap Sys] System Design Class 2 </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/24/three-property-object/">[Java OOP] Three Properties of Class/Object </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/23/SysDesign-class-1/">[NineChap Sys] System Design Class 1 </a>
+        <a href="/blog/2015/08/23/design-class-1/">[NineChap Sys] System Design Class 1 </a>
       </li>
     
       <li class="post">
@@ -946,10 +989,6 @@ public class CountCompleteBinayTreeNodes {
     
       <li class="post">
         <a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/">[Design] Cryptographic standard, AES and RSA </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/08/linux-and-tcp-ports/">[Design] Linux and TCP ports </a>
       </li>
     
   </ul>

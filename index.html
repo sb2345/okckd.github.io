@@ -9,7 +9,9 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Objects Much of the power and flexibility of modern software analysis and design derives from its use of objects. Classes Classes create an abstract &hellip;">
+  <meta name="description" content="Overview This class covers database design: design data with class and inheritance
+design a user system (Netflix 2015)
+design a payment system (Yelp &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +77,339 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/26/design-class-2/">[NineChap Sys] System Design Class 2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/26/design-class-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p>This class covers database design:</p>
+
+<ol>
+<li>design data with class and inheritance</li>
+<li>design a user system (Netflix 2015)</li>
+<li>design a payment system (Yelp, BigCommerce 2015)</li>
+</ol>
+
+
+<h1>Example One</h1>
+
+<p><strong>design account (login/out) system</strong> for our radio.</p>
+
+<h2>Step one, scenario</h2>
+
+<ol>
+<li>register, update, remove account</li>
+<li>login/out</li>
+<li>user balance, VIP services</li>
+</ol>
+
+
+<h2>Step Two, necessary</h2>
+
+<ol>
+<li><p>Ask</p>
+
+<ol>
+<li>total user: 100 million</li>
+<li>daily user: 1 million</li>
+</ol>
+</li>
+<li><p>predict</p>
+
+<ol>
+<li>daily active user in 3 month: 10 million</li>
+<li>register percentage: 1%</li>
+<li>daily new register: 100 thousand</li>
+</ol>
+</li>
+<li><p>more predict</p>
+
+<ol>
+<li>login percentage: 15%</li>
+<li>average login frequency: 1.2 (ppl may input wrong password 20% of time)</li>
+<li>daily login attempts: 10 million * 15% * 1.2 = 1.8 million</li>
+<li>average login frequency: 1.8 million / 24hr = 21 login/sec</li>
+<li>normal login frequency: 21 * 2 = 42 login/sec</li>
+<li>peak login frequency: 42 * 3 = 126 login/sec</li>
+</ol>
+</li>
+</ol>
+
+
+<h2>Step Three, Application</h2>
+
+<p><img class="middle" src="/assets/images/design-class2-app-design.png"></p>
+
+<h2>Step Four, Kilobit</h2>
+
+<p>Data &ndash; User table should contain name and password. What else?</p>
+
+<pre><code>class User {
+    int userId; (primary key)
+    String name;
+    String password;
+}
+</code></pre>
+
+<p>Data &ndash; User Table</p>
+
+<pre><code>class UserTable {
+    list&lt;User&gt; table;
+
+    public insert(){}
+    public delete(User){}
+    public update(User){}
+    public User select(){}
+}
+</code></pre>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a></strong>, (Sometimes called SCRUD with an &ldquo;S&rdquo; for Search) are the four basic functions of persistent storage.</p></blockquote>
+
+<h1>Step Five, Evolve</h1>
+
+<h2>advanced 2: <strong>verification and forbidden accounts</strong></h2>
+
+<p>We have to know the concept of <strong>Account State Lifecycle Graph</strong>:</p>
+
+<p><img class="middle" src="/assets/images/design-class2-account-life-cycle.png"></p>
+
+<ol>
+<li><p>ban: fake user, advertising users&hellip; bannned by the management</p></li>
+<li><p>inactive: user choose to suspend his own account, voluntarily.</p></li>
+<li><p>delete account: normally we won&rsquo;t remove all related data (just make userId as &ldquo;deleted&rdquo;). Otherwise a lot of data can be violated. All your chatting history <strong>actually remains</strong>. 软删除。</p></li>
+</ol>
+
+
+<h3>redesign User Table</h3>
+
+<p>Old User table:</p>
+
+<pre><code>class User {
+    int userId; (primary key)
+    String name;
+    String password;
+}
+</code></pre>
+
+<p>Modified User table:</p>
+
+<pre><code>class User {
+    int userId;
+    char name[10];
+    char hiddenPassword[10];
+    int state;
+}
+</code></pre>
+
+<ol>
+<li><p>We added state, to support Account life cycle.</p></li>
+<li><p>We changed username to fixed size, for better performance on searching and storing. Can prevent certain attacks, too.</p></li>
+<li><p>save encrypted password.</p></li>
+</ol>
+
+
+<h2>advanced 3: login/out process</h2>
+
+<ol>
+<li>User account auto logged out after a certain period of time.</li>
+<li>multiple account logged in at same time.</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class2-session-life-cycle.png"></p>
+
+<h3>Session</h3>
+
+<p><strong>Session is a conversation</strong> between user and server.</p>
+
+<ol>
+<li>User can have >1 session, if he log in from different devices.</li>
+<li>Session must be verified, thus we have to keep <strong>sessionId</strong>.</li>
+</ol>
+
+
+<p>Session status: &ldquo;iPad online&rdquo;, &ldquo;PC online&rdquo;&hellip;</p>
+
+<p>Modify User table:</p>
+
+<pre><code>class User {
+    int userId;
+    char name[10];
+    char hiddenPassword[10];
+    int state;
+    List&lt;session&gt; sessionList;
+}
+</code></pre>
+
+<p>Important in Session table:</p>
+
+<ol>
+<li>device ID</li>
+<li><p>time-out period</p>
+
+<p> class Session {
+     private sessionId;
+     int userId;</p>
+
+<pre><code> int deviceCode;
+ long timeOut;
+</code></pre>
+
+<p> }</p></li>
+</ol>
+
+
+<p>User table would include a <strong>session list</strong>.</p>
+
+<h3>further improvement: session</h3>
+
+<ol>
+<li>we update sessionList very frequently.</li>
+<li>size of sessionList is dynamic.</li>
+</ol>
+
+
+<p>Solution: seperate the table.</p>
+
+<p><img class="middle" src="/assets/images/design-class2-user-session-table.png"></p>
+
+<p>Question: When to clean up the session data (considering huge amount of data and frequent calculation)?</p>
+
+<blockquote><p>Answer: every end of day. Or store sessions in-memory, so it lose all the data when machine restarts (it is used in Gaming platforms). Or we can clean up one user&rsquo;s session list whenever the user did a new log-in.</p>
+
+<p>We do not remove session whenever it expires. It&rsquo;s too much calculation.</p></blockquote>
+
+<h3>further improvement: inheritance</h3>
+
+<p>Apply inheritance to UserTable and SessionTable:</p>
+
+<pre><code>class Table {
+    list&lt;Row*&gt; table;
+
+    public insert(){}
+    public delete(){}
+    public update(){}
+    public User select(){}
+}
+
+class UserTable extends Table {
+}
+
+class SessionTable extends Table {
+}
+</code></pre>
+
+<p>As for the Row class:</p>
+
+<pre><code>class Row {
+    List&lt;Attributes&gt; row;
+}
+
+class User extends Row {
+}
+
+class Session extends Row {
+}
+</code></pre>
+
+<h2>advanced 4: search in table</h2>
+
+<ol>
+<li>find my userId</li>
+<li>find my userId range</li>
+</ol>
+
+
+<p>Solution 1: add <strong>HashMap</strong> in the table. Can do search in O(1), but can&rsquo;t find range.</p>
+
+<p>Solution 2: <strong>BST data structure</strong>. Can do search range and search in O(log2 n) time.</p>
+
+<h3>Best solution: B+ tree</h3>
+
+<p><strong><a href="https://en.wikipedia.org/wiki/B%2B_tree">B+ tree</a></strong> &ndash; everything in O(logb n) which is <strong>close to constant time</strong>.</p>
+
+<p>Plus, B+ tree is hard disk friendly. Read more on a future post.</p>
+
+<h2>advanced 5: VIP services</h2>
+
+<p>User could buy VIP services using his acccount balance.</p>
+
+<pre><code>class ProService {
+    int userId;
+    double money;
+    long endTime;
+
+    public addMoney(){}
+    public buyPro(){}
+}
+</code></pre>
+
+<h3>Problem 1: System crashes before adding time</h3>
+
+<p>Solution: <strong>transaction with log</strong></p>
+
+<pre><code>WriteLOG
+Transaction_1123: BEGIN
+money=20; endTime=16_07_2016
+</code></pre>
+
+<p>If system crash happens here, system will read the log, recover and roll back all original data. Try not to complete the transaction &ndash; just fail it.</p>
+
+<pre><code>WriteLOG
+Transaction_1123: BEGIN
+money=20; endTime=16_07_2016
+WriteLOG
+Transaction_1123: END
+money=10; endTime=16_08_2016
+</code></pre>
+
+<blockquote><p>What happens if system crash during writing the log? or during the rollback?</p></blockquote>
+
+<h3>Problem 2: check list</h3>
+
+<ol>
+<li>one user id have 2 corresponding pro-services information.</li>
+<li>Shallow user: a pro-services info does not have corresponding user.</li>
+</ol>
+
+
+<p>Solution: have a checker class.</p>
+
+<h3>Problem 3:</h3>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -147,7 +482,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/08/23/SysDesign-class-1/">[NineChap Sys] System Design Class 1</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/08/23/design-class-1/">[NineChap Sys] System Design Class 1</a></h1>
     
     
       <p class="meta">
@@ -165,7 +500,7 @@
 
 <time datetime="2015-08-23T00:00:00+08:00" pubdate data-updated="true"></time>
         
-         | <a href="/blog/2015/08/23/SysDesign-class-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2015/08/23/design-class-1/#disqus_thread">Comments</a>
         
       </p>
     
@@ -1388,139 +1723,6 @@ uint32_t reverseBits(uint32_t n) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/10/Number-of-Islands/">[LeetCode 200] Number of Islands</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-10T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/10/Number-of-Islands/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/number-of-islands/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given a 2d grid map of <code>'1'</code>s (land) and <code>'0'</code>s (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.</p>
-
-<p><i><b>Example 1:</b></i></p>
-<pre>11110<br>11010<br>11000<br>00000</pre>
-<p>Answer: 1</p>
-<p><i><b>Example 2:</b></i></p>
-<pre>11000<br>11000<br>00100<br>00011</pre>
-<p>Answer: 3</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://leetcode.com/discuss/user/mithmatt">@mithmatt</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/depth-first-search/">Depth-first Search</a>
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/breadth-first-search/">Breadth-first Search</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>At every &lsquo;1&rsquo; position, do DFS.</p>
-
-<h3>Solution</h3>
-
-<p>I post my code below. Note that we do not actually have to have the method &ldquo;findLand&rdquo; &ndash;  we can simply read through the grid and mark all &lsquo;1&rsquo;s in one run.</p>
-
-<p>You might want to come up with your own code. Mine is just for reference. This is not an very interesting question, I assume.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public int numIslands(char[][] grid) {
-        if (grid == null || grid.length == 0 || grid[0].length == 0) {
-            return 0;
-        }
-        int m = grid.length;
-        int n = grid[0].length;
-        int count = 0;
-
-        Pair firstPiece = findLand(grid, m, n);
-        while (firstPiece != null) {
-            // mark all neighbors, and count increment
-            mark(grid, m, n, firstPiece);
-            firstPiece = findLand(grid, m, n);
-            count++;
-        }
-
-        return count;
-    }
-
-    void mark(char[][] grid, int m, int n, Pair p) {
-        if (p.x &lt; 0 || p.x == m || p.y &lt; 0 || p.y == n) {
-            return;
-        } else if (grid[p.x][p.y] != '1') {
-            return;
-        }
-        // mark current and then dfs
-        grid[p.x][p.y] = '2';
-        mark(grid, m, n, new Pair(p.x - 1, p.y));
-        mark(grid, m, n, new Pair(p.x + 1, p.y));
-        mark(grid, m, n, new Pair(p.x, p.y - 1));
-        mark(grid, m, n, new Pair(p.x, p.y + 1));
-    }
-
-    Pair findLand(char[][] grid, int m, int n) {
-        for (int i = 0; i &lt; m; i++) {
-            for (int j = 0; j &lt; n; j++) {
-                if (grid[i][j] == '1') {
-                    return new Pair(i, j);
-                }
-            }
-        }
-        return null;
-    }
-
-    class Pair {
-        int x;
-        int y;
-
-        public Pair(int a, int b) {
-            x = a;
-            y = b;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -1543,7 +1745,7 @@ uint32_t reverseBits(uint32_t n) {
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (17)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (18)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
@@ -1558,11 +1760,15 @@ uint32_t reverseBits(uint32_t n) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/08/26/design-class-2/">[NineChap Sys] System Design Class 2 </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/24/three-property-object/">[Java OOP] Three Properties of Class/Object </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/23/SysDesign-class-1/">[NineChap Sys] System Design Class 1 </a>
+        <a href="/blog/2015/08/23/design-class-1/">[NineChap Sys] System Design Class 1 </a>
       </li>
     
       <li class="post">
@@ -1571,10 +1777,6 @@ uint32_t reverseBits(uint32_t n) {
     
       <li class="post">
         <a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/">[Design] Cryptographic standard, AES and RSA </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/08/linux-and-tcp-ports/">[Design] Linux and TCP ports </a>
       </li>
     
   </ul>
