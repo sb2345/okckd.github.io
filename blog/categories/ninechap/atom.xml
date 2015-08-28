@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ninechap | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/ninechap/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-08-28T01:13:27+08:00</updated>
+  <updated>2015-08-28T12:36:41+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -19,6 +19,7 @@
     <updated>2015-08-28T00:00:00+08:00</updated>
     <id>http://www.shuatiblog.com/blog/2015/08/28/design-class-3</id>
     <content type="html"><![CDATA[# Overview
+
 ]]></content>
   </entry>
   
@@ -35,7 +36,7 @@ This class covers database design:
 1. design a user system (Netflix 2015)
 1. design a payment system (Yelp, BigCommerce 2015)
 
-# Example One
+# Question One
 
 __design account (login/out) system__ for our radio. 
 
@@ -94,9 +95,7 @@ Data - User Table
 
 > __[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)__, (Sometimes called SCRUD with an "S" for Search) are the four basic functions of persistent storage.
 
-# Step Five, Evolve
-
-## advanced 2: __verification and forbidden accounts__
+# Question 2: __verification and forbidden accounts__
 
 We have to know the concept of __Account State Lifecycle Graph__:
 
@@ -108,7 +107,7 @@ We have to know the concept of __Account State Lifecycle Graph__:
 
 1. delete account: normally we won't remove all related data (just make userId as "deleted"). Otherwise a lot of data can be violated. All your chatting history __actually remains__. 
 
-### redesign User Table
+## redesign User Table
 
 Old User table:
 
@@ -133,14 +132,14 @@ Modified User table:
 
 1. save encrypted password. 
 
-## advanced 3: login/out process
+# Question 3: login/out process
 
 1. User account auto logged out after a certain period of time.
 1. multiple account logged in at same time.
 
 <img class="middle" src="/assets/images/design-class2-session-life-cycle.png">
 
-### Session
+## Session
 
 __Session is a conversation__ between user and server. 
 
@@ -174,7 +173,7 @@ Important in Session table:
 
 User table would include a __session list__. 
 
-### further improvement: session
+## further improvement: session
 
 1. we update sessionList very frequently.
 1. size of sessionList is dynamic.
@@ -189,7 +188,7 @@ Question: When to clean up the session data (considering huge amount of data and
 >
 > We do not remove session whenever it expires. It's too much calculation. 
 
-### further improvement: inheritance
+## further improvement: inheritance
 
 Apply inheritance to UserTable and SessionTable: 
 
@@ -220,7 +219,7 @@ As for the Row class:
     class Session extends Row {
     }
 
-## advanced 4: search in table
+# Question 4: search in table
 
 1. find my userId
 1. find my userId range
@@ -229,13 +228,13 @@ Solution 1: add __HashMap__ in the table. Can do search in O(1), but can't find 
 
 Solution 2: __BST data structure__. Can do search range and search in O(log2 n) time. 
 
-### Best solution: B+ tree
+## Best solution: B+ tree
 
 __[B+ tree](https://en.wikipedia.org/wiki/B%2B_tree)__ - everything in O(logb n) which is __close to constant time__. 
 
 Plus, B+ tree is hard disk friendly. Read more on a future post. 
 
-## advanced 5: VIP services
+# Question 5: VIP services
 
 User could buy VIP services using his acccount balance. 
 
@@ -248,7 +247,7 @@ User could buy VIP services using his acccount balance.
         public buyPro(){}
     }
 
-### Q5.1: System crashes before adding time
+## Q5.1: System crash when purchasing VIP
 
 Solution: __transaction with log__
 
@@ -267,14 +266,14 @@ If system crash happens here, system will read the log, recover and roll back al
 
 > What happens if system crash during writing the log? or during the rollback?
 
-### Q5.2: check list
+## Q5.2: dataset contains bad data
 
 1. one user id have 2 corresponding pro-services information.
 1. Shallow user: a pro-services info does not have corresponding user. 
 
 Solution: have a checker class.
 
-### Q5.3: 2 simutaneous purchase. 
+## Q5.3: simutaneous purchase by 2 users
 
 Solution: lock. 
 
@@ -296,7 +295,7 @@ Question: does lock make your execution slow?
 
 1. Java [CAS](https://en.wikipedia.org/wiki/Compare-and-swap) (Compare and swap ) 
 
-### Q5.4: machine crash
+## Q5.4: Server crash
 
 Solution: duplication. 
 
@@ -326,11 +325,11 @@ Solution: duplication.
 
     It is actually 'checkpoint' + log. It allows you to rollback.
 
-Summary:
+Data redundancy - Summary:
 
 <img class="middle" src="/assets/images/design-class2-data-redundancy-1.png">
 
-### Final note: Data consistency
+## Final note: Data inconsistency
 
 Main sources of inconsistency comes from:
 
@@ -341,27 +340,27 @@ The disk eror is solved by __checksum__ (compare during disk writing).
 
 # Summary
 
-__[ACID](https://en.wikipedia.org/wiki/ACID)__ is a set of properties that guarantee that database transactions are processed reliably. 
+__[ACID](https://en.wikipedia.org/wiki/ACID) (Atomicity, Consistency, Isolation, Durability)__  is a set of properties that guarantee that database transactions are processed reliably. 
 
-1. Atomicity: __all or nothing__
+1. __Atomicity: all or nothing__
 
-    Q5.1: System crashes before adding time
+    Q5.1: System crash when purchasing VIP
     
-1. Consistency: validate according to defined rules
+1. __Consistency__: validate according to defined rules
 
-    Q5.2: check list
+    Q5.2: dataset contains bad data
     
-1. Isolation: independency between transactions __(lock)__
+1. __Isolation__: independency between transactions __(lock)__
 
-    Q5.3: 2 simutaneous purchase. 
+    Q5.3: simutaneous purchase by 2 users
     
-1. Durability: stored permanently
+1. __Durability__: stored permanently
 
-    Q5.4: machine crash
+    Q5.4: Server crash
 
 <img class="middle" src="/assets/images/design-class2-summary.png">
 
-Question:
+Additional Questions:
 
 1. design a user system (Netflix 2015)
 
