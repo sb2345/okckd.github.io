@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ninechap | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/ninechap/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-08-29T22:56:56+08:00</updated>
+  <updated>2015-08-30T00:20:31+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -186,6 +186,96 @@ AT Number 4, we can add __more servers__. Number 3, __reverse proxy__. Number 2 
 After this step, Web failure rate fall from 7% to 4%. Why still 4%? Well, these failure is mainly from the junk users created by marketing.
 
 # Question 4, fix MP3 problem
+
+The process of fetching a MP3 (from CDN):
+
+<img class="middle" src="/assets/images/design-class3-client-request-mp3.png">
+
+1. aquire MP3 link, and send request
+1. send request to CDN
+1. CDN receive request, find MP3
+1. response to client
+1. play the music
+
+<img class="middle" src="/assets/images/design-class3-client-request-mp3-errors.png">
+
+Question: in step 2, there's more Network error, but in step 4, there's no Network error, but Timeout. Why?
+
+## Fix step 2, Network error
+
+Problem is: MP3 url invalid. It actually comes from a failed CDN sever. 
+
+Solution: fix the server.
+
+## Fix step 3, CDN can't find MP3 
+
+Problem associated with __Anti-Leech__. 
+
+> __[a leech](https://en.wikipedia.org/wiki/Leech_(computing))__ is one who benefits, usually deliberately, from others' information or effort but does not offer anything in return. 
+>
+> Example: Wi-Fi leeches, Direct linking (or hot-linking) and In most P2P-networks, leeching is whose who download too much.
+
+> __[Anti-Leech](https://answers.yahoo.com/question/index?qid=1006042926419)__ specializes in protecting file downloads and stopping bandwidth leeching. 
+
+See that some P2P and leeching software will steal your url links, so the MP3 url expiration time is 5 minutes. 
+
+So when CDN server's clock and web server's clock are not synchronized well, MP3 url can expire. 
+
+Solution: every 10 minutes sync CDN clock with web server clock. 
+
+## Fix step 4, Timeout error
+
+Some MP3 are relatively large. Thus timeout. 
+
+> MP3 performs better at higher bps, and aac(Advanced Audio Coding) works better at lower bps. 
+
+Solution: 
+
+1. compress MP3 to 48bps, or use aac format. So, play lower-rate music first, then switch automatically.
+
+1. pre-load a music while previous is playing. 
+
+1. optimize CDN
+
+> __[CDN](https://en.wikipedia.org/wiki/Content_delivery_network)__ content delivery network is a large __distributed system of servers__ deployed in __multiple data centers__ across the Internet. 
+
+> The goal of a CDN is to serve content to end-users with high availability and high performance.  
+
+<img class="middle" src="/assets/images/design-class3-CDN.png">
+
+Which CDN should client choose?
+
+> Not DNS, but web server calculates which to choose. It can be calculated using IP distance, or ISP provider, but not accurate. 
+
+> We can also use local desktop apps (in different locations) to ping CDN servers. This may violate user privacy, though. 
+
+## Fix step 5, Fail to play
+
+Problem: some files got wrong decoding. 
+
+## Fix step 6, unkown error
+
+Problem: some users close the page while MP3 loading. 
+
+# Question 5, fix player problem
+
+Problem: iOS device can never play Flash. 
+
+Solution: develop HTML5 player. 
+
+## 5.2 how to evaluate that you solved the problem
+
+1. user complains
+
+1. __important__: daily retention rate! 
+
+We can't use daily active user, cuz it depends on marketing, competitors, and infrastructure changes. 
+
+__One day retention rate__:
+
+<img class="middle" src="/assets/images/design-class3-user-retention.png">
+
+
 
 ]]></content>
   </entry>
