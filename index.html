@@ -9,9 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Lecture overview KISS &ndash; Keep It Simple, Sweetie. In Today&rsquo;s lecture: write a crawler
-thread-saft consumer &amp; producer
-GFS, BigTable &hellip;">
+  <meta name="description" content="Overview Launched on Sep 15th, 1997 60 trillion individual pages. 100 million GB data. 40,000 search per second, or 3 billion search per day. As of &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,6 +81,74 @@ GFS, BigTable &hellip;">
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/08/30/how-google-search-works/">[Design] How Google Search Works</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/30/how-google-search-works/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p>Launched on Sep 15th, 1997</p>
+
+<p><strong>60 trillion individual pages. 100 million GB data</strong>.</p>
+
+<p><strong>40,000 search per second</strong>, or 3 billion search per day.</p>
+
+<p>As of Feb 2015, 65% market share in US.</p>
+
+<h1>1. Crawl</h1>
+
+<p>Google crawl from 1 page to another using <strong><a href="https://support.google.com/webmasters/answer/182072?vid=1-635765406868848825-432642872">Googlebot</a></strong>. It starts from previous urls crawled, or augmented with <strong><a href="https://en.wikipedia.org/wiki/Site_map">Sitemap data</a></strong></p>
+
+<blockquote><p><strong>A sitemap</strong> is a list of pages of a web site accessible to crawlers or users. It can be either a document in any form used as a planning tool for Web design, or a Web page that lists the pages on a Web site, typically organized in hierarchical fashion.</p></blockquote>
+
+<h1>2. Indexing</h1>
+
+<p>Compile the data (key content tags, atrributes, like title tags, ALT attributes). Google don&rsquo;t process rich media or dynamic files.</p>
+
+<h1>3. Algorithm</h1>
+
+<p>When search, pull all relevant results from the Index.</p>
+
+<p>Rank the result based on 200+ factors, one of which is the <strong><a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a></strong> for a given page.</p>
+
+<blockquote><p><strong>PageRank</strong> is the measure of the importance of a page based on the incoming links from other pages. In simple terms, each link to a page on your site from another site adds to your site&rsquo;s PageRank.</p>
+
+<p>Not all links are equal: Google works hard to identify spam links. The best types of links are those that are given based on the quality of your content.</p></blockquote>
+
+<p>To rank higher, follow <a href="https://support.google.com/webmasters/answer/35769?vid=1-635765406868848825-432642872">Webmaster Guidelines</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/08/30/design-class-4/">[NineChap Sys] System Design Class 4: Crawler & Search Engine</a></h1>
     
     
@@ -137,7 +203,7 @@ GFS, BigTable &hellip;">
 
 <p><img class="middle" src="/assets/images/design-class4-News-Aggregator.png"></p>
 
-<h2>Info collection with crawler</h2>
+<h2>Step 1, Info collection with crawler</h2>
 
 <h3>crawler code</h3>
 
@@ -198,6 +264,85 @@ webFile.close()
 
 
 <h2>Crawl more websites</h2>
+
+<h3>Simple design</h3>
+
+<ol>
+<li>use crawlers to find out all list pages</li>
+<li>send the new lists to a Scheduler</li>
+<li>Scheduler will use crawlers again, to crawl pages.</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-1.gif"></p>
+
+<p>This design is bad, cuz there is crawler waste. How can we <strong>reuse</strong> these crawlers???</p>
+
+<h3>Adv design</h3>
+
+<p>Design crawler that can crawl <strong>both list and pages</strong> information.</p>
+
+<blockquote><p>Look at our crawler: the text extraction logic and Regex for <em>abc.com</em> and <em>bfe.com</em> are totally different. However, they both share the same crawling techniques.</p></blockquote>
+
+<p>So we pass in all info a crawler task needs. Like:</p>
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-2.gif"></p>
+
+<ol>
+<li><p>we gave <strong>more priority to list pages than content pages</strong>. Otherwise, your content get out of date soon.</p></li>
+<li><p>Type include both list/content and source info.</p></li>
+<li><p>status can be done, working, or new.</p></li>
+<li><p>timestamps helps us make sure each crawler runs every hour (let&rsquo;s say)</p></li>
+</ol>
+
+
+<p>So when schedule <strong>pick the next crawler task</strong> to run, it will choose <strong>based on Priority</strong>. However if the <strong>timestamp (availableTime) is not yet reached</strong>, the job won&rsquo;t be executed.</p>
+
+<p>If you crawler <strong>runs until endTime</strong> and haven&rsquo;t finish, force finish it. We should also add <strong>task created time</strong> to the info.</p>
+
+<h3>How to identify similar news?</h3>
+
+<p>Calculate the similarity between pages. More on this subject later.</p>
+
+<h2>How to design Scheduler?</h2>
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-3.gif"></p>
+
+<h2>Solution with Sleep</h2>
+
+<p>Define variables:</p>
+
+<pre><code>taskTable&lt;table&gt; - store task lists
+pageTable&lt;page&gt; - store page contents
+
+task.url
+task.state = new/working/done
+task.type = list/page
+</code></pre>
+
+<p>code:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    nextTask = taskTable.findOne(state == 'new')
+    if (!newTask) {
+        sleep(1000);
+        continue;
+    }
+    taskTable.lock();
+    newTask.state = working;
+    taskTable.unlock();
+
+    newPage = Crawl(newTask.url);
+
+}
+</code></pre>
+
+<h2>Solution with Conditional Variable</h2>
+
+<p>Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better.</p>
+
+<h2>Solution with Semaphore</h2>
 </div>
   
   
@@ -588,7 +733,7 @@ webFile.close()
 </ol>
 
 
-<h3>How to defent hackers</h3>
+<h3>How to defend hackers</h3>
 
 <ol>
 <li>IP address (to defent auto softwares), but it&rsquo;s easy for hackers to fake IP address</li>
@@ -2051,80 +2196,6 @@ public class SOAPMessage : IMessage
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/21/sort-letters-given-lexicographic-order/">[Palantir] Sort Letters Given Lexicographic Order</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-21T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/21/sort-letters-given-lexicographic-order/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://quant365.com/viewtopic.php?t=11">link</a></p>
-
-<blockquote><p>Sort the letters in one word by the order they occur in another in linear time.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This</p>
-
-<p>text</p>
-
-<p>is</p>
-
-<p>used</p>
-
-<p>to</p>
-
-<p>stop</p>
-
-<p>you</p>
-
-<p>from</p>
-
-<p>looking</p>
-
-<p>at</p>
-
-<p>the</p>
-
-<p>answer</p>
-
-<p>immediately,</p>
-
-<p>which is, to use counting sort</p>
-
-<h3>Code</h3>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -2140,7 +2211,7 @@ public class SOAPMessage : IMessage
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (75)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
@@ -2162,6 +2233,10 @@ public class SOAPMessage : IMessage
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/08/30/how-google-search-works/">[Design] How Google search works </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/30/design-class-4/">[NineChap Sys] System Design Class 4: Crawler & Search Engine </a>
       </li>
     
@@ -2175,10 +2250,6 @@ public class SOAPMessage : IMessage
     
       <li class="post">
         <a href="/blog/2015/08/24/three-property-object/">[Java OOP] Three Properties of Class/Object </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/23/design-class-1/">[NineChap Sys] System Design Class 1: Overview </a>
       </li>
     
   </ul>

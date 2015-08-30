@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ninechap | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/ninechap/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-08-30T04:29:50+08:00</updated>
+  <updated>2015-08-30T22:42:15+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -42,7 +42,7 @@ In Today's lecture:
 
 <img class="middle" src="/assets/images/design-class4-News-Aggregator.png">
 
-## Info collection with crawler
+## Step 1, Info collection with crawler
 
 ### crawler code
 
@@ -99,6 +99,97 @@ Remembering that socket is like a cellphone. It is an __abstraction layer__, tha
 1. identify all the links (regex)
 
 ## Crawl more websites
+
+### Simple design
+
+1. use crawlers to find out all list pages
+1. send the new lists to a Scheduler
+1. Scheduler will use crawlers again, to crawl pages. 
+
+<img class="middle" src="/assets/images/design-class4-cralwer-arch-1.gif">
+
+This design is bad, cuz there is crawler waste. How can we __reuse__ these crawlers???
+
+### Adv design
+
+Design crawler that can crawl __both list and pages__ information. 
+
+> Look at our crawler: the text extraction logic and Regex for _abc.com_ and _bfe.com_ are totally different. However, they both share the same crawling techniques. 
+
+So we pass in all info a crawler task needs. Like: 
+
+<img class="middle" src="/assets/images/design-class4-cralwer-arch-2.gif">
+
+1. we gave __more priority to list pages than content pages__. Otherwise, your content get out of date soon. 
+
+1. Type include both list/content and source info. 
+
+1. status can be done, working, or new. 
+
+1. timestamps helps us make sure each crawler runs every hour (let's say)
+
+So when schedule __pick the next crawler task__ to run, it will choose __based on Priority__. However if the __timestamp (availableTime) is not yet reached__, the job won't be executed. 
+
+If you crawler __runs until endTime__ and haven't finish, force finish it. We should also add __task created time__ to the info. 
+
+### How to identify similar news?
+
+Calculate the similarity between pages. More on this subject later. 
+
+## How to design Scheduler?
+
+<img class="middle" src="/assets/images/design-class4-cralwer-arch-3.gif">
+
+## Solution with Sleep
+
+Define variables:
+
+    taskTable<table> - store task lists
+    pageTable<page> - store page contents
+    
+    task.url
+    task.state = new/working/done
+    task.type = list/page
+
+code:
+
+    while (true) {
+        // get 1 task. If can't get, wait
+        nextTask = taskTable.findOne(state == 'new')
+        if (!newTask) {
+            sleep(1000);
+            continue;
+        }
+        taskTable.lock();
+        newTask.state = working;
+        taskTable.unlock();
+        
+        newPage = Crawl(newTask.url);
+        
+    }
+
+## Solution with Conditional Variable
+
+Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better. 
+
+## Solution with Semaphore
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ]]></content>
   </entry>
@@ -423,7 +514,7 @@ Also, can use front-end javascript to prevent clicking. There are method to bypa
 1. use new server to do __Miao Sha__, in case of crash
 1. asyc prcessing everything! Don't let other people wait, in case of crash. 
 
-### How to defent hackers
+### How to defend hackers
 
 1. IP address (to defent auto softwares), but it's easy for hackers to fake IP address
 1. CAPTCHA 

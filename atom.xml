@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-08-30T04:29:50+08:00</updated>
+  <updated>2015-08-30T22:42:15+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,45 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] How Google search works ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/30/how-google-search-works/"/>
+    <updated>2015-08-30T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/30/how-google-search-works</id>
+    <content type="html"><![CDATA[<h1>Overview</h1>
+
+<p>Launched on Sep 15th, 1997</p>
+
+<p><strong>60 trillion individual pages. 100 million GB data</strong>.</p>
+
+<p><strong>40,000 search per second</strong>, or 3 billion search per day.</p>
+
+<p>As of Feb 2015, 65% market share in US.</p>
+
+<h1>1. Crawl</h1>
+
+<p>Google crawl from 1 page to another using <strong><a href="https://support.google.com/webmasters/answer/182072?vid=1-635765406868848825-432642872">Googlebot</a></strong>. It starts from previous urls crawled, or augmented with <strong><a href="https://en.wikipedia.org/wiki/Site_map">Sitemap data</a></strong></p>
+
+<blockquote><p><strong>A sitemap</strong> is a list of pages of a web site accessible to crawlers or users. It can be either a document in any form used as a planning tool for Web design, or a Web page that lists the pages on a Web site, typically organized in hierarchical fashion.</p></blockquote>
+
+<h1>2. Indexing</h1>
+
+<p>Compile the data (key content tags, atrributes, like title tags, ALT attributes). Google don&rsquo;t process rich media or dynamic files.</p>
+
+<h1>3. Algorithm</h1>
+
+<p>When search, pull all relevant results from the Index.</p>
+
+<p>Rank the result based on 200+ factors, one of which is the <strong><a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a></strong> for a given page.</p>
+
+<blockquote><p><strong>PageRank</strong> is the measure of the importance of a page based on the incoming links from other pages. In simple terms, each link to a page on your site from another site adds to your site&rsquo;s PageRank.</p>
+
+<p>Not all links are equal: Google works hard to identify spam links. The best types of links are those that are given based on the quality of your content.</p></blockquote>
+
+<p>To rank higher, follow <a href="https://support.google.com/webmasters/answer/35769?vid=1-635765406868848825-432642872">Webmaster Guidelines</a>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[NineChap Sys] System Design Class 4: Crawler & Search Engine ]]></title>
@@ -47,7 +86,7 @@
 
 <p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class4-News-Aggregator.png"></p>
 
-<h2>Info collection with crawler</h2>
+<h2>Step 1, Info collection with crawler</h2>
 
 <h3>crawler code</h3>
 
@@ -108,6 +147,85 @@ webFile.close()
 
 
 <h2>Crawl more websites</h2>
+
+<h3>Simple design</h3>
+
+<ol>
+<li>use crawlers to find out all list pages</li>
+<li>send the new lists to a Scheduler</li>
+<li>Scheduler will use crawlers again, to crawl pages.</li>
+</ol>
+
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class4-cralwer-arch-1.gif"></p>
+
+<p>This design is bad, cuz there is crawler waste. How can we <strong>reuse</strong> these crawlers???</p>
+
+<h3>Adv design</h3>
+
+<p>Design crawler that can crawl <strong>both list and pages</strong> information.</p>
+
+<blockquote><p>Look at our crawler: the text extraction logic and Regex for <em>abc.com</em> and <em>bfe.com</em> are totally different. However, they both share the same crawling techniques.</p></blockquote>
+
+<p>So we pass in all info a crawler task needs. Like:</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class4-cralwer-arch-2.gif"></p>
+
+<ol>
+<li><p>we gave <strong>more priority to list pages than content pages</strong>. Otherwise, your content get out of date soon.</p></li>
+<li><p>Type include both list/content and source info.</p></li>
+<li><p>status can be done, working, or new.</p></li>
+<li><p>timestamps helps us make sure each crawler runs every hour (let&rsquo;s say)</p></li>
+</ol>
+
+
+<p>So when schedule <strong>pick the next crawler task</strong> to run, it will choose <strong>based on Priority</strong>. However if the <strong>timestamp (availableTime) is not yet reached</strong>, the job won&rsquo;t be executed.</p>
+
+<p>If you crawler <strong>runs until endTime</strong> and haven&rsquo;t finish, force finish it. We should also add <strong>task created time</strong> to the info.</p>
+
+<h3>How to identify similar news?</h3>
+
+<p>Calculate the similarity between pages. More on this subject later.</p>
+
+<h2>How to design Scheduler?</h2>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class4-cralwer-arch-3.gif"></p>
+
+<h2>Solution with Sleep</h2>
+
+<p>Define variables:</p>
+
+<pre><code>taskTable&lt;table&gt; - store task lists
+pageTable&lt;page&gt; - store page contents
+
+task.url
+task.state = new/working/done
+task.type = list/page
+</code></pre>
+
+<p>code:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    nextTask = taskTable.findOne(state == 'new')
+    if (!newTask) {
+        sleep(1000);
+        continue;
+    }
+    taskTable.lock();
+    newTask.state = working;
+    taskTable.unlock();
+
+    newPage = Crawl(newTask.url);
+
+}
+</code></pre>
+
+<h2>Solution with Conditional Variable</h2>
+
+<p>Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better.</p>
+
+<h2>Solution with Semaphore</h2>
 ]]></content>
   </entry>
   
@@ -469,7 +587,7 @@ webFile.close()
 </ol>
 
 
-<h3>How to defent hackers</h3>
+<h3>How to defend hackers</h3>
 
 <ol>
 <li>IP address (to defent auto softwares), but it&rsquo;s easy for hackers to fake IP address</li>
@@ -2519,121 +2637,6 @@ Ref: <a href="http://www.cnblogs.com/hzhesi/p/4285793.html">BUPT-哲人善思</a
             String second = b + a;
             return second.compareTo(first);
         }
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LeetCode 174] Dungeon Game ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/04/15/Dungeon-Game/"/>
-    <updated>2015-04-15T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/04/15/Dungeon-Game</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/dungeon-game/">link</a></p>
-
-<div class="question-content">
-              <p><style>
-table.dungeon, .dungeon th, .dungeon td {
-  border:3px solid black;
-}
-
- .dungeon th, .dungeon td {
-    text-align: center;
-    height: 70px;
-    width: 70px;
-}
-</style>
-
-</p><p>The demons had captured the princess (<b>P</b>) and imprisoned her in the bottom-right corner of a dungeon. The dungeon consists of M x N rooms laid out in a 2D grid. Our valiant knight (<b>K</b>) was initially positioned in the top-left room and must fight his way through the dungeon to rescue the princess. </p>
-<p>The knight has an initial health point represented by a positive integer. If at any point his health point drops to 0 or below, he dies immediately. </p>
-<p>Some of the rooms are guarded by demons, so the knight loses health (<i>negative</i> integers) upon entering these rooms;
-other rooms are either empty (<i>0&#8217;s</i>) or contain magic orbs that increase the knight&#8217;s health (<i>positive</i> integers).</p>
-<p>In order to reach the princess as quickly as possible, the knight decides to move only rightward or downward in each step. </p>
-
-<br>
-<p><b>Write a function to determine the knight&#8217;s minimum initial health so that he is able to rescue the princess.</b></p>
-<p>For example, given the dungeon below, the initial health of the knight must be at least <b>7</b> if he follows the optimal path <code>RIGHT-&gt; RIGHT -&gt; DOWN -&gt; DOWN</code>.</p>
-
-<table class="dungeon">
-<tbody><tr>
-<td>-2 (K)</td>
-<td>-3</td>
-<td>3</td>
-</tr>
-<tr>
-<td>-5</td>
-<td>-10</td>
-<td>1</td>
-</tr>
-<tr>
-<td>10</td>
-<td>30</td>
-<td>-5 (P)</td>
-</tr>
-</tbody></table>
-<!---2K   -3  3
--5   -10   1
-10 30   5P-->
-
-<br>
-<p><b>Notes:</b>
-</p><ul>
-<li>The knight&#8217;s health has no upper bound.</li>
-<li>Any room can contain threats or power-ups, even the first room the knight enters and the bottom-right room where the princess is imprisoned.  </li>
-</ul>
-<p></p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/stellari">@stellari</a> for adding this problem and creating all test cases.</p><p></p>
-
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/dynamic-programming/">Dynamic Programming</a>
-
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/binary-search/">Binary Search</a>
-
-                </span>
-
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>The key of solving this problem is to <strong>do DP from bottom right to top left</strong>.</p>
-
-<h3>Solution</h3>
-
-<p>dp[i][j] means the minimum initial value of each position. As suggested by<a href="http://www.cnblogs.com/grandyang/p/4233035.html"></a>, the DP equation is:</p>
-
-<blockquote><p>dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) &ndash; dungeon[i][j]).</p></blockquote>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public int calculateMinimumHP(int[][] dungeon) {
-        if (dungeon == null) return 1;
-        int m = dungeon.length;
-        int n = dungeon[0].length;
-
-        int[][] dp = new int[m][n];
-        for (int i = m - 1; i &gt;= 0; i--) {
-            for (int j = n - 1; j &gt;= 0; j--) {
-                if (i == m - 1 &amp;&amp; j == n - 1) {
-                    dp[i][j] = Math.max(1, 1 - dungeon[i][j]);
-                } else if (i == m - 1) {
-                    dp[i][j] = Math.max(1, dp[i][j + 1] - dungeon[i][j]);
-                } else if (j == n - 1) {
-                    dp[i][j] = Math.max(1, dp[i + 1][j] - dungeon[i][j]);
-                } else {
-                    dp[i][j] = Math.max(1,
-                        Math.min(dp[i + 1][j], dp[i][j + 1]) - dungeon[i][j]);
-                }
-            }
-        }
-        return dp[0][0];
     }
 }
 </code></pre>
