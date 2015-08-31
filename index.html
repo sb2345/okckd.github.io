@@ -324,25 +324,180 @@ task.type = list/page
 
 <pre><code>while (true) {
     // get 1 task. If can't get, wait
-    nextTask = taskTable.findOne(state == 'new')
+    taskTable.lock();               // IMPORTANT
+    newTask = taskTable.findOne(state == 'new')
+
     if (!newTask) {
-        sleep(1000);
+        taskTable.unlock();         // IMPORTANT
+        sleep(1000);                // IMPORTANT
         continue;
     }
-    taskTable.lock();
-    newTask.state = working;
+
+    newTask.state = "working";
     taskTable.unlock();
 
+    // execute the task, and insert to
+    // either taskTable or pageTable
     newPage = Crawl(newTask.url);
 
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";     // IMPORTANT
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";     // IMPORTANT
+        taskTable.unlock();
+    }
 }
 </code></pre>
 
 <h2>Solution with Conditional Variable</h2>
 
-<p>Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better.</p>
+<p>What is Conditional Variable:</p>
+
+<blockquote><p><a href="https://goo.gl/xOFXrY">A condition variable</a> is basically <strong>a container of threads that are waiting on a certain condition</strong>.</p>
+
+<p>Monitors provide a mechanism for threads to temporarily give up exclusive access in order to wait for some condition to be met, before regaining exclusive access and resuming their task.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/design-class4-condition-variable.gif"></p>
+
+<p>Look at last 3 lines of code. <strong>Before going to sleep, CV have to release the lock</strong>, so that other threads can access the taskTable.</p>
+
+<p>Then CV goes to sleep. <strong>Right after CV has been waken up</strong>, it has to lock the mutex again.</p>
+
+<p>Solution w/ cv:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    taskTable.lock();
+    nextTask = taskTable.findOne(state == 'new')
+
+    if (!newTask) {
+        taskTable.unlock();
+        Cond_Wait(cond, taskTable);    // Modified
+        continue;
+    }
+
+    newTask.state = "working";
+    taskTable.unlock();
+
+    // execute the task, and insert to
+    // either taskTable or pageTable
+    newPage = Crawl(newTask.url);
+
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+            Cond_Signal(cond);         // Modified
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";     // IMPORTANT
+        taskTable.unlock();
+    }
+}
+</code></pre>
+
+<p>Why Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better.</p>
 
 <h2>Solution with Semaphore</h2>
+
+<p>This is better than Condition Variable, cuz it&rsquo;s easier to implement. And Semaphore not only locks thread, it also <strong>can lock process</strong>.</p>
+
+<p>CV locks on a certain condition. But Semaphore locks the numbers (of task, or resources etc).</p>
+
+<pre><code>Wait(semaphore) {
+    Lockf(semaphore);
+    semaphore.value--;
+    if (semaphore.value &lt; 0) {
+        semaphore.processWaitList.Add(this.process);
+        Release(semaphore);
+        Block(this.process);
+    } else {
+        Release(semaphore);
+    }
+}
+
+Signal(semaphore) {
+    Lock(semaphore);
+    semaphore.value++;
+    if (semaphore.value &lt;= 0) {
+        process = semaphore.processWaitList.pop();
+        Wakeup(process);
+    }
+    Release(semaphore);
+}
+</code></pre>
+
+<p>code w/ semaphore:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    taskTable.lock();
+    nextTask = taskTable.findOne(state == 'new')
+
+    if (!newTask) {
+        taskTable.unlock();
+        Cond_Wait(cond, taskTable);    // Modified
+        continue;
+    }
+
+    newTask.state = "working";
+    taskTable.unlock();
+
+    // execute the task, and insert to
+    // either taskTable or pageTable
+    newPage = Crawl(newTask.url);
+
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+            Cond_Signal(cond);         // Modified
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";     // IMPORTANT
+        taskTable.unlock();
+    }
+}
+</code></pre>
 </div>
   
   

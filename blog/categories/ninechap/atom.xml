@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ninechap | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/ninechap/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-08-30T22:42:15+08:00</updated>
+  <updated>2015-08-31T18:09:20+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -155,29 +155,176 @@ code:
 
     while (true) {
         // get 1 task. If can't get, wait
-        nextTask = taskTable.findOne(state == 'new')
+        taskTable.lock();               // IMPORTANT
+        newTask = taskTable.findOne(state == 'new')
+        
         if (!newTask) {
-            sleep(1000);
+            taskTable.unlock();         // IMPORTANT
+            sleep(1000);                // IMPORTANT
             continue;
         }
-        taskTable.lock();
-        newTask.state = working;
+        
+        newTask.state = "working";
         taskTable.unlock();
         
+        // execute the task, and insert to
+        // either taskTable or pageTable
         newPage = Crawl(newTask.url);
         
+        if (newTask.state === 'list') {
+            // insert all urls to taskTable
+            taskTable.lock();
+            foreach (url in newPage) {
+                taskTable.add(new task(url));
+            }
+            
+            // mark the task as "done"
+            newTask.state = "done";     // IMPORTANT
+            taskTable.unlock();
+        } else {
+            // insert page content to pageTable
+            pageTable.lock();
+            pageTable.add(newPage.content());
+            pageTable.unlock();
+            
+            // mark the task as "done"
+            taskTable.lock();
+            newTask.state = "done";     // IMPORTANT
+            taskTable.unlock();
+        }
     }
 
 ## Solution with Conditional Variable
 
-Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better. 
+What is Conditional Variable:
+
+> [A condition variable](https://goo.gl/xOFXrY) is basically __a container of threads that are waiting on a certain condition__. 
+>
+> Monitors provide a mechanism for threads to temporarily give up exclusive access in order to wait for some condition to be met, before regaining exclusive access and resuming their task.
+
+<img class="middle" src="/assets/images/design-class4-condition-variable.gif">
+
+Look at last 3 lines of code. __Before going to sleep, CV have to release the lock__, so that other threads can access the taskTable. 
+
+Then CV goes to sleep. __Right after CV has been waken up__, it has to lock the mutex again. 
+
+Solution w/ cv:
+
+    while (true) {
+        // get 1 task. If can't get, wait
+        taskTable.lock();
+        nextTask = taskTable.findOne(state == 'new')
+        
+        if (!newTask) {
+            taskTable.unlock();
+            Cond_Wait(cond, taskTable);    // Modified
+            continue;
+        }
+        
+        newTask.state = "working";
+        taskTable.unlock();
+        
+        // execute the task, and insert to
+        // either taskTable or pageTable
+        newPage = Crawl(newTask.url);
+        
+        if (newTask.state === 'list') {
+            // insert all urls to taskTable
+            taskTable.lock();
+            foreach (url in newPage) {
+                taskTable.add(new task(url));
+                Cond_Signal(cond);         // Modified
+            }
+            
+            // mark the task as "done"
+            newTask.state = "done";
+            taskTable.unlock();
+        } else {
+            // insert page content to pageTable
+            pageTable.lock();
+            pageTable.add(newPage.content());
+            pageTable.unlock();
+            
+            // mark the task as "done"
+            taskTable.lock();
+            newTask.state = "done";     // IMPORTANT
+            taskTable.unlock();
+        }
+    }
+
+Why Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better. 
 
 ## Solution with Semaphore
 
+This is better than Condition Variable, cuz it's easier to implement. And Semaphore not only locks thread, it also __can lock process__. 
 
+CV locks on a certain condition. But Semaphore locks the numbers (of task, or resources etc). 
 
+    Wait(semaphore) {
+        Lockf(semaphore);
+        semaphore.value--;
+        if (semaphore.value < 0) {
+            semaphore.processWaitList.Add(this.process);
+            Release(semaphore);
+            Block(this.process);
+        } else {
+            Release(semaphore);
+        }
+    }
 
+    Signal(semaphore) {
+        Lock(semaphore);
+        semaphore.value++;
+        if (semaphore.value <= 0) {
+            process = semaphore.processWaitList.pop();
+            Wakeup(process);
+        }
+        Release(semaphore);
+    }
 
+code w/ semaphore:
+
+    while (true) {
+        // get 1 task. If can't get, wait
+        taskTable.lock();
+        nextTask = taskTable.findOne(state == 'new')
+        
+        if (!newTask) {
+            taskTable.unlock();
+            Cond_Wait(cond, taskTable);    // Modified
+            continue;
+        }
+        
+        newTask.state = "working";
+        taskTable.unlock();
+        
+        // execute the task, and insert to
+        // either taskTable or pageTable
+        newPage = Crawl(newTask.url);
+        
+        if (newTask.state === 'list') {
+            // insert all urls to taskTable
+            taskTable.lock();
+            foreach (url in newPage) {
+                taskTable.add(new task(url));
+                Cond_Signal(cond);         // Modified
+            }
+            
+            // mark the task as "done"
+            newTask.state = "done";
+            taskTable.unlock();
+        } else {
+            // insert page content to pageTable
+            pageTable.lock();
+            pageTable.add(newPage.content());
+            pageTable.unlock();
+            
+            // mark the task as "done"
+            taskTable.lock();
+            newTask.state = "done";     // IMPORTANT
+            taskTable.unlock();
+        }
+    }
 
 
 
