@@ -257,7 +257,7 @@ webFile.close()
 
 <p><img class="middle" src="/assets/images/design-class4-cralwer-arch-3.gif"></p>
 
-<h2>Solution with Sleep</h2>
+<h3>Solution with Sleep</h3>
 
 <p>Define variables:</p>
 
@@ -313,7 +313,7 @@ task.type = list/page
 }
 </code></pre>
 
-<h2>Solution with Conditional Variable</h2>
+<h3>Solution with Conditional Variable</h3>
 
 <p>What is Conditional Variable:</p>
 
@@ -332,11 +332,11 @@ task.type = list/page
 <pre><code>while (true) {
     // get 1 task. If can't get, wait
     taskTable.lock();
-    nextTask = taskTable.findOne(state == 'new')
+    newTask = taskTable.findOne(state == 'new')
 
     if (!newTask) {
         taskTable.unlock();
-        Cond_Wait(cond, taskTable);    // Modified
+        Cond_Wait(cond, taskTable);  // Modified
         continue;
     }
 
@@ -352,7 +352,7 @@ task.type = list/page
         taskTable.lock();
         foreach (url in newPage) {
             taskTable.add(new task(url));
-            Cond_Signal(cond);         // Modified
+            Cond_Signal(cond);       // Modified
         }
 
         // mark the task as "done"
@@ -366,7 +366,7 @@ task.type = list/page
 
         // mark the task as "done"
         taskTable.lock();
-        newTask.state = "done";     // IMPORTANT
+        newTask.state = "done";
         taskTable.unlock();
     }
 }
@@ -374,11 +374,13 @@ task.type = list/page
 
 <p>Why Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better.</p>
 
-<h2>Solution with Semaphore</h2>
+<h3>Solution with Semaphore</h3>
 
 <p>This is better than Condition Variable, cuz it&rsquo;s easier to implement. And Semaphore not only locks thread, it also <strong>can lock process</strong>.</p>
 
 <p>CV locks on a certain condition. But Semaphore locks the numbers (of task, or resources etc).</p>
+
+<p>Semaphore implementation (fairly difficult, read for interest):</p>
 
 <pre><code>Wait(semaphore) {
     Lockf(semaphore);
@@ -403,19 +405,16 @@ Signal(semaphore) {
 }
 </code></pre>
 
+<p>Note that in Java and C++, Wait() == acquire() and Signal() == release(). Read more <a href="http://tutorials.jenkov.com/java-util-concurrent/semaphore.html">Jenkov&rsquo;s post</a>.</p>
+
 <p>code w/ semaphore:</p>
 
 <pre><code>while (true) {
     // get 1 task. If can't get, wait
+    Wait(numberOfNewTask);           // Modified
+
     taskTable.lock();
-    nextTask = taskTable.findOne(state == 'new')
-
-    if (!newTask) {
-        taskTable.unlock();
-        Cond_Wait(cond, taskTable);    // Modified
-        continue;
-    }
-
+    newTask = taskTable.findOne(state == 'new')
     newTask.state = "working";
     taskTable.unlock();
 
@@ -428,7 +427,7 @@ Signal(semaphore) {
         taskTable.lock();
         foreach (url in newPage) {
             taskTable.add(new task(url));
-            Cond_Signal(cond);         // Modified
+            Signal(numberOfNewTask); // Modified
         }
 
         // mark the task as "done"
@@ -442,11 +441,23 @@ Signal(semaphore) {
 
         // mark the task as "done"
         taskTable.lock();
-        newTask.state = "done";     // IMPORTANT
+        newTask.state = "done";
         taskTable.unlock();
     }
 }
 </code></pre>
+
+<p><strong>What happens in Line 3 &lsquo;Wait(numberOfNewTask)&rsquo;</strong>? Well, the programs checks on the numberOfNewTask (counter) variable, and:</p>
+
+<ol>
+<li>If there is 1 or more tasks, just proceed.</li>
+<li>If no tasks available, block itself and wait there. (Later someone will wake it up and it will resume).</li>
+</ol>
+
+
+<h3>Design an consumer-producer</h3>
+
+<p>Stay tuned for future post.</p>
 </div>
 
 
