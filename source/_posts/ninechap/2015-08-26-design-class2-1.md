@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[NineChap Sys] System Design Class 2 "
+title: "[NineChap System Design] Class 2.1: Database "
 comments: true
 category: NineChap
 
@@ -14,9 +14,9 @@ This class covers database design:
 1. design a user system (Netflix 2015)
 1. design a payment system (Yelp, BigCommerce 2015)
 
-# Example One
+# Question 1
 
-__design account (login/out) system__ for our radio. 
+__design account (login/out) system__ for our radio app. 
 
 ## Step one, scenario
 
@@ -73,9 +73,9 @@ Data - User Table
 
 > __[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)__, (Sometimes called SCRUD with an "S" for Search) are the four basic functions of persistent storage.
 
-# Step Five, Evolve
+# Question 2
 
-## advanced 2: __verification and forbidden accounts__
+__verification and forbidden accounts__
 
 We have to know the concept of __Account State Lifecycle Graph__:
 
@@ -87,7 +87,7 @@ We have to know the concept of __Account State Lifecycle Graph__:
 
 1. delete account: normally we won't remove all related data (just make userId as "deleted"). Otherwise a lot of data can be violated. All your chatting history __actually remains__. 
 
-### redesign User Table
+## redesign User Table
 
 Old User table:
 
@@ -112,14 +112,16 @@ Modified User table:
 
 1. save encrypted password. 
 
-## advanced 3: login/out process
+# Question 3
+
+__design login/out process__
 
 1. User account auto logged out after a certain period of time.
 1. multiple account logged in at same time.
 
 {% img middle /assets/images/design-class2-session-life-cycle.png %}
 
-### Session
+## Session
 
 __Session is a conversation__ between user and server. 
 
@@ -153,7 +155,7 @@ Important in Session table:
 
 User table would include a __session list__. 
 
-### further improvement: session
+## further improvement: session
 
 1. we update sessionList very frequently.
 1. size of sessionList is dynamic.
@@ -168,7 +170,7 @@ Question: When to clean up the session data (considering huge amount of data and
 >
 > We do not remove session whenever it expires. It's too much calculation. 
 
-### further improvement: inheritance
+## further improvement: inheritance
 
 Apply inheritance to UserTable and SessionTable: 
 
@@ -199,7 +201,9 @@ As for the Row class:
     class Session extends Row {
     }
 
-## advanced 4: search in table
+# Question 4
+
+__design search algorithm__
 
 1. find my userId
 1. find my userId range
@@ -208,144 +212,8 @@ Solution 1: add __HashMap__ in the table. Can do search in O(1), but can't find 
 
 Solution 2: __BST data structure__. Can do search range and search in O(log2 n) time. 
 
-### Best solution: B+ tree
+## Best solution: B+ tree
 
 __[B+ tree](https://en.wikipedia.org/wiki/B%2B_tree)__ - everything in O(logb n) which is __close to constant time__. 
 
 Plus, B+ tree is hard disk friendly. Read more on a future post. 
-
-## advanced 5: VIP services
-
-User could buy VIP services using his acccount balance. 
-
-    class ProService {
-        int userId;
-        double money;
-        long endTime;
-
-        public addMoney(){}
-        public buyPro(){}
-    }
-
-### Q5.1: System crashes before adding time
-
-Solution: __transaction with log__
-
-    WriteLOG
-    Transaction_1123: BEGIN
-    money=20; endTime=16_07_2016
-
-If system crash happens here, system will read the log, recover and roll back all original data. Try not to complete the transaction - just fail it. 
-
-    WriteLOG
-    Transaction_1123: BEGIN
-    money=20; endTime=16_07_2016
-    WriteLOG
-    Transaction_1123: END
-    money=10; endTime=16_08_2016
-
-> What happens if system crash during writing the log? or during the rollback?
-
-### Q5.2: check list
-
-1. one user id have 2 corresponding pro-services information.
-1. Shallow user: a pro-services info does not have corresponding user. 
-
-Solution: have a checker class.
-
-### Q5.3: 2 simutaneous purchase. 
-
-Solution: lock. 
-
-1. first process lock money & endTime.
-1. Read money = 20
-1. another process try to lock, but end up waiting (sleeping).
-1. first process do the job, and release the lock. 
-1. another process wakes up. 
-
-> lock have time-out settings. It can be applied in distributed system as well. 
-
-Question: does lock make your execution slow?
-
-1. If another process is sleeping, CPU will be fully consumed by other process. So it won't impact. 
-
-1. You can do some async processing, too. 
-
-1. When you lock, try to lock only a small piece of code, not the entire method. In DB, lock only a row, not a table. 
-
-1. Java [CAS](https://en.wikipedia.org/wiki/Compare-and-swap) (Compare and swap ) 
-
-### Q5.4: machine crash
-
-Solution: duplication. 
-
-1. How many copies?
-
-    Google did 3. Normally 2 in same data center, and 1 in another location. 
-    
-    Backup data normally is on another machine. But there's also [RAID](https://en.wikipedia.org/wiki/RAID) (redundant array of independent disks) which:
-    
-    > combines multiple physical disk drive components into a single logical unit for the purposes of __data redundancy, performance improvement__, or both. 
-
-1. When does the copy happen? 
-
-    Option 1 is __doing everyday nightly__. This is called a 'check point'.
-    
-    Option 2 is use another server to support __Shadow Redundancy__. All data from Machine 0 will be copied to Machine 1 WHILE it happens. The result is, Machine 1 is identical to Machine 0. If Machine 0 crashes, Machine 1 may be behind less than 1 second. 
-    
-    The way to duplicate is either re-play all the actions, or to read Machine 0's log and apply the new data. 
-
-1. How to copy?
-
-    User send data to 1 server, and from that server, pipeline. This ensures good usage of server bandwith, and serial transfer of data ensures low latency (several ms). 
-    
-    It's also possible to do tree-like transfer, but the above method is preferred cuz all machine consume same bandwidth.
-
-1. What is log?
-
-    It is actually 'checkpoint' + log. It allows you to rollback.
-
-Data redundancy - Summary:
-
-{% img middle /assets/images/design-class2-data-redundancy-1.png %}
-
-### Final note: Data inconsistency
-
-Main sources of inconsistency comes from:
-
-1. network fault
-1. disk error
-
-The disk eror is solved by __checksum__ (compare during disk writing). 
-
-# Summary
-
-__[ACID](https://en.wikipedia.org/wiki/ACID) (Atomicity, Consistency, Isolation, Durability)__  is a set of properties that guarantee that database transactions are processed reliably. 
-
-1. __Atomicity: all or nothing__
-
-    Q5.1: System crashes before adding time
-    
-1. __Consistency__: validate according to defined rules
-
-    Q5.2: check list
-    
-1. __Isolation__: independency between transactions __(lock)__
-
-    Q5.3: 2 simutaneous purchase. 
-    
-1. __Durability__: stored permanently
-
-    Q5.4: machine crash
-
-{% img middle /assets/images/design-class2-summary.png %}
-
-Question:
-
-1. design a user system (Netflix 2015)
-
-Hint: table design, register, login/out, password check, find password. 
-
-1. Design payment system (Yelp, BigCommerce 2015)
-
-Hint: the question does not ask about table/ds design itself, but rather the problems associated with payment. Read about ACID principle. 
