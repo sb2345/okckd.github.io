@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-02T16:52:58+08:00</updated>
+  <updated>2015-09-03T00:20:27+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,112 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Facebook Photo Storage ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage/"/>
+    <updated>2015-09-02T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage</id>
+    <content type="html"><![CDATA[<h1>Stats</h1>
+
+<p>Facebook has 1.5 billion monthly active users, 970 million daily active users <a href="http://newsroom.fb.com/company-info/">as of June 2015</a>.</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/facebook-user-count.png"></p>
+
+<p>image from <a href="http://www.statista.com/statistics/264810/number-of-monthly-active-facebook-users-worldwide/">statista.com</a>.</p>
+
+<p>In 2009, Facebook stores 15 billion photos for the user, which grows at 220 million per week. It&rsquo;s 2015 now, you might want to mulitply these numbers by 3~6.</p>
+
+<p>I have roughly estimated the statistics of Facebook users, Facebook photos and growth rate, just to give you an idea of the size of data Facebook has got:</p>
+
+<blockquote><p>Total user: 1.5b</p>
+
+<p>Total photoes: 75b, which is 50 photo/user</p>
+
+<p>Each photo got 4 different sizes, so 300b photos are stored.</p>
+
+<p>New photo per day: 1b</p>
+
+<p>New photo per second: 10,000</p>
+
+<p>Peak incoming photo per second: 10m</p></blockquote>
+
+<h1>Old architecture</h1>
+
+<p>3 tiers design:</p>
+
+<ol>
+<li><p><strong>Upload tier</strong> receives users’ photo uploads, scales the original images and saves them on the NFS storage tier.</p></li>
+<li><p><strong>Photo serving tier</strong> receives HTTP requests for photo images and serves them from the NFS storage tier.</p></li>
+<li><p><strong>NFS storage tier</strong> built on top of commercial storage appliances.</p></li>
+</ol>
+
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Network_File_System">Network File System</a></strong> (NFS) is a distributed file system protocol originally developed by Sun Microsystems in 1984, allowing a user on a client computer to access files over a network much like local storage is accessed.</p></blockquote>
+
+<h2>problem</h2>
+
+<ol>
+<li><p>there is an <strong>enormous amount of metadata</strong></p>
+
+<p> &hellip; so much that is <a href="https://code.facebook.com/posts/685565858139515/needle-in-a-haystack-efficient-storage-of-billions-of-photos/">exceeds the caching abilities of the NFS storage tier</a>, <strong> resulting in multiple I/O operations</strong> per photo upload or read request</p></li>
+</ol>
+
+
+<h2>Solution</h2>
+
+<ol>
+<li><p>relies heavily on CDNs to serve photos.</p></li>
+<li><p>Cachr: a caching server tier caching Facebook &ldquo;profile&rdquo; images.</p></li>
+<li><p>NFS file handle cache &ndash; deployed on the photo serving tier eliminates some of the NFS storage tier metadata overhead</p></li>
+</ol>
+
+
+<h1>Haystack Photo Infrastructure</h1>
+
+<p>The new photo infrastructure merges the <strong>photo serving</strong> and <strong>storage tier</strong> into one physical tier. It implements <strong>a HTTP based photo server</strong> which stores photos in a generic object store called Haystack.</p>
+
+<p>Goal: eliminate any unnecessary metadata overhead for photo read operations, so that each read I/O operation was only reading actual photo data</p>
+
+<p>5 main functional layers:</p>
+
+<ol>
+<li><p>HTTP server</p></li>
+<li><p>Photo Store</p></li>
+<li><p>Haystack Object Store</p></li>
+<li><p>Filesystem</p></li>
+<li><p>Storage</p></li>
+</ol>
+
+
+<h2>Storage</h2>
+
+<p>The commodity machine HW typically is 2x quadcore CPU + 32GB RAM + 512MB NV-RAM cache + 12TB SATA drives.</p>
+
+<blockquote><p><a href="https://en.wikipedia.org/wiki/Non-volatile_random-access_memory">Non-volatile random-access memory</a> (NVRAM) is random-access memory that retains its information when power is turned off (non-volatile).</p>
+
+<p>This is in contrast to dynamic random-access memory (DRAM) and static random-access memory (SRAM)</p></blockquote>
+
+<p>So each <strong>storage blade</strong> is around 10TB. Configured as <strong>RAID-6</strong> partition.</p>
+
+<blockquote><p><a href="http://searchstorage.techtarget.com/definition/RAID-6-redundant-array-of-independent-disks">RAID 6</a>, also known as double-parity RAID, uses two parity stripes on each disk. It allows for two disk failures within the RAID set before any data is lost.</p></blockquote>
+
+<p>Pros:</p>
+
+<ol>
+<li>adequate redundancy</li>
+<li>excellent read performance</li>
+<li>low storage cost down</li>
+</ol>
+
+
+<p>Cons:</p>
+
+<p><strong>The poor write performance</strong> is partially mitigated by the <strong>RAID controller NVRAM write-back cache</strong>. Since the reads are mostly random, the NVRAM cache is fully reserved for writes.</p>
+
+<p><strong>The disk caches are disabled</strong> in order to guarantee data consistency in the event of a crash or a power loss.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] How Google search works ]]></title>
@@ -49,15 +155,6 @@
 <p>Not all links are equal: Google works hard to identify spam links. The best types of links are those that are given based on the quality of your content.</p></blockquote>
 
 <p>To rank higher, follow <a href="https://support.google.com/webmasters/answer/35769?vid=1-635765406868848825-432642872">Webmaster Guidelines</a>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[NineChap System Design] Class 4.2: Search Engine ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/"/>
-    <updated>2015-08-30T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/30/design-class4-2</id>
-    <content type="html"><![CDATA[
 ]]></content>
   </entry>
   

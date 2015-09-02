@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[NineChap System Design] Class 4.2: Search Engine  - Shuatiblog.com</title>
+  <title>[Design] Facebook Photo Storage  - Shuatiblog.com</title>
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="
-">
+  <meta name="description" content="Stats Facebook has 1.5 billion monthly active users, 970 million daily active users as of June 2015. image from statista.com. In 2009, Facebook &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/">
+  <link rel="canonical" href="http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -97,7 +96,7 @@
   
   <header>
     
-      <h1 class="entry-title">[NineChap System Design] Class 4.2: Search Engine</h1>
+      <h1 class="entry-title">[Design] Facebook Photo Storage</h1>
     
     
       <p class="meta">
@@ -113,7 +112,7 @@
   
 
 
-<time datetime="2015-08-30T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -122,7 +121,104 @@
   </header>
 
 
-<div class="entry-content">
+<div class="entry-content"><h1>Stats</h1>
+
+<p>Facebook has 1.5 billion monthly active users, 970 million daily active users <a href="http://newsroom.fb.com/company-info/">as of June 2015</a>.</p>
+
+<p><img class="middle" src="/assets/images/facebook-user-count.png"></p>
+
+<p>image from <a href="http://www.statista.com/statistics/264810/number-of-monthly-active-facebook-users-worldwide/">statista.com</a>.</p>
+
+<p>In 2009, Facebook stores 15 billion photos for the user, which grows at 220 million per week. It&rsquo;s 2015 now, you might want to mulitply these numbers by 3~6.</p>
+
+<p>I have roughly estimated the statistics of Facebook users, Facebook photos and growth rate, just to give you an idea of the size of data Facebook has got:</p>
+
+<blockquote><p>Total user: 1.5b</p>
+
+<p>Total photoes: 75b, which is 50 photo/user</p>
+
+<p>Each photo got 4 different sizes, so 300b photos are stored.</p>
+
+<p>New photo per day: 1b</p>
+
+<p>New photo per second: 10,000</p>
+
+<p>Peak incoming photo per second: 10m</p></blockquote>
+
+<h1>Old architecture</h1>
+
+<p>3 tiers design:</p>
+
+<ol>
+<li><p><strong>Upload tier</strong> receives users’ photo uploads, scales the original images and saves them on the NFS storage tier.</p></li>
+<li><p><strong>Photo serving tier</strong> receives HTTP requests for photo images and serves them from the NFS storage tier.</p></li>
+<li><p><strong>NFS storage tier</strong> built on top of commercial storage appliances.</p></li>
+</ol>
+
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Network_File_System">Network File System</a></strong> (NFS) is a distributed file system protocol originally developed by Sun Microsystems in 1984, allowing a user on a client computer to access files over a network much like local storage is accessed.</p></blockquote>
+
+<h2>problem</h2>
+
+<ol>
+<li><p>there is an <strong>enormous amount of metadata</strong></p>
+
+<p> &hellip; so much that is <a href="https://code.facebook.com/posts/685565858139515/needle-in-a-haystack-efficient-storage-of-billions-of-photos/">exceeds the caching abilities of the NFS storage tier</a>, <strong> resulting in multiple I/O operations</strong> per photo upload or read request</p></li>
+</ol>
+
+
+<h2>Solution</h2>
+
+<ol>
+<li><p>relies heavily on CDNs to serve photos.</p></li>
+<li><p>Cachr: a caching server tier caching Facebook &ldquo;profile&rdquo; images.</p></li>
+<li><p>NFS file handle cache &ndash; deployed on the photo serving tier eliminates some of the NFS storage tier metadata overhead</p></li>
+</ol>
+
+
+<h1>Haystack Photo Infrastructure</h1>
+
+<p>The new photo infrastructure merges the <strong>photo serving</strong> and <strong>storage tier</strong> into one physical tier. It implements <strong>a HTTP based photo server</strong> which stores photos in a generic object store called Haystack.</p>
+
+<p>Goal: eliminate any unnecessary metadata overhead for photo read operations, so that each read I/O operation was only reading actual photo data</p>
+
+<p>5 main functional layers:</p>
+
+<ol>
+<li><p>HTTP server</p></li>
+<li><p>Photo Store</p></li>
+<li><p>Haystack Object Store</p></li>
+<li><p>Filesystem</p></li>
+<li><p>Storage</p></li>
+</ol>
+
+
+<h2>Storage</h2>
+
+<p>The commodity machine HW typically is 2x quadcore CPU + 32GB RAM + 512MB NV-RAM cache + 12TB SATA drives.</p>
+
+<blockquote><p><a href="https://en.wikipedia.org/wiki/Non-volatile_random-access_memory">Non-volatile random-access memory</a> (NVRAM) is random-access memory that retains its information when power is turned off (non-volatile).</p>
+
+<p>This is in contrast to dynamic random-access memory (DRAM) and static random-access memory (SRAM)</p></blockquote>
+
+<p>So each <strong>storage blade</strong> is around 10TB. Configured as <strong>RAID-6</strong> partition.</p>
+
+<blockquote><p><a href="http://searchstorage.techtarget.com/definition/RAID-6-redundant-array-of-independent-disks">RAID 6</a>, also known as double-parity RAID, uses two parity stripes on each disk. It allows for two disk failures within the RAID set before any data is lost.</p></blockquote>
+
+<p>Pros:</p>
+
+<ol>
+<li>adequate redundancy</li>
+<li>excellent read performance</li>
+<li>low storage cost down</li>
+</ol>
+
+
+<p>Cons:</p>
+
+<p><strong>The poor write performance</strong> is partially mitigated by the <strong>RAID controller NVRAM write-back cache</strong>. Since the reads are mostly random, the NVRAM cache is fully reserved for writes.</p>
+
+<p><strong>The disk caches are disabled</strong> in order to guarantee data consistency in the event of a crash or a power loss.</p>
 </div>
 
 
@@ -146,12 +242,12 @@
   
 
 
-<time datetime="2015-08-30T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2015-09-02T00:00:00+08:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ninechap/'>ninechap</a>
+    <a class='category' href='/blog/categories/design/'>design</a>
   
 </span>
 
@@ -160,7 +256,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage/" >Tweet</a>
   
   
   
@@ -169,10 +265,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/08/30/design-class4-1/" title="Previous Post: [NineChap System Design] Class 4.1: Crawler ">&laquo; [NineChap System Design] Class 4.1: Crawler </a>
+        <a class="basic-alignment left" href="/blog/2015/08/30/how-google-search-works/" title="Previous Post: [Design] How Google search works ">&laquo; [Design] How Google search works </a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/08/30/how-google-search-works/" title="Next Post: [Design] How Google search works ">[Design] How Google search works  &raquo;</a>
       
     </p>
   </footer>
@@ -220,14 +314,14 @@
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (77)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (24)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
@@ -242,11 +336,11 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/08/30/how-google-search-works/">[Design] How Google search works </a>
+        <a href="/blog/2015/09/02/Facebook-photo-storage/">[Design] Facebook Photo Storage </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/30/design-class4-2/">[NineChap System Design] Class 4.2: Search Engine </a>
+        <a href="/blog/2015/08/30/how-google-search-works/">[Design] How Google search works </a>
       </li>
     
       <li class="post">
@@ -302,8 +396,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/';
-        var disqus_url = 'http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/';
+        var disqus_identifier = 'http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage/';
+        var disqus_url = 'http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage/';
         var disqus_script = 'embed.js';
       
     (function () {
