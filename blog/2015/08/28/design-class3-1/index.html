@@ -5,11 +5,16 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[NineChap Sys] System Design Class 3: Web Service  - Shuatiblog.com</title>
+  <title>[NineChap Sys] System Design Class 3.1: Web Service (1)  - Shuatiblog.com</title>
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question 0 how to solve raido-play failures &gt; Failure rate = % user who can't listen to music properly &gt; = # user who fail to plya one song &hellip;">
+  <meta name="description" content="Overview Today we&rsquo;ll look at 6 examples of problems associated with Web Service: how the internet works
+DNS
+Web server
+Music Player
+MP3 file
+秒杀 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +23,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.shuatiblog.com/blog/2015/08/28/design-class-3/">
+  <link rel="canonical" href="http://www.shuatiblog.com/blog/2015/08/28/design-class3-1/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -96,7 +101,7 @@
   
   <header>
     
-      <h1 class="entry-title">[NineChap Sys] System Design Class 3: Web Service</h1>
+      <h1 class="entry-title">[NineChap Sys] System Design Class 3.1: Web Service (1)</h1>
     
     
       <p class="meta">
@@ -121,7 +126,21 @@
   </header>
 
 
-<div class="entry-content"><h1>Question 0</h1>
+<div class="entry-content"><h1>Overview</h1>
+
+<p>Today we&rsquo;ll look at 6 examples of problems associated with Web Service:</p>
+
+<ol>
+<li>how the internet works</li>
+<li>DNS</li>
+<li>Web server</li>
+<li>Music Player</li>
+<li>MP3 file</li>
+<li>秒杀</li>
+</ol>
+
+
+<h1>Question 0</h1>
 
 <p><strong>how to solve raido-play failures</strong></p>
 
@@ -316,177 +335,6 @@
 <p>AT Number 4, we can add <strong>more servers</strong>. Number 3, <strong>reverse proxy</strong>. Number 2 is <strong>caching within the ISP network</strong>, which avoids requesting info again from backend. Number 1 is <strong>front-end browser cache</strong>.</p>
 
 <p>After this step, Web failure rate fall from 7% to 4%. Why still 4%? Well, these failure is mainly from the junk users created by marketing.</p>
-
-<h1>Question 4</h1>
-
-<p><strong>fix MP3 problem</strong></p>
-
-<p>The process of fetching a MP3 (from CDN):</p>
-
-<p><img class="middle" src="/assets/images/design-class3-client-request-mp3.png"></p>
-
-<ol>
-<li>aquire MP3 link, and send request</li>
-<li>send request to CDN</li>
-<li>CDN receive request, find MP3</li>
-<li>response to client</li>
-<li>play the music</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/design-class3-client-request-mp3-errors.png"></p>
-
-<p>Question: in step 2, there&rsquo;s more Network error, but in step 4, there&rsquo;s no Network error, but Timeout. Why?</p>
-
-<h2>Fix step 2, Network error</h2>
-
-<p>Problem is: MP3 url invalid. It actually comes from a failed CDN sever.</p>
-
-<p>Solution: fix the server.</p>
-
-<h2>Fix step 3, CDN can&rsquo;t find MP3</h2>
-
-<p>Problem associated with <strong>Anti-Leech</strong>.</p>
-
-<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Leech_(computing">a leech</a>)</strong> is one who benefits, usually deliberately, from others&#8217; information or effort but does not offer anything in return.</p>
-
-<p>Example: Wi-Fi leeches, Direct linking (or hot-linking) and In most P2P-networks, leeching is whose who download too much.</p>
-
-<p><strong><a href="https://answers.yahoo.com/question/index?qid=1006042926419">Anti-Leech</a></strong> specializes in protecting file downloads and stopping bandwidth leeching.</p></blockquote>
-
-<p>See that some P2P and leeching software will steal your url links, so the MP3 url expiration time is 5 minutes.</p>
-
-<p>So when CDN server&rsquo;s clock and web server&rsquo;s clock are not synchronized well, MP3 url can expire.</p>
-
-<p>Solution: every 10 minutes sync CDN clock with web server clock.</p>
-
-<h2>Fix step 4, Timeout error</h2>
-
-<p>Some MP3 are relatively large. Thus timeout.</p>
-
-<blockquote><p>MP3 performs better at higher bps, and aac(Advanced Audio Coding) works better at lower bps.</p></blockquote>
-
-<p>Solution:</p>
-
-<ol>
-<li><p>compress MP3 to 48bps, or use aac format. So, play lower-rate music first, then switch automatically.</p></li>
-<li><p>pre-load a music while previous is playing.</p></li>
-<li><p>optimize CDN</p></li>
-</ol>
-
-
-<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Content_delivery_network">CDN</a></strong> content delivery network is a large <strong>distributed system of servers</strong> deployed in <strong>multiple data centers</strong> across the Internet.</p>
-
-<p>The goal of a CDN is to serve content to end-users with high availability and high performance.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/design-class3-CDN.png"></p>
-
-<p>Which CDN should client choose?</p>
-
-<blockquote><p>Not DNS, but web server calculates which to choose. It can be calculated using IP distance, or ISP provider, but not accurate.</p>
-
-<p>We can also use local desktop apps (in different locations) to ping CDN servers. This may violate user privacy, though.</p></blockquote>
-
-<h2>Fix step 5, Fail to play</h2>
-
-<p>Problem: some files got wrong decoding.</p>
-
-<h2>Fix step 6, unkown error</h2>
-
-<p>Problem: some users close the page while MP3 loading.</p>
-
-<h1>Question 5</h1>
-
-<p><strong>fix player problem</strong></p>
-
-<p>Problem: iOS device can never play Flash.</p>
-
-<p>Solution: develop HTML5 player.</p>
-
-<h2>5.2 how to evaluate that you solved the problem</h2>
-
-<ol>
-<li><p>user complains</p></li>
-<li><p><strong>important</strong>: daily retention rate!</p></li>
-</ol>
-
-
-<p>We can&rsquo;t use daily active user, cuz it depends on marketing, competitors, and infrastructure changes.</p>
-
-<p><strong>One day retention rate</strong>:</p>
-
-<p><img class="middle" src="/assets/images/design-class3-user-retention.png"></p>
-
-<blockquote><p>Today’s visitor = {U1, U3, U7, U9, U10}</p>
-
-<p>Tomorrow&rsquo;s visitor = {U2, U3, U9,}</p>
-
-<p>Today’s one day retention rate = 2/5</p></blockquote>
-
-<h1>Question 6 秒杀</h1>
-
-<h2>Design</h2>
-
-<p>Queue A and Queue B</p>
-
-<p><img class="middle" src="/assets/images/design-class3-miao-sha.png"></p>
-
-<h3>Queue A</h3>
-
-<p>Many queues, each one locates on a individual web server or reverse proxy. It is mainly used to accept large amount of requests coming from the clients.</p>
-
-<p>Each machine may takes 10,000 or more requests per second.</p>
-
-<p>Queue A will redirect most requests to a static page (cached).</p>
-
-<h3>Queue B</h3>
-
-<p>Queue B is a single machine, to aviod distributed problems. It takes in small amount of requests and decides results (eg. redirect to payment page).</p>
-
-<blockquote><p>Now, why do we need 2 queues, not 1?</p>
-
-<p>Think about a hospital. Queue A is the hospital lobby and security guard, and Queue B is the queue of patience.</p></blockquote>
-
-<h2>How to reduce traffic</h2>
-
-<ol>
-<li>no image</li>
-<li>cache more static pages</li>
-<li>reverse proxy: batch sending the requests</li>
-</ol>
-
-
-<p>Also, can use front-end javascript to prevent clicking. There are method to bypass, so we need to check IP or do some filtering.</p>
-
-<h2>How to keep it simple?</h2>
-
-<ol>
-<li>no DB: basic logic. But rmb to use a log file</li>
-<li>no lock</li>
-</ol>
-
-
-<h2>How to improve stability</h2>
-
-<ol>
-<li>use new server to do <strong>Miao Sha</strong>, in case of crash</li>
-<li>asyc prcessing everything! Don&rsquo;t let other people wait, in case of crash.</li>
-</ol>
-
-
-<h3>How to defend hackers</h3>
-
-<ol>
-<li>IP address (to defent auto softwares), but it&rsquo;s easy for hackers to fake IP address</li>
-<li>CAPTCHA</li>
-</ol>
-
-
-<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/CAPTCHA">CAPTCHA</a></strong> (an acronym for &ldquo;Completely Automated Public Turing test to tell Computers and Humans Apart&rdquo;) is a type of challenge-response test used in computing to determine whether or not the user is human.</p></blockquote>
-
-<h2>follow-up</h2>
-
-<p>How to design 12306 (several million QPS)</p>
 </div>
 
 
@@ -524,7 +372,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2015/08/28/design-class-3/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2015/08/28/design-class-3/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2015/08/28/design-class3-1/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2015/08/28/design-class3-1/" >Tweet</a>
   
   
   
@@ -533,10 +381,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/08/26/design-class-2/" title="Previous Post: [NineChap Sys] System Design Class 2: Database ">&laquo; [NineChap Sys] System Design Class 2: Database </a>
+        <a class="basic-alignment left" href="/blog/2015/08/26/design-class2-2/" title="Previous Post: [NineChap Sys] System Design Class 2.2: Database (2) ">&laquo; [NineChap Sys] System Design Class 2.2: Database (2) </a>
       
       
-        <a class="basic-alignment right" href="/blog/2015/08/30/design-class-4/" title="Next Post: [NineChap Sys] System Design Class 4: Crawler & Search Engine ">[NineChap Sys] System Design Class 4: Crawler & Search Engine  &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2015/08/28/design-class3-2/" title="Next Post: [NineChap Sys] System Design Class 3.2: Web Service (2) ">[NineChap Sys] System Design Class 3.2: Web Service (2)  &raquo;</a>
       
     </p>
   </footer>
@@ -591,7 +439,7 @@
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (20)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
@@ -610,19 +458,19 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/30/design-class-4/">[NineChap Sys] System Design Class 4: Crawler & Search Engine </a>
+        <a href="/blog/2015/08/30/design-class4-2/">[NineChap Sys] System Design Class 4: Search Engine </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/28/design-class-3/">[NineChap Sys] System Design Class 3: Web Service </a>
+        <a href="/blog/2015/08/30/design-class4-1/">[NineChap Sys] System Design Class 4: Crawler </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/26/design-class-2/">[NineChap Sys] System Design Class 2: Database </a>
+        <a href="/blog/2015/08/28/design-class3-2/">[NineChap Sys] System Design Class 3.2: Web Service (2) </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/24/three-property-object/">[Java OOP] Three Properties of Class/Object </a>
+        <a href="/blog/2015/08/28/design-class3-1/">[NineChap Sys] System Design Class 3.1: Web Service (1) </a>
       </li>
     
   </ul>
@@ -666,8 +514,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://www.shuatiblog.com/blog/2015/08/28/design-class-3/';
-        var disqus_url = 'http://www.shuatiblog.com/blog/2015/08/28/design-class-3/';
+        var disqus_identifier = 'http://www.shuatiblog.com/blog/2015/08/28/design-class3-1/';
+        var disqus_url = 'http://www.shuatiblog.com/blog/2015/08/28/design-class3-1/';
         var disqus_script = 'embed.js';
       
     (function () {

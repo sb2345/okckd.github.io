@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[NineChap Sys] System Design Class 1: Overview  - Shuatiblog.com</title>
+  <title>[NineChap Sys] System Design Class 1.1: Overview  - Shuatiblog.com</title>
   <meta name="author" content="CodeMonkey">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.shuatiblog.com/blog/2015/08/23/design-class-1/">
+  <link rel="canonical" href="http://www.shuatiblog.com/blog/2015/08/23/design-class1-1/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -96,7 +96,7 @@
   
   <header>
     
-      <h1 class="entry-title">[NineChap Sys] System Design Class 1: Overview</h1>
+      <h1 class="entry-title">[NineChap Sys] System Design Class 1.1: Overview</h1>
     
     
       <p class="meta">
@@ -276,209 +276,6 @@
 <p>From views of <strong>Performance, Scalability and Robustness</strong>.</p>
 
 <p><img class="middle" src="/assets/images/design-class1-snake.jpg"></p>
-
-<h1>A bottom-up example</h1>
-
-<p>Example two: <strong>design a recommendation module</strong></p>
-
-<h2>A simple algo:</h2>
-
-<pre><code>u1={m3,m5,m7,m11}
-u2={m1,m2,m3,m4,m5,m6,m7,m8,m9}
-Similarity( u1, u2 ) = 3
-</code></pre>
-
-<p>m &ndash; music</p>
-
-<p>u &ndash; user</p>
-
-<p>Similarity = # of same music for different users</p>
-
-<h2>Adv algo:</h2>
-
-<p>find his <strong>top-1 similar user</strong>. Stay tuned for future posts.</p>
-
-<h2>Use the 5 Steps (SNAKE)</h2>
-
-<ol>
-<li>Step One, Scenario</li>
-<li>Step Two, Necessary</li>
-<li>Step Three, Application</li>
-<li>Step Four, Kilobit: data</li>
-<li>Last Step, Evolve</li>
-</ol>
-
-
-<p>Because this question is relatively easy, we will not do case-analysis (Macro).</p>
-
-<p><strong>Instead, we do micro design</strong> by starting at the interface.</p>
-
-<h2>Step One, Scenario</h2>
-
-<p>Interface</p>
-
-<pre><code>class Recommender {
-    public int findSimilarUser(int userId) {
-        //
-    }
-}
-</code></pre>
-
-<h2>Step Two, Necessary</h2>
-
-<ol>
-<li><p>ask</p>
-
-<ol>
-<li>total users = 100,000,000</li>
-<li>total music = 10,000,000</li>
-<li>peak users in 3 month = 6,000,000</li>
-</ol>
-
-
-<p> However, not everyone is logged in. Thus we won&rsquo;t need to recommend for everybody. On average, the logged-in ratio is 1% &ndash; 30%. Let&rsquo;s assume 5%.</p>
-
-<ol>
-<li>participation percentage = 5%</li>
-</ol>
-
-
-<p> And user&rsquo;s interest won&rsquo;t change every minute. Let&rsquo;s recalculate only after 10 minutes.</p>
-
-<ol>
-<li>calculation frequency = 1 update/10min/user</li>
-</ol>
-</li>
-<li><p>predict</p>
-
-<ol>
-<li>user analysis (skip)</li>
-<li>Traffic analysis (skip)</li>
-<li>Memory analysis (skip)</li>
-<li>QPS</li>
-</ol>
-
-
-<p> Peak QPS = 6,000,000 * 5% / (10 * 60) = 500/s</p></li>
-</ol>
-
-
-<h2>Step Three, Application</h2>
-
-<p><strong>The simpliest algorithm: BF compare</strong>. The complexity is O(m n) for each user, where m is # of music a person likes, and n is # of total users. For k users, it takes O(k m n) time (k can be = peak concurrent users).</p>
-
-<p>This is roughly 0.2s per user. Thus <strong>Max QPS = 5</strong>.</p>
-
-<blockquote><p>One word about complexity-to-seconds estimation.</p>
-
-<p>O(n ^ 3) &ndash;> 1s</p>
-
-<p>O(n ^ 2) &ndash;> 0.2s</p>
-
-<p>O(n) &ndash;> 20ms</p>
-
-<p>O(k) &ndash;> k ms</p></blockquote>
-
-<h2>Step Four, Kilobit: data</h2>
-
-<p>Very simple:</p>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-1.png"></p>
-
-<h2>Last Step, Evolve</h2>
-
-<p>Read on.</p>
-
-<h1>From Level 0 to Level 1</h1>
-
-<p>Refer to the previous question. How can we improve???</p>
-
-<ol>
-<li>performance</li>
-<li>scalability</li>
-<li>robustness</li>
-</ol>
-
-
-<h2>performance</h2>
-
-<p>A better algo: Inverted Index</p>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-2.png"></p>
-
-<p>Avg performance increase to ~ 20ns (with some optimization of MapReduce procedure, discuss later).</p>
-
-<p><strong>Max QPS increase to 50</strong>.</p>
-
-<h2>scalability</h2>
-
-<p>Use a <strong>dispatcher</strong> to re-direct the requests to multiple machines.</p>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-3.png"></p>
-
-<h3>How many machines do we need then?</h3>
-
-<p>Well we need 500 QPS. The algo above achieves ~ 50 QPS. <strong>Should we need 10 machines</strong>?</p>
-
-<p>The answer is NO. A machine with 8 (or 16) core CPU could be able to handle.</p>
-
-<p>We can also have a <strong>hot-standby</strong>, to be safe.</p>
-
-<blockquote><p>hot standby is used as a failover mechanism to provide reliability in system configurations.</p>
-
-<p>When a key component fails, the hot spare is switched into operation.</p></blockquote>
-
-<h2>robustness</h2>
-
-<p>Tips about system design for senior engineers:</p>
-
-<blockquote><p><strong>Draw 1 machine first</strong>. This machine can contains multiple datasets and run multiple processes.</p>
-
-<p>On top of this machine, the interface layer is <strong>one single Manager process</strong>. The Manager is in charge of almost everything: handling data lost, handle high concurrency, copy multiple instance of itself&hellip;</p>
-
-<p>Like this:</p></blockquote>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-6.png"></p>
-
-<h3>Back-end</h3>
-
-<p>Now we need <strong>a cluster of datasets</strong> (which has Manager on top of it), and <strong>a cluster of Recommenders</strong>. Manager is in charge of copying multiple instances.</p>
-
-<p>Dataset can be put in different physical locations. Recommender don&rsquo;t really need, cuz it&rsquo;s only do calculation job.</p>
-
-<h3>Receiving requests</h3>
-
-<p>Just now we used <strong>Receptionist (or Dispatcher)</strong> to handle request. Now we use a <strong>Web service</strong> (eg. Apache). It&rsquo;s not necessary to make it a cluster.</p>
-
-<h3>Big Brother</h3>
-
-<p>We need a <strong>monitor system</strong> to oversee everything.</p>
-
-<p>Also, Big Brother is in charge of heart-beat. If not received, Big Brother have some double-check machanism.</p>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-4.png"></p>
-
-<h3>Connecting the dots</h3>
-
-<p><strong>Dispatcher</strong> is used to connect the 4 components. It&rsquo;s like a messaging queue that collects and distributes jobs among everybody (eg. control and distributed info).</p>
-
-<p>It can be stateful or stateless.</p>
-
-<p>Keep in mind <strong>the connection between Dataset and Recommender</strong> remains. It&rsquo;s slow going thru Dispatcher.</p>
-
-<h3>Distribute it</h3>
-
-<p>During development, the 5 components can be put on same machine. When we deploy distributely, we use <strong>Socket connection (keep alive)</strong> to connect them.</p>
-
-<p>Notice the Web Service is <strong>connection heavy</strong>, which consume large CPU and RAM resource. It&rsquo;s better to seperate to one machine.</p>
-
-<p>Big brother is read/write heavy, so it&rsquo;s OKAY to put on same machine with Dispatcher.</p>
-
-<p>Since Dataset and Recommender have data exchange, it&rsquo;s a good idea to put on same machine.</p>
-
-<h3>Additional questions</h3>
-
-<p>Implement Dispatcher with <strong>consumer-producer</strong> model.</p>
 </div>
 
 
@@ -516,7 +313,7 @@ Similarity( u1, u2 ) = 3
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2015/08/23/design-class-1/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2015/08/23/design-class-1/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2015/08/23/design-class1-1/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2015/08/23/design-class1-1/" >Tweet</a>
   
   
   
@@ -528,7 +325,7 @@ Similarity( u1, u2 ) = 3
         <a class="basic-alignment left" href="/blog/2015/07/23/how-is-pipe-implemented-unix/" title="Previous Post: [Design] How is Pipe implemented in Unix/Linux ">&laquo; [Design] How is Pipe implemented in Unix/Linux </a>
       
       
-        <a class="basic-alignment right" href="/blog/2015/08/24/three-property-object/" title="Next Post: [Java OOP] Three Properties of Class/Object ">[Java OOP] Three Properties of Class/Object  &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2015/08/23/design-class1-2/" title="Next Post: [NineChap Sys] System Design Class 1.2: An Example ">[NineChap Sys] System Design Class 1.2: An Example  &raquo;</a>
       
     </p>
   </footer>
@@ -583,7 +380,7 @@ Similarity( u1, u2 ) = 3
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (20)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
@@ -602,19 +399,19 @@ Similarity( u1, u2 ) = 3
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/30/design-class-4/">[NineChap Sys] System Design Class 4: Crawler & Search Engine </a>
+        <a href="/blog/2015/08/30/design-class4-2/">[NineChap Sys] System Design Class 4: Search Engine </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/28/design-class-3/">[NineChap Sys] System Design Class 3: Web Service </a>
+        <a href="/blog/2015/08/30/design-class4-1/">[NineChap Sys] System Design Class 4: Crawler </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/26/design-class-2/">[NineChap Sys] System Design Class 2: Database </a>
+        <a href="/blog/2015/08/28/design-class3-2/">[NineChap Sys] System Design Class 3.2: Web Service (2) </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/24/three-property-object/">[Java OOP] Three Properties of Class/Object </a>
+        <a href="/blog/2015/08/28/design-class3-1/">[NineChap Sys] System Design Class 3.1: Web Service (1) </a>
       </li>
     
   </ul>
@@ -658,8 +455,8 @@ Similarity( u1, u2 ) = 3
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://www.shuatiblog.com/blog/2015/08/23/design-class-1/';
-        var disqus_url = 'http://www.shuatiblog.com/blog/2015/08/23/design-class-1/';
+        var disqus_identifier = 'http://www.shuatiblog.com/blog/2015/08/23/design-class1-1/';
+        var disqus_url = 'http://www.shuatiblog.com/blog/2015/08/23/design-class1-1/';
         var disqus_script = 'embed.js';
       
     (function () {

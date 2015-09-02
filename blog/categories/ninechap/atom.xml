@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ninechap | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/ninechap/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-01T23:35:04+08:00</updated>
+  <updated>2015-09-02T16:15:22+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -14,11 +14,19 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[NineChap Sys] System Design Class 4: Crawler & Search Engine ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/30/design-class-4/"/>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 4: Search Engine ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/"/>
     <updated>2015-08-30T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/30/design-class-4</id>
-    <content type="html"><![CDATA[# Lecture overview
+    <id>http://www.shuatiblog.com/blog/2015/08/30/design-class4-2</id>
+    <content type="html"><![CDATA[]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 4: Crawler ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/30/design-class4-1/"/>
+    <updated>2015-08-30T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/30/design-class4-1</id>
+    <content type="html"><![CDATA[# Overview
 
 __KISS - Keep It Simple, Sweetie__.
 
@@ -349,11 +357,182 @@ Stay tuned for future post.
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[NineChap Sys] System Design Class 3: Web Service ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/28/design-class-3/"/>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 3.2: Web Service (2) ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/28/design-class3-2/"/>
     <updated>2015-08-28T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/28/design-class-3</id>
-    <content type="html"><![CDATA[# Question 0
+    <id>http://www.shuatiblog.com/blog/2015/08/28/design-class3-2</id>
+    <content type="html"><![CDATA[# Question 4
+
+__fix MP3 problem__
+
+The process of fetching a MP3 (from CDN):
+
+<img class="middle" src="/assets/images/design-class3-client-request-mp3.png">
+
+1. aquire MP3 link, and send request
+1. send request to CDN
+1. CDN receive request, find MP3
+1. response to client
+1. play the music
+
+<img class="middle" src="/assets/images/design-class3-client-request-mp3-errors.png">
+
+Question: in step 2, there's more Network error, but in step 4, there's no Network error, but Timeout. Why?
+
+## Fix step 2, Network error
+
+Problem is: MP3 url invalid. It actually comes from a failed CDN sever. 
+
+Solution: fix the server.
+
+## Fix step 3, CDN can't find MP3 
+
+Problem associated with __Anti-Leech__. 
+
+> __[a leech](https://en.wikipedia.org/wiki/Leech_(computing))__ is one who benefits, usually deliberately, from others' information or effort but does not offer anything in return. 
+>
+> Example: Wi-Fi leeches, Direct linking (or hot-linking) and In most P2P-networks, leeching is whose who download too much.
+
+> __[Anti-Leech](https://answers.yahoo.com/question/index?qid=1006042926419)__ specializes in protecting file downloads and stopping bandwidth leeching. 
+
+See that some P2P and leeching software will steal your url links, so the MP3 url expiration time is 5 minutes. 
+
+So when CDN server's clock and web server's clock are not synchronized well, MP3 url can expire. 
+
+Solution: every 10 minutes sync CDN clock with web server clock. 
+
+## Fix step 4, Timeout error
+
+Some MP3 are relatively large. Thus timeout. 
+
+> MP3 performs better at higher bps, and aac(Advanced Audio Coding) works better at lower bps. 
+
+Solution: 
+
+1. compress MP3 to 48bps, or use aac format. So, play lower-rate music first, then switch automatically.
+
+1. pre-load a music while previous is playing. 
+
+1. optimize CDN
+
+> __[CDN](https://en.wikipedia.org/wiki/Content_delivery_network)__ content delivery network is a large __distributed system of servers__ deployed in __multiple data centers__ across the Internet. 
+
+> The goal of a CDN is to serve content to end-users with high availability and high performance.  
+
+<img class="middle" src="/assets/images/design-class3-CDN.png">
+
+Which CDN should client choose?
+
+> Not DNS, but web server calculates which to choose. It can be calculated using IP distance, or ISP provider, but not accurate. 
+
+> We can also use local desktop apps (in different locations) to ping CDN servers. This may violate user privacy, though. 
+
+## Fix step 5, Fail to play
+
+Problem: some files got wrong decoding. 
+
+## Fix step 6, unkown error
+
+Problem: some users close the page while MP3 loading. 
+
+# Question 5
+
+__fix player problem__
+
+Problem: iOS device can never play Flash. 
+
+Solution: develop HTML5 player. 
+
+## 5.2 how to evaluate that you solved the problem
+
+1. user complains
+
+1. __important__: daily retention rate! 
+
+We can't use daily active user, cuz it depends on marketing, competitors, and infrastructure changes. 
+
+__One day retention rate__:
+
+<img class="middle" src="/assets/images/design-class3-user-retention.png">
+
+> Today’s visitor = {U1, U3, U7, U9, U10} 
+>
+> Tomorrow's visitor = {U2, U3, U9,}
+>
+> Today’s one day retention rate = 2/5
+
+# Question 6 秒杀
+
+## Design
+
+Queue A and Queue B
+
+<img class="middle" src="/assets/images/design-class3-miao-sha.png">
+
+### Queue A
+
+Many queues, each one locates on a individual web server or reverse proxy. It is mainly used to accept large amount of requests coming from the clients. 
+
+Each machine may takes 10,000 or more requests per second. 
+
+Queue A will redirect most requests to a static page (cached).
+
+### Queue B
+
+Queue B is a single machine, to aviod distributed problems. It takes in small amount of requests and decides results (eg. redirect to payment page). 
+
+> Now, why do we need 2 queues, not 1?
+
+> Think about a hospital. Queue A is the hospital lobby and security guard, and Queue B is the queue of patience. 
+
+## How to reduce traffic
+
+1. no image
+1. cache more static pages
+1. reverse proxy: batch sending the requests
+
+Also, can use front-end javascript to prevent clicking. There are method to bypass, so we need to check IP or do some filtering. 
+
+## How to keep it simple?
+
+1. no DB: basic logic. But rmb to use a log file
+1. no lock
+
+## How to improve stability
+
+1. use new server to do __Miao Sha__, in case of crash
+1. asyc prcessing everything! Don't let other people wait, in case of crash. 
+
+### How to defend hackers
+
+1. IP address (to defent auto softwares), but it's easy for hackers to fake IP address
+1. CAPTCHA 
+
+> __[CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA)__ (an acronym for "Completely Automated Public Turing test to tell Computers and Humans Apart") is a type of challenge-response test used in computing to determine whether or not the user is human. 
+
+## follow-up
+
+How to design 12306 (support several million QPS)
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 3.1: Web Service (1) ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/28/design-class3-1/"/>
+    <updated>2015-08-28T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/28/design-class3-1</id>
+    <content type="html"><![CDATA[# Overview
+
+Today we'll look at 6 examples of problems associated with Web Service:
+
+1. how the internet works
+1. DNS
+1. Web server
+1. Music Player
+1. MP3 file
+1. 秒杀
+
+# Question 0
 
 __how to solve raido-play failures__
 
@@ -525,382 +704,17 @@ Caching can happen at place Number 1, 2 and 3:
 AT Number 4, we can add __more servers__. Number 3, __reverse proxy__. Number 2 is __caching within the ISP network__, which avoids requesting info again from backend. Number 1 is __front-end browser cache__. 
 
 After this step, Web failure rate fall from 7% to 4%. Why still 4%? Well, these failure is mainly from the junk users created by marketing.
-
-# Question 4
-
-__fix MP3 problem__
-
-The process of fetching a MP3 (from CDN):
-
-<img class="middle" src="/assets/images/design-class3-client-request-mp3.png">
-
-1. aquire MP3 link, and send request
-1. send request to CDN
-1. CDN receive request, find MP3
-1. response to client
-1. play the music
-
-<img class="middle" src="/assets/images/design-class3-client-request-mp3-errors.png">
-
-Question: in step 2, there's more Network error, but in step 4, there's no Network error, but Timeout. Why?
-
-## Fix step 2, Network error
-
-Problem is: MP3 url invalid. It actually comes from a failed CDN sever. 
-
-Solution: fix the server.
-
-## Fix step 3, CDN can't find MP3 
-
-Problem associated with __Anti-Leech__. 
-
-> __[a leech](https://en.wikipedia.org/wiki/Leech_(computing))__ is one who benefits, usually deliberately, from others' information or effort but does not offer anything in return. 
->
-> Example: Wi-Fi leeches, Direct linking (or hot-linking) and In most P2P-networks, leeching is whose who download too much.
-
-> __[Anti-Leech](https://answers.yahoo.com/question/index?qid=1006042926419)__ specializes in protecting file downloads and stopping bandwidth leeching. 
-
-See that some P2P and leeching software will steal your url links, so the MP3 url expiration time is 5 minutes. 
-
-So when CDN server's clock and web server's clock are not synchronized well, MP3 url can expire. 
-
-Solution: every 10 minutes sync CDN clock with web server clock. 
-
-## Fix step 4, Timeout error
-
-Some MP3 are relatively large. Thus timeout. 
-
-> MP3 performs better at higher bps, and aac(Advanced Audio Coding) works better at lower bps. 
-
-Solution: 
-
-1. compress MP3 to 48bps, or use aac format. So, play lower-rate music first, then switch automatically.
-
-1. pre-load a music while previous is playing. 
-
-1. optimize CDN
-
-> __[CDN](https://en.wikipedia.org/wiki/Content_delivery_network)__ content delivery network is a large __distributed system of servers__ deployed in __multiple data centers__ across the Internet. 
-
-> The goal of a CDN is to serve content to end-users with high availability and high performance.  
-
-<img class="middle" src="/assets/images/design-class3-CDN.png">
-
-Which CDN should client choose?
-
-> Not DNS, but web server calculates which to choose. It can be calculated using IP distance, or ISP provider, but not accurate. 
-
-> We can also use local desktop apps (in different locations) to ping CDN servers. This may violate user privacy, though. 
-
-## Fix step 5, Fail to play
-
-Problem: some files got wrong decoding. 
-
-## Fix step 6, unkown error
-
-Problem: some users close the page while MP3 loading. 
-
-# Question 5
-
-__fix player problem__
-
-Problem: iOS device can never play Flash. 
-
-Solution: develop HTML5 player. 
-
-## 5.2 how to evaluate that you solved the problem
-
-1. user complains
-
-1. __important__: daily retention rate! 
-
-We can't use daily active user, cuz it depends on marketing, competitors, and infrastructure changes. 
-
-__One day retention rate__:
-
-<img class="middle" src="/assets/images/design-class3-user-retention.png">
-
-> Today’s visitor = {U1, U3, U7, U9, U10} 
->
-> Tomorrow's visitor = {U2, U3, U9,}
->
-> Today’s one day retention rate = 2/5
-
-# Question 6 秒杀
-
-## Design
-
-Queue A and Queue B
-
-<img class="middle" src="/assets/images/design-class3-miao-sha.png">
-
-### Queue A
-
-Many queues, each one locates on a individual web server or reverse proxy. It is mainly used to accept large amount of requests coming from the clients. 
-
-Each machine may takes 10,000 or more requests per second. 
-
-Queue A will redirect most requests to a static page (cached).
-
-### Queue B
-
-Queue B is a single machine, to aviod distributed problems. It takes in small amount of requests and decides results (eg. redirect to payment page). 
-
-> Now, why do we need 2 queues, not 1?
-
-> Think about a hospital. Queue A is the hospital lobby and security guard, and Queue B is the queue of patience. 
-
-## How to reduce traffic
-
-1. no image
-1. cache more static pages
-1. reverse proxy: batch sending the requests
-
-Also, can use front-end javascript to prevent clicking. There are method to bypass, so we need to check IP or do some filtering. 
-
-## How to keep it simple?
-
-1. no DB: basic logic. But rmb to use a log file
-1. no lock
-
-## How to improve stability
-
-1. use new server to do __Miao Sha__, in case of crash
-1. asyc prcessing everything! Don't let other people wait, in case of crash. 
-
-### How to defend hackers
-
-1. IP address (to defent auto softwares), but it's easy for hackers to fake IP address
-1. CAPTCHA 
-
-> __[CAPTCHA](https://en.wikipedia.org/wiki/CAPTCHA)__ (an acronym for "Completely Automated Public Turing test to tell Computers and Humans Apart") is a type of challenge-response test used in computing to determine whether or not the user is human. 
-
-## follow-up
-
-How to design 12306 (several million QPS)
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[NineChap Sys] System Design Class 2: Database ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/26/design-class-2/"/>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 2.2: Database (2) ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/26/design-class2-2/"/>
     <updated>2015-08-26T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/26/design-class-2</id>
-    <content type="html"><![CDATA[# Overview
+    <id>http://www.shuatiblog.com/blog/2015/08/26/design-class2-2</id>
+    <content type="html"><![CDATA[# Question 5
 
-This class covers database design: 
-
-1. design data with class and inheritance
-1. design a user system (Netflix 2015)
-1. design a payment system (Yelp, BigCommerce 2015)
-
-# Question 1
-
-__design account (login/out) system__ for our radio app. 
-
-## Step one, scenario
-
-1. register, update, remove account
-1. login/out
-1. user balance, VIP services
-
-## Step Two, necessary
-
-1. Ask
-	
-	1. total user: 100 million
-	1. daily user: 1 million
-	
-1. predict
-
-	1. daily active user in 3 month: 10 million
-	1. register percentage: 1%
-	1. daily new register: 100 thousand
-
-1. more predict
-
-	1. login percentage: 15%
-	1. average login frequency: 1.2 (ppl may input wrong password 20% of time)
-	1. daily login attempts: 10 million * 15% * 1.2 = 1.8 million
-	1. average login frequency: 1.8 million / 24hr = 21 login/sec
-	1. normal login frequency: 21 * 2 = 42 login/sec
-	1. peak login frequency: 42 * 3 = 126 login/sec
-
-## Step Three, Application
-
-<img class="middle" src="/assets/images/design-class2-app-design.png">
-
-## Step Four, Kilobit
-
-Data - User table should contain name and password. What else? 
-
-    class User {
-        int userId; (primary key)
-        String name;
-        String password;
-    }
-
-Data - User Table
-
-    class UserTable {
-        list<User> table;
-
-        public insert(){}
-        public delete(User){}
-        public update(User){}
-        public User select(){}
-    }
-
-> __[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)__, (Sometimes called SCRUD with an "S" for Search) are the four basic functions of persistent storage.
-
-# Question 2
-
-__verification and forbidden accounts__
-
-We have to know the concept of __Account State Lifecycle Graph__:
-
-<img class="middle" src="/assets/images/design-class2-account-life-cycle.png">
-
-1. ban: fake user, advertising users... bannned by the management
-
-1. inactive: user choose to suspend his own account, voluntarily.
-
-1. delete account: normally we won't remove all related data (just make userId as "deleted"). Otherwise a lot of data can be violated. All your chatting history __actually remains__. 
-
-## redesign User Table
-
-Old User table:
-
-    class User {
-        int userId; (primary key)
-        String name;
-        String password;
-    }
-
-Modified User table:
-
-    class User {
-        int userId;
-        char name[10];
-        char hiddenPassword[10];
-        int state;
-    }
-
-1. We added state, to support Account life cycle. 
-
-1. We changed username to fixed size, for better performance on searching and storing. Can prevent certain attacks, too. 
-
-1. save encrypted password. 
-
-# Question 3
-
-__design login/out process__
-
-1. User account auto logged out after a certain period of time.
-1. multiple account logged in at same time.
-
-<img class="middle" src="/assets/images/design-class2-session-life-cycle.png">
-
-## Session
-
-__Session is a conversation__ between user and server. 
-
-1. User can have >1 session, if he log in from different devices.
-1. Session must be verified, thus we have to keep __sessionId__.
-
-Session status: "iPad online", "PC online"...
-
-Modify User table: 
-
-    class User {
-        int userId;
-        char name[10];
-        char hiddenPassword[10];
-        int state;
-        List<session> sessionList;
-    }
-
-Important in Session table:
-
-1. device ID
-1. time-out period
-
-    class Session {
-        private sessionId;
-        int userId;
-        
-        int deviceCode;
-        long timeOut;
-    }
-
-User table would include a __session list__. 
-
-## further improvement: session
-
-1. we update sessionList very frequently.
-1. size of sessionList is dynamic.
-
-Solution: seperate the table. 
-
-<img class="middle" src="/assets/images/design-class2-user-session-table.png">
-
-Question: When to clean up the session data (considering huge amount of data and frequent calculation)?
-
-> Answer: every end of day. Or store sessions in-memory, so it lose all the data when machine restarts (it is used in Gaming platforms). Or we can clean up one user's session list whenever the user did a new log-in. 
->
-> We do not remove session whenever it expires. It's too much calculation. 
-
-## further improvement: inheritance
-
-Apply inheritance to UserTable and SessionTable: 
-
-    class Table {
-        list<Row*> table;
-
-        public insert(){}
-        public delete(){}
-        public update(){}
-        public User select(){}
-    }
-
-    class UserTable extends Table {
-    }
-    
-    class SessionTable extends Table {
-    }
-
-As for the Row class:
-
-    class Row {
-        List<Attributes> row;
-    }
-    
-    class User extends Row {
-    }
-    
-    class Session extends Row {
-    }
-
-# Question 4
-
-__design search algorithm__
-
-1. find my userId
-1. find my userId range
-
-Solution 1: add __HashMap__ in the table. Can do search in O(1), but can't find range. 
-
-Solution 2: __BST data structure__. Can do search range and search in O(log2 n) time. 
-
-## Best solution: B+ tree
-
-__[B+ tree](https://en.wikipedia.org/wiki/B%2B_tree)__ - everything in O(logb n) which is __close to constant time__. 
-
-Plus, B+ tree is hard disk friendly. Read more on a future post. 
-
-# Question 5
-
-__support VIP services__
+Continue from last post, now let's __support VIP services__. 
 
 User could buy VIP services using his acccount balance. 
 
@@ -1035,346 +849,6 @@ Hint: table design, register, login/out, password check, find password.
 1. Design payment system (Yelp, BigCommerce 2015)
 
 Hint: the question does not ask about table/ds design itself, but rather the problems associated with payment. Read about ACID principle. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[NineChap Sys] System Design Class 1: Overview ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/23/design-class-1/"/>
-    <updated>2015-08-23T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/23/design-class-1</id>
-    <content type="html"><![CDATA[# Overview
-
-## defination 
-
-the process of defining the __architecture, components, modules, interfaces and data__ to satisfy specified __requirements__. 
-
-1. conceptual design (macro)
-2. logical design
-3. physical design (micro)
-
-### Top-down design
-
-Eg. MS Office, Huawei Security System
-
-### Bottom-up design
-
-Most start-up use, MVP first using Medetor + MongoDb. 
-
-## 5 steps (SNAKE Principle):
-
-1. __Scenario__: case/interface - input
-1. __Necessary__: constrain/hypothesis - input
-1. __Application__: service/algorithm - output
-1. __Kilobit__: data - output
-1. __Evolve__ - solution
-
-# A top-down example
-
-Example one: __design a radio__
-
-## Step One, Scenario
-
-1. brain storm
-
-    1. register/log in
-    1. play music
-    1. recommendation
-
-1. prioritize
-
-    1. play music
-        1. Get channel
-        1. select a channel
-        1. play
-
-## Step Two, Necessary
-
-1. ask
-
-    1. total user - 100,000,000
-    1. __daily users - 1,000,000__
-
-1. predict
-
-    1. user analysis
-    1. Traffic analysis
-    1. Memory analysis
-    1. QPS
-
-Details:
-
-1. user analysis
-
-    > Avg Concurrent users = daily users __/ 5__ = 200,000
-    >
-    > Peak Concurrent users = concurrent user __\* 3__ = 600,000
-
-    considering your product may grow in the next 3 month:
-    
-    > Max Peak users in 3 month = Peak users __\* 10__ = 6,000,000
-
-1. Traffic analysis
-
-	> Request of new music per user: 1 music/min
-	>
-	> Music size = 3MB
-	>
-	> Max peak traffic (in 3 months) = 6,000,000 \* 3MB / 60 = 300GB/s
-
-1. Memory analysis
-
-	> Memory per user (metadata) = 10KB
-	>
-	> Max daily memory = 1,000,000 \* 10 \* 10 = 100 million KB = 100GB
-    >
-    > (10 times of avg daily user)
-
-## Step Three, Application
-
-1. Replay the case, one service for each
-1. Merge the services
-
-<img class="middle" src="/assets/images/design-class1-basic-receptionist.png">
-
-## Step Four, Kilobit: data
-
-1. Append 1 dataset for each service
-
-    Eg. User service: stability, more addition, less modify and deletion.
-
-    Eg. Channel Service: high concurrency, MongoDB
-
-    Eg. Music Service: MP3 File Systems
-
-<img class="middle" src="/assets/images/design-class1-reco-5.png">
-
-## Last Step, Evolve
-
-1. Better: constrains 
-
-    eg. able to handle 300GB/s traffic?
-
-1. Broader: new cases
-
-    share music? delete user account?
-
-1. Deeper: details design
-
-From views of __Performance, Scalability and Robustness__.
-
-<img class="middle" src="/assets/images/design-class1-snake.jpg">
-
-# A bottom-up example
-
-Example two: __design a recommendation module__
-
-## A simple algo: 
-
-    u1={m3,m5,m7,m11}
-    u2={m1,m2,m3,m4,m5,m6,m7,m8,m9}
-    Similarity( u1, u2 ) = 3
-    
-m - music
-
-u - user
-
-Similarity = # of same music for different users
-
-## Adv algo: 
-
-find his __top-1 similar user__. Stay tuned for future posts. 
-
-## Use the 5 Steps (SNAKE)
-
-1. Step One, Scenario
-1. Step Two, Necessary
-1. Step Three, Application
-1. Step Four, Kilobit: data
-1. Last Step, Evolve
-
-Because this question is relatively easy, we will not do case-analysis (Macro). 
-
-__Instead, we do micro design__ by starting at the interface. 
-
-## Step One, Scenario
-
-Interface 
-
-    class Recommender {
-        public int findSimilarUser(int userId) {
-            //
-        }
-    }
-
-## Step Two, Necessary
-
-1. ask
-    1. total users = 100,000,000
-    1. total music = 10,000,000
-    1. peak users in 3 month = 6,000,000
-    
-    However, not everyone is logged in. Thus we won't need to recommend for everybody. On average, the logged-in ratio is 1% - 30%. Let's assume 5%. 
-    
-    1. participation percentage = 5%
-    
-    And user's interest won't change every minute. Let's recalculate only after 10 minutes.
-    
-    1. calculation frequency = 1 update/10min/user
-
-1. predict
-
-    1. user analysis (skip)
-    1. Traffic analysis (skip)
-    1. Memory analysis (skip)
-    1. QPS
-    
-    Peak QPS = 6,000,000 \* 5% / (10 \* 60) = 500/s
-
-## Step Three, Application
-
-__The simpliest algorithm: BF compare__. The complexity is O(m n) for each user, where m is # of music a person likes, and n is # of total users. For k users, it takes O(k m n) time (k can be = peak concurrent users). 
-
-This is roughly 0.2s per user. Thus __Max QPS = 5__. 
-
-> One word about complexity-to-seconds estimation. 
->
-> O(n ^ 3) -> 1s
->
-> O(n ^ 2) -> 0.2s
->
-> O(n) -> 20ms
->
-> O(k) -> k ms
-
-## Step Four, Kilobit: data
-
-Very simple:
-
-<img class="middle" src="/assets/images/design-class1-reco-1.png">
-
-## Last Step, Evolve
-
-Read on. 
-
-# From Level 0 to Level 1
-
-Refer to the previous question. How can we improve???
-
-1. performance
-1. scalability
-1. robustness
-
-## performance
-
-A better algo: Inverted Index
-
-<img class="middle" src="/assets/images/design-class1-reco-2.png">
-
-Avg performance increase to ~ 20ns (with some optimization of MapReduce procedure, discuss later). 
-
-__Max QPS increase to 50__. 
-
-## scalability
-
-Use a __dispatcher__ to re-direct the requests to multiple machines. 
-
-<img class="middle" src="/assets/images/design-class1-reco-3.png">
-
-### How many machines do we need then? 
-
-Well we need 500 QPS. The algo above achieves ~ 50 QPS. __Should we need 10 machines__?
-
-The answer is NO. A machine with 8 (or 16) core CPU could be able to handle. 
-
-We can also have a __hot-standby__, to be safe. 
-
-> hot standby is used as a failover mechanism to provide reliability in system configurations. 
->
-> When a key component fails, the hot spare is switched into operation. 
-
-## robustness
-
-Tips about system design for senior engineers: 
-
-> __Draw 1 machine first__. This machine can contains multiple datasets and run multiple processes. 
->
-> On top of this machine, the interface layer is __one single Manager process__. The Manager is in charge of almost everything: handling data lost, handle high concurrency, copy multiple instance of itself... 
->
-> Like this: 
-
-<img class="middle" src="/assets/images/design-class1-reco-6.png">
-
-### Back-end
-
-Now we need __a cluster of datasets__ (which has Manager on top of it), and __a cluster of Recommenders__. Manager is in charge of copying multiple instances. 
-
-Dataset can be put in different physical locations. Recommender don't really need, cuz it's only do calculation job. 
-
-### Receiving requests
-
-Just now we used __Receptionist (or Dispatcher)__ to handle request. Now we use a __Web service__ (eg. Apache). It's not necessary to make it a cluster. 
-
-### Big Brother
-
-We need a __monitor system__ to oversee everything. 
-
-Also, Big Brother is in charge of heart-beat. If not received, Big Brother have some double-check machanism. 
-
-<img class="middle" src="/assets/images/design-class1-reco-4.png">
-
-### Connecting the dots
-
-__Dispatcher__ is used to connect the 4 components. It's like a messaging queue that collects and distributes jobs among everybody (eg. control and distributed info). 
-
-It can be stateful or stateless. 
-
-Keep in mind __the connection between Dataset and Recommender__ remains. It's slow going thru Dispatcher. 
-
-### Distribute it
-
-During development, the 5 components can be put on same machine. When we deploy distributely, we use __Socket connection (keep alive)__ to connect them. 
-
-Notice the Web Service is __connection heavy__, which consume large CPU and RAM resource. It's better to seperate to one machine. 
-
-Big brother is read/write heavy, so it's OKAY to put on same machine with Dispatcher. 
-
-Since Dataset and Recommender have data exchange, it's a good idea to put on same machine. 
-
-### Additional questions
-
-Implement Dispatcher with __consumer-producer__ model. 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[NineChap 10] Additional Questions]]></title>
-    <link href="http://www.shuatiblog.com/blog/2014/07/07/NineChap-additional/"/>
-    <updated>2014-07-07T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2014/07/07/NineChap-additional</id>
-    <content type="html"><![CDATA[The following questions does not appear in NineChap, but they all worth reading. 
-
-### Question List 
-
-1. __[Longest Substring Without Repeating Characters ](/blog/2014/04/27/longest-substring-without-repeating/)__
-
-1. __[Minimum Window Substring ](/blog/2014/05/21/Minimum-Window-Substring/)__ - very difficult
-
-1. __[Scramble String ](/blog/2014/05/23/Scramble-String/)__
-
-1. __[Recover Binary Search Tree ](/blog/2014/05/25/Recover-Binary-Search-Tree/)__
-
-1. __[Median of Two Sorted Arrays ](/blog/2014/04/26/Median-of-Two-Sorted-Arrays/)__ - difficult
-
-1. __[Sudoku Solver ](/blog/2014/05/14/Sudoku-Solver/)__ - difficult
-
-1. __[Word Search ](/blog/2014/05/21/Word-Search/)__
-
-1. __[Simplify Path](/blog/2014/05/21/Simplify-Path/)__
-
-1. __[Regular Expression Matching](/blog/2014/04/29/Regular-Expression-Matching/)__ - very difficult
-
-1. __[Wildcard Matching](/blog/2014/05/15/Wildcard-Matching/)__ - difficult
 ]]></content>
   </entry>
   

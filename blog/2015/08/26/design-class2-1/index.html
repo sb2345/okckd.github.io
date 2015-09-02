@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[NineChap Sys] System Design Class 2: Database  - Shuatiblog.com</title>
+  <title>[NineChap Sys] System Design Class 2.1: Database (1)  - Shuatiblog.com</title>
   <meta name="author" content="CodeMonkey">
 
   
@@ -20,7 +20,7 @@ design a payment system (Yelp &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.shuatiblog.com/blog/2015/08/26/design-class-2/">
+  <link rel="canonical" href="http://www.shuatiblog.com/blog/2015/08/26/design-class2-1/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -98,7 +98,7 @@ design a payment system (Yelp &hellip;">
   
   <header>
     
-      <h1 class="entry-title">[NineChap Sys] System Design Class 2: Database</h1>
+      <h1 class="entry-title">[NineChap Sys] System Design Class 2.1: Database (1)</h1>
     
     
       <p class="meta">
@@ -376,162 +376,6 @@ class Session extends Row {
 <p><strong><a href="https://en.wikipedia.org/wiki/B%2B_tree">B+ tree</a></strong> &ndash; everything in O(logb n) which is <strong>close to constant time</strong>.</p>
 
 <p>Plus, B+ tree is hard disk friendly. Read more on a future post.</p>
-
-<h1>Question 5</h1>
-
-<p><strong>support VIP services</strong></p>
-
-<p>User could buy VIP services using his acccount balance.</p>
-
-<pre><code>class ProService {
-    int userId;
-    double money;
-    long endTime;
-
-    public addMoney(){}
-    public buyPro(){}
-}
-</code></pre>
-
-<h2>Q5.1: System crash when purchasing VIP</h2>
-
-<p>Solution: <strong>transaction with log</strong></p>
-
-<pre><code>WriteLOG
-Transaction_1123: BEGIN
-money=20; endTime=16_07_2016
-</code></pre>
-
-<p>If system crash happens here, system will read the log, recover and roll back all original data. Try not to complete the transaction &ndash; just fail it.</p>
-
-<pre><code>WriteLOG
-Transaction_1123: BEGIN
-money=20; endTime=16_07_2016
-WriteLOG
-Transaction_1123: END
-money=10; endTime=16_08_2016
-</code></pre>
-
-<blockquote><p>What happens if system crash during writing the log? or during the rollback?</p></blockquote>
-
-<h2>Q5.2: dataset contains bad data</h2>
-
-<ol>
-<li>one user id have 2 corresponding pro-services information.</li>
-<li>Shallow user: a pro-services info does not have corresponding user.</li>
-</ol>
-
-
-<p>Solution: have a checker class.</p>
-
-<h2>Q5.3: simutaneous purchase by 2 users</h2>
-
-<p>Solution: lock.</p>
-
-<ol>
-<li>first process lock money &amp; endTime.</li>
-<li>Read money = 20</li>
-<li>another process try to lock, but end up waiting (sleeping).</li>
-<li>first process do the job, and release the lock.</li>
-<li>another process wakes up.</li>
-</ol>
-
-
-<blockquote><p>lock have time-out settings. It can be applied in distributed system as well.</p></blockquote>
-
-<p>Question: does lock make your execution slow?</p>
-
-<ol>
-<li><p>If another process is sleeping, CPU will be fully consumed by other process. So it won&rsquo;t impact.</p></li>
-<li><p>You can do some async processing, too.</p></li>
-<li><p>When you lock, try to lock only a small piece of code, not the entire method. In DB, lock only a row, not a table.</p></li>
-<li><p>Java <a href="https://en.wikipedia.org/wiki/Compare-and-swap">CAS</a> (Compare and swap )</p></li>
-</ol>
-
-
-<h2>Q5.4: Server crash</h2>
-
-<p>Solution: duplication.</p>
-
-<ol>
-<li><p>How many copies?</p>
-
-<p> Google did 3. Normally 2 in same data center, and 1 in another location.</p>
-
-<p> Backup data normally is on another machine. But there&rsquo;s also <a href="https://en.wikipedia.org/wiki/RAID">RAID</a> (redundant array of independent disks) which:</p>
-
-<blockquote><p>combines multiple physical disk drive components into a single logical unit for the purposes of <strong>data redundancy, performance improvement</strong>, or both.</p></blockquote></li>
-<li><p>When does the copy happen?</p>
-
-<p> Option 1 is <strong>doing everyday nightly</strong>. This is called a &lsquo;check point&rsquo;.</p>
-
-<p> Option 2 is use another server to support <strong>Shadow Redundancy</strong>. All data from Machine 0 will be copied to Machine 1 WHILE it happens. The result is, Machine 1 is identical to Machine 0. If Machine 0 crashes, Machine 1 may be behind less than 1 second.</p>
-
-<p> The way to duplicate is either re-play all the actions, or to read Machine 0&rsquo;s log and apply the new data.</p></li>
-<li><p>How to copy?</p>
-
-<p> User send data to 1 server, and from that server, pipeline. This ensures good usage of server bandwith, and serial transfer of data ensures low latency (several ms).</p>
-
-<p> It&rsquo;s also possible to do tree-like transfer, but the above method is preferred cuz all machine consume same bandwidth.</p></li>
-<li><p>What is log?</p>
-
-<p> It is actually &lsquo;checkpoint&rsquo; + log. It allows you to rollback.</p></li>
-</ol>
-
-
-<p>Data redundancy &ndash; Summary:</p>
-
-<p><img class="middle" src="/assets/images/design-class2-data-redundancy-1.png"></p>
-
-<h2>Final note: Data inconsistency</h2>
-
-<p>Main sources of inconsistency comes from:</p>
-
-<ol>
-<li>network fault</li>
-<li>disk error</li>
-</ol>
-
-
-<p>The disk eror is solved by <strong>checksum</strong> (compare during disk writing).</p>
-
-<h1>Summary</h1>
-
-<p><strong><a href="https://en.wikipedia.org/wiki/ACID">ACID</a> (Atomicity, Consistency, Isolation, Durability)</strong>  is a set of properties that guarantee that database transactions are processed reliably.</p>
-
-<ol>
-<li><p><strong>Atomicity: all or nothing</strong></p>
-
-<p> Q5.1: System crash when purchasing VIP</p></li>
-<li><p><strong>Consistency</strong>: validate according to defined rules</p>
-
-<p> Q5.2: dataset contains bad data</p></li>
-<li><p><strong>Isolation</strong>: independency between transactions <strong>(lock)</strong></p>
-
-<p> Q5.3: simutaneous purchase by 2 users</p></li>
-<li><p><strong>Durability</strong>: stored permanently</p>
-
-<p> Q5.4: Server crash</p></li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/design-class2-summary.png"></p>
-
-<p>Additional Questions:</p>
-
-<ol>
-<li>design a user system (Netflix 2015)</li>
-</ol>
-
-
-<p>Hint: table design, register, login/out, password check, find password.</p>
-
-<ol>
-<li>Design payment system (Yelp, BigCommerce 2015)</li>
-</ol>
-
-
-<p>Hint: the question does not ask about table/ds design itself, but rather the problems associated with payment. Read about ACID principle.</p>
 </div>
 
 
@@ -569,7 +413,7 @@ money=10; endTime=16_08_2016
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2015/08/26/design-class-2/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2015/08/26/design-class-2/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2015/08/26/design-class2-1/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2015/08/26/design-class2-1/" >Tweet</a>
   
   
   
@@ -581,7 +425,7 @@ money=10; endTime=16_08_2016
         <a class="basic-alignment left" href="/blog/2015/08/24/three-property-object/" title="Previous Post: [Java OOP] Three Properties of Class/Object ">&laquo; [Java OOP] Three Properties of Class/Object </a>
       
       
-        <a class="basic-alignment right" href="/blog/2015/08/28/design-class-3/" title="Next Post: [NineChap Sys] System Design Class 3: Web Service ">[NineChap Sys] System Design Class 3: Web Service  &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2015/08/26/design-class2-2/" title="Next Post: [NineChap Sys] System Design Class 2.2: Database (2) ">[NineChap Sys] System Design Class 2.2: Database (2)  &raquo;</a>
       
     </p>
   </footer>
@@ -636,7 +480,7 @@ money=10; endTime=16_08_2016
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
-<li class='category'><a href='/blog/categories/ninechap/'>ninechap (20)</a></li>
+<li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (62)</a></li>
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
@@ -655,19 +499,19 @@ money=10; endTime=16_08_2016
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/30/design-class-4/">[NineChap Sys] System Design Class 4: Crawler & Search Engine </a>
+        <a href="/blog/2015/08/30/design-class4-2/">[NineChap Sys] System Design Class 4: Search Engine </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/28/design-class-3/">[NineChap Sys] System Design Class 3: Web Service </a>
+        <a href="/blog/2015/08/30/design-class4-1/">[NineChap Sys] System Design Class 4: Crawler </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/26/design-class-2/">[NineChap Sys] System Design Class 2: Database </a>
+        <a href="/blog/2015/08/28/design-class3-2/">[NineChap Sys] System Design Class 3.2: Web Service (2) </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/08/24/three-property-object/">[Java OOP] Three Properties of Class/Object </a>
+        <a href="/blog/2015/08/28/design-class3-1/">[NineChap Sys] System Design Class 3.1: Web Service (1) </a>
       </li>
     
   </ul>
@@ -711,8 +555,8 @@ money=10; endTime=16_08_2016
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://www.shuatiblog.com/blog/2015/08/26/design-class-2/';
-        var disqus_url = 'http://www.shuatiblog.com/blog/2015/08/26/design-class-2/';
+        var disqus_identifier = 'http://www.shuatiblog.com/blog/2015/08/26/design-class2-1/';
+        var disqus_url = 'http://www.shuatiblog.com/blog/2015/08/26/design-class2-1/';
         var disqus_script = 'embed.js';
       
     (function () {

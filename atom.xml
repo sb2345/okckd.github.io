@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-01T23:35:04+08:00</updated>
+  <updated>2015-09-02T16:15:22+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -53,11 +53,20 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[NineChap Sys] System Design Class 4: Crawler & Search Engine ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/30/design-class-4/"/>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 4: Search Engine ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/"/>
     <updated>2015-08-30T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/30/design-class-4</id>
-    <content type="html"><![CDATA[<h1>Lecture overview</h1>
+    <id>http://www.shuatiblog.com/blog/2015/08/30/design-class4-2</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 4: Crawler ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/30/design-class4-1/"/>
+    <updated>2015-08-30T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/30/design-class4-1</id>
+    <content type="html"><![CDATA[<h1>Overview</h1>
 
 <p><strong>KISS &ndash; Keep It Simple, Sweetie</strong>.</p>
 
@@ -396,11 +405,203 @@ Signal(semaphore) {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[NineChap Sys] System Design Class 3: Web Service ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/28/design-class-3/"/>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 3.2: Web Service (2) ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/28/design-class3-2/"/>
     <updated>2015-08-28T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/28/design-class-3</id>
-    <content type="html"><![CDATA[<h1>Question 0</h1>
+    <id>http://www.shuatiblog.com/blog/2015/08/28/design-class3-2</id>
+    <content type="html"><![CDATA[<h1>Question 4</h1>
+
+<p><strong>fix MP3 problem</strong></p>
+
+<p>The process of fetching a MP3 (from CDN):</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-client-request-mp3.png"></p>
+
+<ol>
+<li>aquire MP3 link, and send request</li>
+<li>send request to CDN</li>
+<li>CDN receive request, find MP3</li>
+<li>response to client</li>
+<li>play the music</li>
+</ol>
+
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-client-request-mp3-errors.png"></p>
+
+<p>Question: in step 2, there&rsquo;s more Network error, but in step 4, there&rsquo;s no Network error, but Timeout. Why?</p>
+
+<h2>Fix step 2, Network error</h2>
+
+<p>Problem is: MP3 url invalid. It actually comes from a failed CDN sever.</p>
+
+<p>Solution: fix the server.</p>
+
+<h2>Fix step 3, CDN can&rsquo;t find MP3</h2>
+
+<p>Problem associated with <strong>Anti-Leech</strong>.</p>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Leech_(computing">a leech</a>)</strong> is one who benefits, usually deliberately, from others&#8217; information or effort but does not offer anything in return.</p>
+
+<p>Example: Wi-Fi leeches, Direct linking (or hot-linking) and In most P2P-networks, leeching is whose who download too much.</p>
+
+<p><strong><a href="https://answers.yahoo.com/question/index?qid=1006042926419">Anti-Leech</a></strong> specializes in protecting file downloads and stopping bandwidth leeching.</p></blockquote>
+
+<p>See that some P2P and leeching software will steal your url links, so the MP3 url expiration time is 5 minutes.</p>
+
+<p>So when CDN server&rsquo;s clock and web server&rsquo;s clock are not synchronized well, MP3 url can expire.</p>
+
+<p>Solution: every 10 minutes sync CDN clock with web server clock.</p>
+
+<h2>Fix step 4, Timeout error</h2>
+
+<p>Some MP3 are relatively large. Thus timeout.</p>
+
+<blockquote><p>MP3 performs better at higher bps, and aac(Advanced Audio Coding) works better at lower bps.</p></blockquote>
+
+<p>Solution:</p>
+
+<ol>
+<li><p>compress MP3 to 48bps, or use aac format. So, play lower-rate music first, then switch automatically.</p></li>
+<li><p>pre-load a music while previous is playing.</p></li>
+<li><p>optimize CDN</p></li>
+</ol>
+
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Content_delivery_network">CDN</a></strong> content delivery network is a large <strong>distributed system of servers</strong> deployed in <strong>multiple data centers</strong> across the Internet.</p>
+
+<p>The goal of a CDN is to serve content to end-users with high availability and high performance.</p></blockquote>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-CDN.png"></p>
+
+<p>Which CDN should client choose?</p>
+
+<blockquote><p>Not DNS, but web server calculates which to choose. It can be calculated using IP distance, or ISP provider, but not accurate.</p>
+
+<p>We can also use local desktop apps (in different locations) to ping CDN servers. This may violate user privacy, though.</p></blockquote>
+
+<h2>Fix step 5, Fail to play</h2>
+
+<p>Problem: some files got wrong decoding.</p>
+
+<h2>Fix step 6, unkown error</h2>
+
+<p>Problem: some users close the page while MP3 loading.</p>
+
+<h1>Question 5</h1>
+
+<p><strong>fix player problem</strong></p>
+
+<p>Problem: iOS device can never play Flash.</p>
+
+<p>Solution: develop HTML5 player.</p>
+
+<h2>5.2 how to evaluate that you solved the problem</h2>
+
+<ol>
+<li><p>user complains</p></li>
+<li><p><strong>important</strong>: daily retention rate!</p></li>
+</ol>
+
+
+<p>We can&rsquo;t use daily active user, cuz it depends on marketing, competitors, and infrastructure changes.</p>
+
+<p><strong>One day retention rate</strong>:</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-user-retention.png"></p>
+
+<blockquote><p>Today’s visitor = {U1, U3, U7, U9, U10}</p>
+
+<p>Tomorrow&rsquo;s visitor = {U2, U3, U9,}</p>
+
+<p>Today’s one day retention rate = 2/5</p></blockquote>
+
+<h1>Question 6 秒杀</h1>
+
+<h2>Design</h2>
+
+<p>Queue A and Queue B</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-miao-sha.png"></p>
+
+<h3>Queue A</h3>
+
+<p>Many queues, each one locates on a individual web server or reverse proxy. It is mainly used to accept large amount of requests coming from the clients.</p>
+
+<p>Each machine may takes 10,000 or more requests per second.</p>
+
+<p>Queue A will redirect most requests to a static page (cached).</p>
+
+<h3>Queue B</h3>
+
+<p>Queue B is a single machine, to aviod distributed problems. It takes in small amount of requests and decides results (eg. redirect to payment page).</p>
+
+<blockquote><p>Now, why do we need 2 queues, not 1?</p>
+
+<p>Think about a hospital. Queue A is the hospital lobby and security guard, and Queue B is the queue of patience.</p></blockquote>
+
+<h2>How to reduce traffic</h2>
+
+<ol>
+<li>no image</li>
+<li>cache more static pages</li>
+<li>reverse proxy: batch sending the requests</li>
+</ol>
+
+
+<p>Also, can use front-end javascript to prevent clicking. There are method to bypass, so we need to check IP or do some filtering.</p>
+
+<h2>How to keep it simple?</h2>
+
+<ol>
+<li>no DB: basic logic. But rmb to use a log file</li>
+<li>no lock</li>
+</ol>
+
+
+<h2>How to improve stability</h2>
+
+<ol>
+<li>use new server to do <strong>Miao Sha</strong>, in case of crash</li>
+<li>asyc prcessing everything! Don&rsquo;t let other people wait, in case of crash.</li>
+</ol>
+
+
+<h3>How to defend hackers</h3>
+
+<ol>
+<li>IP address (to defent auto softwares), but it&rsquo;s easy for hackers to fake IP address</li>
+<li>CAPTCHA</li>
+</ol>
+
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/CAPTCHA">CAPTCHA</a></strong> (an acronym for &ldquo;Completely Automated Public Turing test to tell Computers and Humans Apart&rdquo;) is a type of challenge-response test used in computing to determine whether or not the user is human.</p></blockquote>
+
+<h2>follow-up</h2>
+
+<p>How to design 12306 (support several million QPS)</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 3.1: Web Service (1) ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/28/design-class3-1/"/>
+    <updated>2015-08-28T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/28/design-class3-1</id>
+    <content type="html"><![CDATA[<h1>Overview</h1>
+
+<p>Today we&rsquo;ll look at 6 examples of problems associated with Web Service:</p>
+
+<ol>
+<li>how the internet works</li>
+<li>DNS</li>
+<li>Web server</li>
+<li>Music Player</li>
+<li>MP3 file</li>
+<li>秒杀</li>
+</ol>
+
+
+<h1>Question 0</h1>
 
 <p><strong>how to solve raido-play failures</strong></p>
 
@@ -595,185 +796,177 @@ Signal(semaphore) {
 <p>AT Number 4, we can add <strong>more servers</strong>. Number 3, <strong>reverse proxy</strong>. Number 2 is <strong>caching within the ISP network</strong>, which avoids requesting info again from backend. Number 1 is <strong>front-end browser cache</strong>.</p>
 
 <p>After this step, Web failure rate fall from 7% to 4%. Why still 4%? Well, these failure is mainly from the junk users created by marketing.</p>
-
-<h1>Question 4</h1>
-
-<p><strong>fix MP3 problem</strong></p>
-
-<p>The process of fetching a MP3 (from CDN):</p>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-client-request-mp3.png"></p>
-
-<ol>
-<li>aquire MP3 link, and send request</li>
-<li>send request to CDN</li>
-<li>CDN receive request, find MP3</li>
-<li>response to client</li>
-<li>play the music</li>
-</ol>
-
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-client-request-mp3-errors.png"></p>
-
-<p>Question: in step 2, there&rsquo;s more Network error, but in step 4, there&rsquo;s no Network error, but Timeout. Why?</p>
-
-<h2>Fix step 2, Network error</h2>
-
-<p>Problem is: MP3 url invalid. It actually comes from a failed CDN sever.</p>
-
-<p>Solution: fix the server.</p>
-
-<h2>Fix step 3, CDN can&rsquo;t find MP3</h2>
-
-<p>Problem associated with <strong>Anti-Leech</strong>.</p>
-
-<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Leech_(computing">a leech</a>)</strong> is one who benefits, usually deliberately, from others&#8217; information or effort but does not offer anything in return.</p>
-
-<p>Example: Wi-Fi leeches, Direct linking (or hot-linking) and In most P2P-networks, leeching is whose who download too much.</p>
-
-<p><strong><a href="https://answers.yahoo.com/question/index?qid=1006042926419">Anti-Leech</a></strong> specializes in protecting file downloads and stopping bandwidth leeching.</p></blockquote>
-
-<p>See that some P2P and leeching software will steal your url links, so the MP3 url expiration time is 5 minutes.</p>
-
-<p>So when CDN server&rsquo;s clock and web server&rsquo;s clock are not synchronized well, MP3 url can expire.</p>
-
-<p>Solution: every 10 minutes sync CDN clock with web server clock.</p>
-
-<h2>Fix step 4, Timeout error</h2>
-
-<p>Some MP3 are relatively large. Thus timeout.</p>
-
-<blockquote><p>MP3 performs better at higher bps, and aac(Advanced Audio Coding) works better at lower bps.</p></blockquote>
-
-<p>Solution:</p>
-
-<ol>
-<li><p>compress MP3 to 48bps, or use aac format. So, play lower-rate music first, then switch automatically.</p></li>
-<li><p>pre-load a music while previous is playing.</p></li>
-<li><p>optimize CDN</p></li>
-</ol>
-
-
-<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Content_delivery_network">CDN</a></strong> content delivery network is a large <strong>distributed system of servers</strong> deployed in <strong>multiple data centers</strong> across the Internet.</p>
-
-<p>The goal of a CDN is to serve content to end-users with high availability and high performance.</p></blockquote>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-CDN.png"></p>
-
-<p>Which CDN should client choose?</p>
-
-<blockquote><p>Not DNS, but web server calculates which to choose. It can be calculated using IP distance, or ISP provider, but not accurate.</p>
-
-<p>We can also use local desktop apps (in different locations) to ping CDN servers. This may violate user privacy, though.</p></blockquote>
-
-<h2>Fix step 5, Fail to play</h2>
-
-<p>Problem: some files got wrong decoding.</p>
-
-<h2>Fix step 6, unkown error</h2>
-
-<p>Problem: some users close the page while MP3 loading.</p>
-
-<h1>Question 5</h1>
-
-<p><strong>fix player problem</strong></p>
-
-<p>Problem: iOS device can never play Flash.</p>
-
-<p>Solution: develop HTML5 player.</p>
-
-<h2>5.2 how to evaluate that you solved the problem</h2>
-
-<ol>
-<li><p>user complains</p></li>
-<li><p><strong>important</strong>: daily retention rate!</p></li>
-</ol>
-
-
-<p>We can&rsquo;t use daily active user, cuz it depends on marketing, competitors, and infrastructure changes.</p>
-
-<p><strong>One day retention rate</strong>:</p>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-user-retention.png"></p>
-
-<blockquote><p>Today’s visitor = {U1, U3, U7, U9, U10}</p>
-
-<p>Tomorrow&rsquo;s visitor = {U2, U3, U9,}</p>
-
-<p>Today’s one day retention rate = 2/5</p></blockquote>
-
-<h1>Question 6 秒杀</h1>
-
-<h2>Design</h2>
-
-<p>Queue A and Queue B</p>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class3-miao-sha.png"></p>
-
-<h3>Queue A</h3>
-
-<p>Many queues, each one locates on a individual web server or reverse proxy. It is mainly used to accept large amount of requests coming from the clients.</p>
-
-<p>Each machine may takes 10,000 or more requests per second.</p>
-
-<p>Queue A will redirect most requests to a static page (cached).</p>
-
-<h3>Queue B</h3>
-
-<p>Queue B is a single machine, to aviod distributed problems. It takes in small amount of requests and decides results (eg. redirect to payment page).</p>
-
-<blockquote><p>Now, why do we need 2 queues, not 1?</p>
-
-<p>Think about a hospital. Queue A is the hospital lobby and security guard, and Queue B is the queue of patience.</p></blockquote>
-
-<h2>How to reduce traffic</h2>
-
-<ol>
-<li>no image</li>
-<li>cache more static pages</li>
-<li>reverse proxy: batch sending the requests</li>
-</ol>
-
-
-<p>Also, can use front-end javascript to prevent clicking. There are method to bypass, so we need to check IP or do some filtering.</p>
-
-<h2>How to keep it simple?</h2>
-
-<ol>
-<li>no DB: basic logic. But rmb to use a log file</li>
-<li>no lock</li>
-</ol>
-
-
-<h2>How to improve stability</h2>
-
-<ol>
-<li>use new server to do <strong>Miao Sha</strong>, in case of crash</li>
-<li>asyc prcessing everything! Don&rsquo;t let other people wait, in case of crash.</li>
-</ol>
-
-
-<h3>How to defend hackers</h3>
-
-<ol>
-<li>IP address (to defent auto softwares), but it&rsquo;s easy for hackers to fake IP address</li>
-<li>CAPTCHA</li>
-</ol>
-
-
-<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/CAPTCHA">CAPTCHA</a></strong> (an acronym for &ldquo;Completely Automated Public Turing test to tell Computers and Humans Apart&rdquo;) is a type of challenge-response test used in computing to determine whether or not the user is human.</p></blockquote>
-
-<h2>follow-up</h2>
-
-<p>How to design 12306 (several million QPS)</p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[NineChap Sys] System Design Class 2: Database ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/26/design-class-2/"/>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 2.2: Database (2) ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/26/design-class2-2/"/>
     <updated>2015-08-26T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/26/design-class-2</id>
+    <id>http://www.shuatiblog.com/blog/2015/08/26/design-class2-2</id>
+    <content type="html"><![CDATA[<h1>Question 5</h1>
+
+<p>Continue from last post, now let&rsquo;s <strong>support VIP services</strong>.</p>
+
+<p>User could buy VIP services using his acccount balance.</p>
+
+<pre><code>class ProService {
+    int userId;
+    double money;
+    long endTime;
+
+    public addMoney(){}
+    public buyPro(){}
+}
+</code></pre>
+
+<h2>Q5.1: System crash when purchasing VIP</h2>
+
+<p>Solution: <strong>transaction with log</strong></p>
+
+<pre><code>WriteLOG
+Transaction_1123: BEGIN
+money=20; endTime=16_07_2016
+</code></pre>
+
+<p>If system crash happens here, system will read the log, recover and roll back all original data. Try not to complete the transaction &ndash; just fail it.</p>
+
+<pre><code>WriteLOG
+Transaction_1123: BEGIN
+money=20; endTime=16_07_2016
+WriteLOG
+Transaction_1123: END
+money=10; endTime=16_08_2016
+</code></pre>
+
+<blockquote><p>What happens if system crash during writing the log? or during the rollback?</p></blockquote>
+
+<h2>Q5.2: dataset contains bad data</h2>
+
+<ol>
+<li>one user id have 2 corresponding pro-services information.</li>
+<li>Shallow user: a pro-services info does not have corresponding user.</li>
+</ol>
+
+
+<p>Solution: have a checker class.</p>
+
+<h2>Q5.3: simutaneous purchase by 2 users</h2>
+
+<p>Solution: lock.</p>
+
+<ol>
+<li>first process lock money &amp; endTime.</li>
+<li>Read money = 20</li>
+<li>another process try to lock, but end up waiting (sleeping).</li>
+<li>first process do the job, and release the lock.</li>
+<li>another process wakes up.</li>
+</ol>
+
+
+<blockquote><p>lock have time-out settings. It can be applied in distributed system as well.</p></blockquote>
+
+<p>Question: does lock make your execution slow?</p>
+
+<ol>
+<li><p>If another process is sleeping, CPU will be fully consumed by other process. So it won&rsquo;t impact.</p></li>
+<li><p>You can do some async processing, too.</p></li>
+<li><p>When you lock, try to lock only a small piece of code, not the entire method. In DB, lock only a row, not a table.</p></li>
+<li><p>Java <a href="https://en.wikipedia.org/wiki/Compare-and-swap">CAS</a> (Compare and swap )</p></li>
+</ol>
+
+
+<h2>Q5.4: Server crash</h2>
+
+<p>Solution: duplication.</p>
+
+<ol>
+<li><p>How many copies?</p>
+
+<p> Google did 3. Normally 2 in same data center, and 1 in another location.</p>
+
+<p> Backup data normally is on another machine. But there&rsquo;s also <a href="https://en.wikipedia.org/wiki/RAID">RAID</a> (redundant array of independent disks) which:</p>
+
+<blockquote><p>combines multiple physical disk drive components into a single logical unit for the purposes of <strong>data redundancy, performance improvement</strong>, or both.</p></blockquote></li>
+<li><p>When does the copy happen?</p>
+
+<p> Option 1 is <strong>doing everyday nightly</strong>. This is called a &lsquo;check point&rsquo;.</p>
+
+<p> Option 2 is use another server to support <strong>Shadow Redundancy</strong>. All data from Machine 0 will be copied to Machine 1 WHILE it happens. The result is, Machine 1 is identical to Machine 0. If Machine 0 crashes, Machine 1 may be behind less than 1 second.</p>
+
+<p> The way to duplicate is either re-play all the actions, or to read Machine 0&rsquo;s log and apply the new data.</p></li>
+<li><p>How to copy?</p>
+
+<p> User send data to 1 server, and from that server, pipeline. This ensures good usage of server bandwith, and serial transfer of data ensures low latency (several ms).</p>
+
+<p> It&rsquo;s also possible to do tree-like transfer, but the above method is preferred cuz all machine consume same bandwidth.</p></li>
+<li><p>What is log?</p>
+
+<p> It is actually &lsquo;checkpoint&rsquo; + log. It allows you to rollback.</p></li>
+</ol>
+
+
+<p>Data redundancy &ndash; Summary:</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class2-data-redundancy-1.png"></p>
+
+<h2>Final note: Data inconsistency</h2>
+
+<p>Main sources of inconsistency comes from:</p>
+
+<ol>
+<li>network fault</li>
+<li>disk error</li>
+</ol>
+
+
+<p>The disk eror is solved by <strong>checksum</strong> (compare during disk writing).</p>
+
+<h1>Summary</h1>
+
+<p><strong><a href="https://en.wikipedia.org/wiki/ACID">ACID</a> (Atomicity, Consistency, Isolation, Durability)</strong>  is a set of properties that guarantee that database transactions are processed reliably.</p>
+
+<ol>
+<li><p><strong>Atomicity: all or nothing</strong></p>
+
+<p> Q5.1: System crash when purchasing VIP</p></li>
+<li><p><strong>Consistency</strong>: validate according to defined rules</p>
+
+<p> Q5.2: dataset contains bad data</p></li>
+<li><p><strong>Isolation</strong>: independency between transactions <strong>(lock)</strong></p>
+
+<p> Q5.3: simutaneous purchase by 2 users</p></li>
+<li><p><strong>Durability</strong>: stored permanently</p>
+
+<p> Q5.4: Server crash</p></li>
+</ol>
+
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class2-summary.png"></p>
+
+<p>Additional Questions:</p>
+
+<ol>
+<li>design a user system (Netflix 2015)</li>
+</ol>
+
+
+<p>Hint: table design, register, login/out, password check, find password.</p>
+
+<ol>
+<li>Design payment system (Yelp, BigCommerce 2015)</li>
+</ol>
+
+
+<p>Hint: the question does not ask about table/ds design itself, but rather the problems associated with payment. Read about ACID principle.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 2.1: Database (1) ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/26/design-class2-1/"/>
+    <updated>2015-08-26T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/26/design-class2-1</id>
     <content type="html"><![CDATA[<h1>Overview</h1>
 
 <p>This class covers database design:</p>
@@ -1027,162 +1220,6 @@ class Session extends Row {
 <p><strong><a href="https://en.wikipedia.org/wiki/B%2B_tree">B+ tree</a></strong> &ndash; everything in O(logb n) which is <strong>close to constant time</strong>.</p>
 
 <p>Plus, B+ tree is hard disk friendly. Read more on a future post.</p>
-
-<h1>Question 5</h1>
-
-<p><strong>support VIP services</strong></p>
-
-<p>User could buy VIP services using his acccount balance.</p>
-
-<pre><code>class ProService {
-    int userId;
-    double money;
-    long endTime;
-
-    public addMoney(){}
-    public buyPro(){}
-}
-</code></pre>
-
-<h2>Q5.1: System crash when purchasing VIP</h2>
-
-<p>Solution: <strong>transaction with log</strong></p>
-
-<pre><code>WriteLOG
-Transaction_1123: BEGIN
-money=20; endTime=16_07_2016
-</code></pre>
-
-<p>If system crash happens here, system will read the log, recover and roll back all original data. Try not to complete the transaction &ndash; just fail it.</p>
-
-<pre><code>WriteLOG
-Transaction_1123: BEGIN
-money=20; endTime=16_07_2016
-WriteLOG
-Transaction_1123: END
-money=10; endTime=16_08_2016
-</code></pre>
-
-<blockquote><p>What happens if system crash during writing the log? or during the rollback?</p></blockquote>
-
-<h2>Q5.2: dataset contains bad data</h2>
-
-<ol>
-<li>one user id have 2 corresponding pro-services information.</li>
-<li>Shallow user: a pro-services info does not have corresponding user.</li>
-</ol>
-
-
-<p>Solution: have a checker class.</p>
-
-<h2>Q5.3: simutaneous purchase by 2 users</h2>
-
-<p>Solution: lock.</p>
-
-<ol>
-<li>first process lock money &amp; endTime.</li>
-<li>Read money = 20</li>
-<li>another process try to lock, but end up waiting (sleeping).</li>
-<li>first process do the job, and release the lock.</li>
-<li>another process wakes up.</li>
-</ol>
-
-
-<blockquote><p>lock have time-out settings. It can be applied in distributed system as well.</p></blockquote>
-
-<p>Question: does lock make your execution slow?</p>
-
-<ol>
-<li><p>If another process is sleeping, CPU will be fully consumed by other process. So it won&rsquo;t impact.</p></li>
-<li><p>You can do some async processing, too.</p></li>
-<li><p>When you lock, try to lock only a small piece of code, not the entire method. In DB, lock only a row, not a table.</p></li>
-<li><p>Java <a href="https://en.wikipedia.org/wiki/Compare-and-swap">CAS</a> (Compare and swap )</p></li>
-</ol>
-
-
-<h2>Q5.4: Server crash</h2>
-
-<p>Solution: duplication.</p>
-
-<ol>
-<li><p>How many copies?</p>
-
-<p> Google did 3. Normally 2 in same data center, and 1 in another location.</p>
-
-<p> Backup data normally is on another machine. But there&rsquo;s also <a href="https://en.wikipedia.org/wiki/RAID">RAID</a> (redundant array of independent disks) which:</p>
-
-<blockquote><p>combines multiple physical disk drive components into a single logical unit for the purposes of <strong>data redundancy, performance improvement</strong>, or both.</p></blockquote></li>
-<li><p>When does the copy happen?</p>
-
-<p> Option 1 is <strong>doing everyday nightly</strong>. This is called a &lsquo;check point&rsquo;.</p>
-
-<p> Option 2 is use another server to support <strong>Shadow Redundancy</strong>. All data from Machine 0 will be copied to Machine 1 WHILE it happens. The result is, Machine 1 is identical to Machine 0. If Machine 0 crashes, Machine 1 may be behind less than 1 second.</p>
-
-<p> The way to duplicate is either re-play all the actions, or to read Machine 0&rsquo;s log and apply the new data.</p></li>
-<li><p>How to copy?</p>
-
-<p> User send data to 1 server, and from that server, pipeline. This ensures good usage of server bandwith, and serial transfer of data ensures low latency (several ms).</p>
-
-<p> It&rsquo;s also possible to do tree-like transfer, but the above method is preferred cuz all machine consume same bandwidth.</p></li>
-<li><p>What is log?</p>
-
-<p> It is actually &lsquo;checkpoint&rsquo; + log. It allows you to rollback.</p></li>
-</ol>
-
-
-<p>Data redundancy &ndash; Summary:</p>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class2-data-redundancy-1.png"></p>
-
-<h2>Final note: Data inconsistency</h2>
-
-<p>Main sources of inconsistency comes from:</p>
-
-<ol>
-<li>network fault</li>
-<li>disk error</li>
-</ol>
-
-
-<p>The disk eror is solved by <strong>checksum</strong> (compare during disk writing).</p>
-
-<h1>Summary</h1>
-
-<p><strong><a href="https://en.wikipedia.org/wiki/ACID">ACID</a> (Atomicity, Consistency, Isolation, Durability)</strong>  is a set of properties that guarantee that database transactions are processed reliably.</p>
-
-<ol>
-<li><p><strong>Atomicity: all or nothing</strong></p>
-
-<p> Q5.1: System crash when purchasing VIP</p></li>
-<li><p><strong>Consistency</strong>: validate according to defined rules</p>
-
-<p> Q5.2: dataset contains bad data</p></li>
-<li><p><strong>Isolation</strong>: independency between transactions <strong>(lock)</strong></p>
-
-<p> Q5.3: simutaneous purchase by 2 users</p></li>
-<li><p><strong>Durability</strong>: stored permanently</p>
-
-<p> Q5.4: Server crash</p></li>
-</ol>
-
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class2-summary.png"></p>
-
-<p>Additional Questions:</p>
-
-<ol>
-<li>design a user system (Netflix 2015)</li>
-</ol>
-
-
-<p>Hint: table design, register, login/out, password check, find password.</p>
-
-<ol>
-<li>Design payment system (Yelp, BigCommerce 2015)</li>
-</ol>
-
-
-<p>Hint: the question does not ask about table/ds design itself, but rather the problems associated with payment. Read about ACID principle.</p>
 ]]></content>
   </entry>
   
@@ -1224,10 +1261,227 @@ money=10; endTime=16_08_2016
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[NineChap Sys] System Design Class 1: Overview ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/08/23/design-class-1/"/>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 1.3: Improvement ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/23/design-class1-3/"/>
     <updated>2015-08-23T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/08/23/design-class-1</id>
+    <id>http://www.shuatiblog.com/blog/2015/08/23/design-class1-3</id>
+    <content type="html"><![CDATA[<h1>From Level 0 to Level 1</h1>
+
+<p>Refer to the previous question. How can we improve???</p>
+
+<ol>
+<li>performance</li>
+<li>scalability</li>
+<li>robustness</li>
+</ol>
+
+
+<h2>performance</h2>
+
+<p>A better algo: Inverted Index</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-2.png"></p>
+
+<p>Avg performance increase to ~ 20ns (with some optimization of MapReduce procedure, discuss later).</p>
+
+<p><strong>Max QPS increase to 50</strong>.</p>
+
+<h2>scalability</h2>
+
+<p>Use a <strong>dispatcher</strong> to re-direct the requests to multiple machines.</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-3.png"></p>
+
+<h3>How many machines do we need then?</h3>
+
+<p>Well we need 500 QPS. The algo above achieves ~ 50 QPS. <strong>Should we need 10 machines</strong>?</p>
+
+<p>The answer is NO. A machine with 8 (or 16) core CPU could be able to handle.</p>
+
+<p>We can also have a <strong>hot-standby</strong>, to be safe.</p>
+
+<blockquote><p>hot standby is used as a failover mechanism to provide reliability in system configurations.</p>
+
+<p>When a key component fails, the hot spare is switched into operation.</p></blockquote>
+
+<h2>robustness</h2>
+
+<p>Tips about system design for senior engineers:</p>
+
+<blockquote><p><strong>Draw 1 machine first</strong>. This machine can contains multiple datasets and run multiple processes.</p>
+
+<p>On top of this machine, the interface layer is <strong>one single Manager process</strong>. The Manager is in charge of almost everything: handling data lost, handle high concurrency, copy multiple instance of itself&hellip;</p>
+
+<p>Like this:</p></blockquote>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-6.png"></p>
+
+<h3>Back-end</h3>
+
+<p>Now we need <strong>a cluster of datasets</strong> (which has Manager on top of it), and <strong>a cluster of Recommenders</strong>. Manager is in charge of copying multiple instances.</p>
+
+<p>Dataset can be put in different physical locations. Recommender don&rsquo;t really need, cuz it&rsquo;s only do calculation job.</p>
+
+<h3>Receiving requests</h3>
+
+<p>Just now we used <strong>Receptionist (or Dispatcher)</strong> to handle request. Now we use a <strong>Web service</strong> (eg. Apache). It&rsquo;s not necessary to make it a cluster.</p>
+
+<h3>Big Brother</h3>
+
+<p>We need a <strong>monitor system</strong> to oversee everything.</p>
+
+<p>Also, Big Brother is in charge of heart-beat. If not received, Big Brother have some double-check machanism.</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-4.png"></p>
+
+<h3>Connecting the dots</h3>
+
+<p><strong>Dispatcher</strong> is used to connect the 4 components. It&rsquo;s like a messaging queue that collects and distributes jobs among everybody (eg. control and distributed info).</p>
+
+<p>It can be stateful or stateless.</p>
+
+<p>Keep in mind <strong>the connection between Dataset and Recommender</strong> remains. It&rsquo;s slow going thru Dispatcher.</p>
+
+<h3>Distribute it</h3>
+
+<p>During development, the 5 components can be put on same machine. When we deploy distributely, we use <strong>Socket connection (keep alive)</strong> to connect them.</p>
+
+<p>Notice the Web Service is <strong>connection heavy</strong>, which consume large CPU and RAM resource. It&rsquo;s better to seperate to one machine.</p>
+
+<p>Big brother is read/write heavy, so it&rsquo;s OKAY to put on same machine with Dispatcher.</p>
+
+<p>Since Dataset and Recommender have data exchange, it&rsquo;s a good idea to put on same machine.</p>
+
+<h3>Additional questions</h3>
+
+<p>Implement Dispatcher with <strong>consumer-producer</strong> model.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 1.2: An Example ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/23/design-class1-2/"/>
+    <updated>2015-08-23T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/23/design-class1-2</id>
+    <content type="html"><![CDATA[<h1>A bottom-up example</h1>
+
+<p>Example two: <strong>design a recommendation module</strong></p>
+
+<h2>A simple algo:</h2>
+
+<pre><code>u1={m3,m5,m7,m11}
+u2={m1,m2,m3,m4,m5,m6,m7,m8,m9}
+Similarity( u1, u2 ) = 3
+</code></pre>
+
+<p>m &ndash; music</p>
+
+<p>u &ndash; user</p>
+
+<p>Similarity = # of same music for different users</p>
+
+<h2>Adv algo:</h2>
+
+<p>find his <strong>top-1 similar user</strong>. Stay tuned for future posts.</p>
+
+<h2>Use the 5 Steps (SNAKE)</h2>
+
+<ol>
+<li>Step One, Scenario</li>
+<li>Step Two, Necessary</li>
+<li>Step Three, Application</li>
+<li>Step Four, Kilobit: data</li>
+<li>Last Step, Evolve</li>
+</ol>
+
+
+<p>Because this question is relatively easy, we will not do case-analysis (Macro).</p>
+
+<p><strong>Instead, we do micro design</strong> by starting at the interface.</p>
+
+<h2>Step One, Scenario</h2>
+
+<p>Interface</p>
+
+<pre><code>class Recommender {
+    public int findSimilarUser(int userId) {
+        //
+    }
+}
+</code></pre>
+
+<h2>Step Two, Necessary</h2>
+
+<ol>
+<li><p>ask</p>
+
+<ol>
+<li>total users = 100,000,000</li>
+<li>total music = 10,000,000</li>
+<li>peak users in 3 month = 6,000,000</li>
+</ol>
+
+
+<p> However, not everyone is logged in. Thus we won&rsquo;t need to recommend for everybody. On average, the logged-in ratio is 1% &ndash; 30%. Let&rsquo;s assume 5%.</p>
+
+<ol>
+<li>participation percentage = 5%</li>
+</ol>
+
+
+<p> And user&rsquo;s interest won&rsquo;t change every minute. Let&rsquo;s recalculate only after 10 minutes.</p>
+
+<ol>
+<li>calculation frequency = 1 update/10min/user</li>
+</ol>
+</li>
+<li><p>predict</p>
+
+<ol>
+<li>user analysis (skip)</li>
+<li>Traffic analysis (skip)</li>
+<li>Memory analysis (skip)</li>
+<li>QPS</li>
+</ol>
+
+
+<p> Peak QPS = 6,000,000 * 5% / (10 * 60) = 500/s</p></li>
+</ol>
+
+
+<h2>Step Three, Application</h2>
+
+<p><strong>The simpliest algorithm: BF compare</strong>. The complexity is O(m n) for each user, where m is # of music a person likes, and n is # of total users. For k users, it takes O(k m n) time (k can be = peak concurrent users).</p>
+
+<p>This is roughly 0.2s per user. Thus <strong>Max QPS = 5</strong>.</p>
+
+<blockquote><p>One word about complexity-to-seconds estimation.</p>
+
+<p>O(n ^ 3) &ndash;> 1s</p>
+
+<p>O(n ^ 2) &ndash;> 0.2s</p>
+
+<p>O(n) &ndash;> 20ms</p>
+
+<p>O(k) &ndash;> k ms</p></blockquote>
+
+<h2>Step Four, Kilobit: data</h2>
+
+<p>Very simple:</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-1.png"></p>
+
+<h2>Last Step, Evolve</h2>
+
+<p>Read on.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap Sys] System Design Class 1.1: Overview ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/23/design-class1-1/"/>
+    <updated>2015-08-23T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/23/design-class1-1</id>
     <content type="html"><![CDATA[<h1>Overview</h1>
 
 <h2>defination</h2>
@@ -1383,209 +1637,6 @@ money=10; endTime=16_08_2016
 <p>From views of <strong>Performance, Scalability and Robustness</strong>.</p>
 
 <p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-snake.jpg"></p>
-
-<h1>A bottom-up example</h1>
-
-<p>Example two: <strong>design a recommendation module</strong></p>
-
-<h2>A simple algo:</h2>
-
-<pre><code>u1={m3,m5,m7,m11}
-u2={m1,m2,m3,m4,m5,m6,m7,m8,m9}
-Similarity( u1, u2 ) = 3
-</code></pre>
-
-<p>m &ndash; music</p>
-
-<p>u &ndash; user</p>
-
-<p>Similarity = # of same music for different users</p>
-
-<h2>Adv algo:</h2>
-
-<p>find his <strong>top-1 similar user</strong>. Stay tuned for future posts.</p>
-
-<h2>Use the 5 Steps (SNAKE)</h2>
-
-<ol>
-<li>Step One, Scenario</li>
-<li>Step Two, Necessary</li>
-<li>Step Three, Application</li>
-<li>Step Four, Kilobit: data</li>
-<li>Last Step, Evolve</li>
-</ol>
-
-
-<p>Because this question is relatively easy, we will not do case-analysis (Macro).</p>
-
-<p><strong>Instead, we do micro design</strong> by starting at the interface.</p>
-
-<h2>Step One, Scenario</h2>
-
-<p>Interface</p>
-
-<pre><code>class Recommender {
-    public int findSimilarUser(int userId) {
-        //
-    }
-}
-</code></pre>
-
-<h2>Step Two, Necessary</h2>
-
-<ol>
-<li><p>ask</p>
-
-<ol>
-<li>total users = 100,000,000</li>
-<li>total music = 10,000,000</li>
-<li>peak users in 3 month = 6,000,000</li>
-</ol>
-
-
-<p> However, not everyone is logged in. Thus we won&rsquo;t need to recommend for everybody. On average, the logged-in ratio is 1% &ndash; 30%. Let&rsquo;s assume 5%.</p>
-
-<ol>
-<li>participation percentage = 5%</li>
-</ol>
-
-
-<p> And user&rsquo;s interest won&rsquo;t change every minute. Let&rsquo;s recalculate only after 10 minutes.</p>
-
-<ol>
-<li>calculation frequency = 1 update/10min/user</li>
-</ol>
-</li>
-<li><p>predict</p>
-
-<ol>
-<li>user analysis (skip)</li>
-<li>Traffic analysis (skip)</li>
-<li>Memory analysis (skip)</li>
-<li>QPS</li>
-</ol>
-
-
-<p> Peak QPS = 6,000,000 * 5% / (10 * 60) = 500/s</p></li>
-</ol>
-
-
-<h2>Step Three, Application</h2>
-
-<p><strong>The simpliest algorithm: BF compare</strong>. The complexity is O(m n) for each user, where m is # of music a person likes, and n is # of total users. For k users, it takes O(k m n) time (k can be = peak concurrent users).</p>
-
-<p>This is roughly 0.2s per user. Thus <strong>Max QPS = 5</strong>.</p>
-
-<blockquote><p>One word about complexity-to-seconds estimation.</p>
-
-<p>O(n ^ 3) &ndash;> 1s</p>
-
-<p>O(n ^ 2) &ndash;> 0.2s</p>
-
-<p>O(n) &ndash;> 20ms</p>
-
-<p>O(k) &ndash;> k ms</p></blockquote>
-
-<h2>Step Four, Kilobit: data</h2>
-
-<p>Very simple:</p>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-1.png"></p>
-
-<h2>Last Step, Evolve</h2>
-
-<p>Read on.</p>
-
-<h1>From Level 0 to Level 1</h1>
-
-<p>Refer to the previous question. How can we improve???</p>
-
-<ol>
-<li>performance</li>
-<li>scalability</li>
-<li>robustness</li>
-</ol>
-
-
-<h2>performance</h2>
-
-<p>A better algo: Inverted Index</p>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-2.png"></p>
-
-<p>Avg performance increase to ~ 20ns (with some optimization of MapReduce procedure, discuss later).</p>
-
-<p><strong>Max QPS increase to 50</strong>.</p>
-
-<h2>scalability</h2>
-
-<p>Use a <strong>dispatcher</strong> to re-direct the requests to multiple machines.</p>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-3.png"></p>
-
-<h3>How many machines do we need then?</h3>
-
-<p>Well we need 500 QPS. The algo above achieves ~ 50 QPS. <strong>Should we need 10 machines</strong>?</p>
-
-<p>The answer is NO. A machine with 8 (or 16) core CPU could be able to handle.</p>
-
-<p>We can also have a <strong>hot-standby</strong>, to be safe.</p>
-
-<blockquote><p>hot standby is used as a failover mechanism to provide reliability in system configurations.</p>
-
-<p>When a key component fails, the hot spare is switched into operation.</p></blockquote>
-
-<h2>robustness</h2>
-
-<p>Tips about system design for senior engineers:</p>
-
-<blockquote><p><strong>Draw 1 machine first</strong>. This machine can contains multiple datasets and run multiple processes.</p>
-
-<p>On top of this machine, the interface layer is <strong>one single Manager process</strong>. The Manager is in charge of almost everything: handling data lost, handle high concurrency, copy multiple instance of itself&hellip;</p>
-
-<p>Like this:</p></blockquote>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-6.png"></p>
-
-<h3>Back-end</h3>
-
-<p>Now we need <strong>a cluster of datasets</strong> (which has Manager on top of it), and <strong>a cluster of Recommenders</strong>. Manager is in charge of copying multiple instances.</p>
-
-<p>Dataset can be put in different physical locations. Recommender don&rsquo;t really need, cuz it&rsquo;s only do calculation job.</p>
-
-<h3>Receiving requests</h3>
-
-<p>Just now we used <strong>Receptionist (or Dispatcher)</strong> to handle request. Now we use a <strong>Web service</strong> (eg. Apache). It&rsquo;s not necessary to make it a cluster.</p>
-
-<h3>Big Brother</h3>
-
-<p>We need a <strong>monitor system</strong> to oversee everything.</p>
-
-<p>Also, Big Brother is in charge of heart-beat. If not received, Big Brother have some double-check machanism.</p>
-
-<p><img class="middle" src="http://www.shuatiblog.com/assets/images/design-class1-reco-4.png"></p>
-
-<h3>Connecting the dots</h3>
-
-<p><strong>Dispatcher</strong> is used to connect the 4 components. It&rsquo;s like a messaging queue that collects and distributes jobs among everybody (eg. control and distributed info).</p>
-
-<p>It can be stateful or stateless.</p>
-
-<p>Keep in mind <strong>the connection between Dataset and Recommender</strong> remains. It&rsquo;s slow going thru Dispatcher.</p>
-
-<h3>Distribute it</h3>
-
-<p>During development, the 5 components can be put on same machine. When we deploy distributely, we use <strong>Socket connection (keep alive)</strong> to connect them.</p>
-
-<p>Notice the Web Service is <strong>connection heavy</strong>, which consume large CPU and RAM resource. It&rsquo;s better to seperate to one machine.</p>
-
-<p>Big brother is read/write heavy, so it&rsquo;s OKAY to put on same machine with Dispatcher.</p>
-
-<p>Since Dataset and Recommender have data exchange, it&rsquo;s a good idea to put on same machine.</p>
-
-<h3>Additional questions</h3>
-
-<p>Implement Dispatcher with <strong>consumer-producer</strong> model.</p>
 ]]></content>
   </entry>
   
@@ -2388,421 +2439,6 @@ uint32_t reverseBits(uint32_t n) {
             count++;
         }
         return count;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LeetCode 198] House Robber ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/05/10/House-Robber/"/>
-    <updated>2015-05-10T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/05/10/House-Robber</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/house-robber/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security system connected and <b>it will automatically contact the police if two adjacent houses were broken into on the same night</b>.</p>
-
-<p>Given a list of non-negative integers representing the amount of money of each house, determine the maximum amount of money you can rob tonight <b>without alerting the police</b>.</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ifanchu">@ifanchu</a> for adding this problem and creating all test cases. Also thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding additional test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/dynamic-programming/">Dynamic Programming</a>
-                  
-                </span>
-              
-</div>
-
-
-<h3>Solution</h3>
-
-<p>DP question. Be careful what the initial values of dp(1) is. You should work this out without a problem!</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public int rob(int[] num) {
-        if (num == null || num.length == 0) {
-            return 0;
-        } else if (num.length == 1) {
-            return num[0];
-        }
-        int len = num.length;
-        int[] dp = new int[len];
-        dp[0] = num[0];
-        dp[1] = Math.max(num[0], num[1]);
-        int max = Math.max(num[0], num[1]);
-        for (int i = 2; i &lt; len; i++) {
-            dp[i] = Math.max(dp[i - 1], dp[i - 2] + num[i]);
-            max = Math.max(max, dp[i]);
-        }
-        return max;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LeetCode 201] Bitwise AND of Numbers Range ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/05/10/Bitwise-AND-of-Numbers-Range/"/>
-    <updated>2015-05-10T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/05/10/Bitwise-AND-of-Numbers-Range</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/bitwise-and-of-numbers-range/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given a range [m, n] where 0 &lt;= m &lt;= n &lt;= 2147483647, return the bitwise AND of all numbers in this range, inclusive.</p>
-
-<p>
-For example, given the range [5, 7], you should return 4.
-</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://leetcode.com/discuss/user/amrsaqr">@amrsaqr</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/bit-manipulation/">Bit Manipulation</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>This is a pretty interesting mathematics question. Now we take 2 numbers as example:</p>
-
-<blockquote><p>Num1: 110010</p>
-
-<p>Num2: 110111</p>
-
-<p>Result: 110000</p></blockquote>
-
-<p>And:</p>
-
-<blockquote><p>Num1: 0110</p>
-
-<p>Num2: 1100</p>
-
-<p>Result: 0</p></blockquote>
-
-<p>Note that:</p>
-
-<ol>
-<li><p>if the first &lsquo;1&rsquo; bit of the 2 numbers are at different position, the answer should simply be 0.</p></li>
-<li><p>if have same position, then the result would be the continous sequence of 1s, followed by all 0s.</p></li>
-</ol>
-
-
-<h3>Solution</h3>
-
-<p>The 2 best solutions is very well presented by <a href="http://www.cnblogs.com/grandyang/p/4431646.html">Grandyang</a> using bit shifting and masking. Please refer to code 1 and code 2 below.</p>
-
-<p>I found a third solution at <a href="http://www.programcreek.com/2014/04/leetcode-bitwise-and-of-numbers-range-java/">programcreek</a>, which makes use of the fact that m is smaller than n.</p>
-
-<h3>Code</h3>
-
-<p>code 1</p>
-
-<pre><code>class Solution {
-public:
-    int rangeBitwiseAnd(int m, int n) {
-        int d = INT_MAX;
-        while ((m &amp; d) != (n &amp; d)) {
-            d &lt;&lt;= 1;
-        }
-        return m &amp; d;
-    }
-};
-</code></pre>
-
-<p>code 2</p>
-
-<pre><code>class Solution {
-public:
-    int rangeBitwiseAnd(int m, int n) {
-        int i = 0;
-        while (m != n) {
-            m &gt;&gt;= 1;
-            n &gt;&gt;= 1;
-            ++i;
-        }
-        return (m &lt;&lt; i);
-    }
-};
-</code></pre>
-
-<p>code 3</p>
-
-<pre><code>public int rangeBitwiseAnd(int m, int n) {
-     while (n &gt; m) {
-          n = n &amp; n - 1;
-     }
-     return m &amp; n;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LeetCode 199] Binary Tree Right Side View ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/05/10/Binary-Tree-Right-Side-View/"/>
-    <updated>2015-05-10T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/05/10/Binary-Tree-Right-Side-View</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/binary-tree-right-side-view/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given a binary tree, imagine yourself standing on the <i>right</i> side of it, return the values of the nodes you can see ordered from top to bottom.</p>
-
-<p>
-For example:<br>
-Given the following binary tree,<br>
-</p><pre>   1            &lt;---
- /   \
-2     3         &lt;---
- \     \
-  5     4       &lt;---
-</pre>
-<p></p>
-<p>
-You should return <code>[1, 3, 4]</code>.
-</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://leetcode.com/discuss/user/amrsaqr">@amrsaqr</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/tree/">Tree</a>
-                  
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/depth-first-search/">Depth-first Search</a>
-                  
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/breadth-first-search/">Breadth-first Search</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Solution</h3>
-
-<p>This question basically is binary tree traversal. During the process, we keep a list and update the elements in it.</p>
-
-<h3>Code</h3>
-
-<pre><code>/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode(int x) { val = x; }
- * }
- */
-public class Solution {
-    public List&lt;Integer&gt; rightSideView(TreeNode root) {
-        List&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
-        traverse(result, root, 1);
-        return result;
-    }
-
-    void traverse(List&lt;Integer&gt; result, TreeNode node, int level) {
-        if (node == null) return;
-        if (level &gt; result.size()) {
-            result.add(node.val);
-        }
-        traverse(result, node.right, level + 1);
-        traverse(result, node.left, level + 1);
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LeetCode 187] Repeated DNA Sequences ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/05/01/Repeated-DNA-Sequences/"/>
-    <updated>2015-05-01T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/05/01/Repeated-DNA-Sequences</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/repeated-dna-sequences/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>
-All DNA is composed of a series of nucleotides abbreviated as A, C, G, and T, for example: &#8220;ACGAATTCCG&#8221;. When studying DNA, it is sometimes useful to identify repeated sequences within the DNA.</p>
-
-<p>Write a function to find all the 10-letter-long sequences (substrings) that occur more than once in a DNA molecule.</p>
-
-<p>
-For example,</p>
-<pre>Given s = "AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT",
-
-Return:
-["AAAAACCCCC", "CCCCCAAAAA"].
-</pre><p></p>
-
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/hash-table/">Hash Table</a>
-
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/bit-manipulation/">Bit Manipulation</a>
-
-                </span>
-
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>This question is straight-forward: just iterate thru all the 10-letter long subsequences, and then add into hashmap.</p>
-
-<p>However, if you simply use String as hash key, it will exceed OJ run time.</p>
-
-<h3>Solution</h3>
-
-<p>Convert string to int is the right approach. To get the best performance, we use 2 bits to represent each DNA nucleotide. Integer is 32-bit long so, no problem with that.</p>
-
-<p>Node that Integer.Max = 2,147,483,647. There&rsquo;s total of 10 digitals, so using 1 digit to represent 1 letter is not feasible.
-Ref: <a href="http://www.cnblogs.com/hzhesi/p/4285793.html">BUPT-哲人善思</a></p>
-
-<h3>Code</h3>
-
-<p>The code is pretty difficult to write.</p>
-
-<pre><code>public class Solution {
-    public List&lt;String&gt; findRepeatedDnaSequences(String s) {
-        List&lt;String&gt; res = new ArrayList&lt;String&gt;();
-        if (s == null || s.length() &lt; 10) {
-            return res;
-        }
-
-        Map&lt;Integer, Integer&gt; map = new HashMap&lt;Integer, Integer&gt;();
-        // map&lt;&gt; stores int-to-int: first int is "ACGT" -&gt; 1234
-        // second int is the init position of the pattern in s
-
-        int num = 0;
-        int mask = 0xFFFFFFFF;
-        mask &gt;&gt;&gt;= (32 - 18);
-
-        for (int i = 0; i &lt; s.length(); i++) {
-            num = mask &amp; num;
-            // get the last 18 binary digits of num
-
-            num = (num &lt;&lt; 2) | convertChatToInt(s.charAt(i));
-            // append num with the number representing charAt(i)
-
-            if (i &gt;= 9) {
-                // insert or search num in the map
-                if (!map.containsKey(num)) {
-                    map.put(num, (i - 9));
-                    // (i - 9) is the start position of 
-                    // the 10-letter-long sequence
-                } else if (map.get(num) != -1) {
-                    res.add(s.substring(map.get(num), map.get(num) + 10));
-                    map.put(num, -1);
-                    // after the sequence has been added, mark it in the map
-                } else {
-                    // do nothing
-                }
-            }
-        }
-
-        return res;
-    }
-
-    int convertChatToInt(char ch) {
-        if (ch == 'A') {
-            return 1;
-        } else if (ch == 'C') {
-            return 2;
-        } else if (ch == 'G') {
-            return 3;
-        }
-        return 0;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LeetCode 179] Largest Number ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/04/15/Largest-Number/"/>
-    <updated>2015-04-15T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/04/15/Largest-Number</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/largest-number/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given a list of non negative integers, arrange them such that they form the largest number.</p>
-
-<p>For example, given <code>[3, 30, 34, 5, 9]</code>, the largest formed number is <code>9534330</code>.</p>
-
-<p>Note: The result may be very large, so you need to return a string instead of an integer.</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
-
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/sort/">Sort</a>
-
-                </span>
-
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>Please refer to [[ItInt5] Numbers Concatenation Max (Largest Number)(/blog/2014/08/17/Numbers-Concatenation-Max/).</p>
-
-<h3>Solution</h3>
-
-<p>Note that we <strong>can not override Comparator(Integer)</strong>. So we must first convert int to string then sort.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-
-    // this code should pass
-    public String largestNumber(int[] num) {
-        if (num == null || num.length == 0) {
-            return "0";
-        }
-        String[] strs = new String[num.length];
-        for (int i = 0; i &lt; num.length; i++) {
-            strs[i] = String.valueOf(num[i]);
-        }
-        Arrays.sort(strs, new LargerComparator());
-
-        String res = "";
-        for (String str : strs) {
-            res = res + str;
-        }
-        return res;
-    }
-
-    class LargerComparator implements Comparator&lt;String&gt; {
-
-        public int compare(String a, String b) {
-            String first = a + b;
-            String second = b + a;
-            return second.compareTo(first);
-        }
     }
 }
 </code></pre>
