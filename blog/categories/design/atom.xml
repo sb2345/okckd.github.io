@@ -4,7 +4,7 @@
   <title><![CDATA[Category: design | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-02T16:52:58+08:00</updated>
+  <updated>2015-09-02T22:11:45+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,84 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Facebook Photo Storage ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage/"/>
+    <updated>2015-09-02T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/09/02/Facebook-photo-storage</id>
+    <content type="html"><![CDATA[# Stats
+
+Facebook has 1.5 billion monthly active users, 970 million daily active users [as of June 2015](http://newsroom.fb.com/company-info/). 
+
+{% img middle /assets/images/facebook-user-count.png %}
+
+image from [statista.com](http://www.statista.com/statistics/264810/number-of-monthly-active-facebook-users-worldwide/). 
+
+In 2009, Facebook stores 15 billion photos for the user, which grows at 220 million per week. It's 2015 now, you might want to mulitply these numbers by 3~6. 
+
+I have roughly estimated the statistics of Facebook users, Facebook photos and growth rate, just to give you an idea of the size of data Facebook has got: 
+
+> Total user: 1.5b
+>
+> Total photoes: 75b, which is 50 photo/user
+>
+> Each photo got 4 different sizes, so 300b photos are stored. 
+>
+> New photo per day: 1b
+>
+> New photo per second: 10,000
+>
+> Peak incoming photo per second: 10m
+
+# Old architecture
+
+3 tiers design:
+
+1. __Upload tier__ receives users’ photo uploads, scales the original images and saves them on the NFS storage tier.
+
+1. __Photo serving tier__ receives HTTP requests for photo images and serves them from the NFS storage tier.
+
+1. __NFS storage tier__ built on top of commercial storage appliances.
+
+> __[Network File System](https://en.wikipedia.org/wiki/Network_File_System)__ (NFS) is a distributed file system protocol originally developed by Sun Microsystems in 1984, allowing a user on a client computer to access files over a network much like local storage is accessed. 
+
+## problem
+
+1. there is an __enormous amount of metadata__ 
+
+    ... so much that is [exceeds the caching abilities of the NFS storage tier](https://code.facebook.com/posts/685565858139515/needle-in-a-haystack-efficient-storage-of-billions-of-photos/), __ resulting in multiple I/O operations__ per photo upload or read request
+
+## Solution
+
+1. relies heavily on CDNs to serve photos. 
+
+1. Cachr: a caching server tier caching Facebook "profile" images.
+
+1. NFS file handle cache - deployed on the photo serving tier eliminates some of the NFS storage tier metadata overhead
+
+# Haystack Photo Infrastructure 
+
+The new photo infrastructure merges the __photo serving__ and __storage tier__ into one physical tier. It implements __a HTTP based photo server__ which stores photos in a generic object store called Haystack. 
+
+Goal: eliminate any unnecessary metadata overhead for photo read operations, so that each read I/O operation was only reading actual photo data
+
+5 main functional layers:
+
+1. HTTP server
+
+1. Photo Store
+
+1. Haystack Object Store
+
+1. Filesystem
+
+1. Storage
+
+## Storage 
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Design] How Google search works ]]></title>
@@ -185,7 +263,7 @@ A valid digital signature gives a recipient confidence that the message was crea
 
 commonly used for software distribution, financial transactions 
 
-<img class="middle" src="/assets/images/digital_signature.png">
+{% img middle /assets/images/digital_signature.png %}
 
 [To create a digital signature](http://searchsecurity.techtarget.com/definition/digital-signature), signing software (such as an email program) creates a one-way hash of the data to be signed. The private key is then used to encrypt the hash. 
 
@@ -370,48 +448,6 @@ Can't. [Because You can only have one application](http://stackoverflow.com/ques
 > If the OS allowed two apps to open the same port, how would it know which one to notify?
 
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Design] HBase and HDFS]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/02/15/HBase-and-HDFS/"/>
-    <updated>2015-02-15T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/02/15/HBase-and-HDFS</id>
-    <content type="html"><![CDATA[### Overview 
-
-[Hadoop Distributed File System](http://hortonworks.com/hadoop/hdfs/) (HDFS) is a __Java-based file system__ that provides scalable and reliable data storage that is designed to span large clusters of commodity servers. __HDFS, MapReduce__, and YARN form the core of Apache™ Hadoop®.
-
-[Apache HBase](http://hbase.apache.org/) is the Hadoop database, a distributed, scalable, big data store.
-
-#### Hadoop
-
-Hadoop is [basically 2 things](http://stackoverflow.com/a/16930049), a FS (Hadoop Distributed File System) and a computation framework (MapReduce). 
-
-HDFS allows you store huge amounts of data in a distributed (provides faster read/write access) and redundant (provides better availability) manner. And MapReduce allows you to process this huge data in a distributed and parallel manner. 
-
-But MapReduce is not limited to just HDFS. 
-
-#### HDFS and HBase
-
-Being a FS, HDFS lacks the random read/write capability. It is good for sequential data access. And this is where HBase comes into picture. It is a NoSQL database that runs on top your Hadoop cluster and provides you random real-time read/write access to your data.
-
-### Now, the Comparison
-
-__HDFS is a distributed file system__. [ref](http://qr.ae/BqrVU)
-
-1. It is optimized for streaming access of large files. You would typically store files that are in the 100s of MB upwards on HDFS and access them through MapReduce to process them in batch mode. 
-2. HDFS files are write once files. You can append to files in some of the recent versions but that is not a feature that is very commonly used. Consider HDFS files as write-once and read-many files. There is no concept of random writes.
-3. HDFS doesn't do random reads very well.
-
-__HBase is a database that stores it's data in a distributed filesystem__. 
-
-The filesystem of choice typically is HDFS owing to the tight integration between HBase and HDFS. It doesn't mean that HBase can't work on any other filesystem.
-
-1. Low latency access to small amounts of data from within a large data set. You can access single rows quickly from a billion row table.
-2. Flexible data model to work with and data is indexed by the row key.
-3. Fast scans across tables.
-4. Scale in terms of writes as well as total volume of data.
 ]]></content>
   </entry>
   
