@@ -4,7 +4,7 @@
   <title><![CDATA[Category: design | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-03T20:50:47+08:00</updated>
+  <updated>2015-09-04T00:31:54+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -156,13 +156,15 @@ Currently, the filesystem of choice is XFS, an extent based filesystem providing
 >
 > __Delayed allocation__ assists in the prevention of file system fragmentation; __online defragmentation__ is also supported. A feature unique to XFS is the __pre-allocation of I/O bandwidth__ at a pre-determined rate, which is suitable for many real-time applications.
 
-## Haystack Object Store
+## Haystack
 
-Haystack is a simple __log structured (append-only)__ object store. A Haystack consists of two files:
+Haystack is a simple __log structured (append-only) object store__. Many images store in one Haystack. Typically, [Haystack Store is 100GB size](http://jishu.zol.com.cn/17742.html). 
+
+A Haystack consists of two files:
 
 1. __haystack store file__ (containing the needles)
     1. superblock
-    1. needles
+    1. needles (1 needle is 1 image)
 1. __an index file__
 
 ### 1. haystack store file 
@@ -181,7 +183,6 @@ Haystack is a simple __log structured (append-only)__ object store. A Haystack c
 
     Haystack doesn’t put any restriction on the values of the keys, and there can be needles with duplicate keys. 
 
-
 ### 2. Index File
 
 __Needle__ consisting of a header, the data, and a footer: 
@@ -192,15 +193,95 @@ The index file provides the minimal metadata required to locate a particular nee
 
 <img class="middle" src="/assets/images/851582_314454922033518_1196942525_n.jpg">
 
-The index file is not critical, as it can be rebuilt from the haystack store file if required. The main purpose of the index is to allow quick loading of the needle metadata into memory without traversing the larger Haystack store file.
+The index file is not critical, as it can be rebuilt from the haystack store file if required. 
 
-The main purpose of the index: quick loading of the needle metadata into memory without traversing the larger Haystack store file, since the index is usually less than 1% the size of the store file.
+The main purpose of the index: quick loading of the needle metadata into memory without traversing the larger Haystack store file, since the index is usually less than 1% the size of the store file. 
 
 ### Summary
 
 All needles are stored in Haystack store file, and their location information is stored in Index File. 
 
+What is Needle? Needles represents the stored objects (1 needle - 1 image). 
 
+## Haystack Operations
+
+1. __write__
+
+    append new needle to haystack store file.
+    
+    later, corresponding index records are __updated async__. 
+    
+    In case of failure, any partial needles are discarded, and fix index from the end of the haystack.
+    
+    You can't overwrite any needle, but you can insert using same key. Later, the needle __with dup keys but largest offset__ became the most recent one. 
+
+1. __read__
+
+    __parameters passed in__: offset, key, alt key, cookie, data size
+    
+    if key, alt key and cookie matches, and checksum correct and needle is not marked as deleted, return. 
+
+1. __delete__
+
+    marks needle as deleted (set 1 bit), but index is not modified. 
+    
+    the deleted space is not reclaimed unless __compact the haystack__
+
+## Photo Store Server 
+
+Photo Store Server is responsible for accepting HTTP requests and translating them to the corresponding Haystack store operations. 
+
+In order to minimize the number of I/Os required to retrieve photos, the server keeps an __in-memory index of all photo offsets__. 
+
+At startup, __the (photo) server reads the haystack index file and populates the in-memory index__. The in-memory index is different from the index file in Haystack, as it stores lesser information, like this: 
+
+<img class="middle" src="/assets/images/851584_503528913060377_1268325854_n.jpg">
+
+1. __Photo Store Write/Modify Operation__
+
+    1. writes photos to the haystack 
+    1. updates the in-memory index 
+    
+    if there are duplicate images, the one stored at a larger offset is valid.
+
+1. __Photo Store Read Operation__
+
+    passed in:
+    
+    1. haystack id 
+    1. a photo key, 
+    1. size 
+    1. cookie 
+    
+    The server performs a lookup in the in-memory index based on the photo key and retrieves the offset of the needle containing the requested image.
+    
+    Since haystack delete operation doesn’t update the haystack index file record. Therefore a freshly populated in-memory index can contain stale entries for the previously deleted photos. Read such photo will fail and the in-memory index is updated to 0.
+
+1. __Photo Store Delete Operation__
+
+    After calling the haystack delete operation, the in-memory index is updated to 'offset = zero' 
+
+1. __Compaction__
+
+    Compaction is an online operation which reclaims the space used by the deleted and duplicate needles.
+    
+    creates a new haystack 
+
+1. __HTTP Server__
+
+    evhttp server 
+
+    multiple threads, with each serving a single HTTP request. Workload is mostly I/O bound, thus the performance of the HTTP server is not critical.
+
+# Summary 
+
+Storing photos as needles in the haystack __eliminates the metadata overhead__ by aggregating hundreds of thousands of images in a single haystack store file. 
+
+This keeps the metadata overhead very small and allows us to __store each needle’s location in the store file in an in-memory index__. 
+
+This allows retrieval of an image’s data in __a minimal number of I/O operations__, eliminating all unnecessary metadata overhead. 
+
+Ref: https://code.facebook.com/posts/685565858139515/needle-in-a-haystack-efficient-storage-of-billions-of-photos/
 ]]></content>
   </entry>
   
