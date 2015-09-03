@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-03T20:00:43+08:00</updated>
+  <updated>2015-09-03T20:50:47+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -57,7 +57,7 @@
 
 <blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Network_File_System">Network File System</a></strong> (NFS) is a distributed file system protocol originally developed by Sun Microsystems in 1984, allowing a user on a client computer to access files over a network much like local storage is accessed.</p></blockquote>
 
-<h2>problem</h2>
+<h2>Problem</h2>
 
 <ol>
 <li><p>there is an <strong>enormous amount of metadata</strong></p>
@@ -129,13 +129,13 @@
 
 <p>For large files, the block map can be quite large.</p>
 
-<h3>problem</h3>
+<h3>Problem</h3>
 
 <p><strong>Block based filesystems</strong> maintain mappings for <strong>each logical block</strong>, and for large files, this information will not typically fit into the cached inode and is stored in indirect address blocks instead, which must be traversed in order to read the data for a file.</p>
 
 <p>There can be several layers of indirection, so a single read could result in <strong>several I/Os</strong> (if not cached).</p>
 
-<h3>Solution for block-based FS</h3>
+<h3>Solution</h3>
 
 <p><strong>Extent based filesystems</strong> maintain mappings only for contiguous ranges of blocks (extents). A block map for a contiguous large file could consist of only one extent which would fit in the inode itself.</p>
 
@@ -143,11 +143,11 @@
 
 <p>Extent-based file systems can also <strong>eliminate most of the metadata overhead of large files</strong> that would traditionally be taken up by the block allocation tree&hellip; saving on storage space is pretty slight, but&hellip; <strong>the reduction in metadata is significant and reduces exposure to file system corruption</strong> as one bad sector in the <em>block allocation tree</em> causes much greater data loss than one bad sector in stored data.</p></blockquote>
 
-<h3>problem of Extent-based file systems</h3>
+<h3>Problem of Extent-based file systems</h3>
 
 <p>However, if the file is severely fragmented and its blocks are not contiguous on the underlying volume, its block map can grow large as well.</p>
 
-<h3>the solution</h3>
+<h3>The solution</h3>
 
 <p>Fragmentation can be mitigated by <strong>aggressively allocating a large chunk of space</strong> whenever growing the physical file.</p>
 
@@ -162,6 +162,58 @@
 <p>Space allocation is performed via extents with <strong>data structures stored in B+ trees</strong>, improving the overall performance of the file system, especially when handling large files.</p>
 
 <p><strong>Delayed allocation</strong> assists in the prevention of file system fragmentation; <strong>online defragmentation</strong> is also supported. A feature unique to XFS is the <strong>pre-allocation of I/O bandwidth</strong> at a pre-determined rate, which is suitable for many real-time applications.</p></blockquote>
+
+<h2>Haystack Object Store</h2>
+
+<p>Haystack is a simple <strong>log structured (append-only)</strong> object store. A Haystack consists of two files:</p>
+
+<ol>
+<li><strong>haystack store file</strong> (containing the needles)
+
+<ol>
+<li>superblock</li>
+<li>needles</li>
+</ol>
+</li>
+<li><strong>an index file</strong></li>
+</ol>
+
+
+<h3>1. haystack store file</h3>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/851582_1409519009260319_311676661_n.jpg"></p>
+
+<ol>
+<li><p>The first 8KB of the haystack store is occupied by the <strong>superblock</strong>.</p></li>
+<li><p>following the superblock are <strong>needles</strong></p>
+
+<p> <strong>Needles represents the stored objects</strong>. Needle consisting of a header, the data, and a footer:</p>
+
+<p> <img class="middle" src="http://www.shuatiblog.com/assets/images/851578_319395058204993_541487263_n.jpg"></p>
+
+<p> A needle is uniquely identified by its &lt;Offset, Key, Alternate Key, Cookie> tuple.</p>
+
+<p> Haystack doesn’t put any restriction on the values of the keys, and there can be needles with duplicate keys.</p></li>
+</ol>
+
+
+<h3>2. Index File</h3>
+
+<p><strong>Needle</strong> consisting of a header, the data, and a footer:</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/851582_1374324519464800_699636937_n.jpg"></p>
+
+<p>The index file provides the minimal metadata required to locate a particular needle in the haystack store file.</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/851582_314454922033518_1196942525_n.jpg"></p>
+
+<p>The index file is not critical, as it can be rebuilt from the haystack store file if required. The main purpose of the index is to allow quick loading of the needle metadata into memory without traversing the larger Haystack store file.</p>
+
+<p>The main purpose of the index: quick loading of the needle metadata into memory without traversing the larger Haystack store file, since the index is usually less than 1% the size of the store file.</p>
+
+<h3>Summary</h3>
+
+<p>All needles are stored in Haystack store file, and their location information is stored in Index File.</p>
 ]]></content>
   </entry>
   

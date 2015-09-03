@@ -4,7 +4,7 @@
   <title><![CDATA[Category: design | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-03T20:00:43+08:00</updated>
+  <updated>2015-09-03T20:50:47+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -56,7 +56,7 @@ I have roughly estimated the statistics of Facebook users, Facebook photos and g
 
 > __[Network File System](https://en.wikipedia.org/wiki/Network_File_System)__ (NFS) is a distributed file system protocol originally developed by Sun Microsystems in 1984, allowing a user on a client computer to access files over a network much like local storage is accessed. 
 
-## problem
+## Problem
 
 1. there is an __enormous amount of metadata__ 
 
@@ -122,13 +122,13 @@ Each file in the filesystem is represented by a structure called an inode which 
 
 For large files, the block map can be quite large.
 
-### problem
+### Problem
 
 __Block based filesystems__ maintain mappings for __each logical block__, and for large files, this information will not typically fit into the cached inode and is stored in indirect address blocks instead, which must be traversed in order to read the data for a file. 
 
 There can be several layers of indirection, so a single read could result in __several I/Os__ (if not cached).
 
-### Solution for block-based FS
+### Solution
 
 __Extent based filesystems__ maintain mappings only for contiguous ranges of blocks (extents). A block map for a contiguous large file could consist of only one extent which would fit in the inode itself. 
 
@@ -136,11 +136,11 @@ __Extent based filesystems__ maintain mappings only for contiguous ranges of blo
 >
 > Extent-based file systems can also __eliminate most of the metadata overhead of large files__ that would traditionally be taken up by the block allocation tree... saving on storage space is pretty slight, but... __the reduction in metadata is significant and reduces exposure to file system corruption__ as one bad sector in the _block allocation tree_ causes much greater data loss than one bad sector in stored data.
 
-### problem of Extent-based file systems
+### Problem of Extent-based file systems
 
 However, if the file is severely fragmented and its blocks are not contiguous on the underlying volume, its block map can grow large as well. 
 
-### the solution
+### The solution
 
 Fragmentation can be mitigated by __aggressively allocating a large chunk of space__ whenever growing the physical file. 
 
@@ -155,6 +155,51 @@ Currently, the filesystem of choice is XFS, an extent based filesystem providing
 > Space allocation is performed via extents with __data structures stored in B+ trees__, improving the overall performance of the file system, especially when handling large files.
 >
 > __Delayed allocation__ assists in the prevention of file system fragmentation; __online defragmentation__ is also supported. A feature unique to XFS is the __pre-allocation of I/O bandwidth__ at a pre-determined rate, which is suitable for many real-time applications.
+
+## Haystack Object Store
+
+Haystack is a simple __log structured (append-only)__ object store. A Haystack consists of two files:
+
+1. __haystack store file__ (containing the needles)
+    1. superblock
+    1. needles
+1. __an index file__
+
+### 1. haystack store file 
+
+<img class="middle" src="/assets/images/851582_1409519009260319_311676661_n.jpg">
+
+1. The first 8KB of the haystack store is occupied by the __superblock__. 
+
+1. following the superblock are __needles__
+
+    __Needles represents the stored objects__. Needle consisting of a header, the data, and a footer: 
+
+    <img class="middle" src="/assets/images/851578_319395058204993_541487263_n.jpg">
+
+    A needle is uniquely identified by its \<Offset, Key, Alternate Key, Cookie\> tuple. 
+
+    Haystack doesn’t put any restriction on the values of the keys, and there can be needles with duplicate keys. 
+
+
+### 2. Index File
+
+__Needle__ consisting of a header, the data, and a footer: 
+
+<img class="middle" src="/assets/images/851582_1374324519464800_699636937_n.jpg">
+
+The index file provides the minimal metadata required to locate a particular needle in the haystack store file. 
+
+<img class="middle" src="/assets/images/851582_314454922033518_1196942525_n.jpg">
+
+The index file is not critical, as it can be rebuilt from the haystack store file if required. The main purpose of the index is to allow quick loading of the needle metadata into memory without traversing the larger Haystack store file.
+
+The main purpose of the index: quick loading of the needle metadata into memory without traversing the larger Haystack store file, since the index is usually less than 1% the size of the store file.
+
+### Summary
+
+All needles are stored in Haystack store file, and their location information is stored in Index File. 
+
 
 ]]></content>
   </entry>
