@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-03T06:11:03+08:00</updated>
+  <updated>2015-09-03T20:00:43+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -26,21 +26,23 @@
 
 <p>image from <a href="http://www.statista.com/statistics/264810/number-of-monthly-active-facebook-users-worldwide/">statista.com</a>.</p>
 
-<p>In 2009, Facebook stores 15 billion photos for the user, which grows at 220 million per week. It&rsquo;s 2015 now, you might want to mulitply these numbers by 3~6.</p>
+<p>In 2009, Facebook stores 15 billion photos for the user, which grows at 220 million per week, and 550,000 per second at peak.</p>
+
+<p>It&rsquo;s 2015 now, you might want to mulitply these numbers by 3~6.</p>
 
 <p>I have roughly estimated the statistics of Facebook users, Facebook photos and growth rate, just to give you an idea of the size of data Facebook has got:</p>
 
 <blockquote><p>Total user: 1.5b</p>
 
-<p>Total photoes: 75b, which is 50 photo/user</p>
+<p>Total photoes: 150b, which is 100 photo/user</p>
 
-<p>Each photo got 4 different sizes, so 300b photos are stored.</p>
+<p>Each photo got 4 different sizes, so 600b photos are stored.</p>
 
-<p>New photo per day: 1b</p>
+<p>New photo per day: 500m</p>
 
-<p>New photo per second: 10,000</p>
+<p>New photo per second: 6,000</p>
 
-<p>Peak incoming photo per second: 10m</p></blockquote>
+<p>Peak incoming photo per second: 3m</p></blockquote>
 
 <h1>Old architecture</h1>
 
@@ -118,6 +120,48 @@
 <p><strong>The disk caches are disabled</strong> in order to guarantee data consistency in the event of a crash or a power loss.</p>
 
 <h2>Filesystem</h2>
+
+<h3>How does filesystem read pictures?</h3>
+
+<p>Photo read requests result in <strong>read() system calls</strong> at known offsets in these files.</p>
+
+<p>Each file in the filesystem is represented by a structure called an inode which contains a block map that maps the logical file offset to the physical block offset on the physical volume.</p>
+
+<p>For large files, the block map can be quite large.</p>
+
+<h3>problem</h3>
+
+<p><strong>Block based filesystems</strong> maintain mappings for <strong>each logical block</strong>, and for large files, this information will not typically fit into the cached inode and is stored in indirect address blocks instead, which must be traversed in order to read the data for a file.</p>
+
+<p>There can be several layers of indirection, so a single read could result in <strong>several I/Os</strong> (if not cached).</p>
+
+<h3>Solution for block-based FS</h3>
+
+<p><strong>Extent based filesystems</strong> maintain mappings only for contiguous ranges of blocks (extents). A block map for a contiguous large file could consist of only one extent which would fit in the inode itself.</p>
+
+<blockquote><p><a href="https://goo.gl/uQA35V">An extent</a> is a contiguous area of storage reserved for a file in a file system, represented as a range. A file can consist of zero or more extents; <strong>one file fragment requires one extent</strong>. The direct benefit is in storing each range compactly as two numbers, instead of canonically storing every block number in the range.</p>
+
+<p>Extent-based file systems can also <strong>eliminate most of the metadata overhead of large files</strong> that would traditionally be taken up by the block allocation tree&hellip; saving on storage space is pretty slight, but&hellip; <strong>the reduction in metadata is significant and reduces exposure to file system corruption</strong> as one bad sector in the <em>block allocation tree</em> causes much greater data loss than one bad sector in stored data.</p></blockquote>
+
+<h3>problem of Extent-based file systems</h3>
+
+<p>However, if the file is severely fragmented and its blocks are not contiguous on the underlying volume, its block map can grow large as well.</p>
+
+<h3>the solution</h3>
+
+<p>Fragmentation can be mitigated by <strong>aggressively allocating a large chunk of space</strong> whenever growing the physical file.</p>
+
+<p>Currently, the filesystem of choice is XFS, an extent based filesystem providing efficient file preallocation.</p>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/XFS">XFS</a></strong> is a high-performance 64-bit journaling file system created by Silicon Graphics, Inc (SGI) in 1993.</p>
+
+<p>&hellip;was ported to the Linux kernel in 2001. As of June 2014, XFS is supported by most Linux distributions, some of which use it as the default file system.</p>
+
+<p>XFS enables <strong>extreme scalability of I/O threads</strong>, file system bandwidth, and size of files and of the file system itself when spanning multiple physical storage devices.</p>
+
+<p>Space allocation is performed via extents with <strong>data structures stored in B+ trees</strong>, improving the overall performance of the file system, especially when handling large files.</p>
+
+<p><strong>Delayed allocation</strong> assists in the prevention of file system fragmentation; <strong>online defragmentation</strong> is also supported. A feature unique to XFS is the <strong>pre-allocation of I/O bandwidth</strong> at a pre-determined rate, which is suitable for many real-time applications.</p></blockquote>
 ]]></content>
   </entry>
   
@@ -157,6 +201,15 @@
 <p>Not all links are equal: Google works hard to identify spam links. The best types of links are those that are given based on the quality of your content.</p></blockquote>
 
 <p>To rank higher, follow <a href="https://support.google.com/webmasters/answer/35769?vid=1-635765406868848825-432642872">Webmaster Guidelines</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NineChap System Design] Class 4.2: Search Engine ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/08/30/design-class4-2/"/>
+    <updated>2015-08-30T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/08/30/design-class4-2</id>
+    <content type="html"><![CDATA[
 ]]></content>
   </entry>
   
@@ -2485,59 +2538,6 @@ uint32_t reverseBits(uint32_t n) {
             x = a;
             y = b;
         }
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LeetCode 191] Number of 1 Bits ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/05/10/Number-of-1-Bits/"/>
-    <updated>2015-05-10T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/05/10/Number-of-1-Bits</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/number-of-1-bits/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Write a function that takes an unsigned integer and returns the number of ’1&#8217; bits it has (also known as the <a href="http://en.wikipedia.org/wiki/Hamming_weight">Hamming weight</a>).</p>
-
-<p>For example, the 32-bit integer ’11&#8217; has binary representation <code>00000000000000000000000000001011</code>, so the function should return 3.</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="http://www.shuatiblog.com/tag/bit-manipulation/">Bit Manipulation</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>In order to remove the last &lsquo;1&rsquo; bit, we use this operation:</p>
-
-<pre><code>n = n &amp; (n - 1);
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Just remove all the &lsquo;1&rsquo; bits.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public int hammingWeight(int n) {
-        int count = 0;
-        while (n != 0) {
-            n = n &amp; (n - 1);
-            count++;
-        }
-        return count;
     }
 }
 </code></pre>

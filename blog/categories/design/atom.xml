@@ -4,7 +4,7 @@
   <title><![CDATA[Category: design | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-09-03T06:11:03+08:00</updated>
+  <updated>2015-09-03T20:00:43+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -26,21 +26,23 @@ Facebook has 1.5 billion monthly active users, 970 million daily active users [a
 
 image from [statista.com](http://www.statista.com/statistics/264810/number-of-monthly-active-facebook-users-worldwide/). 
 
-In 2009, Facebook stores 15 billion photos for the user, which grows at 220 million per week. It's 2015 now, you might want to mulitply these numbers by 3~6. 
+In 2009, Facebook stores 15 billion photos for the user, which grows at 220 million per week, and 550,000 per second at peak. 
+    
+It's 2015 now, you might want to mulitply these numbers by 3~6. 
 
 I have roughly estimated the statistics of Facebook users, Facebook photos and growth rate, just to give you an idea of the size of data Facebook has got: 
 
 > Total user: 1.5b
 >
-> Total photoes: 75b, which is 50 photo/user
+> Total photoes: 150b, which is 100 photo/user
 >
-> Each photo got 4 different sizes, so 300b photos are stored. 
+> Each photo got 4 different sizes, so 600b photos are stored. 
 >
-> New photo per day: 1b
+> New photo per day: 500m
 >
-> New photo per second: 10,000
+> New photo per second: 6,000
 >
-> Peak incoming photo per second: 10m
+> Peak incoming photo per second: 3m
 
 # Old architecture
 
@@ -112,7 +114,47 @@ __The disk caches are disabled__ in order to guarantee data consistency in the e
 
 ## Filesystem 
 
+### How does filesystem read pictures?
 
+Photo read requests result in __read() system calls__ at known offsets in these files.
+
+Each file in the filesystem is represented by a structure called an inode which contains a block map that maps the logical file offset to the physical block offset on the physical volume. 
+
+For large files, the block map can be quite large.
+
+### problem
+
+__Block based filesystems__ maintain mappings for __each logical block__, and for large files, this information will not typically fit into the cached inode and is stored in indirect address blocks instead, which must be traversed in order to read the data for a file. 
+
+There can be several layers of indirection, so a single read could result in __several I/Os__ (if not cached).
+
+### Solution for block-based FS
+
+__Extent based filesystems__ maintain mappings only for contiguous ranges of blocks (extents). A block map for a contiguous large file could consist of only one extent which would fit in the inode itself. 
+
+> [An extent](https://goo.gl/uQA35V) is a contiguous area of storage reserved for a file in a file system, represented as a range. A file can consist of zero or more extents; __one file fragment requires one extent__. The direct benefit is in storing each range compactly as two numbers, instead of canonically storing every block number in the range.
+>
+> Extent-based file systems can also __eliminate most of the metadata overhead of large files__ that would traditionally be taken up by the block allocation tree... saving on storage space is pretty slight, but... __the reduction in metadata is significant and reduces exposure to file system corruption__ as one bad sector in the _block allocation tree_ causes much greater data loss than one bad sector in stored data.
+
+### problem of Extent-based file systems
+
+However, if the file is severely fragmented and its blocks are not contiguous on the underlying volume, its block map can grow large as well. 
+
+### the solution
+
+Fragmentation can be mitigated by __aggressively allocating a large chunk of space__ whenever growing the physical file. 
+
+Currently, the filesystem of choice is XFS, an extent based filesystem providing efficient file preallocation. 
+
+> __[XFS](https://en.wikipedia.org/wiki/XFS)__ is a high-performance 64-bit journaling file system created by Silicon Graphics, Inc (SGI) in 1993.
+>
+> ...was ported to the Linux kernel in 2001. As of June 2014, XFS is supported by most Linux distributions, some of which use it as the default file system.
+>
+> XFS enables __extreme scalability of I/O threads__, file system bandwidth, and size of files and of the file system itself when spanning multiple physical storage devices. 
+>
+> Space allocation is performed via extents with __data structures stored in B+ trees__, improving the overall performance of the file system, especially when handling large files.
+>
+> __Delayed allocation__ assists in the prevention of file system fragmentation; __online defragmentation__ is also supported. A feature unique to XFS is the __pre-allocation of I/O bandwidth__ at a pre-determined rate, which is suitable for many real-time applications.
 
 ]]></content>
   </entry>
