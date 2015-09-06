@@ -46,6 +46,7 @@ Below is my code, it may not be the correct solution. If you would like to discu
 
         public void run() {
             // this would be the consumer
+            // everything that is added to BlockingQueue<String> messages is printed
             while (!isFinished) {
                 String msg;
                 try {
@@ -57,13 +58,12 @@ Below is my code, it may not be the correct solution. If you would like to discu
             }
         }
 
-        public void printMessage(String msg) {
+        public void sendMessage(String msg) {
             // this is the producer
-            // System.out.println(serverId + " says: " + msg);
 
             // insert this msg in the blockingQ of all other servers
             for (MessagingServer server : servers) {
-                server.messages.add(this.serverId + " said: " + msg);
+                server.messages.add(msg + " (received from " + this.serverId + ")");
             }
         }
 
