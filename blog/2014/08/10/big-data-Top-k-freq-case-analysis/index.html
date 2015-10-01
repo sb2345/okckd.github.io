@@ -5,11 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[Design] Big Data - Top k Frequency 2 - Shuatiblog.com</title>
+  <title>[Design] Big Data - Top k Frequency (case analysis) - Shuatiblog.com</title>
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link 一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。 Analysis The basic solution for &lsquo;Top K&rsquo; questions is 【分治+trie树/hash &hellip;">
+  <meta name="description" content="Question link 在海量数据中找出出现频率最高的前K个数，或者从海量数据中找出最大的前K个数，这类问题通常称为“top K”问题， top K value
+top K frequency Analysis Standard solution is 【分治+trie树/hash+小顶堆/ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.shuatiblog.com/blog/2014/08/10/big-data-top-k-frequency-2/">
+  <link rel="canonical" href="http://www.shuatiblog.com/blog/2014/08/10/big-data-Top-k-freq-case-analysis/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -96,7 +97,7 @@
   
   <header>
     
-      <h1 class="entry-title">[Design] Big Data - Top K Frequency 2</h1>
+      <h1 class="entry-title">[Design] Big Data - Top K Frequency (Case Analysis)</h1>
     
     
       <p class="meta">
@@ -123,21 +124,66 @@
 
 <div class="entry-content"><h3>Question</h3>
 
-<p><a href="http://blog.csdn.net/v_july_v/article/details/7382693">link</a></p>
+<p><a href="http://dongxicheng.org/big-data/select-ten-from-billions/">link</a></p>
 
-<blockquote><p>一个文本文件，大约有一万行，每行一个词，要求统计出其中最频繁出现的前10个词，请给出思想，给出时间复杂度分析。</p></blockquote>
+<blockquote><p>在海量数据中找出出现频率最高的前K个数，或者从海量数据中找出最大的前K个数，这类问题通常称为“top K”问题，</p>
+
+<ol>
+<li>top K value</li>
+<li>top K frequency</li>
+</ol>
+</blockquote>
 
 <h3>Analysis</h3>
 
-<p><strong>The basic solution for &lsquo;Top K&rsquo; questions</strong> is 【分治+trie树/hash+小顶堆】.</p>
+<p><strong>Standard solution</strong> is 【分治+trie树/hash+小顶堆/quickselect】, which I covered in another post <a href="/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>. Briefly it is 3 steps:</p>
 
-<p>In the previous post <a href="/blog/2014/07/25/big-data-Top-k-frequency/">Big Data &ndash; Top k Frequency</a>, we used HashMap for calculating query frequency. Now we <strong>use Trie to do it</strong>.</p>
+<ol>
+<li>先将数据集按照hash方法分解成多个小数据集，</li>
+<li>使用trie树或者hash统计每个小数据集中的query词频，</li>
+<li>用小顶堆/quickselect求出每个数据集中出频率最高的前K个数</li>
+</ol>
 
-<blockquote><p>这题是考虑时间效率。用trie树统计每个词出现的次数，时间复杂度是O(n x le)（le表示单词的平准长度）。然后是找出出现最频繁的前10个词，可以用堆来实现，前面的题中已经讲到了，时间复杂度是O(n x lg10)。所以总的时间复杂度，是O(n x le)与O(n x lg10)中较大的哪一个。</p></blockquote>
 
-<h4>How to use Trie to calculate word frequency?</h4>
+<p>But, there&rsquo;re other senarios where different solutions may apply. Consider:</p>
 
-<p>在Trie的node节点中<a href="http://blog.csdn.net/ohmygirl/article/details/7953814">添加count域后</a>，可以统计单词出现的次数。统计的方法就是在插入单词的时候，令相应的count域加1（初始化为0）.</p>
+<ol>
+<li><p>Single core vs. multiple core</p></li>
+<li><p>Single PC vs. multiple PC</p></li>
+<li><p>Large RAM vs. limited RAM</p></li>
+<li><p>Distributed system</p></li>
+</ol>
+
+
+<h3>1. 单机+单核+足够大内存</h3>
+
+<p>设每个查询词平均占8Byte，则10亿个查询词所需的内存大约是10<sup>9</sup>*8=8G内存。如果你有这么大的内存，直接在内存中对查询词进行排序，顺序遍历找出10个出现频率最大的10个即可。这种方法简单快速，更加实用。当然，也可以先用HashMap求出每个词出现的频率，然后求出出现频率最大的10个词。</p>
+
+<h3>2. 单机+单核+受限内存</h3>
+
+<p>这种情况下，需要将原数据文件切割成一个一个小文件，如，采用hash(x)%M，将原文件中的数据切割成M小文件，如果小文件仍大于内存大小，继续采用hash的方法对数据文件进行切割，直到每个小文件小于内存大小，这样，每个文件可放到内存中处理。采用3.1节的方法依次处理每个小文件。</p>
+
+<h3>3. 单机+多核+足够大内存</h3>
+
+<p>这时可以直接在内存中实用hash方法将数据划分成n个partition，每个partition交给一个线程处理，线程的处理逻辑是同[1]节类似，最后一个线程将结果归并。</p>
+
+<p>该方法存在一个瓶颈会明显影响效率，即数据倾斜，每个线程的处理速度可能不同，快的线程需要等待慢的线程，最终的处理速度取决于慢的线程。解决方法是，<strong>将数据划分成 (c x n)个partition（c>1），每个线程处理完当前partition后主动取下一个partition继续处理</strong>，直到所有数据处理完毕，最后由一个线程进行归并。</p>
+
+<h3>4. 多机+受限内存</h3>
+
+<p>这种情况下，为了合理利用多台机器的资源，可将数据分发到多台机器上，每台机器采用[3]节中的策略解决本地的数据。可采用<strong>hash + socket</strong>方法进行数据分发。</p>
+
+<h3>5. Distributed</h3>
+
+<p>Top k问题很适合采用<strong>MapReduce框架</strong>解决，用户只需编写一个map函数和两个reduce 函数，然后提交到Hadoop（采用mapchain和reducechain）上即可解决该问题。</p>
+
+<p>A map function. 对于map函数，采用hash算法，将hash值相同的数据交给同一个reduce task.</p>
+
+<p>2 reduce functions. 对于<strong>第一个reduce函数</strong>，采用HashMap统计出每个词出现的频率，对于<strong>第二个reduce函数</strong>，统计所有reduce task输出数据中的top k即可。</p>
+
+<h3>6. Other</h3>
+
+<p>公司一般不会自己写个程序进行计算，而是提交到自己核心的数据处理平台上计算，该平台的计算效率可能不如直接写程序高，但它具有<strong>良好的扩展性和容错性</strong>，而这才是企业最看重的。</p>
 </div>
 
 
@@ -175,7 +221,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2014/08/10/big-data-top-k-frequency-2/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2014/08/10/big-data-top-k-frequency-2/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2014/08/10/big-data-Top-k-freq-case-analysis/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2014/08/10/big-data-Top-k-freq-case-analysis/" >Tweet</a>
   
   
   
@@ -184,10 +230,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/08/10/big-data-fuzzy-search-url/" title="Previous Post: [Design] Big Data - Fuzzy Search url (Bloom Filter) ">&laquo; [Design] Big Data - Fuzzy Search url (Bloom Filter) </a>
+        <a class="basic-alignment left" href="/blog/2014/08/10/big-data-Remove-Duplicate-Numbers/" title="Previous Post: [Design] Big Data - Remove Duplicate Numbers">&laquo; [Design] Big Data - Remove Duplicate Numbers</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/08/10/big-data-top-k-questions-summarize/" title="Next Post: [Design] Big Data - Top k Questions (summarize)">[Design] Big Data - Top k Questions (summarize) &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/08/10/big-data-find-existence-of-number/" title="Next Post: [Design] Big Data - Find Existence of a Number">[Design] Big Data - Find Existence of a Number &raquo;</a>
       
     </p>
   </footer>
@@ -235,7 +281,7 @@
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (77)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (11)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
@@ -248,7 +294,7 @@
 <li class='category'><a href='/blog/categories/question/'>question (124)</a></li>
 <li class='category'><a href='/blog/categories/string-search/'>string search (17)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (7)</a></li>
-<li class='category'><a href='/blog/categories/top-k/'>top k (7)</a></li>
+<li class='category'><a href='/blog/categories/top-k/'>top k (6)</a></li>
 
   </ul>
 </section>
@@ -316,8 +362,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://www.shuatiblog.com/blog/2014/08/10/big-data-top-k-frequency-2/';
-        var disqus_url = 'http://www.shuatiblog.com/blog/2014/08/10/big-data-top-k-frequency-2/';
+        var disqus_identifier = 'http://www.shuatiblog.com/blog/2014/08/10/big-data-Top-k-freq-case-analysis/';
+        var disqus_url = 'http://www.shuatiblog.com/blog/2014/08/10/big-data-Top-k-freq-case-analysis/';
         var disqus_script = 'embed.js';
       
     (function () {
