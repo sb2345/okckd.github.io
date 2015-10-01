@@ -18,16 +18,13 @@ Iterative solution is easy, __recursive is not__.
 
 ### Code
 
-	private static int myAns = -1;
-
-	public static int nthToLastMe(LinkedListNode head, int n) {
-		if (head == null) {
+	public static int nthToLastRecursive(LinkedListNode head, int n) {
+		if (n == 0 || head == null) {
 			return 0;
-		} else if (nthToLastMe(head.next, n) < n - 1) {
-			return nthToLastMe(head.next, n) + 1;
-		} else if (nthToLastMe(head.next, n) == n - 1) {
-			myAns = head.data;
-			return Integer.MAX_VALUE;
 		}
-		return Integer.MAX_VALUE;
+		int k = nthToLastRecursive(head.next, n) + 1;
+		if (k == n) {
+			System.out.println(n + "th to last node is " + head.data);
+		}
+		return k;
 	}

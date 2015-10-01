@@ -49,6 +49,7 @@ Suggested by level 5 of [this post](http://www.mitbbs.com/article_t/JobHunting/3
         boolean process(long timestamp) {
             // suppose timestamp is ms
             synchronized (this) {
+                // to process or not to process
                 if (count.get() < limit) {
                     // can process
                     count.incrementAndGet();
@@ -56,6 +57,7 @@ Suggested by level 5 of [this post](http://www.mitbbs.com/article_t/JobHunting/3
                             + timestamp % 100000 / 1000 + "," + timestamp % 1000);
                     return true;
                 }
+                // to clear or not to clear
                 if (timestamp - startTimestamp >= 1000) {
                     // every 1 seconds, reset
                     count.set(0);

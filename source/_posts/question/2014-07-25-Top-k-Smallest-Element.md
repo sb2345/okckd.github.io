@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Top k Element (quick select)"
+title: "[Question] Top k Element (Quickselect)"
 comments: true
 categories:
 - Question
@@ -20,13 +20,23 @@ There're 2 solutions.
 
 First solution, __use a max-heap__. O(nlgk) time complexity.
 
-Second solution is called __[quick select](http://www.geekviewpoint.com/java/search/quickselect)__, a type of [selection algorithm](http://en.wikipedia.org/wiki/Selection_algorithm) that's based on quicksort. It's averaging O(n) time, but O(n^2) if pivot selection is poor. The code is posted below. There's also a similar [iterative solution](http://blog.teamleadnet.com/2012/07/quick-select-algorithm-find-kth-element.html). 
+Second solution is called __[quickselect](http://www.geekviewpoint.com/java/search/quickselect)__, a type of [selection algorithm](http://en.wikipedia.org/wiki/Selection_algorithm) that's based on quicksort. It's averaging O(n) time, but O(n^2) if pivot selection is poor. The code is posted below. There's also a similar [iterative solution](http://blog.teamleadnet.com/2012/07/quick-select-algorithm-find-kth-element.html). 
 
 To [further optimize this](http://www.isnowfy.com/top-k-number/), we can change the pivot selection method by dividing into k group and find median of each. This is called [Median of medians algorithm](http://en.wikipedia.org/wiki/Median_of_medians). The worst case is O(n) time. And this is the best solution for "Top k" questions. 
 
+### Why quickselect is O(n) time?
+
+It's a very good question to ask. Why O(n)?
+
+Well think about it. Let's assume you always find the pivot that makes you eliminate half of the input. 
+
+__The first run, you would read n elements__. Second time you read half of n, and third time, quarter of n. In the end, you read n + n/2 + n/4 + ... = 2n times. 
+
+Compared to the Heap method to find top K, quick select has its advantage. __Heap top K take O(n lgK) time__. So __when K is pretty large__, quick select might be an better solution. 
+
 ### Code 
 
-__quick select__
+__quickselect__
 
 	public static void quickSelect1(int[] list, int k) {
 		selectHelper1(list, 0, list.length - 1, k);
@@ -56,7 +66,7 @@ __quick select__
 		return left;
 	}
 
-__quick select, iteratively__
+__quickselect, iteratively__
 
 	public static int quickSelect2(int[] arr, int k) {
 		if (arr == null || arr.length <= k)

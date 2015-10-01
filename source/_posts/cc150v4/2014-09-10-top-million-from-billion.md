@@ -22,4 +22,4 @@ There're enough discussion on __Top K problems__ so far in this blog. The sugges
 
 1. Min Heap, O(n logm) time. 
 
-1. Quick select algorithm. O(n) time. 
+1. Quickselect algorithm. O(n) time. 
