@@ -4,7 +4,7 @@ title: "[Question] Most Frequent Word from a book "
 comments: true
 categories:
 - Question
-- String search
+- z-string-search
 
 ---
 

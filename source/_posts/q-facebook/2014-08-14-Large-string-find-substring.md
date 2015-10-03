@@ -4,7 +4,7 @@ title: "[Facebook] Query Search (HashMap, suffix array) "
 comments: true
 categories:
 - q-facebook
-- String search
+- z-string-search
 
 ---
 

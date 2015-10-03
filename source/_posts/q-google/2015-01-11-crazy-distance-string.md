@@ -4,7 +4,7 @@ title: "[Google] Crazy Distance Between Strings "
 comments: true
 categories:
 - q-google
-- String search
+- z-string-search
 tags: [ src ]
 ---
 

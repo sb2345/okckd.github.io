@@ -4,7 +4,7 @@ title: "[Google] Boggle Solver (search words from matrix)"
 comments: true
 categories:
 - q-google
-- String search
+- z-string-search
 
 ---
 

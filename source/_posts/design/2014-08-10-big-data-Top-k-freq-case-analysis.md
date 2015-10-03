@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[Design] Big Data - Top k Questions (summarize)"
+title: "[Design] Big Data - Top k Frequency (case analysis)"
 comments: true
 categories:
 - Design
-- Top K
+- z-top-K
 
 ---
 
@@ -19,11 +19,11 @@ categories:
 
 ### Analysis
 
-__Standard solution__ is 【分治+trie树/hash+小顶堆】, which I covered in another post [Big Data - Top k Frequency]({% post_url /design/2014-07-25-big-data-Top-k-frequency %}). Briefly it is 3 steps: 
+__Standard solution__ is 【分治+trie树/hash+小顶堆/quickselect】, which I covered in another post [Big Data - Top k Frequency]({% post_url /design/2014-07-25-big-data-Top-k-frequency %}). Briefly it is 3 steps: 
 
 1. 先将数据集按照hash方法分解成多个小数据集，
 1. 使用trie树或者hash统计每个小数据集中的query词频，
-1. 用小顶堆求出每个数据集中出频率最高的前K个数
+1. 用小顶堆/quickselect求出每个数据集中出频率最高的前K个数
 
 But, there're other senarios where different solutions may apply. Consider: 
 

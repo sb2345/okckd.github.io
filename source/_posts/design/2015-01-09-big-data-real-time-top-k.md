@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[Design] Big Data - Real Time Top k "
+title: "[Design] Real Time Top k "
 comments: true
 categories:
 - Design
-- Top K
+- z-top-K
 
 ---
 

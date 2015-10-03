@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[Design] Big Data - Top k Frequency 3 "
+title: "[Design] Big Data - Top k Frequency (hands-on) "
 comments: true
 categories:
 - Design
-- Top K
+- z-top-K
 
 ---
 

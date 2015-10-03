@@ -4,7 +4,7 @@ title: "[Amazon] Longest Repeating Substring "
 comments: true
 categories:
 - Question
-- String search
+- z-string-search
 tags: [ src ]
 ---
 

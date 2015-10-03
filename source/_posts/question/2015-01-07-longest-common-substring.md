@@ -4,7 +4,7 @@ title: "[Question] Longest Common Substring "
 comments: true
 categories:
 - Question
-- String search
+- z-string-search
 tags: [ src ]
 ---
 

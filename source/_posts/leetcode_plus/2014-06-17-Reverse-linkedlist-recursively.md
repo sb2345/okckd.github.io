@@ -6,7 +6,6 @@ category: leetcode_plus
 tags: [ unit test needed ]
 ---
 
-
 ### Question 
 
 [link](http://leetcode.com/2010/04/reversing-linked-list-iteratively-and.html)
@@ -50,27 +49,16 @@ First, the iterative solution is very common, and is listed as __one of the "5 f
 
 ### Recursively
 
-A good code from [here](http://stackoverflow.com/a/354937).
+A good solution suggest by [this answer](http://stackoverflow.com/a/354937):
 
-    public ListNode Reverse(ListNode list) {
-        if (list == null) return null; 
-        if (list.next == null) return list; 
-        ListNode secondElem = list.next;
-        list.next = null;
-        ListNode reverseRest = Reverse(secondElem);
-        secondElem.next = list;
-        return reverseRest;
-    }
-
-Alternatively, the code can be written in a 'show-off' practice.
-
-    public ListNode Reverse(ListNode list) {
-        if (list == null) return null;
-        if (list.next == null) return list;
-        ListNode reverseRest = Reverse(list.next);
-        list.next.next = list;
-        list.next = null;
-        return reverseRest;
-    }
-
-Test cases urgently needed. 
+	public ListNode reverseRecursively(ListNode head) {
+		if (head == null || head.next == null) {
+			return head;
+		}
+		ListNode temp = head.next;
+		// temp is not NULL
+		ListNode newHead = reverseRecursively(temp);
+		temp.next = head;
+		head.next = null;
+		return newHead;
+	}

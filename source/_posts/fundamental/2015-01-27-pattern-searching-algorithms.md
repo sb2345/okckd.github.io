@@ -4,7 +4,7 @@ title: "[Fundamental] Pattern Searching Algorithms "
 comments: true
 categories:
 - Fundamental
-- String search
+- z-string-search
 
 ---
 

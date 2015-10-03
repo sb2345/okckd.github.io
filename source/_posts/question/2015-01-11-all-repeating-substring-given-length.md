@@ -4,7 +4,7 @@ title: "[LinkedIn] Find all repeating substring with given length "
 comments: true
 categories:
 - Question
-- String search
+- z-string-search
 tags: [ src ]
 ---
 

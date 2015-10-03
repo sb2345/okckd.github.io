@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[Question] Top k Element (Quickselect)"
+title: "[Fundamental] Quickselect "
 comments: true
 categories:
-- Question
-- Top K
+- Fundamental
+- z-top-K
 tags: [ src ]
 ---
 

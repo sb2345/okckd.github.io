@@ -4,7 +4,7 @@ title: "[Fundamental] Prefix Tree "
 comments: true
 categories:
 - Fundamental
-- String search
+- z-string-search
 
 ---
 

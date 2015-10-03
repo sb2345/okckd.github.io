@@ -4,7 +4,7 @@ title: "[CC150v4] 11.2 Random error debugging 2 "
 comments: true
 categories:
 - CC150v4
-- Testing
+- z-testing
 
 ---
 

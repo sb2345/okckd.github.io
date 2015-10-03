@@ -4,7 +4,7 @@ title: "[CC150v5] 12.0 Example - Troubleshoot Google Chrome "
 comments: true
 categories:
 - CC150v5
-- Testing
+- z-testing
 
 ---
 

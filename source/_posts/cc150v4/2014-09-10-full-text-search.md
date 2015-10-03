@@ -4,7 +4,7 @@ title: "[CC150v4] 20.8 Full Text Search (suffix tree) "
 comments: true
 categories:
 - CC150v4
-- String search
+- z-string-search
 
 ---
 

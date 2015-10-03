@@ -4,7 +4,7 @@ title: "[Design] Big Data - Fuzzy Search url (Bloom Filter) "
 comments: true
 categories:
 - Design
-- String search
+- z-string-search
 ---
 
 ### Question 

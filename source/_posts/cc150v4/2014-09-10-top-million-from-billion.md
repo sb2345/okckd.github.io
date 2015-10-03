@@ -4,7 +4,7 @@ title: "[CC150v4] 20.6 Top Million from Billion "
 comments: true
 categories:
 - CC150v4
-- Top K
+- z-top-K
 
 ---
 

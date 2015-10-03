@@ -4,7 +4,7 @@ title: "[Question] Number of occurence of given sub-sequence "
 comments: true
 categories:
 - Question
-- String search
+- z-string-search
 
 ---
 

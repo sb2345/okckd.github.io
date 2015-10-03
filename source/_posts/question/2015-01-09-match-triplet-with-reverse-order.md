@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[Question] Match triplet with reverse order "
+title: "[Amazon] Match triplet with reverse order "
 comments: true
 categories:
 - Question
-- String search
+- z-string-search
 
 ---
 

@@ -4,7 +4,7 @@ title: "[LeetCode 79] Word Search"
 comments: true
 categories:
 - Leetcode
-- String search
+- z-string-search
 
 ---
 
