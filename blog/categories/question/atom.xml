@@ -4,7 +4,7 @@
   <title><![CDATA[Category: question | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/question/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-10-05T22:03:21+08:00</updated>
+  <updated>2015-10-08T03:23:37+08:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,276 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Largest Sub-square with Edges filled ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/10/07/largest-subsquare-with-edge-filled/"/>
+    <updated>2015-10-07T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/10/07/largest-subsquare-with-edge-filled</id>
+    <content type="html"><![CDATA[### Question
+
+[link](www.geeksforgeeks.org/given-matrix-o-x-find-largest-subsquare-surrounded-x/index.html)
+
+> Given a matrix where every element is either ‘O’ or ‘X’, find the largest sub-square surrounded by ‘X’. (meaning that the 4 edges are filled with 'X')
+
+> Example Input:
+
+    {{'X', 'O', 'X', 'X', 'X'},
+     {'X', 'X', 'X', 'X', 'X'},
+     {'X', 'X', 'O', 'X', 'O'},
+     {'X', 'X', 'X', 'X', 'X'},
+     {'X', 'X', 'X', 'O', 'O'},
+    };
+
+> Output: 3. The square submatrix starting at (1, 1) is the largest sub-squre. 
+
+> Example Input:
+
+    {{'X', 'O', 'X', 'X', 'X', 'X'},
+     {'X', 'O', 'X', 'X', 'O', 'X'},
+     {'X', 'X', 'X', 'O', 'O', 'X'},
+     {'X', 'X', 'X', 'X', 'X', 'X'},
+     {'X', 'X', 'X', 'O', 'X', 'O'},
+    };
+
+> Output: 4. The square submatrix starting at (0, 2) is the largest
+
+### Solution
+
+Read a very similar question - __[Question] Maximum Square Sub-matrix With All 1s__
+
+Typical DP question. Now the solution is to build 2 arrays to cache info. One horizontally and one, vertical. 
+
+> create two auxiliary arrays hor[N][N] and ver[N][N]. 
+
+> hor[i][j] is the number of horizontal continuous ‘X’ characters till mat[i][j] in mat[][]. 
+
+> ver[i][j] is the number of vertical continuous ‘X’ characters till mat[i][j] in mat[][]. 
+
+    mat[6][6] =  X  O  X  X  X  X
+                 X  O  X  X  O  X
+                 X  X  X  O  O  X
+                 O  X  X  X  X  X
+                 X  X  X  O  X  O
+                 O  O  X  O  O  O
+
+    hor[6][6] = 1  0  1  2  3  4
+                1  0  1  2  0  1
+                1  2  3  0  0  1
+                0  1  2  3  4  5
+                1  2  3  0  1  0
+                0  0  1  0  0  0
+
+    ver[6][6] = 1  0  1  1  1  1
+                2  0  2  2  0  2
+                3  1  3  0  0  3
+                0  2  4  1  1  4
+                1  3  5  0  2  0
+                0  0  6  0  0  0
+
+After we got these, start from the bottom-right corner row by row up... For every mat[i][j], we compare hor[i][j] with ver[i][j] and pick the smaller one. 
+
+All we need to do next, is to check the other 2 edges. This solution is O(n^3).
+
+### Code 
+
+C++ code provided by [G4G](www.geeksforgeeks.org/given-matrix-o-x-find-largest-subsquare-surrounded-x/index.html):
+
+    int findSubSquare(int mat[][N])
+    {
+        int max = 1; // Initialize result
+
+        // Initialize the left-top value in hor[][] and ver[][]
+        int hor[N][N], ver[N][N];
+        hor[0][0] = ver[0][0] = (mat[0][0] == 'X');
+
+        // Fill values in hor[][] and ver[][]
+        for (int i=0; i<N; i++)
+        {
+            for (int j=0; j<N; j++)
+            {
+                if (mat[i][j] == 'O')
+                    ver[i][j] = hor[i][j] = 0;
+                else
+                {
+                    hor[i][j] = (j==0)? 1: hor[i][j-1] + 1;
+                    ver[i][j] = (i==0)? 1: ver[i-1][j] + 1;
+                }
+            }
+        }
+
+        // Start from the rightmost-bottommost corner element and find
+        // the largest ssubsquare with the help of hor[][] and ver[][]
+        for (int i = N-1; i>=1; i--)
+        {
+            for (int j = N-1; j>=1; j--)
+            {
+                // Find smaller of values in hor[][] and ver[][]
+                // A Square can only be made by taking smaller
+                // value
+                int small = getMin(hor[i][j], ver[i][j]);
+
+                // At this point, we are sure that there is a right
+                // vertical line and bottom horizontal line of length
+                // at least 'small'.
+
+                // We found a bigger square if following conditions
+                // are met:
+                // 1)If side of square is greater than max.
+                // 2)There is a left vertical line of length >= 'small'
+                // 3)There is a top horizontal line of length >= 'small'
+                while (small > max)
+                {
+                    if (ver[i][j-small+1] >= small &&
+                        hor[i-small+1][j] >= small)
+                    {
+                        max = small;
+                    }
+                    small--;
+                }
+            }
+        }
+        return max;
+    }
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Question] Find Cloest Leaf in Binary Tree ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/10/07/closest-leaf-binary-tree/"/>
+    <updated>2015-10-07T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/10/07/closest-leaf-binary-tree</id>
+    <content type="html"><![CDATA[### Question
+
+[link](www.geeksforgeeks.org/find-closest-leaf-binary-tree/index.html)
+
+> Given a Binary Tree and a key, find distance of the closest leaf.
+
+> Examples:
+
+              1
+            /    \    
+           2       3
+                 /   \  
+                5     6   
+               /       \
+              7         8
+             / \       /
+            9  10     11
+            
+    Closest key to '8' is '11', so distance is 1 for '8'
+    Closest key to '3' is '2', so distance is 2 for '3'
+    Closest key to '5' is either '9' or '10', so distance is 2 for '5'
+    Closest key to '2' is '2' itself, so distance is 0 for '2' 
+
+### Solution
+
+> traverse the given tree in preorder and keep track of ancestors (in a caching data struture, either it's List or an array with a correct pointer)
+
+When we find our target, we do 2 things: 
+
+1. find __closest distance on lower subtrees of current node__.
+
+1. for every ancester, find the __closest distance on lower subtrees__, then add with __distance to ancester__. 
+
+Finally, return the smallest value seen above. 
+
+### Code
+
+Inspired by the code from [G4G](www.geeksforgeeks.org/find-closest-leaf-binary-tree/index.html)
+
+	int answer;
+
+	public int findClosest(TreeNode root, int key) {
+		answer = Integer.MAX_VALUE;
+		helper(root, key, new ArrayList<TreeNode>());
+		return answer;
+	}
+
+	private void helper(TreeNode node, int key, List<TreeNode> path) {
+		if (node == null) {
+			return;
+		} else if (node.val != key) {
+			path.add(node);
+			helper(node.left, key, path);
+			helper(node.right, key, path);
+			path.remove(path.size() - 1);
+		} else {
+			// key matches with current node value
+			answer = lenToLowerLeaf(node);
+			// answer initially = cloest leaf from lower
+
+			int len = path.size();
+			for (int i = 0; i < len; i++) {
+				// for every ancestor, calculate distance and compare
+				int ithToLowerLeaf = lenToLowerLeaf(path.get(i));
+				answer = Math.min(answer, (len - i) + ithToLowerLeaf);
+			}
+		}
+	}
+
+	private int lenToLowerLeaf(TreeNode node) {
+		if (node == null) {
+			return Integer.MAX_VALUE;
+		} else if (node.left == null && node.right == null) {
+			return 0;
+		} else {
+			return 1 + Math.min(lenToLowerLeaf(node.left), lenToLowerLeaf(node.right));
+		}
+	}
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Amazon] All Strings by Placing Spaces ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/10/07/all-string-placing-space/"/>
+    <updated>2015-10-07T00:00:00+08:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/10/07/all-string-placing-space</id>
+    <content type="html"><![CDATA[### Question
+
+[link](www.geeksforgeeks.org/print-possible-strings-can-made-placing-spaces/index.html)
+
+> Given a string, print all possible strings that can be made by placing spaces (zero or one) in between them.
+
+> Input:  str[] = "ABC"
+
+>Output:
+
+        ABC
+        AB C
+        A BC
+        A B C
+
+### Solution
+
+recursion.
+
+### Code 
+
+
+	public void printAll(String input) {
+		if (input == null || input.length() <= 1) {
+			// since we insert space in-between chars, so
+			return;
+		}
+		int len = input.length();
+		// len >= 2
+		helper(input, len - 1);
+	}
+
+	private void helper(String s, int p) {
+		if (p == 1) {
+			System.out.println(s);
+			// no insertion
+			System.out.println(s.substring(0, 1) + " " + s.substring(1));
+			// insert at position 1
+		} else {
+			helper(s, p - 1);
+			helper(s.substring(0, p) + " " + s.substring(p), p - 1);
+		}
+	}
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Palantir] Sort Letters Given Lexicographic Order ]]></title>
@@ -50,13 +320,11 @@ the
 
 answer
 
-immediately,
+immediately
 
-which is, to use counting sort
+The answer is __counting sort__.
 
 ### Code 
-
-
 ]]></content>
   </entry>
   
@@ -135,7 +403,7 @@ line.
 
 ### Analysis
 
-This question is a little similar to [[CC150v5] 9.10 Stack Up the Boxes](/blog/2014/09/17/stack-up-boxes/), yet different. 
+This question is a little similar to [[CC150v5] 9.10 Stack Up the Boxes]({% post_url /cc150v5/2014-09-17-stack-up-boxes %}), yet different. 
 
 ### Solution
 
@@ -197,103 +465,6 @@ The following Java code is written by me
         public int compare(Pair p1, Pair p2) {
             return p1.x - p2.x;
         }
-    }
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Question] 编程之美 NIM 一排石头的游戏 ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/04/14/NIM-stone-game/"/>
-    <updated>2015-04-14T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/04/14/NIM-stone-game</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://blog.csdn.net/starcuan/article/details/20546993)
-
-> N块石头排成一行，两个玩家依次取石头，每个玩家可以取其中任意一块或者相邻的两块，最后能将剩下的石头一次取光的玩家获胜。
-
-
-### Solution
-
-1. when n = 1, first move wins
-1. when n = 2, first move wins
-1. when n = 3, first move removes middle stone, wins
-1. when n = 4, first move removes 2 stones from middle, wins
-1. when n = 5, first move removes middle stone, which leaves 2 piles of stones of count 2. First move wins.
-
-So to conclude the above, we will have: 
-
-> 先取者只要取中间的元素，N为奇数取中间一个，偶数取中间两个，将石头分为两部分，然后无论第二个人怎么取，先取者只要在另一部分的同样位置取走同样多的石头，则最后先取者必胜
-
-Quoted from [王川的私房菜
-](http://blog.csdn.net/starcuan/article/details/20546993). 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Palantir] MultiMap in Java without using Collections ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/04/12/multi-map-java/"/>
-    <updated>2015-04-12T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/04/12/multi-map-java</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.careercup.com/question?id=18479662)
-
-> Explain how you would implement a multi-map in Java without using any collections?
-
-### Solution
-
-This question is pretty strange in a tech interview. But still, if you are asked, I think the most obvious solution is pointed out by [careercup user Abhi](http://www.careercup.com/question?id=18479662). 
-
-The basic idea is to build a nested list structure ourselves, without considering the time complexity. See code below. 
-
-### Code
-
-    public class Node {
-        Object key;
-        Node next;
-        ValueNode vnode;
-    }
-    public class ValueNode {
-        Object Value;
-        ValueNode next;
-    }
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[Palantir] Find Duplicate within K Distance ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/04/12/duplicate-within-k-distance/"/>
-    <updated>2015-04-12T00:00:00+08:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/04/12/duplicate-within-k-distance</id>
-    <content type="html"><![CDATA[### Question 
-
-[link](http://www.careercup.com/question?id=18517665)
-
-> Given an array of values, design and code an algorithm that returns whether there are two duplicates within k indices of each other? 
-
-### Solution
-
-We can keep a HashMap for storing the previous occuring position of a number. 
-
-### Code
-
-    public boolean dupWithinK(int k, int[] arr) {
-        Set<Integer> set = new HashSet<Integer>();
-        for (int i = 0; i < arr.length; i++) {
-            if (set.contains(arr[i])) {
-                return true;
-            }
-            if (i < k) {
-                // the first k numbers
-                set.add(arr[i]);
-            } else {
-                // the (k+1) th number and onwards
-                set.add(arr[i]);
-                set.remove(arr[i - k]);
-            }
-        }
-        return false;
     }
 ]]></content>
   </entry>
