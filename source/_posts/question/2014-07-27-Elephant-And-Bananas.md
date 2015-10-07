@@ -3,7 +3,7 @@ layout: post
 title: "[Question] Elephant And Bananas"
 comments: true
 category: Question
-tags: [ unit test needed ]
+tags: [  ]
 ---
 
 ### Question 
@@ -27,43 +27,3 @@ __Start from here, we only loose 3 bananas every km__. This goes on for another 
 ### Solution
 
 __532 bananas__. 
-
-### Code
-
-__not written by me__
-
-    double transferBananas(double N, double D, double C, double F) {  
-        // base case: remaining bananas <= C,  
-        // so carry all the bananas in one trip  
-        // at this point if distance is more than N/F,  
-        // elephant can never reach destination, return 0  
-        if (N <= C) {
-            double bananasAtDestination = N - D*F;  
-            return (bananasAtDestination >= 0.0) ?  
-                bananasAtDestination :  0.0;    // out of bananas!  
-        }  
-
-        // # trips you would travel back and forth  
-        int numTrips = 2*(ceil(N/C) - 1) + 1;  
-
-        // how many bananas you consume per km  
-        double costPerKm = numTrips * F;  
-
-        // remaining number of bananas after consumption, we want it  
-        // as an integer multiple of C.  
-        double remainingBananas = C*(ceil(N/C) - 1.0);  
-
-        // this is the distance you are able to travel before you  
-        // reach ONE LESS round trip fetching bananas  
-        // derived from eq: N - costPerKm * traveled = remaining bananas  
-
-        double traveled = (N - remainingBananas) / costPerKm;  
-
-        // we are able to travel greater (or equal) than the remaining  
-        // distance, so fetch the bananas right to the destination  
-        if (traveled >= D)
-            return N - D*costPerKm;  
-
-        // calculate recursively as we travel ONE less round trip now.  
-        return transferBananas(remainingBananas, D-traveled, C, F);  
-    }

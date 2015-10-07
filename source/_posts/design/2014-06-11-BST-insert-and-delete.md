@@ -6,7 +6,6 @@ category: Design
 tags: [ unit test needed ]
 ---
 
-
 ## First Word
 
 For BST it's very important to do insert and delete (balancing not required). 

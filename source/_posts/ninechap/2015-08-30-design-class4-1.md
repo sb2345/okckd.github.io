@@ -318,18 +318,6 @@ __What happens in Line 3 'Wait(numberOfNewTask)'__? Well, the programs checks on
 1. If there is 1 or more tasks, just proceed.
 1. If no tasks available, block itself and wait there. (Later someone will wake it up and it will resume). 
 
-
 ### Design an consumer-producer
 
 Stay tuned for future post. 
-
-
-
-
-
-
-
-
-
-
-

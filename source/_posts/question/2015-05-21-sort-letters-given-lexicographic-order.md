@@ -38,10 +38,8 @@ the
 
 answer
 
-immediately,
+immediately
 
-which is, to use counting sort
+The answer is __counting sort__.
 
 ### Code 
-
-
