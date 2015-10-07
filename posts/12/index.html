@@ -9,7 +9,8 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link 给定两个数组A，B，长度均为n，求A[0]+B[0],…,A[0]+B[n-1],…,A[n-1]+B[0],…,A[n-1]+B[n]总共n2个数的最大的n个值。 Solution Use a Heap and then iteratively pop 1 and &hellip;">
+  <meta name="description" content="Question link Consider the following class: class MyCounter { private static int counter = 0; public static int getCount() { return counter++; }
+} Is &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +76,386 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/26/make-java-method-thread-safe/">[Google] Make a Java Method Thread-safe</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/26/make-java-method-thread-safe/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.programcreek.com/2014/02/how-to-make-a-method-thread-safe-in-java/">link</a></p>
+
+<blockquote><p>Consider the following class:</p></blockquote>
+
+<pre><code>class MyCounter {
+    private static int counter = 0;
+
+    public static int getCount() {
+        return counter++;
+    }
+}
+</code></pre>
+
+<blockquote><p>Is the method thread-safe? How to make it thread-safe?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>No</strong>, it&rsquo;s not.</p>
+
+<blockquote><p>The method is not thread-safe, because the <strong>counter++ operation is not atomic</strong>, which means it consists more than one atomic operations. In this case, one is accessing value and the other is increasing the value by one.</p>
+
+<p>When Thread 1 accesses the method at t1, Thread 2 may not be done with the method. So the value returned to Thread 1 is the value that has not been increased.</p></blockquote>
+
+<h3>Approach 1</h3>
+
+<p>Adding <strong>synchronized</strong> to this method. This will synchronize the instance of the static class.</p>
+
+<pre><code>class MyCounter {
+    private static int counter = 0;
+
+    public static synchronized int getCount() {
+        return counter++;
+    }
+}
+</code></pre>
+
+<h3>Approach 2</h3>
+
+<p>We actually can make <strong>count++</strong> atomic by using AtomicInteger from the package &ldquo;java.util.concurrent.atomic&rdquo;.</p>
+
+<p>import java.util.concurrent.atomic.AtomicInteger;</p>
+
+<pre><code>public class MyCounter {
+    private static AtomicInteger counter = new AtomicInteger(0);
+
+    public static int getCount() {
+        return counter.getAndIncrement();
+    }
+}
+</code></pre>
+
+<h3>Follow-up on thread stack</h3>
+
+<ol>
+<li>Each thread has its own stack (never share stack).</li>
+<li>All local variables defined in a method will be allocated memory in stack.</li>
+<li>When execution completed by a thread, stack frame will be removed.</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/26/Push-and-Pop-Sequences-Stacks/">[Question] Push and Pop Sequences of Stacks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-26T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/26/Push-and-Pop-Sequences-Stacks/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://codercareer.blogspot.sg/2011/11/no-21-push-and-pop-sequences-of-stacks.html">link</a></p>
+
+<blockquote><p>Given two integer sequences, one of which is the push sequence of a stack, please check whether the other sequence is a corresponding pop sequence or not.</p>
+
+<p>For example, if 1, 2, 3, 4, 5 is a push sequence, 4, 5, 3, 2, 1 is a corresponding pop sequence, but the sequence 4, 3, 5, 1, 2 is not.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Refer to <a href="http://stackoverflow.com/a/17828345">this answer</a>:</p>
+
+<blockquote><p>Construct the stack:</p>
+
+<p>For each number X in the pop order:</p></blockquote>
+
+<pre><code>If this number is not the same as the top of the stack (or the stack is empty), 
+push numbers from the push order until you pushed X. 
+
+If you pushed all numbers and didn't find X, there's no way to get the pop order.
+
+Pop X
+</code></pre>
+
+<h3>Code</h3>
+
+<pre><code>public boolean validSequence(int[] input, int[] sequenc) {
+    // keep a pointer p in the input[] array
+    int len = input.length;
+    int p = 0;
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+
+    int i = 0;
+    while (i &lt; len) {
+        if (stack.isEmpty()) {
+            // just push an element to stack
+            stack.push(input[p++]);
+        } else {
+            // stack got elements, then check top one
+            if (stack.peek() == sequenc[i]) {
+                // seq found, proceed to next number in seq
+                stack.pop();
+                i++;
+            } else {
+                // did not find seq, keep pushing to stack until done
+                if (p == len) {
+                    return false;
+                } else {
+                    stack.push(input[p++]);
+                }
+            }
+        }
+    }
+    return i == len; // or just return true;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/24/distributed-caching-memcached/">[Design] Distributed Caching - Memcached</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/24/distributed-caching-memcached/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>What is Memcached?</h3>
+
+<p><a href="http://memcached.org/">Memcached</a> is an <strong>in-memory key-value store for small chunks of arbitrary data</strong> (strings, objects) from results of database calls, API calls, or page rendering.</p>
+
+<ol>
+<li>Free &amp; open source</li>
+<li>high-performance, distributed memory object caching system</li>
+<li>generic in nature</li>
+<li>intended for use in speeding up dynamic web applications by alleviating database load</li>
+</ol>
+
+
+<p>Definition from <a href="http://en.wikipedia.org/wiki/Memcached">wiki</a>:</p>
+
+<blockquote><p>Memcached is a <strong>general-purpose distributed memory caching system</strong>. It is often used to speed up dynamic database-driven websites by <strong>caching data and objects in RAM</strong> to reduce the number of times an <strong>external data source</strong> (such as a database or API) must be read.</p></blockquote>
+
+<h3>Who uses Memcached?</h3>
+
+<ol>
+<li>Facebook</li>
+<li>YouTube</li>
+<li>Twitter</li>
+<li>Amazon</li>
+<li>Reddit</li>
+<li>Yahoo</li>
+<li>Zynga</li>
+</ol>
+
+
+<h3>Why Memcached?</h3>
+
+<p>Run memcached on one or more hosts and then use the shared cache to store objects. Because each host’s RAM is storing information, the access speed <a href="http://www.blogs.zeenor.com/category/interview-questions/page/9">will be much faster than</a> having to load the information from disk. This can provide <strong>a significant performance boost in retrieving data</strong> versus loading the data natively from a database.</p>
+
+<p>Also, because the cache is just a repository for information, you can use the cache to store <strong>any data, including complex structures</strong> that would normally require a significant amount of effort to create, but in <strong>a ready-to-use format</strong>, helping to reduce the load on your MySQL servers.</p>
+
+<h3>FAQ</h3>
+
+<p><strong>What is Memcached?</strong></p>
+
+<p><a href="http://www.web-technology-experts-notes.in/2014/09/memcached-interview-questions-and-answers.html">It is component</a> which stored the data temporary for 1 Hour/ 6 Hour/1 Day etc. When we integrate the Memcached with our application, performance of application increased.</p>
+
+<p>Memcached is open source, high-performance distributed memory object used for caching so that execution can be enhanced at nth level.</p>
+
+<p><strong>Where Memcached can be used?</strong></p>
+
+<p>•  Social Networking &ndash;> Profile Caching</p>
+
+<p>•  Content Aggregation &ndash;> HTML/ Page Caching</p>
+
+<p>•  Ad targeting &ndash;> Cookie/profile tracking</p>
+
+<p>•  Relationship &ndash;> Session caching</p>
+
+<p>•  E-commerce &ndash;> Session and HTML caching</p>
+
+<p>•  Location-based services &ndash;> Data-base query scaling</p>
+
+<p>•  Gaming and entertainment &ndash;> Session caching</p>
+
+<p><strong>Why use Memcached?</strong></p>
+
+<p>•  Speed up application processes</p>
+
+<p>•  It determines what to store and what not to</p>
+
+<p>•  Reduce the number of retrieval requests to the database</p>
+
+<p>•  Cuts down the I/O ( Input/Output) access (hard disk)</p>
+
+<p><strong>In what condition does retrieving cache fail?</strong></p>
+
+<p>•  Memory allocated for the cache is exhausted</p>
+
+<p>•  Item from cache is deleted</p>
+
+<p>•  Individual item in the cache is expired</p>
+
+<p><strong>What is the drawback of Memcached?</strong></p>
+
+<p>•  It is not a persistent data store</p>
+
+<p>•  Not a database</p>
+
+<p>•  It is not an application specific</p>
+
+<p>•  It cannot cache large object</p>
+
+<p><strong>Give more details about memcached failures</strong></p>
+
+<p><a href="http://programmers.stackexchange.com/a/187101">Memcached servers</a> are indeed independent of each other. Memcached server is just an efficient key-value store implemented as in-memory hash table.</p>
+
+<p><strong>What makes memcached distributed is the client</strong>, which in most implementations can connect to a pool of servers. Typical implementations use consistent hashing, which means that when you add or remove server to/from a pool of N servers, you only have to remap 1/N keys.</p>
+
+<p>Typically keys are <strong>not duplicated</strong> on various hosts, as memcached is <strong>not meant to be persistent store</strong> and gives no guarantees that your value will persist (for example when running out of assigned memory, memcached server drops least recently used (LRU) elements). Thus it&rsquo;s assumed that your application should handle missing keys.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/24/design-google-suggest-autocomplete/">[Design] Design Google Suggest (Autocomplete)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-24T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/24/design-google-suggest-autocomplete/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Overview</h3>
+
+<p><strong>Google Suggest</strong> was <a href="http://googleblog.blogspot.sg/2004/12/ive-got-suggestion.html">launched in 2004</a> as a 20% time project from Google engineer Kevin Gibbs. He developed the idea on a <a href="http://www.theatlantic.com/technology/archive/2013/08/how-googles-autocomplete-was-created-invented-born/278991/">Google shuttle bus</a>.</p>
+
+<h3>Design</h3>
+
+<ol>
+<li>Use trie.</li>
+<li>Use cache (distributed cache)</li>
+</ol>
+
+
+<h4>Trie</h4>
+
+<p>Just make use of all keywords (including space) and build a trie out of it. Then you are good to go just search in Trie.</p>
+
+<p>A comparison of speed between DB, Set and Trie can be found <a href="http://sujitpal.blogspot.sg/2007/02/three-autocomplete-implementations.html">here</a>. A lot of implementation code can be found <a href="http://stackoverflow.com/questions/7058724/how-to-create-an-efficient-auto-complete">here</a>.</p>
+
+<h4>Memcached</h4>
+
+<p>Distributed caching + LRU replacement algorithm. Refer to <strong>[Design] Distributed Caching &ndash; memcached</strong> for more.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -785,462 +1166,6 @@ class Pair {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/19/check-if-point-inside-polygon/">[Question] Check if Given Point Inside Polygon</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/19/check-if-point-inside-polygon/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/">link</a></p>
-
-<blockquote><p>Given a polygon and a point ‘p’, find if ‘p’ lies inside the polygon or not. The points lying on the border are considered inside.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/point-in-polygon.png"></p>
-
-<h3>Solution</h3>
-
-<p>Prerequisite reading: <strong>[Question] Check if two line segments intersect</strong>.</p>
-
-<p>Suggested by G4G, this is a simple idea to check:</p>
-
-<p><img class="middle" src="/assets/images/polygon31-300x169.png"></p>
-
-<ol>
-<li><p>Draw a horizontal line to the right of each point and extend it to infinity</p></li>
-<li><p>Count the number of times the line intersects with polygon edges.</p></li>
-<li><p>A point is inside the polygon if either count of intersections is odd or point lies on an edge of polygon.</p></li>
-<li><p>Note the special case of point &lsquo;g&rsquo;.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/19/check-if-line-segment-intersect/">[Question] Check if Two Line Segments Intersect</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-19T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/19/check-if-line-segment-intersect/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/">link</a></p>
-
-<blockquote><p>Given two line segments (p1, q1) and (p2, q2), check if 2 line segments intersect.</p></blockquote>
-
-<h3>Orientation</h3>
-
-<p>Considering 3 pointer, orientation can be:</p>
-
-<ol>
-<li>counterclockwise</li>
-<li>clockwise</li>
-<li>colinear (not considering direction)</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/line-orientation.png"></p>
-
-<p>Note that orientation only tells the order and sequence relationship of 3 points. <strong>It tells nothing about intersection</strong>.</p>
-
-<h3>Intersection</h3>
-
-<p>Considering 2 line segments: (p1,q1) and (p2,q2).</p>
-
-<h4>Case 1: general</h4>
-
-<p>Two line segment intersect if <strong>BOTH</strong> the 2 conditions hold:</p>
-
-<ol>
-<li>(p1, q1, p2) and (p1, q1, q2) have different orientations and</li>
-<li>(p2, q2, p1) and (p2, q2, q1) have different orientations</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/GeneralCaseExamples1.png"></p>
-
-<p><img class="middle" src="/assets/images/examplesGeneralCase211.png"></p>
-
-<h4>Case 2: special</h4>
-
-<p>The speical case is: <strong>what if all 4 pointers (p1, q1, p2, q2) are all on the same line</strong>!!! Well, this definitely can happen.</p>
-
-<p>If so, check if the values of x-axis and y-axis intersect. I.e. the below 2 cases:</p>
-
-<p><img class="middle" src="/assets/images/examplesSpecialCase1.png"></p>
-
-<h3>Code</h3>
-
-<p>Translated from G4G:</p>
-
-<pre><code>public boolean intersect(Pair p1, Pair q1, Pair p2, Pair q2) {
-
-    int o1 = orientation(p1, q1, p2);
-    int o2 = orientation(p1, q1, q2);
-    int o3 = orientation(p2, q2, p1);
-    int o4 = orientation(p2, q2, q1);
-
-    // General case
-    if (o1 != o2 &amp;&amp; o3 != o4) {
-        // 2 lines intersect
-        return true;
-    }
-
-    // Special Cases
-    Segment seg1 = new Segment(p1, q1);
-    Segment seg2 = new Segment(p2, q2);
-
-    // p1, q1 and p2 are colinear and p2 lies on segment p1q1
-    if (o1 == 0 &amp;&amp; onSegment(seg1, p2))
-        return true;
-
-    // p1, q1 and p2 are colinear and q2 lies on segment p1q1
-    if (o2 == 0 &amp;&amp; onSegment(seg1, q2))
-        return true;
-
-    // p2, q2 and p1 are colinear and p1 lies on segment p2q2
-    if (o3 == 0 &amp;&amp; onSegment(seg2, p1))
-        return true;
-
-    // p2, q2 and q1 are colinear and q1 lies on segment p2q2
-    if (o4 == 0 &amp;&amp; onSegment(seg2, q1))
-        return true;
-
-    return false; // Doesn't fall in any of the above cases
-}
-
-private boolean onSegment(Segment seg, Pair q) {
-    // check if q lies on line segment seg(p1, p2)
-    if (q.x &lt;= Math.max(seg.p1.x, seg.p2.x)
-            &amp;&amp; q.x &gt;= Math.min(seg.p1.x, seg.p2.x)
-            &amp;&amp; q.y &lt;= Math.max(seg.p1.y, seg.p2.y)
-            &amp;&amp; q.y &gt;= Math.min(seg.p1.y, seg.p2.y))
-        return true;
-
-    return false;
-}
-
-private int orientation(Pair first, Pair second, Pair third) {
-    int val = (second.y - first.y) * (third.x - second.x)
-            - (second.x - first.x) * (third.y - second.y);
-    if (val == 0) {
-        // colinear
-        return 0;
-    } else {
-        // clock or counterclock wise (1 or -1)
-        return val / Math.abs(val);
-    }
-}
-
-class Segment {
-    Pair p1;
-    Pair p2;
-
-    public Segment(Pair p1, Pair p2) {
-        this.p1 = p1;
-        this.p2 = p2;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/18/max-squre-with-all-1/">[Question] Maximum Square Sub-matrix With All 1s</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-18T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/18/max-squre-with-all-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/maximum-size-sub-matrix-with-all-1s-in-a-binary-matrix/">link</a></p>
-
-<blockquote><p>Given a binary matrix, find out the maximum size square sub-matrix with all 1s. For example, consider the below binary matrix.</p></blockquote>
-
-<pre><code>   0  1  1  0  1 
-   1  1  0  1  0 
-   0  1  1  1  0
-   1  1  1  1  0
-   1  1  1  1  1
-   0  0  0  0  0
-</code></pre>
-
-<blockquote><p>The maximum square sub-matrix with all set bits is size 9. Note we only find <strong>square</strong>, not rectangles! (this makes it much easier)</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Since <strong>square only</strong>, we can use DP. <a href="http://www.geeksforgeeks.org/maximum-size-sub-matrix-with-all-1s-in-a-binary-matrix/">Quoted answer</a> below:</p>
-
-<blockquote><p>Let the given binary matrix be M[R][C]. The idea of the algorithm is to construct an auxiliary size matrix S[][] in which each entry S[i][j] represents size of the square sub-matrix with all 1s including M[i][j] where M[i][j] is the rightmost and bottommost entry in sub-matrix.</p>
-
-<ol>
-<li><p>Construct a sum matrix S[R][C] for the given M[R][C].</p></li>
-<li><p> Copy first row and first columns as it is from M[][] to S[][]</p></li>
-<li><p> For other entries, use following expressions to construct S[][]</p></li>
-</ol>
-</blockquote>
-
-<pre><code>         If M[i][j] is 1 then
-            S[i][j] = min(S[i][j-1], S[i-1][j], S[i-1][j-1]) + 1
-         Else /*If M[i][j] is 0*/
-            S[i][j] = 0
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/18/lexicographic-order-from-dict/">[Google] Lexicographic Order (Letter Replacement) of Dictionary</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-18T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/18/lexicographic-order-from-dict/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=13394663">link</a></p>
-
-<blockquote><p>Given set of words that are lexicographically sorted, return lexicographic order. E.g:</p></blockquote>
-
-<pre><code>abc
-acd
-bcc
-bed
-bdc
-dab
-</code></pre>
-
-<blockquote><p>The order of letters for the given example would be</p></blockquote>
-
-<pre><code>a-&gt;b-&gt;c-&gt;e-&gt;d
-</code></pre>
-
-<h3>Solution</h3>
-
-<blockquote><p>Just form a graph(DAG) and do a topological sort.</p></blockquote>
-
-<p>Start from the first pair in the dictionary. Compare two strings in this pair <strong>till first mismatch</strong>.</p>
-
-<p>Eg: <strong>aad &amp; aab</strong>, in this case create an edge <strong>d &ndash;> b</strong>.</p>
-
-<p>More details is available <a href="http://codereview.stackexchange.com/questions/48292/return-the-lexicographic-order">here</a>.</p>
-
-<h4>Variant, and a different solution</h4>
-
-<p>Another way of asking this question, is:</p>
-
-<blockquote><p>有一个字典因为某种原因每个字符都被替换成一个别的字符了（但还是一一对应)，
-但是单词的顺序没有改变，比如</p></blockquote>
-
-<pre><code>cat
-coffee
-common
-
---&gt; 
-
-dkc
-dbhhzz
-dbllbq
-</code></pre>
-
-<blockquote><p>让找出的这个替换的规则（guaranteed to have a unique one)</p></blockquote>
-
-<p><strong>Alternative solution</strong> is to check according to frequencies.</p>
-
-<h3>Code</h3>
-
-<pre><code>public String lexicoOrder(String[] dict) {
-    String ans = "";
-
-    // for each pair, maintain 2 HashMap
-    HashMap&lt;Character, Integer&gt; incount = new HashMap&lt;Character, Integer&gt;();
-    HashMap&lt;Character, List&lt;Character&gt;&gt; connection = new HashMap&lt;Character, List&lt;Character&gt;&gt;();
-    for (String str : dict) {
-        for (char c : str.toCharArray()) {
-            incount.put(c, 0);
-            connection.put(c, new ArrayList&lt;Character&gt;());
-        }
-    }
-    buildGraph(dict, incount, connection);
-
-    // start topology sorting
-    Queue&lt;Character&gt; temp = new LinkedList&lt;Character&gt;();
-    for (char c : incount.keySet()) {
-        if (incount.get(c) == 0) {
-            temp.offer(c);
-            incount.remove(c);
-            // remove any node whose incount is 0
-        }
-    }
-    while (!temp.isEmpty()) {
-        char top = temp.poll();
-        ans += top;
-        // 'top' is next char in line. remove it and delete connections
-        List&lt;Character&gt; inNodes = connection.get(top);
-        for (char c : inNodes) {
-            // remove incount for all nodes from inNodes
-            incount.put(c, incount.get(c) - 1);
-            if (incount.get(c) == 0) {
-                incount.remove(c);
-                temp.offer(c);
-            }
-        }
-    }
-    if (incount.size() == 0)
-        return ans;
-    else
-        return "unable to find a valid char sequence.";
-}
-
-public void buildGraph(String[] dict, HashMap&lt;Character, Integer&gt; incount,
-        HashMap&lt;Character, List&lt;Character&gt;&gt; connection) {
-    // build the graph map
-    // abc
-    // acd
-    // bcc
-    // bed
-    // bdc
-    // dab
-    for (int i = 0; i &lt; dict.length - 1; i++) {
-        // compare dict[i] and dict[i+1]
-        String str1 = dict[i];
-        String str2 = dict[i + 1];
-        int p = 0;
-        while (p &lt; str1.length() &amp;&amp; p &lt; str2.length()) {
-            if (str1.charAt(p) == str2.charAt(p)) {
-                p++;
-            } else {
-                break;
-            }
-        }
-        if (p == str1.length()) {
-            // this is special case eg. "ab" &amp; "abc"
-            // this will not give up any information about lexico order
-            continue;
-        }
-        char from = str1.charAt(p);
-        char to = str2.charAt(p);
-        // update incount
-        incount.put(to, incount.get(to) + 1);
-        // update connection
-        connection.get(from).add(to);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="13">&larr; Older</a>
@@ -1260,7 +1185,7 @@ public void buildGraph(String[] dict, HashMap&lt;Character, Integer&gt; incount,
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (12)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (13)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1268,7 +1193,7 @@ public void buildGraph(String[] dict, HashMap&lt;Character, Integer&gt; incount,
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (123)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (126)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/z-string-search/'>z-string-search (17)</a></li>
 <li class='category'><a href='/blog/categories/z-testing/'>z-testing (2)</a></li>
@@ -1281,23 +1206,23 @@ public void buildGraph(String[] dict, HashMap&lt;Character, Integer&gt; incount,
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/07/closest-leaf-binary-tree/">[Question] Find Cloest Leaf in Binary Tree </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/07/all-string-placing-space/">[Amazon] All Strings by Placing Spaces </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/02/shorest-manhattan-distance/">[Google] Shortest Manhattan Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/09/02/Facebook-photo-storage/">[Design] Facebook Photo Storage </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/how-google-search-works/">[Design] How Google search works </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/design-class4-2/">[NineChap System Design] Class 4.2: Search Engine </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/design-class4-1/">[NineChap System Design] Class 4.1: Crawler </a>
       </li>
     
   </ul>

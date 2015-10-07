@@ -9,7 +9,8 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Given a value N, if we want to make change for N cents, and we have infinite supply of each of S = { S1, S2, .. , Sm} valued coins, how &hellip;">
+  <meta name="description" content="Overview HashTable HashTable is thread safe synchronized. Only 1 thread can access at a time (compromise speed).
+HashTable does not allow null for &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +76,436 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/01/Hashmap-Hashtable-Hashset/">[Design] HashMap vs Hashtable vs HashSet</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-01T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/07/01/Hashmap-Hashtable-Hashset/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Overview</h2>
+
+<h3>HashTable</h3>
+
+<ol>
+<li>HashTable is thread safe synchronized. Only 1 thread can access at a time (compromise speed).</li>
+<li>HashTable does not allow null for key and value.</li>
+</ol>
+
+
+<h3>HashMap &amp; HashSet</h3>
+
+<ol>
+<li>HashMap is not sync, but better performance.</li>
+<li>HashMap allows null key or null value.</li>
+<li>HashSet is same as HashMap, just interface difference.</li>
+</ol>
+
+
+<h2>Conclusion</h2>
+
+<ol>
+<li>HashMap is roughly equivalent to Hashtable, except that it is unsynchronized and permits nulls.</li>
+<li>HashSet is same as HashMap. It&rsquo;s not thread safe.</li>
+</ol>
+
+
+<h3>Implementation</h3>
+
+<ol>
+<li>C++ Map is rbtree</li>
+<li>Java HashMap is buckets + entries (using Array + LinkedList)</li>
+<li>HashTable in Java is basically HashMap + lock</li>
+</ol>
+
+
+<h3>One more thing</h3>
+
+<p>HashMap is locked-out during rehashing, so it&rsquo;s better to avoid rehashing (by setting initial size bigger).</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/30/NineChap-Big-date-system-design-resume/">[NineChap 9] Big Date, System Design and Resume (`)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/06/30/NineChap-Big-date-system-design-resume/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Resume</h2>
+
+<ol>
+<li>Do not write anything unrelated to CS.</li>
+<li>Do not write too long &ndash; 1 or 2 pages are fine. Senior engineer 3 pages.</li>
+<li>Do not write low GPA</li>
+<li>Never ever write &ldquo;proficient in anything&rdquo;</li>
+</ol>
+
+
+<h2>Big Data</h2>
+
+<p>Most classic question is &ldquo;Frequent items&rdquo; (refer to July&rsquo;s blog).</p>
+
+<h3>Find top k hot queries in a daily access log of Google.</h3>
+
+<p>Variation:</p>
+
+<ol>
+<li>k = 1 vs k = 100000 &ndash; majority numbers</li>
+<li>low RAM vs sufficient RAM</li>
+<li>single machine vs multiple machines</li>
+<li>accurate vs inaccurate</li>
+</ol>
+
+
+<p>Sufficient RAM</p>
+
+<ol>
+<li>HashTable + Heap (min-heap)</li>
+<li>Time O(n * logk), Space O(n)</li>
+</ol>
+
+
+<p>Low RAM</p>
+
+<ol>
+<li>Split into 1000 (i.e. LOG/M) files by hash(query) % 1000</li>
+<li>Using HashTable + Heap to get top k for each files</li>
+<li>Collect 1000 top k queries and get global top k</li>
+<li>This method requires a lot of disk access and r/w, still slow.</li>
+</ol>
+
+
+<p>Inaccurate (reduce memory from O(n) to O(k))</p>
+
+<ol>
+<li>Hash Count (only need to know this one)
+ Limit the size of HashMap. The bigger the RAM, the more accurate is the result.</li>
+<li>Space Saving</li>
+<li>Lossy Counting</li>
+<li>Sticky Sampling</li>
+<li>Count Sketch</li>
+</ol>
+
+
+<p>Bloom Filter</p>
+
+<ol>
+<li>Regular bloom filter &ndash; use 4 线性无关 formula</li>
+<li>Counting bloom filter &ndash; support delete</li>
+<li>Better DS than HashMap, but can loose some accuracy</li>
+</ol>
+
+
+<p>Trie</p>
+
+<p>Bitmap</p>
+
+<p>Find all unique queries &ndash; use bigmap to store 3 types of states</p>
+
+<h2>System Design</h2>
+
+<h3>Design a short url system</h3>
+
+<ol>
+<li>Cache</li>
+</ol>
+
+
+<blockquote><p>to store hot urls</p></blockquote>
+
+<ol>
+<li>Load Balance</li>
+</ol>
+
+
+<blockquote><p>Too many click in short time</p></blockquote>
+
+<ol>
+<li>Storage balance</li>
+</ol>
+
+
+<blockquote><p>Hash value of an url and then store in
+individual machine</p>
+
+<p>Expansibility?</p></blockquote>
+
+<ol>
+<li>Consistent Hash</li>
+</ol>
+
+
+<blockquote><p>Node, can increase # of machines to store information</p>
+
+<p>Migration process</p></blockquote>
+
+<ol>
+<li>Router</li>
+</ol>
+
+
+<blockquote><p>check which machine response my query</p>
+
+<p>light-weight calculations</p>
+
+<p>what is router is down?</p></blockquote>
+
+<ol>
+<li>Locale</li>
+</ol>
+
+
+<blockquote><p>url frequently access by China, then put the url storage in Beijing</p></blockquote>
+
+<h3>Need-to-know Design patterns</h3>
+
+<ol>
+<li>Singleton</li>
+<li>Factory</li>
+<li>Master-slave (esp. for relational DB)</li>
+</ol>
+
+
+<p><a href="http://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf">MapReduce: Simplified Data Processing on Large Clusters</a></p>
+
+<p><a href="http://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf">The Google File System</a></p>
+
+<p><a href="http://static.googleusercontent.com/media/research.google.com/en//archive/bigtable-osdi06.pdf">BigTable: A Distributed Storage System for Structured Data</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/30/Knapsack-problem/">[Question] 0-1 Knapsack Problem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/06/30/Knapsack-problem/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/dynamic-programming-set-10-0-1-knapsack-problem/">link</a></p>
+
+<blockquote><p>Given weights and values of n items, put these items in a knapsack of capacity W to get the maximum total value.</p>
+
+<p>In other words, given two integer arrays val[0..n-1] and wt[0..n-1] which represent values and weights. Also given an integer W which represents knapsack capacity, find out the maximum possible value.</p>
+
+<p>You cannot break an item, either pick it or don’t pick it (0-1 property).</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>This is a very similar question to <strong>[Question] Coin Change Problem</strong>, because directly using recursion to solve will result in a lot of re-calculations. It&rsquo;s a DP question.</p>
+
+<h3>Solution</h3>
+
+<p>First of all, define a 2D array, Knapsack(n,W) denotes getting &lsquo;n&#8217;th item, with weight &#8216;W&rsquo;. When n == 0 or W = 0, dp value is 0.</p>
+
+<blockquote><p>int[][] Knapsack = new int[n + 1][W + 1];</p></blockquote>
+
+<p>Using &lsquo;n&rsquo; to denote the items to put into Knapsack. &lsquo;v&rsquo; is the value and &lsquo;w&rsquo; is the total weight.</p>
+
+<p>Now if item &lsquo;n&rsquo; is able to fit in:</p>
+
+<blockquote><p>Knapsack(n,W) = max(vn + Knapsack(n-1, W-wn), Knapsack(n-1, W))</p></blockquote>
+
+<p>If not able to fit in:</p>
+
+<blockquote><p>Knapsack(n,W) = Knapsack(n-1, W)</p></blockquote>
+
+<p>Refer to page 11 to 12 of <a href="http://www.cs.rit.edu/~zjb/courses/800/lec7.pdf">this pdf</a>.</p>
+
+<h3>Follow up</h3>
+
+<p>Look at the code, we checked dp[i-1][j]. Now the question is:</p>
+
+<blockquote><p>Do we need to check dp[i][j-1] ? (In case that total weight is not fully used up)</p></blockquote>
+
+<p>The answer is NO. We don&rsquo;t. Look at example: weights = {1, 2} and values = {3, 5}, and knapsack weight = 4. DP array would be:</p>
+
+<pre><code>[
+ [0, 0, 0, 0, 0],
+ [0, 3, 3, 3, 3],
+ [0, 3, 5, 8, 8]
+]
+</code></pre>
+
+<p>See that? The way that we keep DP array size int[items + 1][totalWeight + 1], the DP value is always 0 at 1st column and row.</p>
+
+<p>So, in the example when i == 1, total value is ALWAYS 3.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int maxValNoDup(int totalWeight, int[] value, int[] weight) {
+    int items = value.length;
+    Arrays.sort(value);
+    Arrays.sort(weight);
+
+    int[][] dp = new int[items + 1][totalWeight + 1];
+    for (int i = 1; i &lt;= items; i++) {
+        for (int j = 1; j &lt;= totalWeight; j++) {
+            // we'll try to take i'th item, to fit in weight j
+            if (j &lt; weight[i - 1]) {
+                // not able to put in
+                dp[i][j] = dp[i - 1][j];
+            } else {
+                // we are able to take i'th item into knapsack
+                dp[i][j] = Math.max(dp[i - 1][j], value[i - 1]
+                        + dp[i - 1][j - weight[i - 1]]);
+            }
+        }
+    }
+    return dp[items][totalWeight];
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/30/Fair-coin-from-baised-coin/">[Question] Make a Fair Coin From a Biased Coin</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-30T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/06/30/Fair-coin-from-baised-coin/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/print-0-and-1-with-50-probability/">link</a></p>
+
+<blockquote><p>You are given a function foo() that represents a biased coin. When foo() is called, it returns 0 with 60% probability, and 1 with 40% probability. Write a new function that returns 0 and 1 with 50% probability each. Your function should use only foo(), no other library method.</p></blockquote>
+
+<h3>Analysis</h3>
+
+<p>(0, 1): The probability to get 0 followed by 1 from two calls of foo() = 0.6 * 0.4 = 0.24</p>
+
+<p>(1, 0): The probability to get 1 followed by 0 from two calls of foo() = 0.4 * 0.6 = 0.24</p>
+
+<h3>Solution</h3>
+
+<p>Toss twice. If get (0, 0) or (1, 1), discard. Otherwise, return 0 or 1 for the 2 different cases.</p>
+
+<h3>Code</h3>
+
+<pre><code>int my_fun() {
+    int val1 = foo();
+    int val2 = foo();
+    if (val1 == 0 &amp;&amp; val2 == 1)
+        return 0;   // Will reach here with 0.24 probability
+    if (val1 == 1 &amp;&amp; val2 == 0)
+        return 1;   // Will reach here with 0.24 probability
+    return my_fun();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1227,336 +1658,6 @@ Remove:
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Minimum-subarray/">[LintCode] Minimum Subarray</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/28/Minimum-subarray/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/minimum-subarray/">link</a></p>
-
-<blockquote><p>Given an array of integers, find the subarray with smallest sum. Return the sum of the subarray.</p>
-
-<p>Note The subarray should contain at least one integer.</p>
-
-<p>Example For [1, -1, -2, 1], return -3</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Same as &ldquo;Max subarray&rdquo;.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int minSubArray(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    if (nums == null || nums.size() == 0) {
-        return 0;
-    }
-    int min = nums.get(0);
-    int pre = Math.min(0, nums.get(0));
-    for (int i = 1; i &lt; nums.size(); i++) {
-        pre += nums.get(i);
-        min = Math.min(min, pre);
-        pre = Math.min(0, pre);
-    }
-    return min;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Maximum-subarray-II/">[LintCode] Maximum Subarray II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/28/Maximum-subarray-II/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/maximum-subarray-ii/">link</a></p>
-
-<blockquote><p>Given an array of integers, find two non-overlapping subarrays which have the largest sum. The number in each subarray should be contiguous. Return the largest sum.</p>
-
-<p>Note The subarray should contain at least one number</p>
-
-<p>Example For given [1, 3, -1, 2, -1, 2], the two subarrays are [1, 3] and [2, -1, -2] or [1, 3, -1, 2] and [2], they both have the largest sum 7.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p><strong>This is not an easy question</strong>. I thought I have to use DP 2 times:</p>
-
-<ol>
-<li>first time, calculate max sum ending at each point.</li>
-<li>second time, calculate max sum to the left/right of a point (inclusive but not necessarily ending at current point).</li>
-</ol>
-
-
-<p>After a second thought, <strong>the first DP path can be denoted with a single variable</strong>. So there comes the solution below.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int maxTwoSubArrays(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    int len = nums.size();
-    int[] dp1 = new int[len];
-    int[] dp2 = new int[len];
-    // dp1[k] denotes the max sum to the left of k (inclusive)
-    // dp2[k] denotes the max sum to the right of k (inclusive)
-    dp1[0] = nums.get(0);
-    int sumSoFar = Math.max(0, nums.get(0));
-    for (int i = 1; i &lt; len; i++) {
-        sumSoFar += nums.get(i);
-        dp1[i] = Math.max(dp1[i - 1], sumSoFar);
-        sumSoFar = Math.max(0, sumSoFar);
-    }
-    dp2[len - 1] = nums.get(len - 1);
-    sumSoFar = Math.max(0, nums.get(len - 1));
-    for (int i = len - 2; i &gt;= 0; i--) {
-        sumSoFar += nums.get(i);
-        dp2[i] = Math.max(dp2[i + 1], sumSoFar);
-        sumSoFar = Math.max(0, sumSoFar);
-    }
-    // now for every node, calculate leftMaxSum + rightMaxSum
-    int maxSum = Integer.MIN_VALUE;
-    for (int i = 0; i &lt; len - 1; i++) {
-        maxSum = Math.max(maxSum, dp1[i] + dp2[i + 1]);
-    }
-    return maxSum;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Majority-Number-III/">[LintCode] Majority Number III</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/28/Majority-Number-III/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/majority-number-iii/">link</a></p>
-
-<blockquote><p>Given an array of integers and a number k, the majority number is the number that occurs more than 1/k of the size of the array. Find it.</p>
-
-<p>Note: There is only one majority number in the array</p>
-
-<p>Example: For [3,1,2,3,2,3,3,4,4,4] and k = 3, return 3</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Similar to &lsquo;Majority Number II&rsquo;, but a little more difficult.</p>
-
-<p>_Instead of keeping 2 value for checking, now keep k values__. Since values are constantly checked for existance, using a HashMap looks like a great idea.</p>
-
-<p><strong>Another idea suggest by <a href="http://www.geeksforgeeks.org/given-an-array-of-of-size-n-finds-all-the-elements-that-appear-more-than-nk-times/">G4G</a> is a mechanism similar to the famous Tetris Game</strong>. The size of the buffer is k. The buffer is full, we remove all items by counter of 1. When counter reach 0, remove that item. In this way, the elements left in the buffer are the majority numbers.</p>
-
-<p>This method is also used in counting highly-frequent string keywrods. For example, another post <strong>[Design] Big Data &ndash; Real Time Top K</strong> discusses about it.</p>
-
-<h3>Code</h3>
-
-<p>I did not write code for this question. Shouldn&rsquo;t be difficult.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/Majority-Number-II/">[LintCode] Majority Number II</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-28T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/28/Majority-Number-II/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/majority-number-ii/">link</a></p>
-
-<blockquote><p>Given an array of integers, the majority number is the number that occurs more than 1/3 of the size of the array. Find it.</p>
-
-<p>Note: There is only one majority number in the array</p>
-
-<p>Example: For [1, 2, 1, 2, 1, 3, 3] return 1</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>Similar to &lsquo;Majority Number&rsquo;, but a little more difficult.</p>
-
-<p><strong>Instead of keeping 1 value for checking, now keep 2 values</strong>. If the new number is same as any of the 2 values, decrease the count. If the new number is a totally new one, decrease both. The coding is a bit difficult and lengthy.</p>
-
-<p>Note that 2 values are found in the end, do another iteration thru the array, and find the correct result from these 2 values.</p>
-
-<h3>Code</h3>
-
-<pre><code>public int majorityNumber(ArrayList&lt;Integer&gt; nums) {
-    // write your code
-    if (nums == null || nums.size() &lt; 3) {
-        return -1;
-    }
-    int num1 = nums.get(0);
-    int p = 1;
-    int len = nums.size();
-    while (p &lt; len &amp;&amp; nums.get(p) == num1) {
-        p++;
-    }
-    int num2 = nums.get(p);
-    int count1 = p;
-    int count2 = 1;
-    for (int i = p + 1; i &lt; len; i++) {
-        if (nums.get(i) == num1) {
-            count1++;
-        } else if (nums.get(i) == num2) {
-            count2++;
-        } else {
-            // a totally different value
-            if (count1 == 0) {
-                num1 = nums.get(i);
-                count1++;
-            } else if (count2 == 0) {
-                num2 = nums.get(i);
-                count2++;
-            } else {
-                count1--;
-                count2--;
-            }
-        }
-    }
-    if (count1 == 0 &amp;&amp; count2 == 0) {
-        return -1;
-    } else if (count1 == 0) {
-        return num2;
-    } else if (count2 == 0) {
-        return num1;
-    } else {
-        // it's gotta be either num1 or num2
-        int count = 0;
-        for (Integer n: nums) {
-            if (n == num1) {
-                count ++;
-            }
-        }
-        if (count &gt;= len / 3 + 1) {
-            return num1;
-        } else {
-            return num2;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="41">&larr; Older</a>
@@ -1576,7 +1677,7 @@ Remove:
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (12)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (13)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1584,7 +1685,7 @@ Remove:
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (123)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (126)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/z-string-search/'>z-string-search (17)</a></li>
 <li class='category'><a href='/blog/categories/z-testing/'>z-testing (2)</a></li>
@@ -1597,23 +1698,23 @@ Remove:
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/07/closest-leaf-binary-tree/">[Question] Find Cloest Leaf in Binary Tree </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/07/all-string-placing-space/">[Amazon] All Strings by Placing Spaces </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/02/shorest-manhattan-distance/">[Google] Shortest Manhattan Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/09/02/Facebook-photo-storage/">[Design] Facebook Photo Storage </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/how-google-search-works/">[Design] How Google search works </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/design-class4-2/">[NineChap System Design] Class 4.2: Search Engine </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/design-class4-1/">[NineChap System Design] Class 4.1: Crawler </a>
       </li>
     
   </ul>

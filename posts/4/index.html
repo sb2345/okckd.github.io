@@ -9,9 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link N块石头排成一行，两个玩家依次取石头，每个玩家可以取其中任意一块或者相邻的两块，最后能将剩下的石头一次取光的玩家获胜。 Solution when n = 1, first move wins
-when n = 2, first move wins
-when n = 3 &hellip;">
+  <meta name="description" content="Question link Given a list of non negative integers, arrange them such that they form the largest number. For example, given [3, 30, 34, 5, 9], the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +75,547 @@ when n = 3 &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/15/Largest-Number/">[LeetCode 179] Largest Number</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/15/Largest-Number/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/largest-number/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Given a list of non negative integers, arrange them such that they form the largest number.</p>
+
+<p>For example, given <code>[3, 30, 34, 5, 9]</code>, the largest formed number is <code>9534330</code>.</p>
+
+<p>Note: The result may be very large, so you need to return a string instead of an integer.</p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
+
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+
+                  <a class="btn btn-xs btn-primary" href="/tag/sort/">Sort</a>
+
+                </span>
+
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>Please refer to [[ItInt5] Numbers Concatenation Max (Largest Number)(/blog/2014/08/17/Numbers-Concatenation-Max/).</p>
+
+<h3>Solution</h3>
+
+<p>Note that we <strong>can not override Comparator(Integer)</strong>. So we must first convert int to string then sort.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class Solution {
+
+    // this code should pass
+    public String largestNumber(int[] num) {
+        if (num == null || num.length == 0) {
+            return "0";
+        }
+        String[] strs = new String[num.length];
+        for (int i = 0; i &lt; num.length; i++) {
+            strs[i] = String.valueOf(num[i]);
+        }
+        Arrays.sort(strs, new LargerComparator());
+
+        String res = "";
+        for (String str : strs) {
+            res = res + str;
+        }
+        return res;
+    }
+
+    class LargerComparator implements Comparator&lt;String&gt; {
+
+        public int compare(String a, String b) {
+            String first = a + b;
+            String second = b + a;
+            return second.compareTo(first);
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/15/Dungeon-Game/">[LeetCode 174] Dungeon Game</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/15/Dungeon-Game/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/dungeon-game/">link</a></p>
+
+<div class="question-content">
+              <p><style>
+table.dungeon, .dungeon th, .dungeon td {
+  border:3px solid black;
+}
+
+ .dungeon th, .dungeon td {
+    text-align: center;
+    height: 70px;
+    width: 70px;
+}
+</style>
+
+</p><p>The demons had captured the princess (<b>P</b>) and imprisoned her in the bottom-right corner of a dungeon. The dungeon consists of M x N rooms laid out in a 2D grid. Our valiant knight (<b>K</b>) was initially positioned in the top-left room and must fight his way through the dungeon to rescue the princess. </p>
+<p>The knight has an initial health point represented by a positive integer. If at any point his health point drops to 0 or below, he dies immediately. </p>
+<p>Some of the rooms are guarded by demons, so the knight loses health (<i>negative</i> integers) upon entering these rooms;
+other rooms are either empty (<i>0&#8217;s</i>) or contain magic orbs that increase the knight&#8217;s health (<i>positive</i> integers).</p>
+<p>In order to reach the princess as quickly as possible, the knight decides to move only rightward or downward in each step. </p>
+
+<br>
+<p><b>Write a function to determine the knight&#8217;s minimum initial health so that he is able to rescue the princess.</b></p>
+<p>For example, given the dungeon below, the initial health of the knight must be at least <b>7</b> if he follows the optimal path <code>RIGHT-&gt; RIGHT -&gt; DOWN -&gt; DOWN</code>.</p>
+
+<table class="dungeon">
+<tbody><tr>
+<td>-2 (K)</td>
+<td>-3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>-5</td>
+<td>-10</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>30</td>
+<td>-5 (P)</td>
+</tr>
+</tbody></table>
+<!---2K   -3  3
+-5   -10   1
+10 30   5P-->
+
+<br>
+<p><b>Notes:</b>
+</p><ul>
+<li>The knight&#8217;s health has no upper bound.</li>
+<li>Any room can contain threats or power-ups, even the first room the knight enters and the bottom-right room where the princess is imprisoned.  </li>
+</ul>
+<p></p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/stellari">@stellari</a> for adding this problem and creating all test cases.</p><p></p>
+
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+
+                  <a class="btn btn-xs btn-primary" href="/tag/dynamic-programming/">Dynamic Programming</a>
+
+                  <a class="btn btn-xs btn-primary" href="/tag/binary-search/">Binary Search</a>
+
+                </span>
+
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>The key of solving this problem is to <strong>do DP from bottom right to top left</strong>.</p>
+
+<h3>Solution</h3>
+
+<p>dp[i][j] means the minimum initial value of each position. As suggested by<a href="http://www.cnblogs.com/grandyang/p/4233035.html"></a>, the DP equation is:</p>
+
+<blockquote><p>dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) &ndash; dungeon[i][j]).</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public class Solution {
+    public int calculateMinimumHP(int[][] dungeon) {
+        if (dungeon == null) return 1;
+        int m = dungeon.length;
+        int n = dungeon[0].length;
+
+        int[][] dp = new int[m][n];
+        for (int i = m - 1; i &gt;= 0; i--) {
+            for (int j = n - 1; j &gt;= 0; j--) {
+                if (i == m - 1 &amp;&amp; j == n - 1) {
+                    dp[i][j] = Math.max(1, 1 - dungeon[i][j]);
+                } else if (i == m - 1) {
+                    dp[i][j] = Math.max(1, dp[i][j + 1] - dungeon[i][j]);
+                } else if (j == n - 1) {
+                    dp[i][j] = Math.max(1, dp[i + 1][j] - dungeon[i][j]);
+                } else {
+                    dp[i][j] = Math.max(1,
+                        Math.min(dp[i + 1][j], dp[i][j + 1]) - dungeon[i][j]);
+                }
+            }
+        }
+        return dp[0][0];
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/15/Binary-Search-Tree-Iterator/">[LeetCode 173] Binary Search Tree Iterator</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-15T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/15/Binary-Search-Tree-Iterator/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/binary-search-tree-iterator/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Implement an iterator over a binary search tree (BST). Your iterator will be initialized with the root node of a BST.</p>
+
+<p>Calling <code>next()</code> will return the next smallest number in the BST.</p>
+
+<p><b>Note: </b><code>next()</code> and <code>hasNext()</code> should run in average O(1) time and uses O(<i>h</i>) memory, where <i>h</i> is the height of the tree. </p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/tree/">Tree</a>
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/stack/">Stack</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>This is an extremely important question, if you are going for an interview. I repeat: <strong>this is an extremely important question, if you are going for an interview</strong>. If you do not remember it by heart, I will repeat again.</p>
+
+<p>The solution of the iterator applies to a lot of related questions. So make sure you practise this question until you are perfect. You WILL BE ASKED this question at times.</p>
+
+<p>You could read my other post <a href="/blog/2014/06/14/Iterator-of-Tree/">[Question] Iterator of Binary Search Tree</a>.</p>
+
+<h3>Solution</h3>
+
+<p>We only need to keep 1 variable in RAM, that is a stack.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class BSTIterator {
+
+    Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+
+    public BSTIterator(TreeNode root) {
+        while (root != null) {
+            stack.push(root);
+            root = root.left;
+        }
+    }
+
+    /** @return whether we have a next smallest number */
+    public boolean hasNext() {
+        return !stack.isEmpty();
+    }
+
+    /** @return the next smallest number */
+    public int next() {
+        if (!hasNext()) {
+            return 0;
+        }
+        TreeNode next = stack.pop();
+        TreeNode node = next.right;
+        while (node != null) {
+            stack.push(node);
+            node = node.left;
+        }
+        return next.val;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/14/wooden-stick/">[UVa] Wooden Sticks</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-14T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/14/wooden-stick/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=323">link</a></p>
+
+<p><body>There is a pile of <i>n </i>wooden sticks. The length and weight of
+each stick are known in advance. The sticks are
+to be processed by a woodworking machine in one by one fashion. It
+needs some time, called setup time, for
+the machine to prepare processing a stick. The setup times are
+associated with cleaning operations and
+changing tools and shapes in the machine. The setup times of the
+woodworking machine are given as follows:</p>
+
+<ul>
+<li>The setup time for the first wooden
+stick is 1 minute.</li>
+<li>
+Right after processing a stick of length <i>l </i>and weight <i>w
+</i>, the machine will need no setup time for a stick
+of length <i>l</i>&#8217; and weight <i>w</i>&#8217; if <i>l </i>&lt;=<i>l</i>&#8217;
+and <i>w </i>&lt;=<i>w</i>&#8217; . </li>
+</ul>
+
+
+<p>Otherwise, it will need 1 minute for setup.<br>
+You are to find the minimum setup time to process a given pile of <i>n
+</i>wooden sticks. For example, if you have
+five sticks whose pairs of length and weight are (4,9), (5,2), (2,1), (3,5),
+and (1,4) then the minimum setup
+time should be 2 minutes since there is a sequence of pairs (1,4),
+(3,5), (4,9), (2,1), (5,2).</p>
+
+<h2><font size="4" color="#ff0000"><a name="SECTION0001001000000000000000">Input</a> <br>
+</font></h2>
+
+
+<p>The input consists of <i>T</i> test cases. The number of test cases (<i>T</i>) is given in the first line of the input file. Each
+test case consists of two lines: The first line has an integer <i>n</i>,
+1&lt;=<i>n&lt;=</i>5000, that represents the number of
+wooden sticks in the test case, and the second line contains 2<i>n </i>positive
+integers <i>l<sub>1</sub></i>, <i>w<sub>1</sub></i>, <i>l<sub>2</sub></i>,
+<i>w<sub>2</sub></i>, &hellip;, <i>l<sub>n</sub></i>, <i>w<sub>n</sub></i>,
+each of magnitude at most 10000, where <i>l<sub>i</sub> </i>and <i>w<sub>i</sub>
+</i>are the length and weight of the <i>i </i>th wooden stick,
+respectively. The 2<i>n </i>integers are delimited by one or
+more spaces.</p>
+
+<h2><font size="4" color="#ff0000"><a name="SECTION0001002000000000000000">Output</a>&nbsp;</font>
+</h2>
+
+
+<p>The output should contain the minimum setup time in minutes, one per
+line.</p>
+
+<h2><font size="4" color="#ff0000"><a name="SECTION0001003000000000000000">Sample Input</a> <br>
+</font></h2>
+
+
+
+
+<pre>3
+5
+4 9 5 2 2 1 3 5 1 4
+3
+2 2 1 1 2 2
+3
+1 3 2 2 3 1
+</pre>
+
+
+
+
+<h2><font size="4" color="#ff0000"><a name="SECTION000
+1004000000000000000">Sample Output</a>&nbsp;</font>
+</h2>
+
+
+
+
+<pre>2
+1
+3
+</pre>
+
+
+<p></body></p>
+
+<h3>Analysis</h3>
+
+<p>This question is a little similar to <a href="/blog/2014/09/17/stack-up-boxes/">[CC150v5] 9.10 Stack Up the Boxes</a>, yet different.</p>
+
+<h3>Solution</h3>
+
+<p>Solution quoted from <a href="http://www.csdn123.com/html/blogs/20130823/58042.htm">脚本百事通</a>:</p>
+
+<blockquote><p>按长度从小到大排序, 若长度相同, 则按重量从小到大排序(先按重量再按长度也行)</p>
+
+<p>然后, 我们针对当前木棍, 与剩下的木棍比较, 满足 w1 &lt;= w2 &amp;&amp; l1 &lt;= l2 的, 就更新一下当前棍, 并标记~</p>
+
+<p>当所有木棍都被编组后 输出到底设置了几次~</p></blockquote>
+
+<p><a href="http://www.android100.org/html/201502/03/109926.html">ref1</a>, <a href="http://blog.csdn.net/keshuai19940722/article/details/10735689">ref2</a></p>
+
+<h3>Code</h3>
+
+<p>The following Java code is written by me</p>
+
+<pre><code>public int count(Pair[] points) {
+    Arrays.sort(points, new PointComparator());
+    // now the array is sorted with Point.x
+    int total = 0;
+    int p = 0;
+    int len = points.length;
+
+    while (p &lt; len) {
+        // find the next non-null point
+        while (p &lt; len &amp;&amp; points[p] == null) {
+            p++;
+        }
+        if (p == len) {
+            break;
+        }
+        // use points[p] as the first elements in the queue
+        Pair temp = copy(points[p]);
+        points[p] = null;
+        total++;
+
+        // then mark all elements that follow points[p]
+        for (int k = p + 1; k &lt; len; k++) {
+            if (points[k] == null || points[k].y &lt; temp.y) {
+                continue;
+            }
+            temp = copy(points[k]);
+            points[k] = null;
+        }
+        p++;
+    }
+    return total;
+}
+
+Pair copy(Pair p) {
+    Pair newP = new Pair(p.x, p.y);
+    return newP;
+}
+
+class PointComparator implements Comparator&lt;Pair&gt; {
+
+    @Override
+    public int compare(Pair p1, Pair p2) {
+        return p1.x - p2.x;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -689,402 +1228,6 @@ Bucket[] buckets = new Bucket[bCount];
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/12/multi-map-java/">[Palantir] MultiMap in Java Without Using Collections</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/04/12/multi-map-java/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=18479662">link</a></p>
-
-<blockquote><p>Explain how you would implement a multi-map in Java without using any collections?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This question is pretty strange in a tech interview. But still, if you are asked, I think the most obvious solution is pointed out by <a href="http://www.careercup.com/question?id=18479662">careercup user Abhi</a>.</p>
-
-<p>The basic idea is to build a nested list structure ourselves, without considering the time complexity. See code below.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Node {
-    Object key;
-    Node next;
-    ValueNode vnode;
-}
-public class ValueNode {
-    Object Value;
-    ValueNode next;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/12/duplicate-within-k-distance/">[Palantir] Find Duplicate Within K Distance</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/04/12/duplicate-within-k-distance/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=18517665">link</a></p>
-
-<blockquote><p>Given an array of values, design and code an algorithm that returns whether there are two duplicates within k indices of each other?</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We can keep a HashMap for storing the previous occuring position of a number.</p>
-
-<h3>Code</h3>
-
-<pre><code>public boolean dupWithinK(int k, int[] arr) {
-    Set&lt;Integer&gt; set = new HashSet&lt;Integer&gt;();
-    for (int i = 0; i &lt; arr.length; i++) {
-        if (set.contains(arr[i])) {
-            return true;
-        }
-        if (i &lt; k) {
-            // the first k numbers
-            set.add(arr[i]);
-        } else {
-            // the (k+1) th number and onwards
-            set.add(arr[i]);
-            set.remove(arr[i - k]);
-        }
-    }
-    return false;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/12/Find-Peak-Element/">[LeetCode 162] Find Peak Element</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/04/12/Find-Peak-Element/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/find-peak-element/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>A peak element is an element that is greater than its neighbors.</p>
-
-<p>Given an input array where <code>num[i] ? num[i+1]</code>, find a peak element and return its index.</p>
-
-<p>The array may contain multiple peaks, in that case return the index to any one of the peaks is fine.</p>
-
-<p>You may imagine that <code>num[-1] = num[n] = -8</code>.</p>
-
-<p>For example, in array <code>[1, 2, 3, 1]</code>, 3 is a peak element and your function should return the index number 2.</p>
-
-<p class="showspoilers"><a href="#" onclick="showSpoilers(this); return false;">click to show spoilers.</a></p>
-
-<div class="spoilers" style="display: none;"><b>Note:</b>
-<p>Your solution should be in logarithmic complexity.</p>
-</div>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/array/">Array</a>
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/binary-search/">Binary Search</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>This basically is a binary search question. Instead of checking the values, we check the slope (upgoing or downslope).</p>
-
-<p><strong>The important point</strong> is the special cases like [1, 2, 3] or [3, 2, 1], we need to return the corner values. Well there&rsquo;re 2 ways to handle these corner cases.</p>
-
-<h3>Solution</h3>
-
-<p>First, referring to <a href="http://www.geeksforgeeks.org/find-a-peak-in-a-given-array/">G4G</a>, the corner case is handled in this way:</p>
-
-<pre><code>if ((mid == 0 || arr[mid-1] &lt;= arr[mid]) &amp;&amp;
-        (mid == n-1 || arr[mid+1] &lt;= arr[mid]))
-    return mid;
-</code></pre>
-
-<p>The code 1 below is doing similar things. That code is readable and easy to come up with. I recommend this solution during a interview.</p>
-
-<p>For those who are interested, there is a extremely concise solution thanks to <a href="http://blog.csdn.net/u010367506/article/details/41943309">Duplan</a>. I have the Java version posted below as code 2.</p>
-
-<h3>Code</h3>
-
-<p>Code 1</p>
-
-<pre><code>public class Solution {
-    public int findPeakElement(int[] num) {
-        if (num == null || num.length == 0) {
-            return 0;
-        } else if (num.length == 1) {
-            return 0;
-        } else if (num[0] &gt; num[1]) {
-            return 0;
-        } else if (num[num.length - 2] &lt; num[num.length - 1]) {
-            return num.length - 1;
-        }
-        // now the leftmost edge is increasing
-        // and the rightmost edge is also increasing backwards
-        return helper(num, 0, num.length - 1);
-    }
-
-    public int helper(int[] num, int left, int right) {
-        int mid = left + (right - left) / 2;
-        if (left + 2 == right) {
-            return mid;
-        } else if (num[mid] &gt; num[mid + 1]) {
-            // middle is decreasing, so peak on the left side
-            return helper(num, left, mid + 1);
-        } else {
-            return helper(num, mid, right);
-        }
-    }
-}
-</code></pre>
-
-<p>Code 2</p>
-
-<pre><code>public class Solution {
-    public int findPeakElement(int[] num) {
-        if (num == null || num.length == 0) {
-            return 0;
-        }
-        return helper(num, 0, num.length - 1);
-    }
-
-    public int helper(int[] num, int left, int right) {
-        int mid = left + (right - left) / 2;
-        if (left == right) {
-            return left;
-        } else if (num[mid] &gt; num[mid + 1]) {
-            // middle is decreasing, so peak on the left side
-            return helper(num, left, mid);
-        } else {
-            return helper(num, mid + 1, right);
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/12/Compare-Version-Numbers/">[LeetCode 165] Compare Version Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/04/12/Compare-Version-Numbers/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/compare-version-numbers/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Compare two version numbers <i>version1</i> and <i>version2</i>.<br>
-If <i>version1</i> &gt; <i>version2</i> return 1, if <i>version1</i> &lt; <i>version2</i> return -1, otherwise return 0.</p>
-
-<p>You may assume that the version strings are non-empty and contain only digits and the <code>.</code> character.<br>
-The <code>.</code> character does not represent a decimal point and is used to separate number sequences.<br>
-For instance, <code>2.5</code> is not &#8220;two and a half&#8221; or &#8220;half way to version three&#8221;, it is the fifth second-level revision of the second first-level revision.</p>
-
-<p>Here is an example of version numbers ordering:</p>
-<pre>0.1 &lt; 1.1 &lt; 1.2 &lt; 13.37</pre>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/string/">String</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>I&rsquo;ve seen a couple of interesting ideas on other people&rsquo;s blogs, including <a href="http://www.programcreek.com/2014/03/leetcode-compare-version-numbers-java/">one</a> that uses String.split() to convert input to an array, and <a href="http://www.meetqun.com/thread-3331-1-1.html">this one</a> which uses 2 pointers to compare.</p>
-
-<p>My solution might seem more intuitive for some. See below for my solution.</p>
-
-<h3>Solution</h3>
-
-<p>The idea is to identify what the current number is (before end of string, or before the next &lsquo;.&rsquo;). If there&rsquo;s no more string, value = 0, so the case of (1.0, 1) essentially equals. Without further ado, let&rsquo;s look at the code.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public int compareVersion(String version1, String version2) {
-        if (version1 == null || version2 == null) {
-            return 0;
-        }
-        return helper(version1, version2);
-    }
-
-    private int helper(String v1, String v2) {
-        if (v1.length() == 0 &amp;&amp; v2.length() == 0) {
-            return 0;
-        }
-
-        int num1 = 0;
-        int num2 = 0;
-
-        if (v1.length() != 0) {
-            int p1 = 0;
-            while (p1 &lt; v1.length() &amp;&amp; v1.charAt(p1) != '.') {
-                p1++;
-            }
-            num1 = Integer.parseInt(v1.substring(0, p1));
-            if (p1 &lt; v1.length()) p1++;
-            v1 = v1.substring(p1);
-        }
-
-        if (v2.length() != 0) {
-            int p2 = 0;
-            while (p2 &lt; v2.length() &amp;&amp; v2.charAt(p2) != '.') {
-                p2++;
-            }
-            num2 = Integer.parseInt(v2.substring(0, p2));
-            if (p2 &lt; v2.length()) p2++;
-            v2 = v2.substring(p2);
-        }
-
-        if (num1 != num2) {
-            return (num1 - num2) / Math.abs(num1 - num2);
-        } else {
-            return helper(v1, v2);
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="5">&larr; Older</a>
@@ -1104,7 +1247,7 @@ For instance, <code>2.5</code> is not &#8220;two and a half&#8221; or &#8220;hal
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (12)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (13)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1112,7 +1255,7 @@ For instance, <code>2.5</code> is not &#8220;two and a half&#8221; or &#8220;hal
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (123)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (126)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/z-string-search/'>z-string-search (17)</a></li>
 <li class='category'><a href='/blog/categories/z-testing/'>z-testing (2)</a></li>
@@ -1125,23 +1268,23 @@ For instance, <code>2.5</code> is not &#8220;two and a half&#8221; or &#8220;hal
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/07/closest-leaf-binary-tree/">[Question] Find Cloest Leaf in Binary Tree </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/07/all-string-placing-space/">[Amazon] All Strings by Placing Spaces </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/02/shorest-manhattan-distance/">[Google] Shortest Manhattan Distance </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/09/02/Facebook-photo-storage/">[Design] Facebook Photo Storage </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/how-google-search-works/">[Design] How Google search works </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/design-class4-2/">[NineChap System Design] Class 4.2: Search Engine </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/30/design-class4-1/">[NineChap System Design] Class 4.1: Crawler </a>
       </li>
     
   </ul>
