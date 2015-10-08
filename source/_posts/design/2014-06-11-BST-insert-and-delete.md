@@ -3,7 +3,7 @@ layout: post
 title: "[Design] BST Node Insertion / Deletion"
 comments: true
 category: Design
-tags: [ unit test needed ]
+tags: [  ]
 ---
 
 ## First Word

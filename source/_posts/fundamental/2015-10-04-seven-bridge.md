@@ -8,7 +8,7 @@ category: Fundamental
 
 # Overview
 
-In East Prussia, people try to walk all 7 bridges w/o crossing a bridge twice.
+In East Prussia(普鲁士), people try to walk all [7 bridges](https://en.wikipedia.org/wiki/Seven_Bridges_of_K%C3%B6nigsberg) w/o crossing a bridge twice.
 
 Leonhard Euler (pronounced "oiler") – Swiss
 
@@ -30,4 +30,3 @@ A graph contains an euler path iffeither of the following cases hold:
 # Application
 
 networks, distributed systems, coding theory
-

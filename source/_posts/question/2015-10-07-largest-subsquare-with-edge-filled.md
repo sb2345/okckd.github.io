@@ -14,23 +14,22 @@ tags: [  ]
 
 > Example Input:
 
-    {{'X', 'O', 'X', 'X', 'X'},
+     {'X', 'O', 'X', 'X', 'X'},
      {'X', 'X', 'X', 'X', 'X'},
      {'X', 'X', 'O', 'X', 'O'},
      {'X', 'X', 'X', 'X', 'X'},
      {'X', 'X', 'X', 'O', 'O'},
-    };
+
 
 > Output: 3. The square submatrix starting at (1, 1) is the largest sub-squre. 
 
 > Example Input:
 
-    {{'X', 'O', 'X', 'X', 'X', 'X'},
+     {'X', 'O', 'X', 'X', 'X', 'X'},
      {'X', 'O', 'X', 'X', 'O', 'X'},
      {'X', 'X', 'X', 'O', 'O', 'X'},
      {'X', 'X', 'X', 'X', 'X', 'X'},
      {'X', 'X', 'X', 'O', 'X', 'O'},
-    };
 
 > Output: 4. The square submatrix starting at (0, 2) is the largest
 
