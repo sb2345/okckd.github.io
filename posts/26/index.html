@@ -9,7 +9,10 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question Design an algorithm to find the kth number such that the only prime factors are 3, 5, and 7. Solution This is very difficult question. All I &hellip;">
+  <meta name="description" content="Question link Boggle Game: F X I E
+A M L O
+E W B X
+A S T U The goal of the game is to find as many words as you can that can be formed by chaining &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +84,297 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/08/29/Boggle-solver/">[Google] Boggle Solver (Search Words From Matrix)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-29T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/08/29/Boggle-solver/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://stackoverflow.com/questions/746082/how-to-find-list-of-possible-words-from-a-letter-matrix-boggle-solver">link</a></p>
+
+<blockquote><p>Boggle Game:</p></blockquote>
+
+<pre><code>F X I E
+A M L O
+E W B X
+A S T U
+</code></pre>
+
+<blockquote><p>The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference.</p></blockquote>
+
+<h3>Variation</h3>
+
+<p><strong>Another version of questions states in <a href="http://www.glassdoor.com/Interview/I-was-asked-to-write-an-algorithm-to-solve-a-crossword-like-puzzle-I-forget-the-name-but-started-with-a-B-As-opposed-QTN_435641.htm">here</a></strong></p>
+
+<blockquote><p>&hellip; Boggle Game. As opposed to simply vertical, horizontal, and diagonal placement of words, they were allowed to snake around the grid in any way.</p></blockquote>
+
+<p>For this version of question, no &lsquo;visited&rsquo; memory needs to be stored. In other words, it&rsquo;s a simpler version of above question.</p>
+
+<h3>Solution</h3>
+
+<p><strong><a href="http://stackoverflow.com/a/4314056">The best solution</a> is to use Trie</strong>, then do DFS search. However it might not be as intuitive as it seems.</p>
+
+<p>The idea is from <a href="http://stackoverflow.com/a/746102">this answer</a> (However this guy admits that his solution does not handle &lsquo;visited&rsquo; nodes properly, means the same char might be visited again to produce a word).</p>
+
+<p>We need to first define a class called Item:</p>
+
+<pre><code>class Item {
+    public final int x, y;
+    public final String prefix;
+
+    public Item(int row, int column, String prefix) {
+        this.x = row;
+        this.y = column;
+        this.prefix = prefix;
+    }
+}
+</code></pre>
+
+<p>So when we start doing DFS, we pass in an Item object which stores 2 information:</p>
+
+<ol>
+<li>The next position that we&rsquo;re going to visit.</li>
+<li>The prefix string that we have validated so far (before visiting this position).</li>
+</ol>
+
+
+<p>For example:</p>
+
+<pre><code>F X I E
+A M L O
+E W B X
+A S T U
+</code></pre>
+
+<p>We&rsquo;ll have Items objects like (0, 0, &ldquo;&rdquo;), (0, 1, &ldquo;F&rdquo;), (0, 2, &ldquo;FA&rdquo;) &hellip; We guarantee that the prefix must be a valid prefix by searching them in the Trie.</p>
+
+<p>How to tell whether a string is a prefix of word, or it&rsquo;s an actual word? We have a property in TrieNode called TrieNode.isWord() to help us.</p>
+
+<p>That&rsquo;s about it. I spend quite some time writing the code below, by refering to the Java solution by <a href="http://stackoverflow.com/a/11698898">zouzhile</a>.</p>
+
+<h3>Code</h3>
+
+<p>BoggleSolver.java</p>
+
+<pre><code>public class BoggleSolver {
+
+    private static BufferedReader in = null;
+    private static final String INPUT_FILE = "dictionary.txt";
+
+    public static void beginFileReader() {
+        try {
+            in = new BufferedReader(new FileReader(new File(BoggleSolver.class
+                    .getResource(INPUT_FILE).toURI())));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Trie buildTrie() {
+        Trie trie = new Trie();
+        beginFileReader();
+        String line = null;
+        try {
+            while ((line = in.readLine()) != null) {
+                String[] words = line.split(" ");
+                for (String word : words) {
+                    word = word.trim().toLowerCase();
+                    trie.addWord(word);
+                }
+            }
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        return trie;
+    }
+
+    public Set&lt;String&gt; findWords(char[][] map, Trie dict) {
+        Set&lt;String&gt; ans = new TreeSet&lt;String&gt;();
+        int m = map.length;
+        int n = map[0].length;
+        for (int i = 0; i &lt; m; i++) {
+            for (int j = 0; j &lt; n; j++) {
+                boolean[][] visited = new boolean[m][n];
+                findWordsDfs(ans, dict, map, visited, new Item(i, j, ""));
+                // item have 3 parameters:
+                // location x,y and the prefix string before reaching (i.j)
+            }
+        }
+        return ans;
+    }
+
+    public void findWordsDfs(Set&lt;String&gt; ans, Trie dict, char[][] map,
+            boolean[][] visited, Item item) {
+        // item: the location that we're going to test
+        // item.prefix is the word prefix before reaching (x, y)
+
+        int m = map.length;
+        int n = map[0].length;
+        int x = item.x;
+        int y = item.y;
+
+        // check whether cur.(x,y) is a valid position
+        if (x &lt; 0 || x &gt;= m || y &lt; 0 || y &gt;= n) {
+            return;
+        } else if (visited[x][y]) {
+            return;
+        }
+        String newWord = item.prefix + map[x][y];
+        // check whether cur.prefix is a valid prefix
+        TrieNode findWord = dict.match(newWord);
+        if (findWord == null) {
+            // up to this position (x, y), the word dont' exists
+            return;
+        }
+        // now cur is in a valid position, with a valid prefix
+        if (findWord.isWord()) {
+            ans.add(newWord);
+        }
+        // visit this position, and continue in 4 different directions
+        visited[x][y] = true;
+        findWordsDfs(ans, dict, map, visited, new Item(x, y - 1, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x, y + 1, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x - 1, y, newWord));
+        findWordsDfs(ans, dict, map, visited, new Item(x + 1, y, newWord));
+        visited[x][y] = false;
+    }
+
+    public static void main(String[] args) {
+        String[] rows = "eela,elps,weut,korn".split(",");
+        char[][] input = new char[4][4];
+        for (int i = 0; i &lt; 4; i++) {
+            input[i] = rows[i].toCharArray();
+        }
+
+        // prepare test data
+        BoggleSolver solver = new BoggleSolver();
+        Trie dictionary = solver.buildTrie();
+        // start finding words
+        Set&lt;String&gt; set = solver.findWords(input, dictionary);
+        // present the result
+        System.out.println(set.size() + " words are found, they are: ");
+        for (String str : set) {
+            System.out.println(str);
+        }
+    }
+
+    class Item {
+        public final int x, y;
+        public final String prefix;
+
+        public Item(int row, int column, String prefix) {
+            this.x = row;
+            this.y = column;
+            this.prefix = prefix;
+        }
+    }
+}
+</code></pre>
+
+<p>Trie.java</p>
+
+<pre><code>public class Trie {
+    private TrieNode root;
+
+    public Trie() {
+        this.root = new TrieNode();
+    }
+
+    public void addWord(String word) {
+        TrieNode node = this.root;
+        for (char c : word.toCharArray()) {
+            node = node.addChild(c);
+            if (node == null)
+                return;
+        }
+        node.setWord(true);
+    }
+
+    public TrieNode match(String s) {
+        TrieNode node = this.root;
+        for (char c : s.toCharArray()) {
+            node = node.get(c);
+            if (node == null)
+                return null;
+        }
+        return node;
+    }
+}
+</code></pre>
+
+<p>TrieNode.java</p>
+
+<pre><code>public class TrieNode {
+    private TrieNode[] children;
+    private boolean isWord = false;
+
+    public TrieNode() {
+        this.children = new TrieNode[26];
+    }
+
+    public TrieNode addChild(char child) {
+        if (child &lt; 'a' || child &gt; 'z')
+            return null;
+
+        int offset = child - 'a';
+        if (this.children[offset] == null) {
+            this.children[offset] = new TrieNode();
+        }
+        return this.children[offset];
+    }
+
+    public boolean isWord() {
+        return isWord;
+    }
+
+    public void setWord(boolean isWord) {
+        this.isWord = isWord;
+    }
+
+    public TrieNode get(char c) {
+        int offset = c - 'a';
+        return this.children[offset];
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/08/28/ugly-numbers/">[CC150v4] 10.7 Ugly Numbers (Hamming Numbers)</a></h1>
     
     
@@ -97,7 +391,7 @@
   
 
 
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-28T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/28/ugly-numbers/#disqus_thread">Comments</a>
         
@@ -164,7 +458,7 @@
   
 
 
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-28T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/28/google-pre-interview-coaching/#disqus_thread">Comments</a>
         
@@ -250,7 +544,7 @@
   
 
 
-<time datetime="2014-08-28T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-28T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/28/Http-cookie/#disqus_thread">Comments</a>
         
@@ -340,7 +634,7 @@
   
 
 
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-27T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/27/largest-cycle-in-permutation/#disqus_thread">Comments</a>
         
@@ -402,7 +696,7 @@
   
 
 
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-27T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/27/google-api-read-4096/#disqus_thread">Comments</a>
         
@@ -497,7 +791,7 @@ public String read(int n) {
   
 
 
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-27T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/27/Duplicate-rows-in-matrix/#disqus_thread">Comments</a>
         
@@ -624,7 +918,7 @@ class TrieNode {
   
 
 
-<time datetime="2014-08-27T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-27T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/27/Count-visible-nodes-binary-tree/#disqus_thread">Comments</a>
         
@@ -700,7 +994,7 @@ private int helper(TreeNode node, int ancesterMax) {
   
 
 
-<time datetime="2014-08-26T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-26T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/26/Virtual-memory-page-fault-thrashing/#disqus_thread">Comments</a>
         
@@ -842,7 +1136,7 @@ for (i=0; i&lt;256; i++) {
   
 
 
-<time datetime="2014-08-26T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-08-26T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/08/26/Test-hashcode-function/#disqus_thread">Comments</a>
         
@@ -885,103 +1179,6 @@ public void testEquals_Symmetric() {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/26/Design-OOD-elevator/">[Design] OOD Design of Elevator</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-26T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/08/26/Design-OOD-elevator/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://thought-works.blogspot.sg/2012/11/object-oriented-design-for-elevator-in.html">link</a></p>
-
-<blockquote><p>Object Oriented design for Elevator in a multi-storied apartment</p></blockquote>
-
-<h3>A Single Elevator</h3>
-
-<p>Use Case:</p>
-
-<ol>
-<li>User
-
-<ol>
-<li>press a button to summon the lift</li>
-<li>press a button to get to a specific floor</li>
-</ol>
-</li>
-<li>Button
-
-<ol>
-<li>floor button and level button</li>
-<li>illuminates when pressed</li>
-<li>place an &lsquo;elevator request&rsquo; when pressed</li>
-</ol>
-</li>
-<li>Elevator
-
-<ol>
-<li>moves up/down</li>
-<li>open/close the door</li>
-</ol>
-</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/elevator-class-diagram.png"></p>
-
-<p><strong>ElevatorRequests Class</strong></p>
-
-<p>Each button press results in an elevator request which has to be served. Each of these requests is tracked at a global place. ElevatorRequests, the class which stores elevator requests can use different strategies to schedule the elevator requests.</p>
-
-<p><strong>ElevatorController</strong></p>
-
-<p>The elevator is controlled by a controller class which we call ElevatorController. The elevator controller instructs the elevator what to do and also can shutdown/start up the elevator of the building. The elevator controller reads the next elevator request to be processed and serves it.</p>
-
-<p><strong>Button (Abstract) Class</strong></p>
-
-<p>Button is abstract class defining common behavior like illuminate, doNotIlluminate. FloorButton, ElevatorButton extend Button type and define placeRequest() which is invoked when the button is pressed.</p>
-
-<p>In conclusion, <strong>ElevatorController</strong> runs the show by reading the <strong>ElevatorRequests</strong> to process and instructing the <strong>Elevator</strong> what to do. User send request by pressing <strong>Buttons</strong>.</p>
-
-<h3>Extend the answer to multiple elevators</h3>
-
-<ol>
-<li><p>Each elevator have 1 controller.</p></li>
-<li><p>Floor based requests can be served by any elevator, thus these requests are added to a common area accessible by all controllers.</p></li>
-<li><p>Each elevator controller runs as a separate thread and checks if it can process a floor request. Mind synchronization issues.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="27">&larr; Older</a>
@@ -1001,7 +1198,7 @@ public void testEquals_Symmetric() {
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (13)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (14)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1022,6 +1219,10 @@ public void testEquals_Symmetric() {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/08/segment-tree/">[Fundamental] Segment Tree </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
       </li>
     
@@ -1035,10 +1236,6 @@ public void testEquals_Symmetric() {
     
       <li class="post">
         <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/02/shorest-manhattan-distance/">[Google] Shortest Manhattan Distance </a>
       </li>
     
   </ul>

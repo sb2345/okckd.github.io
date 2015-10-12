@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link1, link2. Variant 1: Given a Binary Search Tree, serialize and deserialize it. Variant 2: Given a Binary Tree, serialize and deserialize &hellip;">
+  <meta name="description" content="First Word LinkedList aims to test one of the most important concepts in C++, pointers. Unlike array, linked list does not have &lsquo;in-place&rsquo &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,526 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/06/16/NineChap-Linked-List/">[NineChap 4.1] Linked List</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-16T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/06/16/NineChap-Linked-List/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>First Word</h2>
+
+<p>LinkedList aims to test one of the most important concepts in C++, pointers.</p>
+
+<p><strong>Unlike array, linked list does not have &lsquo;in-place&rsquo; operations</strong>. This is very important to understand.</p>
+
+<h3>Type 1: Dummy Node</h3>
+
+<p>When the head is not determined, use DummyHead.</p>
+
+<p>Note that when using DummyHead to solve problems, the pointer <strong>starts from DummyHead</strong>. By doing this, we assuming that DummyHead must be valid, and we <strong>only check pointer.next (instead of checking pointer itself)</strong>. See &lsquo;Remove Duplicates from Sorted List II&rsquo; for details.</p>
+
+<h3>Type 2: Five Basic Operations in Linked List</h3>
+
+<ol>
+<li>Insert in Sorted List</li>
+<li>Remove in Sorted List</li>
+<li>Reverse a list</li>
+<li>Merge 2 Sorted List</li>
+<li>Find middle</li>
+</ol>
+
+
+<h4>1.Insert in Sorted List</h4>
+
+<pre><code>public ListNode insert(ListNode head, ListNode node) {
+    // first, initialize
+    ListNode dummy = new ListNode(Integer.MIN_VALUE);
+    dummy.next = head;
+
+    // second, assume p is less than node, and check p.next
+    ListNode p = dummy;
+    while (p.next != null &amp;&amp; p.next.val &lt; node.val) {
+        p = p.next;
+    }
+
+    // insert node after 'p'
+    node.next = p.next;
+    p.next = node;
+    return dummy.next;
+}
+</code></pre>
+
+<h4>2.Remove in Sorted List</h4>
+
+<p>(written by me)</p>
+
+<pre><code>public ListNode remove(ListNode head, int value) {
+    ListNode dummy = new ListNode(0);
+    dummy.next = head;
+    ListNode p = dummy;
+    while (p.next != null &amp;&amp; p.next.val != value) {
+        p = p.next;
+    }
+    if (p.next != null &amp;&amp; p.next.val == value) {
+        while (p.next != null &amp;&amp; p.next.val == value)
+            p.next = p.next.next;
+    }
+    return dummy.next;
+}
+</code></pre>
+
+<h4>3.Reverse a list</h4>
+
+<p>First variant: Reverse from a particular node to the end.</p>
+
+<p>四句话 statement.</p>
+
+<pre><code>public ListNode reverse(ListNode start) {
+    ListNode result = null;
+    ListNode cur = start;
+    while (cur != null) {
+        ListNode temp = cur.next;
+        cur.next = result;
+        result = cur;
+        cur = temp;
+    }
+    return result;
+}
+</code></pre>
+
+<p>Second variant: Reverse from a node until another node</p>
+
+<pre><code>// Given 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL, start = 2 and len = 3,
+// return 1-&gt;4-&gt;3-&gt;2-&gt;5-&gt;NULL. 
+public ListNode reverseRange(ListNode start, int len) {
+    ListNode result = null;
+    ListNode cur = start;
+    while (len &gt; 0) {
+        ListNode temp = cur.next;
+        cur.next = result;
+        result = cur;
+        cur = temp;
+        len--;
+    }
+    start.next = cur;
+    return result;
+}
+</code></pre>
+
+<p>The comparison:</p>
+
+<p><img class="middle" src="/assets/images/reverse-linked-list-code-compare.png"></p>
+
+<p>More: there is a way to reverse list recursively. This can be another good interview question. <strong><a href="/blog/2014/06/17/Reverse-linkedlist-recursively/">Reverse linkedlist recursively</a></strong></p>
+
+<h4>4.Merge 2 Sorted List</h4>
+
+<pre><code>public ListNode merge(ListNode head1, ListNode head2) {
+    ListNode dummy = new ListNode(0);
+    ListNode p = dummy;
+    while (head1 != null &amp;&amp; head2 != null) {
+        if (head1.val &lt; head2.val) {
+            p.next = head1;
+            head1 = head1.next;
+            p = p.next;
+        } else {
+            p.next = head2;
+            head2 = head2.next;
+            p = p.next;
+        }
+    }
+    if (head1 == null) {
+        p.next = head2;
+    } else {
+        p.next = head1;
+    }
+    return dummy.next;
+}
+</code></pre>
+
+<h4>5.Find middle</h4>
+
+<p>There are 2 ways to do this: calculate the total length, or fast/slow pointer. But fast/slow pointer is better <strong>because in engineering world, a lot of problems only allows information to flow once (数据流概念)</strong>. Sometimes it&rsquo;s not a good idea to read list for a second (or 1.5) time.</p>
+
+<pre><code>public ListNode findMiddle(ListNode head) {
+    if (head == null) {
+        return null;
+    }
+    ListNode slow = head, fast = head.next;
+    while (fast != null &amp;&amp; fast.next != null) {
+        fast = fast.next.next;
+        slow = slow.next;
+    }
+    return slow;
+}
+</code></pre>
+
+<p><strong>Dummy head questions</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/22/Remove-Duplicates-from-Sorted-List/">Remove Duplicates from Sorted List</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/22/Remove-Duplicates-from-Sorted-List-II/">Remove Duplicates from Sorted List II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/23/Partition-List/">Partition List</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/09/Merge-Two-Sorted-Lists/">Merge Two Sorted Lists</a></strong></p></li>
+</ol>
+
+
+<p><strong>5 basic operations questions</strong></p>
+
+<ol>
+<li><p><strong><a href="/blog/2014/05/23/Reverse-Linked-List-II/">Reverse Linked List II</a></strong> &ndash; difficult</p></li>
+<li><p><strong><a href="/blog/2014/06/02/Sort-List/">Sort List</a></strong></p>
+
+<p> 2 operations used</p></li>
+<li><p><strong><a href="/blog/2014/06/03/Reorder-List/">Reorder List</a></strong></p>
+
+<p> 3 operations used</p></li>
+<li><p><strong><a href="/blog/2014/06/02/Linked-List-Cycle/">Linked List Cycle</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/06/02/Linked-List-Cycle-II/">Linked List Cycle II</a></strong></p></li>
+<li><p><strong><a href="/blog/2014/05/11/Merge-k-Sorted-Lists/">Merge k Sorted Lists</a></strong></p>
+
+<p> For this question, it&rsquo;s important to write a comparator by yourself, to show your understanding of a PriorityQueue.</p>
+
+<p> n<em>k</em>lgk time, why? 1:14:30 recording
+ about heap 1:15:00 recording</p></li>
+<li><p><strong><a href="/blog/2014/06/02/Copy-List-with-Random-Pointer/">Copy List with Random Pointer</a></strong></p></li>
+</ol>
+
+
+<h2>Code</h2>
+
+<p><strong>Remove Duplicates from Sorted List</strong></p>
+
+<p>Easy, no dummy head needed.</p>
+
+<p><strong>Remove Duplicates from Sorted List II</strong></p>
+
+<pre><code>public ListNode deleteDuplicates(ListNode head) {
+    ListNode dummy = new ListNode(0);
+    dummy.next = head;
+    ListNode p = dummy;
+    while (p.next != null &amp;&amp; p.next.next != null) {
+        if (p.next.val == p.next.next.val) {
+            int dupVal = p.next.val;
+            while (p.next != null &amp;&amp; p.next.val == dupVal) {
+                p.next = p.next.next;
+            }
+        } else {
+            p = p.next;
+        }
+    }
+    return dummy.next;
+}
+</code></pre>
+
+<p><strong>Partition List</strong> &ndash; spend a lot of time on a list cycle in the result</p>
+
+<pre><code>public ListNode partition(ListNode head, int x) {
+    if (head == null) {
+        return null;
+    }
+    ListNode head1 = new ListNode(0);
+    ListNode head2 = new ListNode(0);
+
+    ListNode p1 = head1;
+    ListNode p2 = head2;
+    ListNode cur = head;
+
+    while (cur != null) {
+        if (cur.val &lt; x) {
+            p1.next = cur;
+            p1 = cur;
+        } else {
+            p2.next = cur;
+            p2 = cur;
+        }
+        cur = cur.next;
+    }
+
+    p1.next = head2.next;
+    // VERY IMPORTANT THIS LINE !!!
+    p2.next = null;
+    // VERY IMPORTANT THIS LINE !!!
+    return head1.next;
+}
+</code></pre>
+
+<p><strong>Merge Two Sorted Lists</strong></p>
+
+<pre><code>public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+    ListNode dummy = new ListNode(0);
+    ListNode p = dummy;
+    while (l1 != null &amp;&amp; l2 != null) {
+        if (l1.val &lt; l2.val) {
+            p.next = l1;
+            l1 = l1.next;
+            p = p.next;
+        } else {
+            p.next = l2;
+            l2 = l2.next;
+            p = p.next;
+        } 
+    }
+    if (l1 == null) {
+        p.next = l2;
+    } else {
+        p.next = l1;
+    }
+    return dummy.next;
+}
+</code></pre>
+
+<h4>5 basic operations</h4>
+
+<p><strong>Reverse Linked List II</strong></p>
+
+<pre><code>public ListNode reverseBetween(ListNode head, int m, int n) {
+    ListNode dummy = new ListNode(0);
+    dummy.next = head;
+    ListNode start = dummy;
+    int count = 1;
+    while (head != null &amp;&amp; count &lt; m) {
+        start = start.next;
+        count++;
+    }
+    start.next = reverseRange(start.next, n - m + 1);
+    return dummy.next;
+}
+
+private ListNode reverseRange(ListNode start, int len) {
+    ListNode result = null;
+    ListNode cur = start;
+    while (len &gt; 0) {
+        ListNode temp = cur.next;
+        cur.next = result;
+        result = cur;
+        cur = temp;
+        len--;
+    }
+    start.next = cur;
+    return result;
+}
+</code></pre>
+
+<p><strong>Sort List</strong></p>
+
+<p>Time complexity analysis: T(n) = 2 T(n/2) + O(n). <strong>By applying Master theorem, time = O(nlgn)</strong>.</p>
+
+<pre><code>public ListNode sortList(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode mid = findMid(head);
+        ListNode secondHalf = mid.next;
+        mid.next = null;
+        head = sortList(head);
+        secondHalf = sortList(secondHalf);
+        return merge(head, secondHalf);
+}
+
+private ListNode findMid(ListNode head) {
+    ListNode slow = head;
+    ListNode fast = head.next;
+    while (fast != null &amp;&amp; fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return slow;
+}
+
+private ListNode merge(ListNode h1, ListNode h2) {
+    ListNode dummy = new ListNode(0);
+    ListNode p = dummy;
+    while (h1 != null &amp;&amp; h2 != null) {
+        if (h1.val &lt; h2.val) {
+            p.next = h1;
+            h1 = h1.next;
+        } else {
+            p.next = h2;
+            h2 = h2.next;
+        }
+        p = p.next;
+    }
+    if (h1 == null) {
+        p.next = h2;
+    } else if (h2 == null) {
+        p.next = h1;
+    }
+    return dummy.next;
+}
+</code></pre>
+
+<p><strong>Reorder List</strong></p>
+
+<pre><code>public void reorderList(ListNode head) {
+    if (head == null || head.next == null) {
+        return;
+    }
+    ListNode mid = findMid(head);
+    ListNode secondHalf = mid.next;
+    mid.next = null;
+    secondHalf = reverse(secondHalf);
+    head = mergeInterlace(head, secondHalf);
+}
+
+private ListNode findMid(ListNode head) {
+    if (head == null) {
+        return null;
+    }
+    ListNode slow = head;
+    ListNode fast = head.next;
+    while (fast != null &amp;&amp; fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return slow;
+}
+
+private ListNode reverse(ListNode head) {
+    ListNode result = null;
+    ListNode cur = head;
+    while (cur != null) {
+        ListNode temp = cur.next;
+        cur.next = result;
+        result = cur;
+        cur = temp;
+    }
+    return result;
+}
+
+private ListNode mergeInterlace(ListNode h1, ListNode h2) {
+    ListNode result = h1;
+    h1 = h1.next;
+    ListNode p = result;
+    while (h1 != null &amp;&amp; h2 != null) {
+        p.next = h2;
+        h2 = h2.next;
+        p.next.next = h1;
+        h1 = h1.next;
+        p = p.next.next;
+    }
+    if (h1 == null) {
+        p.next = h2;
+    } else {
+        p.next = h1;
+    }
+    return result;
+}
+</code></pre>
+
+<p><strong>Linked List Cycle</strong></p>
+
+<pre><code>public boolean hasCycle(ListNode head) {
+    if (head == null || head.next == null) 
+        return false;
+    ListNode slow = head;
+    ListNode fast = head.next;
+    while (fast != null &amp;&amp; fast.next != null) {
+        fast = fast.next.next;
+        slow = slow.next;
+        if (fast == slow) {
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+
+<p><strong>Linked List Cycle II</strong></p>
+
+<pre><code>public ListNode detectCycle(ListNode head) {
+    if (head == null || head.next == null) 
+        return null;
+    ListNode slow = head;
+    ListNode fast = head;
+    while (fast != null &amp;&amp; fast.next != null) {
+        fast = fast.next.next;
+        slow = slow.next;
+        if (fast == slow) {
+            slow = head;
+            while (slow != fast) {
+                slow = slow.next;
+                fast = fast.next;
+            }
+            return slow;
+        }
+    }
+    return null;
+}
+</code></pre>
+
+<p><strong>Merge k Sorted Lists</strong></p>
+
+<p>I write the code in the original post.</p>
+
+<p><strong>Copy List with Random Pointer</strong></p>
+
+<pre><code>public RandomListNode copyRandomList(RandomListNode head)  {
+    if (head == null)  {
+        return null;
+    }
+    // 1, make a new copy of each node
+    RandomListNode p = head;
+    while (p != null) {
+        RandomListNode copy = new RandomListNode(p.label);
+        copy.next = p.next;
+        p.next = copy;
+        p = copy.next;
+    }
+    // 2. link the random pointer of copied nodes
+    p = head;
+    while (p != null) {
+        if (p.random != null) {
+            p.next.random = p.random.next;
+        }
+        p = p.next.next;
+    }
+    // 3. break the copied nodes from original nodes
+    RandomListNode result = head.next;
+    p = head;
+    RandomListNode p2 = head.next;
+    while (p != null) {
+        p.next = p2.next;
+        if (p2.next != null) {
+            p2.next = p2.next.next;
+        }
+        p = p.next;
+        p2 = p2.next;
+    }
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/06/16/Binary-tree-serialize-deserialize/">[LeetCode Plus] Binary Tree Serialize and Deserialize</a></h1>
     
     
@@ -97,7 +617,7 @@
   
 
 
-<time datetime="2014-06-16T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-16T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/16/Binary-tree-serialize-deserialize/#disqus_thread">Comments</a>
         
@@ -235,7 +755,7 @@ void readBST(BinaryTree *&amp;root, ifstream &amp;fin) {
   
 
 
-<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-15T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/15/NineChap-Binary-Tree-additional/#disqus_thread">Comments</a>
         
@@ -395,7 +915,7 @@ private boolean mirror(TreeNode left, TreeNode right) {
   
 
 
-<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-15T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/15/Java-Global-Variable/#disqus_thread">Comments</a>
         
@@ -475,7 +995,7 @@ private boolean mirror(TreeNode left, TreeNode right) {
   
 
 
-<time datetime="2014-06-15T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-15T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/15/BST-find-upper-lower-bound/#disqus_thread">Comments</a>
         
@@ -559,7 +1079,7 @@ private boolean mirror(TreeNode left, TreeNode right) {
   
 
 
-<time datetime="2014-06-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-14T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/14/Java-modifier-and-access-level/#disqus_thread">Comments</a>
         
@@ -685,7 +1205,7 @@ private boolean mirror(TreeNode left, TreeNode right) {
   
 
 
-<time datetime="2014-06-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-14T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/14/Iterator-of-Tree/#disqus_thread">Comments</a>
         
@@ -786,7 +1306,7 @@ while (e.hasNext()) {
   
 
 
-<time datetime="2014-06-14T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-14T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/14/Count-negative-in-2D-Sorted-Matrix/#disqus_thread">Comments</a>
         
@@ -862,7 +1382,7 @@ while (e.hasNext()) {
   
 
 
-<time datetime="2014-06-13T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-13T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/13/Search-range-BST-trim-BST/#disqus_thread">Comments</a>
         
@@ -957,7 +1477,7 @@ while (e.hasNext()) {
   
 
 
-<time datetime="2014-06-12T00:00:00+08:00" pubdate data-updated="true"></time>
+<time datetime="2014-06-12T00:00:00-05:00" pubdate data-updated="true"></time>
         
          | <a href="/blog/2014/06/12/NineChap-Permutation/#disqus_thread">Comments</a>
         
@@ -1385,102 +1905,6 @@ private void helper(List&lt;String&gt; ans, String path, String[] pad, String di
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/12/Compare-mergesort-quicksort/">[Question] Compare Mergesort and Quicksort</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-12T00:00:00+08:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/06/12/Compare-mergesort-quicksort/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Quicksort</h3>
-
-<p><strong>Quicksort is faster</strong> because it&rsquo;s in-place sort (with O(log n) stack space).</p>
-
-<p>Typical in-place sort is not stable.</p>
-
-<h3>Mergesort</h3>
-
-<p>Mergesort uses O(n) space, thus slower.</p>
-
-<p>It is stable sort.</p>
-
-<h3>Stability 稳定排序</h3>
-
-<p>When sorting, if only part of the data is examined, there&rsquo;re possibility of multiple different correctly sorted versions of the original list. Stable sorting algorithms will preserve the original relative order.</p>
-
-<p>One application for stable sorting algorithms is sorting a list using a primary and secondary key.</p>
-
-<p>Example:</p>
-
-<p><img class="middle" src="/assets/images/sort-stability.png"></p>
-
-<p>Stable sort: first sorting by rank/number (using any sort), and then a stable sort by suit.</p>
-
-<p>Quicksort would not be able to do that.</p>
-
-<h3>Conclusion</h3>
-
-<p>Quicksort is faster.</p>
-
-
-
-<table class="tg">
-  <tr>
-    <th class="tg-031e"></th>
-    <th class="tg-031e">Best</th>
-    <th class="tg-031e">Average</th>
-    <th class="tg-031e">Worst</th>
-    <th class="tg-031e">Memory</th>
-    <th class="tg-031e">Stability</th>
-  </tr>
-  <tr>
-    <td class="tg-031e">Quicksort</td>
-    <td class="tg-031e">nlgn</td>
-    <td class="tg-031e">nlgn</td>
-    <td class="tg-031e">n^2</td>
-    <td class="tg-031e">lgn average<br>n worst case</td>
-    <td class="tg-031e">Not</td>
-  </tr>
-  <tr>
-    <td class="tg-031e">Merge sort</td>
-    <td class="tg-031e">nlgn</td>
-    <td class="tg-031e">nlgn</td>
-    <td class="tg-031e">nlgn</td>
-    <td class="tg-031e">n worst case</td>
-    <td class="tg-031e">Yes</td>
-  </tr>
-</table>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="44">&larr; Older</a>
@@ -1500,7 +1924,7 @@ private void helper(List&lt;String&gt; ans, String path, String[] pad, String di
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (13)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (14)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1521,6 +1945,10 @@ private void helper(List&lt;String&gt; ans, String path, String[] pad, String di
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/08/segment-tree/">[Fundamental] Segment Tree </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
       </li>
     
@@ -1534,10 +1962,6 @@ private void helper(List&lt;String&gt; ans, String path, String[] pad, String di
     
       <li class="post">
         <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/02/shorest-manhattan-distance/">[Google] Shortest Manhattan Distance </a>
       </li>
     
   </ul>
