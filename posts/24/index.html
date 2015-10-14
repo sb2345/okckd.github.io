@@ -9,7 +9,8 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question You are given a binary tree in which each node contains a value. Design an algorithm to print all paths which sum up to that value. Note &hellip;">
+  <meta name="description" content="Question Write a method to compute all permutations of a string. Do it recursively. Solution Get first char.
+Permute the reminder of the string. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +76,377 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/generate-permutation-recursively/">[CC150v4] 8.4 Generate Permutation Recursively</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/07/generate-permutation-recursively/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a method to compute all permutations of a string.</p>
+
+<p>Do it recursively.</p></blockquote>
+
+<h3>Solution</h3>
+
+<ol>
+<li><p>Get first char.</p></li>
+<li><p>Permute the reminder of the string.</p></li>
+<li><p>Insert that char into all possible positions.</p></li>
+</ol>
+
+
+<p>The code is more concise that doing it iteratively, <strong>and no visited array needed</strong>!</p>
+
+<h3>Code</h3>
+
+<pre><code>public static ArrayList&lt;String&gt; getPerms(String s) {
+    ArrayList&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    if (s.length() == 1) {
+        ans.add(s);
+        return ans;
+    }
+    char single = s.charAt(0);
+    ArrayList&lt;String&gt; partialPerms = getPerms(s.substring(1));
+    for (String part : partialPerms) {
+        for (int i = 0; i &lt;= part.length(); i++) {
+            ans.add(part.substring(0, i) + single + part.substring(i));
+        }
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/find-missing-number/">[CC150v4] 5.7 Find Missing Number</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/07/find-missing-number/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>An array A[1&hellip;n] contains all the integers from 0 to n except for one number which is missing. In this problem, we cannot access an entire integer in A with a single operation.</p>
+
+<p>The elements of A are represented in binary, and the only operation we can use to access them is “fetch the jth bit of A[i]”, which takes constant time. Write code to find the missing integer. Can you do it in O(n) time?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult bit operation question</strong>.</p>
+
+<p>The main thing to understand is, for a particular bit:</p>
+
+<blockquote><p>if the bit value of the removed number is 0, then count(0) &lt;= count(1)</p>
+
+<p>if the bit value of the removed number is 1, then count(0) > count(1)</p></blockquote>
+
+<p>By using this principle, we can easily find the missing value for each bit.</p>
+
+<p><strong>However, we must know when to stop checking</strong>. For example:</p>
+
+<blockquote><p>input: 000, 001, 011</p></blockquote>
+
+<p>We know that the last bit is 0, second last is 1. We shall stop here and return the result &ldquo;010&rdquo;. If we did not stop, the result value would be &ldquo;110&rdquo;, which is wrong. How this is handled is by <strong>passing only half of the input list each time</strong>, and we also add one condition at the beginning:</p>
+
+<pre><code>if (list.size() == 0)
+    return 0;
+</code></pre>
+
+<p>By doing this, we always limit the input list to a smaller range, until we finish finding all bits.</p>
+
+<h3>Code</h3>
+
+<p><strong>hard to write</strong></p>
+
+<pre><code>public static int findMissing(List&lt;BitInteger&gt; list) {
+    return helper(list, BitInteger.INTEGER_SIZE - 1);
+}
+
+private static int helper(List&lt;BitInteger&gt; list, int col) {
+    if (list.size() == 0)
+        return 0;
+    List&lt;BitInteger&gt; zeroList = new ArrayList&lt;BitInteger&gt;();
+    List&lt;BitInteger&gt; oneList = new ArrayList&lt;BitInteger&gt;();
+    for (BitInteger bit : list) {
+        if (bit.fetch(col) == 0) {
+            zeroList.add(bit);
+        } else {
+            oneList.add(bit);
+        }
+    }
+    if (zeroList.size() &lt;= oneList.size()) {
+        // this means the missing value contains a 0
+        return helper(zeroList, col - 1) &lt;&lt; 1;
+    } else {
+        // the missing value contains 1
+        return helper(oneList, col - 1) &lt;&lt; 1 | 1;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/cover-the-chess-board/">[Brain Teaser] 6.2 Cover the Chess Board</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/07/cover-the-chess-board/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>There is an 8x8 chess board in which two diagonally opposite squares have been cut off. You are given 31 dominos, and a single domino can cover exactly two squares.</p>
+
+<p>Can you use the 31 dominos to cover the entire board? Prove your answer (by providing an example, or showing why it’s impossible).</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The chess board initially has 32 black and 32 white squares. By removing opposite corners, we&rsquo;re left with 30 of one color and 32 of the other color.</p>
+
+<p>31 dominos must cover 31 of one color and 31 of the other color.</p>
+
+<p>So, impossible.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/07/convert-integer-to-binary/">[CC150v4] 5.2 Convert Integer to Binary Form</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-07T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/07/convert-integer-to-binary/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Given a (decimal &ndash; e.g. 3.72) number that is passed in as a string, print the binary representation.</p>
+
+<p>If the number can not be represented accurately in binary, print “ERROR”</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Convert the integer part is easy.</p>
+
+<p><strong>The difficulty is how to convert a floating point (the decimal part) to binary form</strong>. The idea suggested in the book is to keep x2, and subtract 1 when necessary. Eg.</p>
+
+<blockquote><p>0.625 x 2 = 1.25, append 1</p>
+
+<p>0.25 x 2 = 0.5, append 0</p>
+
+<p>0.5 x 2 = 1, append 1</p>
+
+<p>the binary form of 0.625 would be 0.101.</p></blockquote>
+
+<p>We must declarify the max number of digits in the decimal part. In the book, <strong>the answer assumes a maximum digits of 32 bits</strong> (i.e. when binary length grows more than 32 bits, return &ldquo;Error&rdquo;).</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static String printBinary(String n) {
+    String[] num = n.split("\\.");
+    int integer = Integer.parseInt(num[0]);
+    double decimal = Double.parseDouble("0." + num[1]);
+
+    // now convert decimal part, if can't convert, return ERROR
+    StringBuilder sb = new StringBuilder();
+    while (decimal != 0) {
+        if (sb.length() &gt; 32) {
+            return "ERROR";
+        }
+        double newDoub = 2 * decimal;
+        sb.append(newDoub &gt;= 1 ? "1" : "0");
+        decimal = newDoub % 1;
+    }
+
+    // now convert integer part
+    String intStr = "";
+    while (integer != 0) {
+        intStr = ((integer &amp; 1) == 1 ? "1" : "0") + intStr;
+        integer = integer &gt;&gt; 1;
+    }
+
+    // return the 2 parts connected with a dot
+    return intStr + "." + sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/06/sort-stack/">[CC150v4] 3.6 Sort Stack</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-06T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/06/sort-stack/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a program to sort a stack in ascending order. You should not make any assumptions about how the stack is implemented.</p>
+
+<p>The following are the only functions that should be used to write this program: push | pop | peek | isEmpty.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a very good question that tests stack operations.</p>
+
+<h3>Code</h3>
+
+<p><strong>written by me</strong></p>
+
+<pre><code>public static Stack&lt;Integer&gt; sort(Stack&lt;Integer&gt; s) {
+    Stack&lt;Integer&gt; result = new Stack&lt;Integer&gt;();
+    while (!s.isEmpty()) {
+        Integer nextNum = s.pop();
+        while (!result.isEmpty() &amp;&amp; result.peek() &lt; nextNum) {
+            s.push(result.pop());
+        }
+        result.push(nextNum);
+    }
+    return result;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -556,357 +928,6 @@ private static boolean matchTree(TreeNode t1, TreeNode t2) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/04/unsolved-mystery-of-utf8/">[Google] Unsolved Mystery of UTF8 Encoding</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-04T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/04/unsolved-mystery-of-utf8/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://algorithmguru.com/blog/?p=148">link</a></p>
-
-<blockquote><p>UTF-8 is a variable-length encoding of letters or runes. If the most significant bit of the first byte is 0, the letter is 1 byte long. Otherwise, its length is the number of leading 1’s in the first byte. If a letter is more than one byte long, all subsequent runes start with 10. Here’s a chart:</p>
-
-<p>UTF-8 encoding scheme is described below:</p></blockquote>
-
-<pre><code>0XXXXXXX = this is the entire rune
-10XXXXXX = this is a continuation of the rune from the previous byte
-110XXXXX = this is the start of a 2-byte rune.
-1110XXXX = this is the start of a 3-byte rune.
-11110XXX = this is the start of a 4-byte rune.
-111110XX = this is the start of a 5-byte rune.
-1111110X = this is the start of a 6-byte rune.
-11111110 = this is the start of a 7-byte rune.
-11111111 = this is the start of a 8-byte rune.
-</code></pre>
-
-<blockquote><p>For example, a 3-byte rune would be 1110XXXX 10XXXXXX 10XXXXXX.</p>
-
-<p>Write a function that decides whether a given byte array (or string) is valid UTF-8 encoded text.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is an easy question, just put here for reference.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/04/Find-second-shortest-path/">[Google] Find Second Shortest Path</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-04T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/04/Find-second-shortest-path/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=16922663">link</a></p>
-
-<blockquote><p>You are given a graph and an algorithm that can find the shortest path b/w any two nodes.</p>
-
-<p>Now you have to find the second shortest path between same two nodes.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>From the top answer:</p>
-
-<blockquote><p><strong>Find the shortest path</strong> between any two nodes. Let them be A and B.</p>
-
-<p>Now to get second shortest path between the same nodes, <strong>remove any one edge that is involved in the shortest path</strong> between the same nodes and calculate the shortest path.</p>
-
-<p>Do the above process for each of the node involved in shortest path and keep track of the minimum second shortest path found.</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/03/weird-sort-array/">[Google] Weird Sort Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-03T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/03/weird-sort-array/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32772813.html">link</a></p>
-
-<blockquote><p>数组排序， 排成 a1<a2>a3<a4>a5。。。这种形式。</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>The are 2 solutions</strong>. The easy one is this:</p>
-
-<blockquote><p>sort first, then 把临近的奇数换到偶数(index)上, O(nlog n).</p></blockquote>
-
-<p><strong>There&rsquo;s a great O(n) solution however</strong>, not easy to think:</p>
-
-<blockquote><p>两两比较相邻数字，把大的数字放到下标为奇数的位置。 O(n).</p></blockquote>
-
-<h3>Code</h3>
-
-<p><strong>O(nlgn) solution</strong></p>
-
-<pre><code>public void solutionOnlgn(int[] A) {
-    // this is a O(nlgn) solution
-    Arrays.sort(A);
-    for (int i = 2; i &lt; A.length; i += 2) {
-        swap(A, i - 1, i);
-    }
-}
-
-private void swap(int[] A, int a, int b) {
-    A[a] ^= A[b];
-    A[b] ^= A[a];
-    A[a] ^= A[b];
-}
-</code></pre>
-
-<p><strong>O(n) solution</strong></p>
-
-<pre><code>public void solutionOn(int[] A) {
-    // this is a O(n) solution
-    for (int i = 1; i &lt; A.length; i++) {
-        // compare (i)th with (i-1)th, and put the large value
-        // at odd-indexed positions
-        if ((A[i - 1] &lt; A[i] &amp;&amp; i % 2 == 0)
-                || (A[i - 1] &gt; A[i] &amp;&amp; i % 2 == 1)) {
-            swap(A, i - 1, i);
-        }
-    }
-}
-
-private void swap(int[] A, int a, int b) {
-    A[a] ^= A[b];
-    A[b] ^= A[a];
-    A[a] ^= A[b];
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/03/String-replacement-question/">[Google] String Replacement Question</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-03T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/03/String-replacement-question/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32766461.html">link</a></p>
-
-<blockquote><p>String replace, 给一个原string，一个target，一个替换的新str，把所有出现
-target str的地方都换成新的str， 长度可以任意.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>If the question asks for an in-place algo, then we can refer to <strong>Question 1.5 in CC150v4</strong>.</p>
-
-<h3>Question</h3>
-
-<blockquote><p>1.5 Write a method to replace all spaces in a string with ‘%20’.</p></blockquote>
-
-<h3>Solution</h3>
-
-<ol>
-<li><strong>pre-processing</strong>, count the number of spaces in string</li>
-<li>parse the string from end to beginning.</li>
-</ol>
-
-
-<p>Need 2 pass.</p>
-
-<h3>Code</h3>
-
-<p><strong>not written by me</strong></p>
-
-<pre><code>public static void ReplaceFun(char[] str, int length) {
-    int spaceCount = 0, newLength, i = 0;
-    for (i = 0; i &lt; length; i++) {
-        if (str[i] == ' ') {
-            spaceCount++;
-        }
-    }
-    newLength = length + spaceCount * 2;
-    str[newLength] = '\0';
-    for (i = length - 1; i &gt;= 0; i--) {
-        if (str[i] == ' ') {
-            str[newLength - 1] = '0';
-            str[newLength - 2] = '2';
-            str[newLength - 3] = '%';
-            newLength = newLength - 3;
-        } else {
-            str[newLength - 1] = str[i];
-            newLength = newLength - 1;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/03/Leader-election/">[Design] Leader Election</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-03T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/03/Leader-election/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p>(this question is from MIT handouts B)</p>
-
-<blockquote><p>Describe a technique to identify a &ldquo;leader&rdquo; among a group of 10 identical servers that are all connected to every other server.</p>
-
-<p>There are no prior distinguishing characteristics of any of them and the same program to identify the leader starts running on all of them at the same time. After an answer is given, ask how much network traffic it requires and, if &ldquo;ties&rdquo; are possible, ask how you can break ties.</p></blockquote>
-
-<h3>Leader Election</h3>
-
-<p><strong><a href="http://en.wikipedia.org/wiki/Leader_election">Leader Election</a></strong> is the process of designating a single process as the organizer of some task distributed among several computers. After running this algorithm, each node throughout the network recognizes a unique node as the task leader.</p>
-
-<p>The good answer would be:</p>
-
-<p>Have each server wait a random amount of time and then say &ldquo;I&rsquo;m it.&rdquo; The &ldquo;I&rsquo;m it&rdquo; <strong>announcement is time‐stamped</strong>, and the computer that <strong>time‐stamped its announcement first</strong> is elected the leader.</p>
-
-<p>This approach requires sending out 9 messages. <strong>If there is a tie</strong>, the computers can repeat the procedure.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="25">&larr; Older</a>
@@ -930,7 +951,7 @@ target str的地方都换成新的str， 长度可以任意.</p></blockquote>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
-<li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
+<li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
@@ -947,23 +968,23 @@ target str的地方都换成新的str， 长度可以任意.</p></blockquote>
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/10/08/segment-tree/">[Fundamental] Segment Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query-II/">[LintCode] Segment Tree Query II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query/">[LintCode] Segment Tree Query </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/closest-leaf-binary-tree/">[Question] Find Cloest Leaf in Binary Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Modify/">[LintCode] Segment Tree Modify </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/all-string-placing-space/">[Amazon] All Strings by Placing Spaces </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build-II/">[LintCode] Segment Tree Build II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build/">[LintCode] Segment Tree Build </a>
       </li>
     
   </ul>

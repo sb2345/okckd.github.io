@@ -9,8 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Follow up for &#8220;Find Minimum in Rotated Sorted Array&#8221;:
-What if duplicates are allowed? Would this affect the run-time &hellip;">
+  <meta name="description" content="Question link Given two integers representing the numerator and denominator of a fraction, return the fraction in string format. If the fractional &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +75,628 @@ What if duplicates are allowed? Would this affect the run-time &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/">[LeetCode 166] Fraction to Recurring Decimal</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-11T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/11/Fraction-to-Recurring-Decimal/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/fraction-to-recurring-decimal/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Given two integers representing the numerator and denominator of a fraction, return the fraction in string format.</p>
+
+<p>If the fractional part is repeating, enclose the repeating part in parentheses.</p>
+<p>
+For example,
+</p><ul>
+<li>Given numerator = 1, denominator = 2, return &#8220;0.5&#8221;.</li>
+<li>Given numerator = 2, denominator = 1, return &#8220;2&#8221;.</li>
+<li>Given numerator = 2, denominator = 3, return &#8220;0.(6)&#8221;.</li>
+</ul>
+<p></p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/Shangrila">@Shangrila</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/hash-table/">Hash Table</a>
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/math/">Math</a>
+                  
+                </span>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p>Wow, this is just another incredible question on Leetcode. Quite a few difficult corner cases in the OJ.</p>
+
+<p>Current AC rate is first lowest at 12.4%.</p>
+
+<h3>Solution</h3>
+
+<p>There&rsquo;re 3 things that we must take note:</p>
+
+<ol>
+<li>Handle positive/nagetive cases well. Note that both numerator and denominator can be negative number. And there&rsquo;re also case like:</li>
+</ol>
+
+
+<blockquote><p>1 / -3 = -0.(3)</p></blockquote>
+
+<ol>
+<li>Note that we have to match the repetation of the actual numerator. Not the quotient. What do I mean by that?</li>
+</ol>
+
+
+<blockquote><p>1 / 6 = 0.1(6)</p>
+
+<p>1 / 333 = 0.(003)</p></blockquote>
+
+<ol>
+<li><p>Note below is <strong>how to override the equals() method</strong> (first one is wrong and second is right):</p>
+
+<p> public boolean equals(Pair p) {</p>
+
+<p> }</p>
+
+<p> public boolean equals(Object obj) {</p>
+
+<p> }</p></li>
+</ol>
+
+
+<p><strong>One more thing</strong>: Most other guys&#8217; solutions like <a href="http://www.programcreek.com/2014/03/leetcode-fraction-to-recurring-decimal-java/">this</a>, <a href="http://blog.csdn.net/ljiabin/article/details/42025037">this</a> and <a href="http://yuanhsh.iteye.com/blog/2176178">this</a> are using Hashing. It&rsquo;s fine and definitely good. I used linearly search though, which is a small time compromise. I am presenting my code below and please just consider it as something different. Keep in mind it&rsquo;s not the optimized solution.</p>
+
+<h3>Code</h3>
+
+<pre><code>public class Solution {
+    public String fractionToDecimal(int numerator, int denominator) {
+        long quotient = (long) numerator / denominator;
+        long reminder = (long) numerator % denominator;
+        if (reminder == 0) {
+            return String.valueOf(quotient);
+        }
+
+        // The result has 3 parts: sign, integer part, and fraction part
+        // eg. -4 / 3 = -1 and the result of (1/3) = (3)
+        String sign = ((long) numerator * denominator &gt;= 0) ? "" : "-";
+        long integer = Math.abs(quotient);
+        String fraction = fraction(Math.abs((long)reminder), Math.abs((long)denominator));
+
+        // why do we have to seperate sign from integer?
+        // cuz 1 / -3 = -0.(3), while quotient is 0. 
+        // So, we can't simply concatenate quotient with fraction
+        return sign + integer + "." + fraction;
+    }
+
+    String fraction(long num, long denum) {
+        // eg. num = 1, denum = 4, should return "25"
+
+        List&lt;Pair&gt; list = new ArrayList&lt;Pair&gt;();
+        String result = "";
+        while (num != 0) {
+            num *= 10;
+            long digit = num / denum;
+
+            // eg. 1 / 333 = (003), so the pairs would be like this:
+            // {10, 0}, {100, 0}, {1000, 3}, {10, 0}...
+            Pair cur = new Pair(num, digit);
+            num %= denum;
+
+            // now add cur Pair to the list
+            if (list.indexOf(cur) == -1) {
+                list.add(cur);
+            } else {
+                // found a recurring dicimal in the previous output stream
+                int pos = list.indexOf(cur);
+                for (int i = 0; i &lt; pos; i++) {
+                    result += list.get(i).digit;
+                }
+                result += "(";
+                for (int i = pos; i &lt; list.size(); i++) {
+                    result += list.get(i).digit;
+                }
+                result += ")";
+                break;
+            }
+        }
+
+        // if there is recurring digit, the result should have already been generated
+        if (result.length() == 0) {
+            for (Pair p: list) {
+                result += p.digit;
+            }
+        }
+        return result;
+    }
+
+    class Pair {
+        long num;
+        long digit;
+
+        public Pair(long a, long b) {
+            num = a;
+            digit = b;
+        }
+
+        public boolean equals(Object obj) {
+            // note the equals interface passes in (Object obj)
+            // instead of a Pair object
+            Pair p = (Pair) obj;
+            return this.num == p.num &amp;&amp; this.digit == p.digit;
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/08/Intersection-of-Two-Linked-Lists/">[LeetCode 160] Intersection of Two Linked Lists</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-08T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/08/Intersection-of-Two-Linked-Lists/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/intersection-of-two-linked-lists/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Write a program to find the node at which the intersection of two singly linked lists begins.</p>
+<br>
+<p>For example, the following two linked lists: </p>
+<pre>A:          a1 ? a2
+                   ?
+                     c1 ? c2 ? c3
+                   ?            
+B:     b1 ? b2 ? b3
+</pre>
+<p>begin to intersect at node c1.</p>
+<br>
+<p><b>Notes:</b>
+</p><ul>
+<li>If the two linked lists have no intersection at all, return <code>null</code>.</li>
+<li>The linked lists must retain their original structure after the function returns. </li>
+<li>You may assume there are no cycles anywhere in the entire linked structure.</li>
+<li>Your code should preferably run in O(n) time and use only O(1) memory.</li>
+</ul>
+<p></p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/stellari">@stellari</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/linked-list/">Linked List</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p>This question is very similar to <strong>[LeetCode Plus] Lowest Common Ancestor of Binary Tree (II)</strong>.</p>
+
+<h3>Solution</h3>
+
+<p><a href="http://stackoverflow.com/a/2216683/909524">This</a> is a pretty nice answer. The following explanation is quoted from <a href="http://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/">g4g</a>:</p>
+
+<blockquote><ol>
+<li><p>Get count of the nodes in first list, let count be c1.</p></li>
+<li><p>Get count of the nodes in second list, let count be c2.</p></li>
+<li><p>Get the difference of counts d = abs(c1 – c2)</p></li>
+<li><p>Now traverse the bigger list from the first node till d nodes so that from here onwards both the lists have equal no of nodes.</p></li>
+<li><p>Then we can traverse both the lists in parallel till we come across a common node.</p></li>
+</ol>
+</blockquote>
+
+<h3>Code</h3>
+
+<pre><code>/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        return helper(headA, headB, length(headA) - length(headB));
+    }
+
+    public ListNode helper(ListNode n1, ListNode n2, int offset) {
+        if (offset &lt; 0) {
+            return helper(n2, n1, 0 - offset);
+        }
+        // move n1 to the distance of offset
+        while (offset != 0) {
+            n1 = n1.next;
+            offset--;
+        }
+        while (n1 != null &amp;&amp; n1 != n2) {
+            n1 = n1.next;
+            n2 = n2.next;
+        }
+        return n1;
+    }
+
+    int length(ListNode node) {
+        int len = 0;
+        while (node != null) {
+            node = node.next;
+            len++;
+        }
+        return len;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/07/add-adsense-octopress/">[Octopress] Add Google AdSense to Octopress</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-07T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/07/add-adsense-octopress/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Apply for Google AdSense</h2>
+
+<p>My first request of AdSense is rejected because of &ldquo;<strong>Site does not comply with Google policies</strong>&rdquo;. I do not know the exact reason, but I did the following things to get it through:</p>
+
+<ol>
+<li><p>I registered a top-level .COM domain name to replace the original github page&rsquo;s domain.</p></li>
+<li><p>I added &ldquo;Privacy Policy&rdquo; page, and added the link to the bottom of each blog post.</p></li>
+<li><p>I re-wrote the &ldquo;About Me&rdquo; page, and added in administrator email address.</p></li>
+<li><p>I updated a few more posts, making it more than 580 posts in total.</p></li>
+<li><p>I set up Google Webmaster Tools, and updated sitemap.xml in the configurations.</p></li>
+<li><p>I resubmitted my request of AdSense again.</p></li>
+</ol>
+
+
+<h2>Put AdSense in your blog</h2>
+
+<ol>
+<li><p>Create a new file: source/_includes/asides/advertise.html</p></li>
+<li><p>Copy and paste the code from AdSense, eg.</p>
+
+<pre><code> &lt;script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"&gt;&lt;/script&gt;
+ &lt;!-- ad-name --&gt;
+ &lt;ins class="adsbygoogle"
+      ...............
+ &lt;script&gt;
+ (adsbygoogle = window.adsbygoogle || []).push({});
+ &lt;/script&gt;
+</code></pre></li>
+<li><p>Go to _config.yml, and look for &ldquo;default_asides&rdquo;, then add &ldquo;asides/advertise.html, &rdquo; in the beginning of the array</p>
+
+<p> default_asides: [asides/advertise.html, asides/category_list.html, asides/recent_posts.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]</p></li>
+<li><p>Now you&rsquo;ve added advertisement in your side menu.</p></li>
+<li><p>Go to source/_layouts/post.html and look for:</p>
+
+<p> &lt;h1>Comments&lt;/h1></p></li>
+<li><p>Below the h1 tag, add your AdSense code, again.</p></li>
+<li><p>Now you&rsquo;ve added advertisement above your comment area.</p></li>
+</ol>
+
+
+<p>Thanks for the effort from <a href="https://www.hi29.net/post/2013/11/30/octopresszen-mo-fang-adsense/">this reference</a>.</p>
+
+<h2>Updates</h2>
+
+<p>Apr 9th update: my re-submission of Google AdSense is not approached, because of &ldquo;not enough content&rdquo;. I don&rsquo;t know what else to do, so I switched to another ad platform.</p>
+
+<p>Apr 11th update: For the first time ever, my blog has more than 1,000 visit per day.</p>
+
+<p><img class="middle" src="/assets/images/google-analytics-20150411.png"></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/07/Min-Stack/">[LeetCode 155] Min Stack</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-07T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/07/Min-Stack/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/min-stack/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>
+Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+</p><ul>
+<li>
+push(x) &#8211; Push element x onto stack.
+</li>
+<li>
+pop() &#8211; Removes the element on top of the stack.
+</li>
+<li>
+top() &#8211; Get the top element.
+</li>
+<li>
+getMin() &#8211; Retrieve the minimum element in the stack.
+</li>
+</ul>
+<p></p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/stack/">Stack</a>
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/data-structure/">Data Structure</a>
+                  
+               sn’t look possible to go to left half or right half by doing constant number of comparisons at the mSolution </span>
+</div>
+
+
+<h3>Analysis</h3>
+
+<p>I&rsquo;ve already cover this question in another post <strong>[Question] Min Stack</strong>.</p>
+
+<h3>My Code</h3>
+
+<pre><code>class MinStack {
+
+    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
+
+    public void push(int x) {
+        stack.push(x);
+        if (min.isEmpty() || min.peek() &gt;= x) {
+            min.push(x);
+        }
+    }
+
+    public void pop() {
+        if (stack.isEmpty()) {
+            return;
+        }
+        int topNum = stack.pop();
+        if (topNum == min.peek()) {
+            min.pop();
+        }
+    }
+
+    public int top() {
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        return stack.peek();
+    }
+
+    public int getMin() {
+        if (min.isEmpty()) {
+            return 0;
+        }
+        return min.peek();
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/07/Maximum-Product-Subarray/">[LeetCode 152] Maximum Product Subarray</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-07T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/07/Maximum-Product-Subarray/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/maximum-product-subarray/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>
+Find the contiguous subarray within an array (containing at least one number) which has the largest product.
+</p>
+
+<p>
+For example, given the array <code>[2,3,-2,4]</code>,<br>
+the contiguous subarray <code>[2,3]</code> has the largest product = <code>6</code>.
+</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/array/">Array</a>
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/dynamic-programming/">Dynamic Programming</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p><strong>This is a pretty difficult question</strong>. It&rsquo;s hard to write bug-free solution if you have never practised before.</p>
+
+<p>So the first idea that comes to me is the case of array element = 0. Why this case? cuz the maximum subarray MUST NOT CONTAIN 0 unless the input is like {-1, 0, -1}. So we could divide array from 0s and calculate max sum seperately. This idea is good, though a little difficult in coding. Read it <a href="http://www.geeksforgeeks.org/maximum-product-subarray/">here</a> or <a href="https://shepherdyuan.wordpress.com/2014/07/23/linkedin-maximum-sumproduct-subarray/">here</a>.</p>
+
+<h3>Solution</h3>
+
+<p>After a bit exploration, I found a must easier apporach, thanks to <a href="http://blog.csdn.net/linhuanmars/article/details/39537283">code ganker</a> and <a href="http://yucoding.blogspot.sg/2014/10/leetcode-quesion-maximum-product.html">Yu</a>. The idea is to simply ALWAYS CALCULATE preMax and preMin by using MAX/MIN(Val1, Val2, Val3) method.</p>
+
+<h3>My Code</h3>
+
+<pre><code>public class Solution {
+    public int maxProduct(int[] A) {
+        if (A == null || A.length == 0) {
+            return 0;
+        } else if (A.length == 1) {
+            return A[0];
+        }
+
+        int preMax = A[0];
+        int preMin = A[0];
+        int max = A[0];
+
+        for (int i = 1; i &lt; A.length; i++) {
+            int temp = preMin;
+            preMin = Math.min(Math.min(preMin * A[i], preMax * A[i]), A[i]);
+            preMax = Math.max(Math.max(temp * A[i], preMax * A[i]), A[i]);
+            max = Math.max(max, preMax);
+        }
+
+        return max;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -506,350 +1127,6 @@ What if <i>duplicates</i> are allowed?</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/14/speed-up-web-page-2/">[Design] Speed Up Webpage for Slow Connection (2)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-14T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/14/speed-up-web-page-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>(&hellip; continued from last post)</p>
-
-<h4>9. Use a Content Delivery Network (CDN)</h4>
-
-<p>Your site’s speed is greatly affected by where the user’s location is, relative to your web server. The farther away they are, the more distance the data being transmitted has to travel. Having your content cached <strong>across multiple, strategically placed geographical locations</strong> helps take care of this problem.</p>
-
-<p>A CDN will often make your operating cost a little higher, but you definitely gain a speed bonus. Check out MaxCDN or <strong>Amazon Simple Storage Service (Amazon S3)</strong>.</p>
-
-<h4>10. Optimize Web Caching</h4>
-
-<p>Along with using caching systems, you should create websites that utilize <strong>web caching</strong> as much as possible. Web caching is when files are <strong>cached by the web browser</strong> for later use. Things that browsers can cache include CSS files, JavaScript files, and images.</p>
-
-<p>Aside from the basics, such as putting CSS and JavaScript code that are used in multiple pages in external files, there are many ways to make sure that you are caching your files in the most efficient way possible.</p>
-
-<p>For example, you can set HTTP response headers such as Expires and Last-Modified to reduce the need of re-downloading certain files when the user comes back to your site. To learn more, read about <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html">caching in HTTP</a> and <a href="https://developers.google.com/speed/docs/insights/LeverageBrowserCaching?csw=1#LeverageBrowserCaching">leveraging browser caching</a>.</p>
-
-<p>To set up HTTP Expires headers in Apache, read this tutorial on adding future expires headers.</p>
-
-<h4>Other mentions</h4>
-
-<ol>
-<li><p><strong>Avoid Resizing Images in HTML</strong> (using HTML’s width and height attributes), for the sake of smaller file size.</p></li>
-<li><p><strong>Optimize Image Sizes by Using the Correct File Format</strong>. Eg. JPG format often displays photographic images at smaller file sizes than PNG.</p></li>
-<li><p><strong>Optimize the Way You Write Code</strong>. For example, instead of using (h1)(em)Your heading(em)(h1), you can easily use CSS to make your headings italics.</p>
-
-<p> Writing code efficiently not only reduces file sizes of your HTML and CSS documents, but also makes it easier to maintain.</p></li>
-</ol>
-
-
-<p>Ref: <a href="http://sixrevisions.com/web-development/site-speed-performance/">http://sixrevisions.com/web-development/site-speed-performance/</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/14/speed-up-web-page-1/">[Design] Speed Up Webpage for Slow Connection (1)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-14T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/14/speed-up-web-page-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="www.geeksforgeeks.org/amazon-interview-set-72-campus-sde-1">ref</a></p>
-
-<h3>Question</h3>
-
-<blockquote><p>Suppose you are handling Amazon website and you have 10 MB size home page. Optimize the homepage for a customer who has 100 kbps internet connection.</p>
-
-<p>Further he asked for the customer who has 100 mbps internet connection.</p></blockquote>
-
-<h3>Reading</h3>
-
-<p><a href="http://sixrevisions.com/web-development/site-speed-performance/">This</a> is a very nice article about website speedup. Below is the full quoted text.</p>
-
-<h4>1. Defer Loading Content When Possible</h4>
-
-<p>Ajax allows us to build web pages that can be <strong>asynchronously updated</strong> at any time. This means that instead of reloading an entire page when a user performs an action, we can simply update parts of that page.</p>
-
-<p>We can use an image gallery as an example. Image files are big and heavy; they can slow down page-loading speeds of web pages. Instead of loading all of the images when a user first visits the web page, we can just display thumbnails of the images and then when the user clicks on them, we can asynchronously request the full-size images from the server and update the page. This way, if a user only wants to see a few pictures, they don’t have to suffer waiting for all of the pictures to download. This development pattern is called <strong>lazy loading</strong>.</p>
-
-<p><strong>Ajax/web development libraries</strong> like jQuery, Prototype, and MooTools can make deferred content-loading easier to implement.</p>
-
-<h4>2. Use External JS and CSS Files</h4>
-
-<p>When the user first loads your web page, the browser will cache external resources like CSS and JavaScript files. Thus, instead of inline JavaScript and CSS files, it’s best to <strong>place them in external files</strong>.</p>
-
-<p>Using inline CSS also increases the rendering time of a web page; having everything defined in your main CSS file lets the browser do less work when rendering the page, since it already knows all the style rules that it needs to apply.</p>
-
-<p><strong>As a bonus</strong>, using external JavaScript and CSS files makes site maintenance easier because you only need to maintain global files instead of code scattered in multiple web pages.</p>
-
-<h4>3. Use Caching Systems</h4>
-
-<p>If you find that your site is connecting to your database in order to create the same content, it’s time to start using a <strong>caching system</strong>. By having a caching system in place, your site will only have to create the content once instead of creating the content every time the page is visited by your users. Don’t worry, caching systems periodically refresh their caches depending on how you set it up — so even constantly-changing web pages (like a blog post with comments) can be cached.</p>
-
-<p><strong>Popular content management systems</strong> like WordPress and Drupal will have <strong>static caching features</strong> that convert dynamically generated pages to static HTML files to reduce unnecessary server processing. For WordPress, check out <a href="https://wordpress.org/plugins/wp-super-cache/">WP Super Cache</a> (one of the six critical WordPress plugins which, claimed by the author, enjoyed a improvement by 259.1% for content-heavy pages). Drupal has a page-caching feature in the core.</p>
-
-<p>There are also <strong>database caching and server-side scripts caching systems</strong> that you can install on your web server (if you have the ability to do so). For example, PHP has extensions called PHP accelerators that optimize performance through caching and various other methods; one example of a <a href="http://en.wikipedia.org/wiki/PHP_accelerator">PHP accelerator</a> is APC. <a href="http://en.wikipedia.org/wiki/Database_caching">Database caching</a> improves performance and scalability of your web applications by reducing the work associated with database read/write/access processes; <strong><a href="http://www.memcached.org/">memcached</a></strong>, for example, caches frequently used database queries.</p>
-
-<h4>8. Load JavaScript at the End of Your Document</h4>
-
-<p>It’s best if you have your scripts loading at the end of the page rather than at the beginning. It allows for the browser to render everything before getting started with the JavaScript. This makes your web pages feel more responsive because the way JavaScript works is that it blocks anything below it from rendering until it has finished downloading. If possible, reference JavaScript right before the closing (body) tag of your HTML documents. To learn more, read about deferring the loading of JavaScript.</p>
-
-<p>(to be continued&hellip;)</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/13/sort-part-and-make-whole-array-sorted/">[LinkedIn] Sort Part to Make Entire Array Sorted</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-13T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/13/sort-part-and-make-whole-array-sorted/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/minimum-length-unsorted-subarray-sorting-which-makes-the-complete-array-sorted/">link</a></p>
-
-<blockquote><p>Given an unsorted array arr[0..n-1] of size n, find the minimum length subarray arr[s..e] such that sorting this subarray makes the whole array sorted.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The solution from <a href="http://www.geeksforgeeks.org/minimum-length-unsorted-subarray-sorting-which-makes-the-complete-array-sorted/">gfg</a> is definitely good, but I find <a href="http://stackoverflow.com/a/15855670">this graphic explanation</a> a really great resource.</p>
-
-<p>The idea is, find min and max in the unsorted proportion, and trim the original array.</p>
-
-<h3>Code</h3>
-
-<p>not written.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/13/minimum-adjustments/">[Google] Minimum Adjustments</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-13T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/13/minimum-adjustments/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.careercup.com/question?id=6212066786410496">link</a></p>
-
-<blockquote><p>Given an integer array, adjust each integers so that the difference of every adjacent integers are not greater than a given number target.</p>
-
-<p>If the array before adjustment is A, the array after adjustment is B, you should minimize the sum of |A[i]-B[i]|</p>
-
-<p>Given [1,4,2,3] and target=1, one of the solutions is [2,3,2,3], the minimal adjustment cost is 2.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a difficult DP. Now we define 2D array like this:</p>
-
-<blockquote><p>dp[i][j]: the minimal adjust cost on changing A[i] to j</p></blockquote>
-
-<p>And the equation:</p>
-
-<blockquote><p>dp[i][j] = min{dp[i-1][k] + |j-A[i]|} s.t. |k-j| &lt;= target</p></blockquote>
-
-<p>Refer to the post by <a href="http://www.careercup.com/question?id=6212066786410496">simon.zhangsm</a></p>
-
-<h3>Code</h3>
-
-<p>Not written.</p>
-
-<p>Available at <a href="http://lintcode.com/en/problem/minimum-adjustment-cost/#">OJ</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/13/combination-of-factors/">[LinkedIn] Unique Combination of Factors (因式分解)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-02-13T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/02/13/combination-of-factors/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t1/JobHunting/32803907_0_1.html">link</a></p>
-
-<blockquote><p>A question by dongfeiwww:</p>
-
-<p>打印一个数的所有乘数组合，从大到小，不要有重复</p>
-
-<p>Print all unique combinations of factors of a positive integer. For example given 24:</p></blockquote>
-
-<pre><code>24*1
-12*2
-8*3
-6*4
-6*2*2
-4*3*2
-3*2*2*2
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Simple DFS.</p>
-
-<h3>Code</h3>
-
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; factorCombinations(int n) {
-    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
-    helper(ans, n, n / 2, new ArrayList&lt;Integer&gt;());
-    return ans;
-}
-
-private void helper(List&lt;List&lt;Integer&gt;&gt; ans, int num, int largestFactor,
-        List&lt;Integer&gt; path) {
-    if (num == 1) {
-        ans.add(new ArrayList&lt;Integer&gt;(path));
-        return;
-    }
-    for (int i = largestFactor; i &gt; 1; i--) {
-        if (num % i == 0) {
-            path.add(i);
-            helper(ans, num / i, i, path);
-            path.remove(path.size() - 1);
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="7">&larr; Older</a>
@@ -873,7 +1150,7 @@ private void helper(List&lt;List&lt;Integer&gt;&gt; ans, int num, int largestFac
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
-<li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
+<li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
@@ -890,23 +1167,23 @@ private void helper(List&lt;List&lt;Integer&gt;&gt; ans, int num, int largestFac
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/10/08/segment-tree/">[Fundamental] Segment Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query-II/">[LintCode] Segment Tree Query II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query/">[LintCode] Segment Tree Query </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/closest-leaf-binary-tree/">[Question] Find Cloest Leaf in Binary Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Modify/">[LintCode] Segment Tree Modify </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/all-string-placing-space/">[Amazon] All Strings by Placing Spaces </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build-II/">[LintCode] Segment Tree Build II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build/">[LintCode] Segment Tree Build </a>
       </li>
     
   </ul>

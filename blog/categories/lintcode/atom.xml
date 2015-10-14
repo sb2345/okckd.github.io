@@ -4,7 +4,7 @@
   <title><![CDATA[Category: lintcode | Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/blog/categories/lintcode/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-10-13T00:32:42-05:00</updated>
+  <updated>2015-10-13T21:18:11-05:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -14,227 +14,307 @@
 
   
   <entry>
-    <title type="html"><![CDATA[[LintCode] Trailing Zeros of Factorial]]></title>
-    <link href="http://www.shuatiblog.com/blog/2014/07/02/Trailing-Zero-of-Factorial/"/>
-    <updated>2014-07-02T00:00:00-05:00</updated>
-    <id>http://www.shuatiblog.com/blog/2014/07/02/Trailing-Zero-of-Factorial</id>
+    <title type="html"><![CDATA[[LintCode] Segment Tree Query II ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Query-II/"/>
+    <updated>2015-10-13T00:00:00-05:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Query-II</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.lintcode.com/en/problem/trailing-zeros/)
+[link](http://www.lintcode.com/en/problem/segment-tree-query-ii/)
 
-> Write an algorithm which computes the number of trailing zeros in n factorial.
+> For an array, we can build a SegmentTree for it, each node stores an extra attribute count to denote the number of elements in the the array which value is between interval start and end. (The array may not fully filled by elements)
 
-> Example: 11! = 39916800, so the out should be 2
+> Design a query method with three parameters root, start and end, find the number of elements in the in array's interval [start, end] by the given root of value SegmentTree.
 
 ### Solution
 
-Note that a trailing zero is produced by 2 * 5.
-
-This question basically is couting the number of factor 5 (because factor 2 is always sufficient). 
+Similar.
 
 ### Code
 
-    public long trailingZeros(long n) {
-        if (n <= 0) {
-            return 0;
+    /**
+     * Definition of SegmentTreeNode:
+     * public class SegmentTreeNode {
+     *     public int start, end, count;
+     *     public SegmentTreeNode left, right;
+     *     public SegmentTreeNode(int start, int end, int count) {
+     *         this.start = start;
+     *         this.end = end;
+     *         this.count = count;
+     *         this.left = this.right = null;
+     *     }
+     * }
+     */
+    public class Solution {
+        /**
+         *@param root, start, end: The root of segment tree and 
+         *                         an segment / interval
+         *@return: The count number in the interval [start, end]
+         */
+        public int query(SegmentTreeNode root, int start, int end) {
+            if (root == null || start > end) {
+                return 0;
+            } else if (root.start > end || root.end < start) {
+                return 0;
+            } else if (start <= root.start && root.end <= end) {
+                return root.count;
+            }
+            int mid = (root.start + root.end) / 2;
+            return query(root.left, start, Math.min(mid, end)) + 
+                    query(root.right, Math.max(mid + 1, start), end);
         }
-        long d = 5;
-        long result = 0;
-        while (d <= n) {
-            result += n / d;
-            d *= 5;
-        }
-        return result;
     }
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[LintCode] Partition Array]]></title>
-    <link href="http://www.shuatiblog.com/blog/2014/06/28/Partition-array/"/>
-    <updated>2014-06-28T00:00:00-05:00</updated>
-    <id>http://www.shuatiblog.com/blog/2014/06/28/Partition-array</id>
+    <title type="html"><![CDATA[[LintCode] Segment Tree Query ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Query/"/>
+    <updated>2015-10-13T00:00:00-05:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Query</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.lintcode.com/en/problem/partition-array/)
+[link](http://www.lintcode.com/en/problem/segment-tree-query/)
 
-> Given an array "nums" of integers and an int "k", Partition the array (i.e move the elements in "nums") such that,
+> For an integer array (index from 0 to n-1, where n is the size of this array), in the corresponding SegmentTree, each node stores an extra attribute max to denote the maximum number in the interval of the array (index from start to end).
 
-> 1. All elements < k are moved to the left
-> 2. All elements >= k are moved to the right
+> Design a query method with three parameters root, start and end, find the maximum number in the interval [start, end] by the given root of segment tree.
 
-> Return the partitioning Index, i.e the first index "i" nums[i] >= k.
+### Solution
 
-> Example: If nums=[3,2,2,1] and k=2, a valid answer is 1.
+Slightly difficult as we need to keep in mind the following: 
 
-### Analysis 
+1. what's the return condition? (start and end is large enough to cover the entire range)
 
-The solution is to keep swapping elements. It confuses me for a while, until I realize the swapping mechanism is actually not difficult. 
-
-There's another question on leetcode "Sort Color", which is similar to this question (just partition twice). 
+1. how to handle overlapping case? (find min-point first and then analyse case by case)
 
 ### Code
 
-    public int partitionArray(ArrayList<Integer> nums, int k) {
-	    //write your code here
-		ArrayList<Integer> ans = new ArrayList<Integer>();
-		if (nums == null || nums.size() == 0) {
-			return ans;
-		}
-		int len = nums.size();
-		int left = 0;
-		int right = len - 1;
-		while (left < right) {
-			while (left < len && nums.get(left) < k) {
-				left++;
-			}
-			while (right >= 0 && nums.get(right) >= k) {
-				right--;
-			}
-			if (left > right) {
-				break;
-			} else {
-				// swap 2 elements
-				int temp = nums.get(left);
-				nums.set(left, nums.get(right));
-				nums.set(right, temp);
-				left++;
-				right--;
-			}
-		}
-		// now return the correct value
-		if (left == len) {
-			return len;
-		} else {
-			return left;
-		}
+    /**
+     * Definition of SegmentTreeNode:
+     * public class SegmentTreeNode {
+     *     public int start, end, max;
+     *     public SegmentTreeNode left, right;
+     *     public SegmentTreeNode(int start, int end, int max) {
+     *         this.start = start;
+     *         this.end = end;
+     *         this.max = max
+     *         this.left = this.right = null;
+     *     }
+     * }
+     */
+    public class Solution {
+        /**
+         *@param root, start, end: The root of segment tree and 
+         *                         an segment / interval
+         *@return: The maximum number in the interval [start, end]
+         */
+        public int query(SegmentTreeNode root, int start, int end) {
+            // write your code here
+            if (root == null || start > end) {
+                return -1;
+            } else if (root.start > end || root.end < start) {
+                return -1;
+            } else if (root.start >= start && root.end <= end) {
+                return root.max;
+            }
+            int mid = (root.start + root.end) / 2;
+            return Math.max(query(root.left, start, Math.min(mid, end)), 
+                            query(root.right, Math.max(mid + 1, start), end));
+        }
     }
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[LintCode] Minimum Subarray]]></title>
-    <link href="http://www.shuatiblog.com/blog/2014/06/28/Minimum-subarray/"/>
-    <updated>2014-06-28T00:00:00-05:00</updated>
-    <id>http://www.shuatiblog.com/blog/2014/06/28/Minimum-subarray</id>
+    <title type="html"><![CDATA[[LintCode] Segment Tree Modify ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Modify/"/>
+    <updated>2015-10-13T00:00:00-05:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Modify</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.lintcode.com/en/problem/minimum-subarray/)
+[link](http://www.lintcode.com/en/problem/segment-tree-modify/#)
 
-> Given an array of integers, find the subarray with smallest sum. Return the sum of the subarray.
+> For a Maximum Segment Tree, which each node has an extra value max to store the maximum value in this node's interval.
 
-> Note The subarray should contain at least one integer.
+> Implement a modify function with three parameter root, index and value to change the node's value with [start, end] = [index, index] to the new given value. Make sure after this change, every node in segment tree still has the max attribute with the correct value.
 
-> Example For [1, -1, -2, 1], return -3
+### Solution
 
-### Analysis 
-
-Same as "Max subarray". 
+It's very similar to __Segment Tree Modify/search__. 
 
 ### Code
 
-    public int minSubArray(ArrayList<Integer> nums) {
-        // write your code
-        if (nums == null || nums.size() == 0) {
-            return 0;
+    /**
+     * Definition of SegmentTreeNode:
+     * public class SegmentTreeNode {
+     *     public int start, end, max;
+     *     public SegmentTreeNode left, right;
+     *     public SegmentTreeNode(int start, int end, int max) {
+     *         this.start = start;
+     *         this.end = end;
+     *         this.max = max
+     *         this.left = this.right = null;
+     *     }
+     * }
+     */
+    public class Solution {
+        /**
+         *@param root, index, value: The root of segment tree and 
+         *@ change the node's value with [index, index] to the new given value
+         *@return: void
+         */
+        public void modify(SegmentTreeNode root, int index, int value) {
+            helper(root, index, value);
         }
-        int min = nums.get(0);
-        int pre = Math.min(0, nums.get(0));
-        for (int i = 1; i < nums.size(); i++) {
-            pre += nums.get(i);
-            min = Math.min(min, pre);
-            pre = Math.min(0, pre);
+
+        private int helper(SegmentTreeNode node, int target, int val) {
+            if (node.start > target || node.end < target) {
+                // no update, then just return max as normal
+                return node.max;
+            } else if (node.start == node.end && node.start == target) {
+                node.max = val;
+                return val;
+            } else {
+                // check left and right, and update max value accordingly
+                node.max = Math.max(helper(node.left, target, val), 
+                                    helper(node.right, target, val));
+                return node.max;
+            }
         }
-        return min;
     }
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[LintCode] Maximum Subarray II]]></title>
-    <link href="http://www.shuatiblog.com/blog/2014/06/28/Maximum-subarray-II/"/>
-    <updated>2014-06-28T00:00:00-05:00</updated>
-    <id>http://www.shuatiblog.com/blog/2014/06/28/Maximum-subarray-II</id>
+    <title type="html"><![CDATA[[LintCode] Segment Tree Build II ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Build-II/"/>
+    <updated>2015-10-13T00:00:00-05:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Build-II</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.lintcode.com/en/problem/maximum-subarray-ii/)
+[link](http://www.lintcode.com/en/problem/segmemt-tree-build-ii/)
 
-> Given an array of integers, find two non-overlapping subarrays which have the largest sum. The number in each subarray should be contiguous. Return the largest sum.
+> The structure of Segment Tree is a binary tree which each node has two attributes start and end denote an segment / interval.
 
-> Note The subarray should contain at least one number
+> start and end are both integers, they should be assigned in following rules:
 
-> Example For given [1, 3, -1, 2, -1, 2], the two subarrays are [1, 3] and [2, -1, -2] or [1, 3, -1, 2] and [2], they both have the largest sum 7.
+> The root's start and end is given by build method.
+The left child of node A has start=A.left, end=(A.left + A.right) / 2.
+The right child of node A has start=(A.left + A.right) / 2 + 1, end=A.right.
+if start equals to end, there will be no children for this node.
 
-### Analysis 
+> Implement a build method with a given array, so that we can create a corresponding segment tree with every node value represent the corresponding interval max value in the array, return the root of this segment tree.
 
-__This is not an easy question__. I thought I have to use DP 2 times: 
+### Solution
 
-1. first time, calculate max sum ending at each point.
-1. second time, calculate max sum to the left/right of a point (inclusive but not necessarily ending at current point). 
-
-After a second thought, __the first DP path can be denoted with a single variable__. So there comes the solution below.
+Similar.
 
 ### Code
 
-    public int maxTwoSubArrays(ArrayList<Integer> nums) {
-        // write your code
-        int len = nums.size();
-        int[] dp1 = new int[len];
-        int[] dp2 = new int[len];
-        // dp1[k] denotes the max sum to the left of k (inclusive)
-        // dp2[k] denotes the max sum to the right of k (inclusive)
-        dp1[0] = nums.get(0);
-        int sumSoFar = Math.max(0, nums.get(0));
-        for (int i = 1; i < len; i++) {
-            sumSoFar += nums.get(i);
-            dp1[i] = Math.max(dp1[i - 1], sumSoFar);
-            sumSoFar = Math.max(0, sumSoFar);
+    /**
+     * Definition of SegmentTreeNode:
+     * public class SegmentTreeNode {
+     *     public int start, end, max;
+     *     public SegmentTreeNode left, right;
+     *     public SegmentTreeNode(int start, int end, int max) {
+     *         this.start = start;
+     *         this.end = end;
+     *         this.max = max
+     *         this.left = this.right = null;
+     *     }
+     * }
+     */
+    public class Solution {
+        /**
+         *@param A: a list of integer
+         *@return: The root of Segment Tree
+         */
+        public SegmentTreeNode build(int[] A) {
+            if (A == null || A.length == 0) {
+                return null;
+            }
+            return helper(A, 0, A.length - 1);
         }
-        dp2[len - 1] = nums.get(len - 1);
-        sumSoFar = Math.max(0, nums.get(len - 1));
-        for (int i = len - 2; i >= 0; i--) {
-            sumSoFar += nums.get(i);
-            dp2[i] = Math.max(dp2[i + 1], sumSoFar);
-            sumSoFar = Math.max(0, sumSoFar);
+
+        private SegmentTreeNode helper(int[] A, int start, int end) {
+            if (start > end) {
+                return null;
+            }
+            SegmentTreeNode node = new SegmentTreeNode(start, end);
+            if (start == end) {
+                node.max = A[start];
+                return node;
+            } else {
+                node.left = helper(A, start, (start + end) / 2);
+                node.right = helper(A, (start + end) / 2 + 1, end);
+                if (node.right != null) {
+                    node.max = Math.max(node.left.max, node.right.max);
+                } else {
+                    node.max = node.left.max;
+                }
+            }
+            return node;
         }
-        // now for every node, calculate leftMaxSum + rightMaxSum
-        int maxSum = Integer.MIN_VALUE;
-        for (int i = 0; i < len - 1; i++) {
-            maxSum = Math.max(maxSum, dp1[i] + dp2[i + 1]);
-        }
-        return maxSum;
     }
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[[LintCode] Majority Number III]]></title>
-    <link href="http://www.shuatiblog.com/blog/2014/06/28/Majority-Number-III/"/>
-    <updated>2014-06-28T00:00:00-05:00</updated>
-    <id>http://www.shuatiblog.com/blog/2014/06/28/Majority-Number-III</id>
+    <title type="html"><![CDATA[[LintCode] Segment Tree Build ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Build/"/>
+    <updated>2015-10-13T00:00:00-05:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Build</id>
     <content type="html"><![CDATA[### Question 
 
-[link](http://www.lintcode.com/en/problem/majority-number-iii/)
+[link](http://www.lintcode.com/en/problem/segment-tree-build/)
 
-> Given an array of integers and a number k, the majority number is the number that occurs more than 1/k of the size of the array. Find it.
+> The structure of Segment Tree is a binary tree which each node has two attributes start and end denote an segment / interval.
 
-> Note: There is only one majority number in the array
+> start and end are both integers, they should be assigned in following rules:
 
-> Example: For [3,1,2,3,2,3,3,4,4,4] and k = 3, return 3
+> The root's start and end is given by build method.
+The left child of node A has start=A.left, end=(A.left + A.right) / 2.
+The right child of node A has start=(A.left + A.right) / 2 + 1, end=A.right.
+if start equals to end, there will be no children for this node.
 
-### Analysis 
+> Implement a build method with two parameters start and end, so that we can create a corresponding segment tree with every node has the correct start and end value, return the root of this segment tree.
 
-Similar to 'Majority Number II', but a little more difficult. 
+### Solution
 
-_Instead of keeping 2 value for checking, now keep k values__. Since values are constantly checked for existance, using a HashMap looks like a great idea. 
-
-__Another idea suggest by [G4G](http://www.geeksforgeeks.org/given-an-array-of-of-size-n-finds-all-the-elements-that-appear-more-than-nk-times/) is a mechanism similar to the famous Tetris Game__. The size of the buffer is k. The buffer is full, we remove all items by counter of 1. When counter reach 0, remove that item. In this way, the elements left in the buffer are the majority numbers. 
-
-This method is also used in counting highly-frequent string keywrods. For example, another post __[Design] Big Data - Real Time Top K__ discusses about it. 
+A simple top-down run through. 
 
 ### Code
 
-I did not write code for this question. Shouldn't be difficult. 
+    /**
+     * Definition of SegmentTreeNode:
+     * public class SegmentTreeNode {
+     *     public int start, end;
+     *     public SegmentTreeNode left, right;
+     *     public SegmentTreeNode(int start, int end) {
+     *         this.start = start, this.end = end;
+     *         this.left = this.right = null;
+     *     }
+     * }
+     */
+    public class Solution {
+        /**
+         *@param start, end: Denote an segment / interval
+         *@return: The root of Segment Tree
+         */
+        public SegmentTreeNode build(int start, int end) {
+            // write your code here
+            if (start > end) {
+                return null;
+            }
+            SegmentTreeNode node = new SegmentTreeNode(start, end);
+            if (start < end) {
+                node.left = build(start, (start + end) / 2);
+                node.right = build((start + end) / 2 + 1, end);
+            }
+            return node;
+        }
+    }
 ]]></content>
   </entry>
   

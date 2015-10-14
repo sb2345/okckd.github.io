@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link1 给一个数组a[n]，令s[i]为a[i+1..n-1]中比a[i]大的数的数量。 求最大的s[i]。要求O(nlogn) Solution This is very similar question to [Google] Form a Queue Given &hellip;">
+  <meta name="description" content="Question link Find all the repeating substring of specified length in a large string sequence. For e.g. Input String: "ABCACBABC" repeated sub-string &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,444 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/all-repeating-substring-given-length/">[LinkedIn] Find All Repeating Substring With Given Length</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/11/all-repeating-substring-given-length/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=6495932900179968">link</a></p>
+
+<blockquote><p>Find all the repeating substring of specified length in a large string sequence.</p>
+
+<p>For e.g.</p></blockquote>
+
+<pre><code>Input String: "ABCACBABC" 
+repeated sub-string length: 3 
+Output: ABC 
+</code></pre>
+
+<blockquote><p>eg.</p></blockquote>
+
+<pre><code>Input String: "ABCABCA" 
+repeated sub-string length: 2 
+Output: AB, BC, CA
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Similar to <strong>[Amazon] Longest Repeating Substring</strong>, the best solution is to do <strong>Suffix Tree</strong>, or suffix array. We then need to print nodes on a certain level, who has more than 1 descendant.</p>
+
+<p>However, since the length of substring is given, we can also do simply iteration: insert all substring with given length into a HashSet, and check repetition. <a href="https://github.com/techpanja/interviewproblems/blob/master/src/strings/repeatingstringsofspecifiedlength/RepeatingStringOfSpecificLength.java">ref</a></p>
+
+<h3>Code</h3>
+
+<p>Suffix tree solution: not written.</p>
+
+<p>Hashset code:</p>
+
+<pre><code>public List&lt;String&gt; solve(String input, int k) {
+    List&lt;String&gt; ans = new ArrayList&lt;String&gt;();
+    HashSet&lt;String&gt; set = new HashSet&lt;String&gt;();
+    for (int i = 0; i &lt;= input.length() - k; i++) {
+        String sub = input.substring(i, i + k);
+        if (set.contains(sub)) {
+            ans.add(sub);
+        }
+        set.add(sub);
+    }
+    return ans;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/">[Question] All Distinct Subsequences With Given Length</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/11/all-distinct-subsequences-given-length%20-%20Copy/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://11011110.livejournal.com/254164.html">link</a></p>
+
+<blockquote><p>Find a polynomial-time algorithm that takes a string of length n, and a number k, output the number of distinct k-character subsequences.</p>
+
+<p>For instance, input &ldquo;food&rdquo; and number k=2, output should be 4. There are four distinct 2-character subsequences of &ldquo;food&rdquo;: &ldquo;fo&rdquo;, &ldquo;fd&rdquo;, &ldquo;oo&rdquo;, and &ldquo;od&rdquo;.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>Similar to <strong>[Question] Number of distinct sub-sequence</strong>, we solve this problem with DP. The dp equation is a bit difficult to write.</p>
+
+<p>The idea come from comment from <a href="http://11011110.livejournal.com/254164.html">gareth_rees</a>:</p>
+
+<blockquote><p>Let θ(S, k) be the number of distinct k-character subsequences in the string S of length n.</p>
+
+<p>Clearly θ(S, k) = 1 if n = k or k = 0</p>
+
+<p>and θ(S, k) = 0 if n &lt; k.</p>
+
+<p>Otherwise, <strong>choose 1 unique char from S</strong>, and deduct k by 1, then do the DP calculation with the remaining part of S.</p></blockquote>
+
+<p>Look at this example:</p>
+
+<pre><code>θ("food", 2) = θ("ood", 1) + θ("od", 1) + θ("", 1)
+= (θ("od", 0) + θ("", 0)) + (θ("d", 0) + θ("", 0)) + 0
+= (1 + 1) + (1 + 1)
+= 4
+</code></pre>
+
+<p><strong>&ldquo;food&rdquo; is divided into 3 parts</strong>. First part we choose &ldquo;f&rdquo; to be the first char, thus the value is θ(&ldquo;ood&rdquo;, 1). Second part we choose &ldquo;o&rdquo;, and final part we choose &ldquo;d&rdquo;.</p>
+
+<p><strong>Note that when we choose a char, it must never have been chosen before</strong>. In case of &ldquo;food&rdquo;, we only choose &lsquo;f&rsquo;, &lsquo;o&rsquo;, &rsquo;d&#8217; once for each.</p>
+
+<p>This is a very difficult DP question, but the explanation really makes the answer easier. Read my implementation below.</p>
+
+<h3>Code</h3>
+
+<pre><code>public int countSubSeq(String input, int k) {
+    // assuming all input chars are small letter
+    return choose(input, 0, k);
+}
+
+private int choose(String input, int start, int numChar) {
+    int charLeft = input.length() - start;
+    if (charLeft == numChar || numChar == 0) {
+        return 1;
+    } else if (charLeft &lt; numChar || numChar &lt; 0) {
+        return 0;
+    }
+    // now numChar is smaller than charLeft, and larger than 0
+    // start to pick a char (which is at first appearance)
+    int total = 0;
+    HashSet&lt;Character&gt; chosen = new HashSet&lt;Character&gt;();
+    while (start &lt; input.length()) {
+        char currentChar = input.charAt(start);
+        if (!chosen.contains(currentChar)) {
+            // pick the char pointer by 'start'
+            total += choose(input, start + 1, numChar - 1);
+            chosen.add(currentChar);
+        }
+        start++;
+    }
+    return total;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/Diameter-of-Binary-Tree/">[Google] Diameter of a Binary Tree</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-11T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/11/Diameter-of-Binary-Tree/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/diameter-of-a-binary-tree/">link</a></p>
+
+<blockquote><p>The diameter of a tree (sometimes called the width) is the number of nodes on the longest path between two leaves in the tree.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/tree-diameter-1.gif"></p>
+
+<h3>Solution</h3>
+
+<p>This is a similar question to <strong>[LeetCode 124] Binary Tree Maximum Path Sum</strong>. <strong>However there&rsquo;s a significant difference</strong> which might be overlooked while coding.</p>
+
+<p>Look at this example:</p>
+
+<pre><code>     0
+       1
+        1
+       0  1
+           1
+</code></pre>
+
+<p>If we only want to find the max path, that would return result of 5, which is root-to-rightmost-leaf. However, the diameter should be 4, which is the distance between 2 leaf nodes.</p>
+
+<p>A solution is available for reading <a href="http://stackoverflow.com/a/3124575">here</a>.</p>
+
+<p>For <strong>[Google] Crazy Distance Between Strings</strong>, there is another special case: {&ldquo;1&rdquo;, &ldquo;11&rdquo;, &ldquo;10&rdquo;}. The program will not output correct result (1), because this is not really the diameter of a tree, but instead, a max path from a non-leaf to a leaf. I leave this part for you to finish.</p>
+
+<h3>Code</h3>
+
+<p>Refer to <strong>[Google] Crazy Distance Between Strings</strong> for complete code.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/10/reverse-a-stack/">[Google] Reverse a Stack Without DS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/10/reverse-a-stack/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/">link</a></p>
+
+<blockquote><p>Reverse a stack using recursion. You are not allowed to use loops or data structure, and you can only use the following functions:</p></blockquote>
+
+<pre><code>isEmpty(S)
+push(S)
+pop(S)
+</code></pre>
+
+<h3>Solution</h3>
+
+<p>Well since we are not allowed to use additional DS or loop, we have to use system stack to help us!</p>
+
+<p>We add a new method: <strong>insert at stack bottom</strong>. Then we can solve this question recursively. Nice question, and tricky answer!</p>
+
+<h3>Code</h3>
+
+<pre><code>public void reverse(Stack&lt;Integer&gt; stack) {
+    if (stack.isEmpty() || stack.size() == 1) {
+        return;
+    }
+    int top = stack.pop();
+    this.reverse(stack);
+    this.insertAtBottom(stack, top);
+}
+
+private void insertAtBottom(Stack&lt;Integer&gt; stack, int val) {
+    if (stack.isEmpty()) {
+        stack.push(val);
+        return;
+    }
+    int temp = stack.pop();
+    this.insertAtBottom(stack, val);
+    stack.push(temp);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/">[Amazon] Mininum Range That Includes at Least One</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-10T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/10/minimum-range-inclueds-at-least-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5103437989543936">link</a></p>
+
+<blockquote><p>There are many sorted arrays. Find a minimum range, so that in each array there&rsquo;s at least one integer within this range.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>Min-heap</strong>. <a href="http://www.careercup.com/question?id=16759664">source</a></p>
+
+<blockquote><p>There are k lists of sorted integers. Make a min heap of size k containing 1 element from each list. Keep track of min and max element and calculate the range.</p>
+
+<p>In min heap, minimum element is at top. Delete the minimum element and another element instead of that from the same list to which minimum element belong. Repeat the process till any one of the k list gets empty.</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public void printMinRange(int[][] input) {
+    Comparator&lt;Pointer&gt; compr = new HeapComparator(input);
+    // Note that we pass in 'input' arrays to the comparator
+    PriorityQueue&lt;Pointer&gt; heap = new PriorityQueue&lt;Pointer&gt;(SIZE, compr);
+
+    int maxVal = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; SIZE; i++) {
+        heap.add(new Pointer(i, 0));
+        // insert the head of each array into the heap
+        maxVal = Math.max(maxVal, input[i][0]);
+        // keep additional value to keep track of the max value in heap
+    }
+
+    int left = 0;
+    int right = Integer.MAX_VALUE;
+    while (heap.size() == SIZE) {
+        Pointer p = heap.remove();
+        // first, update the range
+        if (maxVal - input[p.index][p.position] &lt; right - left) {
+            right = maxVal;
+            left = input[p.index][p.position];
+        }
+        // then, push the next element after 'p' to the heap
+        // meanwhile, update 'maxVal'
+        if (p.position + 1 &lt; input[p.index].length) {
+            Pointer nextP = new Pointer(p.index, p.position + 1);
+            heap.add(nextP);
+            maxVal = Math.max(maxVal, input[nextP.index][nextP.position]);
+        }
+        // when 'p' is the last element in the row, terminate loop
+    }
+    System.out.println("Left boundary: " + left);
+    System.out.println("Right boundary: " + right);
+}
+
+class HeapComparator implements Comparator&lt;Pointer&gt; {
+
+    int[][] arrays = null;
+
+    public HeapComparator(int[][] input) {
+        arrays = input;
+    }
+
+    public int compare(Pointer p1, Pointer p2) {
+        return arrays[p1.index][p1.position]
+                - arrays[p2.index][p2.position];
+    }
+}
+
+class Pointer {
+    int index, position;
+
+    public Pointer(int x, int y) {
+        index = x;
+        position = y;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -503,498 +941,6 @@ i C[0,0,2,0]   N[4, 3, 2, 1]
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/09/big-data-top-k-frequency-3/">[Design] Big Data - Top K Frequency (Hands-on)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-09T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/09/big-data-top-k-frequency-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/a/3262855">link</a></p>
-
-<blockquote><p>The input is an endless stream of English words or phrases (we refer them as tokens).</p>
-
-<p>Output top N tokens we have seen so far (from all the tokens we have seen!)</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>We will discuss the following details of implementation and optimization.</p>
-
-<ol>
-<li>String into Integer</li>
-<li>Data Storage</li>
-<li>Process Incoming Streams</li>
-<li>Save result</li>
-</ol>
-
-
-<h4>1. String into Integer</h4>
-
-<p>This is a nice trick that improves eficiency a lot.</p>
-
-<blockquote><p>Though there is almost infinite possible words on the Internet, but after accumulating a large set of words, the possibility of finding new words becomes lower and lower.</p>
-
-<p>We have already found 4 million different words, and assigned a unique ID for each. This is important, because sorting and comparisons on integers is <strong>much much faster</strong> than on strings.</p></blockquote>
-
-<h4>2. Data Storage</h4>
-
-<blockquote><p>The system keeps archive data for every token. Basically it&rsquo;s pairs of (Token, Frequency).</p>
-
-<p>However, the table that stores the data would be so huge such that we have to partition the table physically. One partition scheme is <strong>based on ngrams</strong> of the token. If the token is a single word, it is 1gram. If the token is two-word phrase, it is 2gram.</p></blockquote>
-
-<p>Of course we can also divide the data by the hash value. For information on <strong>ngrams</strong>, read <strong>[Design] Terminology: n-gram</strong>.</p>
-
-<h4>3. Process Incoming Streams</h4>
-
-<blockquote><p>The system will absorbs incoming sentences until memory becomes fully utilized (Ya, we need a MemoryManager). After taking N sentences and storing in memory, the system pauses, and starts tokenize each sentence into words and phrases. Each token (word or phrase) is counted.</p></blockquote>
-
-<p>This data processing logic runs as a process under Memory-Manager. The next part is another processing running concurrently.</p>
-
-<h4>4. Save result</h4>
-
-<blockquote><p>Meanwhile, there will be another process that is activated once it finds any disk file generated by the system, then start merging it. Since the disk file is sorted, merging would take <strong>a similar process like merge sort</strong>.</p></blockquote>
-
-<p>There is <a href="http://stackoverflow.com/a/3262855">some more steps</a> afterwards, but they&rsquo;re trivial. I have listed out the basic steps for processing large stream of incoming data (as string), and how to find out the Top K keywords.</p>
-
-<p>I suggest you read previous <strong>[Design] Big Data &ndash; Top k Frequency</strong> posts before reading this.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/09/big-data-real-time-top-k/">[Design] Real Time Top K</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-09T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/09/big-data-real-time-top-k/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://stackoverflow.com/questions/10189685/realtime-tracking-of-top-100-twitter-words-per-min-hour-day">link</a></p>
-
-<blockquote><p>Given a continuous twitter feed, design an algorithm to return the 100 most
-frequent words used at this minute, this hour and this day.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>This is a frequent and useful problem for companies like Google and Twitter.</p>
-
-<p>The first solution below is <strong>an approximation method</strong> which select keywords that occur more than a certain threshold.</p>
-
-<p>The second solution is <strong>more accurate</strong> but RAM-intensive.</p>
-
-<h3>Lossy Count (used to get an inaccurate trend)</h3>
-
-<p><strong>Solution 1 is a modified version of <a href="http://stackoverflow.com/a/8033083">Lossy Count</a></strong>. The detailed steps are explained <a href="http://stackoverflow.com/a/3260905">here</a>:</p>
-
-<blockquote><p>Start with an empty map (red-black tree). The keys will be search terms, and the values will be a counter for the term.</p>
-
-<ol>
-<li><p>Look at each item in the stream.</p></li>
-<li><p>If the term exists in the map, increment the associated counter.</p></li>
-<li><p>Otherwise, if the map has fewer candidates than you&rsquo;re looking for, add it to the map with a count of one.</p></li>
-<li><p>However, if the map is &ldquo;full&rdquo;, decrement the counter in each entry. If any counter reaches zero during this process, remove it from the map.</p></li>
-</ol>
-</blockquote>
-
-<p><a href="http://www.cse.ust.hk/vldb2002/VLDB2002-proceedings/slides/S10P03slides.pdf">This slide show</a> explains <strong>Lossy Count</strong>, which is to divide input data into chunks. Then count elements and decrease counter by 1 after each chunk.</p>
-
-<p><strong>Note that the result is NOT the top frequency items</strong>. Instead, the final results are <strong>order-dependent</strong>, giving heavier weight to the counts processed last. It maybe helpful in some cases, cuz we want to check the latest trend. However, if we want more accurate top keywords for all data, we will <strong>do a second pass over the log data</strong>.</p>
-
-<p>Now let&rsquo;s discuss the threshold. Use &ldquo;aaabcd&rdquo; and map size = 2 as example. &lsquo;a&rsquo; will be inserted into map with occurance = 3. Then &lsquo;b&rsquo; is inserted, and removed. &lsquo;c&rsquo; is inserted, and removed. &rsquo;d&#8217; is inserted. Since we always decrease 1 at each step, &lsquo;a&rsquo; should only have occurance of 1 at the end. As explained <a href="http://stackoverflow.com/a/3260905">here</a>:</p>
-
-<blockquote><p>If we limit the map to 99 entries, we are guaranteed to find any term that occurs more than 1/(1 + 99) (1%) of the time.</p></blockquote>
-
-<p>We change the size of the map to change the threshold. The occurance of in the final result does not matter.</p>
-
-<h3>Solution 2</h3>
-
-<p>The lossy count does not actually produce the hourly, daily and monthly result accurately. Solution 2 will discuss how we deal with retiring old data in an accurate way.</p>
-
-<p>Suggested by <a href="http://stackoverflow.com/a/3260768">this answer</a>, <strong>we keep a 30-day list for each keyword</strong>, that counts the daily occurance. This list is FIFO. When we remove and insert a new counter value, we update monthly total.</p>
-
-<p>Alaternatively, <a href="http://stackoverflow.com/a/10190836">this answer</a> suggests keeping 1440 (24 * 60) HashMaps, each storing the information for one minute. <strong>And another 2 HashMap for the rolling total for the past hour, and past day</strong>.</p>
-
-<blockquote><p>You need an array of 1440 (24*60) word+count hash maps organized the way that you describe; these are your minute-by-minute counts. You need two additional hash maps &ndash; for the rolling total of the hour and the day.</p>
-
-<p>Define two operations on hash maps &ndash; add and subtract, with the semantic of merging counts of identical words, and removing words when their count drops to zero.</p>
-
-<p>Each minute you start a new hash map, and update counts from the feed. At the end of the minute, you place that hash map into the array for the current minute, add it to the rolling total for the hour and for the day, and then subtract the hash map of an hour ago from the hourly running total, and subtract the hash map of 24 hours ago from the daily running total.</p></blockquote>
-
-<p>This is a very good solution, which I would recommend as the standard solution to this &ldquo;Real Time Top k&rdquo; problem.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/08/number-of-distinct-substrings/">[Google] Number of Distinct Substrings</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-08T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/08/number-of-distinct-substrings/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.quora.com/Given-a-string-how-do-I-find-the-number-of-distinct-substrings-of-the-string">link</a></p>
-
-<blockquote><p>Given a string, find the number of distinct substrings of the string. Example:</p>
-
-<p>input = &ldquo;aaaa&rdquo;,</p>
-
-<p>output = 4 (the 4 substrings are &ldquo;a&rdquo;, &ldquo;aa&rdquo;, &ldquo;aaa&rdquo;, &ldquo;aaaa&rdquo;)</p>
-
-<p>input = &ldquo;abcd&rdquo;,</p>
-
-<p>output = 10 (&ldquo;a&rdquo;, &ldquo;b&rdquo;, &ldquo;c&rdquo;, &ldquo;d&rdquo;, &ldquo;ab&rdquo;, &ldquo;bc&rdquo;, &ldquo;cd&rdquo;, &ldquo;abc&rdquo;, &ldquo;bcd&rdquo;, &ldquo;abcd&rdquo;)</p>
-
-<p>input = &ldquo;banana&rdquo;,</p>
-
-<p>output = 15 (&ldquo;a&rdquo;, &ldquo;an&rdquo;, &ldquo;ana&rdquo;, &ldquo;anan&rdquo;, &ldquo;anana&rdquo;, &ldquo;b&rdquo;, &ldquo;ba&rdquo;, &ldquo;ban&rdquo;, &ldquo;bana&rdquo;, &ldquo;banan&rdquo;, &ldquo;banana&rdquo;, &ldquo;n&rdquo;, &ldquo;na&rdquo;, &ldquo;nan&rdquo;, &ldquo;nana&rdquo;)</p></blockquote>
-
-<p>This is also a question on <a href="http://www.spoj.com/problems/DISUBSTR/">SPOJ</a>.</p>
-
-<h3>Solution</h3>
-
-<p>This is a very good question, which tests Suffix tree, LCP and string manipulation knowledges.</p>
-
-<p><strong>The solution is to build a suffix tree</strong>. This is because:</p>
-
-<blockquote><p>If you look through the <strong><a href="http://qr.ae/6o6Nk">prefixes of each suffix</a></strong> of a string, you have covered all substrings of that string.</p></blockquote>
-
-<p>There are 2 implementations. First one is slightly simpler.</p>
-
-<h4>Implementation 1</h4>
-
-<p><strong>Suffix array + LCP</strong> (longest common prefix). Take &ldquo;Banana&rdquo; as input, then the suffixes:</p>
-
-<pre><code>0) BANANA
-1) ANANA
-2) NANA
-3) ANA
-4) NA
-5) A
-</code></pre>
-
-<p>Sort it:</p>
-
-<pre><code>5) A
-3) ANA
-1) ANANA
-0) BANANA
-4) NA
-2) NANA
-</code></pre>
-
-<p>Then we start calculate number of substring (that is prefixes of suffix). After removing duplicated prefix, the count is:</p>
-
-<pre><code>5) A - 1
-3) ANA - 2
-1) ANANA - 2
-0) BANANA - 6
-4) NA - 2
-2) NANA - 2
-</code></pre>
-
-<p>Total number is:</p>
-
-<pre><code>1 + 2 + 2 + 6 + 2 + 2 = 15
-</code></pre>
-
-<p>But wait, realize something? &ldquo;A&rdquo; is simply duplicate substring in &ldquo;ANA&rdquo;, which appers in &ldquo;ANANA&rdquo;. Keep this in mind, cuz we need to observe this in the 2nd implementation, too.</p>
-
-<p>Finally, the total number is calculated like this:</p>
-
-<pre><code>for each suffix
-    ans += length(suffix) - LCP(suffix, previous suffix)
-</code></pre>
-
-<p>For more details, read <a href="http://qr.ae/6o6Nk">here</a>.</p>
-
-<h4>Implementation 2</h4>
-
-<p>Build a suffix tree, like this:</p>
-
-<p><img class="middle" src="/assets/images/suffix-tree-banana.png"></p>
-
-<p>Number of substrings is simply the <strong>sum of levels of each leaf</strong>. For the 3 branches of the suffix tree, number of levels are: 6, 5 and 4 respectively. Total = 15.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/08/all-number-given-decimal-scale/">[Google] Check All Numbers Given the Decimal Scale</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-08T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/08/all-number-given-decimal-scale/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32859887.html">link</a></p>
-
-<blockquote><p>检查一个字符串是否包含k位a进制数的所有表示形式。</p>
-
-<p>保证原字符串的所有字串都是合法的k位a进制数。</p>
-
-<p>&ldquo;00110, a=2, k=2&rdquo; => true （包括了00，01，10，11）</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>First find all substrings with length == k, then generate all numbers in a scale. This is not a difficult question.</p>
-
-<p>We may want to score the substrings in a HashMap/HashSet. <strong>The hashing procedure is preferrably using <a href="http://en.wikipedia.org/wiki/Rolling_hash">Rolling hash</a></strong>.</p>
-
-<blockquote><p>Rolling Hash</p>
-
-<p>A rolling hash is a hash function where the input is hashed in a window that moves through the input.</p>
-
-<p>A few hash functions allow a rolling hash to be computed very quickly—the new hash value is rapidly calculated given only the old hash value, the old value removed from the window, and the new value added to the window—similar to the way a moving average function can be computed much more quickly than other low-pass filters.</p></blockquote>
-
-<p>Rolling Hash is commonly used in <strong><a href="http://www.geeksforgeeks.org/searching-for-patterns-set-3-rabin-karp-algorithm/">Rabin-Karp Algorithm</a></strong> to speed up strStr() string pattern matching.</p>
-
-<p>People in the origin post &ndash; they discuss about &ldquo;<strong>slide window check</strong>&rdquo; algorithm. I do not understand what&rsquo;s the benefit of this. If you read this and would like to help me, please leave a comment. Thanks!</p>
-
-<h3>A similar question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t/JobHunting/32860321.html">This</a> is simply the reverse of the question above:</p>
-
-<blockquote><p>给出最短的字符串, which is used to 表示k位a进制数的所有表示形式.</p></blockquote>
-
-<p>This question is solved using <strong><a href="http://en.wikipedia.org/wiki/De_Bruijn_sequence">De Bruijn sequence</a></strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/">[Facebook] Scheduling Jobs With Max Cost</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-07T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/07/scheduling-jobs-with-max-cost/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Given-a-set-of-n-jobs-with-start-time-end-time-cost-find-a-subset-so-that-no-2-jobs-overlap-and-the-cost-is-maximum-QTN_440168.htm">link</a></p>
-
-<blockquote><p>Given a set of n jobs with [start time, end time, cost], find a subset so that no 2 jobs overlap and the cost is maximum.</p>
-
-<p>Let&rsquo;s assume the input is already sorted by start_time.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><a href="http://cs.stackexchange.com/a/14237">Somebody</a> mentioned <strong>Interval Graph</strong>, so check it out if you interested!</p>
-
-<p>I am going to discuss both DP and recursive solution.</p>
-
-<p>This question reminds me of <strong>[Question] 0-1 Knapsack Problem</strong> and <strong>[Question] Coin Change Problem</strong>, cuz the basic idea is to compare 2 conditions:</p>
-
-<ol>
-<li>include current element</li>
-<li>or, not include current element</li>
-</ol>
-
-
-<p>A very good DP solution is presented in <a href="http://cs.stackexchange.com/a/16842">here</a>. The code below is written by me and it&rsquo;s very intuitive to read.</p>
-
-<p>Leave me a comment if you have questions. And one more thing~ Happy new year!</p>
-
-<h3>Code</h3>
-
-<p>Dp</p>
-
-<pre><code>private int dpSolution(Job[] jobs, int size) {
-    int[] dp = new int[size];
-    dp[size - 1] = jobs[size - 1].cost;
-    // cost of last job equals to just itself
-    for (int k = size - 2; k &gt;= 0; k--) {
-        int next = findNextJob(jobs, k);
-        int includeK = jobs[k].cost;
-        if (next &lt; size) {
-            includeK += dp[next];
-        }
-        int excludeK = dp[k + 1];
-        dp[k] = Math.max(includeK, excludeK);
-    }
-    return dp[0];
-}
-
-private int findNextJob(Job[] jobs, int k) {
-    int finishTime = jobs[k].finish;
-    int next = k + 1;
-    while (next &lt; jobs.length) {
-        if (jobs[next].start &lt; finishTime) {
-            next++;
-        } else {
-            break;
-        }
-    }
-    return next;
-}
-</code></pre>
-
-<p>Recursion</p>
-
-<pre><code>public int recursiveSolution(Job[] jobs, int size, int k) {
-    // max cost from (k)th job and onwards
-    if (k == size) {
-        return 0;
-    }
-    // (k)th job must not conflict with any previous job
-    int next = findNextJob(jobs, k);
-    int includeK = jobs[k].cost + recursiveSolution(jobs, size, next);
-    int excludeK = recursiveSolution(jobs, size, k + 1);
-    return Math.max(includeK, excludeK);
-}
-
-private int findNextJob(Job[] jobs, int k) {
-    int finishTime = jobs[k].finish;
-    int next = k + 1;
-    while (next &lt; jobs.length) {
-        if (jobs[next].start &lt; finishTime) {
-            next++;
-        } else {
-            break;
-        }
-    }
-    return next;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="16">&larr; Older</a>
@@ -1018,7 +964,7 @@ private int findNextJob(Job[] jobs, int k) {
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
-<li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
+<li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
@@ -1035,23 +981,23 @@ private int findNextJob(Job[] jobs, int k) {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/10/08/segment-tree/">[Fundamental] Segment Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query-II/">[LintCode] Segment Tree Query II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query/">[LintCode] Segment Tree Query </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/closest-leaf-binary-tree/">[Question] Find Cloest Leaf in Binary Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Modify/">[LintCode] Segment Tree Modify </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/all-string-placing-space/">[Amazon] All Strings by Placing Spaces </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build-II/">[LintCode] Segment Tree Build II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build/">[LintCode] Segment Tree Build </a>
       </li>
     
   </ul>

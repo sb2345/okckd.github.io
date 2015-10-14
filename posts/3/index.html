@@ -9,7 +9,9 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Overview a port is a software construct serving as a communications endpoint in a computer&rsquo;s host operating system. purpose of ports is to &hellip;">
+  <meta name="description" content="From Level 0 to Level 1 Refer to the previous question. How can we improve??? performance
+scalability
+robustness performance A better algo: Inverted &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +77,688 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/23/design-class1-3/">[NineChap System Design] Class 1.3: Improvement</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-23T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/23/design-class1-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>From Level 0 to Level 1</h1>
+
+<p>Refer to the previous question. How can we improve???</p>
+
+<ol>
+<li>performance</li>
+<li>scalability</li>
+<li>robustness</li>
+</ol>
+
+
+<h2>performance</h2>
+
+<p>A better algo: Inverted Index</p>
+
+<p><img class="middle" src="/assets/images/design-class1-reco-2.png"></p>
+
+<p>Avg performance increase to ~ 20ns (with some optimization of MapReduce procedure, discuss later).</p>
+
+<p><strong>Max QPS increase to 50</strong>.</p>
+
+<h2>scalability</h2>
+
+<p>Use a <strong>dispatcher</strong> to re-direct the requests to multiple machines.</p>
+
+<p><img class="middle" src="/assets/images/design-class1-reco-3.png"></p>
+
+<h3>How many machines do we need then?</h3>
+
+<p>Well we need 500 QPS. The algo above achieves ~ 50 QPS. <strong>Should we need 10 machines</strong>?</p>
+
+<p>The answer is NO. A machine with 8 (or 16) core CPU could be able to handle.</p>
+
+<p>We can also have a <strong>hot-standby</strong>, to be safe.</p>
+
+<blockquote><p>hot standby is used as a failover mechanism to provide reliability in system configurations.</p>
+
+<p>When a key component fails, the hot spare is switched into operation.</p></blockquote>
+
+<h2>robustness</h2>
+
+<p>Tips about system design for senior engineers:</p>
+
+<blockquote><p><strong>Draw 1 machine first</strong>. This machine can contains multiple datasets and run multiple processes.</p>
+
+<p>On top of this machine, the interface layer is <strong>one single Manager process</strong>. The Manager is in charge of almost everything: handling data lost, handle high concurrency, copy multiple instance of itself&hellip;</p>
+
+<p>Like this:</p></blockquote>
+
+<p><img class="middle" src="/assets/images/design-class1-reco-6.png"></p>
+
+<h3>Back-end</h3>
+
+<p>Now we need <strong>a cluster of datasets</strong> (which has Manager on top of it), and <strong>a cluster of Recommenders</strong>. Manager is in charge of copying multiple instances.</p>
+
+<p>Dataset can be put in different physical locations. Recommender don&rsquo;t really need, cuz it&rsquo;s only do calculation job.</p>
+
+<h3>Receiving requests</h3>
+
+<p>Just now we used <strong>Receptionist (or Dispatcher)</strong> to handle request. Now we use a <strong>Web service</strong> (eg. Apache). It&rsquo;s not necessary to make it a cluster.</p>
+
+<h3>Big Brother</h3>
+
+<p>We need a <strong>monitor system</strong> to oversee everything.</p>
+
+<p>Also, Big Brother is in charge of heart-beat. If not received, Big Brother have some double-check machanism.</p>
+
+<p><img class="middle" src="/assets/images/design-class1-reco-4.png"></p>
+
+<h3>Connecting the dots</h3>
+
+<p><strong>Dispatcher</strong> is used to connect the 4 components. It&rsquo;s like a messaging queue that collects and distributes jobs among everybody (eg. control and distributed info).</p>
+
+<p>It can be stateful or stateless.</p>
+
+<p>Keep in mind <strong>the connection between Dataset and Recommender</strong> remains. It&rsquo;s slow going thru Dispatcher.</p>
+
+<h3>Distribute it</h3>
+
+<p>During development, the 5 components can be put on same machine. When we deploy distributely, we use <strong>Socket connection (keep alive)</strong> to connect them.</p>
+
+<p>Notice the Web Service is <strong>connection heavy</strong>, which consume large CPU and RAM resource. It&rsquo;s better to seperate to one machine.</p>
+
+<p>Big brother is read/write heavy, so it&rsquo;s OKAY to put on same machine with Dispatcher.</p>
+
+<p>Since Dataset and Recommender have data exchange, it&rsquo;s a good idea to put on same machine.</p>
+
+<h3>Additional questions</h3>
+
+<p>Implement Dispatcher with <strong>consumer-producer</strong> model.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/23/design-class1-2/">[NineChap System Design] Class 1.2: An Example</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-23T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/23/design-class1-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>A bottom-up example</h1>
+
+<p>Example two: <strong>design a recommendation module</strong></p>
+
+<h2>A simple algo:</h2>
+
+<pre><code>u1={m3,m5,m7,m11}
+u2={m1,m2,m3,m4,m5,m6,m7,m8,m9}
+Similarity( u1, u2 ) = 3
+</code></pre>
+
+<p>m &ndash; music</p>
+
+<p>u &ndash; user</p>
+
+<p>Similarity = # of same music for different users</p>
+
+<h2>Adv algo:</h2>
+
+<p>find his <strong>top-1 similar user</strong>. Stay tuned for future posts.</p>
+
+<h2>Use the 5 Steps (SNAKE)</h2>
+
+<ol>
+<li>Step One, Scenario</li>
+<li>Step Two, Necessary</li>
+<li>Step Three, Application</li>
+<li>Step Four, Kilobit: data</li>
+<li>Last Step, Evolve</li>
+</ol>
+
+
+<p>Because this question is relatively easy, we will not do case-analysis (Macro).</p>
+
+<p><strong>Instead, we do micro design</strong> by starting at the interface.</p>
+
+<h2>Step One, Scenario</h2>
+
+<p>Interface</p>
+
+<pre><code>class Recommender {
+    public int findSimilarUser(int userId) {
+        //
+    }
+}
+</code></pre>
+
+<h2>Step Two, Necessary</h2>
+
+<ol>
+<li><p>ask</p>
+
+<ol>
+<li>total users = 100,000,000</li>
+<li>total music = 10,000,000</li>
+<li>peak users in 3 month = 6,000,000</li>
+</ol>
+
+
+<p> However, not everyone is logged in. Thus we won&rsquo;t need to recommend for everybody. On average, the logged-in ratio is 1% &ndash; 30%. Let&rsquo;s assume 5%.</p>
+
+<ol>
+<li>participation percentage = 5%</li>
+</ol>
+
+
+<p> And user&rsquo;s interest won&rsquo;t change every minute. Let&rsquo;s recalculate only after 10 minutes.</p>
+
+<ol>
+<li>calculation frequency = 1 update/10min/user</li>
+</ol>
+</li>
+<li><p>predict</p>
+
+<ol>
+<li>user analysis (skip)</li>
+<li>Traffic analysis (skip)</li>
+<li>Memory analysis (skip)</li>
+<li>QPS</li>
+</ol>
+
+
+<p> Peak QPS = 6,000,000 * 5% / (10 * 60) = 500/s</p></li>
+</ol>
+
+
+<h2>Step Three, Application</h2>
+
+<p><strong>The simpliest algorithm: BF compare</strong>. The complexity is O(m n) for each user, where m is # of music a person likes, and n is # of total users. For k users, it takes O(k m n) time (k can be = peak concurrent users).</p>
+
+<p>This is roughly 0.2s per user. Thus <strong>Max QPS = 5</strong>.</p>
+
+<blockquote><p>One word about complexity-to-seconds estimation.</p>
+
+<p>O(n ^ 3) &ndash;> 1s</p>
+
+<p>O(n ^ 2) &ndash;> 0.2s</p>
+
+<p>O(n) &ndash;> 20ms</p>
+
+<p>O(k) &ndash;> k ms</p></blockquote>
+
+<h2>Step Four, Kilobit: data</h2>
+
+<p>Very simple:</p>
+
+<p><img class="middle" src="/assets/images/design-class1-reco-1.png"></p>
+
+<h2>Last Step, Evolve</h2>
+
+<p>Read on.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/23/design-class1-1/">[NineChap System Design] Class 1.1: Overview</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-23T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/23/design-class1-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<h2>defination</h2>
+
+<p>the process of defining the <strong>architecture, components, modules, interfaces and data</strong> to satisfy specified <strong>requirements</strong>.</p>
+
+<ol>
+<li>conceptual design (macro)</li>
+<li>logical design</li>
+<li>physical design (micro)</li>
+</ol>
+
+
+<h3>Top-down design</h3>
+
+<p>Eg. MS Office, Huawei Security System</p>
+
+<h3>Bottom-up design</h3>
+
+<p>Most start-up use, MVP first using Medetor + MongoDb.</p>
+
+<h2>5 steps (SNAKE Principle):</h2>
+
+<ol>
+<li><strong>Scenario</strong>: case/interface &ndash; input</li>
+<li><strong>Necessary</strong>: constrain/hypothesis &ndash; input</li>
+<li><strong>Application</strong>: service/algorithm &ndash; output</li>
+<li><strong>Kilobit</strong>: data &ndash; output</li>
+<li><strong>Evolve</strong> &ndash; solution</li>
+</ol>
+
+
+<h1>A top-down example</h1>
+
+<p>Example one: <strong>design a radio</strong></p>
+
+<h2>Step One, Scenario</h2>
+
+<ol>
+<li><p>brain storm</p>
+
+<ol>
+<li>register/log in</li>
+<li>play music</li>
+<li>recommendation</li>
+</ol>
+</li>
+<li><p>prioritize</p>
+
+<ol>
+<li>play music
+
+<ol>
+<li>Get channel</li>
+<li>select a channel</li>
+<li>play</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+
+
+<h2>Step Two, Necessary</h2>
+
+<ol>
+<li><p>ask</p>
+
+<ol>
+<li>total user &ndash; 100,000,000</li>
+<li><strong>daily users &ndash; 1,000,000</strong></li>
+</ol>
+</li>
+<li><p>predict</p>
+
+<ol>
+<li>user analysis</li>
+<li>Traffic analysis</li>
+<li>Memory analysis</li>
+<li>QPS</li>
+</ol>
+</li>
+</ol>
+
+
+<p>Details:</p>
+
+<ol>
+<li><p>user analysis</p>
+
+<blockquote><p>Avg Concurrent users = daily users <strong>/ 5</strong> = 200,000</p>
+
+<p>Peak Concurrent users = concurrent user <strong>* 3</strong> = 600,000</p></blockquote>
+
+<p> considering your product may grow in the next 3 month:</p>
+
+<blockquote><p>Max Peak users in 3 month = Peak users <strong>* 10</strong> = 6,000,000</p></blockquote></li>
+<li><p>Traffic analysis</p>
+
+<blockquote><p>Request of new music per user: 1 music/min</p>
+
+<p>Music size = 3MB</p>
+
+<p>Max peak traffic (in 3 months) = 6,000,000 * 3MB / 60 = 300GB/s</p></blockquote></li>
+<li><p>Memory analysis</p>
+
+<blockquote><p>Memory per user (metadata) = 10KB</p>
+
+<p>Max daily memory = 1,000,000 * 10 * 10 = 100 million KB = 100GB</p>
+
+<p>(10 times of avg daily user)</p></blockquote></li>
+</ol>
+
+
+<h2>Step Three, Application</h2>
+
+<ol>
+<li>Replay the case, one service for each</li>
+<li>Merge the services</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class1-basic-receptionist.png"></p>
+
+<h2>Step Four, Kilobit: data</h2>
+
+<ol>
+<li><p>Append 1 dataset for each service</p>
+
+<p> Eg. User service: stability, more addition, less modify and deletion.</p>
+
+<p> Eg. Channel Service: high concurrency, MongoDB</p>
+
+<p> Eg. Music Service: MP3 File Systems</p></li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class1-reco-5.png"></p>
+
+<h2>Last Step, Evolve</h2>
+
+<ol>
+<li><p>Better: constrains</p>
+
+<p> eg. able to handle 300GB/s traffic?</p></li>
+<li><p>Broader: new cases</p>
+
+<p> share music? delete user account?</p></li>
+<li><p>Deeper: details design</p></li>
+</ol>
+
+
+<p>From views of <strong>Performance, Scalability and Robustness</strong>.</p>
+
+<p><img class="middle" src="/assets/images/design-class1-snake.jpg"></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/23/how-is-pipe-implemented-unix/">[Design] How Is Pipe Implemented in Unix/Linux</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-23T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/07/23/how-is-pipe-implemented-unix/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p>In Unix-like OS, <strong><a href="https://goo.gl/0NAqd9">a pipeline is a set of processes</a> chained by their standard streams</strong>, so that the output of each process (stdout) feeds directly as input (stdin) to the next one.</p>
+
+<p><a href="http://stackoverflow.com/a/17503877">Pipes are unidirectional byte streams which connect the standard output</a> from one process into the standard input of another process. <strong>Neither process is aware of this redirection</strong> and behaves just as it would normally. It is the shell which sets up these temporary pipes between the processes.</p>
+
+<h1>Process</h1>
+
+<ol>
+<li><p>Linux has a VFS called <strong>pipefs</strong> that is mounted in the kernel (not in user space)</p>
+
+<blockquote><p><strong><a href="http://www.linux.org/threads/pipefs-sockfs-debugfs-and-securityfs.5383/">PipeFS</a></strong> is a unique virtual filesystem. <strong>This filesystem is mounted inside the kernel</strong> rather than in the userspace. While most filesystems are mounted under &ldquo;/&rdquo;, PipeFS is mounted on &ldquo;pipe:&rdquo;, <strong>making PipeFS its own root</strong> (yes, a second root filesystem).</p>
+
+<p>This filesystem is one superblock and cannot exceed that amount system-wide. The entry point of this filesystem/second-root is the system-call &ldquo;pipe()&rdquo;. Unlike the other virtual/pseudo filesystems, this one cannot be viewed.</p>
+
+<p>Many of you may be wondering what purpose this PipeFS filesystem serves. Unix pipes use this filesystem. When a pipe is used (eg. ls | less), <strong>the pipe() system-call makes a new pipe object on this filesystem</strong>. Without this filesystem, pipes cannot be made.</p>
+
+<p>Also, threads and forks communicate together via pipes. Without PipeFS, processes could not fork and threads could not communicate.</p>
+
+<p>Network pipes also rely on this virtual/pseudo filesystem.</p></blockquote></li>
+<li><p>pipefs has a single super block and is mounted at it&rsquo;s own root (pipe:), alongside /</p></li>
+<li><p>pipefs cannot be viewed directly unlike most file systems</p></li>
+<li><p>The entry to pipefs is via the pipe(2) syscall</p></li>
+<li><p>The pipe(2) syscall used by shells for piping with the | operator (or manually from any other process) creates a new file in pipefs which behaves pretty much like a normal file</p></li>
+<li><p>The file on the left hand side of the pipe operator has its stdout redirected to the temporary file created in pipefs</p></li>
+<li><p>The file on the right hand side of the pipe operator has its stdin set to the file on pipefs</p></li>
+<li><p>pipefs is stored in memory and through some kernel magic</p></li>
+</ol>
+
+
+<p>Ref: <a href="http://unix.stackexchange.com/q/148401">http://unix.stackexchange.com/q/148401</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/">[Design] Cryptographic Standard, AES and RSA</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-09T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<h2>3 areas of cryptographic standard:</h2>
+
+<ol>
+<li><p>encryption standard</p>
+
+<ol>
+<li>Data Encryption Standard (obsolete)</li>
+<li>Triple DES</li>
+<li><strong>Advanced Encryption Standard (AES)</strong></li>
+<li><strong>RSA</strong></li>
+<li>OpenPGP</li>
+<li>CipherSaber</li>
+</ol>
+</li>
+<li><p>hash standard</p>
+
+<ol>
+<li><strong>MD5</strong></li>
+<li><strong>SHA-1</strong></li>
+<li>SHA-2</li>
+<li>HMAC</li>
+<li>PBKDF2</li>
+</ol>
+</li>
+<li><p>digital signature standard</p>
+
+<ol>
+<li>Digital Signature Algorithm (DSA)</li>
+<li>RSA</li>
+<li>Elliptic</li>
+</ol>
+</li>
+</ol>
+
+
+<h2>Symmetric-key algorithm</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Symmetric-key_algorithm">Use the same cryptographic keys</a> for both encryption and decryption.</p>
+
+<p>The keys represent a shared secret between two parties, and maintain a private information link.</p>
+
+<p>This requirement that both parties have access to the secret key is one of the main drawbacks.</p>
+
+<h2>Public-key cryptography</h2>
+
+<p>The public key is used:</p>
+
+<ol>
+<li>encrypt plaintext</li>
+<li>verify a digital signature</li>
+</ol>
+
+
+<p>private key is used:</p>
+
+<ol>
+<li>decrypt ciphertext</li>
+<li>create a digital signature.</li>
+</ol>
+
+
+<h1>Encryption standard</h1>
+
+<h2>RSA Vs. AES</h2>
+
+<p><strong>RSA is very computationally expensive</strong> by comparison with AES. It involves mathematics with very large numbers, whilst AES can be implemented with relatively simple bit operations.</p>
+
+<p><a href="http://security.stackexchange.com/questions/10949/encryption-should-i-be-using-rsa-or-aes">RSA is a public-key encryption algorithm</a> (asymmetric), while AES is a symmetric key algorithm. Often a cryptosystem will use both algorithms.</p>
+
+<p><a href="http://stackoverflow.com/questions/13238674/aes-vs-rsa-to-encrypt-large-size-of-data">A good compromise is to</a> use RSA to encrypt the symmetric key that is then used in AES encryption of the larger data.</p>
+
+<h2>GitHub</h2>
+
+<p>uses RSA encryption.</p>
+
+<h1>hash standard</h1>
+
+<h2>MD5</h2>
+
+<p>The MD5 message-digest algorithm is a widely used cryptographic hash function producing a 128-bit (16-byte) hash value, or 32 digit Hex.</p>
+
+<blockquote><p>d &ndash;> 8277e0910d750195b448797616e091ad</p>
+
+<p>good morning &ndash;> 2b849500e4585dab4196ec9a415edf8f</p></blockquote>
+
+<h2>SHA-1</h2>
+
+<p>SHA-1 produces a 160-bit (20-byte) hash value, or 40 digit Hex.</p>
+
+<h2>For more</h2>
+
+<p>About MD5, SHA-1 and other, refer to <strong>[Design] Cryptographic Hash, MD5 and Digital Signature</strong></p>
+
+<h1>digital signature standard</h1>
+
+<p>A valid digital signature gives a recipient confidence that the message was created by a known sender.</p>
+
+<p>commonly used for software distribution, financial transactions</p>
+
+<p><img class="middle" src="/assets/images/digital_signature.png"></p>
+
+<p><a href="http://searchsecurity.techtarget.com/definition/digital-signature">To create a digital signature</a>, signing software (such as an email program) creates a one-way hash of the data to be signed. The private key is then used to encrypt the hash.</p>
+
+<blockquote><p>The reason for encrypting the hash instead of entire message is that a hash function can convert an arbitrary input into a fixed length value, which is usually much shorter.</p></blockquote>
+
+<p>Other party validate the integrity of the data by using the signer&rsquo;s public key to decrypt the hash.</p>
+
+<blockquote><p>Note: you can choose to &lsquo;<strong> Add digital signature to this message </strong>&rsquo; in Microsoft Office.</p></blockquote>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -712,544 +1396,6 @@ uint32_t reverseBits(uint32_t n) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/10/Number-of-Islands/">[LeetCode 200] Number of Islands</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-10T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/10/Number-of-Islands/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/number-of-islands/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given a 2d grid map of <code>'1'</code>s (land) and <code>'0'</code>s (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.</p>
-
-<p><i><b>Example 1:</b></i></p>
-<pre>11110<br>11010<br>11000<br>00000</pre>
-<p>Answer: 1</p>
-<p><i><b>Example 2:</b></i></p>
-<pre>11000<br>11000<br>00100<br>00011</pre>
-<p>Answer: 3</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://leetcode.com/discuss/user/mithmatt">@mithmatt</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/depth-first-search/">Depth-first Search</a>
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/breadth-first-search/">Breadth-first Search</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>At every &lsquo;1&rsquo; position, do DFS.</p>
-
-<h3>Solution</h3>
-
-<p>I post my code below. Note that we do not actually have to have the method &ldquo;findLand&rdquo; &ndash;  we can simply read through the grid and mark all &lsquo;1&rsquo;s in one run.</p>
-
-<p>You might want to come up with your own code. Mine is just for reference. This is not an very interesting question, I assume.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public int numIslands(char[][] grid) {
-        if (grid == null || grid.length == 0 || grid[0].length == 0) {
-            return 0;
-        }
-        int m = grid.length;
-        int n = grid[0].length;
-        int count = 0;
-
-        Pair firstPiece = findLand(grid, m, n);
-        while (firstPiece != null) {
-            // mark all neighbors, and count increment
-            mark(grid, m, n, firstPiece);
-            firstPiece = findLand(grid, m, n);
-            count++;
-        }
-
-        return count;
-    }
-
-    void mark(char[][] grid, int m, int n, Pair p) {
-        if (p.x &lt; 0 || p.x == m || p.y &lt; 0 || p.y == n) {
-            return;
-        } else if (grid[p.x][p.y] != '1') {
-            return;
-        }
-        // mark current and then dfs
-        grid[p.x][p.y] = '2';
-        mark(grid, m, n, new Pair(p.x - 1, p.y));
-        mark(grid, m, n, new Pair(p.x + 1, p.y));
-        mark(grid, m, n, new Pair(p.x, p.y - 1));
-        mark(grid, m, n, new Pair(p.x, p.y + 1));
-    }
-
-    Pair findLand(char[][] grid, int m, int n) {
-        for (int i = 0; i &lt; m; i++) {
-            for (int j = 0; j &lt; n; j++) {
-                if (grid[i][j] == '1') {
-                    return new Pair(i, j);
-                }
-            }
-        }
-        return null;
-    }
-
-    class Pair {
-        int x;
-        int y;
-
-        public Pair(int a, int b) {
-            x = a;
-            y = b;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/10/Number-of-1-Bits/">[LeetCode 191] Number of 1 Bits</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-10T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/10/Number-of-1-Bits/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/number-of-1-bits/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Write a function that takes an unsigned integer and returns the number of ’1&#8217; bits it has (also known as the <a href="http://en.wikipedia.org/wiki/Hamming_weight">Hamming weight</a>).</p>
-
-<p>For example, the 32-bit integer ’11&#8217; has binary representation <code>00000000000000000000000000001011</code>, so the function should return 3.</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/bit-manipulation/">Bit Manipulation</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>In order to remove the last &lsquo;1&rsquo; bit, we use this operation:</p>
-
-<pre><code>n = n &amp; (n - 1);
-</code></pre>
-
-<h3>Solution</h3>
-
-<p>Just remove all the &lsquo;1&rsquo; bits.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public int hammingWeight(int n) {
-        int count = 0;
-        while (n != 0) {
-            n = n &amp; (n - 1);
-            count++;
-        }
-        return count;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/10/House-Robber/">[LeetCode 198] House Robber</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-10T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/10/House-Robber/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/house-robber/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security system connected and <b>it will automatically contact the police if two adjacent houses were broken into on the same night</b>.</p>
-
-<p>Given a list of non-negative integers representing the amount of money of each house, determine the maximum amount of money you can rob tonight <b>without alerting the police</b>.</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/ifanchu">@ifanchu</a> for adding this problem and creating all test cases. Also thanks to <a href="https://oj.leetcode.com/discuss/user/ts">@ts</a> for adding additional test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/dynamic-programming/">Dynamic Programming</a>
-                  
-                </span>
-              
-</div>
-
-
-<h3>Solution</h3>
-
-<p>DP question. Be careful what the initial values of dp(1) is. You should work this out without a problem!</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public int rob(int[] num) {
-        if (num == null || num.length == 0) {
-            return 0;
-        } else if (num.length == 1) {
-            return num[0];
-        }
-        int len = num.length;
-        int[] dp = new int[len];
-        dp[0] = num[0];
-        dp[1] = Math.max(num[0], num[1]);
-        int max = Math.max(num[0], num[1]);
-        for (int i = 2; i &lt; len; i++) {
-            dp[i] = Math.max(dp[i - 1], dp[i - 2] + num[i]);
-            max = Math.max(max, dp[i]);
-        }
-        return max;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/10/Bitwise-AND-of-Numbers-Range/">[LeetCode 201] Bitwise and of Numbers Range</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-10T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/10/Bitwise-AND-of-Numbers-Range/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/bitwise-and-of-numbers-range/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given a range [m, n] where 0 &lt;= m &lt;= n &lt;= 2147483647, return the bitwise AND of all numbers in this range, inclusive.</p>
-
-<p>
-For example, given the range [5, 7], you should return 4.
-</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://leetcode.com/discuss/user/amrsaqr">@amrsaqr</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/bit-manipulation/">Bit Manipulation</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>This is a pretty interesting mathematics question. Now we take 2 numbers as example:</p>
-
-<blockquote><p>Num1: 110010</p>
-
-<p>Num2: 110111</p>
-
-<p>Result: 110000</p></blockquote>
-
-<p>And:</p>
-
-<blockquote><p>Num1: 0110</p>
-
-<p>Num2: 1100</p>
-
-<p>Result: 0</p></blockquote>
-
-<p>Note that:</p>
-
-<ol>
-<li><p>if the first &lsquo;1&rsquo; bit of the 2 numbers are at different position, the answer should simply be 0.</p></li>
-<li><p>if have same position, then the result would be the continous sequence of 1s, followed by all 0s.</p></li>
-</ol>
-
-
-<h3>Solution</h3>
-
-<p>The 2 best solutions is very well presented by <a href="http://www.cnblogs.com/grandyang/p/4431646.html">Grandyang</a> using bit shifting and masking. Please refer to code 1 and code 2 below.</p>
-
-<p>I found a third solution at <a href="http://www.programcreek.com/2014/04/leetcode-bitwise-and-of-numbers-range-java/">programcreek</a>, which makes use of the fact that m is smaller than n.</p>
-
-<h3>Code</h3>
-
-<p>code 1</p>
-
-<pre><code>class Solution {
-public:
-    int rangeBitwiseAnd(int m, int n) {
-        int d = INT_MAX;
-        while ((m &amp; d) != (n &amp; d)) {
-            d &lt;&lt;= 1;
-        }
-        return m &amp; d;
-    }
-};
-</code></pre>
-
-<p>code 2</p>
-
-<pre><code>class Solution {
-public:
-    int rangeBitwiseAnd(int m, int n) {
-        int i = 0;
-        while (m != n) {
-            m &gt;&gt;= 1;
-            n &gt;&gt;= 1;
-            ++i;
-        }
-        return (m &lt;&lt; i);
-    }
-};
-</code></pre>
-
-<p>code 3</p>
-
-<pre><code>public int rangeBitwiseAnd(int m, int n) {
-     while (n &gt; m) {
-          n = n &amp; n - 1;
-     }
-     return m &amp; n;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/10/Binary-Tree-Right-Side-View/">[LeetCode 199] Binary Tree Right Side View</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-10T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/10/Binary-Tree-Right-Side-View/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/binary-tree-right-side-view/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given a binary tree, imagine yourself standing on the <i>right</i> side of it, return the values of the nodes you can see ordered from top to bottom.</p>
-
-<p>
-For example:<br>
-Given the following binary tree,<br>
-</p><pre>   1            &lt;---
- /   \
-2     3         &lt;---
- \     \
-  5     4       &lt;---
-</pre>
-<p></p>
-<p>
-You should return <code>[1, 3, 4]</code>.
-</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://leetcode.com/discuss/user/amrsaqr">@amrsaqr</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/tree/">Tree</a>
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/depth-first-search/">Depth-first Search</a>
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/breadth-first-search/">Breadth-first Search</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Solution</h3>
-
-<p>This question basically is binary tree traversal. During the process, we keep a list and update the elements in it.</p>
-
-<h3>Code</h3>
-
-<pre><code>/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode(int x) { val = x; }
- * }
- */
-public class Solution {
-    public List&lt;Integer&gt; rightSideView(TreeNode root) {
-        List&lt;Integer&gt; result = new ArrayList&lt;Integer&gt;();
-        traverse(result, root, 1);
-        return result;
-    }
-
-    void traverse(List&lt;Integer&gt; result, TreeNode node, int level) {
-        if (node == null) return;
-        if (level &gt; result.size()) {
-            result.add(node.val);
-        }
-        traverse(result, node.right, level + 1);
-        traverse(result, node.left, level + 1);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="4">&larr; Older</a>
@@ -1273,7 +1419,7 @@ public class Solution {
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
-<li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
+<li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
@@ -1290,23 +1436,23 @@ public class Solution {
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/10/08/segment-tree/">[Fundamental] Segment Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query-II/">[LintCode] Segment Tree Query II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query/">[LintCode] Segment Tree Query </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/closest-leaf-binary-tree/">[Question] Find Cloest Leaf in Binary Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Modify/">[LintCode] Segment Tree Modify </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/all-string-placing-space/">[Amazon] All Strings by Placing Spaces </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build-II/">[LintCode] Segment Tree Build II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build/">[LintCode] Segment Tree Build </a>
       </li>
     
   </ul>

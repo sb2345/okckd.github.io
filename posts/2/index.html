@@ -9,9 +9,8 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question 4 fix MP3 problem The process of fetching a MP3 (from CDN): aquire MP3 link, and send request
-send request to CDN
-CDN receive request, find &hellip;">
+  <meta name="description" content="Question link 给一个 n*m 的房间，房间里存在各种可能的墙，房间的格子里已经放了 e 个器材，要
+求新放一个器材，放置位置距其它 e 个器材的距离最近。Breadth-first search. Solution 对 e个设备 BFS, 求每个设备到每个可以放新器材的点的距离， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +76,906 @@ CDN receive request, find &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/10/02/shorest-manhattan-distance/">[Google] Shortest Manhattan Distance</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-10-02T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/10/02/shorest-manhattan-distance/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.mitbbs.com/article_t/JobHunting/33054861.html">link</a></p>
+
+<blockquote><p>给一个 n*m 的房间，房间里存在各种可能的墙，房间的格子里已经放了 e 个器材，要
+求新放一个器材，放置位置距其它 e 个器材的距离最近。Breadth-first search.</p></blockquote>
+
+<h3>Solution</h3>
+
+<blockquote><p>对 e个设备 BFS, 求每个设备到每个可以放新器材的点的距离，然后叠加。</p>
+
+<p>最后O（n<sup>2</sup>）一遍找最小值。复杂度O（e*n<sup>2</sup>）</p></blockquote>
+
+<p>As for whether we choose to check each equipment position, or check each vacant position, it&rsquo;s decided by how many equipment is there. If very little equipments (e is small), then this solution should work.</p>
+
+<p>However, what is there is obstacles in the matrix?</p>
+
+<p>We have to use BFS then. It took more space usage, but the time complexity should be same.</p>
+
+<h3>Code</h3>
+
+<pre><code>public void findCenter(int[][] input, int numberOfEquip) {
+    int m = input.length;
+    int n = input[0].length;
+
+    // there's gonna be m * n positions
+    // we gonna cumulate (numberOfEquip) distances for each position
+    int[] dis = new int[m * n];
+
+    // from the input map, find Equipments
+    for (int i = 0; i &lt; m; i++) {
+        for (int j = 0; j &lt; n; j++) {
+            if (input[i][j] == 1) {
+                // 1 represents equipment
+                // when found, add the distance to every position
+                cumulateDistance(i, j, dis, m, n);
+            }
+        }
+    }
+
+    // find the smallest cumulated distance from dis[].
+    int sIndex = 0;
+    int smallest = dis[0];
+    for (int i = 0; i &lt; m * n; i++) {
+        if (dis[i] &lt; smallest) {
+            smallest = dis[i];
+            sIndex = i;
+        }
+    }
+
+    // index sIndex is the final answer
+    System.out.println("Answer: " + (sIndex / n) + " " + (sIndex % n));
+}
+
+private void cumulateDistance(int x, int y, int[] dis, int m, int n) {
+    for (int i = 0; i &lt; m * n; i++) {
+        int a = i / n;
+        int b = i % n;
+        dis[i] += Math.abs(a - x) + Math.abs(b - y);
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/09/02/Facebook-photo-storage/">[Design] Facebook Photo Storage</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-09-02T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/09/02/Facebook-photo-storage/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Stats</h1>
+
+<p>Facebook has 1.5 billion monthly active users, 970 million daily active users <a href="http://newsroom.fb.com/company-info/">as of June 2015</a>.</p>
+
+<p><img class="middle" src="/assets/images/facebook-user-count.png"></p>
+
+<p>image from <a href="http://www.statista.com/statistics/264810/number-of-monthly-active-facebook-users-worldwide/">statista.com</a>.</p>
+
+<p>In 2009, Facebook stores 15 billion photos for the user, which grows at 220 million per week, and 550,000 per second at peak.</p>
+
+<p>It&rsquo;s 2015 now, you might want to mulitply these numbers by 3~6.</p>
+
+<p>I have roughly estimated the statistics of Facebook users, Facebook photos and growth rate, just to give you an idea of the size of data Facebook has got:</p>
+
+<blockquote><p>Total user: 1.5b</p>
+
+<p>Total photoes: 150b, which is 100 photo/user</p>
+
+<p>Each photo got 4 different sizes, so 600b photos are stored.</p>
+
+<p>New photo per day: 500m</p>
+
+<p>New photo per second: 6,000</p>
+
+<p>Peak incoming photo per second: 3m</p></blockquote>
+
+<h1>Old architecture</h1>
+
+<p>3 tiers design:</p>
+
+<ol>
+<li><p><strong>Upload tier</strong> receives users’ photo uploads, scales the original images and saves them on the NFS storage tier.</p></li>
+<li><p><strong>Photo serving tier</strong> receives HTTP requests for photo images and serves them from the NFS storage tier.</p></li>
+<li><p><strong>NFS storage tier</strong> built on top of commercial storage appliances.</p></li>
+</ol>
+
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Network_File_System">Network File System</a></strong> (NFS) is a distributed file system protocol originally developed by Sun Microsystems in 1984, allowing a user on a client computer to access files over a network much like local storage is accessed.</p></blockquote>
+
+<h2>Problem</h2>
+
+<ol>
+<li><p>there is an <strong>enormous amount of metadata</strong></p>
+
+<p> &hellip; so much that is <a href="https://code.facebook.com/posts/685565858139515/needle-in-a-haystack-efficient-storage-of-billions-of-photos/">exceeds the caching abilities of the NFS storage tier</a>, <strong> resulting in multiple I/O operations</strong> per photo upload or read request</p></li>
+</ol>
+
+
+<h2>Solution</h2>
+
+<ol>
+<li><p>relies heavily on CDNs to serve photos.</p></li>
+<li><p>Cachr: a caching server tier caching Facebook &ldquo;profile&rdquo; images.</p></li>
+<li><p>NFS file handle cache &ndash; deployed on the photo serving tier eliminates some of the NFS storage tier metadata overhead</p></li>
+</ol>
+
+
+<h1>Haystack Photo Infrastructure</h1>
+
+<p>The new photo infrastructure merges the <strong>photo serving</strong> and <strong>storage tier</strong> into one physical tier. It implements <strong>a HTTP based photo server</strong> which stores photos in a generic object store called Haystack.</p>
+
+<p>Goal: eliminate any unnecessary metadata overhead for photo read operations, so that each read I/O operation was only reading actual photo data</p>
+
+<p>5 main functional layers:</p>
+
+<ol>
+<li><p>HTTP server</p></li>
+<li><p>Photo Store</p></li>
+<li><p>Haystack Object Store</p></li>
+<li><p>Filesystem</p></li>
+<li><p>Storage</p></li>
+</ol>
+
+
+<h2>Storage</h2>
+
+<p>The commodity machine HW typically is 2x quadcore CPU + 32GB RAM + 512MB NV-RAM cache + 12TB SATA drives.</p>
+
+<blockquote><p><a href="https://en.wikipedia.org/wiki/Non-volatile_random-access_memory">Non-volatile random-access memory</a> (NVRAM) is random-access memory that retains its information when power is turned off (non-volatile).</p>
+
+<p>This is in contrast to dynamic random-access memory (DRAM) and static random-access memory (SRAM)</p></blockquote>
+
+<p>So each <strong>storage blade</strong> is around 10TB. Configured as <strong>RAID-6</strong> partition.</p>
+
+<blockquote><p><a href="http://searchstorage.techtarget.com/definition/RAID-6-redundant-array-of-independent-disks">RAID 6</a>, also known as double-parity RAID, uses two parity stripes on each disk. It allows for two disk failures within the RAID set before any data is lost.</p></blockquote>
+
+<p>Pros:</p>
+
+<ol>
+<li>adequate redundancy</li>
+<li>excellent read performance</li>
+<li>low storage cost down</li>
+</ol>
+
+
+<p>Cons:</p>
+
+<p><strong>The poor write performance</strong> is partially mitigated by the <strong>RAID controller NVRAM write-back cache</strong>. Since the reads are mostly random, the NVRAM cache is fully reserved for writes.</p>
+
+<p><strong>The disk caches are disabled</strong> in order to guarantee data consistency in the event of a crash or a power loss.</p>
+
+<h2>Filesystem</h2>
+
+<h3>How does filesystem read pictures?</h3>
+
+<p>Photo read requests result in <strong>read() system calls</strong> at known offsets in these files.</p>
+
+<p>Each file in the filesystem is represented by a structure called an inode which contains a block map that maps the logical file offset to the physical block offset on the physical volume.</p>
+
+<p>For large files, the block map can be quite large.</p>
+
+<h3>Problem</h3>
+
+<p><strong>Block based filesystems</strong> maintain mappings for <strong>each logical block</strong>, and for large files, this information will not typically fit into the cached inode and is stored in indirect address blocks instead, which must be traversed in order to read the data for a file.</p>
+
+<p>There can be several layers of indirection, so a single read could result in <strong>several I/Os</strong> (if not cached).</p>
+
+<h3>Solution</h3>
+
+<p><strong>Extent based filesystems</strong> maintain mappings only for contiguous ranges of blocks (extents). A block map for a contiguous large file could consist of only one extent which would fit in the inode itself.</p>
+
+<blockquote><p><a href="https://goo.gl/uQA35V">An extent</a> is a contiguous area of storage reserved for a file in a file system, represented as a range. A file can consist of zero or more extents; <strong>one file fragment requires one extent</strong>. The direct benefit is in storing each range compactly as two numbers, instead of canonically storing every block number in the range.</p>
+
+<p>Extent-based file systems can also <strong>eliminate most of the metadata overhead of large files</strong> that would traditionally be taken up by the block allocation tree&hellip; saving on storage space is pretty slight, but&hellip; <strong>the reduction in metadata is significant and reduces exposure to file system corruption</strong> as one bad sector in the <em>block allocation tree</em> causes much greater data loss than one bad sector in stored data.</p></blockquote>
+
+<h3>Problem of Extent-based file systems</h3>
+
+<p>However, if the file is severely fragmented and its blocks are not contiguous on the underlying volume, its block map can grow large as well.</p>
+
+<h3>The solution</h3>
+
+<p>Fragmentation can be mitigated by <strong>aggressively allocating a large chunk of space</strong> whenever growing the physical file.</p>
+
+<p>Currently, the filesystem of choice is XFS, an extent based filesystem providing efficient file preallocation.</p>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/XFS">XFS</a></strong> is a high-performance 64-bit journaling file system created by Silicon Graphics, Inc (SGI) in 1993.</p>
+
+<p>&hellip;was ported to the Linux kernel in 2001. As of June 2014, XFS is supported by most Linux distributions, some of which use it as the default file system.</p>
+
+<p>XFS enables <strong>extreme scalability of I/O threads</strong>, file system bandwidth, and size of files and of the file system itself when spanning multiple physical storage devices.</p>
+
+<p>Space allocation is performed via extents with <strong>data structures stored in B+ trees</strong>, improving the overall performance of the file system, especially when handling large files.</p>
+
+<p><strong>Delayed allocation</strong> assists in the prevention of file system fragmentation; <strong>online defragmentation</strong> is also supported. A feature unique to XFS is the <strong>pre-allocation of I/O bandwidth</strong> at a pre-determined rate, which is suitable for many real-time applications.</p></blockquote>
+
+<h2>Haystack</h2>
+
+<p>Haystack is a simple <strong>log structured (append-only) object store</strong>. Many images store in one Haystack. Typically, <a href="http://jishu.zol.com.cn/17742.html">Haystack Store is 100GB size</a>.</p>
+
+<p>A Haystack consists of two files:</p>
+
+<ol>
+<li><strong>haystack store file</strong> (containing the needles)
+
+<ol>
+<li>superblock</li>
+<li>needles (1 needle is 1 image)</li>
+</ol>
+</li>
+<li><strong>an index file</strong></li>
+</ol>
+
+
+<h3>1. haystack store file</h3>
+
+<p><img class="middle" src="/assets/images/851582_1409519009260319_311676661_n.jpg"></p>
+
+<ol>
+<li><p>The first 8KB of the haystack store is occupied by the <strong>superblock</strong>.</p></li>
+<li><p>following the superblock are <strong>needles</strong></p>
+
+<p> <strong>Needles represents the stored objects</strong>. Needle consisting of a header, the data, and a footer:</p>
+
+<p> <img class="middle" src="/assets/images/851578_319395058204993_541487263_n.jpg"></p>
+
+<p> A needle is uniquely identified by its &lt;Offset, Key, Alternate Key, Cookie> tuple.</p>
+
+<p> Haystack doesn’t put any restriction on the values of the keys, and there can be needles with duplicate keys.</p></li>
+</ol>
+
+
+<h3>2. Index File</h3>
+
+<p><strong>Needle</strong> consisting of a header, the data, and a footer:</p>
+
+<p><img class="middle" src="/assets/images/851582_1374324519464800_699636937_n.jpg"></p>
+
+<p>The index file provides the minimal metadata required to locate a particular needle in the haystack store file.</p>
+
+<p><img class="middle" src="/assets/images/851582_314454922033518_1196942525_n.jpg"></p>
+
+<p>The index file is not critical, as it can be rebuilt from the haystack store file if required.</p>
+
+<p>The main purpose of the index: quick loading of the needle metadata into memory without traversing the larger Haystack store file, since the index is usually less than 1% the size of the store file.</p>
+
+<h3>Summary</h3>
+
+<p>All needles are stored in Haystack store file, and their location information is stored in Index File.</p>
+
+<p>What is Needle? Needles represents the stored objects (1 needle &ndash; 1 image).</p>
+
+<h2>Haystack Operations</h2>
+
+<ol>
+<li><p><strong>write</strong></p>
+
+<p> append new needle to haystack store file.</p>
+
+<p> later, corresponding index records are <strong>updated async</strong>.</p>
+
+<p> In case of failure, any partial needles are discarded, and fix index from the end of the haystack.</p>
+
+<p> You can&rsquo;t overwrite any needle, but you can insert using same key. Later, the needle <strong>with dup keys but largest offset</strong> became the most recent one.</p></li>
+<li><p><strong>read</strong></p>
+
+<p> <strong>parameters passed in</strong>: offset, key, alt key, cookie, data size</p>
+
+<p> if key, alt key and cookie matches, and checksum correct and needle is not marked as deleted, return.</p></li>
+<li><p><strong>delete</strong></p>
+
+<p> marks needle as deleted (set 1 bit), but index is not modified.</p>
+
+<p> the deleted space is not reclaimed unless <strong>compact the haystack</strong></p></li>
+</ol>
+
+
+<h2>Photo Store Server</h2>
+
+<p>Photo Store Server is responsible for accepting HTTP requests and translating them to the corresponding Haystack store operations.</p>
+
+<p>In order to minimize the number of I/Os required to retrieve photos, the server keeps an <strong>in-memory index of all photo offsets</strong>.</p>
+
+<p>At startup, <strong>the (photo) server reads the haystack index file and populates the in-memory index</strong>. The in-memory index is different from the index file in Haystack, as it stores lesser information, like this:</p>
+
+<p><img class="middle" src="/assets/images/851584_503528913060377_1268325854_n.jpg"></p>
+
+<ol>
+<li><p><strong>Photo Store Write/Modify Operation</strong></p>
+
+<ol>
+<li>writes photos to the haystack</li>
+<li>updates the in-memory index</li>
+</ol>
+
+
+<p> if there are duplicate images, the one stored at a larger offset is valid.</p></li>
+<li><p><strong>Photo Store Read Operation</strong></p>
+
+<p> passed in:</p>
+
+<ol>
+<li>haystack id</li>
+<li>a photo key,</li>
+<li>size</li>
+<li>cookie</li>
+</ol>
+
+
+<p> The server performs a lookup in the in-memory index based on the photo key and retrieves the offset of the needle containing the requested image.</p>
+
+<p> Since haystack delete operation doesn’t update the haystack index file record. Therefore a freshly populated in-memory index can contain stale entries for the previously deleted photos. Read such photo will fail and the in-memory index is updated to 0.</p></li>
+<li><p><strong>Photo Store Delete Operation</strong></p>
+
+<p> After calling the haystack delete operation, the in-memory index is updated to &lsquo;offset = zero&rsquo;</p></li>
+<li><p><strong>Compaction</strong></p>
+
+<p> Compaction is an online operation which reclaims the space used by the deleted and duplicate needles.</p>
+
+<p> creates a new haystack</p></li>
+<li><p><strong>HTTP Server</strong></p>
+
+<p> evhttp server</p>
+
+<p> multiple threads, with each serving a single HTTP request. Workload is mostly I/O bound, thus the performance of the HTTP server is not critical.</p></li>
+</ol>
+
+
+<h1>Summary</h1>
+
+<p>Storing photos as needles in the haystack <strong>eliminates the metadata overhead</strong> by aggregating hundreds of thousands of images in a single haystack store file.</p>
+
+<p>This keeps the metadata overhead very small and allows us to <strong>store each needle’s location in the store file in an in-memory index</strong>.</p>
+
+<p>This allows retrieval of an image’s data in <strong>a minimal number of I/O operations</strong>, eliminating all unnecessary metadata overhead.</p>
+
+<p>Ref: <a href="https://code.facebook.com/posts/685565858139515/needle-in-a-haystack-efficient-storage-of-billions-of-photos/">https://code.facebook.com/posts/685565858139515/needle-in-a-haystack-efficient-storage-of-billions-of-photos/</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/30/how-google-search-works/">[Design] How Google Search Works</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-30T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/30/how-google-search-works/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p>Launched on Sep 15th, 1997</p>
+
+<p><strong>60 trillion individual pages. 100 million GB data</strong>.</p>
+
+<p><strong>40,000 search per second</strong>, or 3 billion search per day.</p>
+
+<p>As of Feb 2015, 65% market share in US.</p>
+
+<h1>1. Crawl</h1>
+
+<p>Google crawl from 1 page to another using <strong><a href="https://support.google.com/webmasters/answer/182072?vid=1-635765406868848825-432642872">Googlebot</a></strong>. It starts from previous urls crawled, or augmented with <strong><a href="https://en.wikipedia.org/wiki/Site_map">Sitemap data</a></strong></p>
+
+<blockquote><p><strong>A sitemap</strong> is a list of pages of a web site accessible to crawlers or users. It can be either a document in any form used as a planning tool for Web design, or a Web page that lists the pages on a Web site, typically organized in hierarchical fashion.</p></blockquote>
+
+<h1>2. Indexing</h1>
+
+<p>Compile the data (key content tags, atrributes, like title tags, ALT attributes). Google don&rsquo;t process rich media or dynamic files.</p>
+
+<h1>3. Algorithm</h1>
+
+<p>When search, pull all relevant results from the Index.</p>
+
+<p>Rank the result based on 200+ factors, one of which is the <strong><a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a></strong> for a given page.</p>
+
+<blockquote><p><strong>PageRank</strong> is the measure of the importance of a page based on the incoming links from other pages. In simple terms, each link to a page on your site from another site adds to your site&rsquo;s PageRank.</p>
+
+<p>Not all links are equal: Google works hard to identify spam links. The best types of links are those that are given based on the quality of your content.</p></blockquote>
+
+<p>To rank higher, follow <a href="https://support.google.com/webmasters/answer/35769?vid=1-635765406868848825-432642872">Webmaster Guidelines</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/30/design-class4-2/">[NineChap System Design] Class 4.2: Search Engine</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-30T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/30/design-class4-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/30/design-class4-1/">[NineChap System Design] Class 4.1: Crawler</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-30T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/30/design-class4-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p><strong>KISS &ndash; Keep It Simple, Sweetie</strong>.</p>
+
+<p>In Today&rsquo;s lecture:</p>
+
+<ol>
+<li>write a crawler</li>
+<li>thread-saft consumer &amp; producer</li>
+<li>GFS, BigTable and MapReduce</li>
+<li>Top 10 keyword/anagram using MapReduce</li>
+<li>Log analysis</li>
+</ol>
+
+
+<h1>News Aggregator App</h1>
+
+<ol>
+<li><p>Info Collection</p>
+
+<p> crawler</p></li>
+<li><p>Info retrieval: rank, search and recommend.</p>
+
+<p> They are in fact, all related to <strong>sorting</strong>.</p></li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class4-News-Aggregator.png"></p>
+
+<h2>Step 1, Info collection with crawler</h2>
+
+<h3>crawler code</h3>
+
+<p>Python:</p>
+
+<pre><code>import urllib2
+
+# request
+url = "www.google.com"
+request = urllib2.Request(url)
+response = urllib2.urlopen(request)
+page = response.read()
+
+# save the file
+webFile = open('webpage.html', 'web')
+webFile.write(page)
+webFile.close()
+</code></pre>
+
+<h3>Network process</h3>
+
+<p>Use of <strong>socket</strong>.</p>
+
+<p><img class="middle" src="/assets/images/design-class4-web-socket-1.png"></p>
+
+<p>Socket is like the cellphone in the Call Center example.</p>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Network_socket">socket</a></strong> is an endpoint of an inter-process communication across a computer network.</p>
+
+<p>Today, most communication between computers is based on the Internet Protocol; therefore most network sockets are <strong>Internet sockets</strong>.</p></blockquote>
+
+<p>What is socket? Where is it?</p>
+
+<p><img class="middle" src="/assets/images/design-class4-web-socket-2.png"></p>
+
+<p>It&rsquo;s in-between <strong>Application Layer</strong> (HTTP, FTP, DNS) and <strong>Transport layer</strong> (UDP, TCP).</p>
+
+<p>Remembering that socket is like a cellphone. It is an <strong>abstraction layer</strong>, that hinds the complexity of lower layer, thus making it easier to sende data in application layer.</p>
+
+<h3>How is client connected to Server?</h3>
+
+<p>3-way handshake. Read <strong>[Design] TCP 3-Way Handshake</strong></p>
+
+<h3>HTML</h3>
+
+<p><a href="http://www.w3schools.com/js/js_htmldom.asp">DOM tree</a>:</p>
+
+<p><img class="middle" src="/assets/images/html-dom-tree.gif"></p>
+
+<blockquote><p><a href="http://www.w3.org/TR/DOM-Level-2-Core/introduction.html">Document Object Model</a> (DOM) is an application programming interface (API) for valid HTML and well-formed XML documents. It <strong>defines the logical structure of documents</strong> and the way a document is accessed and manipulated.</p></blockquote>
+
+<h3>How to crawler all the news</h3>
+
+<ol>
+<li>Go to index page</li>
+<li>identify all the links (regex)</li>
+</ol>
+
+
+<h2>Crawl more websites</h2>
+
+<h3>Simple design</h3>
+
+<ol>
+<li>use crawlers to find out all list pages</li>
+<li>send the new lists to a Scheduler</li>
+<li>Scheduler will use crawlers again, to crawl pages.</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-1.png"></p>
+
+<p>This design is bad, cuz there is crawler waste. How can we <strong>reuse</strong> these crawlers???</p>
+
+<h3>Adv design</h3>
+
+<p>Design crawler that can crawl <strong>both list and pages</strong> information.</p>
+
+<blockquote><p>Look at our crawler: the text extraction logic and Regex for <em>abc.com</em> and <em>bfe.com</em> are totally different. However, they both share the same crawling techniques.</p></blockquote>
+
+<p>So we pass in all info a crawler task needs. Like:</p>
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-2.png"></p>
+
+<ol>
+<li><p>we gave <strong>more priority to list pages than content pages</strong>. Otherwise, your content get out of date soon.</p></li>
+<li><p>Type include both list/content and source info.</p></li>
+<li><p>status can be done, working, or new.</p></li>
+<li><p>timestamps helps us make sure each crawler runs every hour (let&rsquo;s say)</p></li>
+</ol>
+
+
+<p>So when schedule <strong>pick the next crawler task</strong> to run, it will choose <strong>based on Priority</strong>. However if the <strong>timestamp (availableTime) is not yet reached</strong>, the job won&rsquo;t be executed.</p>
+
+<p>If you crawler <strong>runs until endTime</strong> and haven&rsquo;t finish, force finish it. We should also add <strong>task created time</strong> to the info.</p>
+
+<h3>How to identify similar news?</h3>
+
+<p>Calculate the similarity between pages. More on this subject later.</p>
+
+<h2>How to design Scheduler?</h2>
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-3.png"></p>
+
+<h3>Solution with Sleep</h3>
+
+<p>Define variables:</p>
+
+<pre><code>taskTable&lt;table&gt; - store task lists
+pageTable&lt;page&gt; - store page contents
+
+task.url
+task.state = new/working/done
+task.type = list/page
+</code></pre>
+
+<p>code:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    taskTable.lock();               // IMPORTANT
+    newTask = taskTable.findOne(state == 'new')
+
+    if (!newTask) {
+        taskTable.unlock();         // IMPORTANT
+        sleep(1000);                // IMPORTANT
+        continue;
+    }
+
+    newTask.state = "working";
+    taskTable.unlock();
+
+    // execute the task, and insert to
+    // either taskTable or pageTable
+    newPage = Crawl(newTask.url);
+
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";     // IMPORTANT
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";     // IMPORTANT
+        taskTable.unlock();
+    }
+}
+</code></pre>
+
+<h3>Solution with Conditional Variable</h3>
+
+<p>What is Conditional Variable:</p>
+
+<blockquote><p><a href="https://goo.gl/xOFXrY">A condition variable</a> is basically <strong>a container of threads that are waiting on a certain condition</strong>.</p>
+
+<p>Monitors provide a mechanism for threads to temporarily give up exclusive access in order to wait for some condition to be met, before regaining exclusive access and resuming their task.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/design-class4-condition-variable.png"></p>
+
+<p>Look at last 3 lines of code. <strong>Before going to sleep, CV have to release the lock</strong>, so that other threads can access the taskTable.</p>
+
+<p>Then CV goes to sleep. <strong>Right after CV has been waken up</strong>, it has to lock the mutex again.</p>
+
+<p>Solution w/ cv:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    taskTable.lock();
+    newTask = taskTable.findOne(state == 'new')
+
+    if (!newTask) {
+        taskTable.unlock();
+        Cond_Wait(cond, taskTable);  // Modified
+        continue;
+    }
+
+    newTask.state = "working";
+    taskTable.unlock();
+
+    // execute the task, and insert to
+    // either taskTable or pageTable
+    newPage = Crawl(newTask.url);
+
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+            Cond_Signal(cond);       // Modified
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";
+        taskTable.unlock();
+    }
+}
+</code></pre>
+
+<p>Why Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better.</p>
+
+<h3>Solution with Semaphore</h3>
+
+<p>This is better than Condition Variable, cuz it&rsquo;s easier to implement. And Semaphore not only locks thread, it also <strong>can lock process</strong>.</p>
+
+<p>CV locks on a certain condition. But Semaphore locks the numbers (of task, or resources etc).</p>
+
+<p>Semaphore implementation (fairly difficult, read for interest):</p>
+
+<pre><code>Wait(semaphore) {
+    Lockf(semaphore);
+    semaphore.value--;
+    if (semaphore.value &lt; 0) {
+        semaphore.processWaitList.Add(this.process);
+        Release(semaphore);
+        Block(this.process);
+    } else {
+        Release(semaphore);
+    }
+}
+
+Signal(semaphore) {
+    Lock(semaphore);
+    semaphore.value++;
+    if (semaphore.value &lt;= 0) {
+        process = semaphore.processWaitList.pop();
+        Wakeup(process);
+    }
+    Release(semaphore);
+}
+</code></pre>
+
+<p>Note that in Java and C++, Wait() == acquire() and Signal() == release(). Read more <a href="http://tutorials.jenkov.com/java-util-concurrent/semaphore.html">Jenkov&rsquo;s post</a>.</p>
+
+<p>code w/ semaphore:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    Wait(numberOfNewTask);           // Modified
+
+    taskTable.lock();
+    newTask = taskTable.findOne(state == 'new')
+    newTask.state = "working";
+    taskTable.unlock();
+
+    // execute the task, and insert to
+    // either taskTable or pageTable
+    newPage = Crawl(newTask.url);
+
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+            Signal(numberOfNewTask); // Modified
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";
+        taskTable.unlock();
+    }
+}
+</code></pre>
+
+<p><strong>What happens in Line 3 &lsquo;Wait(numberOfNewTask)&rsquo;</strong>? Well, the programs checks on the numberOfNewTask (counter) variable, and:</p>
+
+<ol>
+<li>If there is 1 or more tasks, just proceed.</li>
+<li>If no tasks available, block itself and wait there. (Later someone will wake it up and it will resume).</li>
+</ol>
+
+
+<h3>Design an consumer-producer</h3>
+
+<p>Stay tuned for future post.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1079,688 +1978,6 @@ class Session extends Row {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/08/23/design-class1-3/">[NineChap System Design] Class 1.3: Improvement</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-08-23T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/08/23/design-class1-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>From Level 0 to Level 1</h1>
-
-<p>Refer to the previous question. How can we improve???</p>
-
-<ol>
-<li>performance</li>
-<li>scalability</li>
-<li>robustness</li>
-</ol>
-
-
-<h2>performance</h2>
-
-<p>A better algo: Inverted Index</p>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-2.png"></p>
-
-<p>Avg performance increase to ~ 20ns (with some optimization of MapReduce procedure, discuss later).</p>
-
-<p><strong>Max QPS increase to 50</strong>.</p>
-
-<h2>scalability</h2>
-
-<p>Use a <strong>dispatcher</strong> to re-direct the requests to multiple machines.</p>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-3.png"></p>
-
-<h3>How many machines do we need then?</h3>
-
-<p>Well we need 500 QPS. The algo above achieves ~ 50 QPS. <strong>Should we need 10 machines</strong>?</p>
-
-<p>The answer is NO. A machine with 8 (or 16) core CPU could be able to handle.</p>
-
-<p>We can also have a <strong>hot-standby</strong>, to be safe.</p>
-
-<blockquote><p>hot standby is used as a failover mechanism to provide reliability in system configurations.</p>
-
-<p>When a key component fails, the hot spare is switched into operation.</p></blockquote>
-
-<h2>robustness</h2>
-
-<p>Tips about system design for senior engineers:</p>
-
-<blockquote><p><strong>Draw 1 machine first</strong>. This machine can contains multiple datasets and run multiple processes.</p>
-
-<p>On top of this machine, the interface layer is <strong>one single Manager process</strong>. The Manager is in charge of almost everything: handling data lost, handle high concurrency, copy multiple instance of itself&hellip;</p>
-
-<p>Like this:</p></blockquote>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-6.png"></p>
-
-<h3>Back-end</h3>
-
-<p>Now we need <strong>a cluster of datasets</strong> (which has Manager on top of it), and <strong>a cluster of Recommenders</strong>. Manager is in charge of copying multiple instances.</p>
-
-<p>Dataset can be put in different physical locations. Recommender don&rsquo;t really need, cuz it&rsquo;s only do calculation job.</p>
-
-<h3>Receiving requests</h3>
-
-<p>Just now we used <strong>Receptionist (or Dispatcher)</strong> to handle request. Now we use a <strong>Web service</strong> (eg. Apache). It&rsquo;s not necessary to make it a cluster.</p>
-
-<h3>Big Brother</h3>
-
-<p>We need a <strong>monitor system</strong> to oversee everything.</p>
-
-<p>Also, Big Brother is in charge of heart-beat. If not received, Big Brother have some double-check machanism.</p>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-4.png"></p>
-
-<h3>Connecting the dots</h3>
-
-<p><strong>Dispatcher</strong> is used to connect the 4 components. It&rsquo;s like a messaging queue that collects and distributes jobs among everybody (eg. control and distributed info).</p>
-
-<p>It can be stateful or stateless.</p>
-
-<p>Keep in mind <strong>the connection between Dataset and Recommender</strong> remains. It&rsquo;s slow going thru Dispatcher.</p>
-
-<h3>Distribute it</h3>
-
-<p>During development, the 5 components can be put on same machine. When we deploy distributely, we use <strong>Socket connection (keep alive)</strong> to connect them.</p>
-
-<p>Notice the Web Service is <strong>connection heavy</strong>, which consume large CPU and RAM resource. It&rsquo;s better to seperate to one machine.</p>
-
-<p>Big brother is read/write heavy, so it&rsquo;s OKAY to put on same machine with Dispatcher.</p>
-
-<p>Since Dataset and Recommender have data exchange, it&rsquo;s a good idea to put on same machine.</p>
-
-<h3>Additional questions</h3>
-
-<p>Implement Dispatcher with <strong>consumer-producer</strong> model.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/08/23/design-class1-2/">[NineChap System Design] Class 1.2: An Example</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-08-23T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/08/23/design-class1-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>A bottom-up example</h1>
-
-<p>Example two: <strong>design a recommendation module</strong></p>
-
-<h2>A simple algo:</h2>
-
-<pre><code>u1={m3,m5,m7,m11}
-u2={m1,m2,m3,m4,m5,m6,m7,m8,m9}
-Similarity( u1, u2 ) = 3
-</code></pre>
-
-<p>m &ndash; music</p>
-
-<p>u &ndash; user</p>
-
-<p>Similarity = # of same music for different users</p>
-
-<h2>Adv algo:</h2>
-
-<p>find his <strong>top-1 similar user</strong>. Stay tuned for future posts.</p>
-
-<h2>Use the 5 Steps (SNAKE)</h2>
-
-<ol>
-<li>Step One, Scenario</li>
-<li>Step Two, Necessary</li>
-<li>Step Three, Application</li>
-<li>Step Four, Kilobit: data</li>
-<li>Last Step, Evolve</li>
-</ol>
-
-
-<p>Because this question is relatively easy, we will not do case-analysis (Macro).</p>
-
-<p><strong>Instead, we do micro design</strong> by starting at the interface.</p>
-
-<h2>Step One, Scenario</h2>
-
-<p>Interface</p>
-
-<pre><code>class Recommender {
-    public int findSimilarUser(int userId) {
-        //
-    }
-}
-</code></pre>
-
-<h2>Step Two, Necessary</h2>
-
-<ol>
-<li><p>ask</p>
-
-<ol>
-<li>total users = 100,000,000</li>
-<li>total music = 10,000,000</li>
-<li>peak users in 3 month = 6,000,000</li>
-</ol>
-
-
-<p> However, not everyone is logged in. Thus we won&rsquo;t need to recommend for everybody. On average, the logged-in ratio is 1% &ndash; 30%. Let&rsquo;s assume 5%.</p>
-
-<ol>
-<li>participation percentage = 5%</li>
-</ol>
-
-
-<p> And user&rsquo;s interest won&rsquo;t change every minute. Let&rsquo;s recalculate only after 10 minutes.</p>
-
-<ol>
-<li>calculation frequency = 1 update/10min/user</li>
-</ol>
-</li>
-<li><p>predict</p>
-
-<ol>
-<li>user analysis (skip)</li>
-<li>Traffic analysis (skip)</li>
-<li>Memory analysis (skip)</li>
-<li>QPS</li>
-</ol>
-
-
-<p> Peak QPS = 6,000,000 * 5% / (10 * 60) = 500/s</p></li>
-</ol>
-
-
-<h2>Step Three, Application</h2>
-
-<p><strong>The simpliest algorithm: BF compare</strong>. The complexity is O(m n) for each user, where m is # of music a person likes, and n is # of total users. For k users, it takes O(k m n) time (k can be = peak concurrent users).</p>
-
-<p>This is roughly 0.2s per user. Thus <strong>Max QPS = 5</strong>.</p>
-
-<blockquote><p>One word about complexity-to-seconds estimation.</p>
-
-<p>O(n ^ 3) &ndash;> 1s</p>
-
-<p>O(n ^ 2) &ndash;> 0.2s</p>
-
-<p>O(n) &ndash;> 20ms</p>
-
-<p>O(k) &ndash;> k ms</p></blockquote>
-
-<h2>Step Four, Kilobit: data</h2>
-
-<p>Very simple:</p>
-
-<p><img class="middle" src="/assets/images/design-class1-reco-1.png"></p>
-
-<h2>Last Step, Evolve</h2>
-
-<p>Read on.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/08/23/design-class1-1/">[NineChap System Design] Class 1.1: Overview</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-08-23T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/08/23/design-class1-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Overview</h1>
-
-<h2>defination</h2>
-
-<p>the process of defining the <strong>architecture, components, modules, interfaces and data</strong> to satisfy specified <strong>requirements</strong>.</p>
-
-<ol>
-<li>conceptual design (macro)</li>
-<li>logical design</li>
-<li>physical design (micro)</li>
-</ol>
-
-
-<h3>Top-down design</h3>
-
-<p>Eg. MS Office, Huawei Security System</p>
-
-<h3>Bottom-up design</h3>
-
-<p>Most start-up use, MVP first using Medetor + MongoDb.</p>
-
-<h2>5 steps (SNAKE Principle):</h2>
-
-<ol>
-<li><strong>Scenario</strong>: case/interface &ndash; input</li>
-<li><strong>Necessary</strong>: constrain/hypothesis &ndash; input</li>
-<li><strong>Application</strong>: service/algorithm &ndash; output</li>
-<li><strong>Kilobit</strong>: data &ndash; output</li>
-<li><strong>Evolve</strong> &ndash; solution</li>
-</ol>
-
-
-<h1>A top-down example</h1>
-
-<p>Example one: <strong>design a radio</strong></p>
-
-<h2>Step One, Scenario</h2>
-
-<ol>
-<li><p>brain storm</p>
-
-<ol>
-<li>register/log in</li>
-<li>play music</li>
-<li>recommendation</li>
-</ol>
-</li>
-<li><p>prioritize</p>
-
-<ol>
-<li>play music
-
-<ol>
-<li>Get channel</li>
-<li>select a channel</li>
-<li>play</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-
-
-<h2>Step Two, Necessary</h2>
-
-<ol>
-<li><p>ask</p>
-
-<ol>
-<li>total user &ndash; 100,000,000</li>
-<li><strong>daily users &ndash; 1,000,000</strong></li>
-</ol>
-</li>
-<li><p>predict</p>
-
-<ol>
-<li>user analysis</li>
-<li>Traffic analysis</li>
-<li>Memory analysis</li>
-<li>QPS</li>
-</ol>
-</li>
-</ol>
-
-
-<p>Details:</p>
-
-<ol>
-<li><p>user analysis</p>
-
-<blockquote><p>Avg Concurrent users = daily users <strong>/ 5</strong> = 200,000</p>
-
-<p>Peak Concurrent users = concurrent user <strong>* 3</strong> = 600,000</p></blockquote>
-
-<p> considering your product may grow in the next 3 month:</p>
-
-<blockquote><p>Max Peak users in 3 month = Peak users <strong>* 10</strong> = 6,000,000</p></blockquote></li>
-<li><p>Traffic analysis</p>
-
-<blockquote><p>Request of new music per user: 1 music/min</p>
-
-<p>Music size = 3MB</p>
-
-<p>Max peak traffic (in 3 months) = 6,000,000 * 3MB / 60 = 300GB/s</p></blockquote></li>
-<li><p>Memory analysis</p>
-
-<blockquote><p>Memory per user (metadata) = 10KB</p>
-
-<p>Max daily memory = 1,000,000 * 10 * 10 = 100 million KB = 100GB</p>
-
-<p>(10 times of avg daily user)</p></blockquote></li>
-</ol>
-
-
-<h2>Step Three, Application</h2>
-
-<ol>
-<li>Replay the case, one service for each</li>
-<li>Merge the services</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/design-class1-basic-receptionist.png"></p>
-
-<h2>Step Four, Kilobit: data</h2>
-
-<ol>
-<li><p>Append 1 dataset for each service</p>
-
-<p> Eg. User service: stability, more addition, less modify and deletion.</p>
-
-<p> Eg. Channel Service: high concurrency, MongoDB</p>
-
-<p> Eg. Music Service: MP3 File Systems</p></li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/design-class1-reco-5.png"></p>
-
-<h2>Last Step, Evolve</h2>
-
-<ol>
-<li><p>Better: constrains</p>
-
-<p> eg. able to handle 300GB/s traffic?</p></li>
-<li><p>Broader: new cases</p>
-
-<p> share music? delete user account?</p></li>
-<li><p>Deeper: details design</p></li>
-</ol>
-
-
-<p>From views of <strong>Performance, Scalability and Robustness</strong>.</p>
-
-<p><img class="middle" src="/assets/images/design-class1-snake.jpg"></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/23/how-is-pipe-implemented-unix/">[Design] How Is Pipe Implemented in Unix/Linux</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-07-23T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/07/23/how-is-pipe-implemented-unix/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Overview</h1>
-
-<p>In Unix-like OS, <strong><a href="https://goo.gl/0NAqd9">a pipeline is a set of processes</a> chained by their standard streams</strong>, so that the output of each process (stdout) feeds directly as input (stdin) to the next one.</p>
-
-<p><a href="http://stackoverflow.com/a/17503877">Pipes are unidirectional byte streams which connect the standard output</a> from one process into the standard input of another process. <strong>Neither process is aware of this redirection</strong> and behaves just as it would normally. It is the shell which sets up these temporary pipes between the processes.</p>
-
-<h1>Process</h1>
-
-<ol>
-<li><p>Linux has a VFS called <strong>pipefs</strong> that is mounted in the kernel (not in user space)</p>
-
-<blockquote><p><strong><a href="http://www.linux.org/threads/pipefs-sockfs-debugfs-and-securityfs.5383/">PipeFS</a></strong> is a unique virtual filesystem. <strong>This filesystem is mounted inside the kernel</strong> rather than in the userspace. While most filesystems are mounted under &ldquo;/&rdquo;, PipeFS is mounted on &ldquo;pipe:&rdquo;, <strong>making PipeFS its own root</strong> (yes, a second root filesystem).</p>
-
-<p>This filesystem is one superblock and cannot exceed that amount system-wide. The entry point of this filesystem/second-root is the system-call &ldquo;pipe()&rdquo;. Unlike the other virtual/pseudo filesystems, this one cannot be viewed.</p>
-
-<p>Many of you may be wondering what purpose this PipeFS filesystem serves. Unix pipes use this filesystem. When a pipe is used (eg. ls | less), <strong>the pipe() system-call makes a new pipe object on this filesystem</strong>. Without this filesystem, pipes cannot be made.</p>
-
-<p>Also, threads and forks communicate together via pipes. Without PipeFS, processes could not fork and threads could not communicate.</p>
-
-<p>Network pipes also rely on this virtual/pseudo filesystem.</p></blockquote></li>
-<li><p>pipefs has a single super block and is mounted at it&rsquo;s own root (pipe:), alongside /</p></li>
-<li><p>pipefs cannot be viewed directly unlike most file systems</p></li>
-<li><p>The entry to pipefs is via the pipe(2) syscall</p></li>
-<li><p>The pipe(2) syscall used by shells for piping with the | operator (or manually from any other process) creates a new file in pipefs which behaves pretty much like a normal file</p></li>
-<li><p>The file on the left hand side of the pipe operator has its stdout redirected to the temporary file created in pipefs</p></li>
-<li><p>The file on the right hand side of the pipe operator has its stdin set to the file on pipefs</p></li>
-<li><p>pipefs is stored in memory and through some kernel magic</p></li>
-</ol>
-
-
-<p>Ref: <a href="http://unix.stackexchange.com/q/148401">http://unix.stackexchange.com/q/148401</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/">[Design] Cryptographic Standard, AES and RSA</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-09T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Overview</h1>
-
-<h2>3 areas of cryptographic standard:</h2>
-
-<ol>
-<li><p>encryption standard</p>
-
-<ol>
-<li>Data Encryption Standard (obsolete)</li>
-<li>Triple DES</li>
-<li><strong>Advanced Encryption Standard (AES)</strong></li>
-<li><strong>RSA</strong></li>
-<li>OpenPGP</li>
-<li>CipherSaber</li>
-</ol>
-</li>
-<li><p>hash standard</p>
-
-<ol>
-<li><strong>MD5</strong></li>
-<li><strong>SHA-1</strong></li>
-<li>SHA-2</li>
-<li>HMAC</li>
-<li>PBKDF2</li>
-</ol>
-</li>
-<li><p>digital signature standard</p>
-
-<ol>
-<li>Digital Signature Algorithm (DSA)</li>
-<li>RSA</li>
-<li>Elliptic</li>
-</ol>
-</li>
-</ol>
-
-
-<h2>Symmetric-key algorithm</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Symmetric-key_algorithm">Use the same cryptographic keys</a> for both encryption and decryption.</p>
-
-<p>The keys represent a shared secret between two parties, and maintain a private information link.</p>
-
-<p>This requirement that both parties have access to the secret key is one of the main drawbacks.</p>
-
-<h2>Public-key cryptography</h2>
-
-<p>The public key is used:</p>
-
-<ol>
-<li>encrypt plaintext</li>
-<li>verify a digital signature</li>
-</ol>
-
-
-<p>private key is used:</p>
-
-<ol>
-<li>decrypt ciphertext</li>
-<li>create a digital signature.</li>
-</ol>
-
-
-<h1>Encryption standard</h1>
-
-<h2>RSA Vs. AES</h2>
-
-<p><strong>RSA is very computationally expensive</strong> by comparison with AES. It involves mathematics with very large numbers, whilst AES can be implemented with relatively simple bit operations.</p>
-
-<p><a href="http://security.stackexchange.com/questions/10949/encryption-should-i-be-using-rsa-or-aes">RSA is a public-key encryption algorithm</a> (asymmetric), while AES is a symmetric key algorithm. Often a cryptosystem will use both algorithms.</p>
-
-<p><a href="http://stackoverflow.com/questions/13238674/aes-vs-rsa-to-encrypt-large-size-of-data">A good compromise is to</a> use RSA to encrypt the symmetric key that is then used in AES encryption of the larger data.</p>
-
-<h2>GitHub</h2>
-
-<p>uses RSA encryption.</p>
-
-<h1>hash standard</h1>
-
-<h2>MD5</h2>
-
-<p>The MD5 message-digest algorithm is a widely used cryptographic hash function producing a 128-bit (16-byte) hash value, or 32 digit Hex.</p>
-
-<blockquote><p>d &ndash;> 8277e0910d750195b448797616e091ad</p>
-
-<p>good morning &ndash;> 2b849500e4585dab4196ec9a415edf8f</p></blockquote>
-
-<h2>SHA-1</h2>
-
-<p>SHA-1 produces a 160-bit (20-byte) hash value, or 40 digit Hex.</p>
-
-<h2>For more</h2>
-
-<p>About MD5, SHA-1 and other, refer to <strong>[Design] Cryptographic Hash, MD5 and Digital Signature</strong></p>
-
-<h1>digital signature standard</h1>
-
-<p>A valid digital signature gives a recipient confidence that the message was created by a known sender.</p>
-
-<p>commonly used for software distribution, financial transactions</p>
-
-<p><img class="middle" src="/assets/images/digital_signature.png"></p>
-
-<p><a href="http://searchsecurity.techtarget.com/definition/digital-signature">To create a digital signature</a>, signing software (such as an email program) creates a one-way hash of the data to be signed. The private key is then used to encrypt the hash.</p>
-
-<blockquote><p>The reason for encrypting the hash instead of entire message is that a hash function can convert an arbitrary input into a fixed length value, which is usually much shorter.</p></blockquote>
-
-<p>Other party validate the integrity of the data by using the signer&rsquo;s public key to decrypt the hash.</p>
-
-<blockquote><p>Note: you can choose to &lsquo;<strong> Add digital signature to this message </strong>&rsquo; in Microsoft Office.</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -1784,7 +2001,7 @@ Similarity( u1, u2 ) = 3
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
-<li class='category'><a href='/blog/categories/lintcode/'>lintcode (11)</a></li>
+<li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
@@ -1801,23 +2018,23 @@ Similarity( u1, u2 ) = 3
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/10/08/segment-tree/">[Fundamental] Segment Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query-II/">[LintCode] Segment Tree Query II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/largest-subsquare-with-edge-filled/">[Question] Largest Sub-square with Edges filled </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Query/">[LintCode] Segment Tree Query </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/closest-leaf-binary-tree/">[Question] Find Cloest Leaf in Binary Tree </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Modify/">[LintCode] Segment Tree Modify </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/07/all-string-placing-space/">[Amazon] All Strings by Placing Spaces </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build-II/">[LintCode] Segment Tree Build II </a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/10/04/seven-bridge/">[Fundamental] The 7 Bridges Problem </a>
+        <a href="/blog/2015/10/13/Segment-Tree-Build/">[LintCode] Segment Tree Build </a>
       </li>
     
   </ul>
