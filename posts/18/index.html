@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Given an array of positive numbers, find the maximum sum of a subsequence that no 2 numbers should be adjacent. Eg. (3, 2, 7, 10) &hellip;">
+  <meta name="description" content="Question link A frog wants to cross the river n meters wide. There&rsquo;re some stones, but not complete from 1 to n. The frog has a peculiar &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,913 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/02/frog-crossing-dp/">[Question] Frog Crossing (Dynamic Programming)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-02T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/02/frog-crossing-dp/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://tkramesh.wordpress.com/2011/02/15/frog-crossing-more-on-dynamic-programming-3/">link</a></p>
+
+<blockquote><p>A frog wants to cross the river n meters wide. There&rsquo;re some stones, but not complete from 1 to n.</p>
+
+<p>The frog has a peculiar jumping rule. If it jumps x meters on one jump, the next jump has to lie in the range {x-1, x, x+1}. Further, the 1st jump that the frog makes is of exactly 1 meter.</p>
+
+<p>Given whether stones are removed or not as array of 0 and 1, check if it is possible to reach the other end.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult DP question</strong>. It can be solved in O(n<sup>2</sup>) time.</p>
+
+<p>The main equation is:</p>
+
+<blockquote><p>can_reach [s, d] =</p>
+
+<p>Stone[d] AND Stone[s] AND [ can_reach [(d-s)-1, s] OR can_reach[d-s, s] OR can_reach[d-s)+1, s] ].</p>
+
+<p>where &rsquo;s&#8217; is starting point, and &rsquo;d&#8217; is destination.</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public boolean canCross(int[] stones) {
+    if (stones.length &lt; 2 || (stones[0] != 1 || stones[1] != 1)) {
+        // invalid input data
+        return false;
+    }
+    int n = stones.length;
+    boolean[][] dp = new boolean[n][n];
+    // dp[i][j] denotes that frog can jump from index i to j
+
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = i + 1; j &lt; n; j++) {
+            if (stones[i] == 0 || stones[j] == 0) {
+                // if either stones i or stone j is removed, skip
+                continue;
+            }
+            // note that j start from (i+1) because we make sure dp[i][i]
+            // false. Otherwise, dp[i][i+1] will always be true
+
+            if (i == 0) {
+                // if jump from position 0, can only reach 1
+                dp[i][j] = j == 1;
+            } else {
+                // if jump from other positions, need to check previous
+                // distance, within range or not.
+                int dis = j - i;
+                for (int pre = i - dis - 1; pre &lt;= i - dis + 1; pre++) {
+                    // pre is the previous position where frog jumps to i
+                    if (pre &lt; 0) {
+                        continue;
+                    } else if (dp[pre][i]) {
+                        // frog jumps from pre to i, then frog is able to
+                        // jump from i to j
+                        dp[i][j] = true;
+                        break;
+                    }
+                }
+            }
+            // finish calculating dp[i][j], now check termination
+            if (j == n - 1 &amp;&amp; dp[i][j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-27T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/27/database-indexing/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://stackoverflow.com/a/1130">ref 1</a> <a href="http://www.interspire.com/content/2006/02/15/introduction-to-database-indexes/">ref 2</a></p>
+
+<h3>Why Indexing?</h3>
+
+<p>In database disks (we&rsquo;re talking about disk-based storage devices), data is stored as blocks. These blocks are accessed atomically. It&rsquo;s like a linked list with pointers to the blocks.</p>
+
+<p>Because of this, searching in database is linear time. That&rsquo;s why we need indexing.</p>
+
+<p><strong>Indexing is a way of sorting a number of records on multiple fields</strong>. Creating an index on a field in a table creates another data structure which holds the field value, and pointer to the record it relates to. This index structure is then sorted, allowing Binary Searches to be performed on it.</p>
+
+<p>In other words, indexing speed up search.</p>
+
+<h3>Downside</h3>
+
+<p>First disadvantage is <strong>the additional space usage</strong>. For example, in MyISAM engine, indexes are stored together with the data in one table. So the indexing files can quickly reach the size limits if many fields are indexed.</p>
+
+<p>Second disadvantage is that <strong>using too many indexes can actually slow your database down</strong>. Each time a page or database row is updated or removed, the reference or index also has to be updated.</p>
+
+<p>So indexes speed up finding data, but slow down inserting, updating or deleting data.</p>
+
+<h3>Primary keys</h3>
+
+<p><strong>Some fields are automatically indexed</strong>.</p>
+
+<p>A primary key or a field marked as ‘unique’ – for example an email address, a userid or a social security number – are <strong>automatically indexed</strong> so the database can quickly check to make sure that you’re not going to introduce bad data.</p>
+
+<h3>When to use</h3>
+
+<p>Since indexes are <strong>only</strong> used to speed up the searching, it&rsquo;s not wise to have indexing used only for output.</p>
+
+<p><strong>The general rule</strong> is, anything that is used to limit the number of results you’re trying to find. For more details, read <a href="http://www.interspire.com/content/2006/02/15/introduction-to-database-indexes/">ref 2</a>.</p>
+
+<h3>How to create index</h3>
+
+<p><a href="http://stackoverflow.com/a/1157">The following</a> is SQL92 standard that&rsquo;s supported by major RDMBSs:</p>
+
+<pre><code>CREATE INDEX [index name] ON [table name] ( [column name] )
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/23/Java-runtime-exception/">[Java OOP] Java Runtime Exception</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-23T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/23/Java-runtime-exception/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Exceptions in Java</h3>
+
+<p>In Java, there are <a href="http://www.tutorialspoint.com/java/java_exceptions.htm">3 categories of exceptions</a>:</p>
+
+<ol>
+<li><p>checked exceptions</p>
+
+<ol>
+<li>Typically a user error</li>
+<li>eg. if a file cannot be found.</li>
+<li>These exceptions cannot simply be ignored at the time of compilation.</li>
+</ol>
+</li>
+<li><p>runtime exceptions (also called un-checked exceptions)</p>
+
+<ol>
+<li>exception that could have been avoided by the programmer</li>
+<li>eg. NullPointerException</li>
+<li>ignored at the time of compilation</li>
+</ol>
+</li>
+<li><p>error</p>
+
+<ol>
+<li>These are not exceptions at all</li>
+<li>eg. stack overflow occurs</li>
+<li>also ignored at the time of compilation</li>
+</ol>
+</li>
+</ol>
+
+
+<h4>1. checked exception</h4>
+
+<p><a href="http://stackoverflow.com/a/2190175">A checked exception</a> <strong>must be handled explicitly</strong> by the code (by either putting a try/catch block around the code, or adding a &ldquo;throws&rdquo; clause to the method).</p>
+
+<p>The <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Exception.html">class Exception</a> and any subclasses that are not also subclasses of RuntimeException are <strong>checked exceptions</strong>. Example:</p>
+
+<ol>
+<li>FileNotFoundException</li>
+<li>HttpRetryException</li>
+<li>SocketException</li>
+<li>IOException</li>
+</ol>
+
+
+<p>Note: <strong>java.lang.RuntimeException</strong> is a subclass of <strong>java.lang.Exception</strong>.</p>
+
+<h4>2. un-checked exceptions (RuntimeException)</h4>
+
+<p>A un-checked exception <strong>does not need</strong> to be explicitly handled.</p>
+
+<p><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/RuntimeException.html">RuntimeException</a> and its subclasses are <strong>unchecked exceptions</strong>.</p>
+
+<p><a href="http://stackoverflow.com/a/2190177">Generally</a> RuntimeExceptions <strong>can be prevented</strong> programmatically. E.g NullPointerException, ArrayIndexOutOfBoundException. If you check for null before calling any method, NullPointerException would never occur. Similarly ArrayIndexOutOfBoundException would never occur if you check the index first. RuntimeException are not checked by the compiler, so it is clean code.</p>
+
+<p>The runtime exception classes <strong><a href="http://stackoverflow.com/a/2190659">are exempted</a> from compile-time checking</strong>, since the compiler cannot establish that run-time exceptions cannot occur.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/23/Endless-error-gem-dependencies/">[Ruby] Endless Error With Gem Dependencies</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-23T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/23/Endless-error-gem-dependencies/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>The problem</h3>
+
+<p>In setting up the octopress environment, we need to install dependencies like this:</p>
+
+<pre><code>gem install bundler
+bundle install
+</code></pre>
+
+<p>First line simply installs bundler (a Ruby dependency manager). The second line is where you might face problems:</p>
+
+<blockquote><p>bundle install</p>
+
+<p><a href="http://bundler.io/man/bundle-install.1.html">Install the dependencies</a> specified in your Gemfile</p></blockquote>
+
+<p>Look at the Gemfile in your octopress folder, it looks like <a href="https://github.com/imathis/octopress/blob/master/Gemfile">this</a>:</p>
+
+<pre><code>source "https://rubygems.org"
+
+group :development do
+  gem 'rake', '~&gt; 10.0'
+  gem 'jekyll', '~&gt; 2.0'
+  gem 'octopress-hooks', '~&gt; 2.2'
+  gem 'octopress-date-format', '~&gt; 2.0'
+  gem 'jekyll-sitemap'
+  gem 'rdiscount', '~&gt; 2.0'
+  gem 'RedCloth', '~&gt; 4.2.9'
+  gem 'haml', '~&gt; 4.0'
+  gem 'compass', '~&gt; 1.0.1'
+  gem 'sass-globbing', '~&gt; 1.0.0'
+  gem 'rubypants', '~&gt; 0.2.0'
+  gem 'rb-fsevent', '~&gt; 0.9'
+  gem 'stringex', '~&gt; 1.4.0'
+end
+
+gem 'sinatra', '~&gt; 1.4.2'
+</code></pre>
+
+<p>When I do &lsquo;bundle install&rsquo;:</p>
+
+<pre><code>$ bundle install
+Fetching gem metadata from https://rubygems.org/........
+Resolving dependencies...
+
+Gem::RemoteFetcher::FetchError: SSL_connect returned=1 errno=0 state=SSLv3 read
+server certificate B: certificate verify failed (https://rubygems.org/gems/rake-
+10.4.2.gem)
+An error occurred while installing rake (10.4.2), and Bundler cannot continue.
+Make sure that `gem install rake -v '10.4.2'` succeeds before bundling.
+</code></pre>
+
+<p>It shows the gem &lsquo;rake&rsquo; is missing. So I did as I was instrcucted to. I type <strong>gem install rake -v &lsquo;10.4.2&rsquo;</strong> into command line, and execute. Again, I was told another gem missing. I kept doing this, until I found this is an endless procedure:</p>
+
+<pre><code>$ bundle install
+Fetching gem metadata from https://rubygems.org/.......
+Using rake 10.3.2
+Using RedCloth 4.2.9
+Using blankslate 2.1.2.4
+
+Gem::RemoteFetcher::FetchError: SSL_connect returned=1 errno=0 state=SSLv3 read
+server certificate B: certificate verify failed (https://rubygems.org/gems/timer
+s-1.1.0.gem)
+An error occurred while installing timers (1.1.0), and Bundler cannot continue.
+Make sure that `gem install timers -v '1.1.0'` succeeds before bundling.
+</code></pre>
+
+<p>Something is very wrong with the execution of &lsquo;bundle install&rsquo;.</p>
+
+<h3>The solution</h3>
+
+<p>Until I found <a href="http://stackoverflow.com/questions/15529451/octopress-installation-stops-during-bundle-install">this post</a>, I was hopelessly searching and learning Ruby gems and related things.</p>
+
+<p>I fact, I just deleted 1 letter by changing <strong>source &ldquo;<a href="https://rubygems.org">https://rubygems.org</a>&rdquo;</strong> to <strong>source &ldquo;<a href="http://rubygems.org">http://rubygems.org</a>&rdquo;</strong> at line 1 of Gemfile in octopress folder.</p>
+
+<p>Then, everything is fine:</p>
+
+<pre><code>$ bundle install
+Fetching gem metadata from http://rubygems.org/........
+Resolving dependencies....
+Installing rake 10.4.2
+Using RedCloth 4.2.9
+Using blankslate 2.1.2.4
+Installing hitimes 1.2.2
+Installing timers 4.0.1
+Installing celluloid 0.16.0
+Installing chunky_png 1.3.3
+Installing fast-stemmer 1.0.2
+Installing classifier-reborn 2.0.2
+Installing coffee-script-source 1.8.0
+Installing execjs 2.2.2
+Installing coffee-script 2.3.0
+Installing colorator 0.1
+Installing multi_json 1.10.1
+Installing sass 3.4.9
+Installing compass-core 1.0.1
+Installing compass-import-once 1.0.5
+Installing rb-fsevent 0.9.4
+Installing ffi 1.9.6
+Installing rb-inotify 0.9.5
+Installing compass 1.0.1
+Installing tilt 1.4.1
+Installing haml 4.0.6
+Installing jekyll-coffeescript 1.0.1
+Installing jekyll-gist 1.1.0
+Installing jekyll-paginate 1.1.0
+Installing jekyll-sass-converter 1.3.0
+Installing listen 2.8.4
+Installing jekyll-watch 1.2.0
+Installing kramdown 1.5.0
+Installing liquid 2.6.1
+Installing mercenary 0.3.5
+Installing posix-spawn 0.3.9
+Installing yajl-ruby 1.1.0
+Installing pygments.rb 0.6.0
+Installing redcarpet 3.2.2
+Installing safe_yaml 1.0.4
+Installing parslet 1.5.0
+Installing toml 0.1.2
+Installing jekyll 2.5.3
+Installing jekyll-sitemap 0.7.0
+Installing octopress-hooks 2.2.3
+Installing octopress-date-format 2.0.2
+Installing rack 1.6.0
+Installing rack-protection 1.5.3
+Installing rdiscount 2.1.7.1
+Installing rubypants 0.2.0
+Installing sass-globbing 1.0.0
+Installing sinatra 1.4.5
+Installing stringex 1.4.0
+Using bundler 1.7.9
+Your bundle is complete!
+Use `bundle show [gemname]` to see where a bundled gem is installed.
+Post-install message from compass:
+    Compass is charityware. If you love it, please donate on our behalf at http:
+//umdf.org/compass Thanks!
+Post-install message from haml:
+
+HEADS UP! Haml 4.0 has many improvements, but also has changes that may break
+your application:
+
+* Support for Ruby 1.8.6 dropped
+* Support for Rails 2 dropped
+* Sass filter now always outputs &lt;style&gt; tags
+* Data attributes are now hyphenated, not underscored
+* html2haml utility moved to the html2haml gem
+* Textile and Maruku filters moved to the haml-contrib gem
+
+For more info see:
+
+http://rubydoc.info/github/haml/haml/file/CHANGELOG.md
+</code></pre>
+
+<p>I guess this is because my network security settings, but I do not know. If you are facing the same issue, I hope my solution helped. Or if you know the reason, please tell me by leaving a comment below. Thanks!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/22/overload-override-java-main-method/">[Java OOP] Override/overload Java Main Method</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-22T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/22/overload-override-java-main-method/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Can we overload main method in Java?</h3>
+
+<p>Can. But only <strong>public static void main(String[] args)</strong> will be used when <a href="http://stackoverflow.com/questions/3759315/can-we-overload-the-main-method-in-java">your class is launched by the JVM</a>.</p>
+
+<p>You can call other <strong>main() method</strong> yourself from code.</p>
+
+<p>Eg.</p>
+
+<pre><code>class Simple{  
+  public static void main(int a){  
+  System.out.println(a);  
+  }  
+
+  public static void main(String args[]){  
+  System.out.println("main() method invoked");  
+  main(10);  
+  }  
+}
+</code></pre>
+
+<p>output:</p>
+
+<pre><code>main() method invoked
+10
+</code></pre>
+
+<h3>Can we override main method in Java?</h3>
+
+<p>No.</p>
+
+<p><a href="http://stackoverflow.com/questions/9083876/override-main-method">MAIN is a class method</a>. Hence, it does not makes sense to &ldquo;override&rdquo; it (or any static method). The concept of &ldquo;overriding&rdquo; is only for instance methods.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/22/common-root-java-class/">[Java OOP] Common Root of Java Classes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-22T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/22/common-root-java-class/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Common Root Class</h3>
+
+<p><strong>java.lang.Object</strong>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html">link</a></p>
+
+<p>All Java classes are derived from this <a href="http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html">common root class</a>, that defines common behaviors.</p>
+
+<p>Common behaviors include multi-threading and garbage collector etc.</p>
+
+<h4>Some methods</h4>
+
+<p><a href="http://docs.oracle.com/javase/tutorial/java/IandI/objectclass.html">ref</a></p>
+
+<p>protected Object clone() throws CloneNotSupportedException</p>
+
+<blockquote><p>Creates and returns a copy of this object.</p></blockquote>
+
+<p>public boolean equals(Object obj)</p>
+
+<blockquote><p>Indicates whether some other object is &ldquo;equal to&rdquo; this one.</p></blockquote>
+
+<p>protected void finalize() throws Throwable</p>
+
+<blockquote><p>Called by the garbage collector on an object when garbage collection determines that there are no more references to the object</p></blockquote>
+
+<p>public final Class getClass()</p>
+
+<blockquote><p>Returns the runtime class of an object.</p></blockquote>
+
+<p>public int hashCode()</p>
+
+<blockquote><p>Returns a hash code value for the object.</p></blockquote>
+
+<p>public String toString()</p>
+
+<blockquote><p>Returns a string representation of the object.</p></blockquote>
+
+<h3>Sync-related methods</h3>
+
+<p>The notify, notifyAll, and wait methods of Object all play a part in synchronizing the activities of independently running threads in a program.</p>
+
+<pre><code>public final void notify()
+public final void notifyAll()
+public final void wait()
+public final void wait(long timeout)
+public final void wait(long timeout, int nanos)
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/22/can-interface-extend-interface/">[Java OOP] Interface Extend Another Interface</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-22T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/22/can-interface-extend-interface/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Can an interface extend another interface in Java?</h3>
+
+<p>Yes. Just remember that you should implement the methods in <a href="http://www.programmerinterview.com/index.php/java-questions/java-can-an-interface-extend-another-interface/">both interfaces</a>.</p>
+
+<p>Example in Java source code <a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html">link1</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html">link2</a>:</p>
+
+<pre><code>public interface List&lt;E&gt; extends Collection&lt;E&gt; {
+
+}
+
+public interface Collection&lt;E&gt; extends Iterable&lt;E&gt; {
+
+}
+</code></pre>
+
+<p>In conclusion, <a href="http://stackoverflow.com/questions/19546357/can-an-interface-extend-multiple-interfaces-in-java">ref</a></p>
+
+<p>An interface can extend multiple interfaces.</p>
+
+<p>A class can implement multiple interfaces.</p>
+
+<p>However, a class can only extend a single class.</p>
+
+<h4>a special case</h4>
+
+<pre><code>interface A
+{
+    void test();
+}
+
+interface B 
+{
+    void test();
+}
+
+class C implements A, B
+{
+    @Override
+    public void test() {
+
+    }
+}
+</code></pre>
+
+<p>Well, a single implementation works for the both methods. This implementation works no problem.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/22/Split-an-integer-or-coin/">[Question] Split an Integer or Coin</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-22T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/22/Split-an-integer-or-coin/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://blog.csdn.net/hackbuteer1/article/details/8035261">link</a></p>
+
+<blockquote><p>整数的拆分问题</p>
+
+<p>如，对于正整数n=6，可以拆分为：</p></blockquote>
+
+<pre><code>6
+5+1
+4+2, 4+1+1
+3+3, 3+2+1, 3+1+1+1
+2+2+2, 2+2+1+1, 2+1+1+1+1
+1+1+1+1+1+1+1
+</code></pre>
+
+<blockquote><p>现在的问题是，对于给定的正整数n，程序输出该整数的拆分种类数(HDOJ  1028)。</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is very similar to another question I posted before: <strong>Coin Change Problem</strong>.</p>
+
+<p><strong>The DP equation is</strong>:</p>
+
+<blockquote><p>q(n,k) = q(n,k-1) + q(n-k,k)</p></blockquote>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong></p>
+
+<pre><code>int main(void) {  
+    int n,i,j,dp[121][121];  
+    for(i = 1 ; i &lt; 121 ; ++i)  
+    {  
+        for(j = 1 ; j &lt; 121 ; ++j)  
+        {  
+            if(i == 1 ||  j == 1)  
+                dp[i][j] = 1;  
+            else if(i &gt; j)  
+                dp[i][j] = dp[i][j-1] + dp[i-j][j];  
+            else if(i == j)  
+                dp[i][j] = dp[i][j-1] + 1;  
+            else  
+                dp[i][j] = dp[i][i];  
+        }  
+    }  
+
+    while(scanf("%d",&amp;n)!=EOF)  
+    {  
+        cout&lt;&lt;dp[n][n]&lt;&lt;endl;  
+    }  
+    return 0;  
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/22/RubyGems-gem-other/">[Ruby] RubyGems, Gem, Gemfile and Bundler</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-22T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/22/RubyGems-gem-other/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Sometme I found the different concepts in Ruby very confusing for beginners. So I write this post to explain some terminologies in ruby setup.</p>
+
+<h3>RubyGems (tool)</h3>
+
+<p><strong><a href="http://en.wikipedia.org/wiki/RubyGems">RubyGems</a></strong> is a package manager for the Ruby programming language.</p>
+
+<p>It is a tool to manage the installation of gems, and a server for distributing them.</p>
+
+<p>RubyGems is very similar to apt-get, portage, and yum in functionality.</p>
+
+<h3>gem (command)</h3>
+
+<p>&lsquo;gem&rsquo; command allows you to interact with RubyGems. It is used build, upload, download, and install Gem packages.</p>
+
+<p>Installation:</p>
+
+<pre><code>gem install mygem
+</code></pre>
+
+<p>Uninstallation:</p>
+
+<pre><code>gem uninstall mygem
+</code></pre>
+
+<p>Listing installed gems:</p>
+
+<pre><code>gem list --local
+</code></pre>
+
+<p>Listing available gems, e.g.:</p>
+
+<pre><code>gem list --remote
+</code></pre>
+
+<h3>Gemfile (text file)</h3>
+
+<p><a href="http://bundler.io/man/gemfile.5.html">A Gemfile</a> describes the gem dependencies required to execute associated Ruby code.</p>
+
+<p>It is placed in the root of the directory containing the associated code.</p>
+
+<p>A Gemfile is evaluated as Ruby code, in a context which makes available a number of methods used to describe the gem requirements.</p>
+
+<h3>gem (program)</h3>
+
+<p><a href="http://stackoverflow.com/questions/5233924/what-is-a-ruby-gem">ref1</a>, <a href="http://guides.rubygems.org/what-is-a-gem/">ref2</a></p>
+
+<p>A gem is a module/Library that you can install and use in every project on your server.</p>
+
+<p>Each gem has a <strong>name, version, and platform</strong>. For example, <strong>rake gem</strong> has a 10.3.2 version on platform Ruby.</p>
+
+<p>Inside a gems are the following components:</p>
+
+<ol>
+<li>Code (including tests and supporting utilities)</li>
+<li>Documentation</li>
+<li>gemspec</li>
+</ol>
+
+
+<p>Standard code structure:</p>
+
+<pre><code>% tree freewill
+freewill/
+├── bin/
+│   └── freewill
+├── lib/
+│   └── freewill.rb
+├── test/
+│   └── test_freewill.rb
+├── README
+├── Rakefile
+└── freewill.gemspec
+</code></pre>
+
+<h3>Bundler (dependency manager)</h3>
+
+<p><a href="http://bundler.io/">ref</a></p>
+
+<p>Bundler manages an application&rsquo;s dependencies.</p>
+
+<p>Bundler provides a consistent environment for Ruby projects by tracking and installing the exact gems and versions that are needed.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -162,877 +1069,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/22/Discussion-of-Polymorphism/">[Java OOP] Discussion of Polymorphism</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-22T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/12/22/Discussion-of-Polymorphism/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Polymorphism</h3>
-
-<p>Polymorphism is to <a href="http://javarevisited.blogspot.sg/2011/08/what-is-polymorphism-in-java-example.html">use common interface</a> instead of concrete implementation while coding.</p>
-
-<p>When we program for interface our code is capable of handling any new requirement or enhancement arise in near future due to new implementation of our common interface. If we don&rsquo;t use common interface and rely on concrete implementation, we always need to change and duplicate most of our code to support new implementation.</p>
-
-<p>The most common use of polymorphism in OOP occurs when a parent class reference is used to refer to a child class object.</p>
-
-<h3>Example</h3>
-
-<p>Example of Bicycle class given on <a href="http://docs.oracle.com/javase/tutorial/java/IandI/polymorphism.html">official oracle website</a>:</p>
-
-<pre><code>public class Bicycle{
-    public void printDescription(){
-        System.out.println("\nBike is " + "in gear " + this.gear
-            + " with a cadence of " + this.cadence +
-            " and travelling at a speed of " + this.speed + ". ");
-    }
-}
-
-public class MountainBike extends Bicycle {
-    private String suspension;
-
-    public void printDescription() {
-        super.printDescription();
-        System.out.println("The " + "MountainBike has a" +
-            getSuspension() + " suspension.");
-    }
-}
-
-public class RoadBike extends Bicycle{
-    private int tireWidth;
-
-    public void printDescription(){
-        super.printDescription();
-        System.out.println("The RoadBike" + " has " + getTireWidth() +
-            " MM tires.");
-    }
-}
-
-public class TestBikes {
-    public static void main(String[] args){
-        Bicycle bike01, bike02, bike03;
-
-        bike01 = new Bicycle(20, 10, 1);
-        bike02 = new MountainBike(20, 10, 5, "Dual");
-        bike03 = new RoadBike(40, 20, 8, 23);
-
-        bike01.printDescription();
-        bike02.printDescription();
-        bike03.printDescription();
-    }
-}
-</code></pre>
-
-<p>The output:</p>
-
-<pre><code>Bike is in gear 1 with a cadence of 20 and travelling at a speed of 10. 
-
-Bike is in gear 5 with a cadence of 20 and travelling at a speed of 10. 
-The MountainBike has a Dual suspension.
-
-Bike is in gear 8 with a cadence of 40 and travelling at a speed of 20. 
-The RoadBike has 23 MM tires.
-</code></pre>
-
-<p>Referring to the same page, <strong>JVM calls the appropriate method for the object that is referred to in each variable</strong>. It does not call the method that is defined by the variable&rsquo;s type.</p>
-
-<h3>Another example</h3>
-
-<p>Cylinder is a subclass of Circle. We can say that Cylinder &ldquo;is-a&rdquo; Circle.</p>
-
-<p>We can create an instance of Cylinder, and assign it to a Circle reference:</p>
-
-<blockquote><p>Circle c1 = new Cylinder();</p></blockquote>
-
-<p>You can invoke all the methods defined in the Circle class, but <strong>you cannot invoke methods defined in the Cylinder class</strong>. c1 is a reference to the Circle class, which does not know about the methods defined in the subclass Cylinder.</p>
-
-<p><strong>The reference c1, however, retains its internal identity</strong>. Since Cylinder overrides getArea() method, calling c1.getArea() will invokes the overridden version defined in subclass Cylinder, instead of in Circle. This is because c1 is holding a Cylinder object internally.</p>
-
-<p>The code is below:</p>
-
-<pre><code>public class PolymorphismSubstitutabilityDemo {
-
-    public static void main(String[] args) {
-        Circle c1 = new Cylinder(1, "white", 10);
-        System.out.println(c1.getClass());
-        System.out.println(c1.getRadius());
-        System.out.println(c1.getColor());
-        System.out.println(c1.getArea());
-    }
-}
-
-class Circle {
-    int radius;
-    String color;
-
-    public Circle(int a, String b) {
-        this.radius = a;
-        this.color = b;
-    }
-
-    public int getRadius() {
-        return radius;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public double getArea() {
-        return 3.14159 * Math.pow(radius, 2);
-    }
-}
-
-class Cylinder extends Circle {
-    int height;
-
-    public Cylinder(int a, String b, int c) {
-        super(a, b);
-        this.height = c;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public double getArea() {
-        return super.getArea() * height;
-    }
-}
-</code></pre>
-
-<p>The output of execution:</p>
-
-<pre><code>class Cylinder
-1
-white
-31.4159
-</code></pre>
-
-<h3>Summary:</h3>
-
-<p><a href="http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html">ref</a></p>
-
-<ol>
-<li><p>A subclass instance can be assigned (substituted) to a superclass&#8217; reference.</p></li>
-<li><p>Once substituted, we can invoke methods defined in the superclass; we cannot invoke methods defined in the subclass.</p></li>
-<li><p>However, if the subclass overrides inherited methods from the superclass, the subclass (overridden) versions will be invoked.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-18T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
-
-<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
-
-<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
-
-<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
-
-<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
-
-<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
-
-<h3>Code</h3>
-
-<p><strong>DLL way, written by me</strong></p>
-
-<pre><code>public void findTriplet(TreeNode root, int target) {
-    TreeNode[] dll = convertToDll(root);
-    TreeNode head = dll[0];
-    TreeNode tail = dll[1];
-    // note that the bst inorder dll should already in sorted by value
-    TreeNode first = head;
-    while (first.right != null) {
-        TreeNode left = first.right;
-        TreeNode right = tail;
-        while (left.val &lt; right.val) {
-            int diff = first.val + left.val + right.val - target;
-            if (diff == 0) {
-                System.out.println("Found triplet: " + first.val + " "
-                        + left.val + " " + right.val + " for sum of "
-                        + target);
-            }
-            if (diff &lt;= 0) {
-                left = left.right;
-            }
-            if (diff &gt;= 0) {
-                right = right.left;
-            }
-        }
-        first = first.right;
-    }
-}
-
-private TreeNode[] convertToDll(TreeNode node) {
-    TreeNode[] ans = new TreeNode[2];
-    // do the left side of node
-    if (node.left == null) {
-        ans[0] = node;
-    } else {
-        TreeNode[] preAns = convertToDll(node.left);
-        ans[0] = preAns[0];
-        node.left = preAns[1];
-        preAns[1].right = node;
-    }
-    // do the right side of node
-    if (node.right == null) {
-        ans[1] = node;
-    } else {
-        TreeNode[] postAns = convertToDll(node.right);
-        ans[1] = postAns[1];
-        node.right = postAns[0];
-        postAns[0].left = node;
-    }
-    return ans;
-}
-</code></pre>
-
-<p><strong>inorder way</strong> &ndash; basically is just <strong>iterator of binary tree</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/17/equilibrium-points-in-2d-array/">[Question] Equilibrium Points in 2D Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-17T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/12/17/equilibrium-points-in-2d-array/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://get-that-job-at-google.blogspot.sg/2013/01/twitter-programming-test.html">link</a></p>
-
-<blockquote><p>In a 2D matrix of dimensions M*N, find number of &ldquo;equilibrium&rdquo; points.  A point (i, j) is said to be an &ldquo;equilibrium&rdquo; point only if all following conditions hold:</p>
-
-<p>a) sum of rows 1&hellip;(i-1) =  sum of rows (i+1)&hellip;M</p>
-
-<p>b) sum of columns 1&hellip;(j-1)  = sum of columns (j+1)&hellip;N</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a generalize question of <strong>Equilibrium index</strong>.</p>
-
-<p>Refer to <strong>Equilibrium index</strong>, read <a href="http://www.geeksforgeeks.org/equilibrium-index-of-an-array/">this</a>. <strong>The idea</strong> is to get total sum of array first. Then Iterate through the array calculate left sum == sum / 2.</p>
-
-<blockquote><p>Equilibrium index of an array is an index such that the sum of elements at lower indexes is equal to the sum of elements at higher indexes. For example, in an arrya A:</p>
-
-<p>A[0] = -7, A[1] = 1, A[2] = 5, A[3] = 2, A[4] = -4, A[5] = 3, A[6]=0</p>
-
-<p>3 is an equilibrium index, because:
-A[0] + A[1] + A[2] = A[4] + A[5] + A[6]</p>
-
-<p>6 is also an equilibrium index, because sum of zero elements is zero, i.e., A[0] + A[1] + A[2] + A[3] + A[4] + A[5]=0</p></blockquote>
-
-<p>Well, for Equilibrium Points in 2D Array, should be similar. DIY and leave me a comment!</p>
-
-<h3>Code</h3>
-
-<p><strong>code for <a href="http://rosettacode.org/wiki/Equilibrium_index#Java">findning EI in 1-D array</a></strong></p>
-
-<pre><code>public List&lt;Integer&gt; findEI(int[] array) {
-    List&lt;Integer&gt; ans = new ArrayList&lt;Integer&gt;();
-    int sum = 0;
-    for (int i = 0; i &lt; array.length; i++) {
-        sum += array[i];
-    }
-    int runningSum = 0;
-    for (int i = 0; i &lt; array.length; i++) {
-        if (2 * runningSum + array[i] == sum) {
-            ans.add(i);
-        }
-        runningSum += array[i];
-    }
-    return ans;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/">[Facebook] Print a Binary Tree in Vertical Order</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-17T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/12/17/Print-Binary-Tree-Vertically/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/print-binary-tree-vertical-order/">link</a></p>
-
-<blockquote><p>Given a binary tree, print it vertically. The following example illustrates vertical order traversal.</p></blockquote>
-
-<pre><code>           1
-        /    \
-       2      3
-      / \    / \
-     4   5  6   7
-             \   \
-              8   9 
-
-The output of print this tree vertically will be:
-4
-2
-1 5 6
-3 8
-7
-9 
-</code></pre>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Traverse the tree once and get the minimum and maximum horizontal distance with respect to root.</p></li>
-<li><p>Iterate the tree and for each vertical line, fill in the values.</p></li>
-</ol>
-
-
-<p>Now, getting the width of tree requires O(n) time. And entire solution is O(n) using a <strong><a href="www.geeksforgeeks.org/print-binary-tree-vertical-order-set-2/">HashMap</a></strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public List&lt;List&lt;Integer&gt;&gt; printVertically(TreeNode root) {
-    List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList&lt;List&lt;Integer&gt;&gt;();
-
-    // 1. find the range of left bound and right bound
-    int[] range = new int[2];
-    findRange(root, range, 0);
-
-    // 2. calculate number of columns in the result
-    int rootIndex = 0 - range[0];
-    int columns = range[1] - range[0] + 1;
-    for (int i = 0; i &lt; columns; i++) {
-        ans.add(new ArrayList&lt;Integer&gt;());
-    }
-
-    // 3. fill in vertically in a recursive manner
-    fillNode(ans, root, rootIndex);
-
-    return ans;
-}
-
-private void fillNode(List&lt;List&lt;Integer&gt;&gt; ans, TreeNode node, int index) {
-    if (node == null) {
-        return;
-    }
-    ans.get(index).add(node.val);
-    fillNode(ans, node.left, index - 1);
-    fillNode(ans, node.right, index + 1);
-}
-
-private void findRange(TreeNode node, int[] range, int position) {
-    if (node == null) {
-        return;
-    }
-    if (position &lt; range[0]) {
-        range[0] = position;
-    }
-    if (position &gt; range[1]) {
-        range[1] = position;
-    }
-    findRange(node.left, range, position - 1);
-    findRange(node.right, range, position + 1);
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/08/patient-disease-data-structure/">[Epic] Patient Disease Data Structure</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-08T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/12/08/patient-disease-data-structure/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.mitbbs.com/article_t0/JobHunting/32844253.html">link</a></p>
-
-<blockquote><p>Suppose N patients and M diseases. N is sufficiently large number and M is
-relatively small, say 30-ish. Each patient can have possible 0 to M kinds of
-diseases.</p>
-
-<p>Given one patient’s name, show me a list of similar patients sharing same
-deseases within 2-3 seconds.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Use 1 bit to represent a disease</strong>. So every patient&rsquo;s conditin can be put into an integer of 32 bits.</p>
-
-<p>How do we calculate the similarity of 2 patients?</p>
-
-<p>Refer to <strong>[CC150v5] 5.5 Calculate Bits Conversion Required</strong> for a special bit operation (remove last &lsquo;1&rsquo; from bit):</p>
-
-<blockquote><p>c = c &amp; (c &ndash; l) clears the least significant bit of &lsquo;1&rsquo;.</p>
-
-<p>Keep doing this until all &lsquo;1&rsquo;s are cleared.</p></blockquote>
-
-<p>For each patient, we simply calculate the XOR and count &lsquo;1&rsquo;s.</p>
-
-<h3>Code</h3>
-
-<p>no code.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/02/Axis-aligned-rectangle/">[Question] Axis Aligned Rectangles</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-02T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/12/02/Axis-aligned-rectangle/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://ankitsambyal.blogspot.sg/2013/10/finding-overlapping-rectangles-in-given.html">link</a>, MIT handouts Person_A</p>
-
-<blockquote><p>Describe an algorithm that takes an unsorted array of axis-aligned rectangles and returns <strong>any pair of</strong> rectangles that overlaps, if there is such a pair.</p>
-
-<p>Axis-aligned means that all the rectangle sides are either parallel or perpendicular to the x- and y-axis.</p>
-
-<p>Each rectangle object has two variables: the x-y coordinates of the upper-left corner and the bottom-right corner.</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>A lot of different solutions on the internet, <a href="http://www.quora.com/Algorithms/Given-a-set-of-n-axis-aligned-rectangles-in-the-plane-find-how-big-is-the-largest-subset-of-these-rectangles-that-contain-a-common-point-in-O-n-3-and-then-in-order-O-nlogn">example 1</a> and <a href="http://ankitsambyal.blogspot.sg/2013/10/finding-overlapping-rectangles-in-given.html">example 2</a>, and some questions asks you to return all overlapping pairs. For now, we just return <strong>any pair</strong> that overlaps.</p>
-
-<h3>Solution</h3>
-
-<p>I concluded some solution and come up with this (the idea of BST is covered in the end of <a href="http://www.cs.princeton.edu/~rs/AlgsDS07/17GeometricSearch.pdf">this pdf</a>):</p>
-
-<ol>
-<li>Sort the input by left edge.</li>
-<li>One by one, get one rectangle from the sorted input, and make a pair (rect.top, rect.bottom).</li>
-<li>Insert this pair into a <strong>Interval Search Tree</strong>.</li>
-<li>This tree is a BST, and use first value of the pair as BST key.</li>
-<li>Insert pair at the correct BST location. If conflicts, we&rsquo;ve found 1 overlapping pair.</li>
-</ol>
-
-
-<p>The code for searching a intersect, and insert a pair looks like this:</p>
-
-<pre><code>Node x = root;
-while (x != null) {
-    if (x.interval.intersects(lo, hi)) 
-        return x.interval;
-    else if (x.left == null)  x = x.right;
-    else if (x.left.max &lt; lo) x = x.right;
-    else                      x = x.left;
-}
-return null;
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/11/30/multiples-of-3-and-5/">[Question] Multiples of 3 and 5</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-30T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/11/30/multiples-of-3-and-5/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://projecteuler.net/problem=1">link</a></p>
-
-<blockquote><p>If we list all the natural numbers below 10 that are multiples of 3 or 5, we get 3, 5, 6 and 9. The sum of these multiples is 23.</p>
-
-<p>Find the sum of all the multiples of 3 or 5 below 1000.</p></blockquote>
-
-<h3>Solution</h3>
-
-<blockquote><p>The multiples of 3 are 3,6,9,12,15,18,21,24,27,30,&hellip;.</p>
-
-<p>The multiples of 5 are 5,10,15,20,25,30,35,40,45,&hellip;.</p>
-
-<p>The intersection of these two sequences is 15,30,45,&hellip;</p></blockquote>
-
-<p><img class="middle" src="/assets/images/multiples-of-3-5.png"></p>
-
-<p><a href="http://math.stackexchange.com/a/9260">source</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/11/04/Code-a-hashmap/">[Google] Code a HashMap</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-04T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/11/04/Code-a-hashmap/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.glassdoor.com/Interview/Code-a-hashmap-which-you-would-be-happy-to-place-into-a-production-environment-QTN_725885.htm">link</a></p>
-
-<blockquote><p>Code a hashmap which you would be happy to place into a production environment.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We already write 2 post before:</p>
-
-<ol>
-<li><p><strong>[Question] Implement a HashMap</strong></p></li>
-<li><p><strong>[CC150v5] 8.10 Implement a Hashmap</strong></p></li>
-</ol>
-
-
-<p>But still, this is not an easy question when asked at an interview. It won&rsquo;t harm to do a little recap:</p>
-
-<ol>
-<li>The basic structure is an array. It can be:
-
-<ol>
-<li>An array of linked nodes (with a next pointer).</li>
-<li>An array of linked list.</li>
-</ol>
-</li>
-<li>There should be a hash function.</li>
-<li>There should be a function to convert the hash value to corresponding array index.</li>
-<li>Remember there&rsquo;s <strong>a concept of Load factor</strong>. It means to what percentage the hashmap is filled.</li>
-<li>h &amp; (length – 1) means h % length, which maps a hashcode to an array index.</li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/11/01/Find-row-with-most-1s/">[Question] Find Row With Most 1s</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-01T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/11/01/Find-row-with-most-1s/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://www.geeksforgeeks.org/find-the-row-with-maximum-number-1s/">link</a></p>
-
-<blockquote><p>Given a 2D array with only 1s and 0s, where each row is sorted.</p>
-
-<p>Find the row with the maximum number of 1s. Input matrix:</p></blockquote>
-
-<pre><code>0 1 1 1
-0 0 1 1
-1 1 1 1  // this row has maximum 1s
-0 0 0 0
-</code></pre>
-
-<blockquote><p>Output: 2</p></blockquote>
-
-<h3>Analysis</h3>
-
-<p>By using a modified version of binary search, we can achieve <strong><a href="http://www.geeksforgeeks.org/find-the-row-with-maximum-number-1s/">a O(mLogn) solution</a></strong> where m is number of rows and n is number of columns in matrix.</p>
-
-<p><strong>However, there&rsquo;s better solution that works in linear time</strong>!</p>
-
-<h3>Solution</h3>
-
-<ol>
-<li><p>Get the index of first (or leftmost) 1 in the first row.</p></li>
-<li><p>Do following for every row after the first row:</p>
-
-<ol>
-<li><p>IF the element on left of previous leftmost 1 is 0, ignore this row.</p></li>
-<li><p>ELSE Move left until a 0 is found. Update the leftmost index to this index and max_row_index to be the current row.</p></li>
-</ol>
-</li>
-</ol>
-
-
-<p>The time complexity is O(m+n).</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public int solution(int[][] matrix) {
-    int m = matrix.length;
-    int n = matrix[0].length;
-    int p = n;
-    int row = -1;
-    for (int i = 0; i &lt; m; i++) {
-        // now p is larger than 0, otherwise it's already terminated
-        if (matrix[i][p - 1] == 0) {
-            continue;
-        }
-        // p points to a 1, now search to the left direction
-        for (int j = p - 1; j &gt;= 0; j--) {
-            if (matrix[i][j] == 1) {
-                p = j;
-            } else {
-                break;
-            }
-        }
-        // p have a new value now
-        if (p == 0) {
-            return i;
-        } else {
-            row = i;
-        }
-    }
-    return row;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="19">&larr; Older</a>
@@ -1054,7 +1090,7 @@ return null;
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (14)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
-<li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
+<li class='category'><a href='/blog/categories/leetcode/'>leetcode (185)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
