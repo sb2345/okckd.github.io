@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Objects Much of the power and flexibility of modern software analysis and design derives from its use of objects. Classes Classes create an abstract &hellip;">
+  <meta name="description" content="Question 5 Continue from last post, now let&rsquo;s support VIP services. User could buy VIP services using his acccount balance. class ProService { &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,488 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/26/design-class2-2/">[NineChap System Design] Class 2.2: Database</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-26T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/26/design-class2-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Question 5</h1>
+
+<p>Continue from last post, now let&rsquo;s <strong>support VIP services</strong>.</p>
+
+<p>User could buy VIP services using his acccount balance.</p>
+
+<pre><code>class ProService {
+    int userId;
+    double money;
+    long endTime;
+
+    public addMoney(){}
+    public buyPro(){}
+}
+</code></pre>
+
+<h2>Q5.1: System crash when purchasing VIP</h2>
+
+<p>Solution: <strong>transaction with log</strong></p>
+
+<pre><code>WriteLOG
+Transaction_1123: BEGIN
+money=20; endTime=16_07_2016
+</code></pre>
+
+<p>If system crash happens here, system will read the log, recover and roll back all original data. Try not to complete the transaction &ndash; just fail it.</p>
+
+<pre><code>WriteLOG
+Transaction_1123: BEGIN
+money=20; endTime=16_07_2016
+WriteLOG
+Transaction_1123: END
+money=10; endTime=16_08_2016
+</code></pre>
+
+<blockquote><p>What happens if system crash during writing the log? or during the rollback?</p></blockquote>
+
+<h2>Q5.2: dataset contains bad data</h2>
+
+<ol>
+<li>one user id have 2 corresponding pro-services information.</li>
+<li>Shallow user: a pro-services info does not have corresponding user.</li>
+</ol>
+
+
+<p>Solution: have a checker class.</p>
+
+<h2>Q5.3: simutaneous purchase by 2 users</h2>
+
+<p>Solution: lock.</p>
+
+<ol>
+<li>first process lock money &amp; endTime.</li>
+<li>Read money = 20</li>
+<li>another process try to lock, but end up waiting (sleeping).</li>
+<li>first process do the job, and release the lock.</li>
+<li>another process wakes up.</li>
+</ol>
+
+
+<blockquote><p>lock have time-out settings. It can be applied in distributed system as well.</p></blockquote>
+
+<p>Question: does lock make your execution slow?</p>
+
+<ol>
+<li><p>If another process is sleeping, CPU will be fully consumed by other process. So it won&rsquo;t impact.</p></li>
+<li><p>You can do some async processing, too.</p></li>
+<li><p>When you lock, try to lock only a small piece of code, not the entire method. In DB, lock only a row, not a table.</p></li>
+<li><p>Java <a href="https://en.wikipedia.org/wiki/Compare-and-swap">CAS</a> (Compare and swap )</p></li>
+</ol>
+
+
+<h2>Q5.4: Server crash</h2>
+
+<p>Solution: duplication.</p>
+
+<ol>
+<li><p>How many copies?</p>
+
+<p> Google did 3. Normally 2 in same data center, and 1 in another location.</p>
+
+<p> Backup data normally is on another machine. But there&rsquo;s also <a href="https://en.wikipedia.org/wiki/RAID">RAID</a> (redundant array of independent disks) which:</p>
+
+<blockquote><p>combines multiple physical disk drive components into a single logical unit for the purposes of <strong>data redundancy, performance improvement</strong>, or both.</p></blockquote></li>
+<li><p>When does the copy happen?</p>
+
+<p> Option 1 is <strong>doing everyday nightly</strong>. This is called a &lsquo;check point&rsquo;.</p>
+
+<p> Option 2 is use another server to support <strong>Shadow Redundancy</strong>. All data from Machine 0 will be copied to Machine 1 WHILE it happens. The result is, Machine 1 is identical to Machine 0. If Machine 0 crashes, Machine 1 may be behind less than 1 second.</p>
+
+<p> The way to duplicate is either re-play all the actions, or to read Machine 0&rsquo;s log and apply the new data.</p></li>
+<li><p>How to copy?</p>
+
+<p> User send data to 1 server, and from that server, pipeline. This ensures good usage of server bandwith, and serial transfer of data ensures low latency (several ms).</p>
+
+<p> It&rsquo;s also possible to do tree-like transfer, but the above method is preferred cuz all machine consume same bandwidth.</p></li>
+<li><p>What is log?</p>
+
+<p> It is actually &lsquo;checkpoint&rsquo; + log. It allows you to rollback.</p></li>
+</ol>
+
+
+<p>Data redundancy &ndash; Summary:</p>
+
+<p><img class="middle" src="/assets/images/design-class2-data-redundancy-1.png"></p>
+
+<h2>Final note: Data inconsistency</h2>
+
+<p>Main sources of inconsistency comes from:</p>
+
+<ol>
+<li>network fault</li>
+<li>disk error</li>
+</ol>
+
+
+<p>The disk eror is solved by <strong>checksum</strong> (compare during disk writing).</p>
+
+<h1>Summary</h1>
+
+<p><strong><a href="https://en.wikipedia.org/wiki/ACID">ACID</a> (Atomicity, Consistency, Isolation, Durability)</strong>  is a set of properties that guarantee that database transactions are processed reliably.</p>
+
+<ol>
+<li><p><strong>Atomicity: all or nothing</strong></p>
+
+<p> Q5.1: System crash when purchasing VIP</p></li>
+<li><p><strong>Consistency</strong>: validate according to defined rules</p>
+
+<p> Q5.2: dataset contains bad data</p></li>
+<li><p><strong>Isolation</strong>: independency between transactions <strong>(lock)</strong></p>
+
+<p> Q5.3: simutaneous purchase by 2 users</p></li>
+<li><p><strong>Durability</strong>: stored permanently</p>
+
+<p> Q5.4: Server crash</p></li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class2-summary.png"></p>
+
+<p>Additional Questions:</p>
+
+<ol>
+<li>design a user system (Netflix 2015)</li>
+</ol>
+
+
+<p>Hint: table design, register, login/out, password check, find password.</p>
+
+<ol>
+<li>Design payment system (Yelp, BigCommerce 2015)</li>
+</ol>
+
+
+<p>Hint: the question does not ask about table/ds design itself, but rather the problems associated with payment. Read about ACID principle.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/26/design-class2-1/">[NineChap System Design] Class 2.1: Database</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-26T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/26/design-class2-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p>This class covers database design:</p>
+
+<ol>
+<li>design data with class and inheritance</li>
+<li>design a user system (Netflix 2015)</li>
+<li>design a payment system (Yelp, BigCommerce 2015)</li>
+</ol>
+
+
+<h1>Question 1</h1>
+
+<p><strong>design account (login/out) system</strong> for our radio app.</p>
+
+<h2>Step one, scenario</h2>
+
+<ol>
+<li>register, update, remove account</li>
+<li>login/out</li>
+<li>user balance, VIP services</li>
+</ol>
+
+
+<h2>Step Two, necessary</h2>
+
+<ol>
+<li><p>Ask</p>
+
+<ol>
+<li>total user: 100 million</li>
+<li>daily user: 1 million</li>
+</ol>
+</li>
+<li><p>predict</p>
+
+<ol>
+<li>daily active user in 3 month: 10 million</li>
+<li>register percentage: 1%</li>
+<li>daily new register: 100 thousand</li>
+</ol>
+</li>
+<li><p>more predict</p>
+
+<ol>
+<li>login percentage: 15%</li>
+<li>average login frequency: 1.2 (ppl may input wrong password 20% of time)</li>
+<li>daily login attempts: 10 million * 15% * 1.2 = 1.8 million</li>
+<li>average login frequency: 1.8 million / 24hr = 21 login/sec</li>
+<li>normal login frequency: 21 * 2 = 42 login/sec</li>
+<li>peak login frequency: 42 * 3 = 126 login/sec</li>
+</ol>
+</li>
+</ol>
+
+
+<h2>Step Three, Application</h2>
+
+<p><img class="middle" src="/assets/images/design-class2-app-design.png"></p>
+
+<h2>Step Four, Kilobit</h2>
+
+<p>Data &ndash; User table should contain name and password. What else?</p>
+
+<pre><code>class User {
+    int userId; (primary key)
+    String name;
+    String password;
+}
+</code></pre>
+
+<p>Data &ndash; User Table</p>
+
+<pre><code>class UserTable {
+    list&lt;User&gt; table;
+
+    public insert(){}
+    public delete(User){}
+    public update(User){}
+    public User select(){}
+}
+</code></pre>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a></strong>, (Sometimes called SCRUD with an &ldquo;S&rdquo; for Search) are the four basic functions of persistent storage.</p></blockquote>
+
+<h1>Question 2</h1>
+
+<p><strong>verification and forbidden accounts</strong></p>
+
+<p>We have to know the concept of <strong>Account State Lifecycle Graph</strong>:</p>
+
+<p><img class="middle" src="/assets/images/design-class2-account-life-cycle.png"></p>
+
+<ol>
+<li><p>ban: fake user, advertising users&hellip; bannned by the management</p></li>
+<li><p>inactive: user choose to suspend his own account, voluntarily.</p></li>
+<li><p>delete account: normally we won&rsquo;t remove all related data (just make userId as &ldquo;deleted&rdquo;). Otherwise a lot of data can be violated. All your chatting history <strong>actually remains</strong>.</p></li>
+</ol>
+
+
+<h2>redesign User Table</h2>
+
+<p>Old User table:</p>
+
+<pre><code>class User {
+    int userId; (primary key)
+    String name;
+    String password;
+}
+</code></pre>
+
+<p>Modified User table:</p>
+
+<pre><code>class User {
+    int userId;
+    char name[10];
+    char hiddenPassword[10];
+    int state;
+}
+</code></pre>
+
+<ol>
+<li><p>We added state, to support Account life cycle.</p></li>
+<li><p>We changed username to fixed size, for better performance on searching and storing. Can prevent certain attacks, too.</p></li>
+<li><p>save encrypted password.</p></li>
+</ol>
+
+
+<h1>Question 3</h1>
+
+<p><strong>design login/out process</strong></p>
+
+<ol>
+<li>User account auto logged out after a certain period of time.</li>
+<li>multiple account logged in at same time.</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class2-session-life-cycle.png"></p>
+
+<h2>Session</h2>
+
+<p><strong>Session is a conversation</strong> between user and server.</p>
+
+<ol>
+<li>User can have >1 session, if he log in from different devices.</li>
+<li>Session must be verified, thus we have to keep <strong>sessionId</strong>.</li>
+</ol>
+
+
+<p>Session status: &ldquo;iPad online&rdquo;, &ldquo;PC online&rdquo;&hellip;</p>
+
+<p>Modify User table:</p>
+
+<pre><code>class User {
+    int userId;
+    char name[10];
+    char hiddenPassword[10];
+    int state;
+    List&lt;session&gt; sessionList;
+}
+</code></pre>
+
+<p>Important in Session table:</p>
+
+<ol>
+<li>device ID</li>
+<li><p>time-out period</p>
+
+<p> class Session {
+     private sessionId;
+     int userId;</p>
+
+<pre><code> int deviceCode;
+ long timeOut;
+</code></pre>
+
+<p> }</p></li>
+</ol>
+
+
+<p>User table would include a <strong>session list</strong>.</p>
+
+<h2>further improvement: session</h2>
+
+<ol>
+<li>we update sessionList very frequently.</li>
+<li>size of sessionList is dynamic.</li>
+</ol>
+
+
+<p>Solution: seperate the table.</p>
+
+<p><img class="middle" src="/assets/images/design-class2-user-session-table.png"></p>
+
+<p>Question: When to clean up the session data (considering huge amount of data and frequent calculation)?</p>
+
+<blockquote><p>Answer: every end of day. Or store sessions in-memory, so it lose all the data when machine restarts (it is used in Gaming platforms). Or we can clean up one user&rsquo;s session list whenever the user did a new log-in.</p>
+
+<p>We do not remove session whenever it expires. It&rsquo;s too much calculation.</p></blockquote>
+
+<h2>further improvement: inheritance</h2>
+
+<p>Apply inheritance to UserTable and SessionTable:</p>
+
+<pre><code>class Table {
+    list&lt;Row*&gt; table;
+
+    public insert(){}
+    public delete(){}
+    public update(){}
+    public User select(){}
+}
+
+class UserTable extends Table {
+}
+
+class SessionTable extends Table {
+}
+</code></pre>
+
+<p>As for the Row class:</p>
+
+<pre><code>class Row {
+    List&lt;Attributes&gt; row;
+}
+
+class User extends Row {
+}
+
+class Session extends Row {
+}
+</code></pre>
+
+<h1>Question 4</h1>
+
+<p><strong>design search algorithm</strong></p>
+
+<ol>
+<li>find my userId</li>
+<li>find my userId range</li>
+</ol>
+
+
+<p>Solution 1: add <strong>HashMap</strong> in the table. Can do search in O(1), but can&rsquo;t find range.</p>
+
+<p>Solution 2: <strong>BST data structure</strong>. Can do search range and search in O(log2 n) time.</p>
+
+<h2>Best solution: B+ tree</h2>
+
+<p><strong><a href="https://en.wikipedia.org/wiki/B%2B_tree">B+ tree</a></strong> &ndash; everything in O(logb n) which is <strong>close to constant time</strong>.</p>
+
+<p>Plus, B+ tree is hard disk friendly. Read more on a future post.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1145,178 +1627,6 @@ public class SOAPMessage : IMessage
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/21/sort-letters-given-lexicographic-order/">[Palantir] Sort Letters Given Lexicographic Order</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-21T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/21/sort-letters-given-lexicographic-order/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://quant365.com/viewtopic.php?t=11">link</a></p>
-
-<blockquote><p>Sort the letters in one word by the order they occur in another in linear time.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This</p>
-
-<p>text</p>
-
-<p>is</p>
-
-<p>used</p>
-
-<p>to</p>
-
-<p>stop</p>
-
-<p>you</p>
-
-<p>from</p>
-
-<p>looking</p>
-
-<p>at</p>
-
-<p>the</p>
-
-<p>answer</p>
-
-<p>immediately</p>
-
-<p>The answer is <strong>counting sort</strong>.</p>
-
-<h3>Code</h3>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/10/Rotate-Array/">[LeetCode 189] Rotate Array</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-10T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/10/Rotate-Array/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/rotate-array/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Rotate an array of <i>n</i> elements to the right by <i>k</i> steps.</p>
-<p>For example, with <i>n</i> = 7 and <i>k</i> = 3, the array <code>[1,2,3,4,5,6,7]</code> is rotated to <code>[5,6,7,1,2,3,4]</code>. </p>
-
-<p><b>Note:</b><br>
-Try to come up as many solutions as you can, there are at least 3 different ways to solve this problem.
-</p>
-
-<p class="showspoilers"><a href="#" onclick="showSpoilers(this); return false;">[show hint]</a></p>
-<div class="spoilers" style="display: none;"><b>Hint:</b><br>
-Could you do it in-place with O(1) extra space?
-</div>
-
-<p>Related problem: <a href="/problems/reverse-words-in-a-string-ii/">Reverse Words in a String II</a></p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/Freezen">@Freezen</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/array/">Array</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Solution</h3>
-
-<p>This question is very standard &ldquo;rotate 3 times&rdquo; solution.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class Solution {
-    public void rotate(int[] nums, int k) {
-        if (nums == null || nums.length == 0) {
-            return;
-        }
-        int len = nums.length;
-        k = k % len;
-
-        reverse(nums, 0, len - k - 1);
-        reverse(nums, len - k, len - 1);
-        reverse(nums, 0, len - 1);
-    }
-
-    void reverse(int[] nums, int start, int end) {
-        while (start &lt; end) {
-            int temp = nums[start];
-            nums[start] = nums[end];
-            nums[end] = temp;
-            start++;
-            end--;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="4">&larr; Older</a>
@@ -1336,7 +1646,7 @@ Could you do it in-place with O(1) extra space?
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
-<li class='category'><a href='/blog/categories/fundamental/'>fundamental (15)</a></li>
+<li class='category'><a href='/blog/categories/fundamental/'>fundamental (17)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (30)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
@@ -1357,6 +1667,14 @@ Could you do it in-place with O(1) extra space?
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/22/reflexive-symmetric-transitive/">[Fundamental] Reflexive, Symmetric and Transitive Rules </a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/22/polynomial-quadratic-cubic-exponential/">[Fundamental] Polynomial, quadratic, cubic and exponential </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/14/UML-diagrams/">[Fundamental] UML Class Diagrams </a>
       </li>
     
@@ -1366,14 +1684,6 @@ Could you do it in-place with O(1) extra space?
     
       <li class="post">
         <a href="/blog/2015/10/13/Segment-Tree-Query/">[LintCode] Segment Tree Query </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/13/Segment-Tree-Modify/">[LintCode] Segment Tree Modify </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/13/Segment-Tree-Build-II/">[LintCode] Segment Tree Build II </a>
       </li>
     
   </ul>
