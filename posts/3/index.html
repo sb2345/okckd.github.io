@@ -9,9 +9,9 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question 4 fix MP3 problem The process of fetching a MP3 (from CDN): aquire MP3 link, and send request
-send request to CDN
-CDN receive request, find &hellip;">
+  <meta name="description" content="Overview KISS &ndash; Keep It Simple, Sweetie. In Today&rsquo;s lecture: write a crawler
+thread-saft consumer &amp; producer
+GFS, BigTable and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,378 @@ CDN receive request, find &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/30/design-class4-1/">[NineChap System Design] Class 4.1: Crawler</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-30T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/30/design-class4-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p><strong>KISS &ndash; Keep It Simple, Sweetie</strong>.</p>
+
+<p>In Today&rsquo;s lecture:</p>
+
+<ol>
+<li>write a crawler</li>
+<li>thread-saft consumer &amp; producer</li>
+<li>GFS, BigTable and MapReduce</li>
+<li>Top 10 keyword/anagram using MapReduce</li>
+<li>Log analysis</li>
+</ol>
+
+
+<h1>News Aggregator App</h1>
+
+<ol>
+<li><p>Info Collection</p>
+
+<p> crawler</p></li>
+<li><p>Info retrieval: rank, search and recommend.</p>
+
+<p> They are in fact, all related to <strong>sorting</strong>.</p></li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class4-News-Aggregator.png"></p>
+
+<h2>Step 1, Info collection with crawler</h2>
+
+<h3>crawler code</h3>
+
+<p>Python:</p>
+
+<pre><code>import urllib2
+
+# request
+url = "www.google.com"
+request = urllib2.Request(url)
+response = urllib2.urlopen(request)
+page = response.read()
+
+# save the file
+webFile = open('webpage.html', 'web')
+webFile.write(page)
+webFile.close()
+</code></pre>
+
+<h3>Network process</h3>
+
+<p>Use of <strong>socket</strong>.</p>
+
+<p><img class="middle" src="/assets/images/design-class4-web-socket-1.png"></p>
+
+<p>Socket is like the cellphone in the Call Center example.</p>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Network_socket">socket</a></strong> is an endpoint of an inter-process communication across a computer network.</p>
+
+<p>Today, most communication between computers is based on the Internet Protocol; therefore most network sockets are <strong>Internet sockets</strong>.</p></blockquote>
+
+<p>What is socket? Where is it?</p>
+
+<p><img class="middle" src="/assets/images/design-class4-web-socket-2.png"></p>
+
+<p>It&rsquo;s in-between <strong>Application Layer</strong> (HTTP, FTP, DNS) and <strong>Transport layer</strong> (UDP, TCP).</p>
+
+<p>Remembering that socket is like a cellphone. It is an <strong>abstraction layer</strong>, that hinds the complexity of lower layer, thus making it easier to sende data in application layer.</p>
+
+<h3>How is client connected to Server?</h3>
+
+<p>3-way handshake. Read <strong>[Design] TCP 3-Way Handshake</strong></p>
+
+<h3>HTML</h3>
+
+<p><a href="http://www.w3schools.com/js/js_htmldom.asp">DOM tree</a>:</p>
+
+<p><img class="middle" src="/assets/images/html-dom-tree.gif"></p>
+
+<blockquote><p><a href="http://www.w3.org/TR/DOM-Level-2-Core/introduction.html">Document Object Model</a> (DOM) is an application programming interface (API) for valid HTML and well-formed XML documents. It <strong>defines the logical structure of documents</strong> and the way a document is accessed and manipulated.</p></blockquote>
+
+<h3>How to crawler all the news</h3>
+
+<ol>
+<li>Go to index page</li>
+<li>identify all the links (regex)</li>
+</ol>
+
+
+<h2>Crawl more websites</h2>
+
+<h3>Simple design</h3>
+
+<ol>
+<li>use crawlers to find out all list pages</li>
+<li>send the new lists to a Scheduler</li>
+<li>Scheduler will use crawlers again, to crawl pages.</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-1.png"></p>
+
+<p>This design is bad, cuz there is crawler waste. How can we <strong>reuse</strong> these crawlers???</p>
+
+<h3>Adv design</h3>
+
+<p>Design crawler that can crawl <strong>both list and pages</strong> information.</p>
+
+<blockquote><p>Look at our crawler: the text extraction logic and Regex for <em>abc.com</em> and <em>bfe.com</em> are totally different. However, they both share the same crawling techniques.</p></blockquote>
+
+<p>So we pass in all info a crawler task needs. Like:</p>
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-2.png"></p>
+
+<ol>
+<li><p>we gave <strong>more priority to list pages than content pages</strong>. Otherwise, your content get out of date soon.</p></li>
+<li><p>Type include both list/content and source info.</p></li>
+<li><p>status can be done, working, or new.</p></li>
+<li><p>timestamps helps us make sure each crawler runs every hour (let&rsquo;s say)</p></li>
+</ol>
+
+
+<p>So when schedule <strong>pick the next crawler task</strong> to run, it will choose <strong>based on Priority</strong>. However if the <strong>timestamp (availableTime) is not yet reached</strong>, the job won&rsquo;t be executed.</p>
+
+<p>If you crawler <strong>runs until endTime</strong> and haven&rsquo;t finish, force finish it. We should also add <strong>task created time</strong> to the info.</p>
+
+<h3>How to identify similar news?</h3>
+
+<p>Calculate the similarity between pages. More on this subject later.</p>
+
+<h2>How to design Scheduler?</h2>
+
+<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-3.png"></p>
+
+<h3>Solution with Sleep</h3>
+
+<p>Define variables:</p>
+
+<pre><code>taskTable&lt;table&gt; - store task lists
+pageTable&lt;page&gt; - store page contents
+
+task.url
+task.state = new/working/done
+task.type = list/page
+</code></pre>
+
+<p>code:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    taskTable.lock();               // IMPORTANT
+    newTask = taskTable.findOne(state == 'new')
+
+    if (!newTask) {
+        taskTable.unlock();         // IMPORTANT
+        sleep(1000);                // IMPORTANT
+        continue;
+    }
+
+    newTask.state = "working";
+    taskTable.unlock();
+
+    // execute the task, and insert to
+    // either taskTable or pageTable
+    newPage = Crawl(newTask.url);
+
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";     // IMPORTANT
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";     // IMPORTANT
+        taskTable.unlock();
+    }
+}
+</code></pre>
+
+<h3>Solution with Conditional Variable</h3>
+
+<p>What is Conditional Variable:</p>
+
+<blockquote><p><a href="https://goo.gl/xOFXrY">A condition variable</a> is basically <strong>a container of threads that are waiting on a certain condition</strong>.</p>
+
+<p>Monitors provide a mechanism for threads to temporarily give up exclusive access in order to wait for some condition to be met, before regaining exclusive access and resuming their task.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/design-class4-condition-variable.png"></p>
+
+<p>Look at last 3 lines of code. <strong>Before going to sleep, CV have to release the lock</strong>, so that other threads can access the taskTable.</p>
+
+<p>Then CV goes to sleep. <strong>Right after CV has been waken up</strong>, it has to lock the mutex again.</p>
+
+<p>Solution w/ cv:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    taskTable.lock();
+    newTask = taskTable.findOne(state == 'new')
+
+    if (!newTask) {
+        taskTable.unlock();
+        Cond_Wait(cond, taskTable);  // Modified
+        continue;
+    }
+
+    newTask.state = "working";
+    taskTable.unlock();
+
+    // execute the task, and insert to
+    // either taskTable or pageTable
+    newPage = Crawl(newTask.url);
+
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+            Cond_Signal(cond);       // Modified
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";
+        taskTable.unlock();
+    }
+}
+</code></pre>
+
+<p>Why Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better.</p>
+
+<h3>Solution with Semaphore</h3>
+
+<p>This is better than Condition Variable, cuz it&rsquo;s easier to implement. And Semaphore not only locks thread, it also <strong>can lock process</strong>.</p>
+
+<p>CV locks on a certain condition. But Semaphore locks the numbers (of task, or resources etc).</p>
+
+<p>Semaphore implementation (fairly difficult, read for interest):</p>
+
+<pre><code>Wait(semaphore) {
+    Lockf(semaphore);
+    semaphore.value--;
+    if (semaphore.value &lt; 0) {
+        semaphore.processWaitList.Add(this.process);
+        Release(semaphore);
+        Block(this.process);
+    } else {
+        Release(semaphore);
+    }
+}
+
+Signal(semaphore) {
+    Lock(semaphore);
+    semaphore.value++;
+    if (semaphore.value &lt;= 0) {
+        process = semaphore.processWaitList.pop();
+        Wakeup(process);
+    }
+    Release(semaphore);
+}
+</code></pre>
+
+<p>Note that in Java and C++, Wait() == acquire() and Signal() == release(). Read more <a href="http://tutorials.jenkov.com/java-util-concurrent/semaphore.html">Jenkov&rsquo;s post</a>.</p>
+
+<p>code w/ semaphore:</p>
+
+<pre><code>while (true) {
+    // get 1 task. If can't get, wait
+    Wait(numberOfNewTask);           // Modified
+
+    taskTable.lock();
+    newTask = taskTable.findOne(state == 'new')
+    newTask.state = "working";
+    taskTable.unlock();
+
+    // execute the task, and insert to
+    // either taskTable or pageTable
+    newPage = Crawl(newTask.url);
+
+    if (newTask.state === 'list') {
+        // insert all urls to taskTable
+        taskTable.lock();
+        foreach (url in newPage) {
+            taskTable.add(new task(url));
+            Signal(numberOfNewTask); // Modified
+        }
+
+        // mark the task as "done"
+        newTask.state = "done";
+        taskTable.unlock();
+    } else {
+        // insert page content to pageTable
+        pageTable.lock();
+        pageTable.add(newPage.content());
+        pageTable.unlock();
+
+        // mark the task as "done"
+        taskTable.lock();
+        newTask.state = "done";
+        taskTable.unlock();
+    }
+}
+</code></pre>
+
+<p><strong>What happens in Line 3 &lsquo;Wait(numberOfNewTask)&rsquo;</strong>? Well, the programs checks on the numberOfNewTask (counter) variable, and:</p>
+
+<ol>
+<li>If there is 1 or more tasks, just proceed.</li>
+<li>If no tasks available, block itself and wait there. (Later someone will wake it up and it will resume).</li>
+</ol>
+
+
+<h3>Design an consumer-producer</h3>
+
+<p>Stay tuned for future post.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1614,153 +1986,6 @@ Similarity( u1, u2 ) = 3
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/">[Design] Cryptographic Standard, AES and RSA</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-09T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/06/09/Cryptographic-standards-AES-RSA/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Overview</h1>
-
-<h2>3 areas of cryptographic standard:</h2>
-
-<ol>
-<li><p>encryption standard</p>
-
-<ol>
-<li>Data Encryption Standard (obsolete)</li>
-<li>Triple DES</li>
-<li><strong>Advanced Encryption Standard (AES)</strong></li>
-<li><strong>RSA</strong></li>
-<li>OpenPGP</li>
-<li>CipherSaber</li>
-</ol>
-</li>
-<li><p>hash standard</p>
-
-<ol>
-<li><strong>MD5</strong></li>
-<li><strong>SHA-1</strong></li>
-<li>SHA-2</li>
-<li>HMAC</li>
-<li>PBKDF2</li>
-</ol>
-</li>
-<li><p>digital signature standard</p>
-
-<ol>
-<li>Digital Signature Algorithm (DSA)</li>
-<li>RSA</li>
-<li>Elliptic</li>
-</ol>
-</li>
-</ol>
-
-
-<h2>Symmetric-key algorithm</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Symmetric-key_algorithm">Use the same cryptographic keys</a> for both encryption and decryption.</p>
-
-<p>The keys represent a shared secret between two parties, and maintain a private information link.</p>
-
-<p>This requirement that both parties have access to the secret key is one of the main drawbacks.</p>
-
-<h2>Public-key cryptography</h2>
-
-<p>The public key is used:</p>
-
-<ol>
-<li>encrypt plaintext</li>
-<li>verify a digital signature</li>
-</ol>
-
-
-<p>private key is used:</p>
-
-<ol>
-<li>decrypt ciphertext</li>
-<li>create a digital signature.</li>
-</ol>
-
-
-<h1>Encryption standard</h1>
-
-<h2>RSA Vs. AES</h2>
-
-<p><strong>RSA is very computationally expensive</strong> by comparison with AES. It involves mathematics with very large numbers, whilst AES can be implemented with relatively simple bit operations.</p>
-
-<p><a href="http://security.stackexchange.com/questions/10949/encryption-should-i-be-using-rsa-or-aes">RSA is a public-key encryption algorithm</a> (asymmetric), while AES is a symmetric key algorithm. Often a cryptosystem will use both algorithms.</p>
-
-<p><a href="http://stackoverflow.com/questions/13238674/aes-vs-rsa-to-encrypt-large-size-of-data">A good compromise is to</a> use RSA to encrypt the symmetric key that is then used in AES encryption of the larger data.</p>
-
-<h2>GitHub</h2>
-
-<p>uses RSA encryption.</p>
-
-<h1>hash standard</h1>
-
-<h2>MD5</h2>
-
-<p>The MD5 message-digest algorithm is a widely used cryptographic hash function producing a 128-bit (16-byte) hash value, or 32 digit Hex.</p>
-
-<blockquote><p>d &ndash;> 8277e0910d750195b448797616e091ad</p>
-
-<p>good morning &ndash;> 2b849500e4585dab4196ec9a415edf8f</p></blockquote>
-
-<h2>SHA-1</h2>
-
-<p>SHA-1 produces a 160-bit (20-byte) hash value, or 40 digit Hex.</p>
-
-<h2>For more</h2>
-
-<p>About MD5, SHA-1 and other, refer to <strong>[Design] Cryptographic Hash, MD5 and Digital Signature</strong></p>
-
-<h1>digital signature standard</h1>
-
-<p>A valid digital signature gives a recipient confidence that the message was created by a known sender.</p>
-
-<p>commonly used for software distribution, financial transactions</p>
-
-<p><img class="middle" src="/assets/images/digital_signature.png"></p>
-
-<p><a href="http://searchsecurity.techtarget.com/definition/digital-signature">To create a digital signature</a>, signing software (such as an email program) creates a one-way hash of the data to be signed. The private key is then used to encrypt the hash.</p>
-
-<blockquote><p>The reason for encrypting the hash instead of entire message is that a hash function can convert an arbitrary input into a fixed length value, which is usually much shorter.</p></blockquote>
-
-<p>Other party validate the integrity of the data by using the signer&rsquo;s public key to decrypt the hash.</p>
-
-<blockquote><p>Note: you can choose to &lsquo;<strong> Add digital signature to this message </strong>&rsquo; in Microsoft Office.</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="4">&larr; Older</a>
@@ -1781,7 +2006,7 @@ Similarity( u1, u2 ) = 3
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (31)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (32)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
@@ -1801,6 +2026,10 @@ Similarity( u1, u2 ) = 3
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/23/Template-method-pattern/">[Java OOP] Template method pattern (abstract class) </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/22/reflexive-symmetric-transitive/">[Fundamental] Reflexive, Symmetric and Transitive Rules </a>
       </li>
     
@@ -1814,10 +2043,6 @@ Similarity( u1, u2 ) = 3
     
       <li class="post">
         <a href="/blog/2015/10/22/avoid-protected/">[Java OOP] Why avoid using Protected? </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/14/UML-diagrams/">[Fundamental] UML Class Diagrams </a>
       </li>
     
   </ul>

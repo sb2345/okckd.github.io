@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Overview Segment tree is a tree data structure for storing intervals, or segments. Can be used to search the max/min or sum values in a range. modify &hellip;">
+  <meta name="description" content="Question link The structure of Segment Tree is a binary tree which each node has two attributes start and end denote an segment / interval. start and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,94 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/10/13/Segment-Tree-Build/">[LintCode] Segment Tree Build</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-10-13T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/10/13/Segment-Tree-Build/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.lintcode.com/en/problem/segment-tree-build/">link</a></p>
+
+<blockquote><p>The structure of Segment Tree is a binary tree which each node has two attributes start and end denote an segment / interval.</p>
+
+<p>start and end are both integers, they should be assigned in following rules:</p>
+
+<p>The root&rsquo;s start and end is given by build method.
+The left child of node A has start=A.left, end=(A.left + A.right) / 2.
+The right child of node A has start=(A.left + A.right) / 2 + 1, end=A.right.
+if start equals to end, there will be no children for this node.</p>
+
+<p>Implement a build method with two parameters start and end, so that we can create a corresponding segment tree with every node has the correct start and end value, return the root of this segment tree.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>A simple top-down run through.</p>
+
+<h3>Code</h3>
+
+<pre><code>/**
+ * Definition of SegmentTreeNode:
+ * public class SegmentTreeNode {
+ *     public int start, end;
+ *     public SegmentTreeNode left, right;
+ *     public SegmentTreeNode(int start, int end) {
+ *         this.start = start, this.end = end;
+ *         this.left = this.right = null;
+ *     }
+ * }
+ */
+public class Solution {
+    /**
+     *@param start, end: Denote an segment / interval
+     *@return: The root of Segment Tree
+     */
+    public SegmentTreeNode build(int start, int end) {
+        // write your code here
+        if (start &gt; end) {
+            return null;
+        }
+        SegmentTreeNode node = new SegmentTreeNode(start, end);
+        if (start &lt; end) {
+            node.left = build(start, (start + end) / 2);
+            node.right = build((start + end) / 2 + 1, end);
+        }
+        return node;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1092,378 +1180,6 @@ private void cumulateDistance(int x, int y, int[] dis, int m, int n) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/08/30/design-class4-1/">[NineChap System Design] Class 4.1: Crawler</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-08-30T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/08/30/design-class4-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Overview</h1>
-
-<p><strong>KISS &ndash; Keep It Simple, Sweetie</strong>.</p>
-
-<p>In Today&rsquo;s lecture:</p>
-
-<ol>
-<li>write a crawler</li>
-<li>thread-saft consumer &amp; producer</li>
-<li>GFS, BigTable and MapReduce</li>
-<li>Top 10 keyword/anagram using MapReduce</li>
-<li>Log analysis</li>
-</ol>
-
-
-<h1>News Aggregator App</h1>
-
-<ol>
-<li><p>Info Collection</p>
-
-<p> crawler</p></li>
-<li><p>Info retrieval: rank, search and recommend.</p>
-
-<p> They are in fact, all related to <strong>sorting</strong>.</p></li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/design-class4-News-Aggregator.png"></p>
-
-<h2>Step 1, Info collection with crawler</h2>
-
-<h3>crawler code</h3>
-
-<p>Python:</p>
-
-<pre><code>import urllib2
-
-# request
-url = "www.google.com"
-request = urllib2.Request(url)
-response = urllib2.urlopen(request)
-page = response.read()
-
-# save the file
-webFile = open('webpage.html', 'web')
-webFile.write(page)
-webFile.close()
-</code></pre>
-
-<h3>Network process</h3>
-
-<p>Use of <strong>socket</strong>.</p>
-
-<p><img class="middle" src="/assets/images/design-class4-web-socket-1.png"></p>
-
-<p>Socket is like the cellphone in the Call Center example.</p>
-
-<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Network_socket">socket</a></strong> is an endpoint of an inter-process communication across a computer network.</p>
-
-<p>Today, most communication between computers is based on the Internet Protocol; therefore most network sockets are <strong>Internet sockets</strong>.</p></blockquote>
-
-<p>What is socket? Where is it?</p>
-
-<p><img class="middle" src="/assets/images/design-class4-web-socket-2.png"></p>
-
-<p>It&rsquo;s in-between <strong>Application Layer</strong> (HTTP, FTP, DNS) and <strong>Transport layer</strong> (UDP, TCP).</p>
-
-<p>Remembering that socket is like a cellphone. It is an <strong>abstraction layer</strong>, that hinds the complexity of lower layer, thus making it easier to sende data in application layer.</p>
-
-<h3>How is client connected to Server?</h3>
-
-<p>3-way handshake. Read <strong>[Design] TCP 3-Way Handshake</strong></p>
-
-<h3>HTML</h3>
-
-<p><a href="http://www.w3schools.com/js/js_htmldom.asp">DOM tree</a>:</p>
-
-<p><img class="middle" src="/assets/images/html-dom-tree.gif"></p>
-
-<blockquote><p><a href="http://www.w3.org/TR/DOM-Level-2-Core/introduction.html">Document Object Model</a> (DOM) is an application programming interface (API) for valid HTML and well-formed XML documents. It <strong>defines the logical structure of documents</strong> and the way a document is accessed and manipulated.</p></blockquote>
-
-<h3>How to crawler all the news</h3>
-
-<ol>
-<li>Go to index page</li>
-<li>identify all the links (regex)</li>
-</ol>
-
-
-<h2>Crawl more websites</h2>
-
-<h3>Simple design</h3>
-
-<ol>
-<li>use crawlers to find out all list pages</li>
-<li>send the new lists to a Scheduler</li>
-<li>Scheduler will use crawlers again, to crawl pages.</li>
-</ol>
-
-
-<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-1.png"></p>
-
-<p>This design is bad, cuz there is crawler waste. How can we <strong>reuse</strong> these crawlers???</p>
-
-<h3>Adv design</h3>
-
-<p>Design crawler that can crawl <strong>both list and pages</strong> information.</p>
-
-<blockquote><p>Look at our crawler: the text extraction logic and Regex for <em>abc.com</em> and <em>bfe.com</em> are totally different. However, they both share the same crawling techniques.</p></blockquote>
-
-<p>So we pass in all info a crawler task needs. Like:</p>
-
-<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-2.png"></p>
-
-<ol>
-<li><p>we gave <strong>more priority to list pages than content pages</strong>. Otherwise, your content get out of date soon.</p></li>
-<li><p>Type include both list/content and source info.</p></li>
-<li><p>status can be done, working, or new.</p></li>
-<li><p>timestamps helps us make sure each crawler runs every hour (let&rsquo;s say)</p></li>
-</ol>
-
-
-<p>So when schedule <strong>pick the next crawler task</strong> to run, it will choose <strong>based on Priority</strong>. However if the <strong>timestamp (availableTime) is not yet reached</strong>, the job won&rsquo;t be executed.</p>
-
-<p>If you crawler <strong>runs until endTime</strong> and haven&rsquo;t finish, force finish it. We should also add <strong>task created time</strong> to the info.</p>
-
-<h3>How to identify similar news?</h3>
-
-<p>Calculate the similarity between pages. More on this subject later.</p>
-
-<h2>How to design Scheduler?</h2>
-
-<p><img class="middle" src="/assets/images/design-class4-cralwer-arch-3.png"></p>
-
-<h3>Solution with Sleep</h3>
-
-<p>Define variables:</p>
-
-<pre><code>taskTable&lt;table&gt; - store task lists
-pageTable&lt;page&gt; - store page contents
-
-task.url
-task.state = new/working/done
-task.type = list/page
-</code></pre>
-
-<p>code:</p>
-
-<pre><code>while (true) {
-    // get 1 task. If can't get, wait
-    taskTable.lock();               // IMPORTANT
-    newTask = taskTable.findOne(state == 'new')
-
-    if (!newTask) {
-        taskTable.unlock();         // IMPORTANT
-        sleep(1000);                // IMPORTANT
-        continue;
-    }
-
-    newTask.state = "working";
-    taskTable.unlock();
-
-    // execute the task, and insert to
-    // either taskTable or pageTable
-    newPage = Crawl(newTask.url);
-
-    if (newTask.state === 'list') {
-        // insert all urls to taskTable
-        taskTable.lock();
-        foreach (url in newPage) {
-            taskTable.add(new task(url));
-        }
-
-        // mark the task as "done"
-        newTask.state = "done";     // IMPORTANT
-        taskTable.unlock();
-    } else {
-        // insert page content to pageTable
-        pageTable.lock();
-        pageTable.add(newPage.content());
-        pageTable.unlock();
-
-        // mark the task as "done"
-        taskTable.lock();
-        newTask.state = "done";     // IMPORTANT
-        taskTable.unlock();
-    }
-}
-</code></pre>
-
-<h3>Solution with Conditional Variable</h3>
-
-<p>What is Conditional Variable:</p>
-
-<blockquote><p><a href="https://goo.gl/xOFXrY">A condition variable</a> is basically <strong>a container of threads that are waiting on a certain condition</strong>.</p>
-
-<p>Monitors provide a mechanism for threads to temporarily give up exclusive access in order to wait for some condition to be met, before regaining exclusive access and resuming their task.</p></blockquote>
-
-<p><img class="middle" src="/assets/images/design-class4-condition-variable.png"></p>
-
-<p>Look at last 3 lines of code. <strong>Before going to sleep, CV have to release the lock</strong>, so that other threads can access the taskTable.</p>
-
-<p>Then CV goes to sleep. <strong>Right after CV has been waken up</strong>, it has to lock the mutex again.</p>
-
-<p>Solution w/ cv:</p>
-
-<pre><code>while (true) {
-    // get 1 task. If can't get, wait
-    taskTable.lock();
-    newTask = taskTable.findOne(state == 'new')
-
-    if (!newTask) {
-        taskTable.unlock();
-        Cond_Wait(cond, taskTable);  // Modified
-        continue;
-    }
-
-    newTask.state = "working";
-    taskTable.unlock();
-
-    // execute the task, and insert to
-    // either taskTable or pageTable
-    newPage = Crawl(newTask.url);
-
-    if (newTask.state === 'list') {
-        // insert all urls to taskTable
-        taskTable.lock();
-        foreach (url in newPage) {
-            taskTable.add(new task(url));
-            Cond_Signal(cond);       // Modified
-        }
-
-        // mark the task as "done"
-        newTask.state = "done";
-        taskTable.unlock();
-    } else {
-        // insert page content to pageTable
-        pageTable.lock();
-        pageTable.add(newPage.content());
-        pageTable.unlock();
-
-        // mark the task as "done"
-        taskTable.lock();
-        newTask.state = "done";
-        taskTable.unlock();
-    }
-}
-</code></pre>
-
-<p>Why Good: no need to busy-spin (example above have to always wait 1 second). So this solution is better.</p>
-
-<h3>Solution with Semaphore</h3>
-
-<p>This is better than Condition Variable, cuz it&rsquo;s easier to implement. And Semaphore not only locks thread, it also <strong>can lock process</strong>.</p>
-
-<p>CV locks on a certain condition. But Semaphore locks the numbers (of task, or resources etc).</p>
-
-<p>Semaphore implementation (fairly difficult, read for interest):</p>
-
-<pre><code>Wait(semaphore) {
-    Lockf(semaphore);
-    semaphore.value--;
-    if (semaphore.value &lt; 0) {
-        semaphore.processWaitList.Add(this.process);
-        Release(semaphore);
-        Block(this.process);
-    } else {
-        Release(semaphore);
-    }
-}
-
-Signal(semaphore) {
-    Lock(semaphore);
-    semaphore.value++;
-    if (semaphore.value &lt;= 0) {
-        process = semaphore.processWaitList.pop();
-        Wakeup(process);
-    }
-    Release(semaphore);
-}
-</code></pre>
-
-<p>Note that in Java and C++, Wait() == acquire() and Signal() == release(). Read more <a href="http://tutorials.jenkov.com/java-util-concurrent/semaphore.html">Jenkov&rsquo;s post</a>.</p>
-
-<p>code w/ semaphore:</p>
-
-<pre><code>while (true) {
-    // get 1 task. If can't get, wait
-    Wait(numberOfNewTask);           // Modified
-
-    taskTable.lock();
-    newTask = taskTable.findOne(state == 'new')
-    newTask.state = "working";
-    taskTable.unlock();
-
-    // execute the task, and insert to
-    // either taskTable or pageTable
-    newPage = Crawl(newTask.url);
-
-    if (newTask.state === 'list') {
-        // insert all urls to taskTable
-        taskTable.lock();
-        foreach (url in newPage) {
-            taskTable.add(new task(url));
-            Signal(numberOfNewTask); // Modified
-        }
-
-        // mark the task as "done"
-        newTask.state = "done";
-        taskTable.unlock();
-    } else {
-        // insert page content to pageTable
-        pageTable.lock();
-        pageTable.add(newPage.content());
-        pageTable.unlock();
-
-        // mark the task as "done"
-        taskTable.lock();
-        newTask.state = "done";
-        taskTable.unlock();
-    }
-}
-</code></pre>
-
-<p><strong>What happens in Line 3 &lsquo;Wait(numberOfNewTask)&rsquo;</strong>? Well, the programs checks on the numberOfNewTask (counter) variable, and:</p>
-
-<ol>
-<li>If there is 1 or more tasks, just proceed.</li>
-<li>If no tasks available, block itself and wait there. (Later someone will wake it up and it will resume).</li>
-</ol>
-
-
-<h3>Design an consumer-producer</h3>
-
-<p>Stay tuned for future post.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -1484,7 +1200,7 @@ Signal(semaphore) {
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (31)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (32)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
@@ -1504,6 +1220,10 @@ Signal(semaphore) {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/23/Template-method-pattern/">[Java OOP] Template method pattern (abstract class) </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/22/reflexive-symmetric-transitive/">[Fundamental] Reflexive, Symmetric and Transitive Rules </a>
       </li>
     
@@ -1517,10 +1237,6 @@ Signal(semaphore) {
     
       <li class="post">
         <a href="/blog/2015/10/22/avoid-protected/">[Java OOP] Why avoid using Protected? </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/14/UML-diagrams/">[Fundamental] UML Class Diagrams </a>
       </li>
     
   </ul>
