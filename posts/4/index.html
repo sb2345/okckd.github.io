@@ -9,10 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Overview 3 areas of cryptographic standard: encryption standard Data Encryption Standard (obsolete)
-Triple DES
-Advanced Encryption Standard (AES)
-RSA &hellip;">
+  <meta name="description" content="Overview In Unix-like OS, a pipeline is a set of processes chained by their standard streams, so that the output of each process (stdout) feeds &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +75,74 @@ RSA &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/23/how-is-pipe-implemented-unix/">[Design] How Is Pipe Implemented in Unix/Linux</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-23T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/07/23/how-is-pipe-implemented-unix/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p>In Unix-like OS, <strong><a href="https://goo.gl/0NAqd9">a pipeline is a set of processes</a> chained by their standard streams</strong>, so that the output of each process (stdout) feeds directly as input (stdin) to the next one.</p>
+
+<p><a href="http://stackoverflow.com/a/17503877">Pipes are unidirectional byte streams which connect the standard output</a> from one process into the standard input of another process. <strong>Neither process is aware of this redirection</strong> and behaves just as it would normally. It is the shell which sets up these temporary pipes between the processes.</p>
+
+<h1>Process</h1>
+
+<ol>
+<li><p>Linux has a VFS called <strong>pipefs</strong> that is mounted in the kernel (not in user space)</p>
+
+<blockquote><p><strong><a href="http://www.linux.org/threads/pipefs-sockfs-debugfs-and-securityfs.5383/">PipeFS</a></strong> is a unique virtual filesystem. <strong>This filesystem is mounted inside the kernel</strong> rather than in the userspace. While most filesystems are mounted under &ldquo;/&rdquo;, PipeFS is mounted on &ldquo;pipe:&rdquo;, <strong>making PipeFS its own root</strong> (yes, a second root filesystem).</p>
+
+<p>This filesystem is one superblock and cannot exceed that amount system-wide. The entry point of this filesystem/second-root is the system-call &ldquo;pipe()&rdquo;. Unlike the other virtual/pseudo filesystems, this one cannot be viewed.</p>
+
+<p>Many of you may be wondering what purpose this PipeFS filesystem serves. Unix pipes use this filesystem. When a pipe is used (eg. ls | less), <strong>the pipe() system-call makes a new pipe object on this filesystem</strong>. Without this filesystem, pipes cannot be made.</p>
+
+<p>Also, threads and forks communicate together via pipes. Without PipeFS, processes could not fork and threads could not communicate.</p>
+
+<p>Network pipes also rely on this virtual/pseudo filesystem.</p></blockquote></li>
+<li><p>pipefs has a single super block and is mounted at it&rsquo;s own root (pipe:), alongside /</p></li>
+<li><p>pipefs cannot be viewed directly unlike most file systems</p></li>
+<li><p>The entry to pipefs is via the pipe(2) syscall</p></li>
+<li><p>The pipe(2) syscall used by shells for piping with the | operator (or manually from any other process) creates a new file in pipefs which behaves pretty much like a normal file</p></li>
+<li><p>The file on the left hand side of the pipe operator has its stdout redirected to the temporary file created in pipefs</p></li>
+<li><p>The file on the right hand side of the pipe operator has its stdin set to the file on pipefs</p></li>
+<li><p>pipefs is stored in memory and through some kernel magic</p></li>
+</ol>
+
+
+<p>Ref: <a href="http://unix.stackexchange.com/q/148401">http://unix.stackexchange.com/q/148401</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1161,139 +1226,6 @@ uint32_t reverseBits(uint32_t n) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/10/Bitwise-AND-of-Numbers-Range/">[LeetCode 201] Bitwise and of Numbers Range</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-10T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/10/Bitwise-AND-of-Numbers-Range/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/bitwise-and-of-numbers-range/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>Given a range [m, n] where 0 &lt;= m &lt;= n &lt;= 2147483647, return the bitwise AND of all numbers in this range, inclusive.</p>
-
-<p>
-For example, given the range [5, 7], you should return 4.
-</p>
-
-<p><b>Credits:</b><br>Special thanks to <a href="https://leetcode.com/discuss/user/amrsaqr">@amrsaqr</a> for adding this problem and creating all test cases.</p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/bit-manipulation/">Bit Manipulation</a>
-                  
-                </span>
-              
-            </div>
-
-
-<h3>Analysis</h3>
-
-<p>This is a pretty interesting mathematics question. Now we take 2 numbers as example:</p>
-
-<blockquote><p>Num1: 110010</p>
-
-<p>Num2: 110111</p>
-
-<p>Result: 110000</p></blockquote>
-
-<p>And:</p>
-
-<blockquote><p>Num1: 0110</p>
-
-<p>Num2: 1100</p>
-
-<p>Result: 0</p></blockquote>
-
-<p>Note that:</p>
-
-<ol>
-<li><p>if the first &lsquo;1&rsquo; bit of the 2 numbers are at different position, the answer should simply be 0.</p></li>
-<li><p>if have same position, then the result would be the continous sequence of 1s, followed by all 0s.</p></li>
-</ol>
-
-
-<h3>Solution</h3>
-
-<p>The 2 best solutions is very well presented by <a href="http://www.cnblogs.com/grandyang/p/4431646.html">Grandyang</a> using bit shifting and masking. Please refer to code 1 and code 2 below.</p>
-
-<p>I found a third solution at <a href="http://www.programcreek.com/2014/04/leetcode-bitwise-and-of-numbers-range-java/">programcreek</a>, which makes use of the fact that m is smaller than n.</p>
-
-<h3>Code</h3>
-
-<p>code 1</p>
-
-<pre><code>class Solution {
-public:
-    int rangeBitwiseAnd(int m, int n) {
-        int d = INT_MAX;
-        while ((m &amp; d) != (n &amp; d)) {
-            d &lt;&lt;= 1;
-        }
-        return m &amp; d;
-    }
-};
-</code></pre>
-
-<p>code 2</p>
-
-<pre><code>class Solution {
-public:
-    int rangeBitwiseAnd(int m, int n) {
-        int i = 0;
-        while (m != n) {
-            m &gt;&gt;= 1;
-            n &gt;&gt;= 1;
-            ++i;
-        }
-        return (m &lt;&lt; i);
-    }
-};
-</code></pre>
-
-<p>code 3</p>
-
-<pre><code>public int rangeBitwiseAnd(int m, int n) {
-     while (n &gt; m) {
-          n = n &amp; n - 1;
-     }
-     return m &amp; n;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="5">&larr; Older</a>
@@ -1314,7 +1246,7 @@ public:
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (32)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (33)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
@@ -1334,6 +1266,10 @@ public:
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/23/static-class-inner-class/">[Java OOP] Static class and Inner class </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/23/Template-method-pattern/">[Java OOP] Template method pattern (abstract class) </a>
       </li>
     
@@ -1347,10 +1283,6 @@ public:
     
       <li class="post">
         <a href="/blog/2015/10/22/literals/">[Fundamental] What is a Literal? </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/22/avoid-protected/">[Java OOP] Why avoid using Protected? </a>
       </li>
     
   </ul>

@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Given an integer n, return the number of trailing zeroes in n!. Note: Your solution should be in logarithmic time complexity. Credits: &hellip;">
+  <meta name="description" content="Question link Given an unsorted array, find the maximum difference between the successive elements in its sorted form. Try to solve it in linear time &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,162 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/04/13/Maximum-Gap/">[LeetCode 164] Maximum Gap</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-13T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/04/13/Maximum-Gap/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://leetcode.com/problems/maximum-gap/">link</a></p>
+
+<div class="question-content">
+              <p></p><p>Given an unsorted array, find the maximum difference between the successive elements in its sorted form.</p>
+
+<p>Try to solve it in linear time/space.</p>
+
+<p>Return 0 if the array contains less than 2 elements.</p>
+
+<p>You may assume all elements in the array are non-negative integers and fit in the 32-bit signed integer range.</p>
+
+<p><b>Credits:</b><br>Special thanks to <a href="https://oj.leetcode.com/discuss/user/porker2008">@porker2008</a> for adding this problem and creating all test cases.</p><p></p>
+              
+                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
+                <span class="hide">
+                  
+                  <a class="btn btn-xs btn-primary" href="/tag/sort/">Sort</a>
+                  
+                </span>
+              
+            </div>
+
+
+<h3>Analysis</h3>
+
+<p><strong>This is an extremely difficult question</strong> of bucket sort. I refered to <a href="http://www.programcreek.com/2014/03/leetcode-maximum-gap-java/">programcreek</a> and <a href="http://leetcode.tgic.me/maximum-gap/index.html">tgic&rsquo;s blog</a> for reference.</p>
+
+<h3>Solution</h3>
+
+<p><strong>Basic idea is to put elements into buckets</strong>. The number of bucket is (almost) same as the number of elements in the input. In this way, each bucket <strong>ideally</strong> will contain 1 element.</p>
+
+<p>We then know that <strong>the max gap must be cross-bucket instead of within bucket</strong>. So we simply keep track of max and min value within each bucket for the purpose of calculating gap.</p>
+
+<p><strong>Why did I say &ldquo;number of bucket is (almost) same as the number of elements in the input&rdquo;</strong>? Well, consider this case: 3 values and (maxVal &ndash; minVal) == 100. We can make 3 bucket with size = 34. How about 5 values and (maxVal &ndash; minVal) == 6? Bucket size shall be either 1 or 2. So we&rsquo;ll have either 3 or 6 bucket.</p>
+
+<p>So, in the code below, you can see I make bucket size &ldquo;larger by 1&rdquo;:</p>
+
+<pre><code>// bSize is size of bucket (should be larger by 1)
+int bSize = (maxVal - minVal + 1) / num.length + 1;
+
+// calcualte number of buckets needed
+int bCount = (maxVal - minVal) / bSize + 1;
+Bucket[] buckets = new Bucket[bCount];
+</code></pre>
+
+<p>Note that simply use <strong>input.length</strong> as bucket count is wrong.</p>
+
+<h3>Code</h3>
+
+<p>My code written in Java:</p>
+
+<pre><code>public class Solution {
+    public int maximumGap(int[] num) {
+        if (num == null || num.length &lt; 2) {
+            return 0;
+        }
+
+        // find out max and min values of input
+        int minVal = num[0];
+        int maxVal = num[0];
+        for (int n: num) {
+            minVal = Math.min(minVal, n);
+            maxVal = Math.max(maxVal, n);
+        }
+        // bSize is size of bucket (should be larger by 1)
+        int bSize = (maxVal - minVal + 1) / num.length + 1;
+
+        // calcualte number of buckets needed
+        int bCount = (maxVal - minVal) / bSize + 1;
+        Bucket[] buckets = new Bucket[bCount];
+
+        // match every value into a bucket
+        // bucket maintains the max/min within the bucket
+        for (int n: num) {
+            int bIndex = (n - minVal) / bSize;
+            if (buckets[bIndex] == null) {
+                buckets[bIndex] = new Bucket(n, n);
+            } else {
+                buckets[bIndex].updateVal(n);
+            }
+        }
+
+        // for every bucket, check in sequence and get max gap
+        int gap = 0;
+        int pre = 0;
+        int cur = 1;
+        while (cur &lt; bCount) {
+            // skip all empty buckets
+            while (cur &lt; bCount &amp;&amp; buckets[cur] == null) {
+                cur++;
+            }
+            if (cur == bCount) break;
+            // update gap, pre and cur
+            gap = Math.max(gap, buckets[cur].min - buckets[pre].max);
+            pre = cur;
+            cur++;
+        }
+
+        return gap;
+    }
+
+    class Bucket {
+        int min;
+        int max;
+
+        public Bucket(int a, int b) {
+            min = a;
+            max = b;
+        }
+
+        public void updateVal(int val) {
+            min = Math.min(min, val);
+            max = Math.max(max, val);
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1081,120 +1237,6 @@ public class Solution {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/04/07/Min-Stack/">[LeetCode 155] Min Stack</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-07T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/04/07/Min-Stack/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="https://leetcode.com/problems/min-stack/">link</a></p>
-
-<div class="question-content">
-              <p></p><p>
-Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
-</p><ul>
-<li>
-push(x) &#8211; Push element x onto stack.
-</li>
-<li>
-pop() &#8211; Removes the element on top of the stack.
-</li>
-<li>
-top() &#8211; Get the top element.
-</li>
-<li>
-getMin() &#8211; Retrieve the minimum element in the stack.
-</li>
-</ul>
-<p></p><p></p>
-              
-                <div id="tags" class="btn btn-xs btn-warning">Show Tags</div>
-                <span class="hide">
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/stack/">Stack</a>
-                  
-                  <a class="btn btn-xs btn-primary" href="/tag/data-structure/">Data Structure</a>
-                  
-               sn’t look possible to go to left half or right half by doing constant number of comparisons at the mSolution </span>
-</div>
-
-
-<h3>Analysis</h3>
-
-<p>I&rsquo;ve already cover this question in another post <strong>[Question] Min Stack</strong>.</p>
-
-<h3>My Code</h3>
-
-<pre><code>class MinStack {
-
-    Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
-    Stack&lt;Integer&gt; min = new Stack&lt;Integer&gt;();
-
-    public void push(int x) {
-        stack.push(x);
-        if (min.isEmpty() || min.peek() &gt;= x) {
-            min.push(x);
-        }
-    }
-
-    public void pop() {
-        if (stack.isEmpty()) {
-            return;
-        }
-        int topNum = stack.pop();
-        if (topNum == min.peek()) {
-            min.pop();
-        }
-    }
-
-    public int top() {
-        if (stack.isEmpty()) {
-            return 0;
-        }
-        return stack.peek();
-    }
-
-    public int getMin() {
-        if (min.isEmpty()) {
-            return 0;
-        }
-        return min.peek();
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="7">&larr; Older</a>
@@ -1215,7 +1257,7 @@ getMin() &#8211; Retrieve the minimum element in the stack.
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (32)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (33)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
@@ -1235,6 +1277,10 @@ getMin() &#8211; Retrieve the minimum element in the stack.
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/23/static-class-inner-class/">[Java OOP] Static class and Inner class </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/23/Template-method-pattern/">[Java OOP] Template method pattern (abstract class) </a>
       </li>
     
@@ -1248,10 +1294,6 @@ getMin() &#8211; Retrieve the minimum element in the stack.
     
       <li class="post">
         <a href="/blog/2015/10/22/literals/">[Fundamental] What is a Literal? </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/22/avoid-protected/">[Java OOP] Why avoid using Protected? </a>
       </li>
     
   </ul>
