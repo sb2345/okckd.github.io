@@ -6,13 +6,37 @@ category: Java OOP
 
 ---
 
-### Overview
+# Definition
 
 [source](http://www.programmerinterview.com/index.php/java-questions/interface-vs-abstract-class/)
 
-__A class__ must be declared abstract when it has one or more __abstract methods__.
+__A abstract class__ is declared when it has one or more __abstract methods__. 
 
 __An interface__ differs from an abstract class because an interface is not a class. An interface is essentially a type that __can be satisfied by any class__ that implements the interface. 
+
+# The short answer
+
+1. Abstract class is REAL parent.
+
+1. Abstr can have data members and non-abstract methods
+while interface only got constant variable and abstract methods (read below)
+1. class can implement multiple interface
+but only extend from 1 abstract class
+
+### does interface got 'abstract' methods?
+
+An interface is "purely" abstract class: every method is an abstract method. We do not use 'abstract' keyword. eg.
+
+    interface Bicycle {
+        void changeCadence(int newValue);
+        void changeGear(int newValue);
+        void speedUp(int increment);
+        void applyBrakes(int decrement);
+    }
+
+> [According to the Java Language Specification](http://stackoverflow.com/a/641549), the abstract keyword for interfaces is obsolete and should no longer be used. (Section 9.1.1.1)
+
+# The long answer
 
 ### Abstract classes: strong relationship
 

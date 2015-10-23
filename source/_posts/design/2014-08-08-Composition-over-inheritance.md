@@ -3,7 +3,6 @@ layout: post
 title: "[Design] Composition Over Inheritance"
 comments: true
 category: Design
-
 ---
 
 ### Overview

@@ -21,19 +21,11 @@ categories:
 
 > The goal of the game is to find as many words as you can that can be formed by chaining letters together. You are given a dictionary of words are reference. 
 
-### Variation
-
-__Another version of questions states in [here](http://www.glassdoor.com/Interview/I-was-asked-to-write-an-algorithm-to-solve-a-crossword-like-puzzle-I-forget-the-name-but-started-with-a-B-As-opposed-QTN_435641.htm)__
-
-> ... Boggle Game. As opposed to simply vertical, horizontal, and diagonal placement of words, they were allowed to snake around the grid in any way. 
-
-For this version of question, no 'visited' memory needs to be stored. In other words, it's a simpler version of above question. 
-
 ### Solution
 
-__[The best solution](http://stackoverflow.com/a/4314056) is to use Trie__, then do DFS search. However it might not be as intuitive as it seems. 
+__[The best solution](http://stackoverflow.com/a/4314056) is to use Trie__, then do DFS search. 
 
-The idea is from [this answer](http://stackoverflow.com/a/746102) (However this guy admits that his solution does not handle 'visited' nodes properly, means the same char might be visited again to produce a word). 
+The idea is from [this answer](http://stackoverflow.com/a/746102) (however, this guy said his solution does not handle 'visited' nodes properly, meaning that same char might be visited again to produce a word). 
 
 We need to first define a class called Item: 
 
@@ -64,7 +56,7 @@ We'll have Items objects like (0, 0, ""), (0, 1, "F"), (0, 2, "FA") ... We guara
 
 How to tell whether a string is a prefix of word, or it's an actual word? We have a property in TrieNode called TrieNode.isWord() to help us. 
 
-That's about it. I spend quite some time writing the code below, by refering to the Java solution by [zouzhile](http://stackoverflow.com/a/11698898). 
+The code I wrote below is based on [this Java solution by zouzhile](http://stackoverflow.com/a/11698898). 
 
 ### Code
 

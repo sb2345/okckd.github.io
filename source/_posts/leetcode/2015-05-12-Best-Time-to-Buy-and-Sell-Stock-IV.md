@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[LeetCode 188] Best Time to Buy and Sell Stock IV "
+title: "[LeetCode 188] Best Time to Buy and Sell Stock IV (undone) "
 comments: true
 category: Leetcode
 published: false
@@ -29,22 +29,8 @@ You may not engage in multiple transactions at the same time (ie, you must sell 
               
             </div>
 
-### Analysis
-
-http://www.programcreek.com/2014/03/leetcode-best-time-to-buy-and-sell-stock-iv-java/
-
-http://www.cnblogs.com/grandyang/p/4295761.html
-
-http://blog.csdn.net/linhuanmars/article/details/23236995
-
-http://www.cnblogs.com/EdwardLiu/p/4306941.html
-
 ### Solution
 
+I can't solve this question. If interested, you can play with the local[i][j] and global[i][j] DP solution [available to read here](http://blog.csdn.net/linhuanmars/article/details/23236995). 
 
-
-### Code
-
-
-
-
+I'm gonna just skip for now.
