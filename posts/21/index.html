@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question Write a program to swap odd and even bits in an integer with as few instructions as possible (e.g., bit 0 and bit 1 are swapped, bit 2 and &hellip;">
+  <meta name="description" content="Question Implement the &ldquo;paint fill&rdquo; function that one might see on many image editing programs. That is, given a screen (represented by a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,271 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/17/paint-fill-map/">[CC150v5] 9.7 Paint Fill in Map</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-17T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/17/paint-fill-map/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Implement the &ldquo;paint fill&rdquo; function that one might see on many image editing programs.</p>
+
+<p>That is, given a screen (represented by a two-dimensional array of colors), a point, and a new color, <strong>fill in the surrounding area</strong> until the color changes from the original color.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>This is a BFS/DFS question, very similar to <strong>[LeetCode 130] Surrounded Regions</strong>.</p>
+
+<p><strong>However, this question is not same as surrounding region</strong>, because no temporary storage of state is needed, <strong>and we DO NOT NEED TO keep track of the visited positions</strong>!</p>
+
+<p>Why is this?</p>
+
+<ol>
+<li>This question, we simple change the color <strong>from A to B</strong>.</li>
+<li>Surrounding Region is <strong>change A to B, and B to A</strong>.</li>
+</ol>
+
+
+<p>That&rsquo;s why, the nature of 2 questions are different.</p>
+
+<p>Code 1 is my first solution, and Code 2 is doing a BFS and set color directly to expected value. This type of questions is highly frequent and sometimes may cause confusions.</p>
+
+<h3>Code</h3>
+
+<p><strong>my code 1</strong>, with &lsquo;temp&rsquo; state</p>
+
+<pre><code>public static void PaintFill1(Color[][] screen, int posX, int posY,
+        Color ncolor) {
+    // the queue keeps the list of positions that I'm going to visit
+    Queue&lt;Position&gt; q = new LinkedList&lt;Position&gt;();
+    int len = screen.length;
+    Color original = screen[posX][posY];
+    // visited origin node first
+    q.offer(new Position(posX, posY));
+    while (!q.isEmpty()) {
+        // visit positions in q one by one (mark color as 'Temp')
+        Position p = q.poll();
+        if (p.x &lt; 0 || p.x &gt;= len || p.y &lt; 0 || p.y &gt;= len) {
+            // invalid pos coordinate
+            continue;
+        } else if (screen[p.x][p.y] == Color.Temp
+                || screen[p.x][p.y] != original) {
+            continue;
+        }
+        screen[p.x][p.y] = Color.Temp;
+        q.offer(new Position(p.x - 1, p.y));
+        q.offer(new Position(p.x + 1, p.y));
+        q.offer(new Position(p.x, p.y - 1));
+        q.offer(new Position(p.x, p.y + 1));
+    }
+    // finish visiting all positions that's original color
+    for (int i = 0; i &lt; len; i++) {
+        for (int j = 0; j &lt; len; j++) {
+            if (screen[i][j] == Color.Temp) {
+                screen[i][j] = ncolor;
+            }
+        }
+    }
+}
+</code></pre>
+
+<p><strong>my code 2</strong>, without &lsquo;temp&rsquo; state</p>
+
+<pre><code>public static void PaintFill2(Color[][] screen, int posX, int posY,
+        Color ncolor) {
+    // the queue keeps the list of positions that I'm going to visit
+    Queue&lt;Position&gt; q = new LinkedList&lt;Position&gt;();
+    int len = screen.length;
+    Color original = screen[posX][posY];
+    // visited origin node first
+    q.offer(new Position(posX, posY));
+    while (!q.isEmpty()) {
+        // visit positions in q one by one (mark color as 'Temp')
+        Position p = q.poll();
+        if (p.x &lt; 0 || p.x &gt;= len || p.y &lt; 0 || p.y &gt;= len) {
+            // invalid pos coordinate
+            continue;
+        } else if (screen[p.x][p.y] != original) {
+            continue;
+        }
+        screen[p.x][p.y] = ncolor;
+        q.offer(new Position(p.x - 1, p.y));
+        q.offer(new Position(p.x + 1, p.y));
+        q.offer(new Position(p.x, p.y - 1));
+        q.offer(new Position(p.x, p.y + 1));
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/17/find-magic-index/">[CC150v5] 9.3 Find Magic Index</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-17T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/17/find-magic-index/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question 1</h3>
+
+<blockquote><p>A magic index in an array A[l.. .n-l] is defined to be an index such that A[i] = i.</p>
+
+<p>Given a sorted array of distinct integers, write a method to find a magic index, if one exists, in array A.</p></blockquote>
+
+<h3>Question 2</h3>
+
+<blockquote><p>FOLLOW UP: What if the values are not distinct?</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult binary search question</strong>!</p>
+
+<p><strong>Question 1 is slightly easier</strong>: we simplyl use binary search, and we are able to discard half of the array each time.</p>
+
+<ol>
+<li>if (array[mid] > mid), then we discard the right half.</li>
+<li>if (array[mid] &lt; mid), then we discard the left half.</li>
+</ol>
+
+
+<p><strong>Question 2 is difficult</strong>. We cannot discard half of the input any more. Instead, we discard a range between (mid) and (array[mid]). Then check left and right part seperately.</p>
+
+<p>So, I wrote the following code:</p>
+
+<pre><code>int mid = left + (right - left) / 2;
+if (array[mid] == mid) {
+    return mid;
+} else {
+    int smaller = Math.min(array[mid], mid);
+    int larger = Math.max(array[mid], mid);
+    int leftResult = helper(array, left, smaller);
+    if (leftResult != -1) {
+        return leftResult;
+    } else {
+        return helper(array, larger, right);
+    }
+}
+</code></pre>
+
+<p>This becomes an endless loop. We did not discard point &lsquo;mid&rsquo; in the code above. The correct code is posted below.</p>
+
+<h3>Code</h3>
+
+<p><strong>code for non-duplicate input</strong></p>
+
+<pre><code>public static int myAnswerNonDup(int[] array) {
+    int len = array.length;
+    return helper(array, 0, len - 1);
+}
+
+public static int helper(int[] array, int left, int right) {
+    if (right &lt; left) {
+        return -1;
+    }
+    int mid = left + (right - left) / 2;
+    if (array[mid] == mid) {
+        return mid;
+    } else if (array[mid] &lt; mid) {
+        // discard all element to the left of array[mid]
+        return helper(array, mid + 1, right);
+    } else {
+        return helper(array, left, mid - 1);
+    }
+}
+</code></pre>
+
+<p><strong>code for have-duplicate input</strong></p>
+
+<pre><code>public static int myAnswerWithDup(int[] array) {
+    int len = array.length;
+    return helper(array, 0, len - 1);
+}
+
+public static int helper(int[] array, int left, int right) {
+    if (right &lt; left) {
+        return -1;
+    }
+    int mid = left + (right - left) / 2;
+    if (array[mid] == mid) {
+        return mid;
+    } else {
+        int smaller = 0;
+        int larger = 0;
+        if (array[mid] &lt; mid) {
+            smaller = array[mid];
+            larger = mid + 1;
+        } else if (array[mid] &gt; mid) {
+            smaller = mid - 1;
+            larger = array[mid];
+        }
+        int leftResult = helper(array, left, smaller);
+        if (leftResult != -1) {
+            return leftResult;
+        } else {
+            return helper(array, larger, right);
+        }
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -744,151 +1009,6 @@ public static boolean recursiveHelper(int from, int to) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/15/implement-stack/">[CC150v5] 3.0 Example - Implement Stack</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-15T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/15/implement-stack/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement a stack.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p><strong>Stack uses LinkedNode to implement</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public class MyStack {
-
-    Node top;
-
-    public int pop() {
-        if (top == null) {
-            return -1;
-        }
-        int returnVal = top.val;
-        top = top.next;
-        return returnVal;
-    }
-
-    public int peek() {
-        if (top == null) {
-            return -1;
-        }
-        return top.val;
-
-    }
-
-    public void push(int val) {
-        Node newNode = new Node(val);
-        newNode.next = top;
-        top = newNode;
-    }
-
-    class Node {
-
-        int val;
-        Node next;
-
-        Node(int value) {
-            val = value;
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/14/kth-last-element-recursive/">[CC150v5] 2.2 Kth Last Element (Recursive)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-14T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/14/kth-last-element-recursive/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>Implement an algorithm to find the kth to last element of a singly linked list.</p>
-
-<p>Do it recursively.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>Iterative solution is easy, <strong>recursive is not</strong>.</p>
-
-<h3>Code</h3>
-
-<pre><code>public static int nthToLastRecursive(LinkedListNode head, int n) {
-    if (n == 0 || head == null) {
-        return 0;
-    }
-    int k = nthToLastRecursive(head.next, n) + 1;
-    if (k == n) {
-        System.out.println(n + "th to last node is " + head.data);
-    }
-    return k;
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="22">&larr; Older</a>
@@ -909,7 +1029,7 @@ public static boolean recursiveHelper(int from, int to) {
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (33)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
@@ -933,19 +1053,19 @@ public static boolean recursiveHelper(int from, int to) {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/10/23/java-what-is-exception/">[Java OOP] What is Java Exception</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/23/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/23/Template-method-pattern/">[Java OOP] Template method pattern (abstract class) </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/10/22/reflexive-symmetric-transitive/">[Fundamental] Reflexive, Symmetric and Transitive Rules </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/22/polynomial-quadratic-cubic-exponential/">[Fundamental] Polynomial, quadratic, cubic and exponential </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/22/literals/">[Fundamental] What is a Literal? </a>
       </li>
     
   </ul>

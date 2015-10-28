@@ -9,9 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Exceptions in Java In Java, there are 3 categories of exceptions: checked exceptions Typically a user error
-eg. if a file cannot be found.
-These &hellip;">
+  <meta name="description" content="Question link A frog wants to cross the river n meters wide. There&rsquo;re some stones, but not complete from 1 to n. The frog has a peculiar &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +75,188 @@ These &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/02/frog-crossing-dp/">[Question] Frog Crossing (Dynamic Programming)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-02T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/02/frog-crossing-dp/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="https://tkramesh.wordpress.com/2011/02/15/frog-crossing-more-on-dynamic-programming-3/">link</a></p>
+
+<blockquote><p>A frog wants to cross the river n meters wide. There&rsquo;re some stones, but not complete from 1 to n.</p>
+
+<p>The frog has a peculiar jumping rule. If it jumps x meters on one jump, the next jump has to lie in the range {x-1, x, x+1}. Further, the 1st jump that the frog makes is of exactly 1 meter.</p>
+
+<p>Given whether stones are removed or not as array of 0 and 1, check if it is possible to reach the other end.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>This is a difficult DP question</strong>. It can be solved in O(n<sup>2</sup>) time.</p>
+
+<p>The main equation is:</p>
+
+<blockquote><p>can_reach [s, d] =</p>
+
+<p>Stone[d] AND Stone[s] AND [ can_reach [(d-s)-1, s] OR can_reach[d-s, s] OR can_reach[d-s)+1, s] ].</p>
+
+<p>where &rsquo;s&#8217; is starting point, and &rsquo;d&#8217; is destination.</p></blockquote>
+
+<h3>Code</h3>
+
+<pre><code>public boolean canCross(int[] stones) {
+    if (stones.length &lt; 2 || (stones[0] != 1 || stones[1] != 1)) {
+        // invalid input data
+        return false;
+    }
+    int n = stones.length;
+    boolean[][] dp = new boolean[n][n];
+    // dp[i][j] denotes that frog can jump from index i to j
+
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = i + 1; j &lt; n; j++) {
+            if (stones[i] == 0 || stones[j] == 0) {
+                // if either stones i or stone j is removed, skip
+                continue;
+            }
+            // note that j start from (i+1) because we make sure dp[i][i]
+            // false. Otherwise, dp[i][i+1] will always be true
+
+            if (i == 0) {
+                // if jump from position 0, can only reach 1
+                dp[i][j] = j == 1;
+            } else {
+                // if jump from other positions, need to check previous
+                // distance, within range or not.
+                int dis = j - i;
+                for (int pre = i - dis - 1; pre &lt;= i - dis + 1; pre++) {
+                    // pre is the previous position where frog jumps to i
+                    if (pre &lt; 0) {
+                        continue;
+                    } else if (dp[pre][i]) {
+                        // frog jumps from pre to i, then frog is able to
+                        // jump from i to j
+                        dp[i][j] = true;
+                        break;
+                    }
+                }
+            }
+            // finish calculating dp[i][j], now check termination
+            if (j == n - 1 &amp;&amp; dp[i][j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/27/database-indexing/">[Design] Database Indexing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-27T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/12/27/database-indexing/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://stackoverflow.com/a/1130">ref 1</a> <a href="http://www.interspire.com/content/2006/02/15/introduction-to-database-indexes/">ref 2</a></p>
+
+<h3>Why Indexing?</h3>
+
+<p>In database disks (we&rsquo;re talking about disk-based storage devices), data is stored as blocks. These blocks are accessed atomically. It&rsquo;s like a linked list with pointers to the blocks.</p>
+
+<p>Because of this, searching in database is linear time. That&rsquo;s why we need indexing.</p>
+
+<p><strong>Indexing is a way of sorting a number of records on multiple fields</strong>. Creating an index on a field in a table creates another data structure which holds the field value, and pointer to the record it relates to. This index structure is then sorted, allowing Binary Searches to be performed on it.</p>
+
+<p>In other words, indexing speed up search.</p>
+
+<h3>Downside</h3>
+
+<p>First disadvantage is <strong>the additional space usage</strong>. For example, in MyISAM engine, indexes are stored together with the data in one table. So the indexing files can quickly reach the size limits if many fields are indexed.</p>
+
+<p>Second disadvantage is that <strong>using too many indexes can actually slow your database down</strong>. Each time a page or database row is updated or removed, the reference or index also has to be updated.</p>
+
+<p>So indexes speed up finding data, but slow down inserting, updating or deleting data.</p>
+
+<h3>Primary keys</h3>
+
+<p><strong>Some fields are automatically indexed</strong>.</p>
+
+<p>A primary key or a field marked as ‘unique’ – for example an email address, a userid or a social security number – are <strong>automatically indexed</strong> so the database can quickly check to make sure that you’re not going to introduce bad data.</p>
+
+<h3>When to use</h3>
+
+<p>Since indexes are <strong>only</strong> used to speed up the searching, it&rsquo;s not wise to have indexing used only for output.</p>
+
+<p><strong>The general rule</strong> is, anything that is used to limit the number of results you’re trying to find. For more details, read <a href="http://www.interspire.com/content/2006/02/15/introduction-to-database-indexes/">ref 2</a>.</p>
+
+<h3>How to create index</h3>
+
+<p><a href="http://stackoverflow.com/a/1157">The following</a> is SQL92 standard that&rsquo;s supported by major RDMBSs:</p>
+
+<pre><code>CREATE INDEX [index name] ON [table name] ( [column name] )
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -889,305 +1069,6 @@ freewill/
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/22/Discussion-of-Polymorphism/">[Java OOP] Discussion of Polymorphism</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-22T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/12/22/Discussion-of-Polymorphism/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Polymorphism</h3>
-
-<p>Polymorphism is to <a href="http://javarevisited.blogspot.sg/2011/08/what-is-polymorphism-in-java-example.html">use common interface</a> instead of concrete implementation while coding.</p>
-
-<p>When we program for interface our code is capable of handling any new requirement or enhancement arise in near future due to new implementation of our common interface. If we don&rsquo;t use common interface and rely on concrete implementation, we always need to change and duplicate most of our code to support new implementation.</p>
-
-<p>The most common use of polymorphism in OOP occurs when a parent class reference is used to refer to a child class object.</p>
-
-<h3>Example</h3>
-
-<p>Example of Bicycle class given on <a href="http://docs.oracle.com/javase/tutorial/java/IandI/polymorphism.html">official oracle website</a>:</p>
-
-<pre><code>public class Bicycle{
-    public void printDescription(){
-        System.out.println("\nBike is " + "in gear " + this.gear
-            + " with a cadence of " + this.cadence +
-            " and travelling at a speed of " + this.speed + ". ");
-    }
-}
-
-public class MountainBike extends Bicycle {
-    private String suspension;
-
-    public void printDescription() {
-        super.printDescription();
-        System.out.println("The " + "MountainBike has a" +
-            getSuspension() + " suspension.");
-    }
-}
-
-public class RoadBike extends Bicycle{
-    private int tireWidth;
-
-    public void printDescription(){
-        super.printDescription();
-        System.out.println("The RoadBike" + " has " + getTireWidth() +
-            " MM tires.");
-    }
-}
-
-public class TestBikes {
-    public static void main(String[] args){
-        Bicycle bike01, bike02, bike03;
-
-        bike01 = new Bicycle(20, 10, 1);
-        bike02 = new MountainBike(20, 10, 5, "Dual");
-        bike03 = new RoadBike(40, 20, 8, 23);
-
-        bike01.printDescription();
-        bike02.printDescription();
-        bike03.printDescription();
-    }
-}
-</code></pre>
-
-<p>The output:</p>
-
-<pre><code>Bike is in gear 1 with a cadence of 20 and travelling at a speed of 10. 
-
-Bike is in gear 5 with a cadence of 20 and travelling at a speed of 10. 
-The MountainBike has a Dual suspension.
-
-Bike is in gear 8 with a cadence of 40 and travelling at a speed of 20. 
-The RoadBike has 23 MM tires.
-</code></pre>
-
-<p>Referring to the same page, <strong>JVM calls the appropriate method for the object that is referred to in each variable</strong>. It does not call the method that is defined by the variable&rsquo;s type.</p>
-
-<h3>Another example</h3>
-
-<p>Cylinder is a subclass of Circle. We can say that Cylinder &ldquo;is-a&rdquo; Circle.</p>
-
-<p>We can create an instance of Cylinder, and assign it to a Circle reference:</p>
-
-<blockquote><p>Circle c1 = new Cylinder();</p></blockquote>
-
-<p>You can invoke all the methods defined in the Circle class, but <strong>you cannot invoke methods defined in the Cylinder class</strong>. c1 is a reference to the Circle class, which does not know about the methods defined in the subclass Cylinder.</p>
-
-<p><strong>The reference c1, however, retains its internal identity</strong>. Since Cylinder overrides getArea() method, calling c1.getArea() will invokes the overridden version defined in subclass Cylinder, instead of in Circle. This is because c1 is holding a Cylinder object internally.</p>
-
-<p>The code is below:</p>
-
-<pre><code>public class PolymorphismSubstitutabilityDemo {
-
-    public static void main(String[] args) {
-        Circle c1 = new Cylinder(1, "white", 10);
-        System.out.println(c1.getClass());
-        System.out.println(c1.getRadius());
-        System.out.println(c1.getColor());
-        System.out.println(c1.getArea());
-    }
-}
-
-class Circle {
-    int radius;
-    String color;
-
-    public Circle(int a, String b) {
-        this.radius = a;
-        this.color = b;
-    }
-
-    public int getRadius() {
-        return radius;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public double getArea() {
-        return 3.14159 * Math.pow(radius, 2);
-    }
-}
-
-class Cylinder extends Circle {
-    int height;
-
-    public Cylinder(int a, String b, int c) {
-        super(a, b);
-        this.height = c;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public double getArea() {
-        return super.getArea() * height;
-    }
-}
-</code></pre>
-
-<p>The output of execution:</p>
-
-<pre><code>class Cylinder
-1
-white
-31.4159
-</code></pre>
-
-<h3>Summary:</h3>
-
-<p><a href="http://www.ntu.edu.sg/home/ehchua/programming/java/J3b_OOPInheritancePolymorphism.html">ref</a></p>
-
-<ol>
-<li><p>A subclass instance can be assigned (substituted) to a superclass&#8217; reference.</p></li>
-<li><p>Once substituted, we can invoke methods defined in the superclass; we cannot invoke methods defined in the subclass.</p></li>
-<li><p>However, if the subclass overrides inherited methods from the superclass, the subclass (overridden) versions will be invoked.</p></li>
-</ol>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/">[Facebook] Binary Search Tree 3Sum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-12-18T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/12/18/Binary-Search-Tree-3Sum/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p>DLL &ndash; <a href="http://www.geeksforgeeks.org/find-if-there-is-a-triplet-in-bst-that-adds-to-0/">link</a></p>
-
-<p>Inorder &ndash; <a href="http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/">link</a></p>
-
-<blockquote><p>Given a BST, write a function that returns true if there is a triplet that sums to 0, returns false otherwise.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>We will solve the question just like we do <strong>[LeetCode 15] 3Sum</strong>. What is missing is an random access of tree nodes, like we have in array.</p>
-
-<p>In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough.</p>
-
-<p>Now there&rsquo;re 2 solution. <strong>First is to convert the tree to Double-linked list</strong>, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n<sup>2</sup>). however doing this modifies the original tree.</p>
-
-<p><strong>Second solution is to to inorder traversal and reversed inorder traversal</strong>. This is a better solution, personally. And the time and space used is same.</p>
-
-<h3>Code</h3>
-
-<p><strong>DLL way, written by me</strong></p>
-
-<pre><code>public void findTriplet(TreeNode root, int target) {
-    TreeNode[] dll = convertToDll(root);
-    TreeNode head = dll[0];
-    TreeNode tail = dll[1];
-    // note that the bst inorder dll should already in sorted by value
-    TreeNode first = head;
-    while (first.right != null) {
-        TreeNode left = first.right;
-        TreeNode right = tail;
-        while (left.val &lt; right.val) {
-            int diff = first.val + left.val + right.val - target;
-            if (diff == 0) {
-                System.out.println("Found triplet: " + first.val + " "
-                        + left.val + " " + right.val + " for sum of "
-                        + target);
-            }
-            if (diff &lt;= 0) {
-                left = left.right;
-            }
-            if (diff &gt;= 0) {
-                right = right.left;
-            }
-        }
-        first = first.right;
-    }
-}
-
-private TreeNode[] convertToDll(TreeNode node) {
-    TreeNode[] ans = new TreeNode[2];
-    // do the left side of node
-    if (node.left == null) {
-        ans[0] = node;
-    } else {
-        TreeNode[] preAns = convertToDll(node.left);
-        ans[0] = preAns[0];
-        node.left = preAns[1];
-        preAns[1].right = node;
-    }
-    // do the right side of node
-    if (node.right == null) {
-        ans[1] = node;
-    } else {
-        TreeNode[] postAns = convertToDll(node.right);
-        ans[1] = postAns[1];
-        node.right = postAns[0];
-        postAns[0].left = node;
-    }
-    return ans;
-}
-</code></pre>
-
-<p><strong>inorder way</strong> &ndash; basically is just <strong>iterator of binary tree</strong>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="19">&larr; Older</a>
@@ -1208,7 +1089,7 @@ private TreeNode[] convertToDll(TreeNode node) {
 <li class='category'><a href='/blog/categories/design/'>design (76)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
-<li class='category'><a href='/blog/categories/java-oop/'>java oop (33)</a></li>
+<li class='category'><a href='/blog/categories/java-oop/'>java oop (35)</a></li>
 <li class='category'><a href='/blog/categories/leetcode/'>leetcode (176)</a></li>
 <li class='category'><a href='/blog/categories/leetcode-plus/'>leetcode_plus (9)</a></li>
 <li class='category'><a href='/blog/categories/lintcode/'>lintcode (16)</a></li>
@@ -1232,19 +1113,19 @@ private TreeNode[] convertToDll(TreeNode node) {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/10/23/java-what-is-exception/">[Java OOP] What is Java Exception</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/10/23/java-vector-arraylist/">[Java OOP] Java Vector and ArrayList </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/23/Template-method-pattern/">[Java OOP] Template method pattern (abstract class) </a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/10/22/reflexive-symmetric-transitive/">[Fundamental] Reflexive, Symmetric and Transitive Rules </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/22/polynomial-quadratic-cubic-exponential/">[Fundamental] Polynomial, quadratic, cubic and exponential </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/22/literals/">[Fundamental] What is a Literal? </a>
       </li>
     
   </ul>
