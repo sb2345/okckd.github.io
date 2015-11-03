@@ -18,6 +18,6 @@ It's not synced.
 
 1. __Circular array__ - Array size is pre-defined. Use head and tail to keep track of list position. 
 
-1. __Insertion and deletion__ - Implement shiftRight() and shiftLeft() methods.
+1. __Insertion and deletion__ - Implement __shiftRight()__ and shiftLeft() methods.
 
 Actual code will come later...

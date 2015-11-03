@@ -16,13 +16,13 @@ Inorder - [link](http://www.geeksforgeeks.org/find-a-pair-with-given-sum-in-bst/
 
 ### Solution
 
-We will solve the question just like we do __[LeetCode 15] 3Sum__. What is missing is an random access of tree nodes, like we have in array.
+We will solve the question just like we do __[LeetCode 15] 3Sum__. What is missing is an random access of tree nodes.
 
 In fact, we do not need random access. Tree traversal (one after another in sequence) would be good enough. 
 
 Now there're 2 solution. __First is to convert the tree to Double-linked list__, then do 3Sum. The conversion takes O(n) time and O(logn) extra space, and 3Sum take O(n^2). however doing this modifies the original tree. 
 
-__Second solution is to to inorder traversal and reversed inorder traversal__. This is a better solution, personally. And the time and space used is same. 
+__Second solution is to to inorder traversal and reversed inorder traversal__. For me, this solution is preferred. Time and space used is same. 
 
 ### Code
 
