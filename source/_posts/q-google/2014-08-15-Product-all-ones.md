@@ -22,7 +22,7 @@ There's 1 equation of mod operation, which is helpful:
 >
 > i.e.  (a * b) mod x = (a mod x) * (b mod x)
 
-Altough [I don't understand why](http://www.itint5.com/discuss/136/%E8%BF%99%E9%A2%98%E6%88%91%E8%B6%85%E6%97%B6%E4%BA%86%EF%BC%8C%E8%AF%B7%E9%97%AE%E5%A6%82%E4%BD%95%E7%BC%A9%E7%9F%AD%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4) does it contribute to the incredibly short solution code posted below. I can't solve this question, freakly speaking. 
+Altough [I don't understand why](http://www.itint5.com/discuss/136/%E8%BF%99%E9%A2%98%E6%88%91%E8%B6%85%E6%97%B6%E4%BA%86%EF%BC%8C%E8%AF%B7%E9%97%AE%E5%A6%82%E4%BD%95%E7%BC%A9%E7%9F%AD%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4) does it contribute to the incredibly short solution code posted below. I can't solve this question, frankly speaking. 
 
 ### Code
 

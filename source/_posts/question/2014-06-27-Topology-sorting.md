@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Question] Topology Sort (undone) "
+title: "[Question] Topology Sort "
 comments: true
 category: Question
 tags: [ unit test needed ]
