@@ -56,3 +56,9 @@ The performance of the naïve minimax algorithm may be improved dramatically, wi
 [Alpha–beta pruning](http://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning) is a search algorithm that seeks to decrease the number of nodes that are evaluated by the minimax algorithm in its search tree. 
 
 {% img middle /assets/images/minmax-ab-pruning.png %}
+
+It works when you evaluate the tree __left-to-rigth__. Considering under the same parent, once you found any number that is largest then the smallest-found-so-far, in the MAX level, you can skip this node. Example: 
+
+{% img middle /assets/images/minmax-ab-pruning2.png %}
+
+The pruned values won't influence the final result.

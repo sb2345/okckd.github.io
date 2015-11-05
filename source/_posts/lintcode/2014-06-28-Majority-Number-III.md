@@ -20,7 +20,7 @@ category: LintCode
 
 Similar to 'Majority Number II', but a little more difficult. 
 
-_Instead of keeping 2 value for checking, now keep k values__. Since values are constantly checked for existance, using a HashMap looks like a great idea. 
+__Instead of keeping 2 value for checking, now keep k values__. Since values are constantly checked for existance, using a HashMap looks like a great idea. 
 
 __Another idea suggest by [G4G](http://www.geeksforgeeks.org/given-an-array-of-of-size-n-finds-all-the-elements-that-appear-more-than-nk-times/) is a mechanism similar to the famous Tetris Game__. The size of the buffer is k. The buffer is full, we remove all items by counter of 1. When counter reach 0, remove that item. In this way, the elements left in the buffer are the majority numbers. 
 
