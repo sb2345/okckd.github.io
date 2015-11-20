@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Given a string, find the length of the longest substring without repeating characters. For example, the longest substring without &hellip;">
+  <meta name="description" content="Question link There are two sorted arrays A and B of size m and n respectively. Find the median of the two sorted arrays. The overall run time &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,448 +75,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/27/longest-substring-without-repeating/">[LeetCode 3] Longest Substring Without Repeating Characters</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-27T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/04/27/longest-substring-without-repeating/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/longest-substring-without-repeating-characters/">link</a></p>
-
-<div class="question-content">
-<p></p><p>Given a string, find the length of the longest substring without repeating characters. For example, the longest substring without repeating letters for &#8220;abcabcbb&#8221; is &#8220;abc&#8221;, which the length is 3. For &#8220;bbbbb&#8221; the longest substring is &#8220;b&#8221;, with the length of 1.</p>
-<p></p></div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>This question looks easy (well, isn&rsquo;t it?), but it <strong>really is not easy</strong>!.</p>
-
-<p><strong>The main idea is</strong>: an array of int(128) is used to keep track of the last occurance position of each character. So we iterate thru the characters while constently checking the last occurrence of the letter. Meanwhile, keep updating the longest distance.</p>
-
-<p><strong>There is 1 place where it&rsquo;s extremely easy to make mistake</strong>, that is the condition of update left points:</p>
-
-<pre><code>if (previousPos != -1&amp;&amp; previousPos &gt;= left) {
-    left = previousPos + 1;
-}
-</code></pre>
-
-<p>If you have an idea of using array int(128) to <strong>store last occurrence</strong>, and you got the above <strong>if condition</strong> correct, then you nailed it!</p>
-
-<p>Again, this is a tough question. There&rsquo;s a seemingly more intuitive solution using the sliding window method. It&rsquo;s very similar to [LeetCode 76] Minimum Window Substring.</p>
-
-<h3>Solution</h3>
-
-<p>Note what happens when a repeating char is found (2 different conditions).</p>
-
-<p><img class="middle" src="/assets/images/longest-without-repeat.png"></p>
-
-<h3>My code</h3>
-
-<p>The proper way:</p>
-
-<pre><code>public class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        if (s == null || s.length() == 0) {
-            return 0;
-        }
-
-        int[] flag = new int[128];
-        for (int i = 0; i &lt; flag.length; i++) {
-            flag[i] = -1;
-        }
-        // left and right pointer defines the valid range
-        int left = 0;
-        int right = 0;
-        int longest = 0;
-        int len = s.length();
-
-        while (right &lt; len) {
-            char letter = s.charAt(right);
-            int previousPos = flag[letter];
-            if (previousPos != -1&amp;&amp; previousPos &gt;= left) {
-                // if right pointer points to an old letter, and is within current range
-                // then we need to update our left pointer: 
-                // to bypass the previous occurrence of that letter
-                left = previousPos + 1;
-            }
-            flag[letter] = right;
-            // advance right pointer to the next letter, and calculate longest distance
-            right++;
-            longest = Math.max(longest, right - left);
-        }
-        return longest;
-    }
-}
-</code></pre>
-
-<p>The sliding window way:</p>
-
-<pre><code>public class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        if (s == null || s.length() == 0) {
-            return 0;
-        }
-        int len = s.length();
-        int left = 0;
-        int right = 1;
-        HashSet&lt;Character&gt; set = new HashSet&lt;Character&gt;();
-        set.add(s.charAt(0));
-        int longest = 1;
-        while (right &lt; len) {
-            // right pointer proceeds until boundary or duplicate char found
-            while (right &lt; len &amp;&amp; !set.contains(s.charAt(right))) {
-                set.add(s.charAt(right));
-                right++;
-                longest = Math.max(longest, right - left);
-            }
-            if (right == len) {
-                return longest;
-            } else {
-                // right pointer has reached a duplicate char.
-                // now move left pointer until that dup char is found
-                while (s.charAt(left) != s.charAt(right)) {
-                    set.remove(s.charAt(left));
-                    left++;
-                }
-                // left pointer advance by one to bypass the dup char
-                left++;
-                // right pointer advance by one to include the dup char
-                right++;
-            }
-        }
-        return Math.max(longest, right - left);
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/27/add-two-numbers/">[LeetCode 2] Add Two Numbers</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-27T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/04/27/add-two-numbers/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/add-two-numbers/">link</a></p>
-
-<div class="question-content">
-    <p></p>
-    <p>You are given two linked lists representing two non-negative numbers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.</p>
-    <p style="font-family:monospace">
-    <b>Input:</b> (2 -&gt; 4 -&gt; 3) + (5 -&gt; 6 -&gt; 4)<br>
-    <b>Output:</b> 7 -&gt; 0 -&gt; 8</p>
-    <p></p>
-</div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">4</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="lime">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Solution</h3>
-
-<p>This question is straight-forward. Just add one by one with a carry bit.</p>
-
-<h3>My code</h3>
-
-<pre><code>/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) {
- *         val = x;
- *         next = null;
- *     }
- * }
- */
-public class Solution {
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        return helper(l1, l2, 0);
-    }
-
-    private ListNode helper(ListNode l1, ListNode l2, int carry) {
-        if (l1 == null &amp;&amp; l2 == null) {
-            if (carry == 0) {
-                return null;
-            } else {
-                return new ListNode(1);
-            }
-        } else if (l1 == null) {
-            return helper(new ListNode(0), l2, carry);
-        } else if (l2 == null) {
-            return helper(l1, new ListNode(0), carry);
-        } else {
-            // both l1 and l2 have value
-            int sum = l1.val + l2.val + carry;
-            int resultNumber = sum % 10;
-            int newCarry = sum / 10;
-            ListNode ans = new ListNode(resultNumber);
-            ans.next = helper(l1.next, l2.next, newCarry);
-            return ans;
-        }
-    }
-}
-</code></pre>
-
-<p>Instead of doing it recursively, someone write a nice code for an iterative <a href="http://gongxuns.blogspot.sg/2012/12/leetcodeadd-two-numbers.html">solution</a></p>
-
-<pre><code>/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) {
- *         val = x;
- *         next = null;
- *     }
- * }
- */
-public class Solution {
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        int carry = 0;
-        ListNode res = new ListNode(0);
-        ListNode cur1 = l1, cur2 = l2, head = res;
-        while (cur1 != null || cur2 != null) {
-            if (cur1 != null) {
-                carry += cur1.val;
-                cur1 = cur1.next;
-            }
-            if (cur2 != null) {
-                carry += cur2.val;
-                cur2 = cur2.next;
-            }
-            head.next = new ListNode(carry % 10);
-            head = head.next;
-            carry /= 10;
-        }
-        if (carry == 1)
-            head.next = new ListNode(1);
-        return res.next;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/26/two-sum/">[LeetCode 1] Two Sum</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-26T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/04/26/two-sum/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://oj.leetcode.com/problems/two-sum/">link</a></p>
-
-<div class="question-content">
-    <p></p><p>Given an array of integers, find two numbers such that they add up to a specific target number.</p>
-    <p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
-    <p>You may assume that each input would have exactly one solution.</p>
-    <p style="font-family:monospace">
-    <b>Input:</b> numbers={2, 7, 11, 15}, target=9<br>
-    <b>Output:</b> index1=1, index2=2
-    </p>
-    <p></p>
-</div>
-
-
-<h3>Stats</h3>
-
-<table border="2">
-    <tr>
-        <td>Frequency</td>
-        <td bgcolor="red">5</td>
-    </tr>
-    <tr>
-        <td>Diffficulty</td>
-        <td bgcolor="lime">2</td>
-    </tr>
-    <tr>
-        <td>Adjusted Difficulty</td>
-        <td bgcolor="yellow">3</td>
-    </tr>
-    <tr>
-        <td>Time to use</td>
-        <td bgcolor="yellow">&#8212;&#8212;&#8212;-</td>
-    </tr>
-</table>
-
-
-<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
-
-<h3>Analysis</h3>
-
-<p>It&rsquo;s <strong>not a good idea to sort the input</strong>, because we are supposed to return the position index. Without sorting, we must use some data structure to help us!</p>
-
-<p>And the answer is HashMap.</p>
-
-<h3>Solution</h3>
-
-<p>Read thru the list of integers, and each time add (targer &ndash; curInt) to the hashmap.</p>
-
-<p>If the number is contained in the HashMap, solution found.</p>
-
-<h3>My code</h3>
-
-<pre><code>public class Solution {
-    public int[] twoSum(int[] numbers, int target) {
-        int[] result = new int[2];
-        if (numbers == null || numbers.length == 1) {
-            return result;
-        }
-        HashMap&lt;Integer, Integer&gt; map = new HashMap&lt;Integer, Integer&gt;();
-        for (int i = 0; i &lt; numbers.length; i++) {
-            if (map.containsKey(numbers[i])) {
-                result[0] = map.get(numbers[i]) + 1;
-                result[1] = i + 1;
-                return result;
-            } else {
-                // put &lt;key, value&gt; into hashmap where key is the number 
-                // that would complement the sum to be target. Like this: 
-                map.put(target - numbers[i], i);
-            }
-        }
-        return result;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
   
   
     <article>
@@ -4039,6 +3597,420 @@ Validate Binary Search Tree</p>
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/20/infix-to-postfix/">[Amazon] Infix to Postfix Conversion</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-20T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2013/11/20/infix-to-postfix/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Question</h1>
+
+<p><a href="https://cs.nyu.edu/courses/Fall12/CSCI-GA.1133-002/notes/InfixToPostfixExamples.pdf">link</a>, <a href="http://csis.pace.edu/~wolf/CS122/infix-postfix.htm">link</a>.</p>
+
+<blockquote><p>example: A * B + C becomes A B * C +</p>
+
+<p>A * (B + C) becomes A B C + *</p></blockquote>
+
+<h1>Solution</h1>
+
+<p>One of the main purpose of converting infix to postfix is to <strong>remove alll parentheses</strong> from the expression.</p>
+
+<p>This is a very difficult question. The solution is:</p>
+
+<ol>
+<li><p>Print operands as they arrive.</p></li>
+<li><p>If the incoming symbol is &lsquo;+&rsquo; or &lsquo;&ndash;&rsquo; or &lsquo;(&rsquo;, push it on the stack.</p></li>
+<li><p>If the incoming symbol is a &lsquo;)&rsquo;, pop the stack and print the operators until you see a &lsquo;(&rsquo;. Discard the pair of parentheses.</p></li>
+<li><p>If the incoming symbol is &lsquo;*&rsquo; or &lsquo;/&rsquo;, pop until we sees &lsquo;+&rsquo; or &lsquo;&ndash;&rsquo; or &lsquo;(&rsquo; at top of the stack, then push the symbol onto the stack.</p></li>
+<li><p>At the end of the expression, pop and print all operators on the stack. (No parentheses should remain.)</p></li>
+</ol>
+
+
+<h1>Code</h1>
+
+<pre><code>public String solve(String infix) {
+    StringBuilder sb = new StringBuilder();
+    // get next operand or non-operand
+    // notice that operand is &gt;=1 chars
+    int p = 0;
+    int len = infix.length();
+    Stack&lt;Character&gt; stack = new Stack&lt;Character&gt;();
+
+    while (p != len) {
+        if (isDigit(infix.charAt(p))) {
+            // if char at p is a digit
+            int q = p;
+            while (q != len &amp;&amp; isDigit(infix.charAt(q))) {
+                q++;
+            }
+            // it is a number in the range [p, q-1]
+            sb.append(infix.substring(p, q) + " ");
+            p = q;
+        } else {
+            // if char at p is + - * / or ( )
+            char op = infix.charAt(p++);
+            if (op == ')') {
+                // pop until sees a '('
+                while (stack.peek() != '(') {
+                    sb.append(stack.pop() + " ");
+                }
+                stack.pop();
+            } else if (op == '(' || op == '+' || op == '-') {
+                stack.push(op);
+            } else {
+                // if * or /
+                // pop until sees + or - or '('
+                while (!stack.isEmpty()) {
+                    if (stack.peek() == '+' || stack.peek() == '-' || stack.peek() == '(') {
+                        break;
+                    }
+                    sb.append(stack.pop() + " ");
+                }
+                stack.push(op);
+            }
+        }
+    }
+    // reach Eof, pop everything
+    while (!stack.isEmpty()) {
+        sb.append(stack.pop() + " ");
+    }
+    return sb.toString();
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/15/shuffle-max-diff/">[Question] Shuffle and Get Max Difference</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-15T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2013/11/15/shuffle-max-diff/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Question</h1>
+
+<p><a href="http://stackoverflow.com/questions/23205277/max-absolute-sum-in-a-array">link</a></p>
+
+<blockquote><p>Given an array with four integers A, B, C, D, shuffle them in some order (there are 24 shuffles).</p>
+
+<p>&hellip; Get the best shuffle such that</p>
+
+<p>F(S) = abs(s[0]-s[1]) + abs(s[1]-s[2])+ abs(s[2]-s[3])
+is maximum</p>
+
+<p>For example</p></blockquote>
+
+<pre><code>A=5, B= 3, C=-1, D =5
+s[0]=5, s[1]=-1, s[2]= 5, s[3] =3
+</code></pre>
+
+<blockquote><p>will give F[s] =14 as max diff</p></blockquote>
+
+<h1>Solution</h1>
+
+<p>Referring to <a href="http://stackoverflow.com/a/23205616">this execellent answer</a>:</p>
+
+<ol>
+<li>sort input and we get 4 number from min to max: A B C D</li>
+<li>swap A and B &ndash; B A C D</li>
+<li>swap C and D &ndash; B A D C</li>
+<li>swap head and tail &ndash; C A D B</li>
+</ol>
+
+
+<p>Finally you got CADB or BDAC.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/15/arithmetic-slice/">[Question] Count Arithmetic Slices</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-15T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2013/11/15/arithmetic-slice/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Question</h1>
+
+<blockquote><p>Given an unsorted array of length N, a slice is defined as a pair of numbers (P, Q) so that:</p>
+
+<ol>
+<li>0 &lt;= P &lt; Q &lt;= N</li>
+<li>A[P], A[P+1]&hellip;.A[Q] is arithmetic sequence</li>
+</ol>
+
+
+<p>Example:</p>
+
+<pre><code>input = { -1, 1, 3, 3, 3, 2, 1, 0 }
+</code></pre>
+
+<p>Output 5 because there&rsquo;re slices:</p>
+
+<pre><code>(0, 2) (2, 4) (4, 6) (4, 7) (5, 7)
+</code></pre></blockquote>
+
+<h1>Solution</h1>
+
+<ol>
+<li>count the length of arithmetic (countinuous) sequence</li>
+<li>form some slices</li>
+<li>proceed from the end of that sequence, till the end.</li>
+</ol>
+
+
+<h1>Code</h1>
+
+<pre><code>public int solve(int[] input) {
+    int len = input.length;
+    int p = 0;
+    int totalSlices = 0;
+
+    while (p + 1 &lt; len) {
+        // check if there is a arithmetic sequence starting at p
+        // note that p is NOT the last element.
+        int diff = input[p + 1] - input[p];
+        int q = p + 1;
+
+        // starting from q, check arithmetic difference
+        while (q &lt; len) {
+            if (input[q] - input[q - 1] == diff) {
+                q++;
+            } else {
+                break;
+            }
+        }
+
+        // so, the range [p, q-1] is a arithmetic sequence.
+        int seqLength = q - p;
+        if (seqLength &gt;= 3) {
+            totalSlices += getSlicesCountFromArithmeticSeq(seqLength);
+        }
+
+        // update p (skip the range [p, q-1])
+        p = q - 1;
+    }
+    return totalSlices;
+}
+
+private int getSlicesCountFromArithmeticSeq(int k) {
+    // choose 2 from (k - 1)
+    return (k - 1) * (k - 2) / 2;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/05/Number-Of-Bus-Stations/">[Question] Number of Bus Stations (Meeting Rooms)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-05T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2013/11/05/Number-Of-Bus-Stations/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://tech-queries.blogspot.sg/2009/05/number-of-bus-stations.html">link</a></p>
+
+<blockquote><p>At a bus-station, you have time-table for buses arrival and departure. You need to find the minimum number of platforms so that all the buses can be accommodated as per their schedule.</p>
+
+<p>Example: Time table is like below:</p></blockquote>
+
+<pre><code>Bus         Arrival         Departure 
+BusA        0900 hrs        0930 hrs
+BusB        0915 hrs        1300 hrs
+BusC        1030 hrs        1100 hrs
+BusD        1045 hrs        1145 hrs
+</code></pre>
+
+<blockquote><p>The answer must be 3.</p></blockquote>
+
+<p>This question can also be in other forms:</p>
+
+<blockquote><p>Given a vector of Nodes, each of which contain the start and end time of a meeting, find the maximum number of rooms one would have to book for the day.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p>The answer is same as finding the maximum number of bus at the bus-station at the same time.</p>
+
+<p><strong>The suggestted solution</strong> from <a href="http://tech-queries.blogspot.sg/2009/05/number-of-bus-stations.html">here</a>:</p>
+
+<blockquote><p>So first sort all the arrival(A) and departure(D) time in an int array. Please save the corresponding arrival or departure in the array also.</p>
+
+<p>After sorting our array will look like this:</p></blockquote>
+
+<pre><code>0900    0915    1930    1030    1045    1100    1145    1300
+A       A       D       A       A       D       D       D
+</code></pre>
+
+<p>Now use a counter. When sees an A, increment. When sees an D, decreament. In the end, return the largest counter value.</p>
+
+<p>Note: If you have a arriving and a departing at same time, put departure time first.</p>
+
+<h3>code</h3>
+
+<pre><code>public int solve(List&lt;Meeting&gt; input) {
+    List&lt;Event&gt; events = new ArrayList&lt;Event&gt;();
+    for (Meeting i : input) {
+        events.add(new Event(i.start, 1));
+        events.add(new Event(i.end, -1));
+    }
+    Collections.sort(events);
+
+    int currentNeeds = 0;
+    int maxNeeds = 0;
+    for (Event e : events) {
+        currentNeeds += e.diff;
+        maxNeeds = Math.max(maxNeeds, currentNeeds);
+    }
+    return maxNeeds;
+}
+</code></pre>
+
+<p>supporting classes:</p>
+
+<pre><code>class Event implements Comparable&lt;Event&gt; {
+    int time;
+    int diff;
+    // variable diff have value of 1 or -1
+    // when = 1, it means starting a meeting and 1 more room needed
+    // when = -1, it means ending a meeting and 1 less room needed
+
+    public Event(int a, int b) {
+        time = a;
+        diff = b;
+    }
+
+    @Override
+    public int compareTo(Event o) {
+        if (this.time == o.time) {
+            return this.diff - o.diff;
+        }
+        return this.time - o.time;
+    }
+}
+
+class Meeting {
+    int start;
+    int end;
+
+    public Meeting(int a, int b) {
+        start = a;
+        end = b;
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
     
     <a href="/blog/archives">Blog Archives</a>
@@ -4064,7 +4036,7 @@ Validate Binary Search Tree</p>
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (129)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (130)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/z-string-search/'>z-string-search (17)</a></li>
 <li class='category'><a href='/blog/categories/z-testing/'>z-testing (2)</a></li>

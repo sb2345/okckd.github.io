@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>[Question] Count Arithmetic Slices  - Shuatiblog.com</title>
+  <title>[Question] Number Of Bus Stations (meeting rooms)  - Shuatiblog.com</title>
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question Given an unsorted array of length N, a slice is defined as a pair of numbers (P, Q) so that: 0 &lt;= P &lt; Q &lt;= N
-A[P], A[P+1]&hellip;.A &hellip;">
+  <meta name="description" content="Question link At a bus-station, you have time-table for buses arrival and departure. You need to find the minimum number of platforms so that all the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@ A[P], A[P+1]&hellip;.A &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.shuatiblog.com/blog/2014/05/15/arithmetic-slice/">
+  <link rel="canonical" href="http://www.shuatiblog.com/blog/2013/11/05/Number-Of-Bus-Stations/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -97,7 +96,7 @@ A[P], A[P+1]&hellip;.A &hellip;">
   
   <header>
     
-      <h1 class="entry-title">[Question] Count Arithmetic Slices</h1>
+      <h1 class="entry-title">[Question] Number of Bus Stations (Meeting Rooms)</h1>
     
     
       <p class="meta">
@@ -113,7 +112,7 @@ A[P], A[P+1]&hellip;.A &hellip;">
   
 
 
-<time datetime="2014-05-15T00:00:00-05:00" pubdate data-updated="true"></time>
+<time datetime="2013-11-05T00:00:00-06:00" pubdate data-updated="true"></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -122,72 +121,96 @@ A[P], A[P+1]&hellip;.A &hellip;">
   </header>
 
 
-<div class="entry-content"><h1>Question</h1>
+<div class="entry-content"><h3>Question</h3>
 
-<blockquote><p>Given an unsorted array of length N, a slice is defined as a pair of numbers (P, Q) so that:</p>
+<p><a href="http://tech-queries.blogspot.sg/2009/05/number-of-bus-stations.html">link</a></p>
 
-<ol>
-<li>0 &lt;= P &lt; Q &lt;= N</li>
-<li>A[P], A[P+1]&hellip;.A[Q] is arithmetic sequence</li>
-</ol>
+<blockquote><p>At a bus-station, you have time-table for buses arrival and departure. You need to find the minimum number of platforms so that all the buses can be accommodated as per their schedule.</p>
 
+<p>Example: Time table is like below:</p></blockquote>
 
-<p>Example:</p>
-
-<pre><code>input = { -1, 1, 3, 3, 3, 2, 1, 0 }
+<pre><code>Bus         Arrival         Departure 
+BusA        0900 hrs        0930 hrs
+BusB        0915 hrs        1300 hrs
+BusC        1030 hrs        1100 hrs
+BusD        1045 hrs        1145 hrs
 </code></pre>
 
-<p>Output 5 because there&rsquo;re slices:</p>
+<blockquote><p>The answer must be 3.</p></blockquote>
 
-<pre><code>(0, 2) (2, 4) (4, 6) (4, 7) (5, 7)
-</code></pre></blockquote>
+<p>This question can also be in other forms:</p>
 
-<h1>Solution</h1>
+<blockquote><p>Given a vector of Nodes, each of which contain the start and end time of a meeting, find the maximum number of rooms one would have to book for the day.</p></blockquote>
 
-<ol>
-<li>count the length of arithmetic (countinuous) sequence</li>
-<li>form some slices</li>
-<li>proceed from the end of that sequence, till the end.</li>
-</ol>
+<h3>Solution</h3>
 
+<p>The answer is same as finding the maximum number of bus at the bus-station at the same time.</p>
 
-<h1>Code</h1>
+<p><strong>The suggestted solution</strong> from <a href="http://tech-queries.blogspot.sg/2009/05/number-of-bus-stations.html">here</a>:</p>
 
-<pre><code>public int solve(int[] input) {
-    int len = input.length;
-    int p = 0;
-    int totalSlices = 0;
+<blockquote><p>So first sort all the arrival(A) and departure(D) time in an int array. Please save the corresponding arrival or departure in the array also.</p>
 
-    while (p + 1 &lt; len) {
-        // check if there is a arithmetic sequence starting at p
-        // note that p is NOT the last element.
-        int diff = input[p + 1] - input[p];
-        int q = p + 1;
+<p>After sorting our array will look like this:</p></blockquote>
 
-        // starting from q, check arithmetic difference
-        while (q &lt; len) {
-            if (input[q] - input[q - 1] == diff) {
-                q++;
-            } else {
-                break;
-            }
-        }
+<pre><code>0900    0915    1930    1030    1045    1100    1145    1300
+A       A       D       A       A       D       D       D
+</code></pre>
 
-        // so, the range [p, q-1] is a arithmetic sequence.
-        int seqLength = q - p;
-        if (seqLength &gt;= 3) {
-            totalSlices += getSlicesCountFromArithmeticSeq(seqLength);
-        }
+<p>Now use a counter. When sees an A, increment. When sees an D, decreament. In the end, return the largest counter value.</p>
 
-        // update p (skip the range [p, q-1])
-        p = q - 1;
+<p>Note: If you have a arriving and a departing at same time, put departure time first.</p>
+
+<h3>code</h3>
+
+<pre><code>public int solve(List&lt;Meeting&gt; input) {
+    List&lt;Event&gt; events = new ArrayList&lt;Event&gt;();
+    for (Meeting i : input) {
+        events.add(new Event(i.start, 1));
+        events.add(new Event(i.end, -1));
     }
-    return totalSlices;
+    Collections.sort(events);
+
+    int currentNeeds = 0;
+    int maxNeeds = 0;
+    for (Event e : events) {
+        currentNeeds += e.diff;
+        maxNeeds = Math.max(maxNeeds, currentNeeds);
+    }
+    return maxNeeds;
+}
+</code></pre>
+
+<p>supporting classes:</p>
+
+<pre><code>class Event implements Comparable&lt;Event&gt; {
+    int time;
+    int diff;
+    // variable diff have value of 1 or -1
+    // when = 1, it means starting a meeting and 1 more room needed
+    // when = -1, it means ending a meeting and 1 less room needed
+
+    public Event(int a, int b) {
+        time = a;
+        diff = b;
+    }
+
+    @Override
+    public int compareTo(Event o) {
+        if (this.time == o.time) {
+            return this.diff - o.diff;
+        }
+        return this.time - o.time;
+    }
 }
 
-private int getSlicesCountFromArithmeticSeq(int k) {
-    // choose 2 from (k - 1)
-    return (k - 1) * (k - 2) / 2;
+class Meeting {
+    int start;
+    int end;
+
+    public Meeting(int a, int b) {
+        start = a;
+        end = b;
+    }
 }
 </code></pre>
 </div>
@@ -213,7 +236,7 @@ private int getSlicesCountFromArithmeticSeq(int k) {
   
 
 
-<time datetime="2014-05-15T00:00:00-05:00" pubdate data-updated="true"></time>
+<time datetime="2013-11-05T00:00:00-06:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
@@ -227,7 +250,7 @@ private int getSlicesCountFromArithmeticSeq(int k) {
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2014/05/15/arithmetic-slice/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2014/05/15/arithmetic-slice/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.shuatiblog.com/blog/2013/11/05/Number-Of-Bus-Stations/" data-via="" data-counturl="http://www.shuatiblog.com/blog/2013/11/05/Number-Of-Bus-Stations/" >Tweet</a>
   
   
   
@@ -236,10 +259,8 @@ private int getSlicesCountFromArithmeticSeq(int k) {
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/05/15/Wildcard-Matching/" title="Previous Post: [LeetCode 44] Wildcard Matching">&laquo; [LeetCode 44] Wildcard Matching</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/05/15/shuffle-max-diff/" title="Next Post: [Question] Shuffle and Get Max Difference ">[Question] Shuffle and Get Max Difference  &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2013/11/15/arithmetic-slice/" title="Next Post: [Question] Count Arithmetic Slices ">[Question] Count Arithmetic Slices  &raquo;</a>
       
     </p>
   </footer>
@@ -297,7 +318,7 @@ private int getSlicesCountFromArithmeticSeq(int k) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (129)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (130)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/z-string-search/'>z-string-search (17)</a></li>
 <li class='category'><a href='/blog/categories/z-testing/'>z-testing (2)</a></li>
@@ -369,8 +390,8 @@ private int getSlicesCountFromArithmeticSeq(int k) {
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://www.shuatiblog.com/blog/2014/05/15/arithmetic-slice/';
-        var disqus_url = 'http://www.shuatiblog.com/blog/2014/05/15/arithmetic-slice/';
+        var disqus_identifier = 'http://www.shuatiblog.com/blog/2013/11/05/Number-Of-Bus-Stations/';
+        var disqus_url = 'http://www.shuatiblog.com/blog/2013/11/05/Number-Of-Bus-Stations/';
         var disqus_script = 'embed.js';
       
     (function () {
