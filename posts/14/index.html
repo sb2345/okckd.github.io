@@ -9,8 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link Consider the following class: class MyCounter { private static int counter = 0; public static int getCount() { return counter++; }
-} Is &hellip;">
+  <meta name="description" content="Question link Design a system to return an unique ID for each request. (For most of requests, the ID value should increase as time goes, the system &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +75,105 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/27/generate-request-id/">[Google] Generate Request ID</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-27T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/01/27/generate-request-id/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.careercup.com/question?id=5169800024162304">link</a></p>
+
+<blockquote><p>Design a system to <strong>return an unique ID for each request</strong>.</p>
+
+<p>(For most of requests, the ID value should increase as time goes, the system should handle 1000 requests per second at least. )</p>
+
+<p>Note: <strong>Timestamps</strong> alone is not valid since there might be multiple requests with same timestamps.</p></blockquote>
+
+<h3>Idea 1</h3>
+
+<h4>Generating UUID</h4>
+
+<p><strong>A universally unique identifier (UUID)</strong> is an identifier standard used in software construction. A UUID is simply a 128-bit value.</p>
+
+<p>Generating unique IDs is easy. All modern OS&#8217;es have that functionality built in.</p>
+
+<p><strong>Detail</strong>: UUIDs may be generated from a combination of <strong>system time stamp, CPU/system ID</strong>, NIC MAC addresses, HBA WWNs, server id etc.</p>
+
+<h4>Clarifications</h4>
+
+<p>Let&rsquo;s assume the following:</p>
+
+<ol>
+<li><p>What&rsquo;s the length of the ID?</p>
+
+<p> &lt;= 128 bits. In that case I&rsquo;ll choose the standard 128 bit UUID format.</p></li>
+<li><p>The requirement states the system should handle 1000 request/s at least.</p></li>
+<li><p>What&rsquo;s the average request rate?</p>
+
+<p> 1000 &lt; avg req. rate &lt; 10,000</p></li>
+<li><p>What&rsquo;s the max. burst rate the system must handle?</p>
+
+<p> &lt; 1,000,000</p></li>
+<li><p>What&rsquo;s the max. latency (wait time) for a request?</p>
+
+<p> 1 ms</p></li>
+</ol>
+
+
+<h4>Solution</h4>
+
+<p>It&rsquo;s a classical consumer-producer problem.</p>
+
+<p>In this case we have many consumers of UUIDs and one producer. Let&rsquo;s assume the OS provides an API to generate UUIDs and the max. running time of the API is 1ms.</p>
+
+<ol>
+<li><p>Pre-allocate 2 Mio UUIDs into an array / stack/ heap (depending on implementation) structure.</p></li>
+<li><p>If no overhead 2 Mio UUIDs would take ~ 32MB of RAM. Not a problem on today&rsquo;s server system with many GB of RAM, but may be a problem on an embedded system.</p></li>
+<li><p>2 Mio UUIDs ensures system can handle burst rate.</p></li>
+<li><p>The solution needs to ensure that its pool of UUIDs doesn&rsquo;t run out as consumers request them and they are replenished.</p></li>
+</ol>
+
+
+<h3>Idea 2</h3>
+
+<p>This question is quite open-ended.</p>
+
+<p>For starter, how about <strong>appending random(N) to the timestamp</strong>? N can be large enough to make collisions unlikely. If each server has an ID we can also include it to further reduce collisions.</p>
+
+<p>If IDs must be unique, then I suppose you can <strong>design a counter</strong> that will return an ID and increment it at the same time. You will then <strong>need mutex to access this counter</strong>.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1137,62 +1235,6 @@ class Pair {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/19/difference-http-tcp/">[Design] Difference Between HTTP Protocol and TCP Protocol</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-19T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/01/19/difference-http-tcp/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://www.quora.com/What-is-the-difference-between-HTTP-protocol-and-TCP-protocol">ref</a></p>
-
-<h3>Short Version</h3>
-
-<p>TCP is a <strong>transport-layer</strong> protocol, and HTTP is an <strong>application-layer</strong> protocol that runs over TCP.</p>
-
-<h3>The layers</h3>
-
-<p>At the very bottom of the network stack is the <strong>physical layer</strong>. This is where electrical signals or light pulses or radio waves actually transmit information from place to place. The physical layer doesn&rsquo;t really have protocols, but instead has standards for voltages, frequencies, and other physical properties. You can transmit information directly this way, but you need a lot of power or a dedicated line, and without higher layers you won&rsquo;t be able to share bandwidth.</p>
-
-<p>The next layer up is the <strong>link layer</strong>. This layer covers communication with devices that share a physical communications medium. Here, protocols like Ethernet, 802.11a/b/g/n, and Token Ring specify how to handle multiple concurrent accesses to the physical medium and how to direct traffic to one device instead of another. In a typical home network, this is how your computer talks to your home &ldquo;router.&rdquo;</p>
-
-<p>The third layer is the <strong>network layer</strong>. In the majority of cases, this is dominated by Internet Protocol (IP). This is where the magic of the Internet happens, and you get to talk to a computer halfway around the world, without needing to know where it is. Routers handle directing your traffic from your local network to the network where the other computer lives, where its own link layer handles getting the packets to the right computer.</p>
-
-<p>Now we are getting somewhere. We can talk to a computer somewhere around the world, but that computer is running lots of different programs. How should it know which one to deliver your message to? The <strong>transport layer</strong> takes care of this, usually with <strong>port numbers</strong>. The two most popular transport layer protocols are TCP and UDP. TCP does a lot of interesting things to smooth over the rough spots of network-layer packet-switched communication like reordering packets, retransmitting lost packets, etc. UDP is more unreliable, but has less overhead.</p>
-
-<p>So we&rsquo;ve connected your browser to the web server software on the other end, but how does the server know what page you want? How can you post a question or an answer? These are things that <strong>application-layer</strong> protocols handle. For <strong>web traffic</strong>, this is the HyperText Transfer Protocol (HTTP). There are thousands of application-layer protocols: SMTP, IMAP, and POP3 for email; XMPP, IRC, ICQ for chat; Telnet, SSH, RDP for remote administration; etc.</p>
-
-<p>Ref: <a href="http://qr.ae/3pnJK">http://qr.ae/3pnJK</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="15">&larr; Older</a>
@@ -1210,7 +1252,7 @@ class Pair {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (77)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (78)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (36)</a></li>
@@ -1237,6 +1279,10 @@ class Pair {
       </li>
     
       <li class="post">
+        <a href="/blog/2015/11/21/generate-maze/">[Design] How to generate Maze </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/18/strategy-pattern/">[Design] Strategy design pattern </a>
       </li>
     
@@ -1246,10 +1292,6 @@ class Pair {
     
       <li class="post">
         <a href="/blog/2015/11/04/Best-Time-to-Buy-and-Sell-Stock-IV/">[LeetCode 188] Best Time to Buy and Sell Stock IV </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/28/arraylist-implementation/">[Java OOP] Java ArrayList implementation </a>
       </li>
     
   </ul>

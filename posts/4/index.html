@@ -9,12 +9,9 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Overview Today we&rsquo;ll look at 6 examples of problems associated with Web Service: how the internet works
-DNS
-Web server
-Music Player
-MP3 file
-秒杀 &hellip;">
+  <meta name="description" content="Question 4 fix MP3 problem The process of fetching a MP3 (from CDN): aquire MP3 link, and send request
+send request to CDN
+CDN receive request, find &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +77,213 @@ MP3 file
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/28/design-class3-2/">[NineChap System Design] Class 3.2: Web Service</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-28T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/28/design-class3-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Question 4</h1>
+
+<p><strong>fix MP3 problem</strong></p>
+
+<p>The process of fetching a MP3 (from CDN):</p>
+
+<p><img class="middle" src="/assets/images/design-class3-client-request-mp3.png"></p>
+
+<ol>
+<li>aquire MP3 link, and send request</li>
+<li>send request to CDN</li>
+<li>CDN receive request, find MP3</li>
+<li>response to client</li>
+<li>play the music</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class3-client-request-mp3-errors.png"></p>
+
+<p>Question: in step 2, there&rsquo;s more Network error, but in step 4, there&rsquo;s no Network error, but Timeout. Why?</p>
+
+<h2>Fix step 2, Network error</h2>
+
+<p>Problem is: MP3 url invalid. It actually comes from a failed CDN sever.</p>
+
+<p>Solution: fix the server.</p>
+
+<h2>Fix step 3, CDN can&rsquo;t find MP3</h2>
+
+<p>Problem associated with <strong>Anti-Leech</strong>.</p>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Leech_(computing">a leech</a>)</strong> is one who benefits, usually deliberately, from others&#8217; information or effort but does not offer anything in return.</p>
+
+<p>Example: Wi-Fi leeches, Direct linking (or hot-linking) and In most P2P-networks, leeching is whose who download too much.</p>
+
+<p><strong><a href="https://answers.yahoo.com/question/index?qid=1006042926419">Anti-Leech</a></strong> specializes in protecting file downloads and stopping bandwidth leeching.</p></blockquote>
+
+<p>See that some P2P and leeching software will steal your url links, so the MP3 url expiration time is 5 minutes.</p>
+
+<p>So when CDN server&rsquo;s clock and web server&rsquo;s clock are not synchronized well, MP3 url can expire.</p>
+
+<p>Solution: every 10 minutes sync CDN clock with web server clock.</p>
+
+<h2>Fix step 4, Timeout error</h2>
+
+<p>Some MP3 are relatively large. Thus timeout.</p>
+
+<blockquote><p>MP3 performs better at higher bps, and aac(Advanced Audio Coding) works better at lower bps.</p></blockquote>
+
+<p>Solution:</p>
+
+<ol>
+<li><p>compress MP3 to 48bps, or use aac format. So, play lower-rate music first, then switch automatically.</p></li>
+<li><p>pre-load a music while previous is playing.</p></li>
+<li><p>optimize CDN</p></li>
+</ol>
+
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Content_delivery_network">CDN</a></strong> content delivery network is a large <strong>distributed system of servers</strong> deployed in <strong>multiple data centers</strong> across the Internet.</p>
+
+<p>The goal of a CDN is to serve content to end-users with high availability and high performance.</p></blockquote>
+
+<p><img class="middle" src="/assets/images/design-class3-CDN.png"></p>
+
+<p>Which CDN should client choose?</p>
+
+<blockquote><p>Not DNS, but web server calculates which to choose. It can be calculated using IP distance, or ISP provider, but not accurate.</p>
+
+<p>We can also use local desktop apps (in different locations) to ping CDN servers. This may violate user privacy, though.</p></blockquote>
+
+<h2>Fix step 5, Fail to play</h2>
+
+<p>Problem: some files got wrong decoding.</p>
+
+<h2>Fix step 6, unkown error</h2>
+
+<p>Problem: some users close the page while MP3 loading.</p>
+
+<h1>Question 5</h1>
+
+<p><strong>fix player problem</strong></p>
+
+<p>Problem: iOS device can never play Flash.</p>
+
+<p>Solution: develop HTML5 player.</p>
+
+<h2>5.2 how to evaluate that you solved the problem</h2>
+
+<ol>
+<li><p>user complains</p></li>
+<li><p><strong>important</strong>: daily retention rate!</p></li>
+</ol>
+
+
+<p>We can&rsquo;t use daily active user, cuz it depends on marketing, competitors, and infrastructure changes.</p>
+
+<p><strong>One day retention rate</strong>:</p>
+
+<p><img class="middle" src="/assets/images/design-class3-user-retention.png"></p>
+
+<blockquote><p>Today’s visitor = {U1, U3, U7, U9, U10}</p>
+
+<p>Tomorrow&rsquo;s visitor = {U2, U3, U9,}</p>
+
+<p>Today’s one day retention rate = 2/5</p></blockquote>
+
+<h1>Question 6 秒杀</h1>
+
+<h2>Design</h2>
+
+<p>Queue A and Queue B</p>
+
+<p><img class="middle" src="/assets/images/design-class3-miao-sha.png"></p>
+
+<h3>Queue A</h3>
+
+<p>Many queues, each one locates on a individual web server or reverse proxy. It is mainly used to accept large amount of requests coming from the clients.</p>
+
+<p>Each machine may takes 10,000 or more requests per second.</p>
+
+<p>Queue A will redirect most requests to a static page (cached).</p>
+
+<h3>Queue B</h3>
+
+<p>Queue B is a single machine, to aviod distributed problems. It takes in small amount of requests and decides results (eg. redirect to payment page).</p>
+
+<blockquote><p>Now, why do we need 2 queues, not 1?</p>
+
+<p>Think about a hospital. Queue A is the hospital lobby and security guard, and Queue B is the queue of patience.</p></blockquote>
+
+<h2>How to reduce traffic</h2>
+
+<ol>
+<li>no image</li>
+<li>cache more static pages</li>
+<li>reverse proxy: batch sending the requests</li>
+</ol>
+
+
+<p>Also, can use front-end javascript to prevent clicking. There are method to bypass, so we need to check IP or do some filtering.</p>
+
+<h2>How to keep it simple?</h2>
+
+<ol>
+<li>no DB: basic logic. But rmb to use a log file</li>
+<li>no lock</li>
+</ol>
+
+
+<h2>How to improve stability</h2>
+
+<ol>
+<li>use new server to do <strong>Miao Sha</strong>, in case of crash</li>
+<li>asyc prcessing everything! Don&rsquo;t let other people wait, in case of crash.</li>
+</ol>
+
+
+<h3>How to defend hackers</h3>
+
+<ol>
+<li>IP address (to defent auto softwares), but it&rsquo;s easy for hackers to fake IP address</li>
+<li>CAPTCHA</li>
+</ol>
+
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/CAPTCHA">CAPTCHA</a></strong> (an acronym for &ldquo;Completely Automated Public Turing test to tell Computers and Humans Apart&rdquo;) is a type of challenge-response test used in computing to determine whether or not the user is human.</p></blockquote>
+
+<h2>follow-up</h2>
+
+<p>How to design 12306 (support several million QPS)</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1557,213 +1761,6 @@ Similarity( u1, u2 ) = 3
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/08/linux-and-tcp-ports/">[Design] Linux and TCP Ports</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-08T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/06/08/linux-and-tcp-ports/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Overview</h1>
-
-<p><a href="http://en.wikipedia.org/wiki/Port_%28computer_networking%29">a port</a> is <strong>a software construct serving as a communications endpoint</strong> in a computer&rsquo;s host operating system.</p>
-
-<p>purpose of ports is to uniquely identify different applications or processes running on a single computer and thereby <strong>enable them to share a single physical connection to a packet-switched network</strong> like the Internet.</p>
-
-<p>The protocols that <strong>primarily use ports</strong> are the Transport Layer protocols, such as TCP and UDP.</p>
-
-<p><strong>Port info can be viewed on Linux /etc/services files</strong>.</p>
-
-<h2>there&rsquo;re only 65536 ports</h2>
-
-<p>In TCP/IP stack, port number field is just 16bit size unsigned integer. Port number thus ranging from 0 to 65535.</p>
-
-<h2>well-known ports</h2>
-
-<p><strong>Well-known ports</strong> (or Privileged Ports) are those from 0 through 1023.</p>
-
-<ul>
-<li>20 &amp; 21: File Transfer Protocol (FTP)</li>
-<li>22: Secure Shell (SSH)</li>
-<li>23: Telnet remote login service</li>
-<li>25: Simple Mail Transfer Protocol (SMTP)</li>
-<li>53: Domain Name System (DNS) service</li>
-<li>80: Hypertext Transfer Protocol (HTTP) used in the World Wide Web</li>
-<li>110: Post Office Protocol (POP3)</li>
-<li>119: Network News Transfer Protocol (NNTP)</li>
-<li>143: Internet Message Access Protocol (IMAP)</li>
-<li>161: Simple Network Management Protocol (SNMP)</li>
-<li>194: Internet Relay Chat (IRC)</li>
-<li>443: HTTP Secure (HTTPS)</li>
-<li>465: SMTP Secure (SMTPS)</li>
-</ul>
-
-
-<h2>Socket</h2>
-
-<p><a href="http://www.linuxnix.com/2011/05/important-port-numbers-linux-system-administrator.html">Socket is combination of</a> software Port and IP address.</p>
-
-<h2>Protocol number</h2>
-
-<p>In an IP header, <a href="https://technet.microsoft.com/en-us/library/cc959827.aspx">the Protocol field identifies the service</a> in the next higher level in the protocol stack to which data is passed. <strong>Do not confuse this with port number, which is used for communication by TCP/UDP</strong>.</p>
-
-<table>
-<tbody><tr><th>
-<p>
-Service</p>
-</th><th>
-<p>
-Protocol Number</p>
-</th></tr>
-<tr><td>
-<p>
-Internet Control Message Protocol (ICMP)</p>
-</td><td>
-<p>
-1</p>
-</td></tr>
-<tr><td>
-<p>
-Transmission Control Protocol (TCP)</p>
-</td><td>
-<p>
-6</p>
-</td></tr>
-<tr><td>
-<p>
-User Datagram Protocol (UDP)</p>
-</td><td>
-<p>
-17</p>
-</td></tr>
-<tr><td>
-<p>
-General Routing Encapsulation (PPTP data over GRE)</p>
-</td><td>
-<p>
-47</p>
-</td></tr>
-<tr><td>
-<p>
-Authentication Header (AH) IPSec</p>
-</td><td>
-<p>
-51</p>
-</td></tr>
-<tr><td>
-<p>
-Encapsulation Security Payload (ESP) IPSec</p>
-</td><td>
-<p>
-50</p>
-</td></tr>
-<tr><td>
-<p>
-Exterior Gateway Protocol (EGP)</p>
-</td><td>
-<p>
-8</p>
-</td></tr>
-<tr><td>
-<p>
-Gateway-Gateway Protocol (GGP)</p>
-</td><td>
-<p>
-3</p>
-</td></tr>
-<tr><td>
-<p>
-Host Monitoring Protocol (HMP)</p>
-</td><td>
-<p>
-20</p>
-</td></tr>
-<tr><td>
-<p>
-Internet Group Management Protocol (IGMP)</p>
-</td><td>
-<p>
-88</p>
-</td></tr>
-<tr><td>
-<p>
-MIT Remote Virtual Disk (RVD)</p>
-</td><td>
-<p>
-66</p>
-</td></tr>
-<tr><td>
-<p>
-OSPF Open Shortest Path First</p>
-</td><td>
-<p>
-89</p>
-</td></tr>
-<tr><td>
-<p>
-PARC Universal Packet Protocol (PUP)</p>
-</td><td>
-<p>
-12</p>
-</td></tr>
-<tr><td>
-<p>
-Reliable Datagram Protocol (RDP)</p>
-</td><td>
-<p>
-27</p>
-</td></tr>
-<tr><td>
-<p>
-Reservation Protocol (RSVP) QoS</p>
-</td><td>
-<p>
-46</p>
-</td></tr>
-</tbody></table>
-
-
-<blockquote><p><a href="https://learningnetwork.cisco.com/thread/61029">When the IP packet contain TCP data</a> the protocol number field will have the value 6 in it, so the payload will be sent to the TCP stack, TCP would then use the port numbers to send the data to the correct application. The same is for UDP with protocol number 17.</p>
-
-<p>Another way to look at the IP protocol number field is, if we didn&rsquo;t have this field in the IP packet header, IP would only be capable of carrying one type of data, while adding this field allowed the IP to carry multiple types of data differentiated by the protocol number, the same goes for TCP/UDP using TCP/UDP ports to serve multiple applications and Ethernet using the Ethertype, and so on.</p></blockquote>
-
-<h2>can multiple app bind to (or listen to) the same port?</h2>
-
-<p>Can&rsquo;t. <a href="http://stackoverflow.com/questions/1694144/can-two-applications-listen-to-the-same-port">Because You can only have one application</a> listening on a single port at one time.</p>
-
-<blockquote><p>the app opens a port, gets a handle to it, and the OS notifies it (via that handle) when a client connection (or a packet in UDP case) arrives.</p>
-
-<p>If the OS allowed two apps to open the same port, how would it know which one to notify?</p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="5">&larr; Older</a>
@@ -1781,7 +1778,7 @@ Reservation Protocol (RSVP) QoS</p>
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (77)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (78)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (36)</a></li>
@@ -1808,6 +1805,10 @@ Reservation Protocol (RSVP) QoS</p>
       </li>
     
       <li class="post">
+        <a href="/blog/2015/11/21/generate-maze/">[Design] How to generate Maze </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/18/strategy-pattern/">[Design] Strategy design pattern </a>
       </li>
     
@@ -1817,10 +1818,6 @@ Reservation Protocol (RSVP) QoS</p>
     
       <li class="post">
         <a href="/blog/2015/11/04/Best-Time-to-Buy-and-Sell-Stock-IV/">[LeetCode 188] Best Time to Buy and Sell Stock IV </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/28/arraylist-implementation/">[Java OOP] Java ArrayList implementation </a>
       </li>
     
   </ul>
