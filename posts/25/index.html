@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question Given a two dimensional graph with points on it, find a line which passes the most number of points. Solution For this question, we used to &hellip;">
+  <meta name="description" content="Question Write a method to implement *, &ndash; , / operations You should use only the + operator. Solution First it&rsquo;s important to write a & &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,104 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/09/08/implement-math-operators/">[CC150v4] 10.4 Implement Mathematical Operators</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-08T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/09/08/implement-math-operators/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<blockquote><p>Write a method to implement *, &ndash; , / operations You should use only the + operator.</p></blockquote>
+
+<h3>Solution</h3>
+
+<p><strong>First it&rsquo;s important to write a &lsquo;negate&rsquo; operator</strong>. The code given in the book:</p>
+
+<pre><code>public static int FnNegate(int a) {
+    int neg = 0;
+    int d = a &lt; 0 ? 1 : -1;
+    while (a != 0) {
+        neg += d;
+        a += d;
+    }
+    return neg;
+}
+</code></pre>
+
+<p><strong>Updated on Feb 1st, 2015</strong>, the negate method:</p>
+
+<pre><code>public static int negate(int a) {
+    // plus -1, then do XOR with 111111111
+    // eg. 1 -&gt; 0000000 -&gt; 11111111 = -1
+    // eg. -1 -&gt; 11111110 -&gt; 00000001 = 1
+    return (a + -1) ^ -1;
+}
+</code></pre>
+
+<p>And the check sign method:</p>
+
+<pre><code>public static boolean sameSign(int a, int b) {
+    // if first bit is same, then xor = 00000000
+    // if first bit is not same, xor = 10000000
+    int xor = (a ^ b) &amp; Integer.MIN_VALUE;
+    return xor == 0;
+}
+</code></pre>
+
+<p>Although we can only use +, the author also used > and &lt; comparison operators.</p>
+
+<h3>Code</h3>
+
+<pre><code>public static int negate(int a) {
+    // plus -1, then do XOR with 111111111
+    // eg. 1 -&gt; 0000000 -&gt; 11111111 = -1
+    // eg. -1 -&gt; 11111110 -&gt; 00000001 = 1
+    return (a + -1) ^ -1;
+}
+
+public static int minus(int a, int b) {
+    return a + negate(b);
+}
+
+public static boolean sameSign(int a, int b) {
+    // if first bit is same, then xor = 00000000
+    // if first bit is not same, xor = 10000000
+    int xor = (a ^ b) &amp; Integer.MIN_VALUE;
+    return xor == 0;
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -815,126 +913,6 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/09/06/hanoi-tower/">[CC150v4] 3.4 Towers of Hanoi</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-06T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/09/06/hanoi-tower/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>In the classic problem of the Towers of Hanoi, you have 3 rods and N disks of di!erent sizes which can slide onto any tower. The puzzle starts with disks sorted in ascending order of size from top to bottom (e.g., each disk sits on top of an even larger one). You have the following constraints:</p></blockquote>
-
-<ol>
-<li>Only one disk can be moved at a time.</li>
-<li>A disk is slid o! the top of one rod onto the next rod.</li>
-<li>A disk can only be placed on top of a larger disk.</li>
-</ol>
-
-
-<blockquote><p>Write a program to move the disks from the &ldquo;rst rod to the last using Stacks.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>This is a <strong>classic recursive question</strong>. The solution code is supposed to be very concise.</p>
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong>, slightly different from the answer in the book, but good.</p>
-
-<p>Main class:</p>
-
-<pre><code>public class HanoiMyAnswer {
-
-    private static Rod r0, r1, r2;
-    private static final int NUM_DISKS = 5;
-
-    public static void main(String[] args) {
-        // Hanoi Tower always have 3 rods
-        r0 = new Rod(0);
-        r1 = new Rod(1);
-        r2 = new Rod(2);
-
-        // Put some disks on the 1st rod, leaving 2nd and 3rd rod empty
-        r0.setDisks(NUM_DISKS);
-
-        // start main algorithm
-        System.out.println("My answer: ");
-        moveDisks(NUM_DISKS, r0, r2, r1);
-    }
-
-    private static void moveDisks(int number, Rod from, Rod to, Rod buffer) {
-        if (number == 1) {
-            int topValue = from.disks.pop();
-            to.disks.push(topValue);
-            displayMessage(topValue, from.name, to.name);
-        } else {
-            moveDisks(number - 1, from, buffer, to);
-            int bottomValue = from.disks.pop();
-            to.disks.push(bottomValue);
-            displayMessage(bottomValue, from.name, to.name);
-            moveDisks(number - 1, buffer, to, from);
-        }
-    }
-
-    private static void displayMessage(int disk, int from, int to) {
-        System.out.println("Disk[" + disk + "]: Rod" + from + "--&gt;" + to);
-    }
-}
-</code></pre>
-
-<p>Rod.java</p>
-
-<pre><code>class Rod {
-
-    int name;
-    Stack&lt;Integer&gt; disks = new Stack&lt;Integer&gt;();
-
-    public Rod(int rodIndex) {
-        this.name = rodIndex;
-    }
-
-    public void setDisks(int n) {
-        // this method will insert n disks on this Rod
-        // the bottom disk is indexed as (n-1) and top one is 0
-        disks.clear();
-        for (int i = n - 1; i &gt;= 0; i--) {
-            disks.push(i);
-        }
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="26">&larr; Older</a>
@@ -962,7 +940,7 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (132)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (133)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/z-string-search/'>z-string-search (17)</a></li>
 <li class='category'><a href='/blog/categories/z-testing/'>z-testing (2)</a></li>
@@ -973,6 +951,10 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/swizzle-sort/">[Question] Swizzle Sort </a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/11/18/strategy-pattern/">[Design] Strategy design pattern </a>
@@ -988,10 +970,6 @@ private static void printPath(List&lt;Integer&gt; buffer, int start) {
     
       <li class="post">
         <a href="/blog/2015/10/28/arraylist-implementation/">[Java OOP] Java ArrayList implementation </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/23/static-class-inner-class/">[Java OOP] Static class and Inner class </a>
       </li>
     
   </ul>

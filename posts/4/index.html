@@ -9,7 +9,12 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question 5 Continue from last post, now let&rsquo;s support VIP services. User could buy VIP services using his acccount balance. class ProService { &hellip;">
+  <meta name="description" content="Overview Today we&rsquo;ll look at 6 examples of problems associated with Web Service: how the internet works
+DNS
+Web server
+Music Player
+MP3 file
+秒杀 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +80,252 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/28/design-class3-1/">[NineChap System Design] Class 3.1: Web Service</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-28T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/08/28/design-class3-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Overview</h1>
+
+<p>Today we&rsquo;ll look at 6 examples of problems associated with Web Service:</p>
+
+<ol>
+<li>how the internet works</li>
+<li>DNS</li>
+<li>Web server</li>
+<li>Music Player</li>
+<li>MP3 file</li>
+<li>秒杀</li>
+</ol>
+
+
+<h1>Question 0</h1>
+
+<p><strong>how to solve raido-play failures</strong></p>
+
+<pre><code>&gt; Failure rate  = % user who can't listen to music properly
+
+&gt; = # user who fail to plya one song / # total users
+</code></pre>
+
+<p>Misson: reduce failure rate.</p>
+
+<h2>How does server identify a user?</h2>
+
+<p><img class="middle" src="/assets/images/design-class3-http-request-overview.png"></p>
+
+<blockquote><p>If a server uses <strong>Cookie</strong> to identify unique users, the result might be > real users.</p>
+
+<p>However, if server uses <strong>IP address</strong>, the result might be &lt; real users.</p></blockquote>
+
+<h2>How to collect data for failure rate</h2>
+
+<h3>Version 1</h3>
+
+<p>Log:</p>
+
+<ol>
+<li>user send a log to server when it visits</li>
+<li>user send another log after it plays a song</li>
+<li>we can identify users who failed to play a song</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class3-server-failure-rate-1.png"></p>
+
+<blockquote><p>In fact, everything should be logged, including play, pause, switch song, refresh etc.</p></blockquote>
+
+<h3>Version 2</h3>
+
+<p>User login are, in fact, <strong>automatically logged</strong> when user visits. Thus user ONLY have to send log <strong>after it plays music</strong>.</p>
+
+<h2>Summary</h2>
+
+<ol>
+<li>define failure rate</li>
+<li>user cookie to identify user</li>
+<li>use log to collect failure data</li>
+<li>analysis pattern of failure againt date/time</li>
+</ol>
+
+
+<h1>Question 1</h1>
+
+<p><strong>the process of playing music</strong></p>
+
+<p><img class="middle" src="/assets/images/design-class3-web-browser-17-steps.png"></p>
+
+<ol>
+<li>Prepare</li>
+<li>Send DNS request</li>
+<li>Prepare DNS reply</li>
+<li>Send DNS reply</li>
+<li><p>Process DNS reply</p>
+
+<p> &ndash;</p></li>
+<li><p>Send webpage request</p></li>
+<li>Prepare webpage reply</li>
+<li>Send webpage reply</li>
+<li><p>Process webpage</p>
+
+<p> &ndash;</p></li>
+<li><p>Request music player</p></li>
+<li>Prepare music player</li>
+<li>Send music player</li>
+<li><p>Process music player</p>
+
+<p>&ndash;</p></li>
+<li><p>Request MP3</p></li>
+<li>Prepare MP3</li>
+<li>Send MP3</li>
+<li>Play MP3</li>
+</ol>
+
+
+<p>What is process Music Play?</p>
+
+<blockquote><p>Local browser will do rendering, flash decoding etc. If any point of this 17 steps went wrong, the music-play fails.</p></blockquote>
+
+<p>Is there a system/browser default Music Play?</p>
+
+<blockquote><p>HTML player is, but flash player is not. So the flash module have to be requested every time.</p></blockquote>
+
+<h2>Real data: failure rate 20%</h2>
+
+<p>In practise, the real failure rate is 20%. Which is:</p>
+
+<ol>
+<li>8% DNS</li>
+<li>5% Web</li>
+<li>5% MP3</li>
+<li>2% Player</li>
+</ol>
+
+
+<h1>Question 2</h1>
+
+<p><strong>fix DNS problem</strong></p>
+
+<p>First of all, how to find out DNS failures? There are 2 ways. First way, help desk do it. Second way is to use the Desktop app to help detect the host address.</p>
+
+<h2>Step 1. HOSTs hijack</h2>
+
+<p>Some users&#8217; host file can modified by competitors.</p>
+
+<ol>
+<li>ping the website url</li>
+<li>modify host file manually or by desktop app</li>
+</ol>
+
+
+<h2>Step 2. ISP</h2>
+
+<p>Each ISP have different DNS service. Eg. CSTNET fails to update the latest DNS, after a server change.</p>
+
+<p>After this step, DNS failure rate fall from 8% to 1%. Why still 1%? Some companies bans music play in company web.</p>
+
+<h1>Question 3</h1>
+
+<p><strong>fix the web problem</strong></p>
+
+<p>Highest failure rate:</p>
+
+<ol>
+<li>3pm office hour</li>
+<li>9pm highest bandwidth nation-wide</li>
+</ol>
+
+
+<p><img class="middle" src="/assets/images/design-class3-web-failure-graph.png"></p>
+
+<h2>Solution 1, reverse proxy</h2>
+
+<p>Reverse proxy w/ more servers. Reverse proxy acts like a load balancer.</p>
+
+<p><img class="middle" src="/assets/images/design-class3-reverse-proxly.png"></p>
+
+<blockquote><p><strong><a href="https://en.wikipedia.org/wiki/Reverse_proxy">Reverse proxy</a></strong> is a type of proxy server that retrieves resources on behalf of a client from one or more servers. These resources are then returned to the client as though they originated from the proxy server itself.</p></blockquote>
+
+<p><a href="https://www.nginx.com/resources/glossary/reverse-proxy-server/">Common uses for a reverse proxy server</a> include:</p>
+
+<blockquote><ol>
+<li><p>Load balancing</p>
+
+<p>act as a “traffic cop,” sitting in front of your back-end servers and client requests. Try to <strong>maximizes speed and capacity utilization</strong> while ensuring <strong>no one server is overloaded</strong>.</p>
+
+<p>If a server goes down, the load balancer redirects traffic to the remaining online servers.</p></li>
+<li><p>Web acceleration</p>
+
+<p> can compress inbound and outbound data, as well as <strong>cache commonly requested content</strong></p>
+
+<p> also perform additional tasks such as SSL encryption to take <strong>load off of your web servers</strong></p></li>
+<li><p>Security and anonymity</p>
+
+<p> By intercepting requests headed for your back-end servers, a reverse proxy server protects their identities and acts as an additional defense against security attacks.</p></li>
+</ol>
+</blockquote>
+
+<h2>Solution 2, reduce size of web page</h2>
+
+<ol>
+<li>simplify javascript files</li>
+<li>compress images (lower dpi)</li>
+<li>merge large images to 1 image (less requests)</li>
+<li>lazy loading (Pinterest uses it a lot)</li>
+</ol>
+
+
+<h2>Solution 3, more cacheable pages</h2>
+
+<p> <strong>Change dynamic webpages to static pages</strong>. The advantage of this is:</p>
+
+<ol>
+<li>more search engine friendly.</li>
+<li>more cache friendly.</li>
+</ol>
+
+
+<h3>Summary on caching</h3>
+
+<p>Caching can happen at place Number 1, 2 and 3:</p>
+
+<p><img class="middle" src="/assets/images/design-class3-web-hosting-4-layers.png"></p>
+
+<p>AT Number 4, we can add <strong>more servers</strong>. Number 3, <strong>reverse proxy</strong>. Number 2 is <strong>caching within the ISP network</strong>, which avoids requesting info again from backend. Number 1 is <strong>front-end browser cache</strong>.</p>
+
+<p>After this step, Web failure rate fall from 7% to 4%. Why still 4%? Well, these failure is mainly from the junk users created by marketing.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1513,120 +1764,6 @@ Reservation Protocol (RSVP) QoS</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/05/24/overload-override-compile-runtime/">[Java OOP] Overload, Override, Compile, Runtime (Static/Dynamic Polymph)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-05-24T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/05/24/overload-override-compile-runtime/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>The master statement</h1>
-
-<p>Overloading is Compile Time and Overriding is Runtime.</p>
-
-<h1>Examples</h1>
-
-<h2>Overloading</h2>
-
-<pre><code>public static class test
-{
-    static void Main(string[] args)
-    {
-        Foo();
-        Foo("test");
-    }
-
-    public static void Foo()
-    {
-        Console.WriteLine("No message supplied");
-    }
-
-    public static void Foo(string message)
-    {
-        Console.WriteLine(message);
-    }
-}
-</code></pre>
-
-<p>This is called <strong>static (compile-time) polymorphism</strong> because the compiler is aware of exactly which method you are calling.</p>
-
-<h2>Overriding</h2>
-
-<p>When the PrintMessage() function is call, it determines which version of GetMessage() to use at runtime, <strong>based on the type of IMessage</strong> that is passed in.</p>
-
-<pre><code>public static class MessagePrinter
-{
-    public static void PrintMessage(IMessage message)
-    {
-        Console.WriteLine(message.GetMessage());
-    }
-}
-
-public interface IMessage
-{
-    public string GetMessage();
-}
-
-public class XMLMessage : IMessage
-{
-    public string GetMessage()
-    {
-        return "This is an XML Message";
-    }
-}
-
-public class SOAPMessage : IMessage
-{
-    public string GetMessage()
-    {
-        return "This is a SOAP Message";
-    }
-}
-</code></pre>
-
-<p>This is <strong>dynamic (runtime) polymorphism</strong>. This is due to the fact that the compiler doesn&rsquo;t necessarily know what type of object is being passed in at compile-time.</p>
-
-<h1>Conclusion</h1>
-
-<h2>Overloading</h2>
-
-<p>Compile time Polymorphism = Static Polymorphism = Early binding</p>
-
-<h2>Overriding</h2>
-
-<p>Runtime Polymorphism = Dynamic Polymorphism = Late binding =</p>
-
-<p>Reference: <a href="http://stackoverflow.com/questions/10915828/how-overloading-is-compile-time-and-overriding-is-runtime">How Overloading is Compile Time and Overriding is Runtime from stackoverflow.com</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="5">&larr; Older</a>
@@ -1654,7 +1791,7 @@ public class SOAPMessage : IMessage
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (132)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (133)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/z-string-search/'>z-string-search (17)</a></li>
 <li class='category'><a href='/blog/categories/z-testing/'>z-testing (2)</a></li>
@@ -1665,6 +1802,10 @@ public class SOAPMessage : IMessage
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/swizzle-sort/">[Question] Swizzle Sort </a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/11/18/strategy-pattern/">[Design] Strategy design pattern </a>
@@ -1680,10 +1821,6 @@ public class SOAPMessage : IMessage
     
       <li class="post">
         <a href="/blog/2015/10/28/arraylist-implementation/">[Java OOP] Java ArrayList implementation </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/23/static-class-inner-class/">[Java OOP] Static class and Inner class </a>
       </li>
     
   </ul>
