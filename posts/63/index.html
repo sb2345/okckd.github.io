@@ -3602,6 +3602,281 @@ Validate Binary Search Tree</p>
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2013/11/21/insert-plus-and-minus/">[Question] Insert Plus and Minus to Complete Expression</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-21T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2013/11/21/insert-plus-and-minus/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Question</h1>
+
+<p><a href="http://www.1point3acres.com/bbs/thread-148692-1-1.html">link</a></p>
+
+<blockquote><p>Given a string of numbers, eg. &ldquo;43868643&rdquo;. Put &lsquo;+&rsquo; and &lsquo;&ndash;&rsquo; in between, and build an expression.</p></blockquote>
+
+<h1>Solution</h1>
+
+<p>Iterate thru the input string and do DFS recrusively.</p>
+
+<p>At each position, there&rsquo;s 3 possibilities: plus, minus or do not skip.</p>
+
+<h1>Code</h1>
+
+<pre><code>public List&lt;String&gt; solve(String str) {
+    if (str == null || str.length() == 0) {
+        return null;
+    }
+    List&lt;String&gt; result = new ArrayList&lt;String&gt;();
+    helper(result, "", 0, str);
+    Collections.sort(result);
+    return result;
+}
+
+private void helper(List&lt;String&gt; result, String curExp, int curVal, String remain) {
+    if (curVal == Integer.parseInt(remain)) {
+        result.add(curExp + "=" + remain);
+    } else if (curVal + Integer.parseInt(remain) == 0) {
+        result.add(curExp + "=-" + remain);
+    }
+    for (int i = 1; i &lt; remain.length(); i++) {
+        String nextStr = remain.substring(0, i);
+        int nextNum = Integer.parseInt(nextStr);
+
+        // case 1: add a + between curExp and nextStr
+        String newExp = curExp + "+" + nextStr;
+        int newVal = curVal + nextNum;
+        helper(result, newExp, newVal, remain.substring(i));
+
+        // case 2: '-' sign
+        newExp = curExp + "-" + nextStr;
+        newVal = curVal - nextNum;
+        helper(result, newExp, newVal, remain.substring(i));
+    }
+}
+</code></pre>
+
+<h1>Testing</h1>
+
+<pre><code>Input is 4312
+Print the list: 
++4-3+1=2
+-4+3-1=-2
+
+Input is 43868643
+Print the list: 
++4+3+8+6-8-6-4=3
++4+3+8-6-8+6-4=3
++4+3+86-86-4=3
++4+3-8+6+8-6-4=3
++4+3-8+68-64=3
++4+3-8-6+8+6-4=3
++4+3-86+86-4=3
++4-3+8+6-8-6-4=-3
++4-3+8-6-8+6-4=-3
++4-3+86-86-4=-3
++4-3-8+6+8-6-4=-3
++4-3-8+68-64=-3
++4-3-8-6+8+6-4=-3
++4-3-86+86-4=-3
++43+8+6-8-6=43
++43+8-6-8+6=43
++43+86-86=43
++43-8+6+8-6=43
++43-8-6+8+6=43
++43-86+86=43
+-4+3+8+6-8-6+4=3
+-4+3+8-6-8+6+4=3
+-4+3+8-68+64=3
+-4+3+86-86+4=3
+-4+3-8+6+8-6+4=3
+-4+3-8-6+8+6+4=3
+-4+3-86+86+4=3
+-4-3+8+6-8-6+4=-3
+-4-3+8-6-8+6+4=-3
+-4-3+8-68+64=-3
+-4-3+86-86+4=-3
+-4-3-8+6+8-6+4=-3
+-4-3-8-6+8+6+4=-3
+-4-3-86+86+4=-3
+-43+8+6-8-6=-43
+-43+8-6-8+6=-43
+-43+86-86=-43
+-43-8+6+8-6=-43
+-43-8-6+8+6=-43
+-43-86+86=-43
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/21/get-max-number-game/">[Question] Get Max Number Game (Minmax + Dp)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-21T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2013/11/21/get-max-number-game/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Question</h1>
+
+<p><a href="http://www.weiming.info/zhuti/JobHunting/31725587/">link</a></p>
+
+<blockquote><p>两个人（A，B）参与一个游戏，规则如下：</p>
+
+<p>1）一个随机的整数数列有偶数个数,a1,a2,&hellip;a2n</p>
+
+<p>2）A 先从数列取数，但只能从两头取,a1 or a2n</p>
+
+<p>3)然后Ｂ取数，也是只能从剩下的两头取，依此类推，两个人轮流，都只能从两头取</p>
+
+<p>Output <strong>the max sum of numbers</strong> that player 1 is going to get.</p></blockquote>
+
+<h1>Solution</h1>
+
+<p>This question can be solved with DP by using the following 3 equations:</p>
+
+<ol>
+<li>sum[i][j] sum of number from i to j</li>
+<li>val[i][j]: the max value that can be obtained if only the range [i,j] is left and you take the move first</li>
+<li>pos[][] is related to val[][], as it denotes whether we take i or j</li>
+</ol>
+
+
+<p>After we got sum[][] array fully filled up, the transition equation of val[][] looks like:</p>
+
+<pre><code>val[x][y] = sum[x][y] - MIN( val[x+1][y], val[x][y-1] )
+</code></pre>
+
+<p>As for pos[][]:</p>
+
+<pre><code>pos[x][y] = x  if val[x+1][y] &lt; val[x][y-1]
+            y  otherwise
+</code></pre>
+
+<h1>Code</h1>
+
+<pre><code>public int getMaxSumPlayerOne(int[] input) {
+    int len = input.length;
+    // sum[i][j] sum of number from i to j
+    int[][] sum = new int[len][len];
+    // val[i][j]: the max value that can be obtained if only
+    // the range [i,j] is left and you take the move first
+    int[][] val = new int[len][len];
+    // pos is related to val, as it denotes whether we take i or j
+    int[][] pos = new int[len][len];
+
+    // 1. fill in sum[][]
+    for (int x = 0; x &lt; len; x++) {
+        for (int y = x; y &lt; len; y++) {
+            if (x == y) {
+                sum[x][y] = input[x];
+            } else if (x == 0) {
+                // fill up the first row in the sum[][] dp array
+                sum[x][y] = sum[x][y - 1] + input[y];
+            } else {
+                // starting from the 2nd row, it's gonna make use of 1st row
+                // x &gt;= 1
+                sum[x][y] = sum[0][y] - sum[0][x - 1];
+            }
+        }
+    }
+
+    // 2. fill in val[][] and pos[][]
+    for (int x = len - 1; x &gt;= 0; x--) {
+        for (int y = x; y &lt; len; y++) {
+            if (x == y) {
+                val[x][y] = input[x];
+                pos[x][y] = x;
+            } else {
+                // when I choose either x or y, I look at what the opponent
+                // is gonna get after my move, then chose the smaller
+                // v[][] for the remaining part
+                val[x][y] = sum[x][y] - Math.min(val[x + 1][y], val[x][y - 1]);
+                pos[x][y] = val[x + 1][y] &lt; val[x][y - 1] ? x : y;
+            }
+        }
+    }
+    this.printSteps(pos, len);
+    return val[0][len - 1];
+}
+</code></pre>
+
+<h1>Testing</h1>
+
+<pre><code>Input {1, 4, 3, 2}
+Player 1 take position 3
+Player 2 take position 2
+Player 1 take position 1
+Player 2 take position 0
+max sum for player 1 is 6
+
+Input {7, 5, 2, 6, 9, 8, 3, 4}
+Player 1 take position 0
+Player 2 take position 1
+Player 1 take position 7
+Player 2 take position 6
+Player 1 take position 5
+Player 2 take position 4
+Player 1 take position 3
+Player 2 take position 2
+max sum for player 1 is 25
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2013/11/20/infix-to-postfix/">[Amazon] Infix to Postfix Conversion</a></h1>
     
     
@@ -4036,7 +4311,7 @@ class Meeting {
 <li class='category'><a href='/blog/categories/ninechap/'>ninechap (25)</a></li>
 <li class='category'><a href='/blog/categories/q-facebook/'>q-facebook (9)</a></li>
 <li class='category'><a href='/blog/categories/q-google/'>q-google (63)</a></li>
-<li class='category'><a href='/blog/categories/question/'>question (130)</a></li>
+<li class='category'><a href='/blog/categories/question/'>question (132)</a></li>
 <li class='category'><a href='/blog/categories/testing/'>testing (5)</a></li>
 <li class='category'><a href='/blog/categories/z-string-search/'>z-string-search (17)</a></li>
 <li class='category'><a href='/blog/categories/z-testing/'>z-testing (2)</a></li>
