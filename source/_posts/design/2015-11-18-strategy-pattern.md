@@ -24,67 +24,69 @@ The strategy pattern uses __composition__ instead of inheritance. This allows:
 
 1. classes can switch between behaviors by changing the specific implementation used without requiring any significant code changes. 
 
-        /* Encapsulated family of Algorithms 
-         * Interface and its implementations
-         */
-        public interface IBrakeBehavior {
-            public void brake(); 
+Code:
+
+    /* Encapsulated family of Algorithms 
+     * Interface and its implementations
+     */
+    public interface IBrakeBehavior {
+        public void brake(); 
+    }
+
+    public class BrakeWithABS implements IBrakeBehavior {
+        public void brake() {
+            System.out.println("Brake with ABS applied");
+        }
+    }
+
+    public class Brake implements IBrakeBehavior {
+        public void brake() {
+            System.out.println("Simple Brake applied");
+        }
+    }
+
+
+    /* Client which can use the algorithms above interchangeably */
+    public abstract class Car {
+        protected IBrakeBehavior brakeBehavior;
+
+        public void applyBrake() {
+            brakeBehavior.brake();
         }
 
-        public class BrakeWithABS implements IBrakeBehavior {
-            public void brake() {
-                System.out.println("Brake with ABS applied");
-            }
+        public void setBrakeBehavior(IBrakeBehavior brakeType) {
+            this.brakeBehavior = brakeType;
         }
+    }
 
-        public class Brake implements IBrakeBehavior {
-            public void brake() {
-                System.out.println("Simple Brake applied");
-            }
+    /* Client 1 uses one algorithm (Brake) in the constructor */
+    public class Sedan extends Car {
+        public Sedan() {
+            this.brakeBehavior = new Brake();
         }
+    }
 
-
-        /* Client which can use the algorithms above interchangeably */
-        public abstract class Car {
-            protected IBrakeBehavior brakeBehavior;
-
-            public void applyBrake() {
-                brakeBehavior.brake();
-            }
-
-            public void setBrakeBehavior(IBrakeBehavior brakeType) {
-                this.brakeBehavior = brakeType;
-            }
+    /* Client 2 uses another algorithm (BrakeWithABS) in the constructor */
+    public class SUV extends Car {
+        public SUV() {
+            this.brakeBehavior = new BrakeWithABS();
         }
+    }
 
-        /* Client 1 uses one algorithm (Brake) in the constructor */
-        public class Sedan extends Car {
-            public Sedan() {
-                this.brakeBehavior = new Brake();
-            }
+
+    /* Using the Car Example */
+    public class CarExample {
+        public static void main(String[] args) {
+            Car sedanCar = new Sedan();
+            sedanCar.applyBrake();  // This will invoke class "Brake"
+
+            Car suvCar = new SUV(); 
+            suvCar.applyBrake();    // This will invoke class "BrakeWithABS"
+
+            // set brake behavior dynamically
+            suvCar.setBrakeBehavior( new Brake() ); 
+            suvCar.applyBrake();    // This will invoke class "Brake" 
         }
-
-        /* Client 2 uses another algorithm (BrakeWithABS) in the constructor */
-        public class SUV extends Car {
-            public SUV() {
-                this.brakeBehavior = new BrakeWithABS();
-            }
-        }
-
-
-        /* Using the Car Example */
-        public class CarExample {
-            public static void main(String[] args) {
-                Car sedanCar = new Sedan();
-                sedanCar.applyBrake();  // This will invoke class "Brake"
-
-                Car suvCar = new SUV(); 
-                suvCar.applyBrake();    // This will invoke class "BrakeWithABS"
-
-                // set brake behavior dynamically
-                suvCar.setBrakeBehavior( new Brake() ); 
-                suvCar.applyBrake();    // This will invoke class "Brake" 
-            }
-        }
+    }
 
 This gives greater flexibility in design and is in harmony with the __[Open/closed principle](https://en.wikipedia.org/wiki/Open/closed_principle)__ (OCP) that states that __classes should be open for extension but closed for modification__.
