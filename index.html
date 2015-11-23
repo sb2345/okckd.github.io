@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link 输入一个数组，要求输出满足：a[0]&lt;=a[1]>=a[2]&lt;=a[3]>=… Solution O(n)，一边扫描即可。发现不符合条件的只要跟前面一个数对调就可以， Code public int[] solve(int[] input) { &hellip;">
+  <meta name="description" content="1. Choose a framework Assuming we use Python to do this. plain python? We can write a simple Python crawler with the code below: import re, urllib &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,181 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/22/challenges-writing-crawler/">[Design] Technical Challenges of Writing a Web Crawler</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-22T00:00:00-06:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2015/11/22/challenges-writing-crawler/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>1. Choose a framework</h1>
+
+<p>Assuming we use Python to do this.</p>
+
+<h2>plain python?</h2>
+
+<p>We can write a simple Python crawler with the code below:</p>
+
+<pre><code>import re, urllib
+
+textfile = file('depth_1.txt','wt')
+print "Enter the URL you wish to crawl.."
+print 'Usage  - "http://phocks.org/stumble/creepy/" &lt;-- With the double quotes'
+myurl = input("@&gt; ")
+for i in re.findall('''href=["'](.[^"']+)["']''', urllib.urlopen(myurl).read(), re.I):
+    print i  
+    for ee in re.findall('''href=["'](.[^"']+)["']''', urllib.urlopen(i).read(), re.I):
+        print ee
+        textfile.write(ee+'\n')
+textfile.close()
+</code></pre>
+
+<h2>Scrapy?</h2>
+
+<ol>
+<li>You only define the rules, Scrapy do the rest</li>
+<li>easily plugin extensions</li>
+<li>portable + python runtime.</li>
+</ol>
+
+
+<h3>Why Scrapy</h3>
+
+<blockquote><p><a href="https://www.quora.com/What-are-the-advantages-of-Scrapy-compared-to-Beautiful-Soup">scrapy has the tools to manage every stage of a web crawl</a>, just to name a few:</p>
+
+<ol>
+<li><p>Requests manager &ndash; in charge of downloading pages all concurrently behind the scenes! You won&rsquo;t need to invest a lot of time in concurrent architecture.</p></li>
+<li><p>Selectors &ndash;  parse the html document (eg. XPath)</p></li>
+<li><p>Pipelines &ndash; after you retrieve the data, there&rsquo;s a bunch of functions to modify the data.</p></li>
+</ol>
+</blockquote>
+
+<p>Following the spirit of other don’t repeat yourself frameworks, such as Django:</p>
+
+<blockquote><p><a href="https://en.wikipedia.org/wiki/Scrapy">it makes it easier to build and scale large crawling projects</a> by allowing developers to re-use their code.</p></blockquote>
+
+<p>For more, read <a href="http://doc.scrapy.org/en/latest/topics/architecture.html">Scrapy Architecture </a>.</p>
+
+<p><img class="middle" src="/assets/images/scrapy_architecture.png"></p>
+
+<ol>
+<li><p>Scrapy Engine</p>
+
+<p> control data flow</p></li>
+<li><p>Scheduler</p>
+
+<p> receives requests from the engine and enqueues them for feeding them later</p></li>
+<li><p>Downloader</p></li>
+<li><p>Spiders</p></li>
+<li><p>Item Pipeline</p></li>
+<li><p>Downloader middlewares</p>
+
+<p> specific hooks that sit between the Engine and the Downloader and process requests</p></li>
+<li><p>Spider middlewares</p>
+
+<p> specific hooks that sit between the Engine and the Spiders and are able to process spider input (responses) and output (items and requests).</p></li>
+</ol>
+
+
+<h1>2. Schedule a Scrapy job</h1>
+
+<p>APScheduler? (todo)</p>
+
+<p>add/remove jobs</p>
+
+<h1>3. Choose a DB</h1>
+
+<p>I chose NoSQL/MongoDB. <a href="http://stackoverflow.com/a/11980154">But why</a>?</p>
+
+<ol>
+<li><p>there&rsquo;s only a few tables with few columns</p></li>
+<li><p>no overly complex associations between nodes</p></li>
+<li><p>huge amount of time-based data</p></li>
+<li><p>scaling requirements: MongoDB better horizontal scaling</p></li>
+<li><p>different field names: dynamical storage</p></li>
+</ol>
+
+
+<h1>4. Technical Difficulty?</h1>
+
+<h2>4.1 differrent way to crawl.</h2>
+
+<p>We need to check AJAX response sometime and study each website&rsquo;s API.</p>
+
+<p>Some site would <strong>close certain APIs</strong> if they found out too many queries requests.</p>
+
+<h2>4.2 Difficulty navigating pages</h2>
+
+<p>Study their URL structure.</p>
+
+<p>eg.</p>
+
+<pre><code>www.abc.com/index.html?page=milk&amp;start_index=0
+</code></pre>
+
+<p>Just play with the url params!</p>
+
+<h2>4.3 What is key?</h2>
+
+<p>I defined extra column only to store keys (combine a few key columns, and convert to lower-case).</p>
+
+<p>We can search using <strong>regex</strong> though, but:</p>
+
+<blockquote><p><a href="http://stackoverflow.com/a/7880894">Mongo (current version 2.0.0) doesn&rsquo;t allow</a> case-insensitive searches against indexed fields. For non-indexed fields, the regex search should be fine.</p></blockquote>
+
+<p>How to go about it:</p>
+
+<blockquote><p><a href="http://stackoverflow.com/a/4441412">searching with regex&rsquo;s case insensitive</a> means that mongodb cannot search by index, so queries against <strong>large datasets can take a long time</strong>.</p>
+
+<p>Even with small datasets, it&rsquo;s not very efficient&hellip; which could become an issue if you are trying to achieve scale.</p>
+
+<p>As an alternative, you can store an uppercase copy and search against that&hellip;</p>
+
+<p>If your field is large, such as a message body, duplicating data is probably not a good option. I believe using <strong>an extraneous indexer like Apache Lucene</strong> is the best option in that case.</p></blockquote>
+
+<h2>4.4 A lot bad data</h2>
+
+<ol>
+<li><p>write a sophisticated pipeline()</p></li>
+<li><p>try not let bad data reach pipeline() &ndash; <strong>better</strong></p></li>
+</ol>
+
+
+<p>Make your spider better!</p>
+
+<h2>4.5 NLP: brand names</h2>
+
+<p>how? (todo)</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -781,131 +956,6 @@ Outer.Inner inner = outer.new Inner();
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/23/Template-method-pattern/">[Java OOP] Template Method Pattern (Abstract Class)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-10-23T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2015/10/23/Template-method-pattern/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Overview</h1>
-
-<p><strong><a href="https://en.wikipedia.org/wiki/Template_method_pattern">Template method pattern</a> is a behavioral design pattern</strong> that defines the program skeleton of an algorithm in a method, called template method, which <strong>defers some steps to subclasses</strong>.</p>
-
-<p>It lets one <strong>redefine</strong> certain steps of an algorithm without changing the algorithm&rsquo;s structure.</p>
-
-<h2>Usage</h2>
-
-<p>The template method is used in frameworks, where each implements the invariant parts of a domain&rsquo;s architecture.</p>
-
-<h2>Example in Java</h2>
-
-<p>Refer to <a href="https://en.wikipedia.org/wiki/Template_method_pattern#Example_in_Java">code from WIKI</a>:</p>
-
-<pre><code>/**
- * An abstract class that is common to several games in
- * which players play against the others, but only one is
- * playing at a given time.
- */
-
-abstract class Game {
- /* Hook methods. Concrete implementation may differ in each subclass*/
-    protected int playersCount;
-    abstract void initializeGame();
-    abstract void makePlay(int player);
-    abstract boolean endOfGame();
-    abstract void printWinner();
-
-    /* A template method : */
-    public final void playOneGame(int playersCount) {
-        this.playersCount = playersCount;
-        initializeGame();
-        int j = 0;
-        while (!endOfGame()) {
-            makePlay(j);
-            j = (j + 1) % playersCount;
-        }
-        printWinner();
-    }
-}
-
-//Now we can extend this class in order 
-//to implement actual games:
-
-class Monopoly extends Game {
-
-    /* Implementation of necessary concrete methods */
-    void initializeGame() {
-        // Initialize players
-        // Initialize money
-    }
-    void makePlay(int player) {
-        // Process one turn of player
-    }
-    boolean endOfGame() {
-        // Return true if game is over 
-        // according to Monopoly rules
-    }
-    void printWinner() {
-        // Display who won
-    }
-    /* Specific declarations for the Monopoly game. */
-
-    // ...
-}
-
-class Chess extends Game {
-
-    /* Implementation of necessary concrete methods */
-    void initializeGame() {
-        // Initialize players
-        // Put the pieces on the board
-    }
-    void makePlay(int player) {
-        // Process a turn for the player
-    }
-    boolean endOfGame() {
-        // Return true if in Checkmate or 
-        // Stalemate has been reached
-    }
-    void printWinner() {
-        // Display the winning player
-    }
-    /* Specific declarations for the chess game. */
-
-    // ...
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -921,7 +971,7 @@ class Chess extends Game {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (78)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (79)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (36)</a></li>
@@ -944,6 +994,10 @@ class Chess extends Game {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/22/challenges-writing-crawler/">[Design] Technical Challenges of writing a web crawler </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/21/swizzle-sort/">[Question] Swizzle Sort </a>
       </li>
     
@@ -957,10 +1011,6 @@ class Chess extends Game {
     
       <li class="post">
         <a href="/blog/2015/11/15/partition-problem/">[Question] Partition Problem (divide array into halves) </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/04/Best-Time-to-Buy-and-Sell-Stock-IV/">[LeetCode 188] Best Time to Buy and Sell Stock IV </a>
       </li>
     
   </ul>

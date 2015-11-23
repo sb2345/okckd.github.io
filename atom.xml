@@ -4,7 +4,7 @@
   <title><![CDATA[Shuatiblog.com]]></title>
   <link href="http://www.shuatiblog.com/atom.xml" rel="self"/>
   <link href="http://www.shuatiblog.com/"/>
-  <updated>2015-11-22T00:00:18-06:00</updated>
+  <updated>2015-11-23T00:55:06-06:00</updated>
   <id>http://www.shuatiblog.com/</id>
   <author>
     <name><![CDATA[CodeMonkey]]></name>
@@ -12,6 +12,152 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[[Design] Technical Challenges of writing a web crawler ]]></title>
+    <link href="http://www.shuatiblog.com/blog/2015/11/22/challenges-writing-crawler/"/>
+    <updated>2015-11-22T00:00:00-06:00</updated>
+    <id>http://www.shuatiblog.com/blog/2015/11/22/challenges-writing-crawler</id>
+    <content type="html"><![CDATA[<h1>1. Choose a framework</h1>
+
+<p>Assuming we use Python to do this.</p>
+
+<h2>plain python?</h2>
+
+<p>We can write a simple Python crawler with the code below:</p>
+
+<pre><code>import re, urllib
+
+textfile = file('depth_1.txt','wt')
+print "Enter the URL you wish to crawl.."
+print 'Usage  - "http://phocks.org/stumble/creepy/" &lt;-- With the double quotes'
+myurl = input("@&gt; ")
+for i in re.findall('''href=["'](.[^"']+)["']''', urllib.urlopen(myurl).read(), re.I):
+    print i  
+    for ee in re.findall('''href=["'](.[^"']+)["']''', urllib.urlopen(i).read(), re.I):
+        print ee
+        textfile.write(ee+'\n')
+textfile.close()
+</code></pre>
+
+<h2>Scrapy?</h2>
+
+<ol>
+<li>You only define the rules, Scrapy do the rest</li>
+<li>easily plugin extensions</li>
+<li>portable + python runtime.</li>
+</ol>
+
+
+<h3>Why Scrapy</h3>
+
+<blockquote><p><a href="https://www.quora.com/What-are-the-advantages-of-Scrapy-compared-to-Beautiful-Soup">scrapy has the tools to manage every stage of a web crawl</a>, just to name a few:</p>
+
+<ol>
+<li><p>Requests manager &ndash; in charge of downloading pages all concurrently behind the scenes! You won&rsquo;t need to invest a lot of time in concurrent architecture.</p></li>
+<li><p>Selectors &ndash;  parse the html document (eg. XPath)</p></li>
+<li><p>Pipelines &ndash; after you retrieve the data, there&rsquo;s a bunch of functions to modify the data.</p></li>
+</ol>
+</blockquote>
+
+<p>Following the spirit of other don’t repeat yourself frameworks, such as Django:</p>
+
+<blockquote><p><a href="https://en.wikipedia.org/wiki/Scrapy">it makes it easier to build and scale large crawling projects</a> by allowing developers to re-use their code.</p></blockquote>
+
+<p>For more, read <a href="http://doc.scrapy.org/en/latest/topics/architecture.html">Scrapy Architecture </a>.</p>
+
+<p><img class="middle" src="http://www.shuatiblog.com/assets/images/scrapy_architecture.png"></p>
+
+<ol>
+<li><p>Scrapy Engine</p>
+
+<p> control data flow</p></li>
+<li><p>Scheduler</p>
+
+<p> receives requests from the engine and enqueues them for feeding them later</p></li>
+<li><p>Downloader</p></li>
+<li><p>Spiders</p></li>
+<li><p>Item Pipeline</p></li>
+<li><p>Downloader middlewares</p>
+
+<p> specific hooks that sit between the Engine and the Downloader and process requests</p></li>
+<li><p>Spider middlewares</p>
+
+<p> specific hooks that sit between the Engine and the Spiders and are able to process spider input (responses) and output (items and requests).</p></li>
+</ol>
+
+
+<h1>2. Schedule a Scrapy job</h1>
+
+<p>APScheduler? (todo)</p>
+
+<p>add/remove jobs</p>
+
+<h1>3. Choose a DB</h1>
+
+<p>I chose NoSQL/MongoDB. <a href="http://stackoverflow.com/a/11980154">But why</a>?</p>
+
+<ol>
+<li><p>there&rsquo;s only a few tables with few columns</p></li>
+<li><p>no overly complex associations between nodes</p></li>
+<li><p>huge amount of time-based data</p></li>
+<li><p>scaling requirements: MongoDB better horizontal scaling</p></li>
+<li><p>different field names: dynamical storage</p></li>
+</ol>
+
+
+<h1>4. Technical Difficulty?</h1>
+
+<h2>4.1 differrent way to crawl.</h2>
+
+<p>We need to check AJAX response sometime and study each website&rsquo;s API.</p>
+
+<p>Some site would <strong>close certain APIs</strong> if they found out too many queries requests.</p>
+
+<h2>4.2 Difficulty navigating pages</h2>
+
+<p>Study their URL structure.</p>
+
+<p>eg.</p>
+
+<pre><code>www.abc.com/index.html?page=milk&amp;start_index=0
+</code></pre>
+
+<p>Just play with the url params!</p>
+
+<h2>4.3 What is key?</h2>
+
+<p>I defined extra column only to store keys (combine a few key columns, and convert to lower-case).</p>
+
+<p>We can search using <strong>regex</strong> though, but:</p>
+
+<blockquote><p><a href="http://stackoverflow.com/a/7880894">Mongo (current version 2.0.0) doesn&rsquo;t allow</a> case-insensitive searches against indexed fields. For non-indexed fields, the regex search should be fine.</p></blockquote>
+
+<p>How to go about it:</p>
+
+<blockquote><p><a href="http://stackoverflow.com/a/4441412">searching with regex&rsquo;s case insensitive</a> means that mongodb cannot search by index, so queries against <strong>large datasets can take a long time</strong>.</p>
+
+<p>Even with small datasets, it&rsquo;s not very efficient&hellip; which could become an issue if you are trying to achieve scale.</p>
+
+<p>As an alternative, you can store an uppercase copy and search against that&hellip;</p>
+
+<p>If your field is large, such as a message body, duplicating data is probably not a good option. I believe using <strong>an extraneous indexer like Apache Lucene</strong> is the best option in that case.</p></blockquote>
+
+<h2>4.4 A lot bad data</h2>
+
+<ol>
+<li><p>write a sophisticated pipeline()</p></li>
+<li><p>try not let bad data reach pipeline() &ndash; <strong>better</strong></p></li>
+</ol>
+
+
+<p>Make your spider better!</p>
+
+<h2>4.5 NLP: brand names</h2>
+
+<p>how? (todo)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[[Question] Swizzle Sort ]]></title>
@@ -1002,65 +1148,6 @@ public class Solution {
             } else {
                 node.max = node.left.max;
             }
-        }
-        return node;
-    }
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[[LintCode] Segment Tree Build ]]></title>
-    <link href="http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Build/"/>
-    <updated>2015-10-13T00:00:00-05:00</updated>
-    <id>http://www.shuatiblog.com/blog/2015/10/13/Segment-Tree-Build</id>
-    <content type="html"><![CDATA[<h3>Question</h3>
-
-<p><a href="http://www.lintcode.com/en/problem/segment-tree-build/">link</a></p>
-
-<blockquote><p>The structure of Segment Tree is a binary tree which each node has two attributes start and end denote an segment / interval.</p>
-
-<p>start and end are both integers, they should be assigned in following rules:</p>
-
-<p>The root&rsquo;s start and end is given by build method.
-The left child of node A has start=A.left, end=(A.left + A.right) / 2.
-The right child of node A has start=(A.left + A.right) / 2 + 1, end=A.right.
-if start equals to end, there will be no children for this node.</p>
-
-<p>Implement a build method with two parameters start and end, so that we can create a corresponding segment tree with every node has the correct start and end value, return the root of this segment tree.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>A simple top-down run through.</p>
-
-<h3>Code</h3>
-
-<pre><code>/**
- * Definition of SegmentTreeNode:
- * public class SegmentTreeNode {
- *     public int start, end;
- *     public SegmentTreeNode left, right;
- *     public SegmentTreeNode(int start, int end) {
- *         this.start = start, this.end = end;
- *         this.left = this.right = null;
- *     }
- * }
- */
-public class Solution {
-    /**
-     *@param start, end: Denote an segment / interval
-     *@return: The root of Segment Tree
-     */
-    public SegmentTreeNode build(int start, int end) {
-        // write your code here
-        if (start &gt; end) {
-            return null;
-        }
-        SegmentTreeNode node = new SegmentTreeNode(start, end);
-        if (start &lt; end) {
-            node.left = build(start, (start + end) / 2);
-            node.right = build((start + end) / 2 + 1, end);
         }
         return node;
     }

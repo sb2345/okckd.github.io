@@ -9,7 +9,7 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link You are given two linked lists representing two non-negative numbers. The digits are stored in reverse order and each of their nodes &hellip;">
+  <meta name="description" content="Question link Given a string, find the length of the longest substring without repeating characters. For example, the longest substring without &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,177 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/27/longest-substring-without-repeating/">[LeetCode 3] Longest Substring Without Repeating Characters</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-27T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/04/27/longest-substring-without-repeating/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://oj.leetcode.com/problems/longest-substring-without-repeating-characters/">link</a></p>
+
+<div class="question-content">
+<p></p><p>Given a string, find the length of the longest substring without repeating characters. For example, the longest substring without repeating letters for &#8220;abcabcbb&#8221; is &#8220;abc&#8221;, which the length is 3. For &#8220;bbbbb&#8221; the longest substring is &#8220;b&#8221;, with the length of 1.</p>
+<p></p></div>
+
+
+<h3>Stats</h3>
+
+<table border="2">
+    <tr>
+        <td>Frequency</td>
+        <td bgcolor="lime">2</td>
+    </tr>
+    <tr>
+        <td>Diffficulty</td>
+        <td bgcolor="yellow">3</td>
+    </tr>
+    <tr>
+        <td>Adjusted Difficulty</td>
+        <td bgcolor="red">4</td>
+    </tr>
+    <tr>
+        <td>Time to use</td>
+        <td bgcolor="red">&#8212;&#8212;&#8212;-</td>
+    </tr>
+</table>
+
+
+<p>Ratings/Color = 1(white) 2(lime) 3(yellow) 4/5(red)</p>
+
+<h3>Analysis</h3>
+
+<p>This question looks easy (well, isn&rsquo;t it?), but it <strong>really is not easy</strong>!.</p>
+
+<p><strong>The main idea is</strong>: an array of int(128) is used to keep track of the last occurance position of each character. So we iterate thru the characters while constently checking the last occurrence of the letter. Meanwhile, keep updating the longest distance.</p>
+
+<p><strong>There is 1 place where it&rsquo;s extremely easy to make mistake</strong>, that is the condition of update left points:</p>
+
+<pre><code>if (previousPos != -1&amp;&amp; previousPos &gt;= left) {
+    left = previousPos + 1;
+}
+</code></pre>
+
+<p>If you have an idea of using array int(128) to <strong>store last occurrence</strong>, and you got the above <strong>if condition</strong> correct, then you nailed it!</p>
+
+<p>Again, this is a tough question. There&rsquo;s a seemingly more intuitive solution using the sliding window method. It&rsquo;s very similar to [LeetCode 76] Minimum Window Substring.</p>
+
+<h3>Solution</h3>
+
+<p>Note what happens when a repeating char is found (2 different conditions).</p>
+
+<p><img class="middle" src="/assets/images/longest-without-repeat.png"></p>
+
+<h3>My code</h3>
+
+<p>The proper way:</p>
+
+<pre><code>public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        }
+
+        int[] flag = new int[128];
+        for (int i = 0; i &lt; flag.length; i++) {
+            flag[i] = -1;
+        }
+        // left and right pointer defines the valid range
+        int left = 0;
+        int right = 0;
+        int longest = 0;
+        int len = s.length();
+
+        while (right &lt; len) {
+            char letter = s.charAt(right);
+            int previousPos = flag[letter];
+            if (previousPos != -1&amp;&amp; previousPos &gt;= left) {
+                // if right pointer points to an old letter, and is within current range
+                // then we need to update our left pointer: 
+                // to bypass the previous occurrence of that letter
+                left = previousPos + 1;
+            }
+            flag[letter] = right;
+            // advance right pointer to the next letter, and calculate longest distance
+            right++;
+            longest = Math.max(longest, right - left);
+        }
+        return longest;
+    }
+}
+</code></pre>
+
+<p>The sliding window way:</p>
+
+<pre><code>public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        }
+        int len = s.length();
+        int left = 0;
+        int right = 1;
+        HashSet&lt;Character&gt; set = new HashSet&lt;Character&gt;();
+        set.add(s.charAt(0));
+        int longest = 1;
+        while (right &lt; len) {
+            // right pointer proceeds until boundary or duplicate char found
+            while (right &lt; len &amp;&amp; !set.contains(s.charAt(right))) {
+                set.add(s.charAt(right));
+                right++;
+                longest = Math.max(longest, right - left);
+            }
+            if (right == len) {
+                return longest;
+            } else {
+                // right pointer has reached a duplicate char.
+                // now move left pointer until that dup char is found
+                while (s.charAt(left) != s.charAt(right)) {
+                    set.remove(s.charAt(left));
+                    left++;
+                }
+                // left pointer advance by one to bypass the dup char
+                left++;
+                // right pointer advance by one to include the dup char
+                right++;
+            }
+        }
+        return Math.max(longest, right - left);
+    }
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -4428,136 +4599,9 @@ private int getSlicesCountFromArithmeticSeq(int k) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/11/05/Number-Of-Bus-Stations/">[Question] Number of Bus Stations (Meeting Rooms)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-11-05T00:00:00-06:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2013/11/05/Number-Of-Bus-Stations/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<p><a href="http://tech-queries.blogspot.sg/2009/05/number-of-bus-stations.html">link</a></p>
-
-<blockquote><p>At a bus-station, you have time-table for buses arrival and departure. You need to find the minimum number of platforms so that all the buses can be accommodated as per their schedule.</p>
-
-<p>Example: Time table is like below:</p></blockquote>
-
-<pre><code>Bus         Arrival         Departure 
-BusA        0900 hrs        0930 hrs
-BusB        0915 hrs        1300 hrs
-BusC        1030 hrs        1100 hrs
-BusD        1045 hrs        1145 hrs
-</code></pre>
-
-<blockquote><p>The answer must be 3.</p></blockquote>
-
-<p>This question can also be in other forms:</p>
-
-<blockquote><p>Given a vector of Nodes, each of which contain the start and end time of a meeting, find the maximum number of rooms one would have to book for the day.</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The answer is same as finding the maximum number of bus at the bus-station at the same time.</p>
-
-<p><strong>The suggestted solution</strong> from <a href="http://tech-queries.blogspot.sg/2009/05/number-of-bus-stations.html">here</a>:</p>
-
-<blockquote><p>So first sort all the arrival(A) and departure(D) time in an int array. Please save the corresponding arrival or departure in the array also.</p>
-
-<p>After sorting our array will look like this:</p></blockquote>
-
-<pre><code>0900    0915    1930    1030    1045    1100    1145    1300
-A       A       D       A       A       D       D       D
-</code></pre>
-
-<p>Now use a counter. When sees an A, increment. When sees an D, decreament. In the end, return the largest counter value.</p>
-
-<p>Note: If you have a arriving and a departing at same time, put departure time first.</p>
-
-<h3>code</h3>
-
-<pre><code>public int solve(List&lt;Meeting&gt; input) {
-    List&lt;Event&gt; events = new ArrayList&lt;Event&gt;();
-    for (Meeting i : input) {
-        events.add(new Event(i.start, 1));
-        events.add(new Event(i.end, -1));
-    }
-    Collections.sort(events);
-
-    int currentNeeds = 0;
-    int maxNeeds = 0;
-    for (Event e : events) {
-        currentNeeds += e.diff;
-        maxNeeds = Math.max(maxNeeds, currentNeeds);
-    }
-    return maxNeeds;
-}
-</code></pre>
-
-<p>supporting classes:</p>
-
-<pre><code>class Event implements Comparable&lt;Event&gt; {
-    int time;
-    int diff;
-    // variable diff have value of 1 or -1
-    // when = 1, it means starting a meeting and 1 more room needed
-    // when = -1, it means ending a meeting and 1 less room needed
-
-    public Event(int a, int b) {
-        time = a;
-        diff = b;
-    }
-
-    @Override
-    public int compareTo(Event o) {
-        if (this.time == o.time) {
-            return this.diff - o.diff;
-        }
-        return this.time - o.time;
-    }
-}
-
-class Meeting {
-    int start;
-    int end;
-
-    public Meeting(int a, int b) {
-        start = a;
-        end = b;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="64">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -4572,7 +4616,7 @@ class Meeting {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (78)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (79)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (36)</a></li>
@@ -4595,6 +4639,10 @@ class Meeting {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/22/challenges-writing-crawler/">[Design] Technical Challenges of writing a web crawler </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/21/swizzle-sort/">[Question] Swizzle Sort </a>
       </li>
     
@@ -4608,10 +4656,6 @@ class Meeting {
     
       <li class="post">
         <a href="/blog/2015/11/15/partition-problem/">[Question] Partition Problem (divide array into halves) </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/04/Best-Time-to-Buy-and-Sell-Stock-IV/">[LeetCode 188] Best Time to Buy and Sell Stock IV </a>
       </li>
     
   </ul>

@@ -9,7 +9,8 @@
   <meta name="author" content="CodeMonkey">
 
   
-  <meta name="description" content="Question link 给定一个表达式字符串，其中只包含非负整数，加法，减法以及乘法符号，例如7+345+2+4-3-1。请写程序计算该表达式的值。 提示：可以尝试使用递归算法，程序将非常简洁易写，很适用于面试场合。 Solution Trying to solve this problem &hellip;">
+  <meta name="description" content="Question link 对于包含n个结点的二叉树（树中结点编号从1到n），已知前序和后序遍历序列，我们知道不一定能唯一的恢复这棵树。请计算出满足条件的二叉树的总数。 Example 前序遍历序列preorder：1 2
+后序遍历序列postorder：2 1 一共有2棵满足条件的二叉树： 1 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +76,99 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/17/Number-of-tree-given-preorder-postorder/">[ItInt5] Number of Valid Trees Given Preorder and Postorder</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-17T00:00:00-05:00" pubdate data-updated="true"></time>
+        
+         | <a href="/blog/2014/08/17/Number-of-tree-given-preorder-postorder/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Question</h3>
+
+<p><a href="http://www.itint5.com/oj/#28">link</a></p>
+
+<blockquote><p>对于包含n个结点的二叉树（树中结点编号从1到n），已知前序和后序遍历序列，我们知道不一定能唯一的恢复这棵树。请计算出满足条件的二叉树的总数。</p>
+
+<p>Example</p></blockquote>
+
+<pre><code>前序遍历序列preorder：1 2
+后序遍历序列postorder：2 1
+
+一共有2棵满足条件的二叉树：
+    1       1
+   /         \
+  2           2
+</code></pre>
+
+<h3>Solution</h3>
+
+<blockquote><p>先看两种遍历的性质:</p>
+
+<p>pre-order: root, left *************, right #########</p>
+
+<p>post-order: **************left, ########right, root</p>
+
+<p>所以 pre-order 的第一个元素一定等于 post-order 的最后一个元素. 然后在post-order中由前往后找, 找出等于pre-oder[left]的位置 p.</p>
+
+<ol>
+<li><p>如果 p 位置不是倒数第二个, fine, 对左右子树递归<strong>调用后用乘法原理</strong>.</p></li>
+<li><p>如果 p 是倒数第二个, 说明either left branch or right branch为空, return的值就是 <strong>2 * 递归调用非空子树</strong>.</p></li>
+</ol>
+</blockquote>
+
+<p><a href="http://www.itint5.com/discuss/94/%E8%AF%B7%E5%A4%A7%E5%AE%B6%E6%8F%90%E4%B8%80%E4%BA%9B%E6%94%B9%E8%BF%9B%E6%84%8F%E8%A7%81">ref</a></p>
+
+<h3>Code</h3>
+
+<p><strong>not written by me</strong>. This code is REALLY 叼炸天。</p>
+
+<pre><code>int helper(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; posorder, 
+         int i1, int j1, int i2, int j2){
+    if(i1 == j1) return 1;
+    if(preorder[i1+1] == posorder[j2-1]){
+        return 2*helper(preorder, posorder, i1+1, j1, i2, j2-1);
+    }
+    int k = i2;
+    while(posorder[k] != preorder[i1+1]){ k++; }
+    return helper(preorder, posorder, i1+1,i1+1+k-i2 ,i2 , k)
+         * helper(preorder, posorder, i1+2+k-i2, j1, k+1, j2-1);
+}
+
+int countValidTrees(vector&lt;int&gt;&amp; preorder, vector&lt;int&gt;&amp; posorder) {
+    int n = preorder.size();
+    return helper(preorder, posorder, 0, n-1, 0, n-1);
+}
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -950,92 +1044,6 @@ public boolean existSubString(String query) {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/12/circus-man-ordering/">[CC150v4] 9.7 Circus Tower Routine</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-12T00:00:00-05:00" pubdate data-updated="true"></time>
-        
-         | <a href="/blog/2014/08/12/circus-man-ordering/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Question</h3>
-
-<blockquote><p>A circus is designing a tower routine consisting of people standing atop one another’s shoulders. For practical and aesthetic reasons, each person must be both shorter and lighter than the person below him or her. Given the heights and weights of each person in the circus, write a method to compute the largest possible number of people in such a tower.</p>
-
-<p>EXAMPLE:</p>
-
-<p>Input: (ht, wt): (65, 100) (70, 150) (56, 90) (75, 190) (60, 95) (68, 110)</p>
-
-<p>Output: The longest tower is length 6 and includes from top to bottom: (56, 90) (60,95) (65,100) (68,110) (70,150) (75,190)</p></blockquote>
-
-<h3>Solution</h3>
-
-<p>The solution given in the book is unclear, but it&rsquo;s a very simple idea which is pointed out <a href="http://www.careercup.com/question?id=9339758">here</a> and <a href="http://hawstein.com/posts/9.7.html">here</a>.</p>
-
-<ol>
-<li>sort the input persons by &lsquo;height&rsquo;. O(nlogn)</li>
-<li>find the longest increasing &lsquo;weight&rsquo; sequence in the sorted list. This can be done in O(nlogn) with DP.</li>
-</ol>
-
-
-<h3>Code</h3>
-
-<p><strong>written by me</strong></p>
-
-<pre><code>public int longestTower(List&lt;Man&gt; list) {
-    Collections.sort(list, new ManComparator());
-    // now find the longest increasing sequence of 'weight' property
-    int len = list.size();
-    int maxLen = 1;
-    int[] dp = new int[len];
-    for (int i = 1; i &lt; len; i++) {
-        dp[i] = 1;
-        for (int j = 0; j &lt; i; j++) {
-            if (list.get(i).weight &gt; list.get(j).weight) {
-                dp[i] = Math.max(dp[i], dp[j] + 1);
-            }
-        }
-        maxLen = Math.max(maxLen, dp[i]);
-    }
-    return maxLen;
-}
-
-class ManComparator implements Comparator&lt;Man&gt; {
-    @Override
-    public int compare(Man o1, Man o2) {
-        return o1.height - o2.height;
-    }
-}
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="32">&larr; Older</a>
@@ -1053,7 +1061,7 @@ class ManComparator implements Comparator&lt;Man&gt; {
   <ul id="categories" class="nav nav-list">
     <li class='category'><a href='/blog/categories/cc150v4/'>cc150v4 (34)</a></li>
 <li class='category'><a href='/blog/categories/cc150v5/'>cc150v5 (28)</a></li>
-<li class='category'><a href='/blog/categories/design/'>design (78)</a></li>
+<li class='category'><a href='/blog/categories/design/'>design (79)</a></li>
 <li class='category'><a href='/blog/categories/experience/'>experience (4)</a></li>
 <li class='category'><a href='/blog/categories/fundamental/'>fundamental (18)</a></li>
 <li class='category'><a href='/blog/categories/java-oop/'>java oop (36)</a></li>
@@ -1076,6 +1084,10 @@ class ManComparator implements Comparator&lt;Man&gt; {
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/22/challenges-writing-crawler/">[Design] Technical Challenges of writing a web crawler </a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/21/swizzle-sort/">[Question] Swizzle Sort </a>
       </li>
     
@@ -1089,10 +1101,6 @@ class ManComparator implements Comparator&lt;Man&gt; {
     
       <li class="post">
         <a href="/blog/2015/11/15/partition-problem/">[Question] Partition Problem (divide array into halves) </a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/04/Best-Time-to-Buy-and-Sell-Stock-IV/">[LeetCode 188] Best Time to Buy and Sell Stock IV </a>
       </li>
     
   </ul>
